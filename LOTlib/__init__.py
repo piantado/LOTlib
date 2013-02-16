@@ -1,0 +1,3 @@
+
+
+LOTlib_VERSION = 0.03
