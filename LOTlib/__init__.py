@@ -1,3 +1,3 @@
 
 
-LOTlib_VERSION = 0.03
+LOTlib_VERSION = 0.04

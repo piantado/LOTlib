@@ -1,6 +1,8 @@
 
 """
 	This class is a wrapper for representing "rules" in the grammar. 
+	
+	TODO: One day we will change "nt" to returntype to match with the FunctionNodes
 """
 
 from math import log

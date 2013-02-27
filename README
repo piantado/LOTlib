@@ -41,4 +41,4 @@ And you should be ready to use the library
 == EXAMPLES:
 ========================================================
 
-Examples are provided in the "examples" folder. These include simple symbolic regression, the recursive number learning model, a quantifier learning model. The "tests" folder may also be useful, as this runs some simple models to check for, e.g., correct sampling and inference. 
+Examples are provided in the "Examples" folder. These include simple symbolic regression, the recursive number learning model, a quantifier learning model. The "tests" folder may also be useful, as this runs some simple models to check for, e.g., correct sampling and inference. 

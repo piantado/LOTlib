@@ -32,6 +32,11 @@ def list2FunctionNode(l, style="atis"):
 	else: # for non-list
 		return l
 
+# a regex for matching variables (y0,y1,.. y15, etc)
+re_variable = re.compile(r"y([0-9]+)$")
+
+# just because this is nicer, and allows us to map, etc. 
+def isFunctionNode(x): return isinstance(x, FunctionNode)
 
 class FunctionNode:
 	"""
@@ -55,12 +60,15 @@ class FunctionNode:
 		self.bv = q.bv
 		self.ruleid = q.ruleid
 	
-	def copy(self):
+	def copy(self, shallow=True):
 		"""
-			A more efficient copy that mainly copies the nodes
+			Copy a function node
+			shallow - if True, this does not cpy the children (self.to points to the same as what we return)
 		"""
-		newargs = [x.copy() if isinstance(x, FunctionNode) else deepcopy(x) for x in self.args]
-		return FunctionNode(self.returntype, self.name, newargs, self.lp, self.resample_p, self.bv, self.ruleid)
+		if not shallow: newargs = [x.copy() if isFunctionNode(x) else deepcopy(x) for x in self.args]
+		else:           newargs = self.args
+		
+		return FunctionNode(self.returntype, self.name, newargs, self.lp, self.resample_p, deepcopy(self.bv), self.ruleid)
 	
 	def is_nonfunction(self):
 		return (self.args is None) or (len(self.args)==0)
@@ -98,8 +106,8 @@ class FunctionNode:
 		tabstr = "  .  " * d
 		print tabstr, self.returntype, self.name, self.bv, "\t", self.lp #"\t", self.resample_p 
 		for a in self.args: 
-			if isinstance(a, FunctionNode): a.fullprint(d+1)
-			else:                           print tabstr, a
+			if isFunctionNode(a): a.fullprint(d+1)
+			else:                 print tabstr, a
 			
 	#def schemestring(self):
 		#if self.args == []: # a terminal
@@ -112,7 +120,7 @@ class FunctionNode:
 	def __str__(self): return self.pystring()
 	def __repr__(self): return self.pystring()
 	
-	def __eq__(self, other): return (cmp(self, other) == 0)
+	def __eq__(self, other): return isFunctionNode(other) and (cmp(self, other) == 0)
 	def __ne__(self, other): return not self.__eq__(other)
 	
 	## TODO: overwrite these with something faster
@@ -132,7 +140,7 @@ class FunctionNode:
 			lp = self.lp # the probability of my rule
 			if self.args is None: return lp
 			for i in range(len(self.args)):
-				if isinstance(self.args[i], FunctionNode):
+				if isFunctionNode(self.args[i]):
 					#print "\t<", self.args[i], self.args[i].log_probability(), ">\n"
 					lp = lp + self.args[i].log_probability() # plus all children
 			return lp
@@ -144,13 +152,13 @@ class FunctionNode:
 		if not no_self: yield self;  # I am a subnode of myself
 		
 		for i in range(len(self.args)): # loop through kids
-			if isinstance(self.args[i],FunctionNode):
+			if isFunctionNode(self.args[i]):
 				for ssn in self.args[i].all_subnodes():
 					yield ssn
 	
 	def all_leaves(self):
 		for i in range(len(self.args)): # loop through kids
-			if isinstance(self.args[i],FunctionNode):
+			if isFunctionNode(self.args[i]):
 				for ssn in self.args[i].all_leaves():
 					yield ssn
 			else:
@@ -159,7 +167,36 @@ class FunctionNode:
 	def string_below(self, sep=" "):
 		return sep.join(map(str, self.all_leaves()))
 		
+	
+	
+	def fix_bound_variables(self, d=0, rename=None):
+		"""
+			Fix the naming scheme of bound variables. This happens if we promote or demote some nodes
+			via insert/delete
+			
+			d - current depth
+			rename - a dictionary to store how we should rename
+		"""
+		if rename is None: rename = dict()
+		#if d==0: print self
 		
+		if self.name is not None:
+			if self.name.lower() == 'lambda': 
+				newname = 'y'+str(d)
+				assert len(self.bv)==1  and len(self.bv[0].to) == 0 # should only add one rule, and it should have no "to"
+				#print ".  ", self.bv[0]
+				rename[self.bv[0].name] = newname
+				self.bv[0].name = newname
+				#print "..", self.bv[0]
+			elif re_variable.match(self.name): # if we find a variable
+				assert_or_die(self.name in rename, "Name "+self.name+" not in rename="+str(rename)+"\t;\t"+str(self))
+				self.name = rename[self.name]
+		
+		# and recurse
+		for k in self.args:
+			if isFunctionNode(k): k.fix_bound_variables(d+1, rename)
+			
+	
 	# resample myself from some grammar
 	def resample(self, g, d=0):
 		"""
@@ -191,7 +228,7 @@ class FunctionNode:
 	def depth(self):
 		depths = [0.0] # if no function nodes
 		for i in range(len(self.args)):
-			if isinstance(self.args[i],FunctionNode):
+			if isFunctionNode(self.args[i]):
 				depths.append( self.args[i].depth()+1 )
 		return max(depths)
 	
@@ -200,7 +237,7 @@ class FunctionNode:
 	def get_type_signature(self):
 		ts = [self.returntype, self.bv]
 		for i in range(len(self.args)):
-			if isinstance(self.args[i],FunctionNode):
+			if isFunctionNode(self.args[i]):
 				ts.append(self.args[i].returntype)
 			else: 
 				ts.append(self.args[i])
@@ -210,6 +247,5 @@ class FunctionNode:
 		"""
 			A function node is replicating (by definition) if one of its children is of the same type
 		"""
-		return any([isinstance(x,FunctionNode) and x.returntype == self.returntype for x in self.args])
-		
-		
+		return any([isFunctionNode(x) and x.returntype == self.returntype for x in self.args])
+	
