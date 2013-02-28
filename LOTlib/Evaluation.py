@@ -4,8 +4,6 @@
 	TODO:
 	
 		Jan 12 2013 -- Hmm things aren't working so well yet... It appears that maybe it doesn't accurately detect when it's found something it already has??
-		
-		-- Make Target a hash so we can actually put things in it!!
 """
 
 from LOTlib.Miscellaneous import *
@@ -14,72 +12,85 @@ from math import log, exp
 from scipy.stats import chisquare
 import numpy
 
-def evaluate_sampler(target, sampler, skip=100, steps=100000, prefix="", trace=False, outfile=None):
+def evaluate_sampler(target, sampler, skip=10000, steps=10000000, chains=1, prefix="", trace=False, outfile=None, assertion=False):
 	"""
 		target - a hash from hypotheses to lps. The keys of this are the only things we 
 		sampler - a sampler we wish to evaluate_sampler
+		skip -- print out every this many samples
+		steps -- how many total samples to draw
+		prefix -- anything to print before
+		trace - should we print a hypothesis every step?
+		assertion - assertion fail if the chi squared doesn't work out
+		chains - how many outside chains to run?
 		
 		print a trace of stats:
-			- KL(sample || target) -- KL estimate
-			- KL(sample || target) -- seen hypothesis estimate
-			- percentage of hypotheses found
-			- Total probability mass found
+			- prefix
+			- what chain
+			- how many samples
+			- KL (via counts)
+			- percent of hypotheses found
+			- percent of probability mass found
+			- number of target 
+			- length of found samples
+			- target normalizer (log)
+			- count of samples overlapping with target
+			- count of samples NOT overlapping with target
+			- chi squared statistic
+			- p value
 	"""
 	
 	hypotheses = target.keys()
 	tZ = logsumexp(target.values()) # get the normalizer
-	
-	# keep track of samples
-	posterior_samples = defaultdict(int)
-	
 	if outfile is not None: bo = ParallelBufferedIO(outfile)
 	
-	n = 0
-	for s in sampler:
+	for chain_i in xrange(chains):
+		samples = defaultdict(int) # keep track of samples
 		
-		if s in target: 
-			posterior_samples[s] += 1
-			#print ">>", s
-		if trace: print "#", s in target, s.lp, s
-		
-		if (n%skip)==(skip-1):
+		n = 0
+		for s in sampler: # each sample should have an .lp defined
 			
-			sm = sum( [posterior_samples[x] for x in posterior_samples.keys() ] )
+			samples[s] += 1
+			n += 1
 			
-			if sm == 0: print "# No valid samples yet for evaluate_sampler"
-			else:
-				sZ_lp = logsumexp( [x.lp for x in posterior_samples.keys()] )
-				sZ_cnt = log(sm)
+			if trace: print "#", s in target, s.lp, s
+			
+			if (n%skip)==0:
 				
-				KL_lp = 0.0
-				KL_cnt = 0.0
-				for h,cnt in posterior_samples.items():
+				sm = sum( [samples[x] for x in hypotheses ] )
+				if sm == 0: continue
+				
+				sm_out = sum(samples.values()) - sm # the counts of things outside of hypotheses
+				sZ = log(sm)
+				
+				KL = 0.0
+				for h in hypotheses:
 					Q = target[h] - tZ
+					sh = samples[h]
+					if sh > 0:
+						P = log( sh ) - sZ
+						KL += (P - Q) * exp( P ) # otherwise, limit->0
 					
-					P_lp = h.lp - sZ_lp # log prob estimate for h's probability
-					KL_lp += (P_lp - Q) * exp( P_lp )
-					
-					P_cnt = log(cnt) - sZ_cnt
-					KL_cnt += (P_cnt - Q) * exp(P_cnt)
-				
 				# And compute the percentage found
-				percent_found = float(len( set(posterior_samples.keys()) & set(hypotheses) )) / float(len(hypotheses))
+				percent_found = float(sum([1 for x in hypotheses if samples[x] > 0]))/ float(len(hypotheses))
+				pm_found = logsumexp([target[x] for x in hypotheses if samples[x] > 0])
+				
+				for k in hypotheses: 
+					if samples[k] == 0: print k
 				
 				# compute chi squared counts
-				fobs = numpy.array( [posterior_samples.get(h,0) for h in hypotheses] )
-				fexp = numpy.array( [ numpy.exp(h.lp-tZ) * len(hypotheses) for h in hypotheses])
+				fobs = numpy.array( [samples[h] for h in hypotheses] )
+				fexp = numpy.array( [ numpy.exp(target[h]-tZ) * sm for h in hypotheses])
 				chi,p = chisquare(fobs, f_exp=fexp)  
 				
 				if outfile is None:
-					print prefix, n, KL_lp, KL_cnt, percent_found, len(hypotheses), len(posterior_samples.keys()), tZ, sZ_lp, log(sZ_cnt), chi, p
+					print prefix, chain_i, n, r3(KL), r3(percent_found), r3(pm_found), len(hypotheses), len(samples.keys()), r3(tZ), sm, sm_out, r3(chi), r3(p)
 				else:
-					bo.write(prefix, n, KL_lp, KL_cnt, percent_found, len(hypotheses), len(posterior_samples.keys()), tZ, sZ_lp, log(sZ_cnt), chi, p)
+					bo.write(prefix, chain_i, n, r3(KL), r3(percent_found), r3(pm_found), len(hypotheses), len(samples.keys()), r3(tZ), sm, sm_out, r3(chi), r3(p))
 		
-		n += 1		
-		if n > steps: break
-	
-	if outfile is not None: bo.close()
-	return 
+			if n > steps: break
+		
+		if outfile is not None: bo.close()
+		return 
 
 	
 	

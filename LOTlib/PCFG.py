@@ -545,15 +545,29 @@ if __name__ == "__main__":
 	## We generate a few ways, mapping strings to the actual things
 	#print "Testing increment (no lambda)"
 	#TEST_INC = dict()
+	
 	#for t in G.increment_tree('START',3): 
 		#TEST_INC[str(t)] = t
 	
 	#print "Testing generate (no lambda)"
-	#TEST_GEN = dict()
-	#for i in xrange(10000): 
-		#t = G.generate('START')
-		##print ">>", t
-		#TEST_GEN[str(t)] = t
+	TEST_GEN = dict()
+	TARGET = dict()
+	from LOTlib.Hypothesis import StandardExpression
+	for i in xrange(10000): 
+		t = G.generate('START')
+		#print ">>", t
+		TEST_GEN[str(t)] = t
+		
+		if t.count_nodes() < 10:
+			TARGET[StandardExpression(G, v=t.copy())] = t.log_probability()
+		
+		
+	from Evaluation import evaluate_sampler
+	import LOTlib.MetropolisHastings
+	
+	hyp = StandardExpression(G)
+	evaluate_sampler(TARGET, LOTlib.MetropolisHastings.mh_sample(hyp, [], 10000000), trace=False)
+	quit()
 	
 	#print "Testing MCMC (no counts) (no lambda)"
 	#TEST_MCMC = dict()

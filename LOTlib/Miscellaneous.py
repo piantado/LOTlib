@@ -87,6 +87,10 @@ def printr(x):
 	print x
 	return x
 	
+def r2(x): return round(x,2)
+def r3(x): return round(x,3)
+def r4(x): return round(x,4)
+
 def tf201(x):
 	if x: return 1
 	else: return 0
