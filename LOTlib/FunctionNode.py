@@ -60,7 +60,7 @@ class FunctionNode:
 		self.bv = q.bv
 		self.ruleid = q.ruleid
 	
-	def copy(self, shallow=True):
+	def copy(self, shallow=False):
 		"""
 			Copy a function node
 			shallow - if True, this does not cpy the children (self.to points to the same as what we return)

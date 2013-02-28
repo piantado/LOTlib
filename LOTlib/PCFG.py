@@ -190,37 +190,28 @@ class PCFG:
 			if predicate(ti): Z += ti.resample_p 
 		return Z
 	
-	def propose(self, t, insert_delete_probability=0.50):
+	def propose(self, t, insert_delete_probability=0.0):
 		if random() < insert_delete_probability: return self.propose_insert_delete(t)			
 		else: 				       	 return self.propose_regenerate(t)
 		
 	# choose a node at random and resample it
 	def propose_regenerate(self, t):
 		""" resample a random subnode of t, returning a copy and a f/b probability """
-			
-		Z = self.resample_normalizer(t) # the total probability
 		
-		r = random() * Z # now select a random number (giving a random node)
-		
-		# copy since we modify in place
 		newt = t.copy()
 		
-		sm = 0.0
-		my_resample_p = 1.0
-		foundit = False
-		for ni, di in self.iterate_subnodes(newt, do_bv=True, yield_depth=True):
-			sm += ni.resample_p
-			if sm >= r and not foundit: # our node
-				ni.resample(self, d=di)
-				my_resample_p = ni.resample_p # which prob did we actually use?
-				foundit = True
-			# NOTE: Here you MUST evaluate on each loop iteration, or else this wont' remove the added bvrules -- no breaking!
+		n, rp, tZ = None, None, None
+		for ni, di, resample_p, Z in self.sample_node_via_iterate(newt):
+			n = ni
+			n.resample(self, d=di)
+			tZ = Z
+			rp = resample_p
 		
 		newZ = self.resample_normalizer(newt)
 		
 		#print "PROPOSED ", newt		
-		f = (log(my_resample_p) - log(Z))       + newt.log_probability()
-		b = (log(my_resample_p) - log(newZ))    + t.log_probability()
+		f = (log(rp) - log(tZ))   + newt.log_probability()
+		b = (log(rp) - log(newZ)) + t.log_probability()
 		
 		return newt, f-b
 	
