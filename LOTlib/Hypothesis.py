@@ -14,12 +14,10 @@
 			And then you can just copy this over with the copy constructor
 """
 from LOTlib.Miscellaneous import *
-from LOTlib.BasicPrimitives import * # needed to eval __call__ here, since that's where they are bound
+import LOTlib.BasicPrimitives # needed to eval __call__ here, since that's where they are bound
 from LOTlib.DataAndObjects import FunctionData,UtteranceData
 from copy import copy
 import numpy
-
-POSTERIOR_CALL_COUNTER = 0
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -34,6 +32,7 @@ class Hypothesis:
 		self.set_value(v) # to zero out prior, likelhood, lp
 		self.prior, self.likelihood, self.lp = [-Infinity, -Infinity, -Infinity] # this should live here in case we overwrite self_value
 		self.stored_likelihood = None
+		POSTERIOR_CALL_COUNTER = 0
 	
 	def set_value(self, v): 
 		""" Sets the (self.)value of this hypothesis to v"""
@@ -111,10 +110,10 @@ class Hypothesis:
 	
 	# this updates last_prior and last_likelihood
 	def compute_posterior(self, d):
-		global POSTERIOR_CALL_COUNTER
-		POSTERIOR_CALL_COUNTER += 1
+		LOTlib.BasicPrimitives.LOCAL_PRIMITIVE_OPS = 0 # Reset this
 		p = self.compute_prior()
 		l = self.compute_likelihood(d)
+		self.lp = p+l
 		return [p,l]
 		
 	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -142,6 +141,27 @@ class Hypothesis:
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+
+class VectorHypothesis(Hypothesis):
+	"""
+		Store N-dimensional vectors (defaultly with Gaussian proposals)
+	"""
+	
+	def __init__(self, v=None, N=1, proposal=numpy.eye(1)):
+		#print numpy.array([0.0]*N), [prposal
+		if v is None: v = numpy.random.multivariate_normal(numpy.array([0.0]*N), proposal)
+		Hypothesis.__init__(self, v=v)
+		
+		self.__dict__.update(locals())
+		
+	def propose(self):
+		## NOTE: Does not copy proposal
+		newv = numpy.random.multivariate_normal(self.v, self.proposal)
+		
+		return VectorHypothesis(v=newv, N=self.N, proposal=self.proposal), 0.0 # symmetric proposals
+
+		# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
 class FunctionHypothesis(Hypothesis):
 	"""
 		A special type of hypothesis whose value is a function. 
@@ -165,6 +185,7 @@ class FunctionHypothesis(Hypothesis):
 		
 	def __call__(self, *vals):
 		""" Make this callable just like a function. Yay python! """
+		#print ">>", vals
 		return self.fvalue(*vals)
 	
 	def value2function(self, v):
@@ -291,7 +312,6 @@ class StandardExpression(FunctionHypothesis):
 			
 			# the pointsiwe undecayed likelihood for this data point
 			self.stored_likelihood[i] = log( self.ALPHA*(r==di.output) + (1.0-self.ALPHA)/2.0 )
-			#print self.stored_likelihood[i], di, r, di.output, "\n\n"
 			
 			# the total culmulative decayed likeliood
 			self.likelihood += self.stored_likelihood[i] * self.likelihood_decay_function(i, N, self.ll_decay)

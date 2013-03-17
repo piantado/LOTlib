@@ -93,7 +93,6 @@ class FunctionNode:
 			return str(self.args[0])
 		elif self.name is not None and self.name.lower() == 'lambda':
 			#print len(self.bv)
-			#print "HERE !!"
 			return '(lambda '+commalist( [ str(x.name) for x in self.bv])+': '+str(self.args[0])+' )'
 		else: 
 			if len(self.args) == 1 and self.args[0] is None: # handle weird case with None as single terminal below
@@ -113,8 +112,6 @@ class FunctionNode:
 		#if self.args == []: # a terminal
 			#return str(self.name)
 		#else: return '('+self.name + ' '+commalist( [ str(x) for x in self.args], sep1=' ', sep2=' ')+' )'
-	
-	
 	
 	# NOTE: in the future we may want to change this to do fancy things
 	def __str__(self): return self.pystring()
@@ -166,8 +163,6 @@ class FunctionNode:
 
 	def string_below(self, sep=" "):
 		return sep.join(map(str, self.all_leaves()))
-		
-	
 	
 	def fix_bound_variables(self, d=0, rename=None):
 		"""
@@ -248,4 +243,9 @@ class FunctionNode:
 			A function node is replicating (by definition) if one of its children is of the same type
 		"""
 		return any([isFunctionNode(x) and x.returntype == self.returntype for x in self.args])
-	
+		
+
+		
+
+
+

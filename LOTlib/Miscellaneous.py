@@ -26,7 +26,8 @@ import types # for checking if something is a function: isinstance(f, types.Func
 
 ## Some useful constants
 Infinity = float("inf")
-inf = float("inf")
+inf = Infinity
+Inf = Infinity
 Null = []
 TAU = 6.28318530718
 
@@ -42,7 +43,6 @@ def fifth(x):  return x[4]
 def sixth(x):  return x[5]
 def seventh(x):  return x[6]
 def eighth(x):  return x[7]
-
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -90,6 +90,7 @@ def printr(x):
 def r2(x): return round(x,2)
 def r3(x): return round(x,3)
 def r4(x): return round(x,4)
+def r5(x): return round(x,5)
 
 def tf201(x):
 	if x: return 1
@@ -178,6 +179,22 @@ def normlogpdf(x, mu, sigma):
 	""" The log pdf of a normal distribution """
 	#print x, mu
 	return math.log(math.sqrt(2. * pi) * sigma) - ((x - mu) * (x - mu)) / (2.0 * sigma * sigma)
+
+def norm_lpdf_multivariate(x, mu, sigma):
+	# Via http://stackoverflow.com/questions/11615664/multivariate-normal-density-in-python
+	size = len(x)
+	
+	# some checks:
+	if size != len(mu) or (size, size) != sigma.shape: raise NameError("The dimensions of the input don't match")	
+	det = np.linalg.det(sigma)
+	if det == 0: raise NameError("The covariance matrix can't be singular")
+
+	norm_const = - size*log(2.0*pi)/2.0 - log(det)/2.0
+	#norm_const = 1.0/ ( math.pow((2*pi),float(size)/2) * math.pow(det,1.0/2) )
+	x_mu = np.matrix(x - mu)
+	inv = np.linalg.inv(sigma)        
+	result = -0.5 * (x_mu * inv * x_mu.T)
+	return norm_const + result
 
 def logrange(mn,mx,steps):
 	"""
@@ -280,64 +297,64 @@ def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, 
 """ 
 	This function is much more elegant than the above, but is painfully slower in tests, likely because it involves many logs and randoms
 """
-def multinomial_sample_DO_NOT_USE_SUPER_SLOW(objs, probs='lp', log=True, return_probability=False):
-	"""
-		Use the A-ES algorithm to sample one object from objs (potentially a generator). See The paper, "Weighted Random Sampling over Data Streams"
+#def multinomial_sample_DO_NOT_USE_SUPER_SLOW(objs, probs='lp', log=True, return_probability=False):
+	#"""
+		#Use the A-ES algorithm to sample one object from objs (potentially a generator). See The paper, "Weighted Random Sampling over Data Streams"
 		
-		objs - the objects to sample
-		probs - the probabilities, either a list (or generator) paired to objs, or a string describing an attribute of objs
+		#objs - the objects to sample
+		#probs - the probabilities, either a list (or generator) paired to objs, or a string describing an attribute of objs
 		
-		Returns the object and optionally the *log* probability of the sample
+		#Returns the object and optionally the *log* probability of the sample
 		
-		This takes the probability to be stored in objs.attr, and treats this probability as a log probability
-		if log=True
+		#This takes the probability to be stored in objs.attr, and treats this probability as a log probability
+		#if log=True
 		
-		  max of u ^ 1/w
-		= max of u ^ 1/exp(lp)  [[log probabilities]]
-		= max of log(u) / exp(lp)
-		= min of -log(u) / exp(lp)
-		= min of log(-log(u)) - lp
+		  #max of u ^ 1/w
+		#= max of u ^ 1/exp(lp)  [[log probabilities]]
+		#= max of log(u) / exp(lp)
+		#= min of -log(u) / exp(lp)
+		#= min of log(-log(u)) - lp
 		
-		TODO: Make this more elegantly handle 0 probability events
-	#"""	
+		#TODO: Make this more elegantly handle 0 probability events
+	##"""	
 	
-	best_value  = float("inf")
-	best_obj    = None
-	best_weight = float("inf")
-	lZ = 0.0 # the log normalizer (for returning the probability)
+	#best_value  = float("inf")
+	#best_obj    = None
+	#best_weight = float("inf")
+	#lZ = 0.0 # the log normalizer (for returning the probability)
 	
-	# then probs is an attribute
-	if isinstance(probs,str): 
-		are_probs_attr = True
-	else:
-		are_probs_attr = False
-		next_prob = probs.__iter__() # we find probs by an interator
+	## then probs is an attribute
+	#if isinstance(probs,str): 
+		#are_probs_attr = True
+	#else:
+		#are_probs_attr = False
+		#next_prob = probs.__iter__() # we find probs by an interator
 	
-	# Now iterate through
-	for o in objs:
+	## Now iterate through
+	#for o in objs:
 		
-		# recover the prob by either the attribute or the next element of the iterator
-		if are_probs_attr: w = getattr(o, probs)
-		else:              w = next_prob.next()
+		## recover the prob by either the attribute or the next element of the iterator
+		#if are_probs_attr: w = getattr(o, probs)
+		#else:              w = next_prob.next()
 		
-		# convert so weights are unnormalized log probabilities
-		if not log: w = math.log(w) 
+		## convert so weights are unnormalized log probabilities
+		#if not log: w = math.log(w) 
 						
-		# the above transfom. Keep the *lowest* k
-		k = math.log( -math.log(random()) ) - w
+		## the above transfom. Keep the *lowest* k
+		#k = math.log( -math.log(random()) ) - w
 				
-		lZ = logplusexp(lZ,w) # keep track of the normalizer
+		#lZ = logplusexp(lZ,w) # keep track of the normalizer
 		
-		# and track the best value
-		if k < best_value:
-			best_value = k
-			best_obj = o
-			best_weight = w
+		## and track the best value
+		#if k < best_value:
+			#best_value = k
+			#best_obj = o
+			#best_weight = w
 		
 		
-	# and return at the end, potentially returning the (normalized) probability
-	if return_probability: return best_obj, best_weight-lZ
-	else:                  return best_obj
+	## and return at the end, potentially returning the (normalized) probability
+	#if return_probability: return best_obj, best_weight-lZ
+	#else:                  return best_obj
 
 
 #from collections import defaultdict
@@ -360,7 +377,6 @@ def lambdaNull(*x): return []
 def lambdaNone(*x): return x
 def lambdaTrue(*x): return True
 def lambdaFalse(*x): return True
-
 
 """
 The Y combinator

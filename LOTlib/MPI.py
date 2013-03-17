@@ -36,7 +36,8 @@ def myexit():
 	MPI.Finalize()
 atexit.register(myexit)
 
-
+def is_master_process():
+	return rank == MASTER_PROCESS
 
 
 

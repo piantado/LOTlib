@@ -12,6 +12,9 @@ from random import randint, random, sample
 from LOTlib.Miscellaneous import *
 from LOTlib.FunctionNode import FunctionNode, isFunctionNode
 from LOTlib.GrammarRule import GrammarRule
+from LOTlib.Hypothesis import Hypothesis
+
+CONSTANT_RESAMPLE_P = 1.0
 
 class PCFG:
 	"""
@@ -19,7 +22,13 @@ class PCFG:
 			- Rules that introduce bound variables
 			- Rules that sample from a continuous distribution
 			- Variable resampling probabilities among the rules
-			
+
+			TODO: Implement this:
+			- This has a few special values of returntype, which are expected on the rhs of rules, and then generate continuous values
+				- *uniform* -- when the name is this, the value printed and evaled is a uniform random sample of [0,1) (which can be resampled via the PCFG)
+				- *normal*  -- 0 mean, 1 sd
+				- *exponential* - rate = 1
+				
 		NOTE: Bound variables have a rule id < 0
 		
 		This class fixes a bunch of problems that were in earlier versions, such as 
@@ -115,6 +124,14 @@ class PCFG:
 			
 			# If we get a list, just map along it to generate. We don't count lists as depth--only FunctionNodes
 			return map(lambda xi: self.generate(x=xi, d=d), x)
+		elif x=='*gaussian*': ## TODO: HIGHLY EXPERIMENTAL!! Wow this is really terrible for mixing...
+			v = np.random.normal()
+			lp = normlogpdf(v, 0.0, 1.0)
+			return FunctionNode(returntype=x, name=str(v), args=[], lp=lp, bv=[], ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
+		elif x=='*uniform*':
+			v = np.random.rand()
+			lp = 0.0
+			return FunctionNode(returntype=x, name=str(v), args=[], lp=lp, bv=[], ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
 		
 		elif self.is_nonterminal(x):
 			# if we generate a nonterminal, then sample a GrammarRule, convert it to a FunctionNode
@@ -145,7 +162,6 @@ class PCFG:
 			ret.to = self.generate(ret.to, d=d+1) # re-generate below -- importantly the "to" points are re-generated, not copied
 			
 			return ret
-			
 		else: # must be a terminal
 			assert_or_die(isinstance(x, str), "Terminal must be a string! x="+x)
 			
@@ -190,7 +206,7 @@ class PCFG:
 			if predicate(ti): Z += ti.resample_p 
 		return Z
 	
-	def propose(self, t, insert_delete_probability=0.0):
+	def propose(self, t, insert_delete_probability=0.5):
 		if random() < insert_delete_probability: return self.propose_insert_delete(t)			
 		else: 				       	 return self.propose_regenerate(t)
 		
@@ -476,8 +492,56 @@ class PCFG:
 			theprior = np.repeat(prior,len(c))
 			lp += (beta(c+theprior) - beta(theprior))
 		return lp
+	
+	
+	def lp_regenerate_propose_to(self, x, y, xZ=None, yZ=None):
+		"""
+			What is the probability of starting at x and ending up at y from a regeneration move?
+			Any node is a candidate if the trees are identical except for what's below those nodes
+			(although what's below *can* be identical!)
+			
+			NOTE: This does NOT take into account insert/delete
+			NOTE: Not so simple because we must count multiple paths
+			
+			TODO: TEST THIS:
+			
+		"""
 		
-	## ------------------------------------------------------------------------------------------------------------------------------
+		# Wrap for hypotheses instead of trees
+		if isinstance(x, Hypothesis):
+			assert_or_die(isinstance(y, Hypothesis), "If x is a hypothesis, y must be! "+str(y) )
+			return self.lp_regenerate_propose_to(x.value,y.value,xZ=xZ, yZ=yZ)
+		
+		RP = -Infinity
+		
+		if (isinstance(x,str) and isinstance(y,str) and x==y) or (x.returntype == y.returntype):
+			
+			# compute the normalizer
+			if xZ is None: xZ = self.resample_normalizer(x)
+			if yZ is None: yZ = self.resample_normalizer(y)
+						
+			# Well we could select x's root to go to Y
+			RP = logplusexp(RP, log(x.resample_p) - log(xZ) + y.log_probability() )
+			
+			if x.name == y.name:
+								
+				# how many kids are not equal, and where was the last?
+				mismatch_count, mismatch_index = 0, 0
+				for i, xa, ya in zip(xrange(len(x.args)), x.args, y.args):
+					if xa != ya: # checks whole subtree!
+						mismatch_count += 1
+						mismatch_index = i
+						
+				if   mismatch_count > 1: # We have to have only selected x,y to regenerate
+					pass
+				elif mismatch_count == 1: # we could propose to x, or x.args[mismatch_index], but nothing else (nothing else will fix the mismatch)
+					RP = logplusexp(RP, self.lp_regenerate_propose_to(x.args[mismatch_index], y.args[mismatch_index], xZ=xZ, yZ=yZ))
+				else: # identical trees -- we could propose to any, so that's just the tree probability below convolved with the resample p
+					for xi in x.all_subnodes(no_self=True): # we already counted ourself
+						RP = logplusexp(RP, log(xi.resample_p) - log(xZ) + xi.log_probability() )
+					
+		return RP
+		## ------------------------------------------------------------------------------------------------------------------------------
 	## Here are some versions of old functions which can be added eventually -- they are for doing "pointwise" changes to hypotheses
 	## ------------------------------------------------------------------------------------------------------------------------------	
 	
@@ -553,7 +617,7 @@ if __name__ == "__main__":
 			TARGET[StandardExpression(G, v=t.copy())] = t.log_probability()
 		
 		
-	from Evaluation import evaluate_sampler
+	from LOTlib.Testing.Evaluation import evaluate_sampler
 	import LOTlib.MetropolisHastings
 	
 	hyp = StandardExpression(G)
@@ -644,7 +708,31 @@ if __name__ == "__main__":
 		
 		
 		## TODO: ADD ASSERTIONS ETC
-		
+	
+	
+	# To check the computation of lp_regenerate_propose_to, which should return how likely we are to propose
+	# from one tree to another
+	#from LOTlib.Examples.Number.Shared import *
+	#x = NumberExpression(G).value
+	#NN = 100000
+	#d = defaultdict(int)
+	#for i in xrange(NN):
+		#y,_ = G.propose(x, insert_delete_probability=0.0)
+		#d[y] += 1
+	## Show counts and expected counts
+	#for y in sorted( d.keys(), key=lambda z: d[z]):
+		#EC = round(exp(G.lp_regenerate_propose_to(x,y))*NN)
+		#if d[y] > 10 or EC > 10: # print only highish prob things
+			#print d[y], EC, y
+	#print ">>", x
+	
+	
+	
+	
+	
+	
+	
+	
 	# If success....
 	print "---------------------------"
 	print ":-) No complaints here!"

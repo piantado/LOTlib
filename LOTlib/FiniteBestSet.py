@@ -33,7 +33,7 @@ class FiniteBestSet:
 		It works by storing a priority queue (in the opposite order), and popping off the worst as we need to add more
 	"""
 	
-	def __init__(self, N=float("inf"), max=True, unique=True):
+	def __init__(self, N=Infinity, max=True, unique=True):
 		self.__dict__.update(locals())
 		
 		self.max_multiplier = ifelse(self.max, 1, -1) # invert sign 
@@ -42,8 +42,11 @@ class FiniteBestSet:
 		self.unique_set = set()
 		
 		
-	def __contains__(self, x): 
-		return (x in self.Q)
+	def __contains__(self, y): 
+		for r in self.Q: 
+			if r.x == y: return True
+		return False
+		#return (x in self.Q)
 		
 	def __iter__(self):
 		for x in self.get_all(): yield x	
@@ -68,7 +71,7 @@ class FiniteBestSet:
 	def get_all(self, **kwargs): 
 		""" Return all elements (arbitrary order). Does NOT return a copy. This uses kwargs so that we can call one 'sorted' """
 		if kwargs.get('sorted', False):
-			return  [ c.x for c in sorted(self.Q, reverse = not kwargs.get('decreasing',False))]
+			return  [ c.x for c in sorted(self.Q, reverse = kwargs.get('decreasing',False))]
 		else:
 			return  [ c.x for c in self.Q]
 		
