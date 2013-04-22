@@ -18,15 +18,15 @@ data = generate_data(DATA_SIZE)
 
 W = 'every'
 
-# Now to use it as a StandardExpression, we need data to have an "output" field which is true/false for whether its the target word. This is then used by StandardExpression.compute_likelihood to see if we match or not with whether a word was said (ignoring the other words -- that's why its a pseudolikelihood)
+# Now to use it as a LOTHypothesis, we need data to have an "output" field which is true/false for whether its the target word. This is then used by LOTHypothesis.compute_likelihood to see if we match or not with whether a word was said (ignoring the other words -- that's why its a pseudolikelihood)
 for di in data: 
 	di.output = (di.word == W)
 	#print (di.word == W)
 
 FBS = FiniteBestSet(max=True, N=100)
 
-H = StandardExpression(G, args=['A', 'B', 'S'], ALPHA=ALPHA)
-# Now just run the sampler with a StandardExpression
+H = LOTHypothesis(G, args=['A', 'B', 'S'], ALPHA=ALPHA)
+# Now just run the sampler with a LOTHypothesis
 for s in LOTlib.MetropolisHastings.mh_sample(H, data, SAMPLES, skip=10):
 	#print s.lp, "\t", s.prior, "\t", s.likelihood, "\n", s, "\n\n"
 	FBS.push(s, s.lp)

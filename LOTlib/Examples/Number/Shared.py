@@ -9,7 +9,7 @@ import LOTlib.MetropolisHastings
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Miscellaneous import *
 from LOTlib.DataAndObjects import *
-from LOTlib.Hypothesis import StandardExpression
+from LOTlib.Hypothesis import LOTHypothesis
 from LOTlib.MPI import MPI_map
 from random import randint
 
@@ -72,10 +72,10 @@ G.add_rule('WORD', 'ten_', [], 0.10)
 ##########################################################
 #Define a class for running MH
 
-class NumberExpression(StandardExpression):
+class NumberExpression(LOTHypothesis):
 	
 	def __init__(self, G, v=None, prior_temperature=1.0): 
-		StandardExpression.__init__(self,G)
+		LOTHypothesis.__init__(self,G)
 		if v is None: self.set_value(G.generate('WORD'))
 		else:         self.set_value(v)
 		

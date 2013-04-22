@@ -11,7 +11,7 @@
 from random import sample
 from copy import deepcopy
 
-from LOTlib.Hypothesis import Hypothesis, StandardExpression
+from LOTlib.Hypothesis import Hypothesis, LOTHypothesis
 from LOTlib.DataAndObjects import UtteranceData
 from LOTlib.Miscellaneous import *
 
@@ -44,10 +44,7 @@ class SimpleLexicon(Hypothesis):
 		return new
 		
 	def __str__(self):
-		out = ''
-		for w, v in self.lex.iteritems():
-			out = out + str(w) + ':\t' + str(v) + '\n'
-		return out
+		return '\n'.join([ str(w)+':\t'+str(v) for w,v in self.lex.iteritems()]) + '\n'
 	def __hash__(self): return hash(str(self))
 	def __eq__(self, other):   return (str(self)==str(other)) # simple but there are probably better ways
 	
@@ -64,14 +61,14 @@ class SimpleLexicon(Hypothesis):
 		
 		assert isinstance(v, FunctionNode)
 			
-		# set this equal to the StandardExpression
+		# set this equal to the LOTHypothesis
 		if self.lex.get(w,None) is None:
-			self.lex[w] = StandardExpression(self.grammar, v=v, f=f, args=self.args) # create this
+			self.lex[w] = LOTHypothesis(self.grammar, v=v, f=f, args=self.args) # create this
 		else:	self.lex[w].set_value(v=v, f=f)
 
 	# set this function (to make something to sample from)
 	def force_function(self, w, f):
-		self.lex[w] = StandardExpression(self.grammar, v=None, f=f) # this sloppily generates v=None, but it's easy for now
+		self.lex[w] = LOTHypothesis(self.grammar, v=None, f=f) # this sloppily generates v=None, but it's easy for now
 		self.lex[w].value = w # Now overwrite so .value is just the word
 		
 	def all_words(self): return self.lex.keys()

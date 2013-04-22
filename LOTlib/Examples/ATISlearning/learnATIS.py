@@ -4,7 +4,7 @@
 	TODO: Need to iterate through the leaves too, to get tihngs like" minneapolis"
 """
 
-from LOTlib.SimpleLambdaParser import *
+from SimpleLambdaParser import *
 from LOTlib.bvPCFG import *
 import re
 
@@ -26,7 +26,7 @@ for l in open(ATIS_path, 'r'):
 		#print "\n\n"
 		
 		for w in re.split("\s",txt):
-			for t in lam.all_subnodes():
+			for t in lam:
 				d = co_occurance_matrix.get(w,dict())
 				d[t] = d.get(t,0) + 1 
 				co_occurance_matrix[w] = d # update

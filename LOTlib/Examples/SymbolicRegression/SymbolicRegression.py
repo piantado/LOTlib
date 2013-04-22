@@ -40,7 +40,7 @@ def run(*args):
 	fs = FiniteBestSet(10, max=True) 
 	
 	# starting hypothesis -- here this generates at random
-	initial_hyp = GaussianStandardExpression(G)
+	initial_hyp = GaussianLOTHypothesis(G)
 
 	# populate the finite sample by running the sampler for this many steps
 	for x in LOTlib.MetropolisHastings.mh_sample(initial_hyp, data, STEPS, skip=SKIP):

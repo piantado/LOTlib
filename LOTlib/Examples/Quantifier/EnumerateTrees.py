@@ -44,7 +44,7 @@ for t in G.increment_tree('START',DEPTH):
 ## for kinder saving and unsaving:
 upq = FiniteBestSet(max=True)
 for k in collapsed_forms.values(): 
-	upq.push(StandardExpression(G, k, args=['A', 'B', 'S']), 0.0)
+	upq.push(LOTHypothesis(G, k, args=['A', 'B', 'S']), 0.0)
 upq.save(OUT)
 
 print "Total tree count: ", all_tree_count

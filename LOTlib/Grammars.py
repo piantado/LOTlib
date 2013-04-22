@@ -1,62 +1,149 @@
 """
-	A bunch of standard grammars. 
-	
-	NOTE: These do not have terminal expansions, since those will vary by program...
+	This folder defines a bunch of "standard" grammars. 
+
+	In each, we do NOT specify the terminals, which typically expand the nonterminal PREDICATE->...
+
 """
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## Now define the grammars:
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+from LOTlib.PCFG import PCFG
 
-Grammar_SimpleBoolean = PCFG()
-Grammar_SimpleBoolean.add_rule('START', 'False', [], 1.0)
-Grammar_SimpleBoolean.add_rule('START', 'True', [], 1.0)
-Grammar_SimpleBoolean.add_rule('START', '', ['BOOL'], 1.0)
+DEFAULT_FEATURE_WEIGHT = 5.0
 
-Grammar_SimpleBoolean.add_rule('BOOL', 'and_', ['BOOL', 'BOOL'], 1.0)
-Grammar_SimpleBoolean.add_rule('BOOL', 'or_', ['BOOL', 'BOOL'], 1.0)
-Grammar_SimpleBoolean.add_rule('BOOL', 'not_', ['BOOL'], 1.0)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## ~ ~ ~ ~ ~ ~ ~ 
+SimpleBoolean_noTF = PCFG()
+SimpleBoolean_noTF.add_rule('START', '', ['BOOL'], 1.0)
 
-Grammar_TF = PCFG()
-Grammar_TF.add_rule('START', 'False', [], 1.0)
-Grammar_TF.add_rule('START', 'True', [], 1.0)
+SimpleBoolean_noTF.add_rule('BOOL', 'and_', ['BOOL', 'BOOL'], 1.0)
+SimpleBoolean_noTF.add_rule('BOOL', 'or_', ['BOOL', 'BOOL'], 1.0)
+SimpleBoolean_noTF.add_rule('BOOL', 'not_', ['BOOL'], 1.0)
 
-## ~ ~ ~ ~ ~ ~ ~ 
+SimpleBoolean_noTF.add_rule('BOOL', '', ['PREDICATE'], DEFAULT_FEATURE_WEIGHT)
 
-Grammar_NAND = PCFG()
-Grammar_NAND.add_rule('START', '', ['BOOL'], 1.0)
-Grammar_NAND.add_rule('BOOL', 'nand_', ['BOOL', 'BOOL'], 1.0)
-Grammar_NAND.add_rule('BOOL', 'True', [], 1.0)
-Grammar_NAND.add_rule('BOOL', 'False', [], 1.0)
 
-## ~ ~ ~ ~ ~ ~ ~ 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Grammar_CNF = PCFG()
-Grammar_CNF.add_rule('START', '', ['CONJ'], 1.0)
-Grammar_CNF.add_rule('START', 'True', [], 1.0)
-Grammar_CNF.add_rule('START', 'False', [], 1.0)
-Grammar_CNF.add_rule('CONJ', '',     ['DISJ'], 1.0)
-Grammar_CNF.add_rule('CONJ', '',     ['PREDICATE'], 1.0)
-Grammar_CNF.add_rule('CONJ', 'not_', ['PREDICATE'], 1.0)
-Grammar_CNF.add_rule('CONJ', 'and_', ['PREDICATE', 'CONJ'], 1.0)
+SimpleBoolean = PCFG()
+SimpleBoolean.add_rule('START', 'False', [], DEFAULT_FEATURE_WEIGHT)
+SimpleBoolean.add_rule('START', 'True', [], DEFAULT_FEATURE_WEIGHT)
+SimpleBoolean.add_rule('START', '', ['BOOL'], 1.0)
 
-Grammar_CNF.add_rule('DISJ', '',     ['PREDICATE'], 1.0)
-Grammar_CNF.add_rule('DISJ', 'not_', ['PREDICATE'], 1.0)
-Grammar_CNF.add_rule('DISJ', 'or_',  ['PREDICATE', 'DISJ'], 1.0)
+SimpleBoolean.add_rule('BOOL', 'and_', ['BOOL', 'BOOL'], 1.0)
+SimpleBoolean.add_rule('BOOL', 'or_', ['BOOL', 'BOOL'], 1.0)
+SimpleBoolean.add_rule('BOOL', 'not_', ['BOOL'], 1.0)
 
-## ~ ~ ~ ~ ~ ~ ~ 
+SimpleBoolean.add_rule('BOOL', '', ['PREDICATE'], DEFAULT_FEATURE_WEIGHT)
 
-Grammar_DNF = PCFG()
-Grammar_DNF.add_rule('START', '', ['DISJ'], 1.0)
-Grammar_DNF.add_rule('START', 'True', [], 1.0)
-Grammar_DNF.add_rule('START', 'False', [], 1.0)
-Grammar_DNF.add_rule('DISJ', '',     ['CONJ'], 1.0)
-Grammar_DNF.add_rule('DISJ', '',     ['PREDICATE'], 1.0)
-Grammar_DNF.add_rule('DISJ', 'not_', ['PREDICATE'], 1.0)
-Grammar_DNF.add_rule('DISJ', 'or_', ['PREDICATE', 'DISJ'], 1.0)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Logical connectives with NO logical compositionality
+# (e.g. one-level recursion)
 
-Grammar_DNF.add_rule('CONJ', '',     ['PREDICATE'], 1.0)
-Grammar_DNF.add_rule('CONJ', 'not_', ['PREDICATE'], 1.0)
-Grammar_DNF.add_rule('CONJ', 'and_',  ['PREDICATE', 'CONJ'], 1.0)
+AndOr = PCFG()
+AndOr.add_rule('START', '', ['BOOL'], 1.0)
+AndOr.add_rule('START', '', ['PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+AndOr.add_rule('START', 'False', [], DEFAULT_FEATURE_WEIGHT)
+AndOr.add_rule('START', 'True', [], DEFAULT_FEATURE_WEIGHT)
+
+AndOr.add_rule('BOOL', 'and_', ['PREDICATE', 'PREDICATE'], 1.0)
+AndOr.add_rule('BOOL', 'or_', ['PREDICATE', 'PREDICATE'], 1.0)
+AndOr.add_rule('BOOL', 'not_', ['PREDICATE'], 1.0)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+CNF = PCFG()
+CNF.add_rule('START', '', ['CONJ'], 1.0)
+CNF.add_rule('START', '', ['PRE-PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+CNF.add_rule('START', 'True', [], DEFAULT_FEATURE_WEIGHT)
+CNF.add_rule('START', 'False', [], DEFAULT_FEATURE_WEIGHT)
+
+CNF.add_rule('CONJ', '',     ['DISJ'], 1.0)
+CNF.add_rule('CONJ', '',     ['PRE-PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+CNF.add_rule('CONJ', 'and_', ['PRE-PREDICATE', 'CONJ'], 1.0)
+
+CNF.add_rule('DISJ', '',     ['PRE-PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+CNF.add_rule('DISJ', 'or_',  ['PRE-PREDICATE', 'DISJ'], 1.0)
+
+# A pre-predicate is how we treat negation
+CNF.add_rule('PRE-PREDICATE', 'not_', ['PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+CNF.add_rule('PRE-PREDICATE', '',     ['PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+DNF = PCFG()
+DNF.add_rule('START', '', ['DISJ'], 1.0)
+DNF.add_rule('START', '', ['PRE-PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+DNF.add_rule('START', 'True', [], DEFAULT_FEATURE_WEIGHT)
+DNF.add_rule('START', 'False', [], DEFAULT_FEATURE_WEIGHT)
+
+DNF.add_rule('DISJ', '',     ['CONJ'], 1.0)
+DNF.add_rule('DISJ', '',     ['PRE-PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+DNF.add_rule('DISJ', 'or_',  ['PRE-PREDICATE', 'DISJ'], 1.0)
+
+DNF.add_rule('CONJ', '',     ['PRE-PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+DNF.add_rule('CONJ', 'and_', ['PRE-PREDICATE', 'CONJ'], 1.0)
+
+# A pre-predicate is how we treat negation
+DNF.add_rule('PRE-PREDICATE', 'not_', ['PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+DNF.add_rule('PRE-PREDICATE', '',     ['PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+CNF_noTF = PCFG()
+CNF_noTF.add_rule('START', '', ['CONJ'], 1.0)
+CNF_noTF.add_rule('START', '', ['PRE-PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+
+CNF_noTF.add_rule('CONJ', '',     ['DISJ'], 1.0)
+CNF_noTF.add_rule('CONJ', '',     ['PRE-PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+CNF_noTF.add_rule('CONJ', 'and_', ['PRE-PREDICATE', 'CONJ'], 1.0)
+
+CNF_noTF.add_rule('DISJ', '',     ['PRE-PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+CNF_noTF.add_rule('DISJ', 'or_',  ['PRE-PREDICATE', 'DISJ'], 1.0)
+
+# A pre-predicate is how we treat negation
+CNF_noTF.add_rule('PRE-PREDICATE', 'not_', ['PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+CNF_noTF.add_rule('PRE-PREDICATE', '',     ['PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+DNF_noTF = PCFG()
+DNF_noTF.add_rule('START', '', ['DISJ'], 1.0)
+DNF_noTF.add_rule('START', '', ['PRE-PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+
+DNF_noTF.add_rule('DISJ', '',     ['CONJ'], 1.0)
+DNF_noTF.add_rule('DISJ', '',     ['PRE-PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+DNF_noTF.add_rule('DISJ', 'or_',  ['PRE-PREDICATE', 'DISJ'], 1.0)
+
+DNF_noTF.add_rule('CONJ', '',     ['PRE-PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+DNF_noTF.add_rule('CONJ', 'and_', ['PRE-PREDICATE', 'CONJ'], 1.0)
+
+# A pre-predicate is how we treat negation
+DNF_noTF.add_rule('PRE-PREDICATE', 'not_', ['PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+DNF_noTF.add_rule('PRE-PREDICATE', '',     ['PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# A NAND grammar. We get a crazy explosion in rules if 
+# we allowed BOOl->True and BOOL->False, so we simply write these in as 
+# separate NAND expansions
+
+Nand = PCFG()
+Nand.add_rule('START', '', ['BOOL'], 1.0)
+
+Nand.add_rule('BOOL', 'nand_', ['BOOL', 'BOOL'], 1.0)
+Nand.add_rule('BOOL', 'nand_', ['True', 'BOOL'], 1.0)
+Nand.add_rule('BOOL', 'nand_', ['False', 'BOOL'], 1.0)
+Nand.add_rule('BOOL', '', ['PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+NoLogic = PCFG()
+NoLogic.add_rule('START', 'False', [], DEFAULT_FEATURE_WEIGHT)
+NoLogic.add_rule('START', 'True', [], DEFAULT_FEATURE_WEIGHT)
+NoLogic.add_rule('START', '', ['PREDICATE'], DEFAULT_FEATURE_WEIGHT)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+TF = PCFG()
+TF.add_rule('START', 'False', [], DEFAULT_FEATURE_WEIGHT)
+TF.add_rule('START', 'True', [], DEFAULT_FEATURE_WEIGHT)

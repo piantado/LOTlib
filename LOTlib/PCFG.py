@@ -9,6 +9,7 @@ from copy import deepcopy
 from collections import defaultdict
 from random import randint, random, sample
 
+import LOTlib
 from LOTlib.Miscellaneous import *
 from LOTlib.FunctionNode import FunctionNode, isFunctionNode
 from LOTlib.GrammarRule import GrammarRule
@@ -382,6 +383,7 @@ class PCFG:
 		"""
 		assert_or_die( self.bv_count==0, "Error: increment_tree not yet implemented for bound variables." )
 		
+		if LOTlib.SIG_INTERRUPTED: return # quit if interrupted
 		
 		if isFunctionNode(x) and depth >= 0: 
 			#print "FN:", x, depth
@@ -468,7 +470,7 @@ class PCFG:
 		counts = defaultdict(int) # a count for each hash type
 		
 		for ti in listifnot(t):
-			for x in ti.all_subnodes():
+			for x in ti:
 				if x.ruleid >= 0: counts[x.ruleid] += 1
 		
 		# and convert into a list of vectors (with the right zero counts)
@@ -537,7 +539,7 @@ class PCFG:
 				elif mismatch_count == 1: # we could propose to x, or x.args[mismatch_index], but nothing else (nothing else will fix the mismatch)
 					RP = logplusexp(RP, self.lp_regenerate_propose_to(x.args[mismatch_index], y.args[mismatch_index], xZ=xZ, yZ=yZ))
 				else: # identical trees -- we could propose to any, so that's just the tree probability below convolved with the resample p
-					for xi in x.all_subnodes(no_self=True): # we already counted ourself
+					for xi in dropfirst(x): # we already counted ourself
 						RP = logplusexp(RP, log(xi.resample_p) - log(xZ) + xi.log_probability() )
 					
 		return RP
@@ -557,7 +559,7 @@ class PCFG:
 	## this enumerates using rules, but it may over-count, creating more than one instance. So we have to wrap it in 
 	## a filter above
 	#def enumerate_pointwise_nonunique(self, t):
-		#for ti in t.all_subnodes():
+		#for ti in t:
 			#titype = ti.get_type_signature() # for now, keep terminals as they are
 			#weightsum = logsumexp([ x.lp for x in self.rules[ti.returntype]])
 			#old_name, old_lp = [ti.name, ti.lp] # save these to restore
@@ -607,20 +609,20 @@ if __name__ == "__main__":
 	#print "Testing generate (no lambda)"
 	TEST_GEN = dict()
 	TARGET = dict()
-	from LOTlib.Hypothesis import StandardExpression
+	from LOTlib.Hypothesis import LOTHypothesis
 	for i in xrange(10000): 
 		t = G.generate('START')
 		#print ">>", t
 		TEST_GEN[str(t)] = t
 		
 		if t.count_nodes() < 10:
-			TARGET[StandardExpression(G, v=t.copy())] = t.log_probability()
+			TARGET[LOTHypothesis(G, v=t.copy())] = t.log_probability()
 		
 		
 	from LOTlib.Testing.Evaluation import evaluate_sampler
 	import LOTlib.MetropolisHastings
 	
-	hyp = StandardExpression(G)
+	hyp = LOTHypothesis(G)
 	evaluate_sampler(TARGET, LOTlib.MetropolisHastings.mh_sample(hyp, [], 10000000), trace=False)
 	quit()
 	
@@ -628,8 +630,8 @@ if __name__ == "__main__":
 	#TEST_MCMC = dict()
 	#MCMC_STEPS = 10000
 	#import LOTlib.MetropolisHastings
-	#from LOTlib.Hypothesis import StandardExpression
-	#hyp = StandardExpression(G)
+	#from LOTlib.Hypothesis import LOTHypothesis
+	#hyp = LOTHypothesis(G)
 	#for x in LOTlib.MetropolisHastings.mh_sample(hyp, [], MCMC_STEPS): 
 		##print ">>", x
 		#TEST_MCMC[str(x.value)] = x.value.copy()
@@ -667,8 +669,8 @@ if __name__ == "__main__":
 	TEST_MCMC_COUNT = defaultdict(int)
 	MCMC_STEPS = 50000
 	import LOTlib.MetropolisHastings
-	from LOTlib.Hypothesis import StandardExpression
-	hyp = StandardExpression(G)
+	from LOTlib.Hypothesis import LOTHypothesis
+	hyp = LOTHypothesis(G)
 	for x in LOTlib.MetropolisHastings.mh_sample(hyp, [], MCMC_STEPS): 
 		TEST_MCMC[str(x.value)] = x.value.copy()
 		TEST_MCMC_COUNT[str(x.value)] += 1 # keep track of these

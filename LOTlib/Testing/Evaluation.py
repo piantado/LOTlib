@@ -92,3 +92,33 @@ def evaluate_sampler(target, sampler, skip=1000, steps=1000000, chains=1, prefix
 		if outfile is not None: bo.close()
 		return 
 
+## this take sa dictionary d
+## the keys of d must contain "lp", and d must contain counts
+## this prints out a chi-squared test to make sure these are right
+## NOTE: This doe snot do well if we have a fat tail, since we will necessarily sample some low probability events
+##from scipy.stats import chisquare
+### importantly, throw out counts less than min_count -- else we get crummy
+#def test_expected_counts(d, display=True, sort=True, min_count=100):
+	#keys = d.keys() # maintain an order for the keys
+	#if sort:
+		#keys = sorted(keys, key=lambda x: d[x])
+	#lpZ = logsumexp([ k.lp for k in keys])
+	#cntZ = sum(d.values())
+	#if display:			
+		#for k in keys:
+			#ocnt = float(d[k])/cntZ
+			#ecnt = exp(k.lp-lpZ)
+			#print d[k], "\t", ocnt, "\t", ecnt, "\t", ocnt/ecnt, "\t", k
+	## now update these with their other probs	
+	#keeper_keys = filter(lambda x: d[x] >= min_count, keys)
+	##print len( keeper_keys), len(keys), map(lambda x: d[x], keys)
+	#lpZ = logsumexp([ k.lp for k in keeper_keys])
+	#cntZ = sum([d[k] for k in keeper_keys])	
+	
+	## The chisquared test does not do well here iwth the low expected counts -- 
+	#print chisquare( [ d[k] for k in keeper_keys ], f_exp=array( [ cntZ * exp(k.lp - lpZ) for k in keeper_keys] ))  ##UGH expected *counts*, not probs
+
+
+	
+
+

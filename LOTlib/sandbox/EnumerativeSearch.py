@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
+
+"""
+	Experimental EnumerativeSearch, where you have a state a bunch of possible next states, and we seach through.
+"""
+
+
+import LOTlib
 from LOTlib.Miscellaneous import *
 from LOTlib.FiniteBestSet import *
 
 ## Make this interruptable by CTRL-C
 import sys
-import signal
-SIG_INTERRUPTED = False
-def signal_handler(signal, frame): 
-	global SIG_INTERRUPTED
-	SIG_INTERRUPTED = True
-signal.signal(signal.SIGINT, signal_handler)
 
 
 def enumerative_search( start, next_states, score, N=-1, breakout=float("inf"), yield_immediate=False):
@@ -63,7 +64,7 @@ def enumerative_search( start, next_states, score, N=-1, breakout=float("inf"), 
 		
 		
 	## Main loop:
-	while len(Q) > 0 and not SIG_INTERRUPTED: # while there is something in the queue
+	while len(Q) > 0 and not LOTlib.SIG_INTERRUPTED: # while there is something in the queue
 		
 		#print len(Q)
 		#print out the current priority queue

@@ -44,6 +44,9 @@ G.add_rule('EXPR', 'PI', [], 1.0) # these terminals should have None for their f
 G.add_rule('EXPR', 'E', [], 1.0) # these terminals should have None for their function type; the literals
 G.add_rule('CONSTANT', '0.0', [], 1.0)
 
+
+#G.add_rule('CONSTANT', '', ['*gaussian*'], 10.0) ##TODO: HIGHLY EXPERIMENTAL
+
 G.add_rule('CONSTANT', '2.0', [], 0.10)
 G.add_rule('CONSTANT', '3.0', [], 0.10)
 G.add_rule('CONSTANT', '4.0', [], 0.10)

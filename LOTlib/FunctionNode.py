@@ -3,6 +3,8 @@
 	A function node -- a tree part representing a function and its arguments. 
 	Also used for PCFG rules, where the arguments are nonterminal symbols. 
 	
+	A Functionnode defaultly iterates over its subnodes
+	
 	TODO: This could use some renaming FunctionNode.bv is not really a bound variable--its a list of rules that were added
 """
 
@@ -63,7 +65,7 @@ class FunctionNode:
 	def copy(self, shallow=False):
 		"""
 			Copy a function node
-			shallow - if True, this does not cpy the children (self.to points to the same as what we return)
+			shallow - if True, this does not copy the children (self.to points to the same as what we return)
 		"""
 		if not shallow: newargs = [x.copy() if isFunctionNode(x) else deepcopy(x) for x in self.args]
 		else:           newargs = self.args
@@ -144,13 +146,17 @@ class FunctionNode:
 	
 	# use generator to enumerate all subnodes
 	# NOTE: To do anything fancy, we should use PCFG.iterate_subnodes in order to update the grammar, resample, etc. 
-	def all_subnodes(self, no_self=False):
+	def all_subnodes(self):
+		print "*** USE __ITER__ now!"
+		assert(False)
 		
-		if not no_self: yield self;  # I am a subnode of myself
+	def __iter__(self):
+		
+		yield self
 		
 		for i in range(len(self.args)): # loop through kids
 			if isFunctionNode(self.args[i]):
-				for ssn in self.args[i].all_subnodes():
+				for ssn in self.args[i]:
 					yield ssn
 	
 	def all_leaves(self):
@@ -209,14 +215,14 @@ class FunctionNode:
 		"""
 			Check if this contains x as function below
 		"""
-		for n in self.all_subnodes():
+		for n in self:
 			if n.name == x: return True
 		return False
 	
 	def count_nodes(self): return self.count_subnodes()
 	def count_subnodes(self):
 		c = 0
-		for n in self.all_subnodes(): 
+		for n in self: 
 			c = c + 1
 		return c
 	

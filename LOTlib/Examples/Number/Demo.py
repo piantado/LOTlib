@@ -25,10 +25,10 @@ allhyp = FiniteBestSet(max=True,N=1000)
 
 # A bunch of different MCMC algorithms to try. mh_sample is from the Rational Rules paper and generally works very well. 
 #for h in LOTlib.MetropolisHastings.tempered_transitions_sample(initial_hyp, data, 500000, skip=0, temperatures=[1.0, 1.1, 1.2, 1.3, 1.4, 1.5]):		
-#for h in LOTlib.MetropolisHastings.tempered_sample(initial_hyp, data, 1000):
+#for h in LOTlib.MetropolisHastings.parallel_tempering_sample(initial_hyp, data, 1000):
 #for h in LOTlib.MetropolisHastings.mhgibbs_sample(initial_hyp, data, 100000, mh_steps=25, gibbs_steps=2):
 #for h in LOTlib.MetropolisHastings.mh_sample(initial_hyp, data, 50000, skip=10):
-for h in LOTlib.MetropolisHastings.mh_sample(initial_hyp, data, 100000, skip=0):
+for h in LOTlib.MetropolisHastings.mh_sample(initial_hyp, data, 10000, skip=0):
 	if TRACE: 
 		print q(get_knower_pattern(h)), h.compute_prior(), h.compute_likelihood(data), q(h)
 		

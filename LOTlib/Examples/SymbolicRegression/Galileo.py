@@ -32,8 +32,8 @@ def run(*args):
 	pq = FiniteBestSet(100, max=True) 
 	
 	# starting hypothesis -- here this generates at random
-	initial_hyp = GaussianStandardExpression(G, prior_temperature=PRIOR_TEMPERATURE, ll_sd=LL_SD)
-
+	initial_hyp = GaussianLOTHypothesis(G, prior_temperature=PRIOR_TEMPERATURE, ll_sd=LL_SD)
+	print initial_hyp
 	# populate the finite sample by running the sampler for this many steps
 	for x in LOTlib.MetropolisHastings.mh_sample(initial_hyp, data, STEPS, skip=SKIP):
 		pq.push(x, x.lp)
@@ -46,7 +46,7 @@ results = map(run, [ [None] ] * CHAINS ) # Run on a single core
 finitesample.merge(results)
 	
 ## and display
-for r in finitesample.get_sorted(decreasing=True):
+for r in finitesample.get_all(decreasing=True, sorted=True):
 	print r.lp, r.prior, r.likelihood, "\t", q(str(r))
 	
 	

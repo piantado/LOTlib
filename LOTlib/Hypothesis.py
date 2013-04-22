@@ -18,6 +18,7 @@ import LOTlib.BasicPrimitives # needed to eval __call__ here, since that's where
 from LOTlib.DataAndObjects import FunctionData,UtteranceData
 from copy import copy
 import numpy
+import sys
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -184,9 +185,11 @@ class FunctionHypothesis(Hypothesis):
 		return FunctionHypothesis(v=self.value.copy(), f=self.fvalue, args=self.args)
 		
 	def __call__(self, *vals):
-		""" Make this callable just like a function. Yay python! """
-		#print ">>", vals
+		""" 
+			Make this callable just like a function. Yay python! 
+		"""
 		return self.fvalue(*vals)
+			
 	
 	def value2function(self, v):
 		#print "ARGS=", self.args
@@ -242,7 +245,7 @@ class FunctionHypothesis(Hypothesis):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-class StandardExpression(FunctionHypothesis):
+class LOTHypothesis(FunctionHypothesis):
 	"""
 		A FunctionHypothesis built from a grammar.
 		Implement a Rational Rules (Goodman et al 2008)-style grammar over Boolean expressions.
@@ -269,7 +272,9 @@ class StandardExpression(FunctionHypothesis):
 		"""
 			Return a copy -- must copy all the other values too (alpha, rrPrior, etc) 
 		"""
-		return StandardExpression(self.G, v=self.value.copy(), start=self.start, ALPHA=self.ALPHA, rrPrior=self.rrPrior, maxnodes=self.maxnodes, args=self.args, ll_decay=self.ll_decay)
+		assert isinstance(self.value, FunctionNode)
+		return LOTHypothesis(self.G, v=self.value.copy(), start=self.start, ALPHA=self.ALPHA, rrPrior=self.rrPrior, maxnodes=self.maxnodes, args=self.args, ll_decay=self.ll_decay)
+		
 			
 	def propose(self): 
 		p = self.copy()
@@ -323,23 +328,24 @@ class StandardExpression(FunctionHypothesis):
 	# must wrap these as SimpleExpressionFunctions
 	def enumerative_proposer(self):
 		for k in G.enumerate_pointwise(self.value):
-			yield StandardExpression(v=k)
+			yield LOTHypothesis(v=k)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class GaussianStandardExpression(StandardExpression):
+class GaussianLOTHypothesis(LOTHypothesis):
 	"""
-		Like StandardExpression but has a Gaussian likelihood
+		Like LOTHypothesis but has a Gaussian likelihood
 	"""
 	
 	def __init__(self, G, ll_sd=1.0, prior_temperature=1.0, ll_decay=0.0): 
 		""" kwargs should include ll_sd """
-		StandardExpression.__init__(self, G)
+		LOTHypothesis.__init__(self, G)
 		self.__dict__.update(locals())
 		
 	def copy(self):
 		""" Return a copy -- must copy all the other values too (alpha, rrPrior, etc) """
-		return GaussianStandardExpression(G=self.G, ll_sd=self.ll_sd, prior_temperature=self.prior_temperature, ll_decay=self.ll_decay)
+		assert isinstance(self.value, FunctionNode)
+		return GaussianLOTHypothesis(G=self.G, ll_sd=self.ll_sd, prior_temperature=self.prior_temperature, ll_decay=self.ll_decay)
 				
 	
 	def compute_likelihood(self, data):
