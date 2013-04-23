@@ -1,3 +1,4 @@
+
 April 23, 2013
 	- Got rid of the annoying MPI warning for too many calls to MPI_Finalize()
 	- Progress bar tweaks
