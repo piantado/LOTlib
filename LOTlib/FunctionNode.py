@@ -154,10 +154,8 @@ class FunctionNode:
 		
 		yield self
 		
-		for i in range(len(self.args)): # loop through kids
-			if isFunctionNode(self.args[i]):
-				for ssn in self.args[i]:
-					yield ssn
+		for a in filter(isFunctionNode, self.args):
+			for ssn in a: yield ssn
 	
 	def all_leaves(self):
 		for i in range(len(self.args)): # loop through kids

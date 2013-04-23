@@ -4,7 +4,7 @@
 	TODO: Need to iterate through the leaves too, to get tihngs like" minneapolis"
 """
 
-from SimpleLambdaParser import *
+from LOTlib.SimpleLambdaParser import *
 from LOTlib.bvPCFG import *
 import re
 

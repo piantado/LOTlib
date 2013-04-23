@@ -72,6 +72,14 @@ def dprint(l, *args):
 			print str(a),
 	sys.stdout.flush()
 
+def dprinterr(l, *args):
+	global DEBUG_LEVEL
+	if DEBUG_LEVEL >= l:
+		for a in args: 
+			print >>sys.stderr, str(a),
+	sys.stderr.flush()
+
+	
 def fprintn(dl, *args, **kwargs):
 	
 	f = kwargs.get('f',sys.stdout)

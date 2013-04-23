@@ -522,6 +522,8 @@ def tree_up_(T,x): return tree_up(T,x)
 def tree_up(T, x):
 	"""
 		Go up one node in the tree. If you are root, return None
+		
+		NOTE: Super slow since we search over the whole tree each time.... This is a little tricky otherwise without pointers
 	"""
 	
 	if x is T: return None
@@ -567,14 +569,38 @@ def is_nonterminal_type(x,y):
 
 @LOTlib_primitive
 @None2None
-def ancestors_(T, x):
-	if not isinstance(x, FunctionNode): return []
-	out = []
-	while not tree_is_(x,T):
-		x = tree_up(T,x)
-		out.append(x)
-	return out
+def ancestors_(T, x): return ancestors(T,x)
 
+#def ancestors(T,x):
+	### SLOW VERSION -- O(N^2) since tree_up is O(N)
+	#if not isinstance(x, FunctionNode): return []
+	#out = []
+	#while not tree_is_(x,T):
+		#x = tree_up(T,x)
+		#out.append(x)
+	#return out
+
+def ancestors(T,x):
+	"""
+		Here is a version of ancestors that is O(n), rather than the repeated calls to tree_up, which is O(N^2)
+	"""
+	
+	anc = []
+	
+	def recurse_down(y):
+		#print "RD", y, "\t", x
+		if isinstance(y,list):
+			return any(map(recurse_down, filter(isFunctionNode, y)))
+		elif isFunctionNode(y):
+			if recurse_down(y.args) or immediately_dominates(y, x): 
+				anc.append(y) # put y on the end
+				return True
+			return False
+	
+	recurse_down(T)
+	
+	return anc
+	
 @LOTlib_primitive
 @None2None
 def whole_tree_(T):

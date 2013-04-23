@@ -26,20 +26,20 @@ comm = MPI.COMM_WORLD
 size = comm.Get_size()
 rank = comm.Get_rank()
 out = None
+MPI_FINALIZED = False
 
-
-# Make sure we always finalize when we exit, or else all hell breaks loose
+# Make sure we always finalize when we exit, or else all hell breaks loose, with loose MPI threads hanging around
+# IT is much better to call MPI_done(), but this catches things just in case we don't
 import atexit # for running things at exit
 def myexit():
 	global out
 	if out is not None: out.close() # close this -- meaning the subprocess is told to stop 
-	MPI.Finalize()
+	if not MPI_FINALIZED: 
+		MPI.Finalize()
 atexit.register(myexit)
 
 def is_master_process():
 	return rank == MASTER_PROCESS
-
-
 
 def synchronize_variable(f):
 	"""
@@ -65,6 +65,7 @@ def worker_process(outfile=None):
 		This implements a worker process who is sitting to receive
 	"""
 	global out # make this global so that myexit can call it
+	global MPI_FINALIZED
 	assert rank != MASTER_PROCESS # better not have master processes in here!
 	
 	if outfile is not None:
@@ -75,9 +76,10 @@ def worker_process(outfile=None):
 		if comm.Iprobe(source=MASTER_PROCESS, tag=EXIT_TAG):
 			comm.recv(source=MASTER_PROCESS, tag=EXIT_TAG)
 			
-			print >>sys.stderr, "# Process exiting ", rank
+			dprinterr(25, "# Process exiting ", rank)
 			# We must exit
 			MPI.Finalize()
+			MPI_FINALIZED = True
 			sys.exit(0)
 		
 		# test for a function to evaluate
@@ -104,7 +106,7 @@ def capture_slaves(outfile=None):
 def MPI_done():
 	# Tell all to exit from this map (Not exit overall)
 	for i in range(1,size): 
-		print >>sys.stderr, "# Master calling exit on ", i
+		dprinterr(25, "# Master calling exit on ", i)
 		comm.send(None, dest=i, tag=EXIT_TAG) 
 		
 
@@ -123,7 +125,7 @@ def MPI_map(f, args, random_order=True, outfile=None, mpi_done=False):
 	"""
 	
 	if size == 1: 
-		print >>sys.stderr, "# *** NOTE: 'MPI_map' running as 'map' since size=1!"
+		dprinterr(25, "# *** NOTE: 'MPI_map' running as 'map' since size=1!")
 		return map(lambda x: f( *listifnot(x)), args)
 		
 	arglen = len(args)
@@ -140,6 +142,8 @@ def MPI_map(f, args, random_order=True, outfile=None, mpi_done=False):
 	
 	# Now only the master process survives:
 	try:
+		draw_progress(float(completed_count)/float(arglen)) # Just to draw it to start
+		
 		while completed_count < arglen:
 			for i in range(1,min(size,arglen),1): # run at most the number of arguments in parallel
 				if (not running[i]) and (started_count < arglen):
