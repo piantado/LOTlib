@@ -1,0 +1,11 @@
+April 23, 2013
+	- Got rid of the annoying MPI warning for too many calls to MPI_Finalize()
+	- Progress bar tweaks
+	- made BasicPrimitives.ancestors O(N) instead of O(N^2)
+	
+April 22, 2013
+	- Changed "StandardExpression" to "LOTHypothesis"
+	- Made FunctionNodes have a default iterator of subnodes, and removed FunctionNode.all_subnodes()
+	- Changed "temperature" in MCMC to apply *only* to the LL, not the prior. This helps keep our PCFGs defined even for higher temperature
+	
+	
