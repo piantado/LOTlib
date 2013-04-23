@@ -10,6 +10,7 @@
 from LOTlib.Miscellaneous import *
 from LOTlib.FiniteBestSet import *
 import numpy
+import math
 import LOTlib.Miscellaneous
 
 def beam_search(start, data, top=100, samples=1000, reps=100, temperature=1.0, taboo=False):
@@ -38,9 +39,11 @@ def beam_search(start, data, top=100, samples=1000, reps=100, temperature=1.0, t
 		xes = fs.get_all()
 		lps = numpy.array([x.lp/temperature for x in xes])
 		Z = logsumexp(lps)
-		counts = numpy.exp(lps-Z)*samples # distribute samples according to probability
-		
+		if Z > -Infinity: counts = numpy.exp(lps-Z)*samples # distribute samples according to probability
+		else:             counts = [samples / len(lps) ] * len(lps) # distribute evenly
+			
 		for x, xcnt in zip(xes, counts):
+			if math.isnan(xcnt): continue
 			for k in xrange(int(xcnt)): # how many times do we propose to this x?
 				pp, _ = x.propose()
 				
