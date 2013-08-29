@@ -79,10 +79,13 @@ class FunctionNode:
 	
 	def as_list(self):
 		"""
-			Not a pretty print, just a list of all key feature
+			This returns ourself structured as a lisp (with function/self.name first)
+			NOTE: This does ot handle BV yet
 		"""
-		return [self.returntype, self.name, self.args, self.lp, self.bv, self.ruleid]
-	
+		x = [self.name] if self.name != '' else []
+		x.extend( [a.as_list() if isFunctionNode(a) else a for a in self.args] )
+		return x
+			
 	# output a string that can be evaluated by python
 	## NOTE: Here we do a little fanciness -- with "if" -- we convert it to the "correct" python form with short circuiting instead of our fancy ifelse function
 	def pystring(self): 
@@ -225,7 +228,7 @@ class FunctionNode:
 		return c
 	
 	def depth(self):
-		depths = [0.0] # if no function nodes
+		depths = [0] # if no function nodes
 		for i in range(len(self.args)):
 			if isFunctionNode(self.args[i]):
 				depths.append( self.args[i].depth()+1 )

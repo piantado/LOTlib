@@ -123,10 +123,19 @@ def display_option_summary(obj):
 	"""
 	
 	print "####################################################################################################"
-	print "# Username: ", os.getlogin()
-	print "# Date: ", strftime("%Y %b %d (%a) %H:%M:%S", localtime(time()) )
-	print "# Uname: ", os.uname()
-	print "# Pid: ", os.getpid()
+	
+	try: print "# Username: ", os.getlogin()
+	except OSError: pass
+	
+	try: print "# Date: ", strftime("%Y %b %d (%a) %H:%M:%S", localtime(time()) )
+	except OSError: pass
+	
+	try: print "# Uname: ", os.uname()
+	except OSError: pass
+	
+	try: print "# Pid: ", os.getpid()
+	except OSError: pass
+	
 	for slot in dir(obj):
 		attr = getattr(obj, slot)
 		if not isinstance(attr, (types.BuiltinFunctionType, types.FunctionType, types.MethodType)) and (slot is not "__doc__") and (slot is not "__module__"):
@@ -174,6 +183,8 @@ def listifnot(x):
 	else:                  return [x]
 
 
+def all_binary_vectors(N):
+	return [  [ (x>>n)&0x1 for n in xrange(N)] for x in xrange(0,2**N) ]
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Math functions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

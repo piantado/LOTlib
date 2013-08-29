@@ -121,6 +121,7 @@ class PCFG:
 			TODO: Add a check that we don't have any leftover bound variable rules, when d==0
 		"""
 		
+		
 		if isinstance(x,list):
 			
 			# If we get a list, just map along it to generate. We don't count lists as depth--only FunctionNodes

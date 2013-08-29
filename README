@@ -19,6 +19,8 @@ Required modules: lockfile, pyparsing
 
 lockfile
 pyparsing
+numpy
+scipy
 mpi4py (if using MPI)
 
 ========================================================

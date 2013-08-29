@@ -12,6 +12,8 @@ from LOTlib.Miscellaneous import *
 from LOTlib.FunctionNode import isFunctionNode
 import re
 
+import math
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # We define two variables, one for how many function calls have been
 # used in a single function/hypothesis, and one for how many have been
@@ -105,17 +107,17 @@ first_ = car_
 
 @LOTlib_primitive
 @None2None
-def I(x):
+def I_(x):
 	return x
 	
 @LOTlib_primitive
 @None2None
-def K(x): # constant function
+def K_(x): # constant function
 	return (lambda y: x)
 	
 @LOTlib_primitive	
 @None2None
-def S(x): #(S x y z) = (x z (y z))
+def S_(x): #(S x y z) = (x z (y z))
 	# (S x) --> lambda y lambda z: 
 	return lambda y: lambda z: x(z)( y(z) )
 	
@@ -152,10 +154,55 @@ def collapse_undef(x):
 		else: x
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Basic arithmetic
+# Assembly arithmetic
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-import math
+def assembly_primitive(fn):
+	def inside(*args):
+		try:
+			v = fn(*args)
+			return v
+		except ZeroDivisionError: return float("nan")
+		except ValueError: return float("nan")
+		except OverflowError: return float("nan")
+		
+	return inside
+
+
+
+# For assembly 
+@assembly_primitive
+def ADD(x,y): return x+y
+
+@assembly_primitive
+def SUB(x,y): return x-y
+
+@assembly_primitive
+def MUL(x,y): return x*y
+
+@assembly_primitive
+def DIV(x,y): return x/y
+
+@assembly_primitive
+def LOG(x): return log(x)
+
+@assembly_primitive
+def POW(x,y):return pow(x,y)
+
+@assembly_primitive
+def EXP(x): return exp(x)
+
+@assembly_primitive
+def NEG(x): return -x
+
+@assembly_primitive
+def SIN(x): return math.sin(x)
+
+@assembly_primitive
+def ASIN(x): return math.asin(x)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Basic arithmetic
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 @LOTlib_primitive
 @None2None
@@ -247,6 +294,11 @@ def mod_(x,y): return (x%y)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Basic logic
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+https://en.wikipedia.org/wiki/Truth_function#Table_of_binary_truth_functions
+	
+"""
+
 
 @LOTlib_primitive
 @None2None
@@ -255,6 +307,34 @@ def id_(A): return A # an identity function
 @LOTlib_primitive
 @None2None
 def and_(A,B): return (A and B)
+
+@LOTlib_primitive
+@None2None
+def AandnotB_(A,B): return (A and (not B))
+
+@LOTlib_primitive
+@None2None
+def notAandB_(A,B): return ((not A) and B)
+
+@LOTlib_primitive
+@None2None
+def AornotB_(A,B): return (A or (not B))
+
+@LOTlib_primitive
+@None2None
+def A_(A,B): return A
+
+@LOTlib_primitive
+@None2None
+def notA_(A,B): return not A
+
+@LOTlib_primitive
+@None2None
+def B_(A,B): return B
+
+@LOTlib_primitive
+@None2None
+def notB_(A,B): return not B
 
 @LOTlib_primitive
 @None2None

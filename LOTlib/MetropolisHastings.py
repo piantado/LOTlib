@@ -40,7 +40,7 @@ def mh_sample(current_sample, data, steps=float("inf"), proposer=None, skip=0, t
 		steps - how many steps to run
 		proposer - if not None, use this instead of inh.propose() to compute proposals
 		skip - only return samples every this many steps
-		temperature - the sampler temperature
+		temperature - the sampler temperature -- only on the likelihood (TODO: FIX)
 		trace - if true, we display the random number, proposal, current hypothesis, and sample proposal
 		stats - if not none, then we store sampling information in it (hopefully, a MHStats object)
 	"""
