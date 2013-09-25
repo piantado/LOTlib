@@ -1,3 +1,6 @@
+Sep 23, 2013:
+	- Removed parallel MPI functions to a separate library, SimpleMPI. This keeps the core LOTlib code separate, and allows easy use of mapping in other applications
+
 July 28, 2013
 	- added NAND Compression example
 	- Made FunctionNode.depth() return an int

@@ -63,7 +63,7 @@ if options.DATA == -1: options.DATA_AMOUNTS = range(options.DATA_MIN,options.DAT
 else:                  options.DATA_AMOUNTS = [ options.DATA ]
 
 if not options.RUN_MPI: display_option_summary(options)
-if options.RUN_MPI: from LOTlib.MPI import MPI_map # get our MPI_map function, which will execute run() on as many processors as we pass to mpiexec # import before we set DEBUG_LEVEL
+if options.RUN_MPI: from SimpleMPI.MPI_map import MPI_map, is_master_process # get our MPI_map function, which will execute run() on as many processors as we pass to mpiexec # import before we set DEBUG_LEVEL
 
 # manage how much we print
 if options.QUIET: options.DEBUG_LEVEL = 0

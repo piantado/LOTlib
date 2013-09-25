@@ -23,8 +23,7 @@ RUN_MPI = False # should we run on MPI
 ########################################################################
 ## MPI imports if we need them
 if RUN_MPI:
-	from mpi4py import MPI
-	from LOTlib.MPI import * # get our MPI_map function, which will execute run() on as many processors as we pass to mpiexec
+	from SimpleMPI.MPI_map import MPI_map
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # the main sampling function to run
@@ -65,12 +64,9 @@ if RUN_MPI:
 else:
 	allret = map(run,  DATA_AMOUNTS * CHAINS)
 
-# if we are the only process or we are the rank 0 process, then save
-if (not RUN_MPI) or MPI.COMM_WORLD.Get_rank() == 0:
-	
-	## combine into a single hypothesis set and save
-	outhyp = FiniteBestSet(max=True)
-	for r in allret: 
-		print "# Merging ", len(r)
-		outhyp.merge(r)
-	outhyp.save(OUT_PATH)
+## combine into a single hypothesis set and save
+outhyp = FiniteBestSet(max=True)
+for r in allret: 
+	print "# Merging ", len(r)
+	outhyp.merge(r)
+outhyp.save(OUT_PATH)

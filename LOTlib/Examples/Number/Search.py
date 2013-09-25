@@ -17,7 +17,7 @@ from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("--out", dest="OUT_PATH", type="string",
                   help="Output file (a pickle of FiniteBestSet)", 
-                  default="/home/piantado/Desktop/mit/Libraries/LOTlib/examples/Number/runs/mpi-run.pkl")
+                  default="/home/piantado/Desktop/mit/Libraries/LOTlib/Examples/Number/mpi-run.pkl")
          
 parser.add_option("--steps", dest="STEPS", type="int", default=200000,
                   help="Number of Gibbs cycles to run")
@@ -60,6 +60,9 @@ LOTlib.Miscellaneous.DEBUG_LEVEL = options.DEBUG_LEVEL
 # And echo the command line options for a record
 dprintn(5, "# Running: ", options)
 
+if options.RUN_MPI:
+	from SimpleMPI.MPI_map import MPI_map, is_master_process
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # the main sampling function to run
 
@@ -88,33 +91,31 @@ def run(data_size):
 
 # choose the appropriate map function
 if options.RUN_MPI:
-	from mpi4py import MPI
-	from LOTlib.MPI import * # get our MPI_map function, which will execute run() on as many processors as we pass to mpiexec
 	allret = MPI_map(run, map(lambda x: [x], options.DATA_AMOUNTS * options.CHAINS)) # this many chains
 else:
 	allret = map(run,  options.DATA_AMOUNTS * options.CHAINS)
 
-# if we are the only process or we are the rank 0 process, then save
-if (not options.RUN_MPI) or MPI.COMM_WORLD.Get_rank() == 0:
+
+
+# Only the master process escapes MPI_map
+allfs = FiniteBestSet(max=True)
+for r in allret: allfs.merge(r)
+
+# save this in a file
+allfs.save(options.OUT_PATH)
+
+#print options.LARGE_DATA_SIZE 
+if options.LARGE_DATA_SIZE > 0:
 	
-	allfs = FiniteBestSet(max=True)
-	for r in allret: allfs.merge(r)
+	#now evaluate on different amounts of data too:
+	huge_data = generate_data(options.LARGE_DATA_SIZE)
 	
-	# save this in a file
-	allfs.save(options.OUT_PATH)
+	H = allfs.get_all()
+	[h.compute_posterior(huge_data) for h in H]
 	
-	#print options.LARGE_DATA_SIZE 
-	if options.LARGE_DATA_SIZE > 0:
-		
-		#now evaluate on different amounts of data too:
-		huge_data = generate_data(options.LARGE_DATA_SIZE)
-		
-		H = allfs.get_all()
-		[h.compute_posterior(huge_data) for h in H]
-		
-		# show the *average* ll for each hypothesis
-		for h in H:
-			if h.prior > float("-inf"):
-				print h.prior, h.likelihood/float(options.LARGE_DATA_SIZE), q(get_knower_pattern(h)),  q(h) # a quoted x
-	
+	# show the *average* ll for each hypothesis
+	for h in H:
+		if h.prior > float("-inf"):
+			print h.prior, h.likelihood/float(options.LARGE_DATA_SIZE), q(get_knower_pattern(h)),  q(h) # a quoted x
+
 	if options.RUN_MPI: MPI_done()

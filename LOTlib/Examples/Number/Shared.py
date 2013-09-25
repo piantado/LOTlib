@@ -10,7 +10,7 @@ from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Miscellaneous import *
 from LOTlib.DataAndObjects import *
 from LOTlib.Hypothesis import LOTHypothesis
-from LOTlib.MPI import MPI_map
+#from LOTlib.MPI import MPI_map
 from random import randint
 
 ALPHA = 0.75 # the probability of uttering something true

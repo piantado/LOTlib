@@ -11,8 +11,6 @@ NOTE: The bound-variable part of PCFGs is not tested or debugged (yet).
 This code is based on scheme code by Steve Piantadosi, and was ported to python 2.6 in September 2011. The scheme code is available upon request (piantado@mit.edu).
 
 
-Required modules: lockfile, pyparsing
-
 ========================================================
 == REQUIREMENTS
 ========================================================
