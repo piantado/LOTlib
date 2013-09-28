@@ -33,7 +33,7 @@ def run(*args):
 	
 	# starting hypothesis -- here this generates at random
 	initial_hyp = GaussianLOTHypothesis(G, prior_temperature=PRIOR_TEMPERATURE, ll_sd=LL_SD)
-	print initial_hyp
+	#print initial_hyp
 	# populate the finite sample by running the sampler for this many steps
 	for x in LOTlib.MetropolisHastings.mh_sample(initial_hyp, data, STEPS, skip=SKIP):
 		pq.push(x, x.lp)
@@ -46,7 +46,7 @@ results = map(run, [ [None] ] * CHAINS ) # Run on a single core
 finitesample.merge(results)
 	
 ## and display
-for r in finitesample.get_all(decreasing=True, sorted=True):
+for r in finitesample.get_all(decreasing=False, sorted=True):
 	print r.lp, r.prior, r.likelihood, "\t", q(str(r))
 	
 	

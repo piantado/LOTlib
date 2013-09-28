@@ -10,6 +10,7 @@
 import LOTlib.MetropolisHastings
 from LOTlib.PCFG import PCFG
 from LOTlib.Hypothesis import *
+from copy import deepcopy
 
 ALPHA = 0.90
 LL_TEMPERATURE = 0.1

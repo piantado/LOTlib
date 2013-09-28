@@ -226,6 +226,11 @@ def divide_(x,y):
 @None2None
 def subtract_(x,y): return x-y
 
+	
+@LOTlib_primitive
+@None2None
+def minus_(x,y): return x-y
+
 @LOTlib_primitive
 @None2None
 def sin_(x): 
@@ -265,9 +270,19 @@ def pow_(x,y):
 def exp_(x): 
 	try: 
 		r = math.exp(x)
-		return x
+		return r
 	except: 
 		return float("inf")*x
+
+@LOTlib_primitive
+@None2None
+def abs_(x): 
+	try: 
+		r = abs(x)
+		return r
+	except: 
+		return float("inf")*x
+		
 		
 @LOTlib_primitive	
 @None2None

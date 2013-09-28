@@ -7,7 +7,7 @@ To install on my system, I had to build mpich2, mpi4py and set up ubunut with th
 	https://help.ubuntu.com/community/MpichCluster
 
 To run on MPI:
-$ time mpiexec --hostfile ../../hosts.mpich2 -n 36 python2.7-mpi Search.py --steps=10000 --top=50 --chains=25 --large=1000 --dmin=0 --dmax=300 --dstep=10 --mpi --out=/home/piantado/Desktop/mit/Libraries/LOTlib/examples/Number/runs/run-201Oct14.pkl 
+$ time mpiexec --hostfile /home/piantado/mit/Libraries/LOTlib/hosts.mpich2 -n 36 python Search.py --steps=10000 --top=50 --chains=25 --large=1000 --dmin=0 --dmax=300 --dstep=10 --mpi --out=/home/piantado/Desktop/mit/Libraries/LOTlib/examples/Number/tmp.pkl
 """
 
 from Shared import *
