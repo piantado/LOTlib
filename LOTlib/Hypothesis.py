@@ -19,10 +19,11 @@ from LOTlib.DataAndObjects import FunctionData,UtteranceData
 from copy import copy
 import numpy
 import sys
+import collections
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class Hypothesis:
+class Hypothesis(object):
 	"""
 		A hypothesis is...
 		
@@ -368,3 +369,62 @@ class GaussianLOTHypothesis(LOTHypothesis):
 		self.lp = self.prior + self.likelihood
 		
 		return self.likelihood
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class StructuralHypothesis(LOTHypothesis):
+	# thanks, stackoverflow
+	@staticmethod
+	def flatten(expr): 
+		def flatten_(expr): 
+			#print 'expr =', expr
+			if expr is None or not isinstance(expr, collections.Iterable) or isinstance(expr, str):
+				yield expr
+			else:
+				for node in expr:
+					#print node, type(node)
+					if (node is not None) and isinstance(node, collections.Iterable) and (not isinstance(node, str)):
+						#print 'recursing on', node
+						for sub_expr in flatten_(node):
+							yield sub_expr
+					else:
+						#print 'yielding', node
+						yield node
+
+		return tuple([x for x in flatten_(expr)])
+
+	def compute_likelihood(self, data):
+		n_samples = 100
+
+		# map of function's outputs to counts
+		self.counts = {}
+
+		for i in xrange(n_samples):
+			result = self.flatten(self(data))
+			if result in self.counts:
+				self.counts[result] += 1
+			else:
+				self.counts[result] = 1
+
+		# normalize
+		for result in self.counts:
+			self.counts[result] = float(self.counts[result]) / float(n_samples)
+
+		#print self, '=>', self.counts
+
+		self.likelihood = 0.0
+
+		# compute histogram instersection
+		for result, count in self.counts.iteritems():
+			if result in data:
+				self.likelihood += min(count,data[result])
+
+		# so ugly
+		self.likelihood *= 20
+				
+		#print self.likelihood
+		return self.likelihood
+
+
+	def copy(self):
+		return StructuralHypothesis(self.G)
