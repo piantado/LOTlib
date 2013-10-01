@@ -64,15 +64,25 @@ G.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0, bv=['EXPR()'])
 # So here, this will expand to (lambda (y2) EXPR) where "y2" can be used in EXPR, but when it is, 
 # it is a thunk, as in (lambda (y2) (cons (y2) (y2))) as opposed to (lambda (y2) (cons y2 y2))
 
+# So, this means we can create a function abstraction: a bound variable
+# that is always evaled:
+G.add_rule('EXPR', 'apply_',  ['FUNCTION', 'THUNK'], 1.)
+G.add_rule('FUNCTION', 'lambda',  ['EXPR'], 1., bv=['EXPR()'])
+G.add_rule('THUNK', 'lambda',  ['EXPR'], 1., bv=[])
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Conditional:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# if_ gets printed specially (see LOTlib.FunctionNode.__str__). Here COND is a name I made up
+# if_ gets printed specially (see LOTlib.FunctionNode.__str__). Here COND is a name that is made up 
 # here for conditional expressions 
 G.add_rule('EXPR', 'if_', ['COND', 'EXPR', 'EXPR'], 1.0)
 G.add_rule('COND', 'gt_', ['EXPR', 'EXPR'], 1.0)
 G.add_rule('COND', 'eq_', ['EXPR', 'EXPR'], 1.0)
+# Note that because if_ prints specially, it is correctly handled (via short circuit evaluation)
+# so that we don't eval both branches unnecessarily
+
 
 for _ in xrange(1000):
 	
