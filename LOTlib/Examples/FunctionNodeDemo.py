@@ -25,6 +25,9 @@ G.add_rule('EXPR', '0.0', [], 3.0)
 G.add_rule('EXPR', 'pi', [], 3.0) 
 G.add_rule('EXPR', 'e', [], 3.0) 
 
+# To have a string terminal, it must be quoted:
+G.add_rule('EXPR', '\'e\'', [], 3.0) 
+
 # Then this is one way to use the variable "x" of the function. 
 # This gets named as the argument in evaluate_expression below
 G.add_rule('EXPR', 'x', [], 10.0) 
@@ -32,7 +35,9 @@ G.add_rule('EXPR', 'x', [], 10.0)
 # A thunk function (lambdaZero is defined in BasicPrimitives)
 # We write these with [None] insead of []. The FunctionNode str function knows to print these with parens
 # This notation keeps it simple since on a FunctionNode, the children ("to") are always a list. 
-G.add_rule('EXPR', 'lambdaZero', [None], 1.0)  
+G.add_rule('EXPR', 'lambdaZero', [None], 1.0) 
+# Or:
+G.add_rule('EXPR', 'flip_()', [], 1.0)
 
 # EXPR -> plus_(EXPR, EXPR)
 G.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1.0)
@@ -52,6 +57,12 @@ G.add_rule('EXPR', 'apply_', ['FUNCTION', 'EXPR'], 5.0)
 # Here, 'lambda' is a special function that allows us to introduce a new bound variable (bv) of
 # type EXPR (via bv='EXPR')
 G.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0, bv=['EXPR'])
+
+# AND, we can require that the bound variable be a thunk. This is currently just hacked onto the return type
+# like this:
+G.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0, bv=['EXPR()'])
+# So here, this will expand to (lambda (y2) EXPR) where "y2" can be used in EXPR, but when it is, 
+# it is a thunk, as in (lambda (y2) (cons (y2) (y2))) as opposed to (lambda (y2) (cons y2 y2))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Conditional:

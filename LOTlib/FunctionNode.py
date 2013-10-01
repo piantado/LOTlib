@@ -97,8 +97,10 @@ class FunctionNode:
 		elif self.name == '':
 			return str(self.args[0])
 		elif self.name is not None and self.name.lower() == 'lambda':
-			#print len(self.bv)
-			return '(lambda '+commalist( [ str(x.name) for x in self.bv])+': '+str(self.args[0])+' )'
+			
+			# Print out hte names, minus the () at the end when they are lambda bv
+			#NOTE: Ugly hack. 
+			return '(lambda '+commalist( [ re.sub(r'\(\)$', "", str(x.name)) for x in self.bv])+': '+str(self.args[0])+' )'
 		else: 
 			if len(self.args) == 1 and self.args[0] is None: # handle weird case with None as single terminal below
 				return str(self.name)+'()'
@@ -252,6 +254,20 @@ class FunctionNode:
 		return any([isFunctionNode(x) and x.returntype == self.returntype for x in self.args])
 		
 
+	def is_canonical_order(self, symmetric_ops):
+		"""
+			Takes a set of symmetric ops (plus, minus, times, etc, not divide) and asserts that the LHS ordering is less than the right (to prevent)
+		"""
+		if len(self.args) == 0: return True
+		
+		if self.name in symmetric_ops:
+			
+			# Then we must check children
+			for i in xrange(len(self.args)-1):
+				if self.args[i].name > self.args[i+1].name: return False
+			
+		# Now check the children, whether or not we are symmetrical
+		return all([x.is_canonical_order(symmetric_ops) for x in self.args])
 		
 
 

@@ -76,8 +76,8 @@ E = math.e
 
 @LOTlib_primitive
 @None2None
-def apply_(f,x):
-	return f(x)
+def apply_(f,*args):
+	return f(*args)
 	
 @LOTlib_primitive
 @None2None

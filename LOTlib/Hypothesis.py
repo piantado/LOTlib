@@ -394,6 +394,7 @@ class StructuralHypothesis(LOTHypothesis):
 		return tuple([x for x in flatten_(expr)])
 
 	def compute_likelihood(self, data):
+		
 		n_samples = 100
 
 		# map of function's outputs to counts

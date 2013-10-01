@@ -83,9 +83,9 @@ class PCFG:
 		
 		assert_or_die( isinstance(bv, list),  "Bound variables must be a list of nonterminals:  " + str(locals()))
 		
-		if name is not None and name.lower() == 'lambda':
+		if name is not None and (name.lower() == 'lambda'):
 			self.bv_count += 1
-			assert_or_die( len(to) == 1,  "Lambda must have exactly one argument: " + str(locals()))
+			assert_or_die( len(to) == 1,  "Lambda must have exactly one argument (for now): " + str(locals()))
 		
 		# Create the rule and add it
 		newrule = GrammarRule(nt,name,to, p=p, resample_p=resample_p, bv=bv, rid=rid)
@@ -105,8 +105,16 @@ class PCFG:
 	def add_bv_rule(self, nt, d):
 		""" Add an expansion to a bound variable of type t, at depth d. Add it and return it. """
 		self.bv_rule_id += 1 # A unique identifier for each bound variable rule (may get quite large!)
-		return self.add_rule( nt, name="y"+str(d), to=[], p=self.BV_P, resample_p=self.BV_RESAMPLE_P, rid=-self.bv_rule_id, bv=[])
-					
+		
+		# Here is where we handle bv thunks too -- if "nt" contains (), then we make it a thunk
+		# This is an ugly hack!
+		if re.search(r"\(\)$", nt):
+			
+			nt = re.sub(r"\(\)$", "", nt)
+			return self.add_rule( nt, name="y"+str(d)+"()", to=[], p=self.BV_P, resample_p=self.BV_RESAMPLE_P, rid=-self.bv_rule_id, bv=[])
+		else:
+			return self.add_rule( nt, name="y"+str(d), to=[], p=self.BV_P, resample_p=self.BV_RESAMPLE_P, rid=-self.bv_rule_id, bv=[])
+			
 	
 	############################################################
 	## generation
@@ -263,6 +271,8 @@ class PCFG:
 	
 	def propose_insert_delete(self, t):
 		"""
+			TODO: MAKE WORK WITH LAMBDA-THUNK
+			
 			TODO: Include insert/delete proposals, such that we can take and_(X,Y) -> X and X->and_(X,Y)
 			
 			TODO: both insert and delete moves compute similar things, so maybe we can collapse them?
@@ -388,6 +398,9 @@ class PCFG:
 		
 		if isFunctionNode(x) and depth >= 0: 
 			#print "FN:", x, depth
+			
+			# Short-circuit if we can
+			
 			
 			# add the rules
 			#addedrules = [ self.add_bv_rule(b,depth) for b in x.bv ]
