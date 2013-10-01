@@ -88,7 +88,11 @@ def cons_(x,y):
 @LOTlib_primitive
 @None2None
 def cdr_(x):
-	try: return x[1:]
+	try:
+		if not isinstance(x, str):
+			return x[1:]
+		else:
+			return None
 	except: return None
 
 rest_  = cdr_
@@ -96,7 +100,11 @@ rest_  = cdr_
 @LOTlib_primitive
 @None2None
 def car_(x):
-	try: return x[0]
+	try:
+		if not isinstance(x, str):
+			return x[0] 
+		else:
+			return None
 	except: return None
 
 first_ = car_
@@ -512,6 +520,21 @@ def cardinalitylt_(A,B): return cardify(A) > cardify(B)
 @None2None
 def subset_(A,B):
 	return A.issubset(B)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Stochastic Primitives
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+@LOTlib_primitive
+@None2None
+def flip_(x):
+	return flip(0.5)
+
+# hack? or is this how you should declare terminals?
+NP_ = 'NP'
+VP_ = 'VP'
+
+dummy_ = ''
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Quantification
