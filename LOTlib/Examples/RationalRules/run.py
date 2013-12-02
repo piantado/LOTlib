@@ -1,6 +1,10 @@
 """
 	A simple rational rules demo.
-	In poor style, this scatters our imports around to show where each part comes from
+	
+		A rational analysis of rule-based concept learning. N. D. Goodman, J. B. Tenenbaum, J. Feldman, and T. L. Griffiths (2008). Cognitive Science. 32:1, 108-154. 
+		http://www.mit.edu/~ndg/papers/RRfinal3.pdf	
+	
+	In poor style, this script scatters our imports around to show where each part comes from
 """
 
 import LOTlib
