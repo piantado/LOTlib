@@ -11,7 +11,7 @@ from LOTlib.Miscellaneous import *
 from collections import deque
 from copy import deepcopy
 
-class QueueItem:
+class QueueItem(object):
 	"""
 		A wrapper to hold items and scores in the queue--just wraps "cmp" on a priority value
 	"""
@@ -27,7 +27,7 @@ class QueueItem:
 	def __str__(self):  return str(self.x)
 
 
-class FiniteBestSet:
+class FiniteBestSet(object):
 	"""
 		This class stores the top N (possibly infite) hypotheses it observes. It can also make the set of top hypotheses unique
 		It works by storing a priority queue (in the opposite order), and popping off the worst as we need to add more

@@ -2,7 +2,7 @@
 """
 	Demo MCMC through lexica. Generally does not work well (too slow) so use the vectorized Gibbs version. 
 """
-
+import re
 from Shared import *
 
 show_baseline_distribution()
@@ -26,7 +26,12 @@ target.compute_likelihood(data)
 #for s in LOTlib.MetropolisHastings.tempered_transitions_sample(learner, data, 1000, skip=0, temperatures=[1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]):
 for s in LOTlib.MetropolisHastings.mh_sample(learner, data, 10000, skip=10):
 	
-	print s.lp, "\t", s.prior, "\t", s.likelihood, "\t", target.likelihood, "\n", s, "\n\n"
+	sstr = str(s)
+	sstr = re.sub("[_ ]", "", sstr)
+	
+	sstr = re.sub("presup", u"\u03BB A B . presup", sstr)
+	
+	print s.lp, "\t", s.prior, "\t", s.likelihood, "\t", target.likelihood, "\n", sstr, "\n\n"
 	
 	
 

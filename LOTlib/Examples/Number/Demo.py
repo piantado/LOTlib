@@ -10,7 +10,7 @@ from Shared import *
 LARGE_DATA_SIZE = 10000 # this is what we compute the average LL on
 DATA_SIZE = 100
 TRACE = True
-STEPS = 100000
+STEPS = 10000
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
 # Generate some data
@@ -28,7 +28,7 @@ allhyp = FiniteBestSet(max=True,N=1000)
 #for h in LOTlib.MetropolisHastings.parallel_tempering_sample(initial_hyp, data, 1000):
 #for h in LOTlib.MetropolisHastings.mhgibbs_sample(initial_hyp, data, 100000, mh_steps=25, gibbs_steps=2):
 #for h in LOTlib.MetropolisHastings.mh_sample(initial_hyp, data, 50000, skip=10):
-for h in LOTlib.MetropolisHastings.mh_sample(initial_hyp, data, 10000, skip=0):
+for h in LOTlib.MetropolisHastings.mh_sample(initial_hyp, data, STEPS, skip=0):
 	if TRACE: 
 		print q(get_knower_pattern(h)), h.compute_prior(), h.compute_likelihood(data), q(h)
 		

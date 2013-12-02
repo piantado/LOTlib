@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 	TODO: Allow PCFG to take another tree of FunctionNodes in generation. It then recurses and only genreates the leaves
-
+		TODO: When we generate, we MUST have a START->EXPR expansion, otherwise the top level doesn't get searched
 """
 import numpy as np
 
@@ -494,7 +494,7 @@ class PCFG:
 			out.append(v)
 		return out
 		
-	def RR_prior(self, t, prior=1.0):
+	def RR_prior(self, t, alpha=1.0):
 		"""
 			Compute the rational rules prior from Goodman et al. 
 			
@@ -505,7 +505,7 @@ class PCFG:
 		lp = 0.0
 		
 		for c in self.get_rule_counts(t):
-			theprior = np.repeat(prior,len(c))
+			theprior = np.repeat(alpha,len(c))
 			lp += (beta(c+theprior) - beta(theprior))
 		return lp
 	

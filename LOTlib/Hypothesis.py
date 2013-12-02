@@ -19,7 +19,7 @@ from LOTlib.DataAndObjects import FunctionData,UtteranceData
 from copy import copy
 import numpy
 import sys
-import collections
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -253,7 +253,7 @@ class LOTHypothesis(FunctionHypothesis):
 		
 	"""
 	
-	def __init__(self, G, v=None, f=None, start='START', ALPHA=0.9, rrPrior=False, maxnodes=25, ll_decay=0.0, prior_temperature=1.0, args=['x']):
+	def __init__(self, G, v=None, f=None, start='START', ALPHA=0.9, rrPrior=False, rrAlpha=1.0, maxnodes=25, ll_decay=0.0, prior_temperature=1.0, args=['x']):
 		"""
 			G - a grammar
 			start - how the grammar starts to generate
@@ -274,7 +274,7 @@ class LOTHypothesis(FunctionHypothesis):
 			Return a copy -- must copy all the other values too (alpha, rrPrior, etc) 
 		"""
 		assert isinstance(self.value, FunctionNode)
-		return LOTHypothesis(self.G, v=self.value.copy(), start=self.start, ALPHA=self.ALPHA, rrPrior=self.rrPrior, maxnodes=self.maxnodes, args=self.args, ll_decay=self.ll_decay)
+		return LOTHypothesis(self.G, v=self.value.copy(), start=self.start, ALPHA=self.ALPHA, rrPrior=self.rrPrior, rrAlpha=self.rrAlpha, maxnodes=self.maxnodes, args=self.args, ll_decay=self.ll_decay)
 		
 			
 	def propose(self): 
@@ -291,7 +291,7 @@ class LOTHypothesis(FunctionHypothesis):
 			self.prior = -Infinity
 		else: 
 			# compute the prior with either RR or not.
-			if self.rrPrior: self.prior = self.G.RR_prior(self.value) / self.prior_temperature
+			if self.rrPrior: self.prior = self.G.RR_prior(self.value, alpha=self.rrAlpha) / self.prior_temperature
 			else:            self.prior = self.value.log_probability() / self.prior_temperature
 			
 			self.lp = self.prior + self.likelihood
@@ -373,25 +373,7 @@ class GaussianLOTHypothesis(LOTHypothesis):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class StructuralHypothesis(LOTHypothesis):
-	# thanks, stackoverflow
-	@staticmethod
-	def flatten(expr): 
-		def flatten_(expr): 
-			#print 'expr =', expr
-			if expr is None or not isinstance(expr, collections.Iterable) or isinstance(expr, str):
-				yield expr
-			else:
-				for node in expr:
-					#print node, type(node)
-					if (node is not None) and isinstance(node, collections.Iterable) and (not isinstance(node, str)):
-						#print 'recursing on', node
-						for sub_expr in flatten_(node):
-							yield sub_expr
-					else:
-						#print 'yielding', node
-						yield node
-
-		return tuple([x for x in flatten_(expr)])
+	
 
 	def compute_likelihood(self, data):
 		

@@ -215,6 +215,7 @@ def ASIN(x): return math.asin(x)
 @LOTlib_primitive
 @None2None
 def negative_(x): return -x
+def neg_(x): return -x
 
 @LOTlib_primitive
 @None2None
@@ -311,7 +312,9 @@ def pow2_(x):
 
 @LOTlib_primitive
 @None2None
-def mod_(x,y): return (x%y)
+def mod_(x,y):
+	if y==0.0: return float("nan")
+	return (x%y)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

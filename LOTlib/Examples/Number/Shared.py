@@ -13,6 +13,9 @@ from LOTlib.Hypothesis import LOTHypothesis
 #from LOTlib.MPI import MPI_map
 from random import randint
 
+
+
+
 ALPHA = 0.75 # the probability of uttering something true
 GAMMA = -30.0 # the log probability penalty for recursion
 LG_1MGAMMA = log(1.0-exp(GAMMA)) # TODO: Make numerically better

@@ -16,6 +16,7 @@ import pickle
 import os
 import sys
 import math
+import collections
 
 from lockfile import FileLock, LockFailed
 
@@ -185,6 +186,29 @@ def listifnot(x):
 
 def all_binary_vectors(N):
 	return [  [ (x>>n)&0x1 for n in xrange(N)] for x in xrange(0,2**N) ]
+	
+	
+def flatten(expr): 
+	"""
+		Flatten lists of lists, via stackoverflow
+	"""
+	def flatten_(expr): 
+		#print 'expr =', expr
+		if expr is None or not isinstance(expr, collections.Iterable) or isinstance(expr, str):
+			yield expr
+		else:
+			for node in expr:
+				#print node, type(node)
+				if (node is not None) and isinstance(node, collections.Iterable) and (not isinstance(node, str)):
+					#print 'recursing on', node
+					for sub_expr in flatten_(node):
+						yield sub_expr
+				else:
+					#print 'yielding', node
+					yield node
+
+	return tuple([x for x in flatten_(expr)])	
+	
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Math functions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -477,8 +501,8 @@ def pickle_load(f):
 	in_file = open(f, 'r')
 	r = pickle.load(in_file)
 	in_file.close()
-	return r	
-		
+	return r
+
 
 
 
