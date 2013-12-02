@@ -13,7 +13,9 @@ from LOTlib.Miscellaneous import *
 from LOTlib.BasicPrimitives import * 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Set up our grammar. We need to add simple predicates to it
+# Set up our grammar. DNF defautly includes the logical connectives, but
+# we need to add predicates to it. 
+
 from LOTlib.Grammars import DNF 
 G = DNF
 
