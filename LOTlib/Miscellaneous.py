@@ -157,6 +157,9 @@ def die(x):
 # Genuine Miscellany
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+def list2str(x, sep=' '):
+	return sep.join(x)
+
 # a wrapper so we can call this in the below weirdo composition
 def raise_exception(e): raise e
 
@@ -208,7 +211,14 @@ def flatten(expr):
 					yield node
 
 	return tuple([x for x in flatten_(expr)])	
-	
+
+def flatten2str(expr, sep=' '):
+	try:
+		if expr is None: return ''
+		else:            return sep.join(flatten(expr))
+	except TypeError:
+		print "Error in flatter2str:", expr
+		raise TypeError
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Math functions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

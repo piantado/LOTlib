@@ -530,14 +530,8 @@ def subset_(A,B):
 
 @LOTlib_primitive
 @None2None
-def flip_(x):
+def flip_():
 	return flip(0.5)
-
-# hack? or is this how you should declare terminals?
-NP_ = 'NP'
-VP_ = 'VP'
-
-dummy_ = ''
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Quantification

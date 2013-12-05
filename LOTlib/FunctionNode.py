@@ -35,7 +35,7 @@ def list2FunctionNode(l, style="atis"):
 		return l
 
 # a regex for matching variables (y0,y1,.. y15, etc)
-re_variable = re.compile(r"y([0-9]+)$")
+re_variable = re.compile(r"y([0-9]+)(\(\))?$")
 
 # just because this is nicer, and allows us to map, etc. 
 def isFunctionNode(x): return isinstance(x, FunctionNode)
@@ -184,13 +184,18 @@ class FunctionNode(object):
 			rename - a dictionary to store how we should rename
 		"""
 		if rename is None: rename = dict()
-		#if d==0: print self
-		
+				
 		if self.name is not None:
-			if self.name.lower() == 'lambda': 
-				newname = 'y'+str(d)
+			if self.name.lower() == 'lambda' and len(self.bv) > 0: 
 				assert len(self.bv)==1  and len(self.bv[0].to) == 0 # should only add one rule, and it should have no "to"
-				#print ".  ", self.bv[0]
+				
+				newname = 'y'+str(d)
+				
+				# Fix missing function call on function bvs
+				if re.search(r'\(\)$', self.bv[0].name):
+					newname = newname + "()"
+					
+				# And rename this below
 				rename[self.bv[0].name] = newname
 				self.bv[0].name = newname
 				#print "..", self.bv[0]
