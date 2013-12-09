@@ -53,6 +53,10 @@ class FiniteBestSet(object):
 	
 	def __len__(self):
 		return len(self.Q)
+	
+	# Another name since I can't stop using it
+	def add(self, x, p):
+		self.push(x,p)
 		
 	def push(self, x, p):
 		""" Add x with value v to the set """

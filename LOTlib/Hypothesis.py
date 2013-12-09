@@ -371,40 +371,6 @@ class GaussianLOTHypothesis(LOTHypothesis):
 		return self.likelihood
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Here the log likelihood can only be computed via simulation
-# To do this, we assume that the data is FunctionData with dicts as the output,
-# giving the counts of how often each outcome is seen on the given input
-
-#class SimulatedLLHypothesis(LOTHypothesis):
-	#"""
-		#This is for when the likelihood requires integration over a latent state.
-		#To perform this integration, this class uses sampling (forward generation). 
-		#For each latent state it simulates, it runs compute_one_likelihood (returning 
-		#a log probability). 
-		
-		#NOTE: The only works for very simple examples. 
-	#"""
-	
-	#def compute_one_likelihood(o,d):
-		#assert False, "Must define compute_one_likelihood to use SimulatedLLHypothesis"
-		
-	#def compute_likelihood(self, data, nsamples=500):
-		
-		#ll = 0.0
-		#for di in data:
-			#assert isinstance(di, FunctionData) # require this
-			
-			## add up the probability of all of the ways we could generate di from the output
-			## Let Theta be the latent variable. Then we sample theta|self.args and compute
-			## \integral_theta P(d.output|theta) P(theta | d.args)
-			## = (1/nsamples) sum_{i=1}^{nsamples} P(d.output|theta_i), with each theta_i chosen from P(theta | d.args)
-			## Here, P(d.output|theta) is compute_one_likelihood 
-			## and   P(Theta | d.args) comes from running the function on d.args
-			#ll += logsumexp([ compute_one_likelihood(self(di.args), di.output) for i in xrange(nsamples) ]) - log(nsamples)
-			
-		#self.likelihood = ll
-		
-		#return self.likelihood
 
 class SimpleGenerativeHypothesis(LOTHypothesis):
 	"""
@@ -419,18 +385,11 @@ class SimpleGenerativeHypothesis(LOTHypothesis):
 		LOTHypothesis.__init__(self, G, args=[])
 		self.__dict__.update(locals())
 		
-		
 	def copy(self):
 		""" Return a copy -- must copy all the other values too (alpha, rrPrior, etc) """
 		assert isinstance(self.value, FunctionNode)
 		return SimpleGenerativeHypothesis(G=self.G)
 	
-	#def propose(self): 
-		#p = self.copy()
-		#ph, fb = self.G.propose(self.value, insert_delete_probability=0.0)
-		#p.set_value(ph)
-		#return p, fb			
-				
 	def compute_likelihood(self, data, nsamples=500, sm=1e-3):
 		"""
 			sm smoothing counts are added to existing bins of counts (just to prevent badness)

@@ -106,14 +106,7 @@ class PCFG:
 		""" Add an expansion to a bound variable of type t, at depth d. Add it and return it. """
 		self.bv_rule_id += 1 # A unique identifier for each bound variable rule (may get quite large!)
 		
-		# Here is where we handle bv thunks too -- if "nt" contains (), then we make it a thunk
-		# This is an ugly hack!
-		if re.search(r"\(\)$", nt):
-			
-			nt = re.sub(r"\(\)$", "", nt)
-			return self.add_rule( nt, name="y"+str(d)+"()", to=[], p=self.BV_P, resample_p=self.BV_RESAMPLE_P, rid=-self.bv_rule_id, bv=[])
-		else:
-			return self.add_rule( nt, name="y"+str(d), to=[], p=self.BV_P, resample_p=self.BV_RESAMPLE_P, rid=-self.bv_rule_id, bv=[])
+		return self.add_rule( nt, name="y"+str(d), to=[], p=self.BV_P, resample_p=self.BV_RESAMPLE_P, rid=-self.bv_rule_id, bv=[])
 			
 	
 	############################################################
@@ -191,11 +184,7 @@ class PCFG:
 			# NOTE: if you DON'T iterate all the way through, you end up acculmulating bv rules
 			# so NEVER stop this iteration in the middle!
 		"""
-		#if isinstance(t, list):
-			#for ti in t: 
-				#for g in self.iterate_subnodes(ti, d=d, do_bv=do_bv, yield_depth=yield_depth):
-					#if predicate(g): yield g 
-					
+		
 		if isFunctionNode(t):
 			yield (t,d) if yield_depth else t
 			
@@ -271,12 +260,8 @@ class PCFG:
 	
 	def propose_insert_delete(self, t):
 		"""
-			TODO: MAKE WORK WITH LAMBDA-THUNK
 			
-			TODO: Include insert/delete proposals, such that we can take and_(X,Y) -> X and X->and_(X,Y)
-			
-			TODO: both insert and delete moves compute similar things, so maybe we can collapse them?
-
+			TODO: both insert and delete moves compute similar things, so maybe we can collapse them more elgantly?
 			
 			NOTE: Without these moves, you will often generate a useful part of a function in, say, an AND, and 
 			     you can't remove the AND, meaning you will just make it some subtree equal to "True" -- 

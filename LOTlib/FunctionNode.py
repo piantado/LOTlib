@@ -35,7 +35,7 @@ def list2FunctionNode(l, style="atis"):
 		return l
 
 # a regex for matching variables (y0,y1,.. y15, etc)
-re_variable = re.compile(r"y([0-9]+)(\(\))?$")
+re_variable = re.compile(r"y([0-9]+)?$")
 
 # just because this is nicer, and allows us to map, etc. 
 def isFunctionNode(x): return isinstance(x, FunctionNode)
@@ -100,7 +100,7 @@ class FunctionNode(object):
 			
 			# Print out hte names, minus the () at the end when they are lambda bv
 			#NOTE: Ugly hack. 
-			return '(lambda '+commalist( [ re.sub(r'\(\)$', "", str(x.name)) for x in self.bv])+': '+str(self.args[0])+' )'
+			return '(lambda '+commalist( [ x.name for x in self.bv])+': '+str(self.args[0])+' )'
 		else: 
 			if len(self.args) == 1 and self.args[0] is None: # handle weird case with None as single terminal below
 				return str(self.name)+'()'
@@ -192,8 +192,8 @@ class FunctionNode(object):
 				newname = 'y'+str(d)
 				
 				# Fix missing function call on function bvs
-				if re.search(r'\(\)$', self.bv[0].name):
-					newname = newname + "()"
+				#if re.search(r'\(\)$', self.bv[0].name):
+					#newname = newname + "()"
 					
 				# And rename this below
 				rename[self.bv[0].name] = newname

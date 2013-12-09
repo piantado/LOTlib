@@ -10,7 +10,6 @@ To run on MPI:
 $time mpiexec -hostfile /home/piantado/Desktop/mit/Libraries/LOTlib/hosts.mpich2 -n 36 python Search.py --steps=10000 --top=50 --chains=25 --large=1000 --dmin=0 --dmax=300 --dstep=10 --mpi --out=/home/mpiu/tmp.pkl
 """
 
-
 from Shared import *
 
 ## Parse command line options:
@@ -18,7 +17,7 @@ from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("--out", dest="OUT_PATH", type="string",
                   help="Output file (a pickle of FiniteBestSet)", 
-                  default="/home/piantado/Desktop/mit/Libraries/LOTlib/Examples/Number/mpi-run.pkl")
+                  default="/home/piantado/Desktop/mit/Libraries/LOTlib/LOTlib/Examples/Number/mpi-run.pkl")
          
 parser.add_option("--steps", dest="STEPS", type="int", default=200000,
                   help="Number of Gibbs cycles to run")
@@ -62,7 +61,7 @@ LOTlib.Miscellaneous.DEBUG_LEVEL = options.DEBUG_LEVEL
 #dprintn(5, "# Running: ", options)
 
 if options.RUN_MPI:
-	from SimpleMPI.MPI_map import MPI_map, is_master_process
+	from SimpleMPI.MPI_map import MPI_map
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # the main sampling function to run
@@ -92,21 +91,17 @@ def run(data_size):
 
 # choose the appropriate map function
 if options.RUN_MPI:
-	allret = MPI_map(run, map(lambda x: [x], options.DATA_AMOUNTS * options.CHAINS)) # this many chains
+	allret = MPI_map(run, map(lambda x: [x], options.DATA_AMOUNTS * options.CHAINS)) 
+	# Only the master process escapes MPI_map
 else:
 	allret = map(run,  options.DATA_AMOUNTS * options.CHAINS)
 
-
-#print "# DONE MAPPING!"
-
-# Only the master process escapes MPI_map
+# Handle all of the output
 allfs = FiniteBestSet(max=True)
-for r in allret: allfs.merge(r)
+allfs.merge(allret)
+allfs.save(options.OUT_PATH) # save this in a file
 
-# save this in a file
-allfs.save(options.OUT_PATH)
-
-#print options.LARGE_DATA_SIZE 
+## If we want to print the summary with the "large" data size (average posterior score computed empirically)
 if options.LARGE_DATA_SIZE > 0:
 	
 	#now evaluate on different amounts of data too:
@@ -119,5 +114,3 @@ if options.LARGE_DATA_SIZE > 0:
 	for h in H:
 		if h.prior > float("-inf"):
 			print h.prior, h.likelihood/float(options.LARGE_DATA_SIZE), q(get_knower_pattern(h)),  q(h) # a quoted x
-
-	if options.RUN_MPI: MPI_done()

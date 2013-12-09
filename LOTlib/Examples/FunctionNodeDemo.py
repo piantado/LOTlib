@@ -36,8 +36,9 @@ G.add_rule('EXPR', 'x', [], 10.0)
 # We write these with [None] insead of []. The FunctionNode str function knows to print these with parens
 # This notation keeps it simple since on a FunctionNode, the children ("to") are always a list. 
 G.add_rule('EXPR', 'lambdaZero', [None], 1.0) 
-# Or:
-G.add_rule('EXPR', 'flip_()', [], 1.0)
+#or
+G.add_rule('EXPR', 'lambdaZero()', [], 1.0) 
+
 
 # EXPR -> plus_(EXPR, EXPR)
 G.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1.0)

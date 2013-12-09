@@ -10,11 +10,7 @@ from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Miscellaneous import *
 from LOTlib.DataAndObjects import *
 from LOTlib.Hypothesis import LOTHypothesis
-#from LOTlib.MPI import MPI_map
 from random import randint
-
-
-
 
 ALPHA = 0.75 # the probability of uttering something true
 GAMMA = -30.0 # the log probability penalty for recursion
@@ -193,37 +189,3 @@ all_objects = make_all_objects(shape=['duck'])
 # all possible data sets on 10 objects
 all_possible_data = [ ('', set(sample_sets_of_objects(n, all_objects))) for n in xrange(1,10) ] 
 
-
-
-def collapser(trees, recurse="L_"):
-	"""
-		A function that can collapse trees from the grammar, as in bvPCFG.all_trees . 
-		This works by treating it as a function of x, and evaluating on all sets. 
-		It sets my_log_probability on each tree (over-riding log_probability() )
-		
-		NOTE: We treat recursion specially here since it is wrong to check recursion as we "build up", so
-		here we return all containing recursion
-		
-		TODO: The log probability calculation here has not been thoroughly checked.
-		
-		This is all experimental and not needed for the demos
-	"""
-	
-	collapsed_forms = dict()
-	
-	ret = []
-	for t in trees:
-		nh = NumberExpression(t)
-		resps = ';'.join(map(str, nh.get_function_responses(all_possible_data)))
-		
-		if t.contains_function("L_"):
-			ret.append(t)
-		elif resps in collapsed_forms: # add to the existing collapsed form if no recursion
-			collapsed_forms[resps].my_log_probability = logsumexpadd( collapsed_forms[resps].my_log_probability, t.log_probability() )
-		else:
-			collapsed_forms[resps] = t
-			t.my_log_probability = t.log_probability()
-	
-	ret.extend(collapsed_forms.values())
-	
-	return ret

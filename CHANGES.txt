@@ -1,3 +1,9 @@
+Dec 9 2013:
+	- Removed crazy function call notation () in bound variables. Now if you want that, you need to call apply (as before)
+	- Cleaned up FiniteBestSet a little -- added FiniteBestSet.add and kinder merge
+	- Cleaned up Number Search to play nicer with new MPI_map
+Dec 2 2013:
+	- Added RR example
 Sep 23, 2013:
 	- Removed parallel MPI functions to a separate library, SimpleMPI. This keeps the core LOTlib code separate, and allows easy use of mapping in other applications
 
