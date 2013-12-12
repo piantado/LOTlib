@@ -7,19 +7,19 @@ from Shared import *
 """
 
 # NOTE: these must be floats, else we get hung up on powers of ints
+LL_SD = 50.0
 data = [ 
-         FunctionData(args=[1000.], output=1500.),\
-         FunctionData(args=[828.], output=1340.),\
-         FunctionData(args=[800.], output=1328.),\
-         FunctionData(args=[600.], output=1172.),\
-         FunctionData(args=[300.], output=800.), \
-         FunctionData(args=[0.], output=0.) # added 0,0 since it makes physical sense. 
+         FunctionData(args=[1000.], output=1500., ll_sd=LL_SD),\
+         FunctionData(args=[828.], output=1340., ll_sd=LL_SD),\
+         FunctionData(args=[800.], output=1328., ll_sd=LL_SD),\
+         FunctionData(args=[600.], output=1172., ll_sd=LL_SD),\
+         FunctionData(args=[300.], output=800., ll_sd=LL_SD), \
+         FunctionData(args=[0.], output=0., ll_sd=LL_SD) # added 0,0 since it makes physical sense. 
 	]
 	
 CHAINS = 10
 STEPS = 1000000
 SKIP = 0
-LL_SD = 50.0
 PRIOR_TEMPERATURE=1.0
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -32,7 +32,7 @@ def run(*args):
 	pq = FiniteBestSet(100, max=True) 
 	
 	# starting hypothesis -- here this generates at random
-	initial_hyp = GaussianLOTHypothesis(G, prior_temperature=PRIOR_TEMPERATURE, ll_sd=LL_SD)
+	initial_hyp = GaussianLOTHypothesis(G, prior_temperature=PRIOR_TEMPERATURE)
 	#print initial_hyp
 	# populate the finite sample by running the sampler for this many steps
 	for x in LOTlib.MetropolisHastings.mh_sample(initial_hyp, data, STEPS, skip=SKIP):

@@ -9,7 +9,7 @@
 """
 
 from random import sample
-from copy import deepcopy
+from copy import deepcopy, copy
 
 from LOTlib.Hypothesis import Hypothesis, LOTHypothesis
 from LOTlib.DataAndObjects import UtteranceData
@@ -36,11 +36,11 @@ class SimpleLexicon(Hypothesis):
 		self.alpha = alpha
 		self.palpha = palpha
 		
-	def copy(self):
+	def __copy__(self):
 		""" Copy a lexicon. We don't re-create the fucntions since that's unnecessary and slow"""
 		new = SimpleLexicon(self.grammar, self.args, alpha=self.alpha, palpha=self.palpha)
 		for w in self.lex.keys():
-			new.lex[w] = self.lex[w].copy()
+			new.lex[w] = copy(self.lex[w])
 		return new
 		
 	def __str__(self):
@@ -57,7 +57,7 @@ class SimpleLexicon(Hypothesis):
 		
 		# Conver to standard expressiosn
 		if isinstance(v, Hypothesis): v = v.value # extract the value (hopefully a FunctionNode)
-		v = v.copy() # and copy it
+		v = copy(v) # and copy it
 		
 		assert isinstance(v, FunctionNode)
 			
@@ -83,7 +83,7 @@ class SimpleLexicon(Hypothesis):
 	###################################################################################
 	
 	def propose(self):
-		new = self.copy()
+		new = copy(self)
 		w = weighted_sample(self.lex.keys()) # the word to change
 		p,fb = self.grammar.propose( self.lex[w].value )
 		
@@ -179,7 +179,7 @@ class SimpleLexicon(Hypothesis):
 		
 		for w in self.all_words():
 			for k in self.grammar.enumerate_pointwise(self.lex[w]):
-				new = self.copy()
+				new = copy(self)
 				new.set_word(w, k)
 				yield new
 	
@@ -220,12 +220,12 @@ class VectorizedLexicon(Hypothesis):
 		s = s + '\n'
 		return s
 	
-	def copy(self):
+	def __copy__(self):
 		return VectorizedLexicon(self.target_words, self.finite_trees, self.priorlist, word_idx=np.copy(self.word_idx), ALPHA=self.ALPHA, PALPHA=self.PALPHA)
 	
 	def enumerative_proposer(self, wd):
 		for k in xrange(len(self.finite_trees)):
-			new = self.copy()
+			new = copy(self)
 			new.word_idx[wd] = k
 			yield new
 			

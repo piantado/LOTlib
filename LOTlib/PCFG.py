@@ -5,7 +5,7 @@
 """
 import numpy as np
 
-from copy import deepcopy
+from copy import copy
 from collections import defaultdict
 from random import randint, random, sample
 
@@ -160,7 +160,7 @@ class PCFG:
 		elif isFunctionNode(x):
 			#for function Nodes, we are able to generate by copying and expanding the children
 			
-			ret = x.copy(shallow=True) # importantly, do not copy the children since we'll recurse and get them next go-round
+			ret = copy(x)
 			
 			ret.to = self.generate(ret.to, d=d+1) # re-generate below -- importantly the "to" points are re-generated, not copied
 			
@@ -213,7 +213,7 @@ class PCFG:
 	def propose_regenerate(self, t):
 		""" resample a random subnode of t, returning a copy and a f/b probability """
 		
-		newt = t.copy()
+		newt = copy(t)
 		
 		n, rp, tZ = None, None, None
 		for ni, di, resample_p, Z in self.sample_node_via_iterate(newt):
@@ -271,7 +271,7 @@ class PCFG:
 			
 		"""
 		
-		newt = t.copy()
+		newt = copy(t)
 		fb = 0.0 # the forward/backward prob we return
 		sampled=False # so we can see if we didn't do it
 		
@@ -303,7 +303,7 @@ class PCFG:
 				args = []
 				for x in r.to:
 					if x == ni.returntype:
-						if replace_i == 0: args.append( ni.copy() ) # if it's the one we replace into
+						if replace_i == 0: args.append( copy(ni) ) # if it's the one we replace into
 						else:              args.append( self.generate(x, d=di+1) ) #else generate like normalized
 						replace_i -= 1
 					else:              
@@ -354,7 +354,7 @@ class PCFG:
 				
 				# and replace it
 				sampled = True
-				ni.setto( ni.args[i].copy() ) # TODO: copy not necessary here, I think?
+				ni.setto( copy(ni.args[i]) ) # TODO: copy not necessary here, I think?
 				
 			if sampled:
 				
@@ -390,11 +390,11 @@ class PCFG:
 			# add the rules
 			#addedrules = [ self.add_bv_rule(b,depth) for b in x.bv ]
 				
-			original_x = x.copy()
+			original_x = copy(x)
 			
 			# go all odometer on the kids below::
 			iters = [self.increment_tree(y,depth) if self.is_nonterminal(y) else None for y in x.args]
-			if len(iters) == 0: yield x.copy()
+			if len(iters) == 0: yield copy(x)
 			else:
 				
 				# First, initialize the arguments
@@ -408,7 +408,7 @@ class PCFG:
 				continue_counting = True
 				while continue_counting: # while we continue incrementing
 					
-					yield x.copy() # yield the initial tree, and then each successive tree
+					yield copy(x) # yield the initial tree, and then each successive tree
 					
 					# and then process each carry:
 					for carry_pos in xrange(len(iters)): # index into which tree we are incrementing
@@ -542,7 +542,8 @@ class PCFG:
 						RP = logplusexp(RP, log(xi.resample_p) - log(xZ) + xi.log_probability() )
 					
 		return RP
-		## ------------------------------------------------------------------------------------------------------------------------------
+	
+	## ------------------------------------------------------------------------------------------------------------------------------
 	## Here are some versions of old functions which can be added eventually -- they are for doing "pointwise" changes to hypotheses
 	## ------------------------------------------------------------------------------------------------------------------------------	
 	
@@ -615,7 +616,7 @@ if __name__ == "__main__":
 		TEST_GEN[str(t)] = t
 		
 		if t.count_nodes() < 10:
-			TARGET[LOTHypothesis(G, v=t.copy())] = t.log_probability()
+			TARGET[LOTHypothesis(G, v=copy(t) )] = t.log_probability()
 		
 		
 	from LOTlib.Testing.Evaluation import evaluate_sampler
@@ -633,7 +634,7 @@ if __name__ == "__main__":
 	#hyp = LOTHypothesis(G)
 	#for x in LOTlib.MetropolisHastings.mh_sample(hyp, [], MCMC_STEPS): 
 		##print ">>", x
-		#TEST_MCMC[str(x.value)] = x.value.copy()
+		#TEST_MCMC[str(x.value)] = copy(x.value)
 	
 	### Now print out the results and see what's up
 	#for x in TEST_GEN.values():
@@ -671,7 +672,7 @@ if __name__ == "__main__":
 	from LOTlib.Hypothesis import LOTHypothesis
 	hyp = LOTHypothesis(G)
 	for x in LOTlib.MetropolisHastings.mh_sample(hyp, [], MCMC_STEPS): 
-		TEST_MCMC[str(x.value)] = x.value.copy()
+		TEST_MCMC[str(x.value)] = copy(x.value)
 		TEST_MCMC_COUNT[str(x.value)] += 1 # keep track of these
 		#print x
 		#for kk in G.iterate_subnodes(x.value, do_bv=True, yield_depth=True):

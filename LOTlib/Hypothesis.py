@@ -8,15 +8,13 @@
 	
 		
 	TODO:
-		- Probably should collapse FunctionHypothesis and STandardHypothesis toegether,since having a FunctionHypothesis is almost always a bad idea (no prior)
-		- type(self).__new__(...args...) -- should be able to use this in the copy constructor, instead of having to compulsively define .copy()
-		- Redo these with a "params" dictionary for each hypothesis, which stores things like decay, alpha, etc. 
-			And then you can just copy this over with the copy constructor
+	
 """
+
 from LOTlib.Miscellaneous import *
 import LOTlib.BasicPrimitives # needed to eval __call__ here, since that's where they are bound
 from LOTlib.DataAndObjects import FunctionData,UtteranceData
-from copy import copy
+from copy import copy, deepcopy
 import numpy
 import sys
 
@@ -32,7 +30,7 @@ class Hypothesis(object):
 	
 	def __init__(self, v=None):
 		self.set_value(v) # to zero out prior, likelhood, lp
-		self.prior, self.likelihood, self.lp = [-Infinity, -Infinity, -Infinity] # this should live here in case we overwrite self_value
+		self.prior, self.likelihood, self.lp = [-Infinity, -Infinity, -Infinity] 
 		self.stored_likelihood = None
 		POSTERIOR_CALL_COUNTER = 0
 	
@@ -40,7 +38,7 @@ class Hypothesis(object):
 		""" Sets the (self.)value of this hypothesis to v"""
 		self.value = v
 		
-	def copy(self):
+	def __copy__(self):
 		""" Returns a copy of myself by calling copy() on self.value """
 		return Hypothesis(v=self.value.copy())
 		
@@ -181,9 +179,9 @@ class FunctionHypothesis(Hypothesis):
 		Hypothesis.__init__(self,v) # this initializes prior and likleihood variables, so keep it here!
 		self.set_value(v,f)
 		
-	def copy(self):
+	def __copy__(self):
 		""" Create a copy, only deeply of of v """
-		return FunctionHypothesis(v=self.value.copy(), f=self.fvalue, args=self.args)
+		return FunctionHypothesis(v=copy(self.value), f=self.fvalue, args=self.args)
 		
 	def __call__(self, *vals):
 		""" 
@@ -193,7 +191,6 @@ class FunctionHypothesis(Hypothesis):
 			
 	
 	def value2function(self, v):
-		#print "ARGS=", self.args
 		""" How we convert a value into a function. Default is LOTlib.Miscellaneous.evaluate_expression """
 		return evaluate_expression(v, args=self.args)
 	
@@ -213,10 +210,9 @@ class FunctionHypothesis(Hypothesis):
 		elif v is None:   self.fvalue = None
 		else:             self.fvalue = self.value2function(v)
 	
-	# ~~~~~~~~~
-	# Evaluate this function on some data
 	def get_function_responses(self, data):
 		""" 
+		Evaluate this function on some data
 		Returns a list of my responses to data, handling exceptions (setting to None)
 		"""
 		out = []
@@ -269,16 +265,25 @@ class LOTHypothesis(FunctionHypothesis):
 		
 		self.likelihood = 0.0
 		
-	def copy(self):
+	def __copy__(self):
 		"""
-			Return a copy -- must copy all the other values too (alpha, rrPrior, etc) 
+			Return a copy of myself.
+			This makes a deepcopy of everything except G (which is the, presumably, static grammar)
 		"""
-		assert isinstance(self.value, FunctionNode)
-		return LOTHypothesis(self.G, v=self.value.copy(), start=self.start, ALPHA=self.ALPHA, rrPrior=self.rrPrior, rrAlpha=self.rrAlpha, maxnodes=self.maxnodes, args=self.args, ll_decay=self.ll_decay)
+
+		# Since this is inherited, call the constructor on everything but G
+		thecopy = type(self)(self.G) # call my own constructor with G
 		
+		# And then deepcopy evrything but G
+		for k in self.__dict__.keys():
+			#print "Copying ", k
+			if k is not 'G': thecopy.__dict__[k] = deepcopy(self.__dict__[k])
+			
+		return thecopy
+
 			
 	def propose(self): 
-		p = self.copy()
+		p = copy(self)
 		ph, fb = self.G.propose(self.value)
 		p.set_value(ph)
 		return p, fb
@@ -329,7 +334,7 @@ class LOTHypothesis(FunctionHypothesis):
 	# must wrap these as SimpleExpressionFunctions
 	def enumerative_proposer(self):
 		for k in G.enumerate_pointwise(self.value):
-			yield LOTHypothesis(v=k)
+			yield LOTHypothesis(self.G, v=k)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -338,17 +343,10 @@ class GaussianLOTHypothesis(LOTHypothesis):
 		Like LOTHypothesis but has a Gaussian likelihood
 	"""
 	
-	def __init__(self, G, ll_sd=1.0, prior_temperature=1.0, ll_decay=0.0): 
-		""" kwargs should include ll_sd """
+	def __init__(self, G, prior_temperature=1.0, ll_decay=0.0): 
 		LOTHypothesis.__init__(self, G)
 		self.__dict__.update(locals())
 		
-	def copy(self):
-		""" Return a copy -- must copy all the other values too (alpha, rrPrior, etc) """
-		assert isinstance(self.value, FunctionNode)
-		return GaussianLOTHypothesis(G=self.G, ll_sd=self.ll_sd, prior_temperature=self.prior_temperature, ll_decay=self.ll_decay)
-				
-	
 	def compute_likelihood(self, data):
 		""" Compute the likelihood with a Gaussian"""
 		
@@ -361,7 +359,7 @@ class GaussianLOTHypothesis(LOTHypothesis):
 		N = len(data)
 		self.likelihood = 0.0
 		for i in xrange(N):
-			self.stored_likelihood[i] = normlogpdf(responses[i], data[i].output, self.ll_sd)
+			self.stored_likelihood[i] = normlogpdf(responses[i], data[i].output, data[i].ll_sd)
 			
 			# the total culmulative decayed likeliood
 			self.likelihood += self.stored_likelihood[i] * self.likelihood_decay_function(i, N, self.ll_decay)
@@ -384,11 +382,6 @@ class SimpleGenerativeHypothesis(LOTHypothesis):
 		""" kwargs should include ll_sd """
 		LOTHypothesis.__init__(self, G, args=[])
 		self.__dict__.update(locals())
-		
-	def copy(self):
-		""" Return a copy -- must copy all the other values too (alpha, rrPrior, etc) """
-		assert isinstance(self.value, FunctionNode)
-		return SimpleGenerativeHypothesis(G=self.G)
 	
 	def compute_likelihood(self, data, nsamples=500, sm=1e-3):
 		"""

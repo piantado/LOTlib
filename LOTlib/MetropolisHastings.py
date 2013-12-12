@@ -20,7 +20,6 @@ import LOTlib.Hypothesis
 
 from LOTlib.Miscellaneous import *
 from LOTlib.FiniteBestSet import FiniteBestSet
-from Memoization import *
 from collections import defaultdict
 
 class MHStats(defaultdict):

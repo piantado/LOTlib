@@ -1,3 +1,9 @@
+Dec 12, 2013:
+	- Changed the .copy() methods to all use the python standard __copy__. This now correctly is handled throughout inheritance
+	- Fixed README.md
+	- Removed memoization -- not used anymore (but should be added back in eventually)
+Dec 10, 2013:
+	- Changed GaussianLOTHypothesis to require ll_sd in FunctionData, not as an argument to the hypothesis.
 Dec 9 2013:
 	- Removed crazy function call notation () in bound variables. Now if you want that, you need to call apply (as before)
 	- Cleaned up FiniteBestSet a little -- added FiniteBestSet.add and kinder merge

@@ -10,7 +10,6 @@
 import LOTlib.MetropolisHastings
 from LOTlib.PCFG import PCFG
 from LOTlib.Hypothesis import *
-from copy import deepcopy
 
 ALPHA = 0.90
 LL_TEMPERATURE = 0.1
@@ -41,7 +40,7 @@ class SchemeHypothesis(Hypothesis):
 		else: self.set_value(v)
 		
 	def propose(self): 
-		p = deepcopy(self)
+		p = copy(self)
 		ph, fb = G.propose(self.value)
 		p.set_value(ph)
 		return [p, fb]

@@ -104,7 +104,7 @@ def proximity_proposal(h, G, p=0.5, p_resample=0.5): # propose to a nodes
 	Z = G.resample_normalizer(t) # the total probability
 	
 	# copy since we modify in place
-	newt = t.copy()
+	newt = copy(t)
 	ni = G.sample_random_node(newt)
 	
 	# Now we do our actual resampling
@@ -153,7 +153,7 @@ def proximity_proposal(h, G, p=0.5, p_resample=0.5): # propose to a nodes
 			nup += 1 # how far up are we from top?
 			
 		# Actually do the replacement
-		ni.setto( btree.copy() )
+		ni.setto( copy(btree))
 		
 		newZ = G.resample_normalizer(newt)
 		#print "FB = ", forward, (log(ni.resample_p) - log(Z)), backward, (log(ni.resample_p) - log(newZ)) 
@@ -177,8 +177,8 @@ data = generate_data(50)
 initial_hyp = NumberExpression(G)
 
 target = dict()
-for h in LOTlib.MetropolisHastings.mh_sample(initial_hyp.copy(), data, 150000):
-	target[h.copy()] = h.lp
+for h in LOTlib.MetropolisHastings.mh_sample( copy(initial_hyp), data, 150000):
+	target[copy(h)] = h.lp
 #for h in pickle.load(open("/home/piantado/Desktop/mit/Libraries/LOTlib/LOTlib/Examples/Number/runs/run-201Oct14.pkl")).get_all(): # Load a target set
 	#h.compute_posterior(data)
 	#target[h] = h.lp
@@ -187,7 +187,7 @@ for h in LOTlib.MetropolisHastings.mh_sample(initial_hyp.copy(), data, 150000):
 print "# Done generating target hypotheses"
 
 from LOTlib.Evaluation import evaluate_sampler
-test_sampler =  LOTlib.MetropolisHastings.mh_sample(initial_hyp.copy(), data) # LOTlib.MetropolisHastings.mh_sample(initial_hyp, data, 100000, proposer=lambda x: proximity_proposal(x,G), skip=5, trace=False)
+test_sampler =  LOTlib.MetropolisHastings.mh_sample( copy(initial_hyp), data) # LOTlib.MetropolisHastings.mh_sample(initial_hyp, data, 100000, proposer=lambda x: proximity_proposal(x,G), skip=5, trace=False)
 evaluate_sampler(target, test_sampler, trace=False)
 
 

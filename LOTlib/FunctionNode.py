@@ -10,8 +10,7 @@
 
 import re
 
-#from numpy import *
-from copy import deepcopy
+from copy import copy, deepcopy
 from LOTlib.Miscellaneous import *
 
 def list2FunctionNode(l, style="atis"):
@@ -62,12 +61,12 @@ class FunctionNode(object):
 		self.bv = q.bv
 		self.ruleid = q.ruleid
 	
-	def copy(self, shallow=False):
+	def __copy__(self, shallow=False):
 		"""
 			Copy a function node
 			shallow - if True, this does not copy the children (self.to points to the same as what we return)
 		"""
-		if not shallow: newargs = [x.copy() if isFunctionNode(x) else deepcopy(x) for x in self.args]
+		if not shallow: newargs = [copy(x) if isFunctionNode(x) else deepcopy(x) for x in self.args]
 		else:           newargs = self.args
 		
 		return FunctionNode(self.returntype, self.name, newargs, self.lp, self.resample_p, deepcopy(self.bv), self.ruleid)

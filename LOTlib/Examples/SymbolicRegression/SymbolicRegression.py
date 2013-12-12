@@ -21,7 +21,7 @@ def generate_data(data_size):
 	data = []
 	for i in range(data_size): 
 		x = random()
-		data.append( FunctionData(args=[x], output=target(x)) )
+		data.append( FunctionData(args=[x], output=target(x), ll_sd=LL_SD) )
 	
 	return data
 	
