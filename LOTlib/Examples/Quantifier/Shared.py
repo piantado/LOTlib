@@ -7,7 +7,7 @@
 
 import numpy
 
-from LOTlib.PCFG import PCFG
+from LOTlib.Grammar import Grammar
 from LOTlib.BasicPrimitives import *
 import LOTlib.MetropolisHastings
 from LOTlib.Miscellaneous import *
@@ -157,7 +157,7 @@ def collapse_undefs(resp):
 	
 ############################################################
 # Set up the grammar
-G = PCFG()
+G = Grammar()
 
 """
 	Note: This was updated on Dec 3 2012, after the language submission. We now include AND/OR/NOT, and S, and removed nonempty
@@ -186,9 +186,9 @@ G.add_rule('SET', 'union_', ['SET', 'SET'], 1.0)
 G.add_rule('SET', 'intersection_', ['SET', 'SET'], 1.0)
 G.add_rule('SET', 'setdifference_', ['SET', 'SET'], 1.0)
 
-G.add_rule('SET', 'A', [], 10.0)
-G.add_rule('SET', 'B', [], 10.0)
-G.add_rule('SET', 'S', [], 10.0) ## Must include this or else we can't get complement
+G.add_rule('SET', 'A', None, 10.0)
+G.add_rule('SET', 'B', None, 10.0)
+G.add_rule('SET', 'S', None, 10.0) ## Must include this or else we can't get complement
 
 # Cardinality operations
 G.add_rule('BOOL', 'cardinalityeq_', ['SET', 'SET'], 1.0)
@@ -198,15 +198,15 @@ G.add_rule('BOOL', 'cardinalitygt_', ['SET', 'SET'], 1.0)
 #G.add_rule('BOOL', 'cardinalitygt_', ['CARD', 'SET'], 1.0)
 ###G.add_rule('CARD', 'cardinality_', ['SET'], 1.0)
 
-##G.add_rule('CARD',  '0', [], 1.0)
-#G.add_rule('CARD',  '1', [], 1.0)
-#G.add_rule('CARD',  '2', [], 1.0)
-#G.add_rule('CARD',  '3', [], 1.0)
-#G.add_rule('CARD',  '4', [], 1.0)
-#G.add_rule('CARD',  '5', [], 1.0)
-#G.add_rule('CARD',  '6', [], 1.0)
-#G.add_rule('CARD',  '7', [], 1.0)
-#G.add_rule('CARD',  '8', [], 1.0)
+##G.add_rule('CARD',  '0', None, 1.0)
+#G.add_rule('CARD',  '1', None, 1.0)
+#G.add_rule('CARD',  '2', None, 1.0)
+#G.add_rule('CARD',  '3', None, 1.0)
+#G.add_rule('CARD',  '4', None, 1.0)
+#G.add_rule('CARD',  '5', None, 1.0)
+#G.add_rule('CARD',  '6', None, 1.0)
+#G.add_rule('CARD',  '7', None, 1.0)
+#G.add_rule('CARD',  '8', None, 1.0)
 
 
 # create a small list of all plausible context sets. 

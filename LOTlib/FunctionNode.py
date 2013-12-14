@@ -24,9 +24,9 @@ def list2FunctionNode(l, style="atis"):
 		elif style is 'atis':
 			rec = lambda x: list2FunctionNode(x, style=style) # a wrapper to my recursive self
 			if l[0] == 'lambda':
-				return FunctionNode('FUNCTION', 'lambda', [rec(l[3])], lp=0.0, bv=[l[1]] ) ## TOOD: HMM WHAT IS THE BV?
+				return FunctionNode('FUNCTION', 'lambda', [rec(l[3])], lp=0.0, bv_name=[l[1]] ) ## TOOD: HMM WHAT IS THE BV?
 			else:
-				return FunctionNode(l[0], l[0], map(rec, l[1:]), lp=0.0, bv=[])
+				return FunctionNode(l[0], l[0], map(rec, l[1:]), lp=0.0, bv_name='')
 		elif sytle is 'scheme':
 			pass #TODO: Add this scheme functionality -- basically differnet handling of lambda bound variables
 			
@@ -48,31 +48,27 @@ class FunctionNode(object):
 		My bv stores the particlar *names* of variables I've introduced
 	"""
 	
-	def __init__(self, returntype, name, args, lp=0.0, resample_p=1.0, bv=[], ruleid=None):
+	def __init__(self, returntype, name, args, lp=0.0, resample_p=1.0, bv_name=None, bv_args=None, ruleid=None):
 		self.__dict__.update(locals())
 		
 	# make all my parts the same as q (not copies)
 	def setto(self, q):
-		self.returntype = q.returntype
-		self.name = q.name
-		self.args = q.args
-		self.lp = q.lp
-		self.resample_p = q.resample_p
-		self.bv = q.bv
-		self.ruleid = q.ruleid
-	
+		self.__dict__.update(q.__dict__)
+			
 	def __copy__(self, shallow=False):
 		"""
 			Copy a function node
 			shallow - if True, this does not copy the children (self.to points to the same as what we return)
 		"""
-		if not shallow: newargs = [copy(x) if isFunctionNode(x) else deepcopy(x) for x in self.args]
-		else:           newargs = self.args
+		if (not shallow) and self.args is not None:
+			newargs = [copy(x) if isFunctionNode(x) else deepcopy(x) for x in self.args]
+		else:
+			newargs = self.args
 		
-		return FunctionNode(self.returntype, self.name, newargs, self.lp, self.resample_p, deepcopy(self.bv), self.ruleid)
+		return FunctionNode(self.returntype, self.name, newargs, self.lp, self.resample_p, self.bv_name, deepcopy(self.bv_args), self.ruleid)
 	
 	def is_nonfunction(self):
-		return (self.args is None) or (len(self.args)==0)
+		return (self.args is None)
 	def is_function(self):
 		return not self.is_nonfunction()
 	
@@ -82,7 +78,8 @@ class FunctionNode(object):
 			NOTE: This does ot handle BV yet
 		"""
 		x = [self.name] if self.name != '' else []
-		x.extend( [a.as_list() if isFunctionNode(a) else a for a in self.args] )
+		if self.args is not None:
+			x.extend( [a.as_list() if isFunctionNode(a) else a for a in self.args] )
 		return x
 			
 	# output a string that can be evaluated by python
@@ -92,27 +89,31 @@ class FunctionNode(object):
 		if self.is_nonfunction(): # a terminal
 			return str(self.name)
 		elif self.name == "if_": # this gets translated
+			assert len(self.args) == 3, "if_ requires 3 arguments!"
 			return '(' + str(self.args[1]) + ') if (' + str(self.args[0]) + ') else (' + str(self.args[2]) + ')'
 		elif self.name == '':
+			assert len(self.args) == 1, "Null names must have exactly 1 argument"
 			return str(self.args[0])
 		elif self.name is not None and self.name.lower() == 'lambda':
+			assert len(self.args) == 1, "Lambda variables require one argument"
 			
-			# Print out hte names, minus the () at the end when they are lambda bv
-			#NOTE: Ugly hack. 
-			return '(lambda '+commalist( [ x.name for x in self.bv])+': '+str(self.args[0])+' )'
-		else: 
-			if len(self.args) == 1 and self.args[0] is None: # handle weird case with None as single terminal below
-				return str(self.name)+'()'
+			# We can allow bv_name to be None, which is a thunk (no arguments)
+			return '(lambda '+ (self.bv_name if self.bv_name is not None else '') +': '+str(self.args[0])+' )'
+		else:
+			
+			if self.args is None:
+				return str(self.name)+'()' # simple call
 			else:
-				return str(self.name)+'('+' '+commalist( [ str(x) for x in self.args])+' )'
-	
+				return str(self.name)+'('+','.join(map(str,self.args))+')'
+			
 	def fullprint(self, d=0):
 		""" A handy printer for debugging"""
 		tabstr = "  .  " * d
-		print tabstr, self.returntype, self.name, self.bv, "\t", self.lp #"\t", self.resample_p 
-		for a in self.args: 
-			if isFunctionNode(a): a.fullprint(d+1)
-			else:                 print tabstr, a
+		print tabstr, self.returntype, self.name, self.bv_name, self.bv_args, "\t", self.lp #"\t", self.resample_p 
+		if self.args is not None:
+			for a in self.args: 
+				if isFunctionNode(a): a.fullprint(d+1)
+				else:                 print tabstr, a
 			
 	#def schemestring(self):
 		#if self.args == []: # a terminal
@@ -160,16 +161,18 @@ class FunctionNode(object):
 		
 		yield self
 		
-		for a in filter(isFunctionNode, self.args):
-			for ssn in a: yield ssn
+		if self.args is not None:
+			for a in filter(isFunctionNode, self.args):
+				for ssn in a: yield ssn
 	
 	def all_leaves(self):
-		for i in range(len(self.args)): # loop through kids
-			if isFunctionNode(self.args[i]):
-				for ssn in self.args[i].all_leaves():
-					yield ssn
-			else:
-				yield self.args[i]
+		if self.args is not None:
+			for i in range(len(self.args)): # loop through kids
+				if isFunctionNode(self.args[i]):
+					for ssn in self.args[i].all_leaves():
+						yield ssn
+				else:
+					yield self.args[i]
 
 	def string_below(self, sep=" "):
 		return sep.join(map(str, self.all_leaves()))
@@ -185,26 +188,23 @@ class FunctionNode(object):
 		if rename is None: rename = dict()
 				
 		if self.name is not None:
-			if self.name.lower() == 'lambda' and len(self.bv) > 0: 
-				assert len(self.bv)==1  and len(self.bv[0].to) == 0 # should only add one rule, and it should have no "to"
+			if self.name.lower() == 'lambda' and (self.bv_name is not None) and (self.args is not None): 
+				#assert (self.bv_args is None) # should only add one rule, and it should have no "to"
 				
 				newname = 'y'+str(d)
-				
-				# Fix missing function call on function bvs
-				#if re.search(r'\(\)$', self.bv[0].name):
-					#newname = newname + "()"
 					
 				# And rename this below
-				rename[self.bv[0].name] = newname
-				self.bv[0].name = newname
+				rename[self.bv_name] = newname
+				self.bv_name = newname
 				#print "..", self.bv[0]
 			elif re_variable.match(self.name): # if we find a variable
 				assert_or_die(self.name in rename, "Name "+self.name+" not in rename="+str(rename)+"\t;\t"+str(self))
 				self.name = rename[self.name]
 		
 		# and recurse
-		for k in self.args:
-			if isFunctionNode(k): k.fix_bound_variables(d+1, rename)
+		if self.args is not None:
+			for k in self.args:
+				if isFunctionNode(k): k.fix_bound_variables(d+1, rename)
 			
 	
 	# resample myself from some grammar
@@ -237,43 +237,46 @@ class FunctionNode(object):
 	
 	def depth(self):
 		depths = [0] # if no function nodes
-		for i in range(len(self.args)):
-			if isFunctionNode(self.args[i]):
-				depths.append( self.args[i].depth()+1 )
+		if self.args is not None:
+			for i in range(len(self.args)):
+				if isFunctionNode(self.args[i]):
+					depths.append( self.args[i].depth()+1 )
 		return max(depths)
 	
 	# get a description of the input and output types
 	# if collapse_terminal then we just map non-FunctionNodes to "TERMINAL"
 	def get_type_signature(self):
-		ts = [self.returntype, self.bv]
-		for i in range(len(self.args)):
-			if isFunctionNode(self.args[i]):
-				ts.append(self.args[i].returntype)
-			else: 
-				ts.append(self.args[i])
+		ts = [self.returntype, self.bv_name, self.bv_args]
+		if self.args is not None:
+			for i in range(len(self.args)):
+				if isFunctionNode(self.args[i]):
+					ts.append(self.args[i].returntype)
+				else: 
+					ts.append(self.args[i])
 		return ts
 	
 	def is_replicating(self):
 		"""
 			A function node is replicating (by definition) if one of its children is of the same type
 		"""
-		return any([isFunctionNode(x) and x.returntype == self.returntype for x in self.args])
+		return any([isFunctionNode(x) and x.returntype == self.returntype for x in self.args if self.args is not None])
 		
 
 	def is_canonical_order(self, symmetric_ops):
 		"""
 			Takes a set of symmetric ops (plus, minus, times, etc, not divide) and asserts that the LHS ordering is less than the right (to prevent)
 		"""
-		if len(self.args) == 0: return True
+		if self.args is None or len(self.args) == 0: return True
 		
 		if self.name in symmetric_ops:
 			
 			# Then we must check children
-			for i in xrange(len(self.args)-1):
-				if self.args[i].name > self.args[i+1].name: return False
+			if self.args is not None:
+				for i in xrange(len(self.args)-1):
+					if self.args[i].name > self.args[i+1].name: return False
 			
 		# Now check the children, whether or not we are symmetrical
-		return all([x.is_canonical_order(symmetric_ops) for x in self.args])
+		return all([x.is_canonical_order(symmetric_ops) for x in self.args if self.args is not None])
 		
 	def proposal_probability_to(self, y):
 		"""
@@ -299,8 +302,9 @@ class FunctionNode(object):
 			
 			# Compute the arguments and see how mismatched we are
 			mismatches = []
-			for a,b in zip(self.args, y.args):
-				if a != b: mismatches.append( [a,b] )
+			if self.args is not None:
+				for a,b in zip(self.args, y.args):
+					if a != b: mismatches.append( [a,b] )
 			
 			# Now act depending on the mismatches
 			if len(mismatches) == 0: # we are identical below

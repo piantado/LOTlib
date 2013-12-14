@@ -20,7 +20,7 @@ from LOTlib.BasicPrimitives import *
 # Set up our grammar. DNF defautly includes the logical connectives
 # in disjunctive normal form, but we need to add predicates to it. 
 
-from LOTlib.Grammars import DNF 
+from LOTlib.DefaultGrammars import DNF 
 G = DNF
 
 # Two predicates for checking x's color and shape
@@ -30,15 +30,15 @@ G.add_rule('PREDICATE', 'is_shape_', ['x', 'SHAPE'], 1.0)
 
 # Some colors/shapes each (for this simple demo)
 # These are written in quotes so they can be evaled
-G.add_rule('COLOR', q('red'), [], 1.0)
-G.add_rule('COLOR', q('blue'), [], 1.0)
-G.add_rule('COLOR', q('green'), [], 1.0)
-G.add_rule('COLOR', q('mauve'), [], 1.0)
+G.add_rule('COLOR', q('red'), None, 1.0)
+G.add_rule('COLOR', q('blue'), None, 1.0)
+G.add_rule('COLOR', q('green'), None, 1.0)
+G.add_rule('COLOR', q('mauve'), None, 1.0)
 
-G.add_rule('SHAPE', q('square'), [], 1.0)
-G.add_rule('SHAPE', q('circle'), [], 1.0)
-G.add_rule('SHAPE', q('triangle'), [], 1.0)
-G.add_rule('SHAPE', q('diamond'), [], 1.0)
+G.add_rule('SHAPE', q('square'), None, 1.0)
+G.add_rule('SHAPE', q('circle'), None, 1.0)
+G.add_rule('SHAPE', q('triangle'), None, 1.0)
+G.add_rule('SHAPE', q('diamond'), None, 1.0)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Make up some data

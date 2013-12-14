@@ -3,10 +3,9 @@
 """
 
 	Here, we start with a sample of hypotheses, and consider all moves from them, organized in a priority queue. 
-	This allows us to search the space *much* more efficiently. 
+	This allows us to search the space much more efficiently, perhaps
 	
-	
-	Hmm Still not great performance. Really, the amount of time spent on one guy should depend on its probability relative to its competitors. I wonder what would happen if we sampled from the queue (renomalizing), and explored around the sampled guy, adding to the queue again. Then we preferentially sample high probability regions, 
+	Hmm Still not great performance. Really, the amount of time spent on one hypothesis should depend on its probability relative to its competitors. I wonder what would happen if we sampled from the queue (renomalizing), and explored around the sampled guy, adding to the queue again. Then we preferentially sample high probability regions, 
 """
 
 from Number_Shared import *

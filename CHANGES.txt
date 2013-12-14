@@ -1,7 +1,14 @@
+Dec 14 2013:
+	- Major revision breaking backward compatibility -- changes to FunctionNode syntax in PCFGs so it makes more sense. Non-function terminals have None as args; function terminals have []
+	- Also changed "PCFG" to "Grammar" since it's not technically a pcfg
+	- Changed bv so that they now have a name and a type (if the type is set to [], they are function calls, else they can expand their type below)
+	- In doing this, the grammar was changed so that each nonterminal can add at most *one* bound variable (no longer a list). This lets lambda be higher order (but typed)
+	- Changed to semantic version numbering, and advanced to version 0.0.1
 Dec 12, 2013:
 	- Changed the .copy() methods to all use the python standard __copy__. This now correctly is handled throughout inheritance
 	- Fixed README.md
 	- Removed memoization -- not used anymore (but should be added back in eventually)
+	- Removed a bunch of old files
 Dec 10, 2013:
 	- Changed GaussianLOTHypothesis to require ll_sd in FunctionData, not as an argument to the hypothesis.
 Dec 9 2013:

@@ -1,5 +1,5 @@
 
-from LOTlib.PCFG import PCFG
+from LOTlib.Grammar import Grammar
 from LOTlib.Miscellaneous import evaluate_expression
 
 """
@@ -11,33 +11,33 @@ from LOTlib.Miscellaneous import evaluate_expression
 
 """
 
-G = PCFG()
+G = Grammar()
 
 # Nonterminal START -> Nonterminal EXPR (with no function call)
 G.add_rule('START', '', ['EXPR'], 1.0) 
 
 # And "EXPR" can rewrite as "1.0" -- and this expansion has probability proportional to 5.0
-G.add_rule('EXPR', '1.0', [], 5.0) 
+G.add_rule('EXPR', '1.0', None, 5.0) 
 
 # some other simple terminals
 # these are given much higher probability in order to keep the PCFG well-defined
-G.add_rule('EXPR', '0.0', [], 3.0) 
-G.add_rule('EXPR', 'pi', [], 3.0) 
-G.add_rule('EXPR', 'e', [], 3.0) 
+G.add_rule('EXPR', '0.0', None, 3.0) 
+G.add_rule('EXPR', 'pi', None, 3.0) 
+G.add_rule('EXPR', 'e', None, 3.0) 
 
 # To have a string terminal, it must be quoted:
-G.add_rule('EXPR', '\'e\'', [], 3.0) 
+#G.add_rule('EXPR', '\'e\'', None, 3.0) 
 
 # Then this is one way to use the variable "x" of the function. 
 # This gets named as the argument in evaluate_expression below
-G.add_rule('EXPR', 'x', [], 10.0) 
+G.add_rule('EXPR', 'x', None, 10.0) 
 
 # A thunk function (lambdaZero is defined in BasicPrimitives)
 # We write these with [None] insead of []. The FunctionNode str function knows to print these with parens
 # This notation keeps it simple since on a FunctionNode, the children ("to") are always a list. 
-G.add_rule('EXPR', 'lambdaZero', [None], 1.0) 
+G.add_rule('EXPR', 'lambdaZero', [], 1.0) 
 #or
-G.add_rule('EXPR', 'lambdaZero()', [], 1.0) 
+G.add_rule('EXPR', 'lambdaZero()', None, 1.0)  # this is supported but not recommended
 
 
 # EXPR -> plus_(EXPR, EXPR)
@@ -55,22 +55,18 @@ G.add_rule('EXPR', 'divide_', ['EXPR', 'EXPR'], 1.0)
 # EXPR -> apply(FUNCTION, EXPR)
 G.add_rule('EXPR', 'apply_', ['FUNCTION', 'EXPR'], 5.0)
 
-# Here, 'lambda' is a special function that allows us to introduce a new bound variable (bv) of
-# type EXPR (via bv='EXPR')
-G.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0, bv=['EXPR'])
+# Here, 'lambda' is a special function that allows us to introduce a new bound variable (bv) of a cetain type.
+# The type is specified by bv_args:
 
-# AND, we can require that the bound variable be a thunk. This is currently just hacked onto the return type
-# like this:
-G.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0, bv=['EXPR()'])
-# So here, this will expand to (lambda (y2) EXPR) where "y2" can be used in EXPR, but when it is, 
-# it is a thunk, as in (lambda (y2) (cons (y2) (y2))) as opposed to (lambda (y2) (cons y2 y2))
+G.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_name=None, bv_args=None) # Creates a thunk -- no variables, but gets evaled like a lambda (does not add rules)
 
-# So, this means we can create a function abstraction: a bound variable
-# that is always evaled:
-G.add_rule('EXPR', 'apply_',  ['FUNCTION', 'THUNK'], 1.)
-G.add_rule('FUNCTION', 'lambda',  ['EXPR'], 1., bv=['EXPR()'])
-G.add_rule('THUNK', 'lambda',  ['EXPR'], 1., bv=[])
+G.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_name='BOOL', bv_args=None) # Creates a terminal of type bool -- e.g. y1
 
+G.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_name='BOOL', bv_args=[]) # Creates a thunk lambda variable -- e.g y1()
+
+G.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_name='BOOL', bv_args=['EXPR']) # Creates a lambda variable yi always called with an EXPR argument -- e.g., y1(plus(1,1))
+
+# Etc. 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Conditional:

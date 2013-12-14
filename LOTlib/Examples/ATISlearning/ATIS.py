@@ -4,13 +4,14 @@
 	TODO: Need to iterate through the leaves too, to get tihngs like" minneapolis"
 """
 
+from LOTlib.Miscellaneous import *
 from LOTlib.SimpleLambdaParser import *
-from LOTlib.bvPCFG import *
+from LOTlib.Grammar import Grammar
 import re
 
 ATIS_path = "/home/piantado/Desktop/mit/Corpora/atis/atis.dev"
 
-G = PCFG()
+G = Grammar()
 co_occurance_matrix = dict()
 
 txt = None

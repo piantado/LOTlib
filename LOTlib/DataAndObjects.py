@@ -23,7 +23,8 @@ class FunctionData:
 		self.output = output
 		self.__dict__.update(kwargs)
 		
-	def __repr__(self): return str(self.args) + " |-> " + str(self.output)
+	def __repr__(self): 
+		return '<' + ','.join(map(str, self.args)) + " -> " + str(self.output) + '>'
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -6,14 +6,14 @@
 	No inference here--just random sampling from a grammar.
 """
 
-from LOTlib.PCFG import PCFG
+from LOTlib.Grammar import Grammar
 from LOTlib.Hypothesis import *
 
-G = PCFG()
+G = Grammar()
 
 # A very simple version of lambda calculus
 G.add_rule('EXPR', 'apply_', ['FUNC', 'EXPR'], 1.0)
-G.add_rule('EXPR', 'x', [], 5.0)
+G.add_rule('EXPR', 'x', None, 5.0)
 G.add_rule('FUNC', 'lambda', ['EXPR'], 1.0, bv=['EXPR'])
 
 G.add_rule('EXPR', 'cons_', ['EXPR', 'EXPR'], 1.0)

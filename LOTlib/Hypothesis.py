@@ -187,7 +187,11 @@ class FunctionHypothesis(Hypothesis):
 		""" 
 			Make this callable just like a function. Yay python! 
 		"""
-		return self.fvalue(*vals)
+		try:
+			return self.fvalue(*vals)
+		except TypeError:
+			print "Error in function call: "+str(self)
+			raise TypeError
 			
 	
 	def value2function(self, v):

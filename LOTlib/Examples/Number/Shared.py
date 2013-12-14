@@ -3,7 +3,7 @@
 	Shared functions and variables for the number learning model. 
 """
 
-from LOTlib.PCFG import PCFG
+from LOTlib.Grammar import Grammar
 from LOTlib.BasicPrimitives import *
 import LOTlib.MetropolisHastings
 from LOTlib.FiniteBestSet import FiniteBestSet
@@ -25,14 +25,14 @@ WORDS = ['one_', 'two_', 'three_', 'four_', 'five_', 'six_', 'seven_', 'eight_',
 ## The priors here are somewhat hierarchical by type in generation, tuned to be a little more efficient
 ## (but the actual RR prior does not care about these probabilities)
 
-G = PCFG()
+G = Grammar()
 
 G.add_rule('BOOL', 'and_',    ['BOOL', 'BOOL'], 1./3.)
 G.add_rule('BOOL', 'or_',     ['BOOL', 'BOOL'], 1./3.)
 G.add_rule('BOOL', 'not_',    ['BOOL'], 1./3.)
 
-G.add_rule('BOOL', 'True',    [], 1.0/2.)
-G.add_rule('BOOL', 'False',   [], 1.0/2.)
+G.add_rule('BOOL', 'True',    None, 1.0/2.)
+G.add_rule('BOOL', 'False',   None, 1.0/2.)
 
 ## note that this can take basically any types for return values
 G.add_rule('WORD', 'if_',    ['BOOL', 'WORD', 'WORD'], 0.5)
@@ -49,7 +49,7 @@ G.add_rule('SET', 'intersection_',     ['SET', 'SET'], 1.0/3.)
 G.add_rule('SET', 'setdifference_',     ['SET', 'SET'], 1.0/3.)
 G.add_rule('SET', 'select_',     ['SET'], 1.0)
 
-G.add_rule('SET', 'x',     [], 4.0)
+G.add_rule('SET', 'x',     None, 4.0)
 
 G.add_rule('WORD', 'L_',        ['SET'], 1.0) 
 
@@ -57,16 +57,16 @@ G.add_rule('WORD', 'next_', ['WORD'], 1.0)
 G.add_rule('WORD', 'prev_', ['WORD'], 1.0)
 
 #G.add_rule('WORD', 'undef', [], 1.0)
-G.add_rule('WORD', 'one_', [], 0.10)
-G.add_rule('WORD', 'two_', [], 0.10)
-G.add_rule('WORD', 'three_', [], 0.10)
-G.add_rule('WORD', 'four_', [], 0.10)
-G.add_rule('WORD', 'five_', [], 0.10)
-G.add_rule('WORD', 'six_', [], 0.10)
-G.add_rule('WORD', 'seven_', [], 0.10)
-G.add_rule('WORD', 'eight_', [], 0.10)
-G.add_rule('WORD', 'nine_', [], 0.10)
-G.add_rule('WORD', 'ten_', [], 0.10)
+G.add_rule('WORD', 'one_', None, 0.10)
+G.add_rule('WORD', 'two_', None, 0.10)
+G.add_rule('WORD', 'three_', None, 0.10)
+G.add_rule('WORD', 'four_', None, 0.10)
+G.add_rule('WORD', 'five_', None, 0.10)
+G.add_rule('WORD', 'six_', None, 0.10)
+G.add_rule('WORD', 'seven_', None, 0.10)
+G.add_rule('WORD', 'eight_', None, 0.10)
+G.add_rule('WORD', 'nine_', None, 0.10)
+G.add_rule('WORD', 'ten_', None, 0.10)
 
 ##########################################################
 #Define a class for running MH

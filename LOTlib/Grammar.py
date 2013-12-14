@@ -17,9 +17,12 @@ from LOTlib.Hypothesis import Hypothesis
 
 CONSTANT_RESAMPLE_P = 1.0
 
-class PCFG:
+
+
+
+class Grammar:
 	"""
-		A PCFG class that can handle special types of rules:
+		A PCFG-ish class that can handle special types of rules:
 			- Rules that introduce bound variables
 			- Rules that sample from a continuous distribution
 			- Variable resampling probabilities among the rules
@@ -57,8 +60,9 @@ class PCFG:
 				if not self.is_terminal(k): return False
 				
 		if isFunctionNode(x): # if you are structured, you must not contain nonterminals below
-			for k in x.args:
-				if not self.is_terminal(k): return False
+			if self.args is not None:
+				for k in x.args:
+					if not self.is_terminal(k): return False
 		
 		# else we get here for strings, etc.
 		return True
@@ -72,7 +76,7 @@ class PCFG:
 		return self.rules.keys()
 		
 	# these take probs instead of log probs, for simplicity
-	def add_rule(self, nt, name, to, p, resample_p=1.0, bv=[], rid=None):
+	def add_rule(self, nt, name, to, p, resample_p=1.0, bv_name=None, bv_args=None, rid=None):
 		"""
 			Adds a rule, and returns the added rule (for use by add_bv)
 		"""
@@ -81,14 +85,11 @@ class PCFG:
 			rid = self.rule_count
 			self.rule_count += 1
 		
-		assert_or_die( isinstance(bv, list),  "Bound variables must be a list of nonterminals:  " + str(locals()))
-		
 		if name is not None and (name.lower() == 'lambda'):
 			self.bv_count += 1
-			assert_or_die( len(to) == 1,  "Lambda must have exactly one argument (for now): " + str(locals()))
-		
+			
 		# Create the rule and add it
-		newrule = GrammarRule(nt,name,to, p=p, resample_p=resample_p, bv=bv, rid=rid)
+		newrule = GrammarRule(nt,name,to, p=p, resample_p=resample_p, bv_name=bv_name, bv_args=bv_args, rid=rid)
 		self.rules[nt].append(newrule)
 		
 		return newrule
@@ -102,11 +103,11 @@ class PCFG:
 		self.rules[r.nt].remove(r)
 	
 	# add a bound variable and return the rule
-	def add_bv_rule(self, nt, d):
+	def add_bv_rule(self, nt, args, d):
 		""" Add an expansion to a bound variable of type t, at depth d. Add it and return it. """
 		self.bv_rule_id += 1 # A unique identifier for each bound variable rule (may get quite large!)
 		
-		return self.add_rule( nt, name="y"+str(d), to=[], p=self.BV_P, resample_p=self.BV_RESAMPLE_P, rid=-self.bv_rule_id, bv=[])
+		return self.add_rule( nt, name="y"+str(d), to=args, p=self.BV_P, resample_p=self.BV_RESAMPLE_P, rid=-self.bv_rule_id)
 			
 	
 	############################################################
@@ -130,12 +131,13 @@ class PCFG:
 		elif x=='*gaussian*': ## TODO: HIGHLY EXPERIMENTAL!! Wow this is really terrible for mixing...
 			v = np.random.normal()
 			lp = normlogpdf(v, 0.0, 1.0)
-			return FunctionNode(returntype=x, name=str(v), args=[], lp=lp, bv=[], ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
+			return FunctionNode(returntype=x, name=str(v), args=[], lp=lp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
 		elif x=='*uniform*':
 			v = np.random.rand()
 			lp = 0.0
-			return FunctionNode(returntype=x, name=str(v), args=[], lp=lp, bv=[], ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
-		
+			return FunctionNode(returntype=x, name=str(v), args=[], lp=lp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
+		elif x is None:
+			return None
 		elif self.is_nonterminal(x):
 			# if we generate a nonterminal, then sample a GrammarRule, convert it to a FunctionNode
 			# via nt->returntype, name->name, to->args, 
@@ -143,19 +145,23 @@ class PCFG:
 			
 			r, lp = weighted_sample(self.rules[x], return_probability=True, log=True)
 			
-			#print " IN GENERATE ADDING d=",d
-			# what rules did we add? Possibly empty. This adds and returns them
-			addedrules = [ self.add_bv_rule(b,d) for b in r.bv ]
-			
+			if r.bv_name is not None: # adding a rule
+				added = self.add_bv_rule(r.bv_name, r.bv_args, d)
+				
 			# expand the "to" part of our rule
-			args = self.generate(r.to, d=d+1)
-
-			# remove what we added
-			[ self.remove_rule(rr) for rr in addedrules ]
+			if r is None:
+				args = None
+			else:
+				args = self.generate(r.to, d=d+1)
+				
+			if r.bv_name is not None:
+				self.remove_rule(added)
 			
 			# create the new node
-			fn = FunctionNode(returntype=r.nt, name=r.name, args=args, lp=lp, bv=addedrules, ruleid=r.rid )
-			
+			if r.bv_name is not None:
+				return FunctionNode(returntype=r.nt, name=r.name, args=args, lp=lp, bv_name=added.name, bv_args=r.bv_args, ruleid=r.rid )
+			else:
+				return FunctionNode(returntype=r.nt, name=r.name, args=args, lp=lp, ruleid=r.rid )
 			return fn
 		elif isFunctionNode(x):
 			#for function Nodes, we are able to generate by copying and expanding the children
@@ -188,16 +194,17 @@ class PCFG:
 		if isFunctionNode(t):
 			yield (t,d) if yield_depth else t
 			
-			if do_bv: # add the bound variables to the rules
-				for r in t.bv: self.rules[r.nt].append(r)
+			if do_bv and t.bv_name is not None:
+				added = self.add_bv_rule( t.bv_name, t.bv_args, d)
 			
-			for a in t.args:
-				for g in self.iterate_subnodes(a, d=d+1, do_bv=do_bv, yield_depth=yield_depth): # pass up anything from below
-					if predicate(g): yield g
+			if t.args is not None:
+				for a in t.args:
+					for g in self.iterate_subnodes(a, d=d+1, do_bv=do_bv, yield_depth=yield_depth): # pass up anything from below
+						if predicate(g): yield g
 			
 			# And remove them
-			if do_bv: 
-				for r in t.bv: self.remove_rule(r)
+			if do_bv and (t.bv_name is not None):
+				self.remove_rule(added)
 		
 	def resample_normalizer(self, t, predicate=lambdaTrue):
 		Z = 0.0
@@ -279,10 +286,11 @@ class PCFG:
 			
 			# first sample a node (through sample_node_via_iterate, which handles everything well)
 			for ni, di, resample_p, resample_Z in self.sample_node_via_iterate(newt):
+				if ni.args is None: continue # Can't deal with these TODO: CHECK THIS?
 				
 				# Since it's an insert, see if there is a (replicating) rule that expands
 				# from ni.returntype to some ni.returntype
-				replicating_rules = filter(lambda x: x.name != 'lambda' and any([a==ni.returntype for a in x.to]), self.rules[ni.returntype])
+				replicating_rules = filter(lambda x: x.name != 'lambda' and (x.to is not None) and any([a==ni.returntype for a in x.to]), self.rules[ni.returntype])
 				
 				# If there are none, then we can't insert!
 				if len(replicating_rules) == 0: continue
@@ -315,7 +323,7 @@ class PCFG:
 				
 				# create the new node
 				sampled = True
-				ni.setto( FunctionNode(returntype=r.nt, name=r.name, args=args, lp=lp, bv=[], ruleid=r.rid, resample_p=r.resample_p ) )
+				ni.setto( FunctionNode(returntype=r.nt, name=r.name, args=args, lp=lp, bv_name=None, bv_args=None, ruleid=r.rid, resample_p=r.resample_p ) )
 				
 			if sampled:
 				
@@ -331,6 +339,7 @@ class PCFG:
 		else: # A delete move!
 			for ni, di, resample_p, resample_Z in self.sample_node_via_iterate(newt):
 				if ni.name == 'lambda': continue # can't do anything
+				if ni.args is None: continue # Can't deal with these TODO: CHECK THIS?
 				
 				# Figure out which of my children have the same type as me
 				replicating_kid_indices = [ i for i in xrange(len(ni.args)) if isFunctionNode(ni.args[i]) and ni.args[i].returntype==ni.returntype]
@@ -339,7 +348,7 @@ class PCFG:
 				if nrk == 0: continue # if no replicating rules here
 				
 				## We need to compute a few things for the backwards probability
-				replicating_rules = filter(lambda x: any([a==ni.returntype for a in x.to]), self.rules[ni.returntype])
+				replicating_rules = filter(lambda x: (x.to is not None) and any([a==ni.returntype for a in x.to]), self.rules[ni.returntype])
 				if len(replicating_rules) == 0: continue
 				
 				i = sample1(replicating_kid_indices) # who to promote; NOTE: not done via any weighting
@@ -381,7 +390,7 @@ class PCFG:
 		
 		if LOTlib.SIG_INTERRUPTED: return # quit if interrupted
 		
-		if isFunctionNode(x) and depth >= 0: 
+		if isFunctionNode(x) and depth >= 0 and x.args is not None: 
 			#print "FN:", x, depth
 			
 			# Short-circuit if we can
@@ -448,13 +457,13 @@ class PCFG:
 			if depth >= 0:
 				# yield each of the rules that lead to terminals
 				for r in terminals:
-					n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), lp=(r.lp - Z), bv=r.bv, ruleid=r.rid )
+					n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), lp=(r.lp - Z), bv_name=r.bv_name, bv_args=r.bv_args, ruleid=r.rid )
 					yield n
 			
 			if depth > 0:
 				# and expand each nonterminals
 				for r in nonterminals:
-					n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), lp=(r.lp - Z), bv=r.bv, ruleid=r.rid )
+					n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), lp=(r.lp - Z), bv_name=r.bv_name, bv_args=r.bv_args, ruleid=r.rid )
 					for q in self.increment_tree(n, depth-1): yield q
 		else:   raise StopIteration
 			
@@ -528,7 +537,8 @@ class PCFG:
 								
 				# how many kids are not equal, and where was the last?
 				mismatch_count, mismatch_index = 0, 0
-				for i, xa, ya in zip(xrange(len(x.args)), x.args, y.args):
+				
+				for i, xa, ya in zip(xrange(len(x.args)), x.args if x.args is not None else [], y.args if y.args is not None else []):
 					if xa != ya: # checks whole subtree!
 						mismatch_count += 1
 						mismatch_index = i
@@ -654,7 +664,7 @@ if __name__ == "__main__":
 	## # # # # # # # # # # # # # # # 
 
 	G.add_rule('EXPR', 'apply', ['FUNCTION', 'EXPR'], 5.0)
-	G.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0, bv=['EXPR']) # bvtype means we introduce a bound variable below
+	G.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0, bv_name='EXPR', bv_args=None) # bvtype means we introduce a bound variable below
 	
 	print "Testing generate (lambda)" 
 	TEST_GEN = dict()

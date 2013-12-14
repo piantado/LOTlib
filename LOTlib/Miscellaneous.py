@@ -110,10 +110,6 @@ def tf201(x):
 	if x: return 1
 	else: return 0
 
-# joins by commas with none at the end. Correctly handles null lists
-def commalist(listtext, sep1=', ', sep2=', '):
-	return sep1.join(listtext[:-2]+['']) + sep2.join(listtext[-2:])
-	
 
 from time import gmtime, strftime, time, localtime
 ## Functions for I/O
@@ -488,7 +484,7 @@ def evaluate_expression(e, args=['x'], recurse="L_", addlambda=True):
 	
 	try:
 		if addlambda:
-			f = eval('lambda ' + recurse + ': lambda ' + commalist(args) + ' :' + e)
+			f = eval('lambda ' + recurse + ': lambda ' + ','.join(args) + ' :' + e)
 			return Y_bounded(f)
 		else: 
 			f = eval(e)
