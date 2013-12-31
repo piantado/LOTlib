@@ -58,7 +58,7 @@ data = [ FunctionData( [Obj(shape='square', color='red')], True), \
 # Create an initial hypothesis
 # This is where we set a number of relevant variables -- whether to use RR, alpha, etc. 
 
-from LOTlib.Hypothesis import LOTHypothesis
+from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
 h0 = LOTHypothesis(G=DNF, rrPrior=True, rrAlpha=1.0)
 

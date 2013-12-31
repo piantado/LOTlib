@@ -4,8 +4,10 @@
 		TODO: When we generate, we MUST have a START->EXPR expansion, otherwise the top level doesn't get searched
 """
 import numpy as np
-
-from copy import copy
+#try:                import numpy as np
+#except ImportError: import numpypy as np
+	
+from copy import copy, deepcopy
 from collections import defaultdict
 from random import randint, random, sample
 
@@ -13,11 +15,9 @@ import LOTlib
 from LOTlib.Miscellaneous import *
 from LOTlib.FunctionNode import FunctionNode, isFunctionNode
 from LOTlib.GrammarRule import GrammarRule
-from LOTlib.Hypothesis import Hypothesis
+from LOTlib.Hypotheses.Hypothesis import Hypothesis
 
 CONSTANT_RESAMPLE_P = 1.0
-
-
 
 
 class Grammar:

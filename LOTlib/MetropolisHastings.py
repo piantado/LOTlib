@@ -16,7 +16,8 @@ from copy import copy, deepcopy
 
 import time
 import LOTlib
-import LOTlib.Hypothesis 
+from LOTlib.Hypotheses.Hypothesis import Hypothesis
+from LOTlib.Memoization.NoisyBoundedMemoize import NoisyBoundedMemoize
 
 from LOTlib.Miscellaneous import *
 from LOTlib.FiniteBestSet import FiniteBestSet
@@ -32,17 +33,21 @@ class MHStats(defaultdict):
 		else:   return None
 
 
-def mh_sample(current_sample, data, steps=float("inf"), proposer=None, skip=0, temperature=1.0, trace=False, stats=None):
+def mh_sample(current_sample, data, steps=float("inf"), proposer=None, skip=0, prior_temperature=1.0, ll_temperature=1.0, temperature=1.0, acceptance_temperature=1.0, trace=False, stats=None, noisy_memoize=0):
 	"""
 		current_sample - the starting hypothesis
 		data - the conditioning data
 		steps - how many steps to run
 		proposer - if not None, use this instead of inh.propose() to compute proposals
 		skip - only return samples every this many steps
-		temperature - the sampler temperature -- only on the likelihood (TODO: FIX)
+		temperature(s) - the sampler temperatures on variosu components
 		trace - if true, we display the random number, proposal, current hypothesis, and sample proposal
 		stats - if not none, then we store sampling information in it (hopefully, a MHStats object)
+		noisy_memoize - if > 0, store this many hypotheses using a NoisyBoundedHash
 	"""
+	
+	if noisy_memoize > 0:
+		mem = NoisyBoundedMemoize( lambda h: h.compute_posterior(data), N=noisy_memoize)
 	
 	mhi = 0
 	while mhi < steps:
@@ -50,18 +55,28 @@ def mh_sample(current_sample, data, steps=float("inf"), proposer=None, skip=0, t
 			
 			if proposer is None: p, fb = current_sample.propose()
 			else:                p, fb = proposer(current_sample)
-				
-			np, nl = p.compute_posterior(data)
 			
+			# A speed to check to see if identical -- not much faster
+			#if fb==0.0 and p == current_sample:
+				#continue # next iteration of the skip loop
+			
+			# either compute this, or use the memoized version
+			if noisy_memoize>0:
+				np, nl = mem(p)
+				#print mem.array
+			else:
+				np, nl = p.compute_posterior(data)
+						
 			#print np, nl, current_sample.prior, current_sample.likelihood
-			prop = (np+nl/temperature)
-			cur  = (current_sample.prior + current_sample.likelihood/temperature)
+			prop = (np/prior_temperature+nl/ll_temperature) / temperature
+			cur  = (current_sample.prior/prior_temperature + current_sample.likelihood/ll_temperature)/temperature
+			
 			if math.isnan(cur) or (cur==-inf and prop==-inf): # if we get infs or are in a stupid state, let's just sample from the prior so things don't get crazy
 				r = -log(2.0) #  just choose at random -- we can't sample priors since they may be -inf both
 			elif math.isnan(prop): #never accept
 				r = float("-inf")
 			else:
-				r = prop-cur-fb
+				r = (prop-cur-fb) / acceptance_temperature
 			
 			if trace: 
 				print "# Proposing: ", r, prop, cur, fb
@@ -84,6 +99,8 @@ def mh_sample(current_sample, data, steps=float("inf"), proposer=None, skip=0, t
 		
 		if LOTlib.SIG_INTERRUPTED: break
 		mhi += 1
+		
+	#print mem.hits, mem.misses
 			
 # this does out special mix of mh and gibbs steps
 def mhgibbs_sample(inh, data, steps, proposer=None, mh_steps=10, gibbs_steps=10, skip=0, temperature=1.0):
@@ -96,17 +113,7 @@ def mhgibbs_sample(inh, data, steps, proposer=None, mh_steps=10, gibbs_steps=10,
 		if LOTlib.SIG_INTERRUPTED: break
 
 		
-## TODO: CHECK THIS--STILL NOT SURE THIS IS RIGHT
-# a helper function for temperature transitions -- one single MH step, returning a new sample
-# this allows diff. temps for top and bottom
-def tt_helper(xi, data, tnew, told, proposer):
-	if proposer is None: xinew, fb = xi.propose()
-	else:                xinew, fb = propose(xi)
-	xinew.compute_posterior(data)
-	r = xinew.prior + xinew.likelihood / tnew - (xi.prior + xi.likelihood / told) - fb
-	if r > 0.0 or random() < exp(r):
-		return xinew 
-	else:   return xi
+
 	
 	
 ## TODO: DEBUG THIS -- especially for asmmetric proposals.. ALSO TO BE SURE IT IS RIGHT
@@ -114,6 +121,19 @@ def tempered_transitions_sample(inh, data, steps, proposer=None, skip=0, tempera
 	current_sample = inh
 	
 	LT = len(temperatures)
+	
+	## TODO: CHECK THIS--STILL NOT SURE THIS IS RIGHT
+	# a helper function for temperature transitions -- one single MH step, returning a new sample
+	# this allows diff. temps for top and bottom
+	def tt_helper(xi, data, tnew, told, proposer):
+		if proposer is None: xinew, fb = xi.propose()
+		else:                xinew, fb = propose(xi)
+		xinew.compute_posterior(data)
+		r = (xinew.prior + xinew.likelihood) / tnew - (xi.prior + xi.likelihood) / told - fb
+		if r > 0.0 or random() < exp(r):
+			return xinew 
+		else:   return xi
+		
 	
 	for mhi in xrange(steps):
 		for skp in xrange(skip+1):
@@ -123,14 +143,14 @@ def tempered_transitions_sample(inh, data, steps, proposer=None, skip=0, tempera
 			
 			for i in xrange(0,LT-2): # go up
 				xi = tt_helper(xi, data, temperatures[i+1], temperatures[i], proposer)
-				totlp = totlp + (xi.prior + xi.likelihood / temperatures[i+1]) - (xi.prior + xi.likelihood / temperatures[i])
+				totlp = totlp + (xi.prior + xi.likelihood) / temperatures[i+1] - (xi.prior + xi.likelihood) / temperatures[i]
 			
 			# do the top:
 			xi = tt_helper(xi, data, temperatures[LT-1], temperatures[LT-1], proposer) 
 			
 			for i in xrange(len(temperatures)-2, 0, -1): # go down
 				xi = tt_helper(xi, data, temperatures[i], temperatures[i], proposer) 
-				totlp = totlp + (xi.prior + xi.likelihood / temperatures[i]) - (xi.prior + xi.likelihood / temperatures[i+1])
+				totlp = totlp + (xi.prior + xi.likelihood) / temperatures[i] - (xi.prior + xi.likelihood) / temperatures[i+1]
 			
 			if random() < exp(totlp): current_sample = xi # copy this over
 
@@ -158,7 +178,7 @@ def parallel_tempering_sample(inh, data, steps, proposer=None, within_steps=10, 
 			frm = randint(0, len(temperatures)-2)
 			
 			# get the joint probability -- since temperature is only on the likelihood, everything cancels
-			r = (samples[frm].likelihood / temperatures[frm+1] + samples[frm+1].likelihood / temperatures[frm]) - (samples[frm].likelihood / temperatures[frm] + samples[frm+1].likelihood / temperatures[frm+1])
+			r = (samples[frm].prior+samples[frm].likelihood) / temperatures[frm+1] + (samples[frm+1].prior+samples[frm+1].likelihood) / temperatures[frm] - (samples[frm].prior+samples[frm].likelihood) / temperatures[frm] + (samples[frm+1].prior+samples[frm+1].likelihood) / temperatures[frm+1]
 			
 			if random() < exp(r):
 				tmp = samples[frm]

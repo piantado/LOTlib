@@ -5,7 +5,7 @@
 	the exp(-RosenbrockFunction)
 """
 
-from LOTlib.Hypothesis import VectorHypothesis
+from LOTlib.Hypotheses.VectorHypothesis import VectorHypothesis
 import LOTlib.MetropolisHastings
 from LOTlib.Miscellaneous import *
 import numpy

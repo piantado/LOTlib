@@ -18,12 +18,12 @@ The original vesion of LOTlib was based on scheme code (available upon request -
 REQUIREMENTS
 ------------
 
-lockfile
-pyparsing
-numpy
-scipy
-mpi4py (if using MPI)
-multiprocessing
+- lockfile
+- numpy
+- scipy
+- mpi4py (if using MPI)
+- multiprocessing
+- pyparsing (for SimpleLambdaParser)
 
 INSTALLATION
 ------------

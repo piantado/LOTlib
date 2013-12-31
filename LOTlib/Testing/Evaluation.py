@@ -5,6 +5,7 @@
 	
 		MAYBE USE: #LOTlib.Hypothesis.POSTERIOR_CALL_COUNTER and report how many calls we've made
 """
+import LOTlib
 
 from LOTlib.Miscellaneous import *
 from collections import defaultdict
@@ -12,11 +13,11 @@ from math import log, exp
 from scipy.stats import chisquare
 import numpy
 
-def evaluate_sampler(target, sampler, skip=1000, steps=1000000, chains=1, prefix="", trace=False, outfile=None, assertion=False):
+def evaluate_sampler(target, sampler, print_every=1000, steps=1000000, chains=1, prefix="", trace=False, outfile=None, assertion=False):
 	"""
 		target - a hash from hypotheses to lps. The keys of this are the only things we 
 		sampler - a sampler we wish to evaluate_sampler
-		skip -- print out every this many samples
+		print_every -- print out every this many samples
 		steps -- how many total samples to draw
 		prefix -- anything to print before
 		trace - should we print a hypothesis every step?
@@ -37,6 +38,8 @@ def evaluate_sampler(target, sampler, skip=1000, steps=1000000, chains=1, prefix
 			- count of samples NOT overlapping with target
 			- chi squared statistic
 			- p value
+			
+		NOTE: You may get no output if there isn't any overlap between samples and target
 	"""
 	
 	hypotheses = target.keys()
@@ -48,13 +51,14 @@ def evaluate_sampler(target, sampler, skip=1000, steps=1000000, chains=1, prefix
 		
 		n = 0
 		for s in sampler: # each sample should have an .lp defined
+			if LOTlib.SIG_INTERRUPTED: break
 			
 			samples[s] += 1
 			n += 1
 			
-			if trace: print "#", s in target, s.lp, s
+			if trace: print "#", n, s in target, s.lp, s
 			
-			if (n%skip)==0:
+			if (n%print_every)==0:
 				
 				sm = sum( [samples[x] for x in hypotheses ] )
 				if sm == 0: continue

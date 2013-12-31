@@ -1,0 +1,11 @@
+## MPI hosts with only one slot per machine 
+## (more convenient than rummaging around the MPI command line options, which are inconsistent across implementations)
+
+metropolis-0:1
+metropolis-1:1
+metropolis-4:1
+metropolis-2:1
+metropolis-3:1
+
+
+

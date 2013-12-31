@@ -8,9 +8,8 @@ from LOTlib.BasicPrimitives import *
 import LOTlib.MetropolisHastings
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Miscellaneous import *
-from LOTlib.Lexicon import *
 from LOTlib.DataAndObjects import *
-from LOTlib.Hypothesis import *
+from LOTlib.Hypotheses.GaussianLOTHypothesis import GaussianLOTHypothesis
 
 
 #from SimpleMPI import MPI_map

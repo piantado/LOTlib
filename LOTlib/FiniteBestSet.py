@@ -89,7 +89,7 @@ class FiniteBestSet(object):
 			Copy over everything from y. Here, y may be a list of things to merge (e.g. other FiniteBestSets)
 			This is slightly inefficient becuase we create all new QueueItems, but it's easiest to deal with min/max
 		"""
-		if isinstance(y, list):
+		if isinstance(y, list) or isinstance(y, tuple) or isinstance(y, set):
 			for yi in y: self.merge(yi)
 		else:
 			for yi in y.Q:
@@ -114,7 +114,7 @@ if __name__ == "__main__":
 		for x in ar: Q.push(x,x)
 		
 		assert set(Q.get_all()).issuperset( set([90,91,92,93,94,95,96,97,98,99]))
-		print Q.get_sorted()
+		print Q.get_all()
 	
 	# check the min
 	for i in xrange(100):
@@ -125,4 +125,4 @@ if __name__ == "__main__":
 		for x in ar: Q.push(x,x)
 		
 		assert set(Q.get_all()).issuperset( set([0,1,2,3,4,5,6,7,8,9]))
-		print Q.get_sorted()
+		print Q.get_all()

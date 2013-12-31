@@ -11,7 +11,6 @@
 
 from pyparsing import *
 from LOTlib.FunctionNode import *
-#from LOTlib.FunctionNode import list2FunctionNode
 import pprint
 
 #####################################################################

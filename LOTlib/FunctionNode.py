@@ -39,6 +39,15 @@ re_variable = re.compile(r"y([0-9]+)?$")
 # just because this is nicer, and allows us to map, etc. 
 def isFunctionNode(x): return isinstance(x, FunctionNode)
 
+def cleanFunctionNodeString(x):
+	"""
+		Make functionNode strings easier to read
+	"""
+	s = re.sub("lambda", u"\u03BB", str(x)) # make lambdas the single char
+	s = re.sub("_", '', s) # remove underscores
+	return s
+	
+
 class FunctionNode(object):
 	"""
 		NOTE: If a node has [ None ] as args, it is treated as a thunk
@@ -90,21 +99,28 @@ class FunctionNode(object):
 			return str(self.name)
 		elif self.name == "if_": # this gets translated
 			assert len(self.args) == 3, "if_ requires 3 arguments!"
-			return '(' + str(self.args[1]) + ') if (' + str(self.args[0]) + ') else (' + str(self.args[2]) + ')'
+			return '(' + str(self.args[1]) + ' if ' + str(self.args[0]) + ' else ' + str(self.args[2]) + ')'
+			#return '(' + str(self.args[1]) + ') if (' + str(self.args[0]) + ') else (' + str(self.args[2]) + ')'
 		elif self.name == '':
 			assert len(self.args) == 1, "Null names must have exactly 1 argument"
 			return str(self.args[0])
+		elif self.name is not None and self.name.lower() == 'apply_':
+			assert self.args is not None and len(self.args)==2, "Apply requires exactly 2 arguments"
+			return '('+str(self.args[0])+')('+str(self.args[1])+')'
 		elif self.name is not None and self.name.lower() == 'lambda':
 			assert len(self.args) == 1, "Lambda variables require one argument"
 			
 			# We can allow bv_name to be None, which is a thunk (no arguments)
-			return '(lambda '+ (self.bv_name if self.bv_name is not None else '') +': '+str(self.args[0])+' )'
+			#return '(lambda '+ (self.bv_name if self.bv_name is not None else '') +': '+str(self.args[0])+' )'
+			
+			# The old version (above) wrapped in parens, but that's probably not necessary?
+			return 'lambda '+ (self.bv_name if self.bv_name is not None else '') +': '+str(self.args[0])
 		else:
 			
 			if self.args is None:
 				return str(self.name)+'()' # simple call
 			else:
-				return str(self.name)+'('+','.join(map(str,self.args))+')'
+				return str(self.name)+'('+', '.join(map(str,self.args))+')'
 			
 	def fullprint(self, d=0):
 		""" A handy printer for debugging"""

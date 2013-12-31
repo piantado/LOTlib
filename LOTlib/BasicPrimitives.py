@@ -228,7 +228,7 @@ def times_(x,y): return x*y
 @LOTlib_primitive
 @None2None
 def divide_(x,y): 
-	if y > 0: return x/y
+	if y != 0.: return x/y
 	else:     return float("inf")*x
 	
 @LOTlib_primitive

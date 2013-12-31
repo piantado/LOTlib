@@ -1,5 +1,5 @@
 from LOTlib.Grammar import Grammar
-from LOTlib.Hypothesis import LOTHypothesis
+from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.DataAndObjects import FunctionData
 from math import log
 
@@ -12,7 +12,7 @@ G = Grammar()
 G.add_rule('START', '', ['EXPR'], 1.0)
 G.add_rule('EXPR', 'apply_', ['FUNC', 'EXPR'], 1.0)
 G.add_rule('EXPR', 'x', None, 5.0)
-G.add_rule('FUNC', 'lambda', ['EXPR'], 1.0, bv=['EXPR'])
+G.add_rule('FUNC', 'lambda', ['EXPR'], 1.0, bv_name='EXPR', bv_args=None)
 
 G.add_rule('EXPR', 'cons_', ['EXPR', 'EXPR'], 1.0)
 G.add_rule('EXPR', 'cdr_',  ['EXPR'], 1.0)

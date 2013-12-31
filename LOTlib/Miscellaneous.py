@@ -300,6 +300,7 @@ def sample_one(*args):
 
 def flip(p): return (random() < p)
 
+
 ## TODO: THIS FUNCTION SUCKS PLEASE FIX IT
 ## TODO: Change this so that if N is large enough, you sort 
 # takes unnormalized probabilities and returns a list of the log probability and the object
@@ -439,9 +440,10 @@ def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, 
 def lambdaZero(*x): return 0
 def lambdaOne(*x): return 1
 def lambdaNull(*x): return []
-def lambdaNone(*x): return x
+def lambdaNone(*x): return None
 def lambdaTrue(*x): return True
 def lambdaFalse(*x): return True
+def lambdaNAN(*x): return float("nan")
 
 """
 The Y combinator
