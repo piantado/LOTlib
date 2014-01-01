@@ -11,8 +11,8 @@
 from random import sample
 from copy import deepcopy, copy
 
-from LOTlib.Hypotheses.Hypothesis import Hypothesis
-from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+from Hypothesis import Hypothesis
+from LOTHypothesis import LOTHypothesis
 from LOTlib.DataAndObjects import UtteranceData
 from LOTlib.Miscellaneous import *
 
