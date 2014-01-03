@@ -29,7 +29,7 @@ class LOTHypothesis(FunctionHypothesis):
 		self.proposal_function = RegenerationProposal(self.grammar)
 		
 		self.likelihood = 0.0
-		
+	
 	def __copy__(self):
 		"""
 			Return a copy of myself.

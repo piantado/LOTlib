@@ -3,9 +3,10 @@
 	Shared functions and variables for the number learning model. 
 """
 
+import LOTlib
 from LOTlib.Grammar import Grammar
 from LOTlib.BasicPrimitives import *
-import LOTlib.MetropolisHastings
+import LOTlib.Inference.MetropolisHastings
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Miscellaneous import *
 from LOTlib.DataAndObjects import *

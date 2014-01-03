@@ -32,10 +32,10 @@ def run(*args):
 	pq = FiniteBestSet(100, max=True) 
 	
 	# starting hypothesis -- here this generates at random
-	initial_hyp = GaussianLOTHypothesis(G, prior_temperature=PRIOR_TEMPERATURE)
+	h0 = GaussianLOTHypothesis(G, prior_temperature=PRIOR_TEMPERATURE)
 	#print initial_hyp
 	# populate the finite sample by running the sampler for this many steps
-	for x in LOTlib.MetropolisHastings.mh_sample(initial_hyp, data, STEPS, skip=SKIP, noisy_memoize=10000):
+	for x in mh_sample(h0, data, STEPS, skip=SKIP, noisy_memoize=10000):
 		pq.push(x, x.lp)
 		print x.lp, x.prior, x.likelihood, q(x)
 	

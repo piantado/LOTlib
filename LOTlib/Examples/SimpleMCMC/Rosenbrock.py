@@ -6,7 +6,7 @@
 """
 
 from LOTlib.Hypotheses.VectorHypothesis import VectorHypothesis
-import LOTlib.MetropolisHastings
+from LOTlib.Inference.MetropolisHastings import mh_sample
 from LOTlib.Miscellaneous import *
 import numpy
 
@@ -39,5 +39,5 @@ if __name__ == "__main__":
 	N = 1
 	initial_hyp = RosenbrockSampler()
 	
-	for x in LOTlib.MetropolisHastings.mh_sample(initial_hyp, [], 1000000, skip=100, trace=False): 
+	for x in mh_sample(initial_hyp, [], 1000000, skip=100, trace=False): 
 		print x, x.lp

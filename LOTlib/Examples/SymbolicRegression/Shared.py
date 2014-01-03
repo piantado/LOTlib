@@ -5,7 +5,7 @@
 
 from LOTlib.Grammar import Grammar
 from LOTlib.BasicPrimitives import *
-import LOTlib.MetropolisHastings
+from LOTlib.Inference.MetropolisHastings import mh_sample
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Miscellaneous import *
 from LOTlib.DataAndObjects import *

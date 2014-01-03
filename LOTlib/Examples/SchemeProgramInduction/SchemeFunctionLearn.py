@@ -7,7 +7,6 @@
 	
 """
 
-import LOTlib.MetropolisHastings
 from Shared import *
 
 STEPS = 1000000
@@ -29,7 +28,7 @@ data = [
        
 # And run
 h0 = SchemeFunction(G, ALPHA=ALPHA)       
-for x in LOTlib.MetropolisHastings.mh_sample(h0, data, STEPS):
+for x in mh_sample(h0, data, STEPS):
 	
 	print x.lp, x
 	for di in data:

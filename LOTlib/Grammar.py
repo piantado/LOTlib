@@ -131,11 +131,11 @@ class Grammar:
 		elif x=='*gaussian*': ## TODO: HIGHLY EXPERIMENTAL!! Wow this is really terrible for mixing...
 			v = np.random.normal()
 			lp = normlogpdf(v, 0.0, 1.0)
-			return FunctionNode(returntype=x, name=str(v), args=[], lp=lp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
+			return FunctionNode(returntype=x, name=str(v), args=None, lp=lp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
 		elif x=='*uniform*':
 			v = np.random.rand()
 			lp = 0.0
-			return FunctionNode(returntype=x, name=str(v), args=[], lp=lp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
+			return FunctionNode(returntype=x, name=str(v), args=None, lp=lp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
 		elif x is None:
 			return None
 		elif self.is_nonterminal(x):

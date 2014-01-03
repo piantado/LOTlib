@@ -6,12 +6,13 @@
 		MAYBE USE: #LOTlib.Hypothesis.POSTERIOR_CALL_COUNTER and report how many calls we've made
 """
 import LOTlib
-
+from SimpleMPI.ParallelBufferedIO import ParallelBufferedIO
 from LOTlib.Miscellaneous import *
 from collections import defaultdict
 from math import log, exp
 from scipy.stats import chisquare
 import numpy
+from time import time
 
 def evaluate_sampler(target, sampler, print_every=1000, steps=1000000, chains=1, prefix="", trace=False, outfile=None, assertion=False):
 	"""
@@ -44,43 +45,49 @@ def evaluate_sampler(target, sampler, print_every=1000, steps=1000000, chains=1,
 	
 	hypotheses = target.keys()
 	tZ = logsumexp(target.values()) # get the normalizer
-	if outfile is not None: bo = ParallelBufferedIO(outfile)
+	
+	# If we write to an output (in parallel)
+	if outfile is not None: 
+		bo = ParallelBufferedIO(outfile)
 	
 	for chain_i in xrange(chains):
 		samples = defaultdict(int) # keep track of samples
 		
-		n = 0
-		for s in sampler: # each sample should have an .lp defined
+		startt = time()
+		for n, s in enumerate(sampler): # each sample should have an .lp defined
 			if LOTlib.SIG_INTERRUPTED: break
 			
 			samples[s] += 1
-			n += 1
 			
-			if trace: print "#", n, s in target, s.lp, s
+			if trace: 
+				print "#", n, s in target, s.lp, s
 			
-			if (n%print_every)==0:
+			if (n%print_every)==0 and n>0:
 				
+				# the sum of everything in hypotheses
 				sm = sum( [samples[x] for x in hypotheses ] )
 				if sm == 0: continue
 				
-				sm_out = sum(samples.values()) - sm # the counts of things outside of hypotheses
+				# the counts of things outside of hypotheses
+				sm_out = n - sm 
 				sZ = log(sm)
 				
-				KL = 0.0
-				for h in hypotheses:
-					Q = target[h] - tZ
-					sh = samples[h]
-					if sh > 0:
-						P = log( sh ) - sZ
-						KL += (P - Q) * exp( P ) # otherwise, limit->0
+				if sm > 0:
+					KL = 0.0
+				
+					for h in hypotheses:
+						Q = target[h] - tZ
+						sh = samples[h]
+						if sh > 0:
+							P = log( sh ) - sZ
+							KL += (P - Q) * exp( P )
+				else:
+					KL = float("inf")
 					
 				# And compute the percentage found
-				percent_found = float(sum([1 for x in hypotheses if samples[x] > 0]))/ float(len(hypotheses))
+				percent_found = float(sum([ (samples[x]>0) for x in hypotheses]))/ float(len(hypotheses))
 				pm_found = logsumexp([target[x] for x in hypotheses if samples[x] > 0])
-				
-				#for k in hypotheses: 
-					#if samples[k] == 0: print k
-				
+								
 				# compute chi squared counts
 				fobs = numpy.array( [samples[h] for h in hypotheses] )
 				fexp = numpy.array( [ numpy.exp(target[h]-tZ) * sm for h in hypotheses])

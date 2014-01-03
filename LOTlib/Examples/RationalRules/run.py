@@ -60,12 +60,12 @@ data = [ FunctionData( [Obj(shape='square', color='red')], True), \
 
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
-h0 = LOTHypothesis(G=DNF, rrPrior=True, rrAlpha=1.0)
+h0 = LOTHypothesis(grammar=DNF, rrPrior=True, rrAlpha=1.0)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run the MH
 
-from LOTlib.MetropolisHastings import mh_sample
+from LOTlib.Inference.MetropolisHastings import mh_sample
 
 # Run the vanilla sampler. Without steps, it will run infinitely
 # this prints out posterior (lp), prior, likelihood, 

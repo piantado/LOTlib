@@ -1,3 +1,10 @@
+"""
+
+	An attempt to keep track of the best hypotheses for searching, and preferentially search them. 
+	
+	Not as good as ProbTaboo!
+"""
+
 import heapq
 from collections import defaultdict
 import random
@@ -45,7 +52,7 @@ def novelty_search(h0s, data, grammar, props=10, novelty_advantage=100):
 		print "\n"
 		print len(openset), "\t", h.lp, "\t", heapweight(h), "\t", novelty[h], "\t", froms[h], tos[h], "\t", q(h)
 		for x in FS.get_all(sorted=True):
-			print "\t", x.lp, "\t", heapweight(x), "\t", novelty[x], "\t", froms[x], tos[x],"\t", q(x)
+			print "\t", x.lp, "\t", heapweight(x), "\t", novelty[x], "\t", q(get_knower_pattern(h)), "\t", froms[x], tos[x],"\t", q(x)
 		
 		# Store all together so we know who to update (we make their novelty the same as their parent's)
 		proposals = [ h.propose()[0] for i in xrange(props) ]

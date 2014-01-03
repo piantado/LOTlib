@@ -9,11 +9,11 @@ import numpy
 
 from LOTlib.Grammar import Grammar
 from LOTlib.BasicPrimitives import *
-import LOTlib.MetropolisHastings
+from LOTlib.Inference.MetropolisHastings import mh_sample
 from LOTlib.Miscellaneous import *
-from LOTlib.Lexicon import *
+from LOTlib.Hypotheses.Lexicon import *
 from LOTlib.DataAndObjects import *
-from LOTlib.Hypothesis import *
+from LOTlib.Hypotheses import *
 from LOTlib.Memoization import *
 from LOTlib.FunctionNode import FunctionNode
 from LOTlib.FiniteBestSet import FiniteBestSet
@@ -79,7 +79,7 @@ def generate_data(data_size):
 	
 	return data
 
-@BoundedMemoize(N=10000)
+#@BoundedMemoize(N=10000)
 def my_gricean_weight(h):
 	"""
 	Takes a hypothesis and its function and returns the weight under a gricean setup, where the production probability is proportional to 

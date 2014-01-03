@@ -43,7 +43,7 @@ def run(*args):
 	initial_hyp = GaussianLOTHypothesis(G)
 
 	# populate the finite sample by running the sampler for this many steps
-	for x in LOTlib.MetropolisHastings.mh_sample(initial_hyp, data, STEPS, skip=SKIP):
+	for x in mh_sample(initial_hyp, data, STEPS, skip=SKIP):
 		fs.push(x, x.lp)
 		print x.lp, x.prior, x.likelihood, q(x)
 	

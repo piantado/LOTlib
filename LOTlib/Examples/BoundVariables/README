@@ -1,9 +1,0 @@
-
-
-These contain examples for doing inference over lambda expressions, with bound variables.
-
-Please note: These have not been well-debugged yet. 
-
-FOL, SchemeGenerate just generate from a PCFG. 
-
-SchemeFunctionLearn learns a simple list function
