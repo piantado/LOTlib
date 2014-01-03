@@ -86,8 +86,9 @@ class SimpleLexicon(LOTHypothesis):
 	
 	def propose(self):
 		new = copy(self)
+		
 		w = weighted_sample(self.lex.keys()) # the word to change
-		p,fb = self.lex[w].value.propose()
+		p,fb = self.lex[w].propose()
 		
 		new.set_word(w, p)
 		
