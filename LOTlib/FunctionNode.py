@@ -121,7 +121,17 @@ class FunctionNode(object):
 				return str(self.name)+'()' # simple call
 			else:
 				return str(self.name)+'('+', '.join(map(str,self.args))+')'
-			
+	
+	def quickstring(self):
+		"""
+			A (maybe??) faster string function used for hashing -- doesn't handle any details and is meant
+			to just be quick
+		"""
+		if self.args is None:
+			return str(self.name) # simple call
+		else:
+			return str(self.name)+' '+','.join(map(str,self.args)) 
+		
 	def fullprint(self, d=0):
 		""" A handy printer for debugging"""
 		tabstr = "  .  " * d
@@ -145,7 +155,22 @@ class FunctionNode(object):
 	
 	## TODO: overwrite these with something faster
 	# hash trees. This just converts to string -- maybe too slow?
-	def __hash__(self): return hash(str(self))
+	def __hash__(self):
+		
+		# An attempt to speed things up -- not so great!
+		#hsh = self.ruleid
+		#if self.args is not None:
+			#for a in filter(isFunctionNode, self.args):
+				#hsh = hsh ^ hash(a)
+		#return hsh
+		
+		# normal string hash -- faster?
+		return hash(str(self))
+		
+		# use a quicker string hash		
+		#return hash(self.quickstring())
+		
+		
 	def __cmp__(self, x): return cmp(str(self), str(x))
 	
 	def __len__(self): return len([a for a in self])

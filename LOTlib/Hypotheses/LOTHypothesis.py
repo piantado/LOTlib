@@ -39,16 +39,22 @@ class LOTHypothesis(FunctionHypothesis):
 		# Since this is inherited, call the constructor on everything but grammar
 		thecopy = type(self)(self.grammar) # call my own constructor with grammar
 		
+		thecopy.proposal_function = self.proposal_function
+		
 		# And then deepcopy evrything but grammar
 		for k in self.__dict__.keys():
-			#print "Copying ", k
-			if k is not 'grammar': thecopy.__dict__[k] = deepcopy(self.__dict__[k])
+			if k is 'grammar': pass
+			if k is 'proposal_function': pass
+			else:
+				thecopy.__dict__[k] = deepcopy(self.__dict__[k])
 			
 		return thecopy
 
 			
 	def propose(self): 
-		return self.proposal_function(self)
+		p,fb = self.proposal_function(self)
+		p.lp = "<must compute posterior!>" # Catch use of proposal.lp, without posteriors!
+		return [p,fb]
 	
 	def compute_prior(self): 
 		"""

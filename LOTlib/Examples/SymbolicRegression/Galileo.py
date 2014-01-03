@@ -18,7 +18,7 @@ data = [
 	]
 	
 CHAINS = 10
-STEPS = 1000000
+STEPS = 10000000
 SKIP = 0
 PRIOR_TEMPERATURE=1.0
 
@@ -35,9 +35,9 @@ def run(*args):
 	initial_hyp = GaussianLOTHypothesis(G, prior_temperature=PRIOR_TEMPERATURE)
 	#print initial_hyp
 	# populate the finite sample by running the sampler for this many steps
-	for x in LOTlib.MetropolisHastings.mh_sample(initial_hyp, data, STEPS, skip=SKIP):
+	for x in LOTlib.MetropolisHastings.mh_sample(initial_hyp, data, STEPS, skip=SKIP, noisy_memoize=10000):
 		pq.push(x, x.lp)
-		#print x.lp, x.prior, x.likelihood, q(x)
+		print x.lp, x.prior, x.likelihood, q(x)
 	
 	return pq
 
