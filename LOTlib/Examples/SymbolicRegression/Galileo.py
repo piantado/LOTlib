@@ -35,7 +35,7 @@ def run(*args):
 	h0 = GaussianLOTHypothesis(G, prior_temperature=PRIOR_TEMPERATURE)
 	#print initial_hyp
 	# populate the finite sample by running the sampler for this many steps
-	for x in mh_sample(h0, data, STEPS, skip=SKIP, noisy_memoize=100):
+	for x in mh_sample(h0, data, STEPS, skip=SKIP):
 		pq.push(x, x.lp)
 		print x.lp, x.prior, x.likelihood, q(x)
 	

@@ -9,7 +9,9 @@
 
 from LOTlib.Examples.Number.Shared import *
 from LOTlib.Testing.Evaluation import evaluate_sampler
-from LOTlib.sandbox.ProbTaboo import ptaboo_search
+from LOTlib.Inference.MetropolisHastings import mh_sample
+from LOTlib.Inference.ProbTaboo import ptaboo_search
+from LOTlib.Inference.IncreaseTemperatureMH import increase_temperature_mh_sample
 from SimpleMPI.MPI_map import MPI_map
 
 from copy import copy
@@ -20,7 +22,7 @@ sys.path.append("/home/piantado/Desktop/mit/Libraries/LOTlib/LOTlib/Examples/Num
 
 DATA_SIZE = 400
 
-TEST_SAMPLES = 10000
+TEST_SAMPLES = 50000
 RUNS = 1000
 
 TARGET_FILE = "/home/piantado/Desktop/mit/Libraries/LOTlib/LOTlib/Examples/Number/mpirun-Dec2013.pkl" # load a small file. The large one is only necessary if we want the "correct" target likelihood and top N numbers; if we just look at Z we don't need it!
@@ -47,18 +49,34 @@ def run_one(r):
 
 	sampler = ptaboo_search( copy(h0), data, steps=TEST_SAMPLES, skip=0, seen_penalty=100.0)
 	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="PtabooSearch-100.0\t"+str(r), trace=False, outfile=outfile )
+
+
+
+	sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=1.01)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="IncreaseTemperature-1.01\t"+str(r), trace=False, outfile=outfile)
+
+	sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=1.1)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="IncreaseTemperature-1.1\t"+str(r), trace=False, outfile=outfile)
 	
-	sampler = LOTlib.MetropolisHastings.mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0)
+	sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=1.5)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="IncreaseTemperature-1.5\t"+str(r), trace=False, outfile=outfile)
+	
+	sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=2.0)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="IncreaseTemperature-2.0\t"+str(r), trace=False, outfile=outfile)
+
+	
+	
+	sampler = mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0)
 	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="BasicSampler\t"+str(r), trace=False, outfile=outfile)
 	
-	sampler = LOTlib.MetropolisHastings.mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, temperature=1.01)
-	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="BasicSamplerT1.01\t"+str(r), trace=False, outfile=outfile )
+	sampler = mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, temperature=1.01)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="BasicSampler-T1.01\t"+str(r), trace=False, outfile=outfile )
 	
-	sampler = LOTlib.MetropolisHastings.mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, temperature=1.05)
-	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="BasicSamplerT1.05\t"+str(r), trace=False, outfile=outfile )
+	sampler = mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, temperature=1.05)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="BasicSampler-T1.05\t"+str(r), trace=False, outfile=outfile )
 	
-	sampler = LOTlib.MetropolisHastings.mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, temperature=1.1)
-	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="BasicSamplerT1.1\t"+str(r), trace=False, outfile=outfile )
+	sampler = mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, temperature=1.1)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="BasicSampler-T1.1\t"+str(r), trace=False, outfile=outfile )
 	
 
 # Actually run, in parallel!
@@ -80,21 +98,7 @@ MPI_map( run_one, range(RUNS) )
 	
 	#sampler = Number_enumerative_search(data, PRIOR_SCORE_TEMPERATURE=1.0, PRIOR_LIKELIHOOD_TEMPERATURE=5.0, N=10000, breakout=1000, yield_immediate=False)
 	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, LLS, prefix="EnumerativeSearch-LL5\t"+str(r) )
-	
-	
-	#sampler = ptaboo_search( copy(h0), data, steps=TEST_SAMPLES, skip=0, seen_penalty=1.0)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="PtabooSearch-1.0\t"+str(r), trace=False )
-
-	#sampler = ptaboo_search( copy(h0), data, steps=TEST_SAMPLES, skip=0, seen_penalty=10.0)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="PtabooSearch-10.0\t"+str(r), trace=False )
-
-	#sampler = ptaboo_search( copy(h0), data, steps=TEST_SAMPLES, skip=0, seen_penalty=100.0)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="PtabooSearch-100.0\t"+str(r), trace=False )
-	
-	#sampler = LOTlib.MetropolisHastings.mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="BasicSampler\t"+str(r), trace=False )
-	
-	
+		
 
 	#sampler = LOTlib.MetropolisHastings.mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, temperature=1.01)
 	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="BasicSamplerT1.01\t"+str(r), trace=False )

@@ -6,6 +6,7 @@
 import LOTlib
 from LOTlib.Grammar import Grammar
 from LOTlib.BasicPrimitives import *
+import LOTlib.Inference.ParallelTempering
 import LOTlib.Inference.MetropolisHastings
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Miscellaneous import *

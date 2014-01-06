@@ -14,7 +14,7 @@ from scipy.stats import chisquare
 import numpy
 from time import time
 
-def evaluate_sampler(target, sampler, print_every=1000, steps=1000000, chains=1, prefix="", trace=False, outfile=None, assertion=False):
+def evaluate_sampler(target, sampler, print_every=250, steps=1000000, chains=1, prefix="", trace=False, outfile=None, assertion=False):
 	"""
 		target - a hash from hypotheses to lps. The keys of this are the only things we 
 		sampler - a sampler we wish to evaluate_sampler

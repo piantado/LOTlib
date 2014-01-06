@@ -11,7 +11,6 @@ from LOTlib.Miscellaneous import *
 from LOTlib.DataAndObjects import *
 from LOTlib.Hypotheses.GaussianLOTHypothesis import GaussianLOTHypothesis
 
-
 #from SimpleMPI import MPI_map
 
 from random import randint
