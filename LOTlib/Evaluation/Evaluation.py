@@ -14,7 +14,7 @@ from scipy.stats import chisquare
 import numpy
 from time import time
 
-def evaluate_sampler(target, sampler, print_every=250, steps=1000000, chains=1, prefix="", trace=False, outfile=None, assertion=False):
+def evaluate_sampler(target, sampler, print_every=250, steps=1000000, chains=1, prefix="", trace=False, output=sys.stdout):
 	"""
 		target - a hash from hypotheses to lps. The keys of this are the only things we 
 		sampler - a sampler we wish to evaluate_sampler
@@ -46,10 +46,6 @@ def evaluate_sampler(target, sampler, print_every=250, steps=1000000, chains=1, 
 	hypotheses = target.keys()
 	tZ = logsumexp(target.values()) # get the normalizer
 	
-	# If we write to an output (in parallel)
-	if outfile is not None: 
-		bo = ParallelBufferedIO(outfile)
-	
 	for chain_i in xrange(chains):
 		samples = defaultdict(int) # keep track of samples
 		
@@ -59,8 +55,7 @@ def evaluate_sampler(target, sampler, print_every=250, steps=1000000, chains=1, 
 			
 			samples[s] += 1
 			
-			if trace: 
-				print "#", n, s in target, s.lp, s
+			if trace: print "#", n, s in target, s.lp, s
 			
 			if (n%print_every)==0 and n>0:
 				
@@ -89,18 +84,17 @@ def evaluate_sampler(target, sampler, print_every=250, steps=1000000, chains=1, 
 				pm_found = logsumexp([target[x] for x in hypotheses if samples[x] > 0])
 								
 				# compute chi squared counts
-				fobs = numpy.array( [samples[h] for h in hypotheses] )
-				fexp = numpy.array( [ numpy.exp(target[h]-tZ) * sm for h in hypotheses])
-				chi,p = chisquare(fobs, f_exp=fexp)  ## TODO: check ddof
+				#fobs = numpy.array( [samples[h] for h in hypotheses] )
+				#fexp = numpy.array( [ numpy.exp(target[h]-tZ) * sm for h in hypotheses])
+				#chi,p = chisquare(fobs, f_exp=fexp)  ## TODO: check ddof
 				
-				if outfile is None:
-					print prefix, chain_i, n, r3(KL), r3(percent_found), r4(exp(pm_found-tZ)), len(hypotheses), len(samples.keys()), r4(tZ), sm, sm_out, r3(chi), r3(p)
-				else:
-					bo.write(prefix, chain_i, n, r3(KL), r3(percent_found), r4(exp(pm_found-tZ)), len(hypotheses), len(samples.keys()), r4(tZ), sm, sm_out, r3(chi), r3(p))
-		
+				output.write(prefix, chain_i, n, time()-startt, r3(KL), r3(percent_found), r4(exp(pm_found-tZ)), len(hypotheses), len(samples.keys()), r4(tZ))
+					#, sm, sm_out, r3(chi), r3(p))
+			
 			if n > steps: break
 		
-		if outfile is not None: bo.close()
+		output.close()
+
 		return 
 
 ## this take sa dictionary d

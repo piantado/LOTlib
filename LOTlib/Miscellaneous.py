@@ -6,7 +6,15 @@
 	Steve Piantadosi - Sept 2011
 """
 
-from scipy.special import gammaln
+
+# Special handilng for numpypy that doesn't use gammaln, assertion error otherwise
+try: 
+	from scipy.special import gammaln
+except ImportError: 
+	# Die if we try to use this in numpypy
+	def gammaln(*args, **kwargs): assert False
+
+
 import numpy as np
 from random import random, sample, randint
 import itertools
@@ -221,8 +229,17 @@ def flatten2str(expr, sep=' '):
 
 
 ## This is just a wrapper to avoid logsumexp([-inf, -inf, -inf...]) warnings
-try:			from scipy.misc import logsumexp as scipy_logsumexp
-except ImportError:	from scipy.maxentropy import logsumexp as scipy_logsumexp
+try:			
+	from scipy.misc import logsumexp as scipy_logsumexp
+except ImportError:	
+	try:
+		from scipy.maxentropy import logsumexp as scipy_logsumexp
+	except ImportError:
+		# fine, our own version, no numpy
+		def scipy_logsumexp(v):
+			m = max(v)
+			return m+log(sum(map( lambda x: exp(x-m), v)))
+			
 def logsumexp(v):
 	"""
 		Logsumexp - our own version wraps the scipy to handle -infs

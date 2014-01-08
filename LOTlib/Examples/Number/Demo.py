@@ -10,7 +10,8 @@ from Shared import *
 LARGE_DATA_SIZE = 10000 # this is what we compute the average LL on
 DATA_SIZE = 500
 TRACE = True
-STEPS = 1000000 #10000000
+STEPS = 10000 #10000000
+SKIP = 100
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
 # Generate some data
@@ -27,8 +28,8 @@ from LOTlib.Memoization.Memoizer import BoundedMemoize
 
 # A bunch of different MCMC algorithms to try. mh_sample is from the Rational Rules paper and generally works very well. 
 #for h in  LOTlib.Inference.MetropolisHasting.tempered_transitions_sample(initial_hyp, data, 500000, skip=0, temperatures=[1.0, 1.1, 1.2, 1.3, 1.4, 1.5]):		
-for h in  LOTlib.Inference.ParallelTempering.parallel_tempering_sample(initial_hyp, data, 1000, yield_all=False):
-#for h in LOTlib.Inference.MetropolisHastings.mh_sample(initial_hyp, data, STEPS, skip=0, memoizer=BoundedMemoize):
+#for h in  LOTlib.Inference.ParallelTempering.parallel_tempering_sample(initial_hyp, data, 1000, yield_all=False):
+for h in LOTlib.Inference.MetropolisHastings.mh_sample(initial_hyp, data, STEPS, skip=SKIP, memoizer=BoundedMemoize):
 	if TRACE: 
 		print q(get_knower_pattern(h)), h.compute_prior(), h.compute_likelihood(data), q(h)
 		

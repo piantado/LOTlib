@@ -17,7 +17,7 @@ from random import randint
 ALPHA = 0.75 # the probability of uttering something true
 GAMMA = -30.0 # the log probability penalty for recursion
 LG_1MGAMMA = log(1.0-exp(GAMMA)) # TODO: Make numerically better
-USE_RR_PRIOR = True # Use the Rational Rules prior? If false, we just use log probability under the PCFG.
+USE_RR_PRIOR = False # Use the Rational Rules prior? If false, we just use log probability under the PCFG. NOTE: Using it is not supported under pypy
 
 WORDS = ['one_', 'two_', 'three_', 'four_', 'five_', 'six_', 'seven_', 'eight_', 'nine_', 'ten_']
 

@@ -810,6 +810,7 @@ word_to_number = dict() # map a word like 'four_' to its number, 4
 for i in range(len(word_list)):
 	word_to_number[word_list[i]] = i+1
 word_to_number['ten_'] = 'A' # so everything is one character
+word_to_number['undef'] = 'U'
 
 prev_hash[None] = None
 

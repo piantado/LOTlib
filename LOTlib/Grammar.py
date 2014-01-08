@@ -3,9 +3,9 @@
 	TODO: Allow PCFG to take another tree of FunctionNodes in generation. It then recurses and only genreates the leaves
 		TODO: When we generate, we MUST have a START->EXPR expansion, otherwise the top level doesn't get searched
 """
-import numpy as np
-#try:                import numpy as np
-#except ImportError: import numpypy as np
+#import numpy as np
+try:                import numpy as np
+except ImportError: import numpypy as np
 	
 from copy import copy, deepcopy
 from collections import defaultdict
@@ -359,7 +359,8 @@ class Grammar:
 		lp = 0.0
 		
 		for c in self.get_rule_counts(t):
-			theprior = np.repeat(alpha,len(c))
+			theprior = np.array( [alpha] * len(c), dtype=float )
+			#theprior = np.repeat(alpha,len(c)) # Not implemented in numpypy
 			lp += (beta(c+theprior) - beta(theprior))
 		return lp
 	

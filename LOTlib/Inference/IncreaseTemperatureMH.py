@@ -10,7 +10,6 @@ from random import random
 from math import log, exp, isnan
 
 import LOTlib
-from LOTlib.Memoization.NoisyBoundedMemoize import NoisyBoundedMemoize
 from LOTlib.Miscellaneous import *
 from LOTlib.FiniteBestSet import FiniteBestSet
 from MHShared import MH_acceptance
