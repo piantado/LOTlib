@@ -14,7 +14,7 @@ from scipy.stats import chisquare
 import numpy
 from time import time
 
-def evaluate_sampler(target, sampler, print_every=250, steps=1000000, chains=1, prefix="", trace=False, output=sys.stdout):
+def evaluate_sampler(target, sampler, print_every=250, steps=1000000, chains=1, name="", trace=False, output=sys.stdout):
 	"""
 		target - a hash from hypotheses to lps. The keys of this are the only things we 
 		sampler - a sampler we wish to evaluate_sampler
@@ -47,6 +47,7 @@ def evaluate_sampler(target, sampler, print_every=250, steps=1000000, chains=1, 
 	tZ = logsumexp(target.values()) # get the normalizer
 	
 	for chain_i in xrange(chains):
+		if LOTlib.SIG_INTERRUPTED: break
 		samples = defaultdict(int) # keep track of samples
 		
 		startt = time()
@@ -88,14 +89,10 @@ def evaluate_sampler(target, sampler, print_every=250, steps=1000000, chains=1, 
 				#fexp = numpy.array( [ numpy.exp(target[h]-tZ) * sm for h in hypotheses])
 				#chi,p = chisquare(fobs, f_exp=fexp)  ## TODO: check ddof
 				
-				output.write(prefix, chain_i, n, time()-startt, r3(KL), r3(percent_found), r4(exp(pm_found-tZ)), len(hypotheses), len(samples.keys()), r4(tZ))
-					#, sm, sm_out, r3(chi), r3(p))
+				output.write('\t'.join(map(str, [name, chain_i, n, time()-startt, r3(KL), r3(percent_found), r4(exp(pm_found-tZ)), len(hypotheses), len(samples.keys()), r4(tZ)]  )) + '\n')
 			
 			if n > steps: break
-		
-		output.close()
-
-		return 
+	
 
 ## this take sa dictionary d
 ## the keys of d must contain "lp", and d must contain counts

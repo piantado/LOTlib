@@ -23,7 +23,7 @@ class LOTProposal(object):
 		# so this manages making LOTHypotheses (or the relevant subclass), and proposal subclasses
 		# can just manage trees
 		p = copy(h)
-		newt, fb = self.propose_tree(h.value, h.grammar)
+		newt, fb = self.propose_tree(h.value)
 		p.set_value(newt)
 		return [p, fb]
 		
@@ -33,17 +33,23 @@ class RegenerationProposal(LOTProposal):
 		The default in LOTHypothesis
 	"""
 	
-	def propose_tree(self, t, grammar):
+	def propose_tree(self, t):
 		newt = copy(t)
 		
 		n, rp, tZ = None, None, None
-		for ni, di, resample_p, Z in grammar.sample_node_via_iterate(newt):
+		for ni, di, resample_p, Z in self.grammar.sample_node_via_iterate(newt, do_bv=True):
 			n = ni
-			n.resample(grammar, d=di)
+			
+			# re-generate my type from the grammar, and change this functionode
+			if self.grammar.is_nonterminal(n.returntype):
+				n.setto(self.grammar.generate(n.returntype, d=di))
+			else: pass # do nothing if we aren't returnable from the grammar
+			
 			tZ = Z
+			
 			rp = resample_p
 		
-		newZ = grammar.resample_normalizer(newt)
+		newZ = self.grammar.resample_normalizer(newt)
 		
 		#print "PROPOSED ", newt		
 		f = (log(rp) - log(tZ))   + newt.log_probability()
@@ -71,11 +77,11 @@ class InsertDeleteProposal(LOTProposal):
 		# Must save this because we mix in RegenerationProposals
 		self.my_regeneration_proposal = RegenerationProposal(grammar)
 		
-	def propose_tree(self, t, grammar):
+	def propose_tree(self, t):
 		
 		# Default regeneration proposal with some probability
 		if random() >= self.insert_delete_probability: 
-			return self.my_regeneration_proposal.propose_tree(t, grammar)
+			return self.my_regeneration_proposal.propose_tree(t, self.grammar)
 		
 		newt = copy(t)
 		fb = 0.0 # the forward/backward prob we return
@@ -84,7 +90,7 @@ class InsertDeleteProposal(LOTProposal):
 		if random() < 0.5: # So we insert
 			
 			# first sample a node (through sample_node_via_iterate, which handles everything well)
-			for ni, di, resample_p, resample_Z in grammar.sample_node_via_iterate(newt):
+			for ni, di, resample_p, resample_Z in self.grammar.sample_node_via_iterate(newt):
 				if ni.args is None: continue # Can't deal with these TODO: CHECK THIS?
 				
 				# Since it's an insert, see if there is a (replicating) rule that expands
@@ -97,7 +103,7 @@ class InsertDeleteProposal(LOTProposal):
 				# choose a replicating rule; NOTE: this is done uniformly in this step, for simplicity
 				r = sample1(replicating_rules)
 				
-				lp = r.lp - logsumexp([x.lp for x in grammar.rules[ni.returntype]]) # this is the probability overall in the grammar, not my prob of sampling
+				lp = r.lp - logsumexp([x.lp for x in self.grammar.rules[ni.returntype]]) # this is the probability overall in the grammar, not my prob of sampling
 				
 				# Now take the rule and expand the children:
 				
@@ -111,10 +117,10 @@ class InsertDeleteProposal(LOTProposal):
 				for x in r.to:
 					if x == ni.returntype:
 						if replace_i == 0: args.append( copy(ni) ) # if it's the one we replace into
-						else:              args.append( grammar.generate(x, d=di+1) ) #else generate like normalized
+						else:              args.append( self.grammar.generate(x, d=di+1) ) #else generate like normalized
 						replace_i -= 1
 					else:              
-						args.append( grammar.generate(x, d=di+1) ) #else generate like normal	
+						args.append( self.grammar.generate(x, d=di+1) ) #else generate like normal	
 							
 				# Now we must count the multiple ways we could go forward or back
 				after_same_children = [ x for x in args if x==ni] # how many are the same after?
@@ -128,7 +134,7 @@ class InsertDeleteProposal(LOTProposal):
 				
 				new_lp_below = sum(map(lambda z: z.log_probability(), filter(isFunctionNode, args))) - ni.log_probability()
 				
-				newZ = grammar.resample_normalizer(newt)
+				newZ = self.grammar.resample_normalizer(newt)
 				# To sample forward: choose the node ni, choose the replicating rule, choose which "to" to expand (we could have put it on any of the replicating rules that are identical), and genreate the rest of the tree
 				f = (log(resample_p) - log(resample_Z)) + -log(len(replicating_rules)) + (log(len(after_same_children))-log(nrhs)) + new_lp_below
 				# To go backwards, choose the inserted rule, and any of the identical children, out of all replicators
@@ -136,7 +142,7 @@ class InsertDeleteProposal(LOTProposal):
 				fb = f-b
 				
 		else: # A delete move!
-			for ni, di, resample_p, resample_Z in grammar.sample_node_via_iterate(newt):
+			for ni, di, resample_p, resample_Z in self.grammar.sample_node_via_iterate(newt):
 				if ni.name == 'lambda': continue # can't do anything
 				if ni.args is None: continue # Can't deal with these TODO: CHECK THIS?
 				
@@ -147,7 +153,7 @@ class InsertDeleteProposal(LOTProposal):
 				if nrk == 0: continue # if no replicating rules here
 				
 				## We need to compute a few things for the backwards probability
-				replicating_rules = filter(lambda x: (x.to is not None) and any([a==ni.returntype for a in x.to]), grammar.rules[ni.returntype])
+				replicating_rules = filter(lambda x: (x.to is not None) and any([a==ni.returntype for a in x.to]), self.grammar.rules[ni.returntype])
 				if len(replicating_rules) == 0: continue
 				
 				i = sample1(replicating_kid_indices) # who to promote; NOTE: not done via any weighting
@@ -166,7 +172,7 @@ class InsertDeleteProposal(LOTProposal):
 				
 			if sampled:
 				
-				newZ = grammar.resample_normalizer(newt)
+				newZ = self.grammar.resample_normalizer(newt)
 				# To go forward, choose the node, and then from all equivalent children
 				f = (log(resample_p) - log(resample_Z)) + (log(len(before_same_children)) - log(nrk))
 				# To go back, choose the node, choose the replicating rule, choose where to put it, and generate the rest of the tree

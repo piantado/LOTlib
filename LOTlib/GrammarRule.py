@@ -9,7 +9,7 @@ from math import log
 from LOTlib.Miscellaneous import assert_or_die
 
 class GrammarRule:
-	def __init__(self, nt, name, to, rid, p=1.0, resample_p=1.0, bv_name=None, bv_args=None):
+	def __init__(self, nt, name, to, rid, p=1.0, resample_p=1.0, bv_type=None, bv_args=None):
 		"""	
 			nt - the nonterminal
 			name - the name of this function
@@ -17,7 +17,7 @@ class GrammarRule:
 			rid - the rule id number
 			p - unnormalized probability of expansion
 			resample_p - in resampling, what is the probability of choosing this node?		
-			bv_name - what bound variable was introduced
+			bv_type - what bound variable was introduced
 			bv_args - what are the args when we use a bv (None is terminals, else a type signature)
 			
 			A rule where "to" is a nonempty list is a real expansion:
@@ -38,7 +38,7 @@ class GrammarRule:
 		
 		
 	def __repr__(self):
-		return str(self.nt) + " -> " + self.name + (str(self.to) if self.to is not None else '') + "\t\t[p=" +str(self.p)+ "; resample_p=" + str(self.resample_p) +"]"
+		return str(self.nt) + " -> " + self.name + (str(self.to) if self.to is not None else '') + "\t\t[p=" +str(self.p)+ "; resample_p=" + str(self.resample_p) +"]" + "<BV:"+ str(self.bv_type)+";"+str(self.bv_args)+">"
 
 	def __eq__(self, other): return ( self.rid == other.rid and self.nt == other.nt)
 	def __ne__(self, other): return not self.__eq__(other)

@@ -76,7 +76,7 @@ class Grammar:
 		return self.rules.keys()
 		
 	# these take probs instead of log probs, for simplicity
-	def add_rule(self, nt, name, to, p, resample_p=1.0, bv_name=None, bv_args=None, rid=None):
+	def add_rule(self, nt, name, to, p, resample_p=1.0, bv_type=None, bv_args=None, rid=None):
 		"""
 			Adds a rule, and returns the added rule (for use by add_bv)
 		"""
@@ -89,7 +89,7 @@ class Grammar:
 			self.bv_count += 1
 			
 		# Create the rule and add it
-		newrule = GrammarRule(nt,name,to, p=p, resample_p=resample_p, bv_name=bv_name, bv_args=bv_args, rid=rid)
+		newrule = GrammarRule(nt,name,to, p=p, resample_p=resample_p, bv_type=bv_type, bv_args=bv_args, rid=rid)
 		self.rules[nt].append(newrule)
 		
 		return newrule
@@ -141,12 +141,15 @@ class Grammar:
 		elif self.is_nonterminal(x):
 			# if we generate a nonterminal, then sample a GrammarRule, convert it to a FunctionNode
 			# via nt->returntype, name->name, to->args, 
-			# And recurse.
+			# And recurse
 			
 			r, lp = weighted_sample(self.rules[x], return_probability=True, log=True)
+			#print "SAMPLED:", r
 			
-			if r.bv_name is not None: # adding a rule
-				added = self.add_bv_rule(r.bv_name, r.bv_args, d)
+			if r.bv_type is not None: # adding a rule
+				added = self.add_bv_rule(r.bv_type, r.bv_args, d)
+				#print "ADDING", added
+				
 				
 			# expand the "to" part of our rule
 			if r is None:
@@ -154,12 +157,16 @@ class Grammar:
 			else:
 				args = self.generate(r.to, d=d+1)
 				
-			if r.bv_name is not None:
-				self.remove_rule(added)
+			#print "GENERATED ", args
 			
+			if r.bv_type is not None:
+				#print "REMOVING ", added
+				self.remove_rule(added)
+				
 			# create the new node
-			if r.bv_name is not None:
-				return FunctionNode(returntype=r.nt, name=r.name, args=args, lp=lp, bv_name=added.name, bv_args=r.bv_args, ruleid=r.rid )
+			if r.bv_type is not None:
+				## UGH, bv_type=r.bv_type -- here bv_type is really bv_returntype. THIS SHOULD BE FIXED
+				return FunctionNode(returntype=r.nt, name=r.name, args=args, lp=lp, bv_type=r.bv_type, bv_name=added.name, bv_args=r.bv_args, ruleid=r.rid )
 			else:
 				return FunctionNode(returntype=r.nt, name=r.name, args=args, lp=lp, ruleid=r.rid )
 			return fn
@@ -194,8 +201,11 @@ class Grammar:
 		if isFunctionNode(t):
 			yield (t,d) if yield_depth else t
 			
-			if do_bv and t.bv_name is not None:
-				added = self.add_bv_rule( t.bv_name, t.bv_args, d)
+			#print "iterate subnode: ", t.name, t.bv_type, t
+			
+			if do_bv and t.bv_type is not None:
+				added = self.add_bv_rule( t.bv_type, t.bv_args, d)
+				#print "ADDING RULE", added
 			
 			if t.args is not None:
 				for a in t.args:
@@ -203,7 +213,7 @@ class Grammar:
 						if predicate(g): yield g
 			
 			# And remove them
-			if do_bv and (t.bv_name is not None):
+			if do_bv and (t.bv_type is not None):
 				self.remove_rule(added)
 		
 	def resample_normalizer(self, t, predicate=lambdaTrue):
@@ -317,13 +327,13 @@ class Grammar:
 			if depth >= 0:
 				# yield each of the rules that lead to terminals
 				for r in terminals:
-					n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), lp=(r.lp - Z), bv_name=r.bv_name, bv_args=r.bv_args, ruleid=r.rid )
+					n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), lp=(r.lp - Z), bv_type=r.bv_type, bv_args=r.bv_args, ruleid=r.rid )
 					yield n
 			
 			if depth > 0:
 				# and expand each nonterminals
 				for r in nonterminals:
-					n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), lp=(r.lp - Z), bv_name=r.bv_name, bv_args=r.bv_args, ruleid=r.rid )
+					n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), lp=(r.lp - Z), bv_type=r.bv_type, bv_args=r.bv_args, ruleid=r.rid )
 					for q in self.increment_tree(n, depth-1): yield q
 		else:   raise StopIteration
 			
@@ -525,7 +535,7 @@ if __name__ == "__main__":
 	## # # # # # # # # # # # # # # # 
 
 	G.add_rule('EXPR', 'apply', ['FUNCTION', 'EXPR'], 5.0)
-	G.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0, bv_name='EXPR', bv_args=None) # bvtype means we introduce a bound variable below
+	G.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0, bv_type='EXPR', bv_args=None) # bvtype means we introduce a bound variable below
 	
 	print "Testing generate (lambda)" 
 	TEST_GEN = dict()

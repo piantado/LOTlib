@@ -14,7 +14,7 @@ from LOTlib.Miscellaneous import *
 from LOTlib.FiniteBestSet import FiniteBestSet
 from MHShared import MH_acceptance
 
-def increase_temperature_mh_sample(current_sample, data, steps=float("inf"), proposer=None, skip=0, prior_temperature=1.0, ll_temperature=1.0, temperature=1.0, acceptance_temperature=1.0, trace=False, stats=None, increase_amount=1.1 ):
+def increase_temperature_mh_sample(current_sample, data, steps=float("inf"), proposer=None, skip=0, prior_temperature=1.0, ll_temperature=1.0, temperature=1.0, acceptance_temperature=1.0, trace=False, stats=None, increase_amount=1.1 , memoizer=None):
 	"""
 		current_sample - the starting hypothesis
 		data - the conditioning data

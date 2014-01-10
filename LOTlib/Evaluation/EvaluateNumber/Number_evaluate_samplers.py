@@ -25,14 +25,17 @@ sys.path.append("/home/piantado/Desktop/mit/Libraries/LOTlib/LOTlib/Examples/Num
 
 DATA_SIZE = 300
 
-TEST_SAMPLES = 1000 # 10000
+TEST_SAMPLES = 10000 # 10000
 RUNS = 1000
 
 TARGET_FILE = "/home/piantado/Desktop/mit/Libraries/LOTlib/LOTlib/Examples/Number/mpirun-Dec2013.pkl" # load a small file. The large one is only necessary if we want the "correct" target likelihood and top N numbers; if we just look at Z we don't need it!
 DATA_FILE = "data/evaluation-data.pkl"
+output = ParallelBufferedIO("evaluation.txt") # Use buffered output, and do it before we load the models (so that each  ParallelBufferedIO subprocess doesn't load)
 
-# Use buffered output, and do it before we load the models (so that each  ParallelBufferedIO subprocess doesn't load)
-output = ParallelBufferedIO("evaluation.txt")
+# FOR DEBUGGING:
+#TARGET_FILE = "tmp-hypotheses.pkl"
+#DATA_FILE = "data/evaluation-data.pkl"
+#output = sys.stdout
 
 data   = pickle_load(DATA_FILE)
 
@@ -40,114 +43,75 @@ data   = pickle_load(DATA_FILE)
 # target here must be a dict from hypotheses to posteriors
 target = dict()
 for h in pickle_load(TARGET_FILE).get_all():
-	target[h] = sum(h.compute_posterior(data)) # add up the components returned by compute_posterior
+	sum(h.compute_posterior(data)) # add up the components returned by compute_posterior
+	
+	# Throw out any (if we changed max depth or anything)
+	if h.lp > -Infinity: target[h] = h.lp
 
 ## A wrapper function for MPI_map
 def run_one(r):
 	h0 = NumberExpression(G)
 	
+	#sampler = tempered_transitions_sample(copy(h0), data, TEST_SAMPLES, skip=0, temperatures=[1.0, 1.25, 1.5])
+	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="TemperedTransitions-1.5\t"+str(r), output=output )
 	
-	sampler = tempered_transitions_sample(copy(h0), data, TEST_SAMPLES, skip=0, temperatures=[1.0, 1.1, 1.2, 1.3, 1.4, 1.5])
-	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="TemperedTransitions-1.5\t"+str(r), output=output )
+	#sampler = tempered_transitions_sample(copy(h0), data, TEST_SAMPLES, skip=0, temperatures=[1.0, 1.05, 1.1])
+	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="TemperedTransitions-1.1\t"+str(r), output=output )
 	
-	sampler = tempered_transitions_sample(copy(h0), data, TEST_SAMPLES, skip=0, temperatures=[1.0, 1.02, 1.04, 1.06, 1.08, 1.1])
-	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="TemperedTransitions-1.1\t"+str(r), output=output )
-	
-	
-	
-	sampler = parallel_tempering_sample(copy(h0), data, TEST_SAMPLES, within_steps=10, temperatures=[1.0, 1.1, 1.2, 1.3, 1.4, 1.5], swaps=1)
-	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="ParallelTempring-1.5\t"+str(r), output=output )
-	
-	sampler = parallel_tempering_sample(copy(h0), data, TEST_SAMPLES, within_steps=10, temperatures=[1.0, 1.02, 1.04, 1.06, 1.08, 1.1], swaps=1)
-	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="ParallelTempring-1.1\t"+str(r), output=output )
+	#sampler = tempered_transitions_sample(copy(h0), data, TEST_SAMPLES, skip=0, temperatures=[1.0, 1.025, 1.05])
+	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="TemperedTransitions-1.05\t"+str(r), output=output )
 	
 	
 	
+	#sampler = parallel_tempering_sample(copy(h0), data, TEST_SAMPLES, within_steps=10, temperatures=[1.0, 1.25, 1.5], swaps=1)
+	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="ParallelTempering-1.5\t"+str(r), output=output )
 	
-	#sampler = ptaboo_search( copy(h0), data, steps=TEST_SAMPLES, skip=0, seen_penalty=1.0)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="PtabooSearch-1.0\t"+str(r), trace=False, output=output )
+	#sampler = parallel_tempering_sample(copy(h0), data, TEST_SAMPLES, within_steps=10, temperatures=[1.0, 1.05, 1.1], swaps=1)
+	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="ParallelTempering-1.1\t"+str(r), output=output )
+	
+	#sampler = parallel_tempering_sample(copy(h0), data, TEST_SAMPLES, within_steps=10, temperatures=[1.0, 1.025, 1.05], swaps=1)
+	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="ParallelTempering-1.05\t"+str(r), output=output )
+	
+	
 
-	#sampler = ptaboo_search( copy(h0), data, steps=TEST_SAMPLES, skip=0, seen_penalty=10.0)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="PtabooSearch-10.0\t"+str(r), trace=False, output=output )
+	sampler = ptaboo_search( copy(h0), data, steps=TEST_SAMPLES, skip=0, seen_penalty=1.0)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="PtabooSearch-1.0\t"+str(r), trace=False, output=output )
 
-	#sampler = ptaboo_search( copy(h0), data, steps=TEST_SAMPLES, skip=0, seen_penalty=100.0)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="PtabooSearch-100.0\t"+str(r), trace=False, output=output )
+	sampler = ptaboo_search( copy(h0), data, steps=TEST_SAMPLES, skip=0, seen_penalty=10.0)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="PtabooSearch-10.0\t"+str(r), trace=False, output=output )
+
+	sampler = ptaboo_search( copy(h0), data, steps=TEST_SAMPLES, skip=0, seen_penalty=100.0)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="PtabooSearch-100.0\t"+str(r), trace=False, output=output )
 
 
 
-	#sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=1.01)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="IncreaseTemperature-1.01\t"+str(r), trace=False, output=output)
+	sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=1.01)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="IncreaseTemperature-1.01\t"+str(r), trace=False, output=output)
 
-	#sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=1.1)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="IncreaseTemperature-1.1\t"+str(r), trace=False, output=output)
+	sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=1.1)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="IncreaseTemperature-1.1\t"+str(r), trace=False, output=output)
 	
-	#sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=1.5)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="IncreaseTemperature-1.5\t"+str(r), trace=False, output=output)
+	sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=1.5)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="IncreaseTemperature-1.5\t"+str(r), trace=False, output=output)
 	
-	#sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=2.0)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="IncreaseTemperature-2.0\t"+str(r), trace=False, output=output)
+	sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=2.0)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="IncreaseTemperature-2.0\t"+str(r), trace=False, output=output)
 
 	
 	
-	#sampler = mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="BasicSampler\t"+str(r), trace=False, output=output)
+	sampler = mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="BasicSampler\t"+str(r), trace=False, output=output)
 	
-	#sampler = mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, temperature=1.01)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="BasicSampler-T1.01\t"+str(r), trace=False, output=output)
+	sampler = mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, temperature=1.01)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="BasicSampler-T1.01\t"+str(r), trace=False, output=output)
 	
-	#sampler = mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, temperature=1.05)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="BasicSampler-T1.05\t"+str(r), trace=False, output=output )
+	sampler = mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, temperature=1.05)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="BasicSampler-T1.05\t"+str(r), trace=False, output=output )
 	
-	#sampler = mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, temperature=1.1)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="BasicSampler-T1.1\t"+str(r), trace=False, output=output )
+	sampler = mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, temperature=1.1)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="BasicSampler-T1.1\t"+str(r), trace=False, output=output )
 	
 
 # Actually run, in parallel!
 MPI_map( run_one, range(RUNS) ) 
 
-
-"""
-#print "# Starting runs"
-#for r in xrange(RUNS):
-	#if LOTlib.SIG_INTERRUPTED: break
-	
-	#h0 = NumberExpression(G)
-	
-	#sampler = Number_enumerative_search(data, PRIOR_SCORE_TEMPERATURE=1.0, PRIOR_LIKELIHOOD_TEMPERATURE=float("+inf"), N=10000, breakout=1000, yield_immediate=False)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="EnumerativeSearch-Prior\t"+str(r) )
-	
-	#sampler = Number_enumerative_search(data, PRIOR_SCORE_TEMPERATURE=1.0, PRIOR_LIKELIHOOD_TEMPERATURE=1.0, N=10000, breakout=1000, yield_immediate=False)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="EnumerativeSearch-Posterior\t"+str(r) )
-	
-	#sampler = Number_enumerative_search(data, PRIOR_SCORE_TEMPERATURE=1.0, PRIOR_LIKELIHOOD_TEMPERATURE=5.0, N=10000, breakout=1000, yield_immediate=False)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, LLS, prefix="EnumerativeSearch-LL5\t"+str(r) )
-		
-
-	#sampler = LOTlib.MetropolisHastings.mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, temperature=1.01)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="BasicSamplerT1.01\t"+str(r), trace=False )
-	
-	#sampler = LOTlib.MetropolisHastings.mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, temperature=1.05)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="BasicSamplerT1.05\t"+str(r), trace=False )
-	
-	#sampler = LOTlib.MetropolisHastings.mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, temperature=1.1)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="BasicSamplerT1.1\t"+str(r), trace=False )
-	
-	#sampler = LOTlib.MetropolisHastings.mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, temperature=1.5)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="BasicSamplerT1.5\t"+str(r), trace=False )
-	
-	#sampler = LOTlib.MetropolisHastings.tempered_transitions_sample(copy(h0), data, TEST_SAMPLES, skip=0, temperatures=[1.0, 1.1, 1.2, 1.3, 1.4, 1.5])
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="TemperedTransitions-1.5\t"+str(r) )
-	
-	#sampler = LOTlib.MetropolisHastings.tempered_transitions_sample(copy(h0), data, TEST_SAMPLES, skip=0, temperatures=[1.0, 1.2, 1.4, 1.6, 1.8, 2.0])
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="TemperedTransitions-2.0\t"+str(r) )
-	
-	#sampler = LOTlib.MetropolisHastings.mhgibbs_sample(copy(h0), data, TEST_SAMPLES, mh_steps=25, gibbs_steps=1)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="MHGibbs\t"+str(r) )
-	
-	#sampler = LOTlib.MetropolisHastings.parallel_tempering_sample(copy(h0), data, TEST_SAMPLES, within_steps=10, temperatures=(1.0, 1.05, 1.10), swaps=1)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="ParallelTempring-1-1.05-1.1\t"+str(r) )
-	
-	#sampler = LOTlib.MetropolisHastings.parallel_tempering_sample(copy(h0), data, TEST_SAMPLES, within_steps=10, temperatures=(1.0, 1.25, 1.5), swaps=1)
-	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, prefix="ParallelTempring-1-1.25-1.5\t"+str(r) )
-
-"""

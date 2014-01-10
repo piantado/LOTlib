@@ -1,32 +1,63 @@
 
 """
-	An example of generating first order logic expressions
+	An example of inference over first-order logical expressions.
+	Here, we take sets of objects and generate quantified descriptions
 """
 
 from LOTlib.Grammar import Grammar
+from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
-# Create a  grammar:
 G = Grammar()
+G.add_rule('START', '', ['QUANT'], 1.0)
 
-G.add_rule('BOOL', 'x', None, 2.0) # X is a terminal, so arguments=None
+# Very simple -- one allowed quantifier
+G.add_rule('QUANT', 'exists_', ['FUNCTION', 'SET'], 1.00)
+G.add_rule('QUANT', 'forall_', ['FUNCTION', 'SET'], 1.00) 
 
- # Each of these is a function, requiring some arguments of some type
+# The thing we are a function of
+G.add_rule('SET', 'S', None, 1.0)
+
+# And allow us to create a new kind of function
+G.add_rule('FUNCTION', 'lambda', ['BOOL'], 1.0, bv_type='OBJECT')
 G.add_rule('BOOL', 'and_', ['BOOL', 'BOOL'], 1.0)
 G.add_rule('BOOL', 'or_', ['BOOL', 'BOOL'], 1.0)
 G.add_rule('BOOL', 'not_', ['BOOL'], 1.0)
 
-G.add_rule('BOOL', 'exists_', ['FUNCTION', 'SET'], 0.50)
-G.add_rule('BOOL', 'forall_', ['FUNCTION', 'SET'], 0.50) 
+# non-terminal arguments get passed as normal python arguments
+G.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'red\''], 5.00) # --> is_color_(OBJECT, 'red') --> OBJECT.color == 'red'
+G.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'blue\''], 5.00) 
+G.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'green\''], 5.00) 
 
-G.add_rule('SET', 'S', None, 1.0)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Just generate from this grammar
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# And allow us to create a new kind of function
-G.add_rule('FUNCTION', 'lambda', ['BOOL'], 1.0, bv_name='BOOL', bv_args=None) # bvtype means we introduce a bound variable below
-G.BV_WEIGHT = 2.0 # When we introduce bound variables, they have this (relative) probability
+#for i in xrange(100):
+	#print G.generate()
 
-
-for i in xrange(1000):
-	x = G.generate('BOOL')
+# Or we can make them as hypotheses (functions of S):
+#for i in xrange(100):
+	#print LOTHypothesis(G, args=['S'])
 	
-	print x.log_probability(), x
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Or real inference:
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+from LOTlib.DataAndObjects import FunctionData, Obj # for nicely managing data
+from LOTlib.Inference.MetropolisHastings import mh_sample # for running MCMC
+
+
+# Make up some data -- here just one set containing {red, red, green} colors
+data = [ FunctionData(args=[ {Obj(color='red'), Obj(color='red'), Obj(color='green')} ], \
+	              output=True) ]
+
+# Create an initial hypothesis
+h0 = LOTHypothesis(G, args=['S'])
+
+# MCMC!
+for h in mh_sample(h0, data, 4000):
+	# hypotheses' .prior, .likelihood, and .lp are set in mh_sample
+	print h.likelihood, h.prior, h.lp, h
+
 	

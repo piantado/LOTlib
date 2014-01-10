@@ -24,9 +24,9 @@ def list2FunctionNode(l, style="atis"):
 		elif style is 'atis':
 			rec = lambda x: list2FunctionNode(x, style=style) # a wrapper to my recursive self
 			if l[0] == 'lambda':
-				return FunctionNode('FUNCTION', 'lambda', [rec(l[3])], lp=0.0, bv_name=[l[1]] ) ## TOOD: HMM WHAT IS THE BV?
+				return FunctionNode('FUNCTION', 'lambda', [rec(l[3])], lp=0.0, bv_type=[l[1]] ) ## TOOD: HMM WHAT IS THE BV?
 			else:
-				return FunctionNode(l[0], l[0], map(rec, l[1:]), lp=0.0, bv_name='')
+				return FunctionNode(l[0], l[0], map(rec, l[1:]), lp=0.0, bv_type='')
 		elif sytle is 'scheme':
 			pass #TODO: Add this scheme functionality -- basically differnet handling of lambda bound variables
 			
@@ -57,7 +57,7 @@ class FunctionNode(object):
 		My bv stores the particlar *names* of variables I've introduced
 	"""
 	
-	def __init__(self, returntype, name, args, lp=0.0, resample_p=1.0, bv_name=None, bv_args=None, ruleid=None):
+	def __init__(self, returntype, name, args, lp=0.0, resample_p=1.0, bv_name=None, bv_type=None, bv_args=None, ruleid=None):
 		self.__dict__.update(locals())
 		
 	# make all my parts the same as q (not copies)
@@ -74,7 +74,7 @@ class FunctionNode(object):
 		else:
 			newargs = self.args
 		
-		return FunctionNode(self.returntype, self.name, newargs, self.lp, self.resample_p, self.bv_name, deepcopy(self.bv_args), self.ruleid)
+		return FunctionNode(self.returntype, self.name, newargs, lp=self.lp, resample_p=self.resample_p, bv_type=self.bv_type, bv_name=self.bv_name, bv_args=deepcopy(self.bv_args), ruleid=self.ruleid)
 	
 	def is_nonfunction(self):
 		return (self.args is None)
@@ -110,8 +110,8 @@ class FunctionNode(object):
 		elif self.name is not None and self.name.lower() == 'lambda':
 			assert len(self.args) == 1, "Lambda variables require one argument"
 			
-			# We can allow bv_name to be None, which is a thunk (no arguments)
-			#return '(lambda '+ (self.bv_name if self.bv_name is not None else '') +': '+str(self.args[0])+' )'
+			# We can allow bv_type to be None, which is a thunk (no arguments)
+			#return '(lambda '+ (self.bv_type if self.bv_type is not None else '') +': '+str(self.args[0])+' )'
 			
 			# The old version (above) wrapped in parens, but that's probably not necessary?
 			return 'lambda '+ (self.bv_name if self.bv_name is not None else '') +': '+str(self.args[0])
@@ -135,7 +135,7 @@ class FunctionNode(object):
 	def fullprint(self, d=0):
 		""" A handy printer for debugging"""
 		tabstr = "  .  " * d
-		print tabstr, self.returntype, self.name, self.bv_name, self.bv_args, "\t", self.lp #"\t", self.resample_p 
+		print tabstr, self.returntype, self.name, self.bv_type, self.bv_name, self.bv_args, "\t", self.lp #"\t", self.resample_p 
 		if self.args is not None:
 			for a in self.args: 
 				if isFunctionNode(a): a.fullprint(d+1)
@@ -229,14 +229,14 @@ class FunctionNode(object):
 		if rename is None: rename = dict()
 				
 		if self.name is not None:
-			if self.name.lower() == 'lambda' and (self.bv_name is not None) and (self.args is not None): 
+			if self.name.lower() == 'lambda' and (self.bv_type is not None) and (self.args is not None): 
 				#assert (self.bv_args is None) # should only add one rule, and it should have no "to"
 				
 				newname = 'y'+str(d)
 					
 				# And rename this below
-				rename[self.bv_name] = newname
-				self.bv_name = newname
+				rename[self.bv_type] = newname
+				self.bv_type = newname
 				#print "..", self.bv[0]
 			elif re_variable.match(self.name): # if we find a variable
 				assert_or_die(self.name in rename, "Name "+self.name+" not in rename="+str(rename)+"\t;\t"+str(self))
@@ -247,16 +247,7 @@ class FunctionNode(object):
 			for k in self.args:
 				if isFunctionNode(k): k.fix_bound_variables(d+1, rename)
 			
-	
-	# resample myself from some grammar
-	def resample(self, g, d=0):
-		"""
-			Resample this node. d (depth) is included in case we are generating bound variables, and then we need to label them by total tree depth
-		"""
-		if g.is_nonterminal(self.returntype):
-			self.setto(g.generate(self.returntype, d=d))
-		else: pass # do nothing if we aren't returnable from the grammar
-		
+
 	############################################################
 	## Derived functions that build on the above core
 	############################################################
@@ -287,7 +278,7 @@ class FunctionNode(object):
 	# get a description of the input and output types
 	# if collapse_terminal then we just map non-FunctionNodes to "TERMINAL"
 	def get_type_signature(self):
-		ts = [self.returntype, self.bv_name, self.bv_args]
+		ts = [self.returntype, self.bv_type, self.bv_args]
 		if self.args is not None:
 			for i in range(len(self.args)):
 				if isFunctionNode(self.args[i]):

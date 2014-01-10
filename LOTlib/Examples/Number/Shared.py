@@ -91,7 +91,7 @@ class NumberExpression(LOTHypothesis):
 		"""
 			Compute the number model prior
 		"""
-		if self.value.depth() > 10:
+		if self.value.count_nodes() > 12:
 			self.prior = -Infinity
 		else: 
 			if self.value.contains_function("L_"): recursion_penalty = GAMMA
