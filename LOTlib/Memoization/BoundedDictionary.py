@@ -34,7 +34,8 @@ class BoundedDictionary:
 			v = sorted(self.last_count.values())
 			median = v[len(v)/2]
 			
-			for k in self.last_count.iterkeys():
+			keys = self.last_count.keys():
+			for k in keys:
 				if self.last_count[k] <= median: # if you were used less recently
 					del self.last_count[k]
 					del self.ret_hash[k]
