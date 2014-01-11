@@ -10,7 +10,7 @@ class LOTHypothesis(FunctionHypothesis):
 		
 	"""
 	
-	def __init__(self, grammar, v=None, f=None, start='START', ALPHA=0.9, rrPrior=False, rrAlpha=1.0, maxnodes=25, ll_decay=0.0, prior_temperature=1.0, args=['x']):
+	def __init__(self, grammar, v=None, f=None, start='START', ALPHA=0.9, rrPrior=False, rrAlpha=1.0, maxnodes=25, ll_decay=0.0, prior_temperature=1.0, args=['x'], proposal_function=None):
 		"""
 			grammar - a grammar
 			start - how the grammar starts to generate
@@ -26,7 +26,8 @@ class LOTHypothesis(FunctionHypothesis):
 		
 		# Save a proposal function
 		## TODO: How to handle this in copying?
-		self.proposal_function = RegenerationProposal(self.grammar)
+		if proposal_function is None:
+			self.proposal_function = RegenerationProposal(self.grammar)
 		
 		self.likelihood = 0.0
 	

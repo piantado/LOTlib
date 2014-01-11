@@ -56,6 +56,11 @@ data = [ FunctionData(args=[ {Obj(color='red'), Obj(color='red'), Obj(color='gre
 # Create an initial hypothesis
 h0 = LOTHypothesis(G, args=['S'])
 
+# OR if we want to specify and use insert/delete proposals
+#from LOTlib.Proposals import *
+#h0 = LOTHypothesis(G, proposal_function=MixtureProposal(G, [RegenerationProposal(G), InsertDeleteProposal(G)] ) )
+
+
 # MCMC!
 for h in mh_sample(h0, data, 4000): # run sampler
 #for h in unique(mh_sample(h0, data, 4000)): # get unique samples

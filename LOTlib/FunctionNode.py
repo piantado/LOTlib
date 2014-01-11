@@ -235,8 +235,8 @@ class FunctionNode(object):
 				newname = 'y'+str(d)
 					
 				# And rename this below
-				rename[self.bv_type] = newname
-				self.bv_type = newname
+				rename[self.bv_name] = newname
+				self.bv_name = newname
 				#print "..", self.bv[0]
 			elif re_variable.match(self.name): # if we find a variable
 				assert_or_die(self.name in rename, "Name "+self.name+" not in rename="+str(rename)+"\t;\t"+str(self))

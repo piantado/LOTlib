@@ -5,10 +5,12 @@
 	They all return [proposal, forwardp-backwardp] for use in MH.
 """
 
+from LOTlib.Miscellaneous import weighted_sample
 from LOTlib.FunctionNode import *
 from copy import copy
 from math import log
 from random import random
+import numpy
 
 class LOTProposal(object):
 	"""
@@ -81,7 +83,7 @@ class InsertDeleteProposal(LOTProposal):
 		
 		# Default regeneration proposal with some probability
 		if random() >= self.insert_delete_probability: 
-			return self.my_regeneration_proposal.propose_tree(t, self.grammar)
+			return self.my_regeneration_proposal.propose_tree(t)
 		
 		newt = copy(t)
 		fb = 0.0 # the forward/backward prob we return
@@ -95,7 +97,7 @@ class InsertDeleteProposal(LOTProposal):
 				
 				# Since it's an insert, see if there is a (replicating) rule that expands
 				# from ni.returntype to some ni.returntype
-				replicating_rules = filter(lambda x: x.name != 'lambda' and (x.to is not None) and any([a==ni.returntype for a in x.to]), grammar.rules[ni.returntype])
+				replicating_rules = filter(lambda x: x.name != 'lambda' and (x.to is not None) and any([a==ni.returntype for a in x.to]), self.grammar.rules[ni.returntype])
 				
 				# If there are none, then we can't insert!
 				if len(replicating_rules) == 0: continue
@@ -184,13 +186,71 @@ class InsertDeleteProposal(LOTProposal):
 		
 		return [newt, fb]
 
-
+class MixtureProposal(LOTProposal):
+	"""
+		A mixture of proposals, like
+		
+		m = MixtureProposal(grammar, [RegenerationProposal(grammar), InsertDeleteProposal(grammar)] )
+		
+		Probabilities of each can be specified
+	
+	"""
+	def __init__(self, grammar, proposals, probs=None):
+		print proposals
+		self.__dict__.update(locals())
+		LOTProposal.__init__(self, grammar)
+		
+		if probs is None:
+			self.probs = numpy.array( [1.] * len(proposals) )
+		
+	def propose_tree(self, t):
+		p = weighted_sample(self.proposals, probs=self.probs, log=False)
+		
+		return p.propose_tree(t)
 
 class InverseInliningProposal(LOTProposal):
 	
+	def __init__(self, grammar, replacetype='EXPR'):
+		self.update(locals())
+		LOTProposal.__init__(self, grammar)
+		
+	
 	def propose_tree(self, t):
 		
+		
+		## Insert/delete must happen at the apply nodes for FunctionGrammarInduction
+		#G.add_rule('EXPR', 'apply_', ['LAMBDAARG', 'LAMBDATHUNK'], 1)
+		#G.add_rule('LAMBDAARG',   'lambda', ['EXPR'], 1., bv_type='EXPR', bv_args=[] )
+		#G.add_rule('LAMBDATHUNK', 'lambda', ['EXPR'], 1., bv_type=None, bv_args=None ) # A thunk
+
+		"""
+			Delete:
+				- find an apply
+				- take the interior of the lambdathunk and sub it in for the lambdaarg everywhere, remove the apply
+			Insert:
+				- Find a node
+				- Find a subnode s
+				- Remove all repetitions of s, create a lambda thunk
+				- and add an apply with the appropriate machinery
+			
+		"""
+
+		newt = copy(t) 
+		
 		if random() < 0.5:
+			
+			is_replacetype = lambda x: x.returntype is replacetype
+			
+			# sample a node
+			for ni, di, resample_p, Z in self.grammar.sample_node_via_iterate(newt, do_bv=True, predicate=is_replacetype):
+				
+				# sample a subnode
+				for s, sdi, sresample_p, sZ in self.grammar.sample_node_via_iterate(ni, do_bv=True, predicate=is_replacetype):
+					
+					# Now convert into a lambda abstraction
+					
+					pass
+			
 			# If we apply a lambda
 			
 			# Sample a lambda
