@@ -196,7 +196,7 @@ class MixtureProposal(LOTProposal):
 	
 	"""
 	def __init__(self, grammar, proposals, probs=None):
-		print proposals
+		#print proposals
 		self.__dict__.update(locals())
 		LOTProposal.__init__(self, grammar)
 		
