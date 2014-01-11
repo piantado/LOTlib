@@ -184,3 +184,23 @@ class InsertDeleteProposal(LOTProposal):
 		
 		return [newt, fb]
 
+
+
+class InverseInliningProposal(LOTProposal):
+	
+	def propose_tree(self, t):
+		
+		if random() < 0.5:
+			# If we apply a lambda
+			
+			# Sample a lambda
+			
+			
+			pass
+			
+		else:
+			
+			pass
+		
+		
+		pass

@@ -1,5 +1,8 @@
 from LOTHypothesis import LOTHypothesis
 from copy import copy, deepcopy
+from collections import defaultdict
+from math import log, exp
+
 
 class SimpleGenerativeHypothesis(LOTHypothesis):
 	"""

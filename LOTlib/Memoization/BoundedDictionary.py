@@ -45,7 +45,7 @@ class BoundedDictionary:
 		self.counter += 1
 		return self.ret_hash[k] # MUST use this form so we raise an exception if k not in ret_hash (for use by Memoize)
 	
-	def contains(self, k):	
+	def __contains__(self, k):	
 		return (k in self.ret_hash)
 		
 

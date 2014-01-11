@@ -4,6 +4,7 @@
 	Here, we take sets of objects and generate quantified descriptions
 """
 
+from LOTlib.Miscellaneous import unique
 from LOTlib.Grammar import Grammar
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
@@ -56,7 +57,8 @@ data = [ FunctionData(args=[ {Obj(color='red'), Obj(color='red'), Obj(color='gre
 h0 = LOTHypothesis(G, args=['S'])
 
 # MCMC!
-for h in mh_sample(h0, data, 4000):
+for h in mh_sample(h0, data, 4000): # run sampler
+#for h in unique(mh_sample(h0, data, 4000)): # get unique samples
 	# hypotheses' .prior, .likelihood, and .lp are set in mh_sample
 	print h.likelihood, h.prior, h.lp, h
 

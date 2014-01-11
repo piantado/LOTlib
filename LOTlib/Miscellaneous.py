@@ -177,14 +177,16 @@ def hashplus(d, k, v=1):
 	else: d[k] = d[k] + v
 
 
-# this takes a generator and by using a set (and thus a hash) it makes it unique, only returning each value once
-# so this filters generators, making them unique
-def make_generator_unique(gen):
+def unique(gen):
+	"""
+		Make a generator unique, returning each element only once
+	"""
 	s = set()
 	for gi in gen:
 		if gi not in s:
-			s.add(gi)
 			yield gi
+			s.add(gi)
+			
 
 def listifnot(x):
 	if isinstance(x,list): return x
