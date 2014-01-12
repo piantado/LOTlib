@@ -192,14 +192,21 @@ class FunctionNode(object):
 					lp = lp + self.args[i].log_probability() # plus all children
 			return lp
 	
-	# use generator to enumerate all subnodes
-	# NOTE: To do anything fancy, we should use PCFG.iterate_subnodes in order to update the grammar, resample, etc. 
-	def all_subnodes(self):
-		print "*** USE __ITER__ now!"
-		assert(False)
+	def subnodes(self):
+		"""
+			Return all subnodes -- no iterator.
+			Useful for modifying
+			
+			NOTE: If you want iterate using the grammar, use Grammar.iterate_subnodes
+		"""
+		return [g for g in self]
 		
 	def __iter__(self):
-		
+		"""
+			Iterater for subnodes. 
+			NOTE: This will NOT work if you modify the tree. Then all goes to hell. 
+			      If the tree must be modified, use self.subnodes()
+		"""
 		yield self
 		
 		if self.args is not None:
@@ -356,7 +363,17 @@ class FunctionNode(object):
 			
 			else: return pself + y.log_probability() # We have to generate from ourselves
 				
-
+	def replace_subnodes(self, find, replace):
+		"""
+			Replace subnodes -- NOTE: NOT THE FASTEST!
+			Also, TODO check correctness
+			
+			Defaultly only makes copies of replace
+		"""
+		
+		# now go through and modify
+		for g in filter(lambda x: x==find, self.subnodes() ): #NOTE: must use subnoes since we are modfiying
+			g.setto(copy(replace))
 
 
 

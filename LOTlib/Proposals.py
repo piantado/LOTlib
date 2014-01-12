@@ -208,10 +208,15 @@ class MixtureProposal(LOTProposal):
 		
 		return p.propose_tree(t)
 
-class InverseInliningProposal(LOTProposal):
+class InverseInlineThunk(LOTProposal):
+	"""
+		Thunk inlining
+		
+		TODO: REALLY DOES NOT WORK YET
+	"""
 	
 	def __init__(self, grammar, replacetype='EXPR'):
-		self.update(locals())
+		self.__dict__.update(locals())
 		LOTProposal.__init__(self, grammar)
 		
 	
@@ -233,34 +238,88 @@ class InverseInliningProposal(LOTProposal):
 				- Remove all repetitions of s, create a lambda thunk
 				- and add an apply with the appropriate machinery
 			
+			TOOD:
+				- how to handle the bv types for the lambdas??
+				- fix forward/backward!
 		"""
 
 		newt = copy(t) 
+		f,b = 0.0, 0.0
 		
-		if random() < 0.5:
+		# Two filtering functions determining when we can do this
+		is_replacetype = lambda x: x.returntype is self.replacetype
+	
+		# we can extract anything of the right type, who does not have any other yi
+		# TODO: REALLY IT CAN'T CONTAIN ANY HIGHER yi
+		is_extractable = lambda x: is_replacetype(x) and all([ not re_variable.match(y.name) for y in x.subnodes()])
+	
+		is_apply = lambda x: (x.name == 'apply_') and (len(x.args)==2) and (x.args[0].name is 'lambda') and (x.args[0].bv_args is not None) and (len(x.args[0].bv_args) == 0) and (x.args[1].name is 'lambda') and (x.args[1].bv_type is None)
+		
+		if random() < 0.5: #INSERT MOVE
 			
-			is_replacetype = lambda x: x.returntype is replacetype
 			
 			# sample a node
-			for ni, di, resample_p, Z in self.grammar.sample_node_via_iterate(newt, do_bv=True, predicate=is_replacetype):
-				
+			for ni, di, resample_p, Z in self.grammar.sample_node_via_iterate(newt, predicate=is_replacetype):
+				#print "NI=", ni
 				# sample a subnode
-				for s, sdi, sresample_p, sZ in self.grammar.sample_node_via_iterate(ni, do_bv=True, predicate=is_replacetype):
+				sresample_p = None
+				for s, sdi, sresample_p, sZ in self.grammar.sample_node_via_iterate(copy(ni), predicate=is_extractable):
+					
+					below = copy(ni)
+					varname = 'y'+str(di)
+					
+					# replace with the variables
+					below.replace_subnodes(s, FunctionNode(s.returntype, varname, []))
+					
+					# create a new node, the lambda abstraction
+					fn = FunctionNode(self.replacetype, 'apply_', [ \
+						FunctionNode('LAMBDAARG', 'lambda', [ below ], bv_name=varname, bv_type=s.returntype, bv_args=[] ),\
+						FunctionNode('LAMBDATHUNK',  'lambda', [ s     ], bv_name=None, bv_type=None, bv_args=None)\
+							] )
 					
 					# Now convert into a lambda abstraction
+					ni.setto(fn) 
 					
-					pass
-			
-			# If we apply a lambda
-			
-			# Sample a lambda
+					f += (log(resample_p) - log(Z)) + (log(sresample_p) - log(sZ))  
 			
 			
-			pass
+			## TODO: NOT WORKING RIGHT, MAY NEED TO SET RULE ID
 			
-		else:
 			
+			if sresample_p is None: return [copy(t),0.0]
+		
+			#if resample_p is None: return [copy(t), 0.0]
+			#newZ = self.grammar.resample_normalizer(newt, predicate=is_apply)
+			#print resample_p, newZ
+			#b += log(resample_p) - log(newZ) # to go back, we must choose ni from the new tree
+		else: # DELETE MOVE
 			pass
 		
+			#resample_p = None
+			#for ni, di, resample_p, Z in self.grammar.sample_node_via_iterate(newt, predicate=is_apply):
+				
+				## what does the variable look like? Here a thunk with bv_name
+				#var = FunctionNode( ni.args[0].bv_type , ni.args[0].bv_name, [])
+		       
+				#newni = copy(ni.args[0].args[0]) # may be able to optimize away?
+				##print newni, var, copy(ni.args[1].args[0])
+				
+				## and remove
+				#newni.replace_subnodes(var, copy(ni.args[1].args[0]))
+				
+				##print ":", newni
+				#ni.setto(newni) 
+				#f += (log(resample_p) - log(Z))
+			
+			#if resample_p is None: return [newt,0.0]
 		
-		pass
+			## TODO: THE BACKWARD PROB IS NOT RIGHT -- MUST COUNT THE NUMBER OF WAYS OF GOING BACK
+			## COUNTING MULTIPLE PATHS
+			
+			#newZ = self.grammar.resample_normalizer(newt, predicate=is_replacetype)
+			##to go back, must choose the 
+			#b += log(resample_p) - log(newZ)
+		
+		newt.fix_bound_variables()
+		
+		return [newt, f-b]

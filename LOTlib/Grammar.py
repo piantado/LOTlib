@@ -199,27 +199,32 @@ class Grammar:
 		"""
 		
 		if isFunctionNode(t):
-			yield (t,d) if yield_depth else t
+			
+			if predicate(t):
+				yield (t,d) if yield_depth else t
 			
 			#print "iterate subnode: ", t.name, t.bv_type, t
 			
 			if do_bv and t.bv_type is not None:
 				added = self.add_bv_rule( t.bv_type, t.bv_args, d)
-				#print "ADDING RULE", added
 			
 			if t.args is not None:
-				for a in t.args:
-					for g in self.iterate_subnodes(a, d=d+1, do_bv=do_bv, yield_depth=yield_depth): # pass up anything from below
-						if predicate(g): yield g
+				for g in self.iterate_subnodes(t.args, d=d+1, do_bv=do_bv, yield_depth=yield_depth, predicate=predicate): # pass up anything from below
+					yield g
 			
 			# And remove them
 			if do_bv and (t.bv_type is not None):
 				self.remove_rule(added)
+				
+		elif isinstance(t, list):
+			for a in t:
+				for g in self.iterate_subnodes(a, d=d, do_bv=do_bv, yield_depth=yield_depth, predicate=predicate):
+					yield g
 		
 	def resample_normalizer(self, t, predicate=lambdaTrue):
 		Z = 0.0
-		for ti in self.iterate_subnodes(t, do_bv=True):
-			if predicate(ti): Z += ti.resample_p 
+		for ti in self.iterate_subnodes(t, do_bv=True, predicate=predicate):
+			Z += ti.resample_p 
 		return Z
 	
 	

@@ -30,11 +30,14 @@ class FunctionHypothesis(Hypothesis):
 			Make this callable just like a function. Yay python! 
 		"""
 		try:
+			#print self
 			return self.fvalue(*vals)
 		except TypeError:
-			print "Error in function call: "+str(self)
+			print "TypeError in function call: "+str(self)
 			raise TypeError
-			
+		except NameError:
+			print "NameError in function call: " + str(self)
+			raise NameError
 	
 	def value2function(self, v):
 		""" How we convert a value into a function. Default is LOTlib.Miscellaneous.evaluate_expression """
