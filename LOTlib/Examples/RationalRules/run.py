@@ -69,7 +69,7 @@ from LOTlib.Inference.MetropolisHastings import mh_sample
 
 # Run the vanilla sampler. Without steps, it will run infinitely
 # this prints out posterior (lp), prior, likelihood, 
-for h in mh_sample(h0, data, skip=100):
+for h in mh_sample(h0, data, 10000, skip=100):
 	print h.lp, h.prior, h.likelihood, q(h)
 	
 	
