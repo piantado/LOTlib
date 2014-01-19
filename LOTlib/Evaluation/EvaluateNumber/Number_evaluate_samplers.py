@@ -29,25 +29,26 @@ DATA_SIZE = 300
 TEST_SAMPLES = 10000 # 10000
 RUNS = 1000
 
-TARGET_FILE = "/home/piantado/Desktop/mit/Libraries/LOTlib/LOTlib/Examples/Number/mpirun-Dec2013.pkl" # load a small file. The large one is only necessary if we want the "correct" target likelihood and top N numbers; if we just look at Z we don't need it!
-DATA_FILE = "data/evaluation-data.pkl"
-output = ParallelBufferedIO("evaluation.txt") # Use buffered output, and do it before we load the models (so that each  ParallelBufferedIO subprocess doesn't load)
+#TARGET_FILE = "/home/piantado/Desktop/mit/Libraries/LOTlib/LOTlib/Examples/Number/mpirun-Dec2013.pkl" 
+#DATA_FILE = "data/evaluation-data.pkl"
+#output = ParallelBufferedIO("evaluation.txt") # Use buffered output, and do it before we load the models (so that each  ParallelBufferedIO subprocess doesn't load). NOTE: Be sure to close it!
 
 # FOR DEBUGGING:
-#TARGET_FILE = "tmp-hypotheses.pkl"
-#DATA_FILE = "data/evaluation-data.pkl"
-#output = sys.stdout
+TARGET_FILE = "tmp-hypotheses.pkl"
+DATA_FILE = "data/evaluation-data.pkl"
+output = sys.stdout
 
 data   = pickle_load(DATA_FILE)
 
 # recompute the target posterior in case it's diff data than was generated
 # target here must be a dict from hypotheses to posteriors
-target = dict()
-for h in pickle_load(TARGET_FILE).get_all():
-	sum(h.compute_posterior(data)) # add up the components returned by compute_posterior
+target = { h: sum(h.compute_posterior(data)) for h in pickle_load(TARGET_FILE).get_all()}
+
+#for h in pickle_load(TARGET_FILE).get_all():
+	#sum(h.compute_posterior(data)) # add up the components returned by compute_posterior
 	
-	# Throw out any (if we changed max depth or anything)
-	if h.lp > -Infinity: target[h] = h.lp
+	## Throw out any (if we changed max depth or anything)
+	#if h.lp > -Infinity: target[h] = h.lp
 
 ## A wrapper function for MPI_map
 def run_one(r):
@@ -76,15 +77,15 @@ def run_one(r):
 	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="ParallelTempering-1.05\t"+str(r), output=output )
 	
 	
+	inner_steps=10
+	sampler = datawise_optimize(copy(h0), data, TEST_SAMPLES*inner_steps, inner_steps=inner_steps, data_weight=1.0)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES*inner_steps, name="DatawiseOptimize-1.0\t"+str(r), output=output )
 	
-	sampler = datawise_optimize(copy(h0), data, TEST_SAMPLES, inner_steps=25, data_weight=1.0)
-	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="DatawiseOptimize-1.0\t"+str(r), output=output )
-	
-	sampler = datawise_optimize(copy(h0), data, TEST_SAMPLES, inner_steps=25, data_weight=0.1)
-	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="DatawiseOptimize-0.1\t"+str(r), output=output )
+	sampler = datawise_optimize(copy(h0), data, TEST_SAMPLES*inner_steps, inner_steps=inner_steps, data_weight=0.1)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES*inner_steps, name="DatawiseOptimize-0.1\t"+str(r), output=output )
 
-	sampler = datawise_optimize(copy(h0), data, TEST_SAMPLES, inner_steps=25, data_weight=0.01)
-	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="DatawiseOptimize-0.01\t"+str(r), output=output )
+	sampler = datawise_optimize(copy(h0), data, TEST_SAMPLES*inner_steps, inner_steps=inner_steps, data_weight=0.01)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES*inner_steps, name="DatawiseOptimize-0.01\t"+str(r), output=output )
 	
 	
 	#sampler = ptaboo_search( copy(h0), data, steps=TEST_SAMPLES, skip=0, seen_penalty=1.0)
@@ -128,3 +129,4 @@ def run_one(r):
 # Actually run, in parallel!
 MPI_map( run_one, range(RUNS) ) 
 
+output.close() #Must do this or subprocesses hang around!

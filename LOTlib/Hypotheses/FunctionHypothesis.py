@@ -70,12 +70,15 @@ class FunctionHypothesis(Hypothesis):
 		Evaluate this function on some data
 		Returns a list of my responses to data, handling exceptions (setting to None)
 		"""
+		
+		#return map(lambda di: self(*di.args), data)
+	
 		out = []
 		for di in data:
 			#print ">>", di, di.__class__.__name__, type(di), isinstance(di, FunctionData)
 			r = None
 			try:
-				if isinstance(di, FunctionData):    r = self(*di.args)
+				if   isinstance(di, FunctionData):  r = self(*di.args)
 				elif isinstance(di, UtteranceData): r = self(*di.context)
 				else:                               r = self(*di) # otherwise just pass along
 			except RecursionDepthException: pass # If there is a recursion depth exception, just ignore (so r=None)

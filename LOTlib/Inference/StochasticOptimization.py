@@ -37,7 +37,7 @@ def datawise_optimize(current_sample, data, steps=1000000, inner_steps=10, data_
 		for di in data:
 			if LOTlib.SIG_INTERRUPTED: break
 			
-			for h in mh_sample(current_sample, [di], steps=inner_steps, ll_temperature=NDATA*ll_temperature*data_weight, **kwargs):
+			for h in mh_sample(current_sample, [di], steps=inner_steps, ll_temperature=ll_temperature/(NDATA*data_weight), **kwargs):
 				current_sample = h 
 				yield h
 				
