@@ -9,6 +9,7 @@
 
 from LOTlib.Examples.Number.Shared import *
 from LOTlib.Evaluation.Evaluation import evaluate_sampler
+from LOTlib.Inference.StochasticOptimization import datawise_optimize
 from LOTlib.Inference.MetropolisHastings import mh_sample
 from LOTlib.Inference.ProbTaboo import ptaboo_search
 from LOTlib.Inference.IncreaseTemperatureMH import increase_temperature_mh_sample
@@ -50,6 +51,8 @@ for h in pickle_load(TARGET_FILE).get_all():
 
 ## A wrapper function for MPI_map
 def run_one(r):
+	if LOTlib.SIG_INTERRUPTED: return
+
 	h0 = NumberExpression(G)
 	
 	#sampler = tempered_transitions_sample(copy(h0), data, TEST_SAMPLES, skip=0, temperatures=[1.0, 1.25, 1.5])
@@ -73,29 +76,39 @@ def run_one(r):
 	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="ParallelTempering-1.05\t"+str(r), output=output )
 	
 	
-
-	sampler = ptaboo_search( copy(h0), data, steps=TEST_SAMPLES, skip=0, seen_penalty=1.0)
-	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="PtabooSearch-1.0\t"+str(r), trace=False, output=output )
-
-	sampler = ptaboo_search( copy(h0), data, steps=TEST_SAMPLES, skip=0, seen_penalty=10.0)
-	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="PtabooSearch-10.0\t"+str(r), trace=False, output=output )
-
-	sampler = ptaboo_search( copy(h0), data, steps=TEST_SAMPLES, skip=0, seen_penalty=100.0)
-	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="PtabooSearch-100.0\t"+str(r), trace=False, output=output )
-
-
-
-	sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=1.01)
-	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="IncreaseTemperature-1.01\t"+str(r), trace=False, output=output)
-
-	sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=1.1)
-	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="IncreaseTemperature-1.1\t"+str(r), trace=False, output=output)
 	
-	sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=1.5)
-	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="IncreaseTemperature-1.5\t"+str(r), trace=False, output=output)
+	sampler = datawise_optimize(copy(h0), data, TEST_SAMPLES, inner_steps=25, data_weight=1.0)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="DatawiseOptimize-1.0\t"+str(r), output=output )
 	
-	sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=2.0)
-	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="IncreaseTemperature-2.0\t"+str(r), trace=False, output=output)
+	sampler = datawise_optimize(copy(h0), data, TEST_SAMPLES, inner_steps=25, data_weight=0.1)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="DatawiseOptimize-0.1\t"+str(r), output=output )
+
+	sampler = datawise_optimize(copy(h0), data, TEST_SAMPLES, inner_steps=25, data_weight=0.01)
+	evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="DatawiseOptimize-0.01\t"+str(r), output=output )
+	
+	
+	#sampler = ptaboo_search( copy(h0), data, steps=TEST_SAMPLES, skip=0, seen_penalty=1.0)
+	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="PtabooSearch-1.0\t"+str(r), trace=False, output=output )
+
+	#sampler = ptaboo_search( copy(h0), data, steps=TEST_SAMPLES, skip=0, seen_penalty=10.0)
+	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="PtabooSearch-10.0\t"+str(r), trace=False, output=output )
+
+	#sampler = ptaboo_search( copy(h0), data, steps=TEST_SAMPLES, skip=0, seen_penalty=100.0)
+	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="PtabooSearch-100.0\t"+str(r), trace=False, output=output )
+
+
+
+	#sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=1.01)
+	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="IncreaseTemperature-1.01\t"+str(r), trace=False, output=output)
+
+	#sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=1.1)
+	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="IncreaseTemperature-1.1\t"+str(r), trace=False, output=output)
+	
+	#sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=1.5)
+	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="IncreaseTemperature-1.5\t"+str(r), trace=False, output=output)
+	
+	#sampler = increase_temperature_mh_sample( copy(h0), data, steps=TEST_SAMPLES, skip=0, increase_amount=2.0)
+	#evaluate_sampler(target, sampler, steps=TEST_SAMPLES, name="IncreaseTemperature-2.0\t"+str(r), trace=False, output=output)
 
 	
 	

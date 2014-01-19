@@ -89,7 +89,7 @@ def evaluate_sampler(target, sampler, print_every=250, steps=1000000, chains=1, 
 				#fexp = numpy.array( [ numpy.exp(target[h]-tZ) * sm for h in hypotheses])
 				#chi,p = chisquare(fobs, f_exp=fexp)  ## TODO: check ddof
 				
-				output.write('\t'.join(map(str, [name, chain_i, n, time()-startt, r3(KL), r3(percent_found), r4(exp(pm_found-tZ)), len(hypotheses), len(samples.keys()), r4(tZ)]  )) + '\n')
+				output.write('\t'.join(map(str, [name, chain_i, n, time()-startt, r3(KL), r3(percent_found), r4(pm_found-tZ), len(hypotheses), len(samples.keys()), r4(tZ)]  )) + '\n')
 			
 			if n > steps: break
 	

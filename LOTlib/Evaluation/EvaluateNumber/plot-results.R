@@ -2,7 +2,7 @@
 library(ggplot2)
 
 d <- read.table("evaluation.txt")
-names(d) <- c("name", "notsure", "chain.i", "n", "time", "KL", "pct.found", "pm.found", "len.hyp", "len.samples", "sampleZ")
+names(d) <- c("name", "notsure", "chain.i", "n", "time", "KL", "pct.found", "log.pm.found", "len.hyp", "len.samples", "sampleZ")
 d$type <- substr(as.character(d$name), 0, 6) # the first few chars, ignoring the parameters at the end of name
 d$time <- round(d$time/100) * 100
 # d <- d[d$time<800,]
