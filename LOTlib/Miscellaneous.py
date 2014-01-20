@@ -225,6 +225,21 @@ def flatten2str(expr, sep=' '):
 	except TypeError:
 		print "Error in flatter2str:", expr
 		raise TypeError
+
+def weave(*iterables):
+	"""
+	Intersperse several iterables, until all are exhausted.
+	This nicely will weave together multiple chains
+	
+	from: http://www.ibm.com/developerworks/linux/library/l-cpyiter/index.html
+	"""
+	
+	iterables = map(iter, iterables)
+	while iterables:
+		for i, it in enumerate(iterables):
+			try: yield it.next()
+			except StopIteration: del iterables[i]	
+		
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Math functions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

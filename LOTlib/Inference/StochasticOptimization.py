@@ -4,7 +4,7 @@
 	This uses a simple stochastic optimization scheme, that cycles through data, 
 	updating a sample a few times based only on *one* data point. This may help
 	get out of local maxima
-
+	NOTE: Wow, doesn't work at all!
 """
 
 from random import random
@@ -47,6 +47,7 @@ def datawise_optimize(current_sample, data, steps=1000000, inner_steps=10, data_
 if __name__ == "__main__":
 	
 	from LOTlib.Examples.Number.Shared import *
+	from copy import copy
 	
 	data = generate_data(200)
 
@@ -55,5 +56,7 @@ if __name__ == "__main__":
 
 	for h in datawise_optimize(initial_hyp, data):
 		#pass
+		g = copy(h)
+		#g.compute_posterior(data)
 		print h.lp, "\t", h
 	

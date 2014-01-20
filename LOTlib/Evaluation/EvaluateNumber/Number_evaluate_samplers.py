@@ -29,14 +29,14 @@ DATA_SIZE = 300
 TEST_SAMPLES = 10000 # 10000
 RUNS = 1000
 
-#TARGET_FILE = "/home/piantado/Desktop/mit/Libraries/LOTlib/LOTlib/Examples/Number/mpirun-Dec2013.pkl" 
-#DATA_FILE = "data/evaluation-data.pkl"
-#output = ParallelBufferedIO("evaluation.txt") # Use buffered output, and do it before we load the models (so that each  ParallelBufferedIO subprocess doesn't load). NOTE: Be sure to close it!
+TARGET_FILE = "/home/piantado/Desktop/mit/Libraries/LOTlib/LOTlib/Examples/Number/mpirun-Dec2013.pkl" 
+DATA_FILE = "data/evaluation-data.pkl"
+output = ParallelBufferedIO("evaluation.txt") # Use buffered output, and do it before we load the models (so that each  ParallelBufferedIO subprocess doesn't load). NOTE: Be sure to close it!
 
 # FOR DEBUGGING:
-TARGET_FILE = "tmp-hypotheses.pkl"
-DATA_FILE = "data/evaluation-data.pkl"
-output = sys.stdout
+#TARGET_FILE = "tmp-hypotheses.pkl"
+#DATA_FILE = "data/evaluation-data.pkl"
+#output = sys.stdout
 
 data   = pickle_load(DATA_FILE)
 

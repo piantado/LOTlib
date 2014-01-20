@@ -48,7 +48,7 @@ class LOTHypothesis(FunctionHypothesis):
 			if k is 'proposal_function': pass
 			else:
 				thecopy.__dict__[k] = deepcopy(self.__dict__[k])
-			
+		
 		return thecopy
 
 			
