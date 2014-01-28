@@ -68,9 +68,9 @@ h0 = LOTHypothesis(grammar=DNF, rrPrior=True, rrAlpha=1.0)
 from LOTlib.Inference.MetropolisHastings import mh_sample
 
 # Run the vanilla sampler. Without steps, it will run infinitely
-# this prints out posterior (lp), prior, likelihood, 
+# this prints out posterior (posterior_score), prior, likelihood, 
 for h in mh_sample(h0, data, 10000, skip=100):
-	print h.lp, h.prior, h.likelihood, q(h)
+	print h.posterior_score, h.prior, h.likelihood, q(h)
 	
 	
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

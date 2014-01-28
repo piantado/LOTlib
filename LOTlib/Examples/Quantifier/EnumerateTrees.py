@@ -39,7 +39,7 @@ for t in G.increment_tree('START',DEPTH):
 	if t.count_subnodes() <= MAX_NODES: 	
 		add_to_collapsed_trees(t)
 		all_tree_count += 1
-		print ">", t, t.lp, t.log_probability()
+		print ">", t, t.posterior_score, t.log_probability()
 
 ## for kinder saving and unsaving:
 upq = FiniteBestSet(max=True)

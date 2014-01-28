@@ -9,7 +9,7 @@ from Shared import *
 
 LARGE_DATA_SIZE = 10000 # this is what we compute the average LL on
 DATA_SIZE = 300
-TRACE = False
+TRACE = True
 STEPS = 100 #10000000
 SKIP = 1
 
@@ -36,8 +36,8 @@ for h in LOTlib.Inference.MetropolisHastings.mh_sample(initial_hyp, data, STEPS,
 	if TRACE: 
 		print q(get_knower_pattern(h)), h.compute_prior(), h.compute_likelihood(data), q(h)
 		
-	# add h to our priority queue, with priority of its log probability, h.lp
-	allhyp.push(h, h.lp)
+	# add h to our priority queue, with priority of its log probability, h.posterior_score
+	allhyp.push(h, h.posterior_score)
 
 # save these hypotheses
 #allhyp.save("demo-hypotheses.pkl")

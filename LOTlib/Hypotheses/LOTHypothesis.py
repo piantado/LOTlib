@@ -10,7 +10,7 @@ class LOTHypothesis(FunctionHypothesis):
 		
 	"""
 	
-	def __init__(self, grammar, v=None, f=None, start='START', ALPHA=0.9, rrPrior=False, rrAlpha=1.0, maxnodes=25, ll_decay=0.0, prior_temperature=1.0, args=['x'], proposal_function=None):
+	def __init__(self, grammar, value=None, f=None, start='START', ALPHA=0.9, rrPrior=False, rrAlpha=1.0, maxnodes=25, ll_decay=0.0, prior_temperature=1.0, args=['x'], proposal_function=None):
 		"""
 			grammar - a grammar
 			start - how the grammar starts to generate
@@ -20,9 +20,9 @@ class LOTHypothesis(FunctionHypothesis):
 		
 		# save all of our keywords (though we don't need v)
 		self.__dict__.update(locals())
-		if v is None: v = grammar.generate(self.start)
+		if value is None: value = grammar.generate(self.start)
 		
-		FunctionHypothesis.__init__(self, v=v, f=f, args=args)
+		FunctionHypothesis.__init__(self, value=value, f=f, args=args)
 		
 		# Save a proposal function
 		## TODO: How to handle this in copying?
@@ -52,10 +52,10 @@ class LOTHypothesis(FunctionHypothesis):
 		return thecopy
 
 			
-	def propose(self): 
-		p,fb = self.proposal_function(self)
-		p.lp = "<must compute posterior!>" # Catch use of proposal.lp, without posteriors!
-		return [p,fb]
+	def propose(self, **kwargs): 
+		ret = self.proposal_function(self, **kwargs)
+		ret[0].posterior_score = "<must compute posterior!>" # Catch use of proposal.posterior_score, without posteriors!
+		return ret
 	
 	def compute_prior(self): 
 		"""
@@ -68,7 +68,7 @@ class LOTHypothesis(FunctionHypothesis):
 			if self.rrPrior: self.prior = self.grammar.RR_prior(self.value, alpha=self.rrAlpha) / self.prior_temperature
 			else:            self.prior = self.value.log_probability() / self.prior_temperature
 			
-			self.lp = self.prior + self.likelihood
+			self.posterior_score = self.prior + self.likelihood
 			
 		return self.prior
 		
@@ -96,11 +96,11 @@ class LOTHypothesis(FunctionHypothesis):
 			# the total culmulative decayed likeliood
 			self.likelihood += self.stored_likelihood[i] * self.likelihood_decay_function(i, N, self.ll_decay)
 		
-		self.lp = self.prior + self.likelihood
+		self.posterior_score = self.prior + self.likelihood
 		
 		return self.likelihood
 		
 	# must wrap these as SimpleExpressionFunctions
 	def enumerative_proposer(self):
 		for k in grammar.enumerate_pointwise(self.value):
-			yield LOTHypothesis(self.grammar, v=k)
+			yield LOTHypothesis(self.grammar, value=k)

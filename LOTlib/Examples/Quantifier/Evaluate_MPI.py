@@ -69,22 +69,22 @@ def run(*args):
 	
 	# normalize the posterior in fs
 	dprintn(8, "# Computing normalizer")
-	Z = logsumexp([x.lp for x in hypotheses])
+	Z = logsumexp([x.posterior_score for x in hypotheses])
 	
 	# and output the top hypotheses
 	qq = FiniteBestSet(max=True, N=25)
-	for h in hypotheses: qq.push(h, h.lp) # get the tops
+	for h in hypotheses: qq.push(h, h.posterior_score) # get the tops
 	for i, h in enumerate(qq.get_sorted()):
 		for w in h.all_words():
-			fprintn(8, data_size, i, w, h.lp, q(h.lex[w]), f=options.OUT_PATH+"-hypotheses."+RANK+".txt")
+			fprintn(8, data_size, i, w, h.posterior_score, q(h.lex[w]), f=options.OUT_PATH+"-hypotheses."+RANK+".txt")
 	
 	# and compute the probability of being correct
 	dprintn(8, "# Computing correct probability")
 	for h in hypotheses:
 		hstr = str(h)
-		#print data_size, len(data), exp(h.lp), correct[ str(h)+":"+w ]
+		#print data_size, len(data), exp(h.posterior_score), correct[ str(h)+":"+w ]
 		for w in words:
-			p = exp(h.lp - Z)
+			p = exp(h.posterior_score - Z)
 			key = w + ":" + hstr
 			
 			p_representation[w] += p * (agree_pct[key] == 1.)

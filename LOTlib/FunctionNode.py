@@ -24,9 +24,9 @@ def list2FunctionNode(l, style="atis"):
 		elif style is 'atis':
 			rec = lambda x: list2FunctionNode(x, style=style) # a wrapper to my recursive self
 			if l[0] == 'lambda':
-				return FunctionNode('FUNCTION', 'lambda', [rec(l[3])], lp=0.0, bv_type=[l[1]] ) ## TOOD: HMM WHAT IS THE BV?
+				return FunctionNode('FUNCTION', 'lambda', [rec(l[3])], generation_probability=0.0, bv_type=[l[1]] ) ## TOOD: HMM WHAT IS THE BV?
 			else:
-				return FunctionNode(l[0], l[0], map(rec, l[1:]), lp=0.0, bv_type='')
+				return FunctionNode(l[0], l[0], map(rec, l[1:]), generation_probability=0.0, bv_type='')
 		elif sytle is 'scheme':
 			pass #TODO: Add this scheme functionality -- basically differnet handling of lambda bound variables
 			
@@ -57,7 +57,7 @@ class FunctionNode(object):
 		My bv stores the particlar *names* of variables I've introduced
 	"""
 	
-	def __init__(self, returntype, name, args, lp=0.0, resample_p=1.0, bv_name=None, bv_type=None, bv_args=None, ruleid=None):
+	def __init__(self, returntype, name, args, generation_probability=0.0, resample_p=1.0, bv_name=None, bv_type=None, bv_args=None, ruleid=None):
 		self.__dict__.update(locals())
 		
 	# make all my parts the same as q (not copies)
@@ -74,7 +74,7 @@ class FunctionNode(object):
 		else:
 			newargs = self.args
 		
-		return FunctionNode(self.returntype, self.name, newargs, lp=self.lp, resample_p=self.resample_p, bv_type=self.bv_type, bv_name=self.bv_name, bv_args=deepcopy(self.bv_args), ruleid=self.ruleid)
+		return FunctionNode(self.returntype, self.name, newargs, generation_probability=self.generation_probability, resample_p=self.resample_p, bv_type=self.bv_type, bv_name=self.bv_name, bv_args=deepcopy(self.bv_args), ruleid=self.ruleid)
 	
 	def is_nonfunction(self):
 		return (self.args is None)
@@ -135,7 +135,7 @@ class FunctionNode(object):
 	def fullprint(self, d=0):
 		""" A handy printer for debugging"""
 		tabstr = "  .  " * d
-		print tabstr, self.returntype, self.name, self.bv_type, self.bv_name, self.bv_args, "\t", self.lp #"\t", self.resample_p 
+		print tabstr, self.returntype, self.name, self.bv_type, self.bv_name, self.bv_args, "\t", self.generation_probability #"\t", self.resample_p 
 		if self.args is not None:
 			for a in self.args: 
 				if isFunctionNode(a): a.fullprint(d+1)
@@ -184,7 +184,7 @@ class FunctionNode(object):
 			#print ">!!>>", t, self.my_log_probability
 			return self.my_log_probability
 		else:
-			lp = self.lp # the probability of my rule
+			lp = self.generation_probability # the probability of my rule
 			if self.args is None: return lp
 			for i in range(len(self.args)):
 				if isFunctionNode(self.args[i]):

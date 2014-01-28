@@ -46,7 +46,7 @@ class VectorizedLexicon(Hypothesis):
 			
 	def compute_prior(self):
 		self.prior = sum([self.priorlist[x] for x in self.word_idx])
-		self.lp = self.prior + self.likelihood
+		self.posterior_score = self.prior + self.likelihood
 		return self.prior
 	
 	def compute_likelihood(self, data):
@@ -80,7 +80,7 @@ class VectorizedLexicon(Hypothesis):
 					( (met_weights>0)*(1.0-self.PALPHA) + (met_weights==0)*1.0 ) * weights[self.word_idx[uttered_word_index]] / (1e-5 + all_weights)))
 				
 			self.likelihood = lp
-		self.lp = self.likelihood+self.prior
+		self.posterior_score = self.likelihood+self.prior
 		return self.likelihood 
 		
 	def propose(self):

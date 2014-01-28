@@ -28,6 +28,6 @@ class GaussianLOTHypothesis(LOTHypothesis):
 			# the total culmulative decayed likeliood
 			self.likelihood += self.stored_likelihood[i] * self.likelihood_decay_function(i, N, self.ll_decay)
 		
-		self.lp = self.prior + self.likelihood
+		self.posterior_score = self.prior + self.likelihood
 		
 		return self.likelihood

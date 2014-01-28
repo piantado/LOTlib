@@ -32,7 +32,6 @@ class GrammarRule:
 			NOTE: The rule id (rid) is very important -- it's what we use to determine equality
 		"""
 		self.__dict__.update(locals())
-		self.lp = log(p)
 		
 		if name == '': assert_or_die( len(to) == 1, "GrammarRules with empty names must have only 1 argument")
 		
@@ -47,5 +46,5 @@ class FunctionRule(GrammarRule):
 	""" Just a subtype for when we want to pass distributions to values"""
 	def __init__(self, nt, function, rid, p=1.0, resample_p=1.0):
 		self.__dict__.update(locals())
-		self.lp = log(p)
+		
 		

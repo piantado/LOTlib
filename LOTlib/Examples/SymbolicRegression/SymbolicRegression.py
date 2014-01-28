@@ -44,8 +44,8 @@ def run(*args):
 
 	# populate the finite sample by running the sampler for this many steps
 	for x in mh_sample(initial_hyp, data, STEPS, skip=SKIP):
-		fs.push(x, x.lp)
-		print x.lp, x.prior, x.likelihood, q(x)
+		fs.push(x, x.posterior_score)
+		print x.posterior_score, x.prior, x.likelihood, q(x)
 	
 	return fs
 	
@@ -55,4 +55,4 @@ results = map(run, [ [] ] * CHAINS ) # a not parallel
 finitesample.merge(results)
 
 for r in finitesample.get_all():
-	print r.lp, r.prior, r.likelihood, "\t", q(str(r))
+	print r.posterior_score, r.prior, r.likelihood, "\t", q(str(r))

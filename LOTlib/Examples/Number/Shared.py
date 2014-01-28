@@ -47,8 +47,8 @@ G.add_rule('BOOL', 'cardinality3_',    ['SET'], 1.0)
 G.add_rule('BOOL', 'equal_',    ['WORD', 'WORD'], 1.0)
 
 G.add_rule('SET', 'union_',     ['SET', 'SET'], 1./3.)
-G.add_rule('SET', 'intersection_',     ['SET', 'SET'], 1.0/3.)
-G.add_rule('SET', 'setdifference_',     ['SET', 'SET'], 1.0/3.)
+G.add_rule('SET', 'intersection_',     ['SET', 'SET'], 1./3.)
+G.add_rule('SET', 'setdifference_',     ['SET', 'SET'], 1./3.)
 G.add_rule('SET', 'select_',     ['SET'], 1.0)
 
 G.add_rule('SET', 'x',     None, 4.0)
@@ -91,7 +91,7 @@ class NumberExpression(LOTHypothesis):
 		"""
 			Compute the number model prior
 		"""
-		if self.value.count_nodes() > 12:
+		if self.value.count_nodes() > 20:
 			self.prior = -Infinity
 		else: 
 			if self.value.contains_function("L_"): recursion_penalty = GAMMA

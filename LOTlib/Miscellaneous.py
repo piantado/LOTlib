@@ -26,8 +26,6 @@ import sys
 import math
 import collections
 
-from lockfile import FileLock, LockFailed
-
 import types # for checking if something is a function: isinstance(f, types.FunctionType)
 
 ## Some useful constants

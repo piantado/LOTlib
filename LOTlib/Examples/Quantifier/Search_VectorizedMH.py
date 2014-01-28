@@ -117,9 +117,9 @@ def run(data_size):
 	
 	
 	for g in generator:
-		dprintn(10, data_size, g.lp, g.prior, g.likelihood, g.word_idx)
+		dprintn(10, data_size, g.posterior_score, g.prior, g.likelihood, g.word_idx)
 		dprintn(15, g) # and show the lexicon
-		hypset.push(VectorizedLexicon_to_SimpleLexicon(g), g.lp)
+		hypset.push(VectorizedLexicon_to_SimpleLexicon(g), g.posterior_score)
 		dprintn(15, mhstats.acceptance_ratio())
 		mhstats.clear()
 
@@ -256,5 +256,5 @@ outhyp.save(options.OUT_PATH)
 # for debugging:
 #learner.compute_likelihood()
 #for g in LOTlib.MetropolisHastings.gibbs_sample(learner, data, options.STEPS, dimensions=xrange(len(target.all_words()))):
-	#print g.lp, g.prior, g.likelihood, g.word_idx, "\n", g
+	#print g.posterior_score, g.prior, g.likelihood, g.word_idx, "\n", g
 	

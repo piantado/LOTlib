@@ -14,6 +14,8 @@ import re
 
 import math
 
+from numpy import sign
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # We define two variables, one for how many function calls have been
 # used in a single function/hypothesis, and one for how many have been
@@ -273,7 +275,15 @@ def pow_(x,y):
 	#print x,y
 	try: return pow(x,y)
 	except: return float("nan")
-	
+
+@LOTlib_primitive
+@None2None
+def abspow_(x,y): 
+	""" Absolute power. sign(x)*abs(x)**y """
+	#print x,y
+	try: return sign(x)*pow(abs(x),y)
+	except: return float("nan")
+
 @LOTlib_primitive
 @None2None
 def exp_(x): 

@@ -20,14 +20,15 @@ class LOTProposal(object):
 	def __init__(self, grammar):
 		self.__dict__.update(locals())
 		
-	def __call__(self, h):
+	def __call__(self, h, **kwargs):
 		# A wrapper that calls propose_tree (defined in subclasses) on our tree value
 		# so this manages making LOTHypotheses (or the relevant subclass), and proposal subclasses
 		# can just manage trees
 		p = copy(h)
-		newt, fb = self.propose_tree(h.value)
-		p.set_value(newt)
-		return [p, fb]
+		ret = self.propose_tree(h.value, **kwargs) # don't unpack, since we may return [newt,fb] or [newt,f,b]
+		p.set_value(ret[0])
+		ret[0] = p
+		return ret
 		
 		
 class RegenerationProposal(LOTProposal):
@@ -35,11 +36,14 @@ class RegenerationProposal(LOTProposal):
 		The default in LOTHypothesis
 	"""
 	
-	def propose_tree(self, t):
+	def propose_tree(self, t, separate_fb=False, predicate=lambdaTrue):
+		"""
+			If separate_fb=True -- return [newt, f, b], instead of [newt,f-b]
+		"""
 		newt = copy(t)
 		
 		n, rp, tZ = None, None, None
-		for ni, di, resample_p, Z in self.grammar.sample_node_via_iterate(newt, do_bv=True):
+		for ni, di, resample_p, Z in self.grammar.sample_node_via_iterate(newt, do_bv=True, predicate=predicate):
 			n = ni
 			
 			# re-generate my type from the grammar, and change this functionode
@@ -51,13 +55,16 @@ class RegenerationProposal(LOTProposal):
 			
 			rp = resample_p
 		
-		newZ = self.grammar.resample_normalizer(newt)
+		newZ = self.grammar.resample_normalizer(newt, predicate=predicate)
 		
 		#print "PROPOSED ", newt		
 		f = (log(rp) - log(tZ))   + newt.log_probability()
 		b = (log(rp) - log(newZ)) + t.log_probability()	
 		
-		return [newt,f-b]
+		if separate_fb:
+			return [newt,f, b]
+		else:
+			return [newt,f-b]
 	
 class InsertDeleteProposal(LOTProposal):
 	"""
@@ -274,7 +281,7 @@ class InverseInlineThunk(LOTProposal):
 					# create a new node, the lambda abstraction
 					fn = FunctionNode(self.replacetype, 'apply_', [ \
 						FunctionNode('LAMBDAARG', 'lambda', [ below ], bv_name=varname, bv_type=s.returntype, bv_args=[] ),\
-						FunctionNode('LAMBDATHUNK',  'lambda', [ s     ], bv_name=None, bv_type=None, bv_args=None)\
+						FunctionNode('LAMBDATHUNK',  'lambda', [ s  ], bv_name=None, bv_type=None, bv_args=None)\
 							] )
 					
 					# Now convert into a lambda abstraction

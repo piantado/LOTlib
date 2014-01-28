@@ -97,7 +97,7 @@ class SimpleLexicon(LOTHypothesis):
 		
 	def compute_prior(self):
 		self.prior = sum([x.compute_prior() for x in self.lex.values()])
-		self.lp = self.prior + self.likelihood
+		self.posterior_score = self.prior + self.likelihood
 		return self.prior		
 			
 	# This combines score_utterance with likelihood so that everything is much faster
@@ -139,7 +139,7 @@ class SimpleLexicon(LOTHypothesis):
 			
 			self.likelihood += self.stored_likelihood[i]
 			
-		self.lp = self.prior + self.likelihood
+		self.posterior_score = self.prior + self.likelihood
 		return self.likelihood
 			
 		

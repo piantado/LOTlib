@@ -49,7 +49,7 @@ def run(data_size):
 	# populate the finite sample by running the sampler for this many steps
 	for x in LOTlib.MetropolisHastings.mh_sample(learner, data, SAMPLES, skip=0):
 		print x
-		hypset.push(x, x.lp)
+		hypset.push(x, x.posterior_score)
 	
 	if RUN_MPI: print rank, "is done ", data_size
 	

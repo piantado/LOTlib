@@ -130,12 +130,12 @@ class Grammar:
 			return map(lambda xi: self.generate(x=xi, d=d), x)
 		elif x=='*gaussian*': ## TODO: HIGHLY EXPERIMENTAL!! Wow this is really terrible for mixing...
 			v = np.random.normal()
-			lp = normlogpdf(v, 0.0, 1.0)
-			return FunctionNode(returntype=x, name=str(v), args=None, lp=lp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
+			gp = normlogpdf(v, 0.0, 1.0)
+			return FunctionNode(returntype=x, name=str(v), args=None, generation_probability=gp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
 		elif x=='*uniform*':
 			v = np.random.rand()
-			lp = 0.0
-			return FunctionNode(returntype=x, name=str(v), args=None, lp=lp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
+			gp = 0.0
+			return FunctionNode(returntype=x, name=str(v), args=None, generation_probability=gp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
 		elif x is None:
 			return None
 		elif self.is_nonterminal(x):
@@ -143,7 +143,7 @@ class Grammar:
 			# via nt->returntype, name->name, to->args, 
 			# And recurse
 			
-			r, lp = weighted_sample(self.rules[x], return_probability=True, log=True)
+			r, gp = weighted_sample(self.rules[x], probs=lambda x: x.p, return_probability=True, log=False)
 			#print "SAMPLED:", r
 			
 			if r.bv_type is not None: # adding a rule
@@ -166,9 +166,9 @@ class Grammar:
 			# create the new node
 			if r.bv_type is not None:
 				## UGH, bv_type=r.bv_type -- here bv_type is really bv_returntype. THIS SHOULD BE FIXED
-				return FunctionNode(returntype=r.nt, name=r.name, args=args, lp=lp, bv_type=r.bv_type, bv_name=added.name, bv_args=r.bv_args, ruleid=r.rid )
+				return FunctionNode(returntype=r.nt, name=r.name, args=args, generation_probability=gp, bv_type=r.bv_type, bv_name=added.name, bv_args=r.bv_args, ruleid=r.rid )
 			else:
-				return FunctionNode(returntype=r.nt, name=r.name, args=args, lp=lp, ruleid=r.rid )
+				return FunctionNode(returntype=r.nt, name=r.name, args=args, generation_probability=gp, ruleid=r.rid )
 			return fn
 		elif isFunctionNode(x):
 			#for function Nodes, we are able to generate by copying and expanding the children
@@ -327,18 +327,18 @@ class Grammar:
 			#print ">>", terminals
 			#print ">>", nonterminals
 			
-			Z = logsumexp([ r.lp for r in self.rules[x]] ) # normalizer
+			Z = logsumexp([ r.generation_probability for r in self.rules[x]] ) # normalizer
 			
 			if depth >= 0:
 				# yield each of the rules that lead to terminals
 				for r in terminals:
-					n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), lp=(r.lp - Z), bv_type=r.bv_type, bv_args=r.bv_args, ruleid=r.rid )
+					n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), generation_probability=(r.generation_probability - Z), bv_type=r.bv_type, bv_args=r.bv_args, ruleid=r.rid )
 					yield n
 			
 			if depth > 0:
 				# and expand each nonterminals
 				for r in nonterminals:
-					n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), lp=(r.lp - Z), bv_type=r.bv_type, bv_args=r.bv_args, ruleid=r.rid )
+					n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), generation_probability=(r.generation_probability - Z), bv_type=r.bv_type, bv_args=r.bv_args, ruleid=r.rid )
 					for q in self.increment_tree(n, depth-1): yield q
 		else:   raise StopIteration
 			
@@ -388,7 +388,7 @@ class Grammar:
 			
 			NOTE: This does NOT take into account insert/delete
 			NOTE: Not so simple because we must count multiple paths
-			
+			 TODO: Can we remove yZ?
 			TODO: TEST THIS:
 			
 		"""
@@ -414,10 +414,12 @@ class Grammar:
 				# how many kids are not equal, and where was the last?
 				mismatch_count, mismatch_index = 0, 0
 				
-				for i, xa, ya in zip(xrange(len(x.args)), x.args if x.args is not None else [], y.args if y.args is not None else []):
-					if xa != ya: # checks whole subtree!
-						mismatch_count += 1
-						mismatch_index = i
+				if x.args is not None:
+					for i, xa, ya in zip(xrange(len(x.args)), x.args if x.args is not None else [], \
+										  y.args if y.args is not None else []):
+						if xa != ya: # checks whole subtree!
+							mismatch_count += 1
+							mismatch_index = i
 						
 				if   mismatch_count > 1: # We have to have only selected x,y to regenerate
 					pass

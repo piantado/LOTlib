@@ -31,6 +31,8 @@ class SimpleGenerativeHypothesis(LOTHypothesis):
 		
 		self.likelihood = sum([ data[k] * (log(self.llcounts[k] + sm)-log(nsamples + sm*len(data.keys())) ) for k in data.keys() ])
 		
+		self.posterior_score = self.likelihood + self.prior
+		
 		return self.likelihood
 		
 		

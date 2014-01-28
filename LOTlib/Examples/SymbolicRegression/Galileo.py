@@ -36,8 +36,8 @@ def run(*args):
 	#print initial_hyp
 	# populate the finite sample by running the sampler for this many steps
 	for x in mh_sample(h0, data, STEPS, skip=SKIP):
-		pq.push(x, x.lp)
-		print x.lp, x.prior, x.likelihood, q(x)
+		pq.push(x, x.posterior_score)
+		print x.posterior_score, x.prior, x.likelihood, q(x)
 	
 	return pq
 
@@ -47,6 +47,6 @@ finitesample.merge(results)
 	
 ## and display
 for r in finitesample.get_all(decreasing=False, sorted=True):
-	print r.lp, r.prior, r.likelihood, "\t", q(str(r))
+	print r.posterior_score, r.prior, r.likelihood, "\t", q(str(r))
 	
 	

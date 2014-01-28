@@ -9,6 +9,7 @@ from LOTlib.Grammar import Grammar
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
 G = Grammar()
+
 G.add_rule('START', '', ['QUANT'], 1.0)
 
 # Very simple -- one allowed quantifier
@@ -25,8 +26,8 @@ G.add_rule('BOOL', 'or_', ['BOOL', 'BOOL'], 1.0)
 G.add_rule('BOOL', 'not_', ['BOOL'], 1.0)
 
 # non-terminal arguments get passed as normal python arguments
-G.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'red\''], 5.00) # --> is_color_(OBJECT, 'red') --> OBJECT.color == 'red'
-G.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'blue\''], 5.00) 
+G.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'red\''],   5.00) # --> is_color_(OBJECT, 'red') --> OBJECT.color == 'red'
+G.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'blue\''],  5.00) 
 G.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'green\''], 5.00) 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -64,7 +65,7 @@ h0 = LOTHypothesis(G, args=['S'])
 # MCMC!
 for h in mh_sample(h0, data, 4000): # run sampler
 #for h in unique(mh_sample(h0, data, 4000)): # get unique samples
-	# hypotheses' .prior, .likelihood, and .lp are set in mh_sample
-	print h.likelihood, h.prior, h.lp, h
+	# hypotheses' .prior, .likelihood, and .posterior_score are set in mh_sample
+	print h.likelihood, h.prior, h.posterior_score, h
 
 	

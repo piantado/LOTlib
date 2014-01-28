@@ -11,19 +11,19 @@ class FunctionHypothesis(Hypothesis):
 		This can also be called like a function, as in fh(data)!
 	"""
 	
-	def __init__(self, v=None, f=None, args=['x']):
+	def __init__(self, value=None, f=None, args=['x']):
 		"""
-			v - the value of this hypothesis
+			value - the value of this hypothesis
 			f - defaultly None, in which case this uses self.value2function
 			args - the argumetns to the function
 		"""
 		self.args = args # must come first since below calls value2function
-		Hypothesis.__init__(self,v) # this initializes prior and likleihood variables, so keep it here!
-		self.set_value(v,f)
+		Hypothesis.__init__(self,value) # this initializes prior and likleihood variables, so keep it here!
+		self.set_value(value,f)
 		
 	def __copy__(self):
-		""" Create a copy, only deeply of of v """
-		return FunctionHypothesis(v=copy(self.value), f=self.fvalue, args=self.args)
+		""" Create a copy, only deeply of of value """
+		return FunctionHypothesis(value=copy(self.value), f=self.fvalue, args=self.args)
 		
 	def __call__(self, *vals):
 		""" 
@@ -39,12 +39,12 @@ class FunctionHypothesis(Hypothesis):
 			print "NameError in function call: " + str(self)
 			raise NameError
 	
-	def value2function(self, v):
+	def value2function(self, value):
 		""" How we convert a value into a function. Default is LOTlib.Miscellaneous.evaluate_expression """
 		
 		# Risky here to catch all exceptions, but we'll do it and warn on failure
 		try:
-			return evaluate_expression(v, args=self.args)
+			return evaluate_expression(value, args=self.args)
 		except:
 			print "# Warning: failed to execute evaluate_expression on " + v
 			return lambdaNone
@@ -54,16 +54,17 @@ class FunctionHypothesis(Hypothesis):
 		self.set_value(self.value)
 		
 	
-	def set_value(self, v, f=None):
+	def set_value(self, value, f=None):
 		"""
 		The the value. You optionally can send f, and not write (this is for some speed considerations) but you better be sure f is correct
 		since an error will not be caught!
 		"""
 		
-		Hypothesis.set_value(self,v)
-		if f is not None: self.fvalue = f
-		elif v is None:   self.fvalue = None
-		else:             self.fvalue = self.value2function(v)
+		Hypothesis.set_value(self,value)
+		
+		if f is not None:     self.fvalue = f
+		elif value is None:   self.fvalue = None
+		else:                 self.fvalue = self.value2function(value)
 	
 	def get_function_responses(self, data):
 		""" 

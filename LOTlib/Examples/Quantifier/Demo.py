@@ -31,7 +31,7 @@ for s in mh_sample(learner, data, 10000, skip=10):
 	
 	sstr = re.sub("presup", u"\u03BB A B . presup", sstr)
 	
-	print s.lp, "\t", s.prior, "\t", s.likelihood, "\t", target.likelihood, "\n", sstr, "\n\n"
+	print s.posterior_score, "\t", s.prior, "\t", s.likelihood, "\t", target.likelihood, "\n", sstr, "\n\n"
 	
 	
 

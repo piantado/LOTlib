@@ -37,8 +37,11 @@ def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_
 		mem = memoizer( lambda h: h.compute_posterior(data), N=memN)
 	
 	for mhi in xrange(steps):
+		if LOTlib.SIG_INTERRUPTED: break
+	
 		for skp in xrange(skip+1):
-			
+			if LOTlib.SIG_INTERRUPTED: break
+		
 			if proposer is None: p, fb = current_sample.propose()
 			else:                p, fb = proposer(current_sample)
 			
@@ -58,7 +61,7 @@ def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_
 			cur  = (current_sample.prior/prior_temperature + current_sample.likelihood/ll_temperature)/temperature
 			
 			if trace: 
-				print "# Proposing: ", r, prop, cur, fb
+				print "# Proposing: ", prop, cur, fb
 				print "# From: ", current_sample
 				print "# To:   ", p
 			
@@ -76,7 +79,7 @@ def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_
 			
 		yield current_sample
 		
-		if LOTlib.SIG_INTERRUPTED: break
+		
 
 	#print mem.hits, mem.misses
 			
@@ -91,6 +94,15 @@ def mhgibbs_sample(inh, data, steps, proposer=None, mh_steps=10, gibbs_steps=10,
 		if LOTlib.SIG_INTERRUPTED: break
 
 		
-
+	
+if __name__ == "__main__":
+	
+	from LOTlib.Examples.Number.Shared import *
+	
+	data = generate_data(500)
+	h0 = NumberExpression(G)	
+	for h in mh_sample(h0, data, 10000):
+		print q(get_knower_pattern(h)), h.lp, h.prior, h.likelihood, q(h)
+		  
 	
 

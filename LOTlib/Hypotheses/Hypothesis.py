@@ -10,19 +10,19 @@ class Hypothesis(object):
 		- optionally, compute_likelihood stores self.stored_likelihood, giving the undecayed likelihood on each data point
 	"""
 	
-	def __init__(self, v=None):
-		self.set_value(v) # to zero out prior, likelhood, lp
-		self.prior, self.likelihood, self.lp = [-Infinity, -Infinity, -Infinity] 
+	def __init__(self, value=None):
+		self.set_value(value) # to zero out prior, likelhood, posterior_score
+		self.prior, self.likelihood, self.posterior_score = [-Infinity, -Infinity, -Infinity] 
 		self.stored_likelihood = None
 		POSTERIOR_CALL_COUNTER = 0
 	
-	def set_value(self, v): 
-		""" Sets the (self.)value of this hypothesis to v"""
-		self.value = v
+	def set_value(self, value): 
+		""" Sets the (self.)value of this hypothesis to value"""
+		self.value = value
 		
 	def __copy__(self):
 		""" Returns a copy of myself by calling copy() on self.value """
-		return Hypothesis(v=self.value.copy())
+		return Hypothesis(value=self.value.copy())
 		
 	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 	# All instances of this must implement these:
@@ -95,7 +95,7 @@ class Hypothesis(object):
 		LOTlib.BasicPrimitives.LOCAL_PRIMITIVE_OPS = 0 # Reset this
 		p = self.compute_prior()
 		l = self.compute_likelihood(d)
-		self.lp = p+l
+		self.posterior_score = p+l
 		return [p,l]
 		
 	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -115,7 +115,7 @@ class Hypothesis(object):
 	
 	# this is for heapq algorithm in FiniteSample, which uses <= instead of cmp
 	# since python implements a "min heap" we can compar elog probs
-	def __le__(self, x): return (self.lp <= x.lp)
+	def __le__(self, x): return (self.posterior_score <= x.posterior_score)
 	def __eq__(self, other): 
 		return (self.value.__eq__(other.value))
 	def __ne__(self, other): return (self.value.__ne__(other.value))

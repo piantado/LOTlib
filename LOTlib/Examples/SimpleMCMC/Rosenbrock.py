@@ -21,11 +21,13 @@ class RosenbrockSampler(VectorHypothesis):
 	"""
 	def compute_likelihood(self, data): 
 		self.likelihood = 0.0
+		self.posterior_score = self.prior + self.likelihood
 		return self.likelihood
 		
 	def compute_prior(self):
 		x,y = self.v
 		self.prior = -((1.0-x)**2.0 + 100.0*(y-x**2.0)**2.0)
+		self.posterior_score = self.prior + self.likelihood
 		return self.prior
 		
 	
@@ -40,4 +42,4 @@ if __name__ == "__main__":
 	initial_hyp = RosenbrockSampler()
 	
 	for x in mh_sample(initial_hyp, [], 1000000, skip=100, trace=False): 
-		print x, x.lp
+		print x, x.posterior_score
