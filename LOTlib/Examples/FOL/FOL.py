@@ -51,7 +51,7 @@ from LOTlib.Inference.MetropolisHastings import mh_sample # for running MCMC
 
 
 # Make up some data -- here just one set containing {red, red, green} colors
-data = [ FunctionData(args=[ {Obj(color='red'), Obj(color='red'), Obj(color='green')} ], \
+data = [ FunctionData(input=[ {Obj(color='red'), Obj(color='red'), Obj(color='green')} ], \
 	              output=True) ]
 
 # Create an initial hypothesis

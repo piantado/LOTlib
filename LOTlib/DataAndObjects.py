@@ -14,17 +14,17 @@ from LOTlib.Miscellaneous import weighted_sample
 class FunctionData:
 	"""
 		This is a nicely wrapped kind of data--if we give it to a FunctionHypothesis, it knows
-		to extract the "args" (NOT the output) and run those on FunctionHypothesis.value(*args)
+		to extract the "input" (NOT the output) and run those on FunctionHypothesis.value(*input)
 		So when you have functional hypotheses, this is a convenient form of data
 	"""
 	
-	def __init__(self, args, output, **kwargs):
-		self.args = args
+	def __init__(self, input, output, **kwargs):
+		self.input = input
 		self.output = output
 		self.__dict__.update(kwargs)
 		
 	def __repr__(self): 
-		return '<' + ','.join(map(str, self.args)) + " -> " + str(self.output) + '>'
+		return '<' + ','.join(map(str, self.input)) + " -> " + str(self.output) + '>'
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

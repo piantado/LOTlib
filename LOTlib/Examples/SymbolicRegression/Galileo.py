@@ -9,12 +9,12 @@ from Shared import *
 # NOTE: these must be floats, else we get hung up on powers of ints
 LL_SD = 50.0
 data = [ 
-         FunctionData(args=[1000.], output=1500., ll_sd=LL_SD),\
-         FunctionData(args=[828.], output=1340., ll_sd=LL_SD),\
-         FunctionData(args=[800.], output=1328., ll_sd=LL_SD),\
-         FunctionData(args=[600.], output=1172., ll_sd=LL_SD),\
-         FunctionData(args=[300.], output=800., ll_sd=LL_SD), \
-         FunctionData(args=[0.], output=0., ll_sd=LL_SD) # added 0,0 since it makes physical sense. 
+         FunctionData(input=[1000.], output=1500., ll_sd=LL_SD),\
+         FunctionData(input=[828.], output=1340., ll_sd=LL_SD),\
+         FunctionData(input=[800.], output=1328., ll_sd=LL_SD),\
+         FunctionData(input=[600.], output=1172., ll_sd=LL_SD),\
+         FunctionData(input=[300.], output=800., ll_sd=LL_SD), \
+         FunctionData(input=[0.], output=0., ll_sd=LL_SD) # added 0,0 since it makes physical sense. 
 	]
 	
 CHAINS = 10

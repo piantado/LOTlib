@@ -16,13 +16,13 @@ ALPHA = 0.9
 
 # here just doubling x :-> cons(x,x)
 data = [
-	FunctionData( args=[ [] ], output=[[],[]] ),
-	FunctionData( args=[ [[]] ], output=[[[]], [[]]] ),
+	FunctionData( input=[ [] ],   output=[[],[]] ),
+	FunctionData( input=[ [[]] ], output=[[[]], [[]]] ),
        ]
        
  # A little more interesting. Squaring: N parens go to N^2
 #data = [
-	#FunctionData( args=[[  [ [] ] * i  ]], output=[ [] ] * (i**2) ) \
+	#FunctionData( input=[[  [ [] ] * i  ]], output=[ [] ] * (i**2) ) \
 	#for i in xrange(1,10)
        #]  
        
@@ -32,5 +32,5 @@ for x in mh_sample(h0, data, STEPS):
 	
 	print x.lp, x
 	for di in data:
-		print "\t", di.args, "->", x(*di.args), " ; should be ", di.output
+		print "\t", di.input, "->", x(*di.input), " ; should be ", di.output
 	

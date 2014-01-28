@@ -79,7 +79,7 @@ class FunctionHypothesis(Hypothesis):
 			#print ">>", di, di.__class__.__name__, type(di), isinstance(di, FunctionData)
 			r = None
 			try:
-				if   isinstance(di, FunctionData):  r = self(*di.args)
+				if   isinstance(di, FunctionData):  r = self(*di.input)
 				elif isinstance(di, UtteranceData): r = self(*di.context)
 				else:                               r = self(*di) # otherwise just pass along
 			except RecursionDepthException: pass # If there is a recursion depth exception, just ignore (so r=None)

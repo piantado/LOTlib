@@ -34,7 +34,7 @@ class SchemeFunction(LOTHypothesis):
 		
 		for di in data:
 			# We'll just use a string comparison on outputs here
-			if str(self(*di.args)) == str(di.output):  
+			if str(self(*di.input)) == str(di.output):  
 				self.likelihood += log(self.ALPHA)
 			else:                       
 				self.likelihood += log(1.0-self.ALPHA)
