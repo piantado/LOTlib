@@ -52,7 +52,6 @@ def None2None(fn):
 		If you want to have this not prevent incrementing (via LOTlib_primitive), then 
 		we need to put it *after* LOTlib_primitive:
 		
-		@LOTlib_primitive
 		@None2None
 		def f(...):
 	"""
@@ -77,18 +76,15 @@ E = math.e
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 @LOTlib_primitive
-@None2None
 def apply_(f,*args):
 	return f(*args)
 	
 @LOTlib_primitive
-@None2None
 def cons_(x,y):
 	try: return [x,y]
 	except: return None
 
 @LOTlib_primitive
-@None2None
 def cdr_(x):
 	try:
 		if not isinstance(x, str):
@@ -100,7 +96,6 @@ def cdr_(x):
 rest_  = cdr_
 
 @LOTlib_primitive
-@None2None
 def car_(x):
 	try:
 		if not isinstance(x, str):
@@ -116,17 +111,14 @@ first_ = car_
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 @LOTlib_primitive
-@None2None
 def I_(x):
 	return x
 	
 @LOTlib_primitive
-@None2None
 def K_(x): # constant function
 	return (lambda y: x)
 	
 @LOTlib_primitive	
-@None2None
 def S_(x): #(S x y z) = (x z (y z))
 	# (S x) --> lambda y lambda z: 
 	return lambda y: lambda z: x(z)( y(z) )
@@ -136,7 +128,6 @@ def S_(x): #(S x y z) = (x z (y z))
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 @LOTlib_primitive
-@None2None
 def presup_(a,b):
 	if a: return b
 	else: 
@@ -144,7 +135,6 @@ def presup_(a,b):
 		else: return "undefF"
 		
 @LOTlib_primitive
-@None2None
 def is_undef(x):
 	if isinstance(x,list): 
 		return map(is_undef, x)
@@ -152,7 +142,6 @@ def is_undef(x):
 		return (x is None) or (x =="undefT") or (x == "undefF") or (x == "undef")
 		
 @LOTlib_primitive
-@None2None
 def collapse_undef(x):
 	"""
 		Change undefT->True and undefF->False
@@ -215,69 +204,57 @@ def ASIN(x): return math.asin(x)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 @LOTlib_primitive
-@None2None
 def negative_(x): return -x
 def neg_(x): return -x
 
 @LOTlib_primitive
-@None2None
 def plus_(x,y): return x+y
 
 @LOTlib_primitive
-@None2None
 def times_(x,y): return x*y
 
 @LOTlib_primitive
-@None2None
 def divide_(x,y): 
 	if y != 0.: return x/y
 	else:     return float("inf")*x
 	
 @LOTlib_primitive
-@None2None
 def subtract_(x,y): return x-y
 
 	
 @LOTlib_primitive
-@None2None
 def minus_(x,y): return x-y
 
 @LOTlib_primitive
-@None2None
 def sin_(x): 
 	try:
 		return math.sin(x)
 	except: return float("nan")
 
 @LOTlib_primitive
-@None2None
 def cos_(x): 
 	try:
 		return math.cos(x)
 	except: return float("nan")
 
 @LOTlib_primitive
-@None2None
 def tan_(x): 
 	try:
 		return math.tan(x)
 	except: return float("nan")
 
 @LOTlib_primitive	
-@None2None
 def sqrt_(x): 
 	try: return math.sqrt(x)
 	except: return float("nan")
 
 @LOTlib_primitive
-@None2None
 def pow_(x,y): 
 	#print x,y
 	try: return pow(x,y)
 	except: return float("nan")
 
 @LOTlib_primitive
-@None2None
 def abspow_(x,y): 
 	""" Absolute power. sign(x)*abs(x)**y """
 	#print x,y
@@ -285,7 +262,6 @@ def abspow_(x,y):
 	except: return float("nan")
 
 @LOTlib_primitive
-@None2None
 def exp_(x): 
 	try: 
 		r = math.exp(x)
@@ -294,7 +270,6 @@ def exp_(x):
 		return float("inf")*x
 
 @LOTlib_primitive
-@None2None
 def abs_(x): 
 	try: 
 		r = abs(x)
@@ -304,24 +279,20 @@ def abs_(x):
 		
 		
 @LOTlib_primitive	
-@None2None
 def log_(x): 
 	if x > 0: return math.log(x)
 	else: return -float("inf")
 
 @LOTlib_primitive
-@None2None
 def log2_(x): 
 	if x > 0: return math.log(x)/log(2.0)
 	else: return -float("inf")
 	
 @LOTlib_primitive
-@None2None
 def pow2_(x): 
 	return math.pow(2.0,x)
 
 @LOTlib_primitive
-@None2None
 def mod_(x,y):
 	if y==0.0: return float("nan")
 	return (x%y)
@@ -337,103 +308,79 @@ https://en.wikipedia.org/wiki/Truth_function#Table_of_binary_truth_functions
 
 
 @LOTlib_primitive
-@None2None
 def id_(A): return A # an identity function
 
 @LOTlib_primitive
-@None2None
 def and_(A,B): return (A and B)
 
 @LOTlib_primitive
-@None2None
 def AandnotB_(A,B): return (A and (not B))
 
 @LOTlib_primitive
-@None2None
 def notAandB_(A,B): return ((not A) and B)
 
 @LOTlib_primitive
-@None2None
 def AornotB_(A,B): return (A or (not B))
 
 @LOTlib_primitive
-@None2None
 def A_(A,B): return A
 
 @LOTlib_primitive
-@None2None
 def notA_(A,B): return not A
 
 @LOTlib_primitive
-@None2None
 def B_(A,B): return B
 
 @LOTlib_primitive
-@None2None
 def notB_(A,B): return not B
 
 @LOTlib_primitive
-@None2None
 def nand_(A,B): return not (A and B)
 
 @LOTlib_primitive
-@None2None
 def or_(A,B): return (A or B)
 
 @LOTlib_primitive
-@None2None
 def nor_(A,B): return not (A or B)
 
 @LOTlib_primitive
-@None2None
 def xor_(A,B): return (A and (not B)) or ((not A) and B)
 
 @LOTlib_primitive
-@None2None
 def not_(A): return (not A)
 
 @LOTlib_primitive
-@None2None
 def implies_(A,B): return (A or (not B))
 
 @LOTlib_primitive
-@None2None
 def iff_(A,B): return ((A and B) or ((not A) and (not B)))
 
 @LOTlib_primitive
-@None2None
 def if_(C,X,Y):
 	if C: return X
 	else: return Y
 
 @LOTlib_primitive
-@None2None
 def ifU_(C,X):
 	if C: return X
 	else: return 'undef'
 
 @LOTlib_primitive
-@None2None
 def gt_(x,y): return x>y
 
 @LOTlib_primitive
-@None2None
 def gte_(x,y): return x>=y
 
 @LOTlib_primitive
-@None2None
 def lt_(x,y): return x<y
 
 @LOTlib_primitive
-@None2None
 def lte_(x,y): return x<=y
 
 @LOTlib_primitive
-@None2None
 def eq_(x,y): return x==y
 
 @LOTlib_primitive
-@None2None
 def zero_(x,y): return x==0.0
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -441,19 +388,15 @@ def zero_(x,y): return x==0.0
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 @LOTlib_primitive
-@None2None
 def union_(A,B): return A.union(B)
 
 @LOTlib_primitive
-@None2None
 def intersection_(A,B): return A.intersection(B)
 
 @LOTlib_primitive
-@None2None
 def setdifference_(A,B): return A.difference(B)
 
 @LOTlib_primitive
-@None2None
 def select_(A): # choose an element, but don't remove it
 	if len(A) > 0:
 		x = A.pop()
@@ -462,54 +405,42 @@ def select_(A): # choose an element, but don't remove it
 	else: return set() # empty set
 
 @LOTlib_primitive
-@None2None
 def exhaustive_(A,B): return coextensive(A,B)
 
 @LOTlib_primitive
-@None2None
 def coextensive_(A,B): return coextensive(A,B)
 def coextensive(A,B): # are the two sets coextensive?
 	#print A,B
 	return (A.issubset(B) and B.issubset(A))
 
 @LOTlib_primitive
-@None2None
 def equal_(A,B): return (A == B)
 
 @LOTlib_primitive
-@None2None
 def equal_word_(A,B): return (A == B)
 
 @LOTlib_primitive
-@None2None
 def empty_(A): return (len(A)==0)
 
 @LOTlib_primitive
-@None2None
 def nonempty_(A): return not empty_(A)
 
 @LOTlib_primitive
-@None2None
 def cardinality1_(A): return (len(A)==1)
 
 @LOTlib_primitive
-@None2None
 def cardinality2_(A): return (len(A)==2)
 
 @LOTlib_primitive
-@None2None
 def cardinality3_(A): return (len(A)==3)
 
 @LOTlib_primitive
-@None2None
 def cardinality4_(A): return (len(A)==4)
 
 @LOTlib_primitive
-@None2None
 def cardinality5_(A): return (len(A)==5)
 
 @LOTlib_primitive
-@None2None
 def cardinality_(A): return len(A)
 
 # returns cardinalities of sets and otherwise numbers -- for duck typing sets/ints
@@ -518,19 +449,15 @@ def cardify(x):
 	else: return x
 
 @LOTlib_primitive
-@None2None
 def cardinalityeq_(A,B): return cardify(A) == cardify(B)
 
 @LOTlib_primitive
-@None2None
 def cardinalitygt_(A,B): return cardify(A) > cardify(B)
 
 @LOTlib_primitive
-@None2None
 def cardinalitylt_(A,B): return cardify(A) > cardify(B)
 
 @LOTlib_primitive
-@None2None
 def subset_(A,B):
 	return A.issubset(B)
 
@@ -539,7 +466,6 @@ def subset_(A,B):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 @LOTlib_primitive
-@None2None
 def flip_():
 	return flip(0.5)
 
@@ -548,11 +474,9 @@ def flip_():
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 @LOTlib_primitive
-@None2None
 def not_exists_(F,S): return not exists_(F,S)
 
 @LOTlib_primitive
-@None2None
 def exists_(F,S): return exists(F,S)
 def exists(F,S):
 	#if not isinstance(S,list): return None
@@ -561,11 +485,9 @@ def exists(F,S):
 	return False
 
 @LOTlib_primitive	
-@None2None
 def not_forall_(F,S): return not forall(F,S)	
 
 @LOTlib_primitive
-@None2None
 def forall_(F,S): return forall(F,S)
 
 def forall(F,S):
@@ -575,7 +497,6 @@ def forall(F,S):
 	return True
 	
 @LOTlib_primitive
-@None2None
 def iota_(F,S):
 	"""
 		The unique F in S. If none, or not unique, return None
@@ -593,11 +514,9 @@ def iota_(F,S):
 # not used, but we leave it in all functions for simplicity
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 @LOTlib_primitive
-@None2None
 def is_(x,y): return (x is y)
 
 @LOTlib_primitive
-@None2None
 def co_referents_(T,x):
 	"""
 		The co-referents of x in t
@@ -605,7 +524,6 @@ def co_referents_(T,x):
 	return filter(lambda si: co_refers(si,x), T)
 
 @LOTlib_primitive
-@None2None
 def sisters_(T, x, y, equality=False):
 	"""
 		Check if x,y are sisters in T
@@ -623,12 +541,10 @@ def immediately_dominates(x, y):
 	return False
 	
 @LOTlib_primitive
-@None2None
 def immediately_dominates_(x, y):
 	return immediately_dominates(x,y)
 	
 @LOTlib_primitive
-@None2None
 def dominates_(x,y):
 	"""
 		This checks if x >> y, but using object identity ("is") rather than equality
@@ -640,7 +556,6 @@ def dominates_(x,y):
 	return False
 	
 @LOTlib_primitive
-@None2None
 def tree_up_(T,x): return tree_up(T,x)
 
 #@Define a non-LOTlib version for defining others
@@ -659,24 +574,20 @@ def tree_up(T, x):
 
 	
 @LOTlib_primitive
-@None2None
 def children_(x): 
 	if isinstance(x, FunctionNode): return [ c for c in x.args ]
 	else: return []
 	
 @LOTlib_primitive	
-@None2None
 def descendants_(x):        
 	if isinstance(x, FunctionNode): return [ c for c in x ]
 	else: return []
 
 @LOTlib_primitive
-@None2None
 def tree_root_(T):
 	return T
 
 @LOTlib_primitive
-@None2None
 def is_nonterminal_type_(x,y): return is_nonterminal_type(x,y)
 
 no_coref_regex = re.compile(r"\..+$")
@@ -693,7 +604,6 @@ def is_nonterminal_type(x,y):
 	return (x==y)
 
 @LOTlib_primitive
-@None2None
 def ancestors_(T, x): return ancestors(T,x)
 
 #def ancestors(T,x):
@@ -727,19 +637,16 @@ def ancestors(T,x):
 	return anc
 	
 @LOTlib_primitive
-@None2None
 def whole_tree_(T):
 	# LIST type of all elements of T
 	return [ti for ti in T ]
 
 @LOTlib_primitive
-@None2None
 def tree_is_(x,y): return (x is y)
 
 ## Co-reference (via strings)
 coref_matcher = re.compile(r".+\.([0-9]+)$")
 @LOTlib_primitive
-@None2None
 def co_refers_(x,y): return co_refers(x,y)
 
 def co_refers(x,y):
@@ -759,12 +666,10 @@ def co_refers(x,y):
 		return (mx.groups("X")[0] == my.groups("Y")[0]) # set the default in groups so that they won't be equal if there is no match
 
 @LOTlib_primitive
-@None2None
 def non_xes_(x,T):
 	return filter(lambda v: v is not x, T)
 
 @LOTlib_primitive
-@None2None
 def first_dominating_(T,x,t):
 	# Returns the first thing dominating x of type t
 	# And None otherwise
@@ -778,7 +683,6 @@ def first_dominating_(T,x,t):
 	return None
 
 @LOTlib_primitive
-@None2None
 def first_dominated_(x,t):
 	# Returns the first thing dominating x of type t
 	# And None otherwise
@@ -794,7 +698,6 @@ def first_dominated_(x,t):
 
 ## TODO: Add transitive closure of an operation
 @LOTlib_primitive
-@None2None
 def filter_(f,x):
 	return filter(f,x)
 
@@ -825,11 +728,9 @@ word_to_number['undef'] = 'U'
 prev_hash[None] = None
 
 @LOTlib_primitive
-@None2None
 def next_(w): return next_hash[w]
 
 @LOTlib_primitive
-@None2None
 def prev_(w): return prev_hash[w]
 
 # and define these
@@ -880,15 +781,12 @@ def F10(x): return x.F10
 
 # Some of our own primitivesS
 @LOTlib_primitive
-@None2None
 def is_color_(x,y): return (x.color == y)
 
 @LOTlib_primitive
-@None2None
 def is_shape_(x,y): return (x.shape == y)
 
 @LOTlib_primitive
-@None2None
 def is_pattern_(x,y): return (x.pattern == y)
 
 
