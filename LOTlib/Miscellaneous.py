@@ -98,8 +98,9 @@ def fprintn(dl, *args, **kwargs):
 		print >>o, "\n",
 		if f is not sys.stdout: o.close()
 		
-def q(x, quote='\"'): return quote+str(x)+quote
-	
+def q(x, quote='\''): return quote+str(x)+quote
+def qq(x): return q(x,quote="\"")
+
 def display(x): print x
 	
 # for functional programming, print something and return it
@@ -351,11 +352,9 @@ def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, 
 	
 	myprobs = None
 	if probs is None: # defaultly, we use .lp
-		probs = map(lambda x: float(x.lp), objs)
+		myprobs = [1.0] * len(objs) # sample uniform
 	elif isinstance(probs, types.FunctionType): #NOTE: this does not work for class instance methods
 		myprobs = map(probs, objs)
-	elif (not isinstance(probs, list)) and probs == 1:
-		myprobs = [1.0] * len(objs) # sample uniform
 	else: 
 		myprobs = map(float, probs)
 	

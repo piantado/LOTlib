@@ -176,7 +176,7 @@ def generate_data(data_size):
 		
 		# sample according to the target
 		if random() < ALPHA: r = WORDS[len(s)-1]
-		else:                r = weighted_sample( WORDS, probs=1 )
+		else:                r = weighted_sample( WORDS )
 		
 		# and append the sampled utterance
 		data.append(FunctionData( input=[s], output=r) ) # convert to "FunctionData" and store
