@@ -33,7 +33,7 @@ class FunctionHypothesis(Hypothesis):
 			#print self
 			return self.fvalue(*vals)
 		except TypeError:
-			print "TypeError in function call: "+str(self)
+			print "TypeError in function call: "+str(self)+"  ;  "+str(vals)
 			raise TypeError
 		except NameError:
 			print "NameError in function call: " + str(self)

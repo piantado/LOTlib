@@ -86,16 +86,14 @@ def cons_(x,y):
 
 @LOTlib_primitive
 def cdr_(x):
-	try:
-		return x[1:]
+	try:    return x[1:]
 	except: return []
 
 rest_  = cdr_
 
 @LOTlib_primitive
 def car_(x):
-	try:
-		return x[0]
+	try:    return x[0]
 	except: return []
 
 first_ = car_
@@ -595,7 +593,8 @@ def is_nonterminal_type(x,y):
 	# Check if x is of a given type, but remove corefence information from X (y is the type)
 	
 	if x is None or y is None: return False
-	
+	if isinstance(x,list): return False # a list can't be a nonterminal
+
 	if not isinstance(x,str): x = x.name
 	
 	# remove the .coreference info
@@ -644,14 +643,18 @@ def whole_tree_(T):
 @LOTlib_primitive
 def tree_is_(x,y): return (x is y)
 
-## Co-reference (via strings)
-coref_matcher = re.compile(r".+\.([0-9]+)$")
+
 @LOTlib_primitive
 def co_refers_(x,y): return co_refers(x,y)
 
+coref_matcher = re.compile(r".+\.([0-9]+)$") ## Co-reference (via strings)
 def co_refers(x,y):
 	
 	if x is y: return False # By stipulation, nothing co-refers to itself
+	
+	# Weird corner cases
+	if isinstance(x,list) or isinstance(y,list): return False
+	if x is None or y is None: return False
 	
 	## Check if two FunctionNodes or strings co-refer (e.g. are indexed with the same .i in their name)
 	xx = x.name if isFunctionNode(x) else x

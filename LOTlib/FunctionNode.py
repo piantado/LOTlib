@@ -24,9 +24,9 @@ def list2FunctionNode(l, style="atis"):
 		elif style is 'atis':
 			rec = lambda x: list2FunctionNode(x, style=style) # a wrapper to my recursive self
 			if l[0] == 'lambda':
-				return FunctionNode('FUNCTION', 'lambda', [rec(l[3])], generation_probability=0.0, bv_type=[l[1]] ) ## TOOD: HMM WHAT IS THE BV?
+				return FunctionNode('FUNCTION', 'lambda', [rec(l[3])], generation_probability=0.0, bv_type=l[1], bv_args=None ) ## TOOD: HMM WHAT IS THE BV?
 			else:
-				return FunctionNode(l[0], l[0], map(rec, l[1:]), generation_probability=0.0, bv_type='')
+				return FunctionNode(l[0], l[0], map(rec, l[1:]), generation_probability=0.0)
 		elif sytle is 'scheme':
 			pass #TODO: Add this scheme functionality -- basically differnet handling of lambda bound variables
 			
