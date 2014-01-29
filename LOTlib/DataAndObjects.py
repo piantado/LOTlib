@@ -87,6 +87,6 @@ def make_all_objects(**f):
 
 # make a set of size N appropriate to using "set" functions on -- this means it must contain copies, not duplicate references
 def sample_sets_of_objects(N, objs):
-	s = weighted_sample(objs, N=N, returnlist=True) # the set of objects
+	s = weighted_sample(objs, probs=1, N=N, returnlist=True) # the set of objects
 	return map(deepcopy, s) # the set must NOT be just the pointers sampled, since then set() operations will collapse them!
 	

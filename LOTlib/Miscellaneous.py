@@ -339,6 +339,10 @@ def flip(p): return (random() < p)
 # returnlist makes the return always a list (even if N=1); otherwise it is a list for N>1 only
 # NOTE: This now can take probs as a function, which is then mapped!
 def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, returnlist=False, Z=None):
+	"""
+	
+		when we return_probability, it is *always* a log probability
+	"""
 	# check how probabilities are specified
 	# either as an argument, or attribute of objs (either probability or lp
 	# NOTE: THis ALWAYS returns a log probability
@@ -346,22 +350,14 @@ def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, 
 	if len(objs) == 0: return None
 	
 	myprobs = None
-	if probs is None:
-		if hasattr(objs[0], 'probability'): # may be log or not
-			myprobs = map(lambda x: x.probability, objs)
-			log = False
-		elif hasattr(objs[0], 'lp'): # MUST be logs
-			myprobs = map(lambda x: x.lp, objs)
-			log = True 
-		else:
-			myprobs = [1.0] * len(objs) # sample uniform
+	if probs is None: # defaultly, we use .lp
+		probs = map(lambda x: float(x.lp), objs)
 	elif isinstance(probs, types.FunctionType): #NOTE: this does not work for class instance methods
 		myprobs = map(probs, objs)
+	elif (not isinstance(probs, list)) and probs == 1:
+		myprobs = [1.0] * len(objs) # sample uniform
 	else: 
-		myprobs = probs
-	
-	# make sure these are floats or things go badly
-	myprobs = map(float, myprobs)
+		myprobs = map(float, probs)
 	
 	# Now normalize and run
 	if Z == None:

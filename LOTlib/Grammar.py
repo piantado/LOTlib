@@ -144,6 +144,7 @@ class Grammar:
 			# And recurse
 			
 			r, gp = weighted_sample(self.rules[x], probs=lambda x: x.p, return_probability=True, log=False)
+			
 			#print "SAMPLED:", r
 			
 			if r.bv_type is not None: # adding a rule

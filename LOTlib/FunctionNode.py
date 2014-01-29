@@ -70,7 +70,7 @@ class FunctionNode(object):
 			shallow - if True, this does not copy the children (self.to points to the same as what we return)
 		"""
 		if (not shallow) and self.args is not None:
-			newargs = [copy(x) if isFunctionNode(x) else deepcopy(x) for x in self.args]
+			newargs = map(copy, self.args) 
 		else:
 			newargs = self.args
 		
@@ -177,20 +177,13 @@ class FunctionNode(object):
 	
 	def log_probability(self):
 		"""
-			Returns the log probability of this node. This is computed by the log probability of each argument,
-			UNLESS "my_log_probability" is defined, and then it returns that
+		Compute the log probability of a tree
 		"""
-		if hasattr(self, 'my_log_probability'):
-			#print ">!!>>", t, self.my_log_probability
-			return self.my_log_probability
-		else:
-			lp = self.generation_probability # the probability of my rule
-			if self.args is None: return lp
-			for i in range(len(self.args)):
-				if isFunctionNode(self.args[i]):
-					#print "\t<", self.args[i], self.args[i].log_probability(), ">\n"
-					lp = lp + self.args[i].log_probability() # plus all children
-			return lp
+		lp = self.generation_probability # the probability of my rule
+		
+		if self.args is not None: 
+			lp += sum([x.log_probability() for x in self.args if isFunctionNode(x)])
+		return lp
 	
 	def subnodes(self):
 		"""

@@ -37,31 +37,8 @@ G.add_rule('EXPR', 'x', None, 10.0) # these terminals should have None for their
 
 G.add_rule('EXPR', '1.0', None, 100.0)
 
-
 #G.add_rule('CONSTANT', '', ['*gaussian*'], 10.0) ##TODO: HIGHLY EXPERIMENTAL
 
-# IF we want to define other constants:
-#G.add_rule('EXPR', '', ['CONSTANT'], 10.0, resample_p=10000.0)
-
-#G.add_rule('EXPR', 'PI', None, 1.0) # these terminals should have None for their function type; the literals
-#G.add_rule('EXPR', 'E', None, 1.0) # these terminals should have None for their function type; the literals
-
-#G.add_rule('CONSTANT', '0.0', None, 1.0)
-#G.add_rule('CONSTANT', '2.0', None, 0.10)
-#G.add_rule('CONSTANT', '3.0', None, 0.10)
-#G.add_rule('CONSTANT', '4.0', None, 0.10)
-#G.add_rule('CONSTANT', '5.0', None, 0.10)
-#G.add_rule('CONSTANT', '6.0', None, 0.10)
-#G.add_rule('CONSTANT', '7.0', None, 0.10)
-#G.add_rule('CONSTANT', '8.0', None, 0.10)
-#G.add_rule('CONSTANT', '9.0', None, 0.10)
-
-#G.add_rule('CONSTANT', '0.01', None, 0.10)
-#G.add_rule('CONSTANT', '0.10', None, 0.10)
-#G.add_rule('CONSTANT', '10.0', None, 0.10)
-#G.add_rule('CONSTANT', '100.0', None, 0.10)
-#G.add_rule('CONSTANT', '1000.0', None, 0.10)
-#G.add_rule('CONSTANT', '10000.0', None, 0.10)
 
 
 

@@ -110,9 +110,8 @@ class InsertDeleteProposal(LOTProposal):
 				if len(replicating_rules) == 0: continue
 				
 				# choose a replicating rule; NOTE: this is done uniformly in this step, for simplicity
-				r = sample1(replicating_rules)
-				
-				lp = r.lp - logsumexp([x.lp for x in self.grammar.rules[ni.returntype]]) # this is the probability overall in the grammar, not my prob of sampling
+				r, gp = weighted_sample(replicating_rules, probs=lambda x: x.p, return_probability=True, log=False)
+				gp = log(r.p) - sum([x.p for x in self.grammar.rules[ni.returntype]]) # this is the probability overall in the grammar, not my prob of sampling
 				
 				# Now take the rule and expand the children:
 				
@@ -137,7 +136,7 @@ class InsertDeleteProposal(LOTProposal):
 				
 				# create the new node
 				sampled = True
-				ni.setto( FunctionNode(returntype=r.nt, name=r.name, args=args, lp=lp, bv_name=None, bv_args=None, ruleid=r.rid, resample_p=r.resample_p ) )
+				ni.setto( FunctionNode(returntype=r.nt, name=r.name, args=args, generation_probability=gp, bv_name=None, bv_args=None, ruleid=r.rid, resample_p=r.resample_p ) )
 				
 			if sampled:
 				

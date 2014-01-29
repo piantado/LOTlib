@@ -87,22 +87,16 @@ def cons_(x,y):
 @LOTlib_primitive
 def cdr_(x):
 	try:
-		if not isinstance(x, str):
-			return x[1:]
-		else:
-			return None
-	except: return None
+		return x[1:]
+	except: return []
 
 rest_  = cdr_
 
 @LOTlib_primitive
 def car_(x):
 	try:
-		if not isinstance(x, str):
-			return x[0] 
-		else:
-			return None
-	except: return None
+		return x[0]
+	except: return []
 
 first_ = car_
 
@@ -398,11 +392,17 @@ def setdifference_(A,B): return A.difference(B)
 
 @LOTlib_primitive
 def select_(A): # choose an element, but don't remove it
-	if len(A) > 0:
-		x = A.pop()
-		A.add(x)
-		return set([x]) # but return a set
-	else: return set() # empty set
+	
+	try: # quick selecting without copying
+		return set([iter(A).next()])
+	except StopIteration:
+		return set()
+	
+	#if len(A) > 0:
+		#x = A.pop()
+		#A.add(x)
+		#return set([x]) # but return a set
+	#else: return set() # empty set
 
 @LOTlib_primitive
 def exhaustive_(A,B): return coextensive(A,B)

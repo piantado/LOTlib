@@ -65,12 +65,12 @@ class SimpleLexicon(LOTHypothesis):
 			
 		# set this equal to the LOTHypothesis
 		if self.lex.get(w,None) is None:
-			self.lex[w] = LOTHypothesis(self.grammar, v=v, f=f, args=self.args) # create this
-		else:	self.lex[w].set_value(v=v, f=f)
+			self.lex[w] = LOTHypothesis(self.grammar, value=v, f=f, args=self.args) # create this
+		else:	self.lex[w].set_value(value=v, f=f)
 
 	# set this function (to make something to sample from)
 	def force_function(self, w, f):
-		self.lex[w] = LOTHypothesis(self.grammar, v=None, f=f) # this sloppily generates v=None, but it's easy for now
+		self.lex[w] = LOTHypothesis(self.grammar, value=None, f=f) # this sloppily generates value=None, but it's easy for now
 		self.lex[w].value = w # Now overwrite so .value is just the word
 		
 	def all_words(self): return self.lex.keys()

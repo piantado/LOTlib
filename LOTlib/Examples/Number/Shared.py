@@ -75,17 +75,18 @@ G.add_rule('WORD', 'ten_', None, 0.10)
 
 class NumberExpression(LOTHypothesis):
 	
-	def __init__(self, G, v=None, prior_temperature=1.0): 
-		LOTHypothesis.__init__(self,G)
-		if v is None: self.set_value(G.generate('WORD'))
-		else:         self.set_value(v)
+	def __init__(self, G, value=None, f=None, prior_temperature=1.0, proposal_function=None): 
+		LOTHypothesis.__init__(self,G,proposal_function=proposal_function)
+		
+		if value is None: self.set_value(G.generate('WORD'), f)
+		else:             self.set_value(value, f)
 		
 		self.prior_temperature = prior_temperature
 		self.likelihood = 0.0
 		
 	def copy(self):
 		""" Must define this else we return "FunctionHypothesis" as a copy. We need to return a NumberExpression """
-		return NumberExpression(G, v=self.value.copy(), prior_temperature=self.prior_temperature)
+		return NumberExpression(G, value=self.value.copy(), prior_temperature=self.prior_temperature)
 		
 	def compute_prior(self): 
 		"""
@@ -137,14 +138,14 @@ class NumberExpression(LOTHypothesis):
 	# must wrap these as SimpleExpressionFunctions
 	def enumerative_proposer(self):
 		for k in G.enumerate_pointwise(self.value):
-			yield NumberExpression(v=k)
+			yield NumberExpression(value=k)
 	
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
 # The target
 
 #target = NumberExpression("one_ if cardinality1_(x) else next_(L_(setdifference_(x, select_(x))))") # we need to translate "if" ourselves
-#target = NumberExpression(v="if_(cardinality1_(x), one_, two_)")
+#target = NumberExpression(value="if_(cardinality1_(x), one_, two_)")
 
 # NOTE: Not necessary, but only for testing -- these are discovered in the real model via search
 #one_knower   = NumberExpression("one_ if cardinality1_(x) else undef") 
@@ -175,7 +176,7 @@ def generate_data(data_size):
 		
 		# sample according to the target
 		if random() < ALPHA: r = WORDS[len(s)-1]
-		else:                r = weighted_sample( WORDS )
+		else:                r = weighted_sample( WORDS, probs=1 )
 		
 		# and append the sampled utterance
 		data.append(FunctionData( input=[s], output=r) ) # convert to "FunctionData" and store

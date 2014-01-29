@@ -17,7 +17,7 @@ class SimpleGenerativeHypothesis(LOTHypothesis):
 		assert kwargs.get('args', None) is None, "Cannot specify args to SimpleGenerativeHypothesis"
 		LOTHypothesis.__init__(self, G, args=[], **kwargs) # this is simple-generative since args=[] (a thunk)
 	
-	def compute_likelihood(self, data, nsamples=250, sm=1e-3):
+	def compute_likelihood(self, data, nsamples=250, sm=0.001):
 		"""
 			sm smoothing counts are added to existing bins of counts (just to prevent badness)
 		"""

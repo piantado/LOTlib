@@ -23,7 +23,6 @@ class LOTHypothesis(FunctionHypothesis):
 		if value is None: value = grammar.generate(self.start)
 		
 		FunctionHypothesis.__init__(self, value=value, f=f, args=args)
-		
 		# Save a proposal function
 		## TODO: How to handle this in copying?
 		if proposal_function is None:
@@ -37,17 +36,13 @@ class LOTHypothesis(FunctionHypothesis):
 			This makes a deepcopy of everything except grammar (which is the, presumably, static grammar)
 		"""
 
-		# Since this is inherited, call the constructor on everything but grammar
-		thecopy = type(self)(self.grammar) # call my own constructor with grammar
+		# Since this is inherited, call the constructor on everything, copying what should be copied
+		thecopy = type(self)(self.grammar, value=copy(self.value), f=self.f, proposal_function=self.proposal_function) 
 		
-		thecopy.proposal_function = self.proposal_function
-		
-		# And then deepcopy evrything but grammar
+		# And then then copy the rest
 		for k in self.__dict__.keys():
-			if k is 'grammar': pass
-			if k is 'proposal_function': pass
-			else:
-				thecopy.__dict__[k] = deepcopy(self.__dict__[k])
+			if k not in ['self', 'grammar', 'value', 'proposal_function', 'f']:
+				thecopy.__dict__[k] = copy(self.__dict__[k])
 		
 		return thecopy
 

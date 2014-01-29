@@ -46,7 +46,7 @@ class FunctionHypothesis(Hypothesis):
 		try:
 			return evaluate_expression(value, args=self.args)
 		except:
-			print "# Warning: failed to execute evaluate_expression on " + v
+			print "# Warning: failed to execute evaluate_expression on " + str(value)
 			return lambdaNone
 	
 	def reset_function(self):

@@ -33,7 +33,9 @@ def run(*args):
 	
 	# starting hypothesis -- here this generates at random
 	h0 = GaussianLOTHypothesis(G, prior_temperature=PRIOR_TEMPERATURE)
-	#print initial_hyp
+	
+	print h0.proposal_function
+	
 	# populate the finite sample by running the sampler for this many steps
 	for x in mh_sample(h0, data, STEPS, skip=SKIP):
 		pq.push(x, x.posterior_score)
