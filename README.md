@@ -28,7 +28,7 @@ REQUIREMENTS
 INSTALLATION
 ------------
 
-Put this library somewhere--mine lives in /home/piantado/Libraries/LOTlib/
+Put this library somewhere--mine lives in /home/piantado/Desktop/Libraries/LOTlib/
 	
 Set the PYTHONPATH environment variable to point to LOTlib/:
 	

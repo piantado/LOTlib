@@ -1,3 +1,10 @@
+Jan 28 2014:
+	- Many changes to naming:
+		lp now posterior_score
+		v (function argument in hypothesses) now value
+		tweaks to weighted_sample, to remove old style usage
+		chanes to p/lp in GrammarRule
+		
 Dec 14 2013:
 	- Major revision breaking backward compatibility -- changes to FunctionNode syntax in PCFGs so it makes more sense. Non-function terminals have None as args; function terminals have []
 	- Also changed "PCFG" to "Grammar" since it's not technically a pcfg

@@ -12,12 +12,14 @@ class SimpleGenerativeHypothesis(LOTHypothesis):
 		
 		NOTE: FOR NOW, Insert/Delete moves are taken off because of some weirdness with the lambda thunks
 	"""
-	def __init__(self, G, **kwargs): 
+	def __init__(self, G, nsamples=100, **kwargs): 
 		""" kwargs should include ll_sd """
 		assert kwargs.get('args', None) is None, "Cannot specify args to SimpleGenerativeHypothesis"
+		self.nsamples=nsamples
+		
 		LOTHypothesis.__init__(self, G, args=[], **kwargs) # this is simple-generative since args=[] (a thunk)
 	
-	def compute_likelihood(self, data, nsamples=250, sm=0.001):
+	def compute_likelihood(self, data, sm=0.001):
 		"""
 			sm smoothing counts are added to existing bins of counts (just to prevent badness)
 		"""
@@ -26,10 +28,10 @@ class SimpleGenerativeHypothesis(LOTHypothesis):
 		assert isinstance(data, dict), "Data supplied to SimpleGenerativeHypothesis must be a dict (function outputs to counts)"
 		
 		self.llcounts = defaultdict(int)
-		for i in xrange(nsamples):
+		for i in xrange(self.nsamples):
 			self.llcounts[ self() ] += 1
 		
-		self.likelihood = sum([ data[k] * (log(self.llcounts[k] + sm)-log(nsamples + sm*len(data.keys())) ) for k in data.keys() ])
+		self.likelihood = sum([ data[k] * (log(self.llcounts[k] + sm)-log(self.nsamples + sm*len(data.keys())) ) for k in data.keys() ])
 		
 		self.posterior_score = self.likelihood + self.prior
 		
