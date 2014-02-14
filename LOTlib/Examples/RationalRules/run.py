@@ -12,7 +12,7 @@ import LOTlib
 # Many useful functions...
 from LOTlib.Miscellaneous import *
 
-# This defines all of our LOT primtiives (is_color_ and is_shape_ below). 
+# This defines all of our LOT primitives (is_color_ and is_shape_ below). 
 # It needs to be globally defined/imported so that python can eval these functions
 from LOTlib.BasicPrimitives import * 
 

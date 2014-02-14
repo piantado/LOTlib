@@ -21,38 +21,30 @@ def generate_data(data_size):
 	data = []
 	for i in range(data_size): 
 		x = random()
-		data.append( FunctionData(args=[x], output=target(x), ll_sd=LL_SD) )
+		data.append( FunctionData(input=[x], output=target(x), ll_sd=LL_SD) )
 	
 	return data
 	
 # generate some data
 data = generate_data(50) # how many data points?
-#print "# DATA = ", data
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Multicore, parallel
 
 #one run with these parameters
 def run(*args):
-	print "Running new chain."
+	# starting hypothesis -- here this generates at random
+	h0 = GaussianLOTHypothesis(G)
 	
 	# We store the top 100 from each run
-	fs = FiniteBestSet(10, max=True) 
-	
-	# starting hypothesis -- here this generates at random
-	initial_hyp = GaussianLOTHypothesis(G)
-
-	# populate the finite sample by running the sampler for this many steps
-	for x in mh_sample(initial_hyp, data, STEPS, skip=SKIP):
-		fs.push(x, x.posterior_score)
-		print x.posterior_score, x.prior, x.likelihood, q(x)
+	fs = FiniteBestSet(10, max=True, key="posterior_score") 
+	fs.add(  mh_sample(h0, data, STEPS, skip=SKIP)  )
 	
 	return fs
 	
 finitesample = FiniteBestSet(max=True) # the finite sample of all
-#results = parallel_map(run, [ [] ] * CHAINS ) # a parallel computed array of finite samples
 results = map(run, [ [] ] * CHAINS ) # a not parallel
 finitesample.merge(results)
 
 for r in finitesample.get_all():
-	print r.posterior_score, r.prior, r.likelihood, "\t", q(str(r))
+	print r.posterior_score, r.prior, r.likelihood, qq(str(r))

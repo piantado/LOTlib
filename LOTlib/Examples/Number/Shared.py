@@ -7,7 +7,7 @@ import LOTlib
 from LOTlib.Grammar import Grammar
 from LOTlib.BasicPrimitives import *
 import LOTlib.Inference.ParallelTempering
-import LOTlib.Inference.MetropolisHastings
+from LOTlib.Inference.MetropolisHastings import mh_sample
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Miscellaneous import *
 from LOTlib.DataAndObjects import *
@@ -74,7 +74,8 @@ G.add_rule('WORD', 'ten_', None, 0.10)
 #Define a class for running MH
 
 class NumberExpression(LOTHypothesis):
-	
+	#__module__ = os.path.splitext(os.path.basename(__file__))[0]  # So that when we pickle this, we know where to read from
+ 	
 	def __init__(self, G, value=None, f=None, prior_temperature=1.0, proposal_function=None): 
 		LOTHypothesis.__init__(self,G,proposal_function=proposal_function)
 		
@@ -103,7 +104,7 @@ class NumberExpression(LOTHypothesis):
 			else:
 				self.prior = (recursion_penalty + self.value.log_probability())  / self.prior_temperature
 			
-			self.lp = self.prior + self.likelihood
+			self.posterior_score = self.prior + self.likelihood
 			
 		return self.prior
 	
@@ -131,7 +132,7 @@ class NumberExpression(LOTHypothesis):
 			# the total culmulative decayed likeliood
 			self.likelihood += self.stored_likelihood[i] * self.likelihood_decay_function(i, N, decay)
 		
-		self.lp = self.prior + self.likelihood
+		self.posterior_score = self.prior + self.likelihood
 		
 		return self.likelihood
 	

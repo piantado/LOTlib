@@ -368,11 +368,35 @@ class FunctionNode(object):
 		for g in filter(lambda x: x==find, self.subnodes() ): #NOTE: must use subnoes since we are modfiying
 			g.setto(copy(replace))
 
-
-
-
-
-
-
-
-
+	
+	def iter_partial_subtrees(self):
+		"""
+			Iterator for all partial subtrees (may end at a nonterminal)
+			as opposed to the self.__iter__ that interates over complete subtrees, ending
+			only with terminals.
+			
+			NOTE: There are LOTS more of these than full subtrees!
+		"""
+		#argfn = filter(isFunctionNode, x.args)
+		
+		def itermark(x):
+			""" Return True when we carry"""
+			
+			if x.marked:
+				x.marked = False
+				
+				afn = filter(isFunctionNode, x.args)
+				
+				for i, a in enumerate(afn):
+					if itermark(a): break
+			else:
+				x.marked = True
+				return False
+					
+		
+		for t in self:
+			
+			
+			
+		
+		

@@ -328,18 +328,18 @@ class Grammar:
 			#print ">>", terminals
 			#print ">>", nonterminals
 			
-			Z = logsumexp([ r.generation_probability for r in self.rules[x]] ) # normalizer
+			Z = logsumexp([ log(r.p) for r in self.rules[x]] ) # normalizer
 			
 			if depth >= 0:
 				# yield each of the rules that lead to terminals
 				for r in terminals:
-					n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), generation_probability=(r.generation_probability - Z), bv_type=r.bv_type, bv_args=r.bv_args, ruleid=r.rid )
+					n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), generation_probability=(log(r.p) - Z), bv_type=r.bv_type, bv_args=r.bv_args, ruleid=r.rid )
 					yield n
 			
 			if depth > 0:
 				# and expand each nonterminals
 				for r in nonterminals:
-					n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), generation_probability=(r.generation_probability - Z), bv_type=r.bv_type, bv_args=r.bv_args, ruleid=r.rid )
+					n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), generation_probability=(log(r.p) - Z), bv_type=r.bv_type, bv_args=r.bv_args, ruleid=r.rid )
 					for q in self.increment_tree(n, depth-1): yield q
 		else:   raise StopIteration
 			

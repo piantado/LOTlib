@@ -98,7 +98,12 @@ def fprintn(dl, *args, **kwargs):
 		print >>o, "\n",
 		if f is not sys.stdout: o.close()
 		
-def q(x, quote='\''): return quote+str(x)+quote
+def q(x, quote='\''): 
+	if isinstance(x,str) or isinstance(x, unicode):
+		return quote+x+quote
+	else:
+		return quote+str(x)+quote
+
 def qq(x): return q(x,quote="\"")
 
 def display(x): print x
@@ -262,6 +267,9 @@ def logsumexp(v):
 	"""
 	if max(v) > -Infinity: return scipy_logsumexp(v)
 	else: return -Infinity
+
+def lognormalize(v):
+	return v - logsumexp(v)
 
 def beta(a):
 	""" Here a is a vector (of ints or floats) and this computes the Beta normalizing function,"""
@@ -537,7 +545,6 @@ def pickle_load(f):
 	r = pickle.load(in_file)
 	in_file.close()
 	return r
-
 
 
 

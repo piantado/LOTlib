@@ -6,10 +6,12 @@
 """
 import heapq
 import operator
+import collections
 
 from LOTlib.Miscellaneous import *
 from collections import deque
 from copy import deepcopy
+
 
 class QueueItem(object):
 	"""
@@ -29,11 +31,17 @@ class QueueItem(object):
 
 class FiniteBestSet(object):
 	"""
-		This class stores the top N (possibly infite) hypotheses it observes. It can also make the set of top hypotheses unique
+		This class stores the top N (possibly infite) hypotheses it observes, keeping only unique ones.
 		It works by storing a priority queue (in the opposite order), and popping off the worst as we need to add more
 	"""
 	
-	def __init__(self, N=Infinity, max=True, unique=True):
+	def __init__(self, N=Infinity, max=True, key=None):
+		"""
+			N - the number of hypothese to store
+			max - True/False -- do we keep the ones closes to +inf (or -inf)
+			key - if a string (attribute) or function, we used this to access a hypothesis' priority score
+		"""
+		
 		self.__dict__.update(locals())
 		
 		self.max_multiplier = ifelse(self.max, 1, -1) # invert sign 
@@ -55,23 +63,40 @@ class FiniteBestSet(object):
 		return len(self.Q)
 	
 	# Another name since I can't stop using it
-	def add(self, x, p):
-		self.push(x,p)
+	def push(self, x, p=None):
+		self.add(x,p)
 		
-	def push(self, x, p):
-		""" Add x with value v to the set """
-		
-		if self.unique and (x in self.unique_set): 
-			return
-		else:
-			heapq.heappush(self.Q, QueueItem(x, self.max_multiplier*p))
-			if self.unique: 
-				self.unique_set.add(x) # add to the set 
+	def add(self, x, p=None):
+		""" 
+			Add x with value v to the set 
 			
-			# if we have too many elements
-			if len(self) > self.N: 
-				rr = heapq.heappop(self.Q)
-				if self.unique: 
+			If p=None, we use self.key to get the value. 
+			If x is an iterable, we add everything in it.
+		
+		"""
+
+		if isinstance(x, collections.Iterable):
+			assert p==None, "FiniteBestSet.add must have p=None for use with an iterator"
+			
+			for xi in x: self.add(xi)
+			
+		else:
+			
+			if p is None:
+				assert self.key is not None
+				if isinstance(self.key, str): p = getattr(x,self.key)
+				else:                         p = self.key(x)
+			
+
+			if (x in self.unique_set): 
+				return
+			else:
+				heapq.heappush(self.Q, QueueItem(x, self.max_multiplier*p))
+				self.unique_set.add(x) # add to the set 
+				
+				# if we have too many elements
+				if len(self) > self.N: 
+					rr = heapq.heappop(self.Q)
 					self.unique_set.remove(rr.x) # clean out the removed from the set
 	
 	def get_all(self, **kwargs): 
@@ -95,7 +120,7 @@ class FiniteBestSet(object):
 			for yi in y: self.merge(yi)
 		else:
 			for yi in y.Q:
-				self.push(yi.x, yi.priority*y.max_multiplier) # mult y by y.max_multiplier to convert it back to the original scale
+				self.add(yi.x, yi.priority*y.max_multiplier) # mult y by y.max_multiplier to convert it back to the original scale
 	
 	def save(self, f):
 		# Just a wrapper for pickle that makes saving a little easier
@@ -113,7 +138,7 @@ if __name__ == "__main__":
 
 		ar = range(100)
 		random.shuffle(ar) 
-		for x in ar: Q.push(x,x)
+		for x in ar: Q.add(x,x)
 		
 		assert set(Q.get_all()).issuperset( set([90,91,92,93,94,95,96,97,98,99]))
 		print Q.get_all()
@@ -124,7 +149,7 @@ if __name__ == "__main__":
 
 		ar = range(100)
 		random.shuffle(ar) 
-		for x in ar: Q.push(x,x)
+		for x in ar: Q.add(x,x)
 		
 		assert set(Q.get_all()).issuperset( set([0,1,2,3,4,5,6,7,8,9]))
 		print Q.get_all()

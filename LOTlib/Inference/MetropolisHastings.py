@@ -20,7 +20,7 @@ from LOTlib.Miscellaneous import *
 from LOTlib.FiniteBestSet import FiniteBestSet
 from MHShared import *
 
-def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_temperature=1.0, ll_temperature=1.0, temperature=1.0, acceptance_temperature=1.0, trace=False, stats=None, memoizer=None, memN=10000):
+def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_temperature=1.0, ll_temperature=1.0, temperature=1.0, acceptance_temperature=1.0, trace=False, debug=False, stats=None, memoizer=None, memN=10000):
 	"""
 		current_sample - the starting hypothesis
 		data - the conditioning data
@@ -60,7 +60,7 @@ def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_
 			prop = (np/prior_temperature+nl/ll_temperature) / temperature
 			cur  = (current_sample.prior/prior_temperature + current_sample.likelihood/ll_temperature)/temperature
 			
-			if trace: 
+			if debug: 
 				print "# Proposing: ", prop, cur, fb
 				print "# From: ", current_sample
 				print "# To:   ", p
@@ -69,14 +69,17 @@ def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_
 				current_sample = p
 				
 				if stats is not None: stats['accept'] += 1
-				if trace: print "# Accept!"
+				if debug: print "# Accept!"
 			else:
-				if trace: print "# Reject."
+				if debug: print "# Reject."
 			
 			if stats is not None: stats['total'] += 1
 			
-			if trace: print "\n\n";
-			
+			if debug: print "\n\n";
+		
+		if trace: 
+			print current_sample.posterior_score, current_sample.likelihood, current_sample.prior, qq(current_sample)
+		
 		yield current_sample
 		
 		

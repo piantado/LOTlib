@@ -48,10 +48,12 @@ def increase_temperature_mh_sample(current_sample, data, steps=float("inf"), pro
 			cur  = (current_sample.prior/prior_temperature + current_sample.likelihood/ll_temperature)/temperature
 			
 			if MH_acceptance(cur, prop, fb, acceptance_temperature=acceptance_temperature):
-				current_sample = p
 				
-				# reset this
-				acceptance_temperature = initial_acceptance_temperature
+				if p != current_sample:
+					# reset this if we've actually ended up in a new state
+					acceptance_temperature = initial_acceptance_temperature
+				
+				current_sample = p
 				
 				if stats is not None: stats['accept'] += 1
 			else:

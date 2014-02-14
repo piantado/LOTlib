@@ -375,6 +375,10 @@ def eq_(x,y): return x==y
 @LOTlib_primitive
 def zero_(x,y): return x==0.0
 
+
+@LOTlib_primitive
+def streq_(x,y): return str(x)==str(y)
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Set-theoretic primitives
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -792,5 +796,16 @@ def is_shape_(x,y): return (x.shape == y)
 @LOTlib_primitive
 def is_pattern_(x,y): return (x.pattern == y)
 
+@LOTlib_primitive
+def switch_(i,*ar):
+	"""
+		Index into an array. NOTE: with run-time priors, the *entire* array gets evaluated.
+		If you want to avoid this, use switchf_, which requires lambdas
+	"""
+	return ar[i]
+
+@LOTlib_primitive
+def switchf_(i,x,*ar):
+	return ar[i](x)
 
 from LOTlib.FunctionNode  import FunctionNode

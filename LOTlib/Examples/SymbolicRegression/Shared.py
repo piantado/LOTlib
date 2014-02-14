@@ -29,9 +29,9 @@ G.add_rule('EXPR', 'exp_', ['EXPR'], 1.0)
 G.add_rule('EXPR', 'log_', ['EXPR'], 1.0)
 G.add_rule('EXPR', 'pow_', ['EXPR', 'EXPR'], 1.0) # including this gives lots of overflow
 
-#G.add_rule('EXPR', 'sin_', ['EXPR'], 1.0)
-#G.add_rule('EXPR', 'cos_', ['EXPR'], 1.0)
-#G.add_rule('EXPR', 'tan_', ['EXPR'], 1.0)
+G.add_rule('EXPR', 'sin_', ['EXPR'], 1.0)
+G.add_rule('EXPR', 'cos_', ['EXPR'], 1.0)
+G.add_rule('EXPR', 'tan_', ['EXPR'], 1.0)
 
 G.add_rule('EXPR', 'x', None, 10.0) # these terminals should have None for their function type; the literals
 

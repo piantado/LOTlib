@@ -24,7 +24,7 @@ target.compute_likelihood(data)
 #for s in LOTlib.MetropolisHastings.mhgibbs_sample(learner, data, 100000, mh_steps=10, gibbs_steps=10):
 #for s in LOTlib.MetropolisHastings.tempered_sample(learner, data, 1000, within_steps=10, temperatures=[1.0, 1.1], swaps=1):
 #for s in LOTlib.MetropolisHastings.tempered_transitions_sample(learner, data, 1000, skip=0, temperatures=[1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]):
-for s in mh_sample(learner, data, 10000, skip=10):
+for s in mh_sample(learner, data, 10000, skip=0):
 	
 	sstr = str(s)
 	sstr = re.sub("[_ ]", "", sstr)

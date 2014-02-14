@@ -127,6 +127,8 @@ DNF_noTF.add_rule('PRE-PREDICATE', '',     ['PREDICATE'], DEFAULT_FEATURE_WEIGHT
 # we allowed BOOl->True and BOOL->False, so we simply write these in as 
 # separate NAND expansions
 
+
+#NOTE: Inference in this grammar is *very* heavily dependent on DEFAULT_FEATURE_WEIGHT
 Nand = Grammar()
 Nand.add_rule('START', '', ['BOOL'], 1.0)
 

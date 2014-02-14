@@ -26,21 +26,14 @@ PRIOR_TEMPERATURE=1.0
 # the running function
 
 def run(*args):
-	print "Running "
-	
-	# We store the top 100 from each run
-	pq = FiniteBestSet(100, max=True) 
 	
 	# starting hypothesis -- here this generates at random
 	h0 = GaussianLOTHypothesis(G, prior_temperature=PRIOR_TEMPERATURE)
 	
-	print h0.proposal_function
-	
-	# populate the finite sample by running the sampler for this many steps
-	for x in mh_sample(h0, data, STEPS, skip=SKIP):
-		pq.push(x, x.posterior_score)
-		print x.posterior_score, x.prior, x.likelihood, q(x)
-	
+	# We store the top 100 from each run
+	pq = FiniteBestSet(100, max=True, key="posterior_score") 
+	pq.add( mh_sample(h0, data, STEPS, skip=SKIP)  )
+		
 	return pq
 
 finitesample = FiniteBestSet(max=True) # the finite sample of all
@@ -49,6 +42,6 @@ finitesample.merge(results)
 	
 ## and display
 for r in finitesample.get_all(decreasing=False, sorted=True):
-	print r.posterior_score, r.prior, r.likelihood, "\t", q(str(r))
+	print r.posterior_score, r.prior, r.likelihood, qq(str(r))
 	
 	
