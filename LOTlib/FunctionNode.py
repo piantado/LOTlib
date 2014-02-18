@@ -182,7 +182,7 @@ class FunctionNode(object):
 		lp = self.generation_probability # the probability of my rule
 		
 		if self.args is not None: 
-			lp += sum([x.log_probability() for x in self.args if isFunctionNode(x)])
+			lp += sum([x.log_probability() for x in self.argFunctionNodes() ])
 		return lp
 	
 	def subnodes(self):
@@ -194,6 +194,16 @@ class FunctionNode(object):
 		"""
 		return [g for g in self]
 		
+	def argFunctionNodes(self):
+		"""
+			Yield FunctionNode immediately below
+			Also handles args is None, so we don't have to check constantly
+		"""
+		if self.args is not None:
+			# TODO: In python 3, use yeild from
+			for n in filter(isFunctionNode, self.args):
+				yield n
+		
 	def __iter__(self):
 		"""
 			Iterater for subnodes. 
@@ -203,9 +213,19 @@ class FunctionNode(object):
 		yield self
 		
 		if self.args is not None:
-			for a in filter(isFunctionNode, self.args):
+			for a in self.argFunctionNodes():
 				for ssn in a: yield ssn
 	
+	def iterdepth(self):
+		"""
+			Iterate subnodes, yielding node and depth
+		"""
+		yield (self,0)
+		
+		if self.args is not None:
+			for a in self.argFunctionNodes():
+				for ssn,dd in a.iterdepth(): yield (ssn,dd+1)
+
 	def all_leaves(self):
 		if self.args is not None:
 			for i in range(len(self.args)): # loop through kids
@@ -243,9 +263,8 @@ class FunctionNode(object):
 				self.name = rename[self.name]
 		
 		# and recurse
-		if self.args is not None:
-			for k in self.args:
-				if isFunctionNode(k): k.fix_bound_variables(d+1, rename)
+		for k in self.argFunctionNodes():
+			k.fix_bound_variables(d+1, rename)
 			
 
 	############################################################
@@ -268,12 +287,9 @@ class FunctionNode(object):
 		return c
 	
 	def depth(self):
-		depths = [0] # if no function nodes
-		if self.args is not None:
-			for i in range(len(self.args)):
-				if isFunctionNode(self.args[i]):
-					depths.append( self.args[i].depth()+1 )
-		return max(depths)
+		depths = [ a.depth() for a in self.argFunctionNodes() ] 
+		depths.append(-1) # for no function nodes (+1=0)
+		return max(depths)+1
 	
 	# get a description of the input and output types
 	# if collapse_terminal then we just map non-FunctionNodes to "TERMINAL"
@@ -291,7 +307,7 @@ class FunctionNode(object):
 		"""
 			A function node is replicating (by definition) if one of its children is of the same type
 		"""
-		return any([isFunctionNode(x) and x.returntype == self.returntype for x in self.args if self.args is not None])
+		return any([ x.returntype == self.returntype for x in self.argFunctionNodes() ])
 		
 
 	def is_canonical_order(self, symmetric_ops):
@@ -365,38 +381,32 @@ class FunctionNode(object):
 		"""
 		
 		# now go through and modify
-		for g in filter(lambda x: x==find, self.subnodes() ): #NOTE: must use subnoes since we are modfiying
+		for g in filter(lambda x: x==find, self.subnodes() ): #NOTE: must use subnodes since we are modfiying
 			g.setto(copy(replace))
-
 	
-	#def iter_partial_subtrees(self):
-		#"""
-			#Iterator for all partial subtrees (may end at a nonterminal)
-			#as opposed to the self.__iter__ that interates over complete subtrees, ending
-			#only with terminals.
-			
-			#NOTE: There are LOTS more of these than full subtrees!
-		#"""
-		##argfn = filter(isFunctionNode, x.args)
+	
+	
+	def random_partial_subtree(self, p=0.5):
+		"""
+			Generate a random partial subtree of me. 
+			We do this because there are waay too many unique subtrees to enumerate, 
+			and this allows a nice variety of structures
+			NOTE: Partial here means that we include nonterminals with probability p
+		"""
 		
-		#def itermark(x):
-			#""" Return True when we carry"""
-			
-			#if x.marked:
-				#x.marked = False
-				
-				#afn = filter(isFunctionNode, x.args)
-				
-				#for i, a in enumerate(afn):
-					#if itermark(a): break
-			#else:
-				#x.marked = True
-				#return False
-					
+		if self.args is None: return copy(self)
 		
-		#for t in self:
-			
-			
-			
+		newargs = []
+		for a in self.args:
+			if isFunctionNode(a):
+				if random() < p: newargs.append( a.name )
+				else:            newargs.append( a.random_partial_subtree(p=p) )
+			else: 
+				newargs.append(a) # string or something else
+				
+		ret =  copy(self, shallow=True) # don't copy kids
+		ret.args = newargs
+		
+		return ret
 		
 		
