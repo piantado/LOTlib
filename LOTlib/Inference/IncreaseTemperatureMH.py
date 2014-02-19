@@ -61,7 +61,8 @@ def increase_temperature_mh_sample(current_sample, data, steps=float("inf"), pro
 			
 			if stats is not None: stats['total'] += 1
 			
-			if trace: print "\n\n";
+		if trace: 
+			print current_sample.posterior_score, current_sample.likelihood, current_sample.prior, qq(current_sample)
 			
 		yield current_sample
 		

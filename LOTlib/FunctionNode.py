@@ -384,11 +384,64 @@ class FunctionNode(object):
 		for g in filter(lambda x: x==find, self.subnodes() ): #NOTE: must use subnodes since we are modfiying
 			g.setto(copy(replace))
 	
-	
+	def partial_subtree_root_match(self, y):
+		"""
+			Does y match from my root?
+			
+			A partial tree here is one with some nonterminals (see random_partial_subtree) that
+			are not expanded
+		"""
+		if isFunctionNode(y):
+			if y.returntype != self.returntype: return False
+			if y.name != self.name: return False
+		
+			if y.args is None: return self.args is None
+			if len(y.args) != len(self.args): return False
+		
+			for a, b in zip(self.args, y.args):
+				if isFunctionNode(a):
+					if not a.partial_subtree_root_match(b): return False
+				else:
+					if isFunctionNode(b): return False # cannot work!
+					
+					# neither is a function node
+					if a != b: return False
+				
+			#print "MATCH:", self, y
+			return True
+		else:
+			# else y is a string and we match if y is our returntype
+			assert isinstance(y,str)
+			return y == self.returntype 
+				
+	def partial_subtree_match(self, y):
+		"""
+			Does y match anywhere?
+		"""
+		for x in self:
+			if x.partial_subtree_root_match(y): return True
+		
+		return False
 	
 	def random_partial_subtree(self, p=0.5):
 		"""
-			Generate a random partial subtree of me. 
+			Generate a random partial subtree of me. So that
+			
+			this: 
+				prev_((seven_ if cardinality1_(x) else next_(next_(L_(x)))))
+			yeilds:
+							
+				prev_(WORD)
+				prev_(WORD)
+				prev_((seven_ if cardinality1_(x) else WORD))
+				prev_(WORD)
+				prev_((seven_ if BOOL else next_(next_(L_(SET)))))
+				prev_(WORD)
+				prev_((seven_ if cardinality1_(SET) else next_(WORD)))
+				prev_(WORD)
+				prev_((seven_ if BOOL else next_(WORD)))
+				...
+				
 			We do this because there are waay too many unique subtrees to enumerate, 
 			and this allows a nice variety of structures
 			NOTE: Partial here means that we include nonterminals with probability p
@@ -399,12 +452,12 @@ class FunctionNode(object):
 		newargs = []
 		for a in self.args:
 			if isFunctionNode(a):
-				if random() < p: newargs.append( a.name )
+				if random() < p: newargs.append( a.returntype )
 				else:            newargs.append( a.random_partial_subtree(p=p) )
 			else: 
 				newargs.append(a) # string or something else
 				
-		ret =  copy(self, shallow=True) # don't copy kids
+		ret =  self.__copy__(shallow=True) # don't copy kids
 		ret.args = newargs
 		
 		return ret
