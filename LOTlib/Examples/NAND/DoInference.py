@@ -2,7 +2,7 @@
 	Play around with learning multiple concepts from a single primitive like NAND. 
 	Useful for learning new chunks of concepts, a la Dechter, Malmaud, Adams & Tenenbaum (2013)
 	
-	This runs inference on each concept in TARGET_CONCEPTS (defined in Shared) and saves teh top
+	This runs inference on each concept in TARGET_CONCEPTS (defined in Shared) and saves the top
 	100 hypotheses from each concept into all_hypotheses, which is written to pickle file OUTFILE
 	
 	You can then run Adapt.py, which reads OUTFILE and calls OptimalGrammarAdaptation.print_subtree_adaptations
