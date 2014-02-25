@@ -22,7 +22,6 @@ TARGET_CONCEPTS = [lambda x: and_(is_shape_(x,'square'), is_color_(x,'blue')), \
 	    lambda x: and_(is_shape_(x,'rectangle'), is_color_(x,'green')), \
 	    lambda x: or_(not_(is_shape_(x,'triangle')), is_color_(x,'red')) ]
 
-
 # ------------------------------------------------------------------
 # Set up the grammar
 # Here, we create our own instead of using DefaultGrammars.Nand because

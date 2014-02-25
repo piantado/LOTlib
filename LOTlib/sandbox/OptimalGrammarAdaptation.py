@@ -4,7 +4,7 @@
 	An experimental adaptive method, that runs a bunch of standard mcmc in order to find tree parts that tend to be used in 
 	good grammars.
 	
-	These parts can be added to the PCFG for preferential generations in the PCFG
+	TODO: FIX MULTIPLE COUNTS ON PARTIAL MATCHES MATCHING THEMSELVES. Here we restrict to one match per tree, which is stupid.
 
 """
 
@@ -18,9 +18,9 @@ import numpy
 import scipy
 import scipy.optimize
 
-from numpy import log, exp, sqrt, sum
 import LOTlib
 from LOTlib.Miscellaneous import *
+from numpy import log, exp, sqrt, sum
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
 # Two quick helper functions
@@ -32,48 +32,52 @@ def count_identical_subtrees(t,x):
 	return sum([tt==t for tt in x])
 
 def count_identical_nonterminals(t,x):
-	""" How many nonterminals in x are of type t? """
-	
-	# Here we add up how many nodes have the same return type
-	# OR how many leaves (from partial trees) have the same returntype
-	#print ">>", [k for k in x.all_leaves()]
+	""" 
+		How many nonterminals in x are of type t?
+		
+		Here we add up how many nodes have the same return type
+		OR how many leaves (from partial trees) have the same returntype
+	"""
 	
 	return sum([tt.returntype==t for tt in x]) +\
 	       sum([tt==t for tt in x.all_leaves()])
 
 def count_subtree_matches(t, x):
 	return sum(map(lambda tt: tt.partial_subtree_root_match(t), x))
-	
+
 # # # # # # # # # # # # # # # # # # # # # # # # #
 
-def print_subtree_adaptations(hypotheses, posteriors, p=0.5, subtree_multiplier=100):
+def print_subtree_adaptations(hypotheses, posteriors, subtrees, relative_KL=True):
 	"""
 		Determine how useful it would be to explicitly define each subtree in H across
-		all of the (corresponding) posteriors. Here, posteriors is a list of posterior log 
-		scores, and we optimize over all of them jointly, seeing how we can change KL
-		by altering the prior
+		all of the (corresponding) posteriors, as measured by KL from prior to posterior
+		
+		- hypotheses - a list of LOThypotheses
+		- posteriors - [ [P(h|data) for h in hypotheies] x problems ]
+		- subtrees   - a collection of (possibly partial) subtrees to try adapting
 		
 		We treat hyps as a fixed finite hypothesis space, and assume every subtree considered
 		is *not* derived compositionally (although thi scould change in future variants)
+		
+		p - the probability of going to kids in randomly generating a subtree
+		subtree_multiplier - how many times we sample a subtree from *each* node in each hypothesis
+		relative_KL - compute summed KL divergence absolutely, or relative to the h.compute_prior()?
+		
 	"""
 	
 	# compute the normalized posteriors
 	Ps = map(lognormalize, posteriors)
 	
-	# Build up a set of unique subtrees by sampling each subtree_multiplier 
-	# times its number of nodes
-	subtrees = set()
-	for h in hypotheses:
-		if LOTlib.SIG_INTERRUPTED: break
-		for x in h.value: # for each subtree
-			for i in xrange(subtree_multiplier):  #take subtree_multiplier random partial subtrees
-				subtrees.add( x.random_partial_subtree(p=p) )
-	print "# Generated", len(subtrees), "subtrees"
+	# Compute the baseline KL divergence so we can score relative to this
+	if relative_KL:
+		oldpriors = lognormalize(numpy.array([h.compute_prior() for h in hypotheses]))
+		KL0s = [ sum(exp(oldpriors)*(oldpriors-P)) for P in Ps ]
+	else:
+		KL0s = [ 1.0 for P in Ps ] # pretend everything just had KL of 1, so we score relatively
 	
 	## Now process each, starting with the most simple
 	for t in sorted(subtrees, key=lambda t: t.log_probability(), reverse=True):
 		if LOTlib.SIG_INTERRUPTED: break
-		#print "SUBTREE:", t
 		
 		# Get some stats on t:
 		tlp = t.log_probability()
@@ -81,29 +85,35 @@ def print_subtree_adaptations(hypotheses, posteriors, p=0.5, subtree_multiplier=
 		
 		# How many matches of t are there in each H?
 		m = numpy.array([ count_subtree_matches(t, h.value) for h in hypotheses])
-		assert max(m)>=1
+		## TODO: There is a complications: partial patterns matching themselves. 
+		##       For simplicity, we'll just take the *first* match, seetting max(m)=1
+		##       In the future, we should change this to correctly handle and count
+		##       partial matches matching themselves
+		m = (m>=1)*1
+		assert max(m)==1, "Error: "+str(t)+"\t"+str(m)
 		
-		# How many times is the nonterminal used, NOT counting the first of t?
-		nt = numpy.array([ count_identical_nonterminals( t.returntype, h.value) for h in hypotheses]) - (tnt-1)*m
-		assert min(nt)>=0
+		# How many times is the nonterminal used, NOT counting in t?
+		nt = numpy.array([ count_identical_nonterminals( t.returntype, h.value ) for h in hypotheses]) - (tnt-1)*m
+		assert min(nt)>=0, "Error: "+str(t)
 		
-		# And the prior *not* counting t
+		# And the PCFG prior *not* counting t
 		q = lognormalize(numpy.array([ h.value.log_probability() for h in hypotheses]) - tlp * m)
 		
 		# The function to optimize
 		def fnc(p):
 			if p <= 0. or p >= 1.: return float("inf") # enforce bounds
-		
+			
 			newprior = lognormalize( q + log(p)*m + log(1.-p)*nt )
 				
 			kl = 0.0
-			for P in Ps:
-				kl += sum( numpy.exp(newprior) * (newprior-P) )
+			for P, kl0 in zip(Ps, KL0s):
+				kl += sum( numpy.exp(newprior) * (newprior-P) ) / kl0
 			
 			return kl
 		
 
 		### TODO: This optimization should be analytically tractable...
+		###       but we need to check that it is convex! Any ideas?
 		o = scipy.optimize.fmin(fnc, numpy.array([0.1]), xtol=0.0001, ftol=0.0001, disp=0)
 		
 		print fnc(o[0]), o[0], log(o[0]), t.log_probability(), qq(t)
@@ -111,4 +121,4 @@ def print_subtree_adaptations(hypotheses, posteriors, p=0.5, subtree_multiplier=
 
 if __name__ == '__main__':
 	
-	print "For an example, see Number.OptimalAdapt"
+	print "For an example, see Examples.NAND"

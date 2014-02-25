@@ -23,5 +23,15 @@ hypotheses = filter(lambda h: sum(h.compute_posterior(datas[0])) > -Infinity,  h
 posteriors = map( lambda d: [ sum(h.compute_posterior(d)) for h in hypotheses], datas)
 print "# Rescored hypotheses!"
 
+
+## Generate a set of subtrees
+subtrees = set()
+for h in hypotheses:
+	if LOTlib.SIG_INTERRUPTED: break
+	for x in h.value: # for each subtree
+		for i in xrange(N_SUBTREES_PER_NODE):  #take subtree_multiplier random partial subtrees
+			subtrees.add(   x.random_partial_subtree(p=SUBTREE_P)   )
+print "# Generated", len(subtrees), "subtrees"
+
 ## And call from OptimalGrammarAdaptation
-print_subtree_adaptations(hypotheses, posteriors)
+print_subtree_adaptations(hypotheses, posteriors, subtrees)

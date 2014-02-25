@@ -374,10 +374,9 @@ class FunctionNode(object):
 				
 	def replace_subnodes(self, find, replace):
 		"""
-			Replace subnodes -- NOTE: NOT THE FASTEST!
-			Also, TODO check correctness
-			
-			Defaultly only makes copies of replace
+			Replace subnodes
+			NOTE: NOT THE FASTEST!
+			NOTE: Defaultly only makes copies of replace
 		"""
 		
 		# now go through and modify
@@ -386,7 +385,7 @@ class FunctionNode(object):
 	
 	def partial_subtree_root_match(self, y):
 		"""
-			Does y match from my root?
+			Does y match from my root? 
 			
 			A partial tree here is one with some nonterminals (see random_partial_subtree) that
 			are not expanded
@@ -407,7 +406,6 @@ class FunctionNode(object):
 					# neither is a function node
 					if a != b: return False
 				
-			#print "MATCH:", self, y
 			return True
 		else:
 			# else y is a string and we match if y is our returntype
