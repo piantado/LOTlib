@@ -10,7 +10,7 @@ class LOTHypothesis(FunctionHypothesis):
 		
 	"""
 	
-	def __init__(self, grammar, value=None, f=None, start='START', ALPHA=0.9, rrPrior=False, rrAlpha=1.0, maxnodes=25, ll_decay=0.0, prior_temperature=1.0, args=['x'], proposal_function=None):
+	def __init__(self, grammar, value=None, f=None, start='START', ALPHA=0.9, rrPrior=False, rrAlpha=1.0, maxnodes=25, ll_decay=0.0, prior_temperature=1.0, likelihood_temperature=1.0, args=['x'], proposal_function=None):
 		"""
 			grammar - a grammar
 			start - how the grammar starts to generate
@@ -86,10 +86,11 @@ class LOTHypothesis(FunctionHypothesis):
 			di = data[i]
 			
 			# the pointsiwe undecayed likelihood for this data point
-			self.stored_likelihood[i] = log( self.ALPHA*(r==di.output) + (1.0-self.ALPHA)/2.0 )
+			self.stored_likelihood[i] = log( self.ALPHA*(r==di.output) + (1.0-self.ALPHA)/2.0 ) / self.likelihood_temperature
 			
 			# the total culmulative decayed likeliood
 			self.likelihood += self.stored_likelihood[i] * self.likelihood_decay_function(i, N, self.ll_decay)
+				
 		
 		self.posterior_score = self.prior + self.likelihood
 		
