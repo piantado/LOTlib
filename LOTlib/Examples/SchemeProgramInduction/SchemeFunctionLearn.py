@@ -30,7 +30,7 @@ data = [
 h0 = SchemeFunction(G, ALPHA=ALPHA)       
 for x in mh_sample(h0, data, STEPS):
 	
-	print x.lp, x
+	print x.posterior_score, x
 	for di in data:
 		print "\t", di.input, "->", x(*di.input), " ; should be ", di.output
 	

@@ -10,7 +10,7 @@ class LOTHypothesis(FunctionHypothesis):
 		
 	"""
 	
-	def __init__(self, grammar, value=None, f=None, start='START', ALPHA=0.9, rrPrior=False, rrAlpha=1.0, maxnodes=25, ll_decay=0.0, prior_temperature=1.0, likelihood_temperature=1.0, args=['x'], proposal_function=None):
+	def __init__(self, grammar, value=None, f=None, start='START', ALPHA=0.9, rrPrior=False, rrAlpha=1.0, maxnodes=25, ll_decay=0.0, args=['x'], proposal_function=None):
 		"""
 			grammar - a grammar
 			start - how the grammar starts to generate
@@ -67,34 +67,13 @@ class LOTHypothesis(FunctionHypothesis):
 			
 		return self.prior
 		
-	def compute_likelihood(self, data):
+	#def compute_likelihood(self, data): # called in FunctionHypothesis.compute_likelihood
+	def compute_single_likelihood(self, datum, response):
 		"""
-			Computes the likelihood of data.
 			The data here is from LOTlib.Data and is of the type FunctionData
+			This assumes binary function data -- maybe it should be a BernoulliLOTHypothesis
 		"""
-		
-		# set up to store this data
-		self.stored_likelihood = [None] * len(data)
-		
-		# compute responses to all data
-		responses = self.get_function_responses(data) # get my response to each object
-		
-		N = len(data)
-		self.likelihood = 0.0
-		for i in xrange(N):
-			r = responses[i]
-			di = data[i]
-			
-			# the pointsiwe undecayed likelihood for this data point
-			self.stored_likelihood[i] = log( self.ALPHA*(r==di.output) + (1.0-self.ALPHA)/2.0 ) / self.likelihood_temperature
-			
-			# the total culmulative decayed likeliood
-			self.likelihood += self.stored_likelihood[i] * self.likelihood_decay_function(i, N, self.ll_decay)
-				
-		
-		self.posterior_score = self.prior + self.likelihood
-		
-		return self.likelihood
+		return log( self.ALPHA*(response==datum.output) + (1.0-self.ALPHA)/2.0 ) / self.likelihood_temperature
 		
 	# must wrap these as SimpleExpressionFunctions
 	def enumerative_proposer(self):

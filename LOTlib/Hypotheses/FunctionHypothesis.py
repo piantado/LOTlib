@@ -86,7 +86,25 @@ class FunctionHypothesis(Hypothesis):
 			
 			out.append(r) # so we get "None" when things mess up
 		return out
+	
+	def compute_single_likelihood(self, datum, response):
+		"""
+			A function that must be implemented by subclasses to compute the likelihood of a single datum/response pair
+			This should NOT implement the temperature (that is handled by compute_likelihood)
+		"""
+		assert False, "*** compute_single_likelihood must be overwritten in a lower class"
+	
+	def compute_likelihood(self, data):
 		
+		# compute responses to all data
+		responses = self.get_function_responses(data) # get my response to each object
+		
+		self.likelihood = sum(map( self.compute_single_likelihood, data, responses))/self.likelihood_temperature
+		
+		self.posterior_score = self.prior + self.likelihood
+		return self.likelihood
+		
+	
 	# ~~~~~~~~~
 	# Make this thing pickleable
 	def __getstate__(self):

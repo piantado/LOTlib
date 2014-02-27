@@ -1,19 +1,33 @@
+"""
+	TODO: Split up likelihood so that decayed versions are separate
+"""
+
 import numpy
 from copy import copy, deepcopy
 import LOTlib
 from LOTlib.Miscellaneous import *
 
+
 class Hypothesis(object):
 	"""
-		A hypothesis is...
+		A hypothesis is bundles together a value (hypothesis value) with a bunch of remember state, like posterior_score, prior, likelihood
+		This class is typically a superclass of the thing you really want.
 		
-		- optionally, compute_likelihood stores self.stored_likelihood, giving the undecayed likelihood on each data point
+		Temperatures:
+			A Hypothesis defaulty has a prior_temperature and likelihood_temperature. These are taken into account in setting the 
+			posterior_score (for computer_prior and compute_likelihood), in the values returned by these, AND in the stored values
+			under self.prior and self.likelihood
 	"""
 	
-	def __init__(self, value=None):
+	def __init__(self, value=None, prior_temperature=1.0, likelihood_temperature=1.0):
+		
 		self.set_value(value) # to zero out prior, likelhood, posterior_score
 		self.prior, self.likelihood, self.posterior_score = [-Infinity, -Infinity, -Infinity] 
+		self.prior_temperature=prior_temperature
+		self.likelihood_temperature=likelihood_temperature		
 		self.stored_likelihood = None
+		
+		# keep track of some calls (Global variable)
 		POSTERIOR_CALL_COUNTER = 0
 	
 	def set_value(self, value): 
@@ -24,71 +38,33 @@ class Hypothesis(object):
 		""" Returns a copy of myself by calling copy() on self.value """
 		return Hypothesis(value=self.value.copy())
 		
-	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# All instances of this must implement these:
-	
-	def likelihood_decay_function(self, i, N, decay):
-		"""
-		The weight of the likelihood for the ith point out of N with the given decay parameter.
-		Generally, this should be a power law decay
-		i - What data point (0-indexed)
-		N - how many total data points
-		"""
-		return (N-i+1)**(-decay)
-	
+		
 	def compute_prior(self):
 		""" computes the prior and stores it in self.prior"""
-		print "*** Must implement compute_prior"
-		assert False # Must implement this
+		assert False, "*** Must implement compute_prior"
 
+	def compute_single_likelihood(self, datum):
+		assert False, "*** Must implement compute_single_likelihood"
 	
-	def compute_likelihood(self, d, decay=0.0):
+	# And the main likelihood function just maps compute_single_likelihood over the data
+	def compute_likelihood(self, data):
 		""" 
 		Compute the likelihood of the *array* d, with the specified likelihood decay
 		This also stores the *undecayed* non-culmulative likelihood of each data point in self.stored_likelihood
 		"""
-		print "*** Must implement compute_likelihood"
-		assert False # Must implement this
-	
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		self.likelihood = sum(map( self.compute_single_likelihood, data))/self.likelihood_temperature
+		
+		self.posterior_score = self.prior + self.likelihood
+		return self.likelihood
+		
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# Methods for accessing likelihoods etc. on a big arrays of data
-	
-	def get_culmulative_likelihoods(self, ll_decay=0.0, shift_right=True):
-		"""
-		Compute the culmulative likelihoods on the stored data
-		This gives the likelihood on the first data point, the first two, first three, etc, appropriately decayed
-		using the 'pointwise' likelihoods stored in self.stored_likelihood.
-		NOTE: This is O(N^2) (for power law decays; for exponential it could be linear)
-		returns: a numpy array of the likelihoods
 		
-		- decay - the memory decay
-		- shift_right -- do we insert a "0" at the beginning (corresponding to inferences with 0 data), and then delete one from the end?
-				- So if you do posterior predictives, you want shift_right=True
-		"""
-		assert self.stored_likelihood is not None
-		
-		offset = 0
-		if shift_right: offset = 1
-		
-		out = []
-		for n in xrange(1-offset,len(self.stored_likelihood)+1-offset):
-			if ll_decay==0.0: # shortcut if no decay
-				sm = numpy.sum(self.stored_likelihood[0:n])
-			else: 
-				sm = numpy.sum( [self.stored_likelihood[j] * self.likelihood_decay_function(j, n, ll_decay) for j in xrange(n) ])
-			out.append(sm)
-		return numpy.array(out)
-			
-	def get_culmulative_posteriors(self, ll_decay=0.0, shift_right=False):
-		"""
-		returns the posterior with the i'th stored CULMULATIVE likelihood, using the assumed decay
-		"""
-		return self.get_culmulative_likelihoods(ll_decay=ll_decay, shift_right=shift_right) + self.prior
-	
 	def propose(self): 
 		""" Generic proposal used by MCMC methods"""
-		print "*** Must implement propose"
-		assert False # Must implement this
+		assert False,  "*** Must implement propose"
 	
 	# this updates last_prior and last_likelihood
 	def compute_posterior(self, d):
@@ -115,8 +91,8 @@ class Hypothesis(object):
 	
 	# this is for heapq algorithm in FiniteSample, which uses <= instead of cmp
 	# since python implements a "min heap" we can compar elog probs
-	def __le__(self, x): return (self.posterior_score <= x.posterior_score)
-	def __eq__(self, other): 
-		return (self.value.__eq__(other.value))
+	def __le__(self, x):     return (self.posterior_score <= x.posterior_score)
+	def __eq__(self, other): return (self.value.__eq__(other.value))
 	def __ne__(self, other): return (self.value.__ne__(other.value))
+
 

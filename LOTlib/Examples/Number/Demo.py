@@ -9,8 +9,8 @@ from Shared import *
 
 LARGE_DATA_SIZE = 10000 # this is what we compute the average LL on
 DATA_SIZE = 300
-TRACE = False
-STEPS = 10000 #10000000
+TRACE = True
+STEPS = 1000000 #10000000
 SKIP = 1
 
 # # # # # # # # # # # # # # # # # # # # # # # # #

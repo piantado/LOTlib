@@ -4,7 +4,7 @@
 	No inference here--just random sampling from a grammar.
 """
 
-
+from Shared import *
 
 example_input = [   [], [[]], [ [], [] ], [[[]]]  ]
 
@@ -15,9 +15,13 @@ for i in xrange(10000):
 	
 	if x not in seen:
 		seen.add(x)
+		
+		# make the function node version
+		f = LOTHypothesis(G, value=x, args=['x'])
+		
 		print x.log_probability(), x
 		for ei in example_input:
-			print "\t", ei, " -> ", x(*ei)
+			print "\t", ei, " -> ", f(ei)
 
 
 

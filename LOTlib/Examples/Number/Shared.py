@@ -76,14 +76,11 @@ G.add_rule('WORD', 'ten_', None, 0.10)
 class NumberExpression(LOTHypothesis):
 	#__module__ = os.path.splitext(os.path.basename(__file__))[0]  # So that when we pickle this, we know where to read from
  	
-	def __init__(self, G, value=None, f=None, prior_temperature=1.0, proposal_function=None): 
-		LOTHypothesis.__init__(self,G,proposal_function=proposal_function)
+	def __init__(self, G, value=None, f=None, proposal_function=None, **kwargs): 
+		LOTHypothesis.__init__(self,G,proposal_function=proposal_function, **kwargs)
 		
 		if value is None: self.set_value(G.generate('WORD'), f)
 		else:             self.set_value(value, f)
-		
-		self.prior_temperature = prior_temperature
-		self.likelihood = 0.0
 		
 	def copy(self):
 		""" Must define this else we return "FunctionHypothesis" as a copy. We need to return a NumberExpression """
@@ -108,33 +105,16 @@ class NumberExpression(LOTHypothesis):
 			
 		return self.prior
 	
-	def compute_likelihood(self, data, decay=0.0):
+	def compute_single_likelihood(self, datum, response):
 		"""
 			Computes the likelihood of data.
 			TODO: Make sure this precisely matches the number paper. 
 			
 		"""
-		# set up to store this data
-		self.stored_likelihood = [None] * len(data)
+		if response == 'undef' or response == None: 
+			return log(1.0/10.0) # if undefined, just sample from a base distribution
+		else:   return log( (1.0 - ALPHA)/10.0 + ALPHA * ( response == datum.output ) )
 		
-		# compute responses to all data
-		responses = self.get_function_responses(data) # get my response to everything
-		
-		N = len(data)
-		self.likelihood = 0.0
-		for i in xrange(N):
-			r = responses[i]
-			
-			if r == 'undef' or r == None: 
-				self.stored_likelihood[i] = log(1.0/10.0) # if undefined, just sample from a base distribution
-			else:   self.stored_likelihood[i] = log( (1.0 - ALPHA)/10.0 + ALPHA * ( r == data[i].output ) )
-			
-			# the total culmulative decayed likeliood
-			self.likelihood += self.stored_likelihood[i] * self.likelihood_decay_function(i, N, decay)
-		
-		self.posterior_score = self.prior + self.likelihood
-		
-		return self.likelihood
 	
 	# must wrap these as SimpleExpressionFunctions
 	def enumerative_proposer(self):

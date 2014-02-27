@@ -28,16 +28,10 @@ class SchemeFunction(LOTHypothesis):
 	
 	# Prior, proposals, __init__ are all inherited from LOTHypothesis
 	
-	def compute_likelihood(self, data):
-		
-		self.likelihood = 0.0 # the log likelihood
-		
-		for di in data:
-			# We'll just use a string comparison on outputs here
-			if str(self(*di.input)) == str(di.output):  
-				self.likelihood += log(self.ALPHA)
-			else:                       
-				self.likelihood += log(1.0-self.ALPHA)
+	def compute_single_likelihood(self, datum, response):
+		# We'll just use a string comparison on outputs here, for ease
+		if str(response) == str(datum.output):  
+			return log(self.ALPHA)
+		else:                       
+			return log(1.0-self.ALPHA)
 			
-		self.lp = self.prior + self.likelihood
-		return self.likelihood

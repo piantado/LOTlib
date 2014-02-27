@@ -12,23 +12,6 @@ class GaussianLOTHypothesis(LOTHypothesis):
 		LOTHypothesis.__init__(self, G, value=value, f=f, proposal_function=proposal_function)
 		
 		
-	def compute_likelihood(self, data):
+	def compute_single_likelihood(self, datum, response):
 		""" Compute the likelihood with a Gaussian"""
-		
-		# set up to store this data
-		self.stored_likelihood = [None] * len(data)
-		
-		# compute responses to all data
-		responses = self.get_function_responses(data) # get my response to each object
-		
-		N = len(data)
-		self.likelihood = 0.0
-		for i in xrange(N):
-			self.stored_likelihood[i] = normlogpdf(responses[i], data[i].output, data[i].ll_sd)
-			
-			# the total culmulative decayed likeliood
-			self.likelihood += self.stored_likelihood[i] * self.likelihood_decay_function(i, N, self.ll_decay)
-		
-		self.posterior_score = self.prior + self.likelihood
-		
-		return self.likelihood
+		return normlogpdf(response, datum.output, datum.ll_sd)

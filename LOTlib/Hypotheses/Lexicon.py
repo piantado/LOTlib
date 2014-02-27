@@ -109,6 +109,14 @@ class SimpleLexicon(LOTHypothesis):
 		for w in self.lex.keys():
 			weights[w] = self.weightfunction(self.lex[w])
 		
+		
+		""" 
+		
+			TODO : FIX THIS WITH THE NEXT HYPOTHESIS, LIKELIHOOD, ETC
+		"""
+		
+		
+		
 		# set up the stored likelihood
 		N = len(data)
 		self.stored_likelihood = [None]*N
