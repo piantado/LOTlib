@@ -22,6 +22,8 @@ SKIP = 0
 LL_SD = 0.1 # the SD of the likelihood
 NDATA = 50
 MEMOIZE = 1000 # 0 means don't memoize
+MAXITER=100 # max iterations for the optimization to run
+MAX_INITIALIZE=25 # max number of random numbers to try initializing with
 
 ## The target function for symbolic regression 
 target = lambda x: 3.*x + sin(4.3/x)
@@ -57,17 +59,18 @@ class MAPSymbolicRegressionHypothesis(GaussianLOTHypothesis):
 			constant_prior = sum(map(lambda x: normlogpdf(x,0.0,CONSTANT_SD), self.CONSTANT_VALUES))
 			return -(GaussianLOTHypothesis.compute_likelihood(self, data) + constant_prior)
 
-		while True:
+		for init in xrange(MAX_INITIALIZE):
 			p0 = normal(0.0, CONSTANT_SD, NCONSTANTS)
-			res = fmin(llgivenC, p0, disp=False)
+			res = fmin(llgivenC, p0, disp=False, maxiter=MAXITER)
 			if llgivenC(res) < Infinity: break
 		
-		self.likelihood = -llgivenC(res) ## must invert since it's a negative
 		self.CONSTANT_VALUES = res
 		
+		if llgivenC(res) < Infinity:  self.likelihood = -llgivenC(res) ## must invert since it's a negative
+		else:                         self.likelihood = -Infinity
+			
 		self.posterior_score = self.prior + self.likelihood
 		return self.likelihood
-
 
 
 # Make up some learning data for the symbolic regression
