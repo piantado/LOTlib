@@ -12,8 +12,8 @@ class DecayedLikelihoodHypothesis(Hypothesis):
 		TODO: MAKE THIS WORK AGAIN! THIS HAS BEEN UPDATED AFTER EXTRACTING FROM HYPOTHESIS CLASS
 	"""
 	
-	def __init__(self, value=None, ll_decay=0.0):
-		Hypothesis.__init__(self, value=value)
+	def __init__(self, value=None, ll_decay=0.0, **kwargs):
+		Hypothesis.__init__(self, value=value, **kwargs)
 		self.ll_decay = ll_decay # store this
 		self.stored_likelihood = None
 		
@@ -38,7 +38,7 @@ class DecayedLikelihoodHypothesis(Hypothesis):
 		
 		- decay - the memory decay
 		- shift_right -- do we insert a "0" at the beginning (corresponding to inferences with 0 data), and then delete one from the end?
-				- So if you do posterior predictives, you want shift_right=True
+			       - So if you do posterior predictives, you want shift_right=True
 		"""
 		assert self.stored_likelihood is not None
 		
@@ -63,26 +63,15 @@ class DecayedLikelihoodHypothesis(Hypothesis):
 	
 	
 	def compute_likelihood(self, data):
-		""" 
-		Compute the likelihood of the *array* d, with the specified likelihood decay
-		This also stores the *undecayed* non-culmulative likelihood of each data point in self.stored_likelihood
-		This just wraps Hypothesis.compute_likelihood with a thing that stores the likelihood first. 
-		
+		"""
+			This is overwritten, writes to stored_likelihood, and thenc alls get_culmulative_likelihoods
 		"""
 		self.stored_likelihood = map( self.compute_single_likelihood, data)
+		culm_lls = self.get_culmulative_likelihoods(self) # TODO: We don't actually need the entire array--shouldn't pass around!
 		
-		""" TODO FINISH THIS"""
+		self.likelihood = culm_lls[-1]/self.likelihood_temperature
 		
-		
-		
-		assert False
-		
-		"""
-		self.likelihood = 
-		
-		sum(self.stored_likelihood)
 		
 		self.posterior_score = self.prior + self.likelihood
 		
-		return self.likelihood/self.likelihood_temperature
-		"""
+		return self.likelihood

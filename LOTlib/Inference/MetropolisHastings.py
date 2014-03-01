@@ -18,24 +18,24 @@ from math import log, exp, isnan
 import LOTlib
 from LOTlib.Miscellaneous import *
 from LOTlib.FiniteBestSet import FiniteBestSet
+from LOTlib.BoundedDictionary import BoundedDictionary
 from MHShared import *
 
-def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_temperature=1.0, ll_temperature=1.0, temperature=1.0, acceptance_temperature=1.0, trace=False, debug=False, stats=None, memoizer=None, memN=10000):
+def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_temperature=1.0, ll_temperature=1.0, acceptance_temperature=1.0, trace=False, debug=False, stats=None, memoize=0):
 	"""
 		current_sample - the starting hypothesis
 		data - the conditioning data
 		steps - how many steps to run
 		proposer - if not None, use this instead of inh.propose() to compute proposals
 		skip - only return samples every this many steps
-		temperature(s) - the sampler temperatures on variosu components
 		trace - if true, we display the random number, proposal, current hypothesis, and sample proposal
 		stats - if not none, then we store sampling information in it (hopefully, a MHStats object)
-		memoizer - what to memoize with
+		memoize - if > 0, we memoize this many
 	"""
 	
-	if memoizer is not None:
-		mem = memoizer( lambda h: h.compute_posterior(data), N=memN)
-	
+	if memoize > 0:
+		mem = BoundedDictionary(N=memoize)
+		
 	for mhi in xrange(steps):
 		if LOTlib.SIG_INTERRUPTED: break
 	
@@ -50,15 +50,19 @@ def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_
 				#continue # next iteration of the skip loop
 			
 			# either compute this, or use the memoized version
-			if memoizer is not None:
-				np, nl = mem(p)
-				p.lp = (np/prior_temperature+nl/ll_temperature) / temperature # update this since it won't be set
+			if memoize > 0:
+				if p in mem:
+					np, nl = mem[p]
+					p.posterior_score = (np+nl) # update this since it won't be set
+				else: 
+					np, nl = p.compute_posterior(data)
+					mem[p] = (np,nl)
 			else:
 				np, nl = p.compute_posterior(data)
 			
 			#print np, nl, current_sample.prior, current_sample.likelihood
-			prop = (np/prior_temperature+nl/ll_temperature) / temperature
-			cur  = (current_sample.prior/prior_temperature + current_sample.likelihood/ll_temperature)/temperature
+			prop = (np/prior_temperature+nl/ll_temperature)
+			cur  = (current_sample.prior/prior_temperature + current_sample.likelihood/ll_temperature)
 			
 			if debug: 
 				print "# Proposing: ", prop, cur, fb

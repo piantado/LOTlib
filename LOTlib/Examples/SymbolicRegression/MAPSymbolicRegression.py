@@ -17,10 +17,11 @@ CONSTANT_NAMES = ['C%i'%i for i in xrange(NCONSTANTS) ]
 CONSTANT_SD = 1.0
 
 CHAINS = 1
-STEPS = 50000
+STEPS = 500000
 SKIP = 0
 LL_SD = 0.1 # the SD of the likelihood
 NDATA = 50
+MEMOIZE = 1000 # 0 means don't memoize
 
 ## The target function for symbolic regression 
 target = lambda x: 3.*x + sin(4.3/x)
@@ -89,7 +90,7 @@ data = generate_data(NDATA) # generate some data
 h0 = MAPSymbolicRegressionHypothesis(G)
 h0.CONSTANT_VALUES = numpy.zeros(NCONSTANTS)
 
-for h in mh_sample(h0, data, STEPS, skip=SKIP, trace=F, debug=F):
+for h in mh_sample(h0, data, STEPS, skip=SKIP, trace=F, debug=F, memoize=MEMOIZE):
 	print h.posterior_score, h.likelihood, h.prior, h.CONSTANT_VALUES, qq(h)
 	pass
 	

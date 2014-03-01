@@ -7,7 +7,7 @@ class GaussianLOTHypothesis(LOTHypothesis):
 		Like LOTHypothesis but has a Gaussian likelihood
 	"""
 	
-	def __init__(self, G, value=None, f=None, prior_temperature=1.0, ll_decay=0.0, proposal_function=None): 
+	def __init__(self, G, value=None, f=None, prior_temperature=1.0, proposal_function=None): 
 		self.__dict__.update(locals()) # must come first or else proposal_function is overwritten
 		LOTHypothesis.__init__(self, G, value=value, f=f, proposal_function=proposal_function)
 		

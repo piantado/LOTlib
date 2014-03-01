@@ -57,8 +57,6 @@ G.add_rule('LAMBDAARG',   'lambda', ['EXPR'], 1., bv_type='EXPR', bv_args=[] )
 G.add_rule('LAMBDATHUNK', 'lambda', ['EXPR'], 1., bv_type=None, bv_args=None ) # A thunk
 
 
-#(lambda x. (.... (x) )
-
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 from LOTlib.Proposals import *
 

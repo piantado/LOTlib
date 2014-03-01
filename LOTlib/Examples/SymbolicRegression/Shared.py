@@ -2,7 +2,7 @@
 """
 	Shared functions for symbolic regression. 
 """
-
+import LOTlib
 from LOTlib.Grammar import Grammar
 from LOTlib.BasicPrimitives import *
 from LOTlib.Inference.MetropolisHastings import mh_sample
@@ -33,9 +33,9 @@ G.add_rule('EXPR', 'sin_', ['EXPR'], 1.0)
 G.add_rule('EXPR', 'cos_', ['EXPR'], 1.0)
 G.add_rule('EXPR', 'tan_', ['EXPR'], 1.0)
 
-G.add_rule('EXPR', 'x', None, 10.0) # these terminals should have None for their function type; the literals
+G.add_rule('EXPR', 'x', None, 5.0) # these terminals should have None for their function type; the literals
 
-G.add_rule('EXPR', '1.0', None, 100.0)
+G.add_rule('EXPR', '1.0', None, 5.0)
 
 #G.add_rule('CONSTANT', '', ['*gaussian*'], 10.0) ##TODO: HIGHLY EXPERIMENTAL
 

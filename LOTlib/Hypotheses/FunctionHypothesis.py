@@ -66,22 +66,24 @@ class FunctionHypothesis(Hypothesis):
 		elif value is None:   self.fvalue = None
 		else:                 self.fvalue = self.value2function(value)
 	
-	def get_function_responses(self, data):
+	def get_function_responses(self, data, *args, **kwargs):
 		""" 
 		Evaluate this function on some data
 		Returns a list of my responses to data, handling exceptions (setting to None)
+		- args, kwargs -- these are just passed to self on evaluation
 		"""
 		
 		#return map(lambda di: self(*di.args), data)
-	
+		
+		args = list(args) # need this so we can concat with + below
+		
 		out = []
 		for di in data:
-			#print ">>", di, di.__class__.__name__, type(di), isinstance(di, FunctionData)
 			r = None
 			try:
-				if   isinstance(di, FunctionData):  r = self(*di.input)
-				elif isinstance(di, UtteranceData): r = self(*di.context)
-				else:                               r = self(*di) # otherwise just pass along
+				if   isinstance(di, FunctionData):  r = self(*(di.input+args), **kwargs)
+				elif isinstance(di, UtteranceData): r = self(*(di.context+args), **kwargs)
+				else:                               r = self(*(di+args), **kwargs) # otherwise just pass along
 			except RecursionDepthException: pass # If there is a recursion depth exception, just ignore (so r=None)
 			
 			out.append(r) # so we get "None" when things mess up
