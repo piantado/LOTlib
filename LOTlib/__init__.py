@@ -19,3 +19,21 @@ def signal_handler(signal, frame):
 	SIG_INTERRUPTED = True
 signal.signal(signal.SIGINT, signal_handler)
 
+
+def lot_iter(g, multi_break=False):
+	"""
+		A wrapper that lets you wrap a generater, rather than have to write "if LOTlib.SIG_INTERRUPTED..."
+	"""
+	for x in g:
+		
+		if LOTlib.SIG_INTERRUPTED: 
+			
+			# reset if we should
+			if not multi_break: LOTlib.SIG_INTERRUPTED = False 
+			
+			# and break
+			break
+		else:
+			 
+			yield g
+		

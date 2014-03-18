@@ -1,7 +1,7 @@
 
 class Memoize(dict):
 	"""
-		Provide a memoization class
+		Provide a memoization class to wrap a *function*
 		This inherits from dictionary, so if we subclass as something else, we will get other dictionary
 		properties. This acts like a dictionary (inhering from dict) and a function
 	"""

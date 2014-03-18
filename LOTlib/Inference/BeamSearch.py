@@ -15,7 +15,7 @@ import LOTlib.Miscellaneous
 
 def beam_search(start, data, top=100, samples=1000, reps=100, temperature=1.0, taboo=False):
 	"""
-		Expands a beam of  top hypotheses. This assumes that each gets a .lp
+		Expands a beam of  top hypotheses. This assumes that each gets a .posterior_score
 		- top - the top number of hypotheses to store
 		- reps - how many times do we do this?
 		- samples - how many to draw from each sample
@@ -37,7 +37,7 @@ def beam_search(start, data, top=100, samples=1000, reps=100, temperature=1.0, t
 		to_add = FiniteBestSet(max=True, N=top) # we can add at most this many
 		
 		xes = fs.get_all()
-		lps = numpy.array([x.lp/temperature for x in xes])
+		lps = numpy.array([x.posterior_score/temperature for x in xes])
 		Z = logsumexp(lps)
 		if Z > -Infinity: counts = numpy.exp(lps-Z)*samples # distribute samples according to probability
 		else:             counts = [samples / len(lps) ] * len(lps) # distribute evenly
@@ -78,7 +78,7 @@ if __name__ == "__main__":
 	i = 0
 	for fs in beam_search(initial_hyp, data, temperature=100.0):
 		for x in fs.get_all(sorted=True):
-			#print i, x.lp, x
+			print i, x.posterior_score, x
 			pass
 		i += 1
 	

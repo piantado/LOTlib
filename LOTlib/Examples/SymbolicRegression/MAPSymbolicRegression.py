@@ -6,8 +6,7 @@
 
 from Shared import * # imports G
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-import scipy
-import numpy
+import scipy, numpy
 from scipy.optimize import fmin
 from numpy.random import normal
 from math import sin
@@ -95,5 +94,4 @@ h0.CONSTANT_VALUES = numpy.zeros(NCONSTANTS)
 
 for h in mh_sample(h0, data, STEPS, skip=SKIP, trace=F, debug=F, memoize=MEMOIZE):
 	print h.posterior_score, h.likelihood, h.prior, h.CONSTANT_VALUES, qq(h)
-	pass
 	
