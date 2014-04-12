@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 	TODO: Allow PCFG to take another tree of FunctionNodes in generation. It then recurses and only genreates the leaves
-		TODO: When we generate, we MUST have a START->EXPR expansion, otherwise the top level doesn't get searched
+	TODO: When we generate, we MUST have a START->EXPR expansion, otherwise the top level doesn't get searched
 """
 #import numpy as np
 try:                import numpy as np
