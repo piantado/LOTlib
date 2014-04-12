@@ -61,6 +61,8 @@ class RegenerationProposal(LOTProposal):
 		f = (log(rp) - log(tZ))   + newt.log_probability()
 		b = (log(rp) - log(newZ)) + t.log_probability()	
 		
+		newt.reset_function() # make sure we update the function
+		
 		if separate_fb:
 			return [newt,f, b]
 		else:
@@ -189,6 +191,8 @@ class InsertDeleteProposal(LOTProposal):
 		
 		# and fix the bound variables, whose depths may have changed
 		if sampled: newt.fix_bound_variables()
+		
+		newt.reset_function() # make sure we update the function
 		
 		return [newt, fb]
 
@@ -327,5 +331,6 @@ class InverseInlineThunk(LOTProposal):
 			#b += log(resample_p) - log(newZ)
 		
 		newt.fix_bound_variables()
+		newt.reset_function() # make sure we update the function
 		
 		return [newt, f-b]
