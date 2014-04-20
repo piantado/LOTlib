@@ -68,7 +68,7 @@ class FiniteBestSet(object):
 		
 	def add(self, x, p=None):
 		""" 
-			Add x with value v to the set 
+			Add x with priority p to the set.
 			
 			If p=None, we use self.key to get the value. 
 			If x is an iterable, we add everything in it.

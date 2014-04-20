@@ -3,6 +3,9 @@
 	
 	These are really just functions that allow us to initialize and store some state (like a grammar)
 	They all return [proposal, forwardp-backwardp] for use in MH.
+	
+	TODO: MixtureProposal only works correctly if boht are ergodic. If not, we may need something special to do forward/backward
+	
 """
 
 from LOTlib.Miscellaneous import weighted_sample
@@ -60,8 +63,6 @@ class RegenerationProposal(LOTProposal):
 		#print "PROPOSED ", newt		
 		f = (log(rp) - log(tZ))   + newt.log_probability()
 		b = (log(rp) - log(newZ)) + t.log_probability()	
-		
-		newt.reset_function() # make sure we update the function
 		
 		if separate_fb:
 			return [newt,f, b]
@@ -191,8 +192,6 @@ class InsertDeleteProposal(LOTProposal):
 		
 		# and fix the bound variables, whose depths may have changed
 		if sampled: newt.fix_bound_variables()
-		
-		newt.reset_function() # make sure we update the function
 		
 		return [newt, fb]
 
