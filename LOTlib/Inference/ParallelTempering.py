@@ -1,5 +1,5 @@
 import LOTlib
-
+from LOTlib import lot_iter
 from MetropolisHastings import mh_sample
 
 from copy import copy
@@ -20,7 +20,7 @@ def parallel_tempering_sample(inh, data, steps, proposer=None, within_steps=10, 
 	# a bunch of hypotheses, one for each temperature
 	samples = map(copy, [ inh ] * len(temperatures) )
 	
-	for mhi in xrange(steps):
+	for mhi in lot_iter(xrange(steps)):
 		
 		for i in xrange(len(temperatures)):
 			
@@ -39,4 +39,4 @@ def parallel_tempering_sample(inh, data, steps, proposer=None, within_steps=10, 
 				samples[frm], samples[frm+1] = samples[frm+1], samples[frm]
 		
 		yield samples[0] # give from the lowest chain
-		if LOTlib.SIG_INTERRUPTED: break
+		

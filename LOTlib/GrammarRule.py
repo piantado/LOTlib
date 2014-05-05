@@ -9,7 +9,7 @@ from math import log
 from LOTlib.Miscellaneous import assert_or_die
 
 class GrammarRule:
-	def __init__(self, nt, name, to, rid, p=1.0, resample_p=1.0, bv_type=None, bv_args=None):
+	def __init__(self, nt, name, to, rid, p=1.0, resample_p=1.0, bv_type=None, bv_args=None, bv_prefix="y"):
 		"""	
 			nt - the nonterminal
 			name - the name of this function
@@ -31,20 +31,15 @@ class GrammarRule:
 						
 			NOTE: The rule id (rid) is very important -- it's what we use to determine equality
 		"""
+		p = float(p) # make sure these are floats
+		
 		self.__dict__.update(locals())
 		
 		if name == '': assert_or_die( len(to) == 1, "GrammarRules with empty names must have only 1 argument")
 		
 		
 	def __repr__(self):
-		return str(self.nt) + " -> " + self.name + (str(self.to) if self.to is not None else '') + "\t\t[p=" +str(self.p)+ "; resample_p=" + str(self.resample_p) +"]" + "<BV:"+ str(self.bv_type)+";"+str(self.bv_args)+">"
+		return str(self.nt) + " -> " + self.name + (str(self.to) if self.to is not None else '') + "\t\t[p=" +str(self.p)+ "; resample_p=" + str(self.resample_p) +"]" + "<BV:"+ str(self.bv_type)+";"+str(self.bv_args)+";"+self.bv_prefix+">"
 
 	def __eq__(self, other): return ( self.rid == other.rid and self.nt == other.nt)
 	def __ne__(self, other): return not self.__eq__(other)
-
-class FunctionRule(GrammarRule):
-	""" Just a subtype for when we want to pass distributions to values"""
-	def __init__(self, nt, function, rid, p=1.0, resample_p=1.0):
-		self.__dict__.update(locals())
-		
-		

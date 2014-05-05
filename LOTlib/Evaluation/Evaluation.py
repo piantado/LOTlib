@@ -6,6 +6,7 @@
 		MAYBE USE: #LOTlib.Hypothesis.POSTERIOR_CALL_COUNTER and report how many calls we've made
 """
 import LOTlib
+from LOTlib import lot_iter
 from SimpleMPI.ParallelBufferedIO import ParallelBufferedIO
 from LOTlib.Miscellaneous import *
 from collections import defaultdict
@@ -46,13 +47,11 @@ def evaluate_sampler(target, sampler, print_every=250, steps=1000000, chains=1, 
 	hypotheses = target.keys()
 	tZ = logsumexp(target.values()) # get the normalizer
 	
-	for chain_i in xrange(chains):
-		if LOTlib.SIG_INTERRUPTED: break
+	for chain_i in lot_iter(xrange(chains)):
 		samples = defaultdict(int) # keep track of samples
 		
 		startt = time()
-		for n, s in enumerate(sampler): # each sample should have an .lp defined
-			if LOTlib.SIG_INTERRUPTED: break
+		for n, s in lot_iter(enumerate(sampler)): # each sample should have an .lp defined
 			
 			samples[s] += 1
 			

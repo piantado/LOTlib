@@ -11,6 +11,7 @@
 from collections import defaultdict
 
 import LOTlib
+from LOTlib import lot_iter
 from LOTlib.Inference.MetropolisHastings import mh_sample
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from copy import copy
@@ -39,8 +40,7 @@ def ptaboo_search(h0, data, steps, skip=0, noisy_memoize=1000, seen_penalty=1.0)
 	myh0 = WrapperClass(h0.grammar, v=h0.value) ## TODO: NOTE HERE WE ASSUME G IS TAKEN!
 	
 	# Now just run standard MCMC:
-	for h in mh_sample(myh0, data, steps, skip=skip):
-		if LOTlib.SIG_INTERRUPTED: break
+	for h in lot_iter(mh_sample(myh0, data, steps, skip=skip)):
 		# THIS IS VERY BIZARRE: 
 		# We don't yield a copy, so we fixlp, yield, and then re-compute the prior to restore the lp
 		# to the current sample

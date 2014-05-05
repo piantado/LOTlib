@@ -3,7 +3,7 @@
 	TODO: Allow PCFG to take another tree of FunctionNodes in generation. It then recurses and only genreates the leaves
 	TODO: When we generate, we MUST have a START->EXPR expansion, otherwise the top level doesn't get searched
 """
-#import numpy as np
+
 try:                import numpy as np
 except ImportError: import numpypy as np
 	
@@ -18,7 +18,6 @@ from LOTlib.GrammarRule import GrammarRule
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
 
 CONSTANT_RESAMPLE_P = 1.0
-
 
 class Grammar:
 	"""
@@ -45,27 +44,25 @@ class Grammar:
 		self.rules = defaultdict(list) # a dict from nonterminals to lists of GrammarRules
 		self.rule_count = 0
 		self.bv_count = 0 # how many ruls in the grammar introduce bound variables?
-		self.bv_rule_id = 0 # a unique idenifier for each bv rule id (may get quite large). The actual stored rule are negative this
+		self.bv_rule_id = 0 # a unique idenifier for each bv rule id (may get quite large)	. The actual stored rule are negative this
 	
 	def is_nonterminal(self, x): 
 		""" A nonterminal is just something that is a key for self.rules"""
 		return isinstance(x, str) and (x in self.rules)
 		
 	def is_terminal(self, x):    
-		""" A terminal is not a nonterminal and either has no children or its children are terminals themselves """
+		""" Check conditions for something to be a terminal """
+		
+		# Nonterminals are not terminals
 		if self.is_nonterminal(x): return False
 		
-		if isinstance(x, list):
-			for k in x: 
-				if not self.is_terminal(k): return False
-				
-		if isFunctionNode(x): # if you are structured, you must not contain nonterminals below
-			if self.args is not None:
-				for k in x.args:
-					if not self.is_terminal(k): return False
+		if isFunctionNode(x): 
+			# You can be a terminal if you are a function with all non-FunctionNode arguments
+			return not any([ isFunctionNode(xi) for xi in None2Empty(x.args)])
+		else:
+			return True # non-functionNodes must be terminals
 		
-		# else we get here for strings, etc.
-		return True
+		
 		
 	def display_rules(self):
 		for k in self.rules.keys():
@@ -76,7 +73,7 @@ class Grammar:
 		return self.rules.keys()
 		
 	# these take probs instead of log probs, for simplicity
-	def add_rule(self, nt, name, to, p, resample_p=1.0, bv_type=None, bv_args=None, rid=None):
+	def add_rule(self, nt, name, to, p, resample_p=1.0, bv_type=None, bv_args=None, bv_prefix=None, rid=None):
 		"""
 			Adds a rule, and returns the added rule (for use by add_bv)
 		"""
@@ -89,7 +86,7 @@ class Grammar:
 			self.bv_count += 1
 			
 		# Create the rule and add it
-		newrule = GrammarRule(nt,name,to, p=p, resample_p=resample_p, bv_type=bv_type, bv_args=bv_args, rid=rid)
+		newrule = GrammarRule(nt,name,to, p=p, resample_p=resample_p, bv_type=bv_type, bv_args=bv_args, bv_prefix=bv_prefix, rid=rid)
 		self.rules[nt].append(newrule)
 		
 		return newrule
@@ -103,11 +100,11 @@ class Grammar:
 		self.rules[r.nt].remove(r)
 	
 	# add a bound variable and return the rule
-	def add_bv_rule(self, nt, args, d):
+	def add_bv_rule(self, nt, args, bv_prefix, d):
 		""" Add an expansion to a bound variable of type t, at depth d. Add it and return it. """
 		self.bv_rule_id += 1 # A unique identifier for each bound variable rule (may get quite large!)
 		
-		return self.add_rule( nt, name="y"+str(d), to=args, p=self.BV_P, resample_p=self.BV_RESAMPLE_P, rid=-self.bv_rule_id)
+		return self.add_rule( nt, name=bv_prefix+str(d), to=args, p=self.BV_P, resample_p=self.BV_RESAMPLE_P, rid=-self.bv_rule_id)
 			
 	
 	############################################################
@@ -148,7 +145,7 @@ class Grammar:
 			#print "SAMPLED:", r
 			
 			if r.bv_type is not None: # adding a rule
-				added = self.add_bv_rule(r.bv_type, r.bv_args, d)
+				added = self.add_bv_rule(r.bv_type, r.bv_args, r.bv_prefix, d)
 				#print "ADDING", added
 				
 				
@@ -167,7 +164,7 @@ class Grammar:
 			# create the new node
 			if r.bv_type is not None:
 				## UGH, bv_type=r.bv_type -- here bv_type is really bv_returntype. THIS SHOULD BE FIXED
-				return FunctionNode(returntype=r.nt, name=r.name, args=args, generation_probability=gp, bv_type=r.bv_type, bv_name=added.name, bv_args=r.bv_args, ruleid=r.rid )
+				return FunctionNode(returntype=r.nt, name=r.name, args=args, generation_probability=gp, bv_type=r.bv_type, bv_name=added.name, bv_args=r.bv_args, bv_prefix=r.bv_prefix, ruleid=r.rid )
 			else:
 				return FunctionNode(returntype=r.nt, name=r.name, args=args, generation_probability=gp, ruleid=r.rid )
 			return fn
@@ -207,7 +204,7 @@ class Grammar:
 			#print "iterate subnode: ", t.name, t.bv_type, t
 			
 			if do_bv and t.bv_type is not None:
-				added = self.add_bv_rule( t.bv_type, t.bv_args, d)
+				added = self.add_bv_rule( t.bv_type, t.bv_args, t.bv_prefix, d)
 			
 			if t.args is not None:
 				for g in self.iterate_subnodes(t.args, d=d+1, do_bv=do_bv, yield_depth=yield_depth, predicate=predicate): # pass up anything from below

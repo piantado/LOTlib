@@ -10,6 +10,7 @@ from random import random
 from math import log, exp, isnan
 
 import LOTlib
+from LOTlib import lot_iter
 from LOTlib.Miscellaneous import *
 from LOTlib.FiniteBestSet import FiniteBestSet
 from MHShared import MH_acceptance
@@ -31,7 +32,7 @@ def increase_temperature_mh_sample(current_sample, data, steps=float("inf"), pro
 	
 	mhi = 0
 	while mhi < steps:
-		for skp in xrange(skip+1):
+		for skp in lot_iter(xrange(skip+1)):
 			
 			if proposer is None: p, fb = current_sample.propose()
 			else:                p, fb = proposer(current_sample)
@@ -66,7 +67,6 @@ def increase_temperature_mh_sample(current_sample, data, steps=float("inf"), pro
 			
 		yield current_sample
 		
-		if LOTlib.SIG_INTERRUPTED: break
 		mhi += 1
 		
 	#print mem.hits, mem.misses
@@ -74,12 +74,11 @@ def increase_temperature_mh_sample(current_sample, data, steps=float("inf"), pro
 # this does out special mix of mh and gibbs steps
 def mhgibbs_sample(inh, data, steps, proposer=None, mh_steps=10, gibbs_steps=10, skip=0, temperature=1.0):
 	current_sample = inh
-	for mhi in xrange(steps):
+	for mhi in lot_iter(xrange(steps)):
 		for skp in xrange(skip+1):
 			for k in mh_sample(current_sample, data, 1, proposer=proposer, skip=mh_steps, temperature=temperature): current_sample = k
 			for k in gibbs_sample(current_sample, data, 1, skip=gibbs_steps, temperature=temperature): current_sample = k
 		yield current_sample
-		if LOTlib.SIG_INTERRUPTED: break
 
 		
 

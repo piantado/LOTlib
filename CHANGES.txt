@@ -1,3 +1,7 @@
+May 1 2014:
+	- Major change: is_terminal now only checks that the descendants are NOT functionNodes
+	- Added lot_iter, which takes a generator and wraps it so that ctrl-c will break 
+	- Added magnetism example
 Jan 28 2014:
 	- Many changes to naming:
 		lp now posterior_score

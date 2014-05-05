@@ -6,6 +6,7 @@
 """
 
 from Shared import *
+
 from LOTlib.sandbox.OptimalGrammarAdaptation import print_subtree_adaptations
 
 ## Set up how much data we want
@@ -26,8 +27,7 @@ print "# Rescored hypotheses!"
 
 ## Generate a set of subtrees
 subtrees = set()
-for h in hypotheses:
-	if LOTlib.SIG_INTERRUPTED: break
+for h in lot_iter(hypotheses):
 	for x in h.value: # for each subtree
 		for i in xrange(N_SUBTREES_PER_NODE):  #take subtree_multiplier random partial subtrees
 			subtrees.add(   x.random_partial_subtree(p=SUBTREE_P)   )

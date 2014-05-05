@@ -19,6 +19,7 @@ class FunctionData:
 	"""
 	
 	def __init__(self, input, output, **kwargs):
+		assert isinstance(input, list) or isinstance(input, tuple) ## since we apply to this
 		self.input = input
 		self.output = output
 		self.__dict__.update(kwargs)

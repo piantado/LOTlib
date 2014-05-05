@@ -5,7 +5,7 @@
 
 """
 from Shared import *
-from LOTlib.sandbox.OptimalGrammarAdaptation import print_subtree_adaptations
+from LOTlib.Subtrees import *
 
 NDATA = 100
 N_SUBTREES_PER_NODE = 50
@@ -27,8 +27,7 @@ print "# Rescored hypotheses!"
 
 ## Generate a set of subtrees
 subtrees = set()
-for h in hypotheses:
-	if LOTlib.SIG_INTERRUPTED: break
+for h in lot_iter(hypotheses):
 	for x in h.value: # for each subtree
 		for i in xrange(N_SUBTREES_PER_NODE):  #take subtree_multiplier random partial subtrees
 			subtrees.add(   x.random_partial_subtree(p=SUBTREE_P)   )
@@ -38,5 +37,6 @@ print "# Generated", len(subtrees), "subtrees"
 #for h,p in zip(hypotheses, posteriors[1]):
 	#print p, h
 
+from LOTlib.sandbox.OptimalGrammarAdaptation import print_subtree_adaptations
 ## And call from OptimalGrammarAdaptation
 print_subtree_adaptations(hypotheses, posteriors, subtrees)

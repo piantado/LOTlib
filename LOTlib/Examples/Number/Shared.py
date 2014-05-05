@@ -4,6 +4,7 @@
 """
 
 import LOTlib
+from LOTlib import lot_iter
 from LOTlib.Grammar import Grammar
 from LOTlib.BasicPrimitives import *
 import LOTlib.Inference.ParallelTempering
@@ -58,7 +59,7 @@ G.add_rule('WORD', 'L_',        ['SET'], 1.0)
 G.add_rule('WORD', 'next_', ['WORD'], 1.0)
 G.add_rule('WORD', 'prev_', ['WORD'], 1.0)
 
-#G.add_rule('WORD', 'undef', [], 1.0)
+#G.add_rule('WORD', 'undef', None, 1.0)
 G.add_rule('WORD', 'one_', None, 0.10)
 G.add_rule('WORD', 'two_', None, 0.10)
 G.add_rule('WORD', 'three_', None, 0.10)

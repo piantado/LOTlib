@@ -16,6 +16,7 @@ from random import random
 from math import log, exp, isnan
 
 import LOTlib
+from LOTlib import lot_iter
 from LOTlib.Miscellaneous import *
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.BoundedDictionary import BoundedDictionary
@@ -36,11 +37,9 @@ def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_
 	if memoize > 0:
 		mem = BoundedDictionary(N=memoize)
 		
-	for mhi in xrange(steps):
-		if LOTlib.SIG_INTERRUPTED: break
+	for mhi in lot_iter(xrange(steps)):
 	
-		for skp in xrange(skip+1):
-			if LOTlib.SIG_INTERRUPTED: break
+		for skp in lot_iter(xrange(skip+1)):
 		
 			if proposer is None: p, fb = current_sample.propose()
 			else:                p, fb = proposer(current_sample)
@@ -93,12 +92,11 @@ def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_
 # this does out special mix of mh and gibbs steps
 def mhgibbs_sample(inh, data, steps, proposer=None, mh_steps=10, gibbs_steps=10, skip=0, temperature=1.0):
 	current_sample = inh
-	for mhi in xrange(steps):
+	for mhi in lot_iter(xrange(steps)):
 		for skp in xrange(skip+1):
 			for k in mh_sample(current_sample, data, 1, proposer=proposer, skip=mh_steps, temperature=temperature): current_sample = k
 			for k in gibbs_sample(current_sample, data, 1, skip=gibbs_steps, temperature=temperature): current_sample = k
 		yield current_sample
-		if LOTlib.SIG_INTERRUPTED: break
 
 		
 	

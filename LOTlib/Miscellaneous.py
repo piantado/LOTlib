@@ -33,7 +33,7 @@ Infinity = float("inf")
 inf = Infinity
 Inf = Infinity
 Null = []
-TAU = 6.28318530718
+TAU = 6.28318530718 #fuck pi
 
 ## For R-friendly
 T=True
@@ -61,6 +61,18 @@ def None2Empty(x):
 	# Treat Nones as empty
 	if x is None: return []
 	else:         return x
+
+def make_mutable(x):
+	# TODO: update with other types
+	if isinstance(x, frozenset): return set(x)
+	elif isinstance(x, tuple): return list(x)
+	else: return x
+
+def make_immutable(x):
+	# TODO: update with other types
+	if isinstance(x, set ): return frozenset(x)
+	elif isinstance(x, list): return tuple(x)
+	else: return x
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Display functions
@@ -196,7 +208,16 @@ def unique(gen):
 			yield gi
 			s.add(gi)
 			
-
+def UniquifyFunction(gen):
+	"""
+		A decorator to make a function only return unique values
+	"""
+	def f(*args, **kwargs):
+		for x in unique(gen(*args, **kwargs)): 
+			yield x
+	return f
+	
+	
 def listifnot(x):
 	if isinstance(x,list): return x
 	else:                  return [x]
@@ -276,12 +297,18 @@ def logsumexp(v):
 def lognormalize(v):
 	return v - logsumexp(v)
 
+def logplusexp(a, b):
+	"""
+		Two argument version. No cast to numpy, so faster
+	"""
+	m = max(a,b)
+	return m+log(exp(a-m)+exp(b-m))
+
 def beta(a):
 	""" Here a is a vector (of ints or floats) and this computes the Beta normalizing function,"""
 	return np.sum(gammaln(np.array(a, dtype=float))) - gammaln(float(sum(a)))
 		
-def logplusexp(*args):
-	return logsumexp(args)
+
 
 def islist(x): return isinstance(x,list)
 
@@ -399,79 +426,6 @@ def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, 
 	if N == 1 and (not returnlist): return out[0]  #don't give back a list if you just want one
 	else:      return out
 
-
-""" 
-	This function is much more elegant than the above, but is painfully slower in tests, likely because it involves many logs and randoms
-"""
-#def multinomial_sample_DO_NOT_USE_SUPER_SLOW(objs, probs='lp', log=True, return_probability=False):
-	#"""
-		#Use the A-ES algorithm to sample one object from objs (potentially a generator). See The paper, "Weighted Random Sampling over Data Streams"
-		
-		#objs - the objects to sample
-		#probs - the probabilities, either a list (or generator) paired to objs, or a string describing an attribute of objs
-		
-		#Returns the object and optionally the *log* probability of the sample
-		
-		#This takes the probability to be stored in objs.attr, and treats this probability as a log probability
-		#if log=True
-		
-		  #max of u ^ 1/w
-		#= max of u ^ 1/exp(lp)  [[log probabilities]]
-		#= max of log(u) / exp(lp)
-		#= min of -log(u) / exp(lp)
-		#= min of log(-log(u)) - lp
-		
-		#TODO: Make this more elegantly handle 0 probability events
-	##"""	
-	
-	#best_value  = float("inf")
-	#best_obj    = None
-	#best_weight = float("inf")
-	#lZ = 0.0 # the log normalizer (for returning the probability)
-	
-	## then probs is an attribute
-	#if isinstance(probs,str): 
-		#are_probs_attr = True
-	#else:
-		#are_probs_attr = False
-		#next_prob = probs.__iter__() # we find probs by an interator
-	
-	## Now iterate through
-	#for o in objs:
-		
-		## recover the prob by either the attribute or the next element of the iterator
-		#if are_probs_attr: w = getattr(o, probs)
-		#else:              w = next_prob.next()
-		
-		## convert so weights are unnormalized log probabilities
-		#if not log: w = math.log(w) 
-						
-		## the above transfom. Keep the *lowest* k
-		#k = math.log( -math.log(random()) ) - w
-				
-		#lZ = logplusexp(lZ,w) # keep track of the normalizer
-		
-		## and track the best value
-		#if k < best_value:
-			#best_value = k
-			#best_obj = o
-			#best_weight = w
-		
-		
-	## and return at the end, potentially returning the (normalized) probability
-	#if return_probability: return best_obj, best_weight-lZ
-	#else:                  return best_obj
-
-
-#from collections import defaultdict
-#cnt = defaultdict(int)
-#for i in xrange(15000):
-	##v = multinomial_sample(range(1,100), probs=range(1,100), log=False)
-	#v = weighted_sample(range(100), probs=range(100), log=False)
-	##print v
-	#cnt[v] += 1
-#print cnt
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Lambda calculus
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -498,12 +452,12 @@ class RecursionDepthException(Exception):
 	# An exception class for recursing too deep
 	def __init__(self): pass
 
-"""
-A fancy fixed point iterator that only goes MAX_RECURSION deep, else throwing a a RecusionDepthException
 
-"""
 MAX_RECURSION = 25
 def Y_bounded(f):
+	"""
+	A fancy fixed point iterator that only goes MAX_RECURSION deep, else throwing a a RecusionDepthException
+	"""
 	return (lambda x, n: x(x, n)) (lambda y, n: f(lambda *args: y(y, n+1)(*args)) if n < MAX_RECURSION else raise_exception(RecursionDepthException()), 0)
 
 # here, e is an expression of the arguments. 

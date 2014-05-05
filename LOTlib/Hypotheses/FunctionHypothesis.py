@@ -29,8 +29,9 @@ class FunctionHypothesis(Hypothesis):
 		""" 
 			Make this callable just like a function. Yay python! 
 		"""
+		assert not any([isinstance(x, FunctionData) for x in vals]), "*** Probably you mean to pass FunctionData.input instead of FunctionData?"
+		
 		try:
-			#print self
 			return self.fvalue(*vals)
 		except TypeError:
 			print "TypeError in function call: "+str(self)+"  ;  "+str(vals)
@@ -101,7 +102,7 @@ class FunctionHypothesis(Hypothesis):
 		# compute responses to all data
 		responses = self.get_function_responses(data) # get my response to each object
 		
-		self.likelihood = sum(map( self.compute_single_likelihood, data, responses))/self.likelihood_temperature
+		self.likelihood = sum(map( self.compute_single_likelihood, data, responses))
 		
 		self.posterior_score = self.prior + self.likelihood
 		return self.likelihood

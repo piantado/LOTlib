@@ -5,9 +5,7 @@ from LOTlib.Miscellaneous import *
 
 class LOTHypothesis(FunctionHypothesis):
 	"""
-		A FunctionHypothesis built from a grammar.
-		Implement a Rational Rules (Goodman et al 2008)-style grammar over Boolean expressions.
-		
+		A FunctionHypothesis built from a grammar.		
 	"""
 	
 	def __init__(self, grammar, value=None, f=None, start='START', ALPHA=0.9, rrPrior=False, rrAlpha=1.0, maxnodes=25, ll_decay=0.0, args=['x'], proposal_function=None):
@@ -60,10 +58,9 @@ class LOTHypothesis(FunctionHypothesis):
 			self.prior = -Infinity
 		else: 
 			# compute the prior with either RR or not.
-			if self.rrPrior: self.prior = self.grammar.RR_prior(self.value, alpha=self.rrAlpha) / self.prior_temperature
-			else:            self.prior = self.value.log_probability() / self.prior_temperature
+			self.prior = self.value.log_probability() / self.prior_temperature
 			
-			self.posterior_score = self.prior + self.likelihood
+		self.posterior_score = self.prior + self.likelihood
 			
 		return self.prior
 		
@@ -73,7 +70,7 @@ class LOTHypothesis(FunctionHypothesis):
 			The data here is from LOTlib.Data and is of the type FunctionData
 			This assumes binary function data -- maybe it should be a BernoulliLOTHypothesis
 		"""
-		return log( self.ALPHA*(response==datum.output) + (1.0-self.ALPHA)/2.0 ) / self.likelihood_temperature
+		return log( self.ALPHA*(response==datum.output) + (1.0-self.ALPHA)/2.0 )
 		
 	# must wrap these as SimpleExpressionFunctions
 	def enumerative_proposer(self):

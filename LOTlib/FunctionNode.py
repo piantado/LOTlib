@@ -33,9 +33,6 @@ def list2FunctionNode(l, style="atis"):
 	else: # for non-list
 		return l
 
-# a regex for matching variables (y0,y1,.. y15, etc)
-re_variable = re.compile(r"y([0-9]+)?$")
-
 # just because this is nicer, and allows us to map, etc. 
 def isFunctionNode(x): return isinstance(x, FunctionNode)
 
@@ -57,7 +54,7 @@ class FunctionNode(object):
 		My bv stores the particlar *names* of variables I've introduced
 	"""
 	
-	def __init__(self, returntype, name, args, generation_probability=0.0, resample_p=1.0, bv_name=None, bv_type=None, bv_args=None, ruleid=None):
+	def __init__(self, returntype, name, args, generation_probability=0.0, resample_p=1.0, bv_name=None, bv_type=None, bv_args=None, bv_prefix=None, ruleid=None):
 		self.__dict__.update(locals())
 		
 	# make all my parts the same as q (not copies)
@@ -74,7 +71,7 @@ class FunctionNode(object):
 		else:
 			newargs = self.args
 		
-		return FunctionNode(self.returntype, self.name, newargs, generation_probability=self.generation_probability, resample_p=self.resample_p, bv_type=self.bv_type, bv_name=self.bv_name, bv_args=deepcopy(self.bv_args), ruleid=self.ruleid)
+		return FunctionNode(self.returntype, self.name, newargs, generation_probability=self.generation_probability, resample_p=self.resample_p, bv_type=self.bv_type, bv_name=self.bv_name, bv_args=deepcopy(self.bv_args), bv_prefix=self.bv_prefix, ruleid=self.ruleid)
 	
 	def is_nonfunction(self):
 		return (self.args is None)
@@ -135,7 +132,7 @@ class FunctionNode(object):
 	def fullprint(self, d=0):
 		""" A handy printer for debugging"""
 		tabstr = "  .  " * d
-		print tabstr, self.returntype, self.name, self.bv_type, self.bv_name, self.bv_args, "\t", self.generation_probability #"\t", self.resample_p 
+		print tabstr, self.returntype, self.name, self.bv_type, self.bv_name, self.bv_args, self.bv_prefix, "\t", self.generation_probability #"\t", self.resample_p 
 		if self.args is not None:
 			for a in self.args: 
 				if isFunctionNode(a): a.fullprint(d+1)
@@ -252,14 +249,12 @@ class FunctionNode(object):
 			if self.name.lower() == 'lambda' and (self.bv_type is not None) and (self.args is not None): 
 				#assert (self.bv_args is None) # should only add one rule, and it should have no "to"
 				
-				newname = 'y'+str(d)
+				newname = self.bv_prefix+str(d)
 					
 				# And rename this below
 				rename[self.bv_name] = newname
 				self.bv_name = newname
-				#print "..", self.bv[0]
-			elif re_variable.match(self.name): # if we find a variable
-				assert_or_die(self.name in rename, "Name "+self.name+" not in rename="+str(rename)+"\t;\t"+str(self))
+			elif self.name in rename:
 				self.name = rename[self.name]
 		
 		# and recurse

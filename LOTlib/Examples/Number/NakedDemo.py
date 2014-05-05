@@ -124,19 +124,18 @@ class PCFG:
 	## HMM Nonterminals are only things that as in self.rules; ther ear ecomplex rules that are neither "nonterminals" by this, and terminals
 	# nonterminals are those things that hash into rules
 	def is_nonterminal(self, x): return (not islist(x)) and (x in self.rules)
+		
 	def is_terminal(self, x):    
-		"""
-			A terminal is not a nonterminal and either has no children or its children are terminals themselves
-		"""
+		""" Check conditions for something to be a terminal """
+		
+		# Nonterminals are not terminals
 		if self.is_nonterminal(x): return False
 		
-		if isinstance(x, FunctionNode): 
-			# else we must have
-			for k in x.args:
-				if not self.is_terminal(k): return False
-		
-		# else we get here for strings, etc.
-		return True
+		if isFunctionNode(x): 
+			# You can be a terminal if you are a function with all non-FunctionNode arguments
+			return not any([ isFunctionNode(xi) for xi in None2Empty(x.args)])
+		else:
+			return True # non-functionNodes must be terminals
 	
 	def nonterminals(self):
 		return self.rules.keys()

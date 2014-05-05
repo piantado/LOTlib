@@ -1,4 +1,5 @@
 import LOTlib
+from LOTlib import lot_iter
 from random import random
 from math import exp
 
@@ -21,7 +22,7 @@ def tempered_transitions_sample(inh, data, steps, proposer=None, skip=0, tempera
 		else:   return xi
 		
 	
-	for mhi in xrange(steps):
+	for mhi in lot_iter(xrange(steps)):
 		for skp in xrange(skip+1):
 		
 			xi = current_sample # do not need to copy this
@@ -42,5 +43,4 @@ def tempered_transitions_sample(inh, data, steps, proposer=None, skip=0, tempera
 				current_sample = xi # copy this over
 
 		yield current_sample
-		if LOTlib.SIG_INTERRUPTED: break
 

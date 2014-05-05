@@ -382,6 +382,13 @@ def streq_(x,y): return str(x)==str(y)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Set-theoretic primitives
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+@LOTlib_primitive
+def set_(): return set()
+
+@LOTlib_primitive
+def set_add_(x,s):
+	s.add(x)
+	return s
 
 @LOTlib_primitive
 def union_(A,B): return A.union(B)
@@ -463,13 +470,17 @@ def cardinalitylt_(A,B): return cardify(A) > cardify(B)
 def subset_(A,B):
 	return A.issubset(B)
 
+@LOTlib_primitive
+def is_in_(x,S):
+	return (x in S)
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Stochastic Primitives
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 @LOTlib_primitive
-def flip_():
-	return flip(0.5)
+def flip_(p=0.5):
+	return flip(p)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Quantification
@@ -517,6 +528,9 @@ def iota_(F,S):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 @LOTlib_primitive
 def is_(x,y): return (x is y)
+
+@LOTlib_primitive
+def equals_(x,y): return (x == y)
 
 @LOTlib_primitive
 def co_referents_(T,x):
@@ -756,35 +770,6 @@ undef = 'undef'
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Access arbitrary features
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-@LOTlib_primitive
-def F1(x): return x.F1
-
-@LOTlib_primitive
-def F2(x): return x.F2
-
-@LOTlib_primitive
-def F3(x): return x.F3
-
-@LOTlib_primitive
-def F4(x): return x.F4
-
-@LOTlib_primitive
-def F5(x): return x.F5
-
-@LOTlib_primitive
-def F6(x): return x.F6
-
-@LOTlib_primitive
-def F7(x): return x.F7
-
-@LOTlib_primitive
-def F8(x): return x.F8
-
-@LOTlib_primitive
-def F9(x): return x.F9
-
-@LOTlib_primitive
-def F10(x): return x.F10
 
 # Some of our own primitivesS
 @LOTlib_primitive

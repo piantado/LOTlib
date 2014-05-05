@@ -2,6 +2,7 @@
 	Inference - sample from the prior (as a baseline comparison)
 """
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+from LOTlib import lot_iter
 
 def prior_sample(h0, data, N):
 	"""
@@ -14,8 +15,7 @@ def prior_sample(h0, data, N):
 	G = h0.grammar 
 	rt = h0.value.returntype
 	
-	for i in xrange(N):
-		if LOTlib.SIG_INTERRUPTED: break
+	for i in lot_iter(xrange(N)):
 	
 		h = LOTHypothesis(G, start=rt)
 		h.compute_posterior(data)
