@@ -106,15 +106,3 @@ class FunctionHypothesis(Hypothesis):
 		
 		self.posterior_score = self.prior + self.likelihood
 		return self.likelihood
-		
-	
-	# ~~~~~~~~~
-	# Make this thing pickleable
-	def __getstate__(self):
-		""" We copy the current dict so that when we pickle, we destroy the function"""
-		dd = copy(self.__dict__)
-		dd['fvalue'] = None # clear the function out
-		return dd
-	def __setstate__(self, state):
-		self.__dict__.update(state)
-		self.set_value(self.value) # just re-set the value so that we re-compute the function

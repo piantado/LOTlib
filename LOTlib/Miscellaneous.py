@@ -15,7 +15,10 @@ except ImportError:
 	def gammaln(*args, **kwargs): assert False
 
 
-import numpy as np
+try:                import numpy as np
+except ImportError: import numpypy as np
+
+
 from random import random, sample, randint
 import itertools
 from math import exp, log, sqrt, pi, e
@@ -390,6 +393,10 @@ def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, 
 	
 	if len(objs) == 0: return None
 	
+	# convert to support indexing if we need it
+	if isinstance(objs, set): 
+		objs = list(objs) 
+	
 	myprobs = None
 	if probs is None: # defaultly, we use .lp
 		myprobs = [1.0] * len(objs) # sample uniform
@@ -460,9 +467,39 @@ def Y_bounded(f):
 	"""
 	return (lambda x, n: x(x, n)) (lambda y, n: f(lambda *args: y(y, n+1)(*args)) if n < MAX_RECURSION else raise_exception(RecursionDepthException()), 0)
 
-# here, e is an expression of the arguments. 
-# this adds lambdas and returns a function which is optionally recursive. 
-# if it is recursive, the "recurse" variable is what you use to call *this* function
+
+
+
+def Ystar(*l):
+	"""
+	The Y* combinator for mutually recursive functions. Holy shit.
+	
+	(define (Y* . l)
+          ((lambda (u) (u u))
+            (lambda (p) (map (lambda (li) (lambda x (apply (apply li (p p)) x))) l))))
+	
+	http://okmij.org/ftp/Computation/fixed-point-combinators.html]
+	
+	http://stackoverflow.com/questions/4899113/fixed-point-combinator-for-mutually-recursive-functions
+	
+	
+	Here is even/odd:
+	
+	
+	even,odd = Ystar( lambda e,o: lambda x: (x==0) or o(x-1), \
+                          lambda e,o: lambda x: (not x==0) and e(x-1) )
+                          
+        Note that we require a lambda e,o on the outside so that these can have names inside.
+	"""
+	
+	return (lambda u: u(u))(lambda p: map(lambda li: lambda x: apply(li, p(p))(x), l))
+
+
+
+"""
+	Evaluation of expressions
+"""
+
 def evaluate_expression(e, args=['x'], recurse="L_", addlambda=True):
 	"""
 	This evaluates an expression. If 
@@ -489,21 +526,6 @@ def evaluate_expression(e, args=['x'], recurse="L_", addlambda=True):
 		print "Error in evaluate_expression:", e
 		raise RuntimeError
 		exit(1)
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#  Easier pickling
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-def pickle_save(x, f):
-	out_file = open(f, 'wb')
-	pickle.dump(x, out_file)
-	out_file.close()
-def pickle_load(f):
-	in_file = open(f, 'r')
-	r = pickle.load(in_file)
-	in_file.close()
-	return r
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  And import the primitives for "eval"

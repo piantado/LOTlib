@@ -28,6 +28,8 @@ class LOTHypothesis(FunctionHypothesis):
 		
 		self.likelihood = 0.0
 	
+	def type(self): return self.value.type()
+	
 	def __copy__(self):
 		"""
 			Return a copy of myself.

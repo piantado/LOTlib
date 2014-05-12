@@ -7,7 +7,7 @@
 """
 from copy import deepcopy
 
-from LOTlib.Miscellaneous import weighted_sample
+from LOTlib.Miscellaneous import weighted_sample, qq
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -28,18 +28,17 @@ class FunctionData:
 		return '<' + ','.join(map(str, self.input)) + " -> " + str(self.output) + '>'
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 class UtteranceData:
 	"""
 		A wrapper for utterances. An utterance data point is a word, in a context, with some set of possible words we could have said
 	"""
-	def __init__(self, word, context, all_words):
+	def __init__(self, utterance, context, possible_utterances):
 		self.__dict__.update(locals())
 		
 	def __repr__(self):
-		return str(self.word)+': '+str(self.context) + " / " + str(self.all_words)
-		
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		return qq(str(self.utterance))+' in '+ str(self.context) + " from " + str(self.possible_utterances)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class Obj:
 	""" Represent bundles of features"""

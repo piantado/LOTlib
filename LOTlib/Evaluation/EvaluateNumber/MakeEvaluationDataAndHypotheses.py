@@ -17,4 +17,5 @@ q = FiniteBestSet(10000)
 for h in LOTlib.Inference.MetropolisHastings.mh_sample(initial_hyp, data, TARGET_SAMPLES, skip=0):
 	q.add(h, h.lp)
 
-q.save(TARGET_FILE)
+from LOTlib.Serialization import serialize2file
+serialize2file(q, TARGET_FILE) # save this in a file

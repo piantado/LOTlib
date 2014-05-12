@@ -38,7 +38,7 @@ class Grammar:
 			
 	"""
 	
-	def __init__(self, BV_P=10.0, BV_RESAMPLE_P=1.0):
+	def __init__(self, BV_P=10.0, BV_RESAMPLE_P=1.0, start='START'):
 		self.__dict__.update(locals())
 		
 		self.rules = defaultdict(list) # a dict from nonterminals to lists of GrammarRules
@@ -73,7 +73,7 @@ class Grammar:
 		return self.rules.keys()
 		
 	# these take probs instead of log probs, for simplicity
-	def add_rule(self, nt, name, to, p, resample_p=1.0, bv_type=None, bv_args=None, bv_prefix=None, rid=None):
+	def add_rule(self, nt, name, to, p, resample_p=1.0, bv_type=None, bv_args=None, bv_prefix='y', rid=None):
 		"""
 			Adds a rule, and returns the added rule (for use by add_bv)
 		"""
@@ -111,7 +111,7 @@ class Grammar:
 	## generation
 	############################################################
 
-	def generate(self, x='START', d=0):
+	def generate(self, x='*USE_START*', d=0):
 		"""
 			Generate from the PCFG -- default is to start from 
 			x - either a nonterminal or a FunctionNode
@@ -119,7 +119,7 @@ class Grammar:
 			TODO: We can make this limit the depth, if we want. Maybe that's dangerous?
 			TODO: Add a check that we don't have any leftover bound variable rules, when d==0
 		"""
-		
+		if x is '*USE_START*': x = self.start
 		
 		if isinstance(x,list):
 			

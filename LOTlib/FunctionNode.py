@@ -87,7 +87,18 @@ class FunctionNode(object):
 		if self.args is not None:
 			x.extend( [a.as_list() if isFunctionNode(a) else a for a in self.args] )
 		return x
-			
+	
+	def islambda(self):
+		"""
+			Is this a lambda node? Using this function allows us to potentially 
+		"""
+		ret = (self.name is not None) and (self.name.lower() == 'lambda')
+		
+		# A nice place to keep this--will get checked a lot!
+		if ret: assert len(self.args) == 1, "*** Lambdas must have exactly 1 arg"
+		
+		return ret
+	
 	# output a string that can be evaluated by python
 	## NOTE: Here we do a little fanciness -- with "if" -- we convert it to the "correct" python form with short circuiting instead of our fancy ifelse function
 	def pystring(self): 
@@ -104,12 +115,7 @@ class FunctionNode(object):
 		elif self.name is not None and self.name.lower() == 'apply_':
 			assert self.args is not None and len(self.args)==2, "Apply requires exactly 2 arguments"
 			return '('+str(self.args[0])+')('+str(self.args[1])+')'
-		elif self.name is not None and self.name.lower() == 'lambda':
-			assert len(self.args) == 1, "Lambda variables require one argument"
-			
-			# We can allow bv_type to be None, which is a thunk (no arguments)
-			#return '(lambda '+ (self.bv_type if self.bv_type is not None else '') +': '+str(self.args[0])+' )'
-			
+		elif self.islambda():
 			# The old version (above) wrapped in parens, but that's probably not necessary?
 			return 'lambda '+ (self.bv_name if self.bv_name is not None else '') +': '+str(self.args[0])
 		else:
@@ -246,7 +252,7 @@ class FunctionNode(object):
 		if rename is None: rename = dict()
 				
 		if self.name is not None:
-			if self.name.lower() == 'lambda' and (self.bv_type is not None) and (self.args is not None): 
+			if self.islambda() and (self.bv_type is not None) and (self.args is not None): 
 				#assert (self.bv_args is None) # should only add one rule, and it should have no "to"
 				
 				newname = self.bv_prefix+str(d)
@@ -288,7 +294,29 @@ class FunctionNode(object):
 	
 	# get a description of the input and output types
 	# if collapse_terminal then we just map non-FunctionNodes to "TERMINAL"
-	def get_type_signature(self):
+	def type(self):
+		"""
+			The type of a functionNode is defined to be it's returntype if it's not a lambda,
+			or the correct (recursive) lambda structure if it is a lambda. For instance (lambda x. lambda y . (and (empty? x) y))
+			is a (SET (BOOL BOOL)), where in types, (A B) is something that takes an A and returns a B
+		"""
+		
+		if self.name == '': # If we don't have a function call (as in START), just use the type of what's below
+			assert len(self.args) == 1, "**** Nameless calls must have exactly 1 arg"
+			return self.args[0].type()
+		if (not self.islambda()): 
+			return self.returntype
+		else:
+			# figure out what kind of lambda
+			t = []
+			if self.bv_args is not None:
+				t = tuple( [self.bv_type,] + copy(self.bv_args) )
+			else:
+				t = self.bv_type
+				
+			return (self.args[0].type(), t)
+		
+		"""
 		ts = [self.returntype, self.bv_type, self.bv_args]
 		if self.args is not None:
 			for i in range(len(self.args)):
@@ -297,7 +325,8 @@ class FunctionNode(object):
 				else: 
 					ts.append(self.args[i])
 		return ts
-	
+		"""
+		
 	def is_replicating(self):
 		"""
 			A function node is replicating (by definition) if one of its children is of the same type

@@ -1,7 +1,17 @@
+May 7 2014:
+	- Added support for types (in the semantic/functional sense), that play nicely with nested lambdas
+	- Major refactoring of Lexicon, into SimpleLexicon, WeightedLexicon, and Examples/Quantifier/GriceanWeightedLexicon
+	- Changed SimpleLexicon to hold Hypotheses for each word, instead of FunctionNodes
+	- Addition of a Testing folder
+	- Added example on regular expression inference, demonstrating how to add a new type of "eval"
+	- Moved vectorized quantifier stuff to a new subfolder, that will have to be brought up to date eventually
+	- Changed serialization to allow for serialization of arbitrary things, with lambdas, etc. This uses the "cloud" library instead of pickle
+	
 May 1 2014:
 	- Major change: is_terminal now only checks that the descendants are NOT functionNodes
 	- Added lot_iter, which takes a generator and wraps it so that ctrl-c will break 
 	- Added magnetism example
+	
 Jan 28 2014:
 	- Many changes to naming:
 		lp now posterior_score

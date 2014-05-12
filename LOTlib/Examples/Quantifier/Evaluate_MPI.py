@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
+
 """
 	This runs after we search, taking the top hypotheses that were found and evaluating them on a bunch of new data
 	
 	This outputs one set of lines for each word, for each amount of data. So when CHAINS=10, 
 	
 	MPI run:
-	$ mpiexec --hostfile ../../hosts.mpich2 -n 25 python2.7-mpi Evaluate_MPI.py --dl=0 --chains=10
+	$ mpiexec --hostfile ../../hosts.mpich2 -n 25 python Evaluate_MPI.py --dl=0 --chains=10
 	
 	TODO: Make sure this is what you want-- when your random data leads you to a hypothesis, this computes how
 	      often that hypothesis agrees on NEW (or average) data -- how right the hypothesis is. 
@@ -16,30 +17,27 @@
 """
 
 from Shared import *
-from mpi4py import MPI
-from LOTlib.MPI import * # get our MPI_map function, which will execute run() on as many processors as we pass to mpiexec
-from scipy.maxentropy import logsumexp
+from Utilities import *
+from SimpleMPI.MPI_map import MPI_map, is_master_process, get_rank
+from LOTlib.Miscellaneous import logsumexp
 from collections import defaultdict
 import numpy as np
 from optparse import OptionParser
+from SimpleMPI.MPI_map import MPI_map,is_master_process
 
 DATA_RANGE = range(0, 2050, 100) # Don't need an option for this right now
 parser = OptionParser()
 
 parser.add_option("--hypotheses", dest="LOAD_HYPOTHESES_PATH", type="string",
                   help="Input file (a pickle of FiniteBestSet)", 
-                  default="/home/piantado/Desktop/mit/Libraries/LOTlib/examples/Quantifier/data/gibbs_trees.pkl")
+                  default="/home/piantado/Desktop/mit/Libraries/LOTlib/LOTlib/Examples/Quantifier/data/mcmc-run.pkl")
 parser.add_option("--out", dest="OUT_PATH", type="string",
                   help="Output file (we append -stats and -hypotheses)", 
-                  default="/home/piantado/Desktop/mit/Libraries/LOTlib/examples/Quantifier/data/eval")
+                  default="/home/piantado/Desktop/mit/Libraries/LOTlib/LOTlib/Examples/Quantifier/data/eval")
 parser.add_option("--chains", dest="CHAINS", type="int", default=1,
                   help="Number of chains to run (new data set for each chain)")
 (options, args) = parser.parse_args()
     
-comm = MPI.COMM_WORLD
-rank = comm.Get_rank()
-size = comm.Get_size()
-
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # the main sampling function to run
 
@@ -48,8 +46,7 @@ def run(*args):
 	dprintn(8, "# Generating data")
 	
 	global hypotheses
-	RANK = str(MPI.COMM_WORLD.Get_rank())
-	
+
 	data_size = args[0]
 	
 	p_representation = defaultdict(int) # how often do you get the right representation
@@ -74,9 +71,9 @@ def run(*args):
 	# and output the top hypotheses
 	qq = FiniteBestSet(max=True, N=25)
 	for h in hypotheses: qq.push(h, h.posterior_score) # get the tops
-	for i, h in enumerate(qq.get_sorted()):
+	for i, h in enumerate(qq.get_all(sorted=True)):
 		for w in h.all_words():
-			fprintn(8, data_size, i, w, h.posterior_score, q(h.lex[w]), f=options.OUT_PATH+"-hypotheses."+RANK+".txt")
+			fprintn(8, data_size, i, w, h.posterior_score, q(h.value[w]), f=options.OUT_PATH+"-hypotheses."+str(get_rank())+".txt")
 	
 	# and compute the probability of being correct
 	dprintn(8, "# Computing correct probability")
@@ -100,22 +97,24 @@ def run(*args):
 	
 
 	for w in words:
-		fprintn(10, rank, q(w), data_size, p_representation[w], p_representation_presup[w], p_representation_literal[w], p_response[w], p_response_presup[w], p_response_literal[w], f=options.OUT_PATH+"-stats."+RANK+".txt")
+		fprintn(10, str(get_rank()), q(w), data_size, p_representation[w], p_representation_presup[w], p_representation_literal[w], p_response[w], p_response_presup[w], p_response_literal[w], f=options.OUT_PATH+"-stats."+str(get_rank())+".txt")
 	
 	return 0
 	
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # MPI interface  
 
-if MPI.COMM_WORLD.Get_rank() > 0: # only load if you aren't zero (else we must wait for zero to load!!
-		
-	# The finite set of samples
-	inh = open(options.LOAD_HYPOTHESES_PATH)
-	fs = pickle.load(inh)
+if True: #not is_master_process(): # only load if you aren't zero (else we must wait for zero to load!!
+	
+	from LOTlib.Serialization import *
+	fs = file2object(options.LOAD_HYPOTHESES_PATH)
+	## The finite set of samples
+	#inh = open(options.LOAD_HYPOTHESES_PATH)
+	#fs = pickle.load(inh)
 
 	hypotheses = fs.get_all()
 	
-	print rank, ": Loaded pickle. ", len(hypotheses), " hypotheses."
+	print "#", get_rank(), ": Loaded pickle. ", len(hypotheses), " hypotheses."
 
 	# get all the words
 	words = hypotheses[0].all_words() # just get the words from the first hypothesis
@@ -126,15 +125,15 @@ if MPI.COMM_WORLD.Get_rank() > 0: # only load if you aren't zero (else we must w
 	agree_pct_literal = dict() 
 	for h in hypotheses:
 		for w in words:
-			tresp = [ target.lex[w](*s) for s in TESTING_SET]
-			hresp = [ h.lex[w](*s)      for s in TESTING_SET]
+			tresp = [ target.value[w](t) for t in TESTING_SET]
+			hresp = [ h.value[w](t)      for t in TESTING_SET]
 			
 			key = w+":"+str(h)
 			agree_pct[key]         = np.mean( collapse_undefs(tresp) == collapse_undefs(hresp) ) 
 			agree_pct_presup[key]  = np.mean( extract_presup(tresp)  == extract_presup(hresp) ) 
 			agree_pct_literal[key] = np.mean( extract_literal(tresp) == extract_literal(hresp) )
 
-	print rank, ": Done caching"
+	print "#", get_rank(), ": Done caching"
 
 # run with null args, this many times
 allret = MPI_map(run, [ [x] for x in DATA_RANGE ] * options.CHAINS ) # pass an array of lists of arguments

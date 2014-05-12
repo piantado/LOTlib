@@ -6,24 +6,21 @@
 	This is much slower than the vectorized versions.
 	
 	MPI run:
-	$ mpiexec --hostfile ../../hosts.mpich2 -n 15 python2.7-mpi Search_MCMC.py
+	$ mpiexec --hostfile ../../hosts.mpich2 -n 15 python Search_MCMC.py
 """
 
 from Shared import *
+from SimpleMPI.MPI_map import MPI_map
 
-CHAINS = 2  #how many times do we run?
-DATA_AMOUNTS = [800] # range(0,1500,100)
-SAMPLES = 1000000
+CHAINS = 3  #how many times do we run?
+DATA_AMOUNTS = range(0,300, 100) #range(0,1500,100)
+SAMPLES = 1 # 1000000
 TOP_COUNT = 50
-OUT_PATH = "/home/piantado/Desktop/mit/Libraries/LOTlib/examples/QuantifierLexicon/data/mcmc-run.pkl"
+OUT_PATH = "/home/piantado/Desktop/mit/Libraries/LOTlib/LOTlib/Examples/Quantifier/data/mcmc-run.pkl"
 
 QUIET = False
-RUN_MPI = False # should we run on MPI
+RUN_MPI = True # should we run on MPI? If not, just run as normal python
 
-########################################################################
-## MPI imports if we need them
-if RUN_MPI:
-	from SimpleMPI.MPI_map import MPI_map
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # the main sampling function to run
@@ -40,33 +37,29 @@ def run(data_size):
 	data = generate_data(data_size)
 	
 	# starting hypothesis -- here this generates at random
-	learner = GriceanSimpleLexicon(G, args=['A', 'B', 'S'])
+	learner = GriceanQuantifierLexicon(make_my_hypothesis, my_weight_function)
 	
-	# initialize all the words in learner
-	for w in target.all_words():
-		learner.set_word(w, G.generate('START')) # each word returns a true, false, or undef (None)
-	
+	# We will defautly generate from null the grammar if no value is specified
+	for w in target.all_words(): learner.set_word(w)
+
 	# populate the finite sample by running the sampler for this many steps
-	for x in LOTlib.MetropolisHastings.mh_sample(learner, data, SAMPLES, skip=0):
-		print x
+	for x in mh_sample(learner, data, SAMPLES, skip=0):
 		hypset.push(x, x.posterior_score)
-	
-	if RUN_MPI: print rank, "is done ", data_size
 	
 	return hypset
 	
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # MPI interface
 
-# choose the appropriate map function
-if RUN_MPI:
-	allret = MPI_map(run, map(lambda x: [x], DATA_AMOUNTS * CHAINS)) # this many chains
-else:
-	allret = map(run,  DATA_AMOUNTS * CHAINS)
+# Map. SimpleMPI will use a normal MAP if we are not running in MPI
+allret = MPI_map(run, map(lambda x: [x], DATA_AMOUNTS * CHAINS)) # this many chains
 
 ## combine into a single hypothesis set and save
 outhyp = FiniteBestSet(max=True)
 for r in allret: 
 	print "# Merging ", len(r)
 	outhyp.merge(r)
-outhyp.save(OUT_PATH)
+	
+from LOTlib.Serialization import *
+serialize2file(outhyp, OUT_PATH)
+#outhyp.save(OUT_PATH)

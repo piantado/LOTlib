@@ -12,7 +12,6 @@ from LOTlib.Miscellaneous import *
 from collections import deque
 from copy import deepcopy
 
-
 class QueueItem(object):
 	"""
 		A wrapper to hold items and scores in the queue--just wraps "cmp" on a priority value
@@ -121,12 +120,6 @@ class FiniteBestSet(object):
 		else:
 			for yi in y.Q:
 				self.add(yi.x, yi.priority*y.max_multiplier) # mult y by y.max_multiplier to convert it back to the original scale
-	
-	def save(self, f):
-		# Just a wrapper for pickle that makes saving a little easier
-		out_file = open(f, 'wb')
-		pickle.dump(self, out_file)
-		out_file.close()
 		
 if __name__ == "__main__":
 	
