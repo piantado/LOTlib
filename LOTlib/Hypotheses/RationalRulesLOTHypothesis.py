@@ -12,7 +12,6 @@ class RationalRulesLOTHypothesis(LOTHypothesis):
 	def __init__(self, grammar, rrAlpha=1.0, *args, **kwargs):
 		"""
 			Everything is passed to LOTHypothesis
-			rrPrior - whether we use RR prior or log probability
 		"""
 		self.rrAlpha = rrAlpha
 		
