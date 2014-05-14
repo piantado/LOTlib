@@ -119,7 +119,7 @@ class Grammar:
 			TODO: We can make this limit the depth, if we want. Maybe that's dangerous?
 			TODO: Add a check that we don't have any leftover bound variable rules, when d==0
 		"""
-		if x is '*USE_START*': x = self.start
+		if x == '*USE_START*': x = self.start
 		
 		if isinstance(x,list):
 			

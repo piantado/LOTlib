@@ -2,17 +2,17 @@ from FunctionHypothesis import FunctionHypothesis
 from copy import copy, deepcopy
 from LOTlib.Proposals import RegenerationProposal
 from LOTlib.Miscellaneous import *
+from LOTlib.DataAndObjects import FunctionData
 
 class LOTHypothesis(FunctionHypothesis):
 	"""
 		A FunctionHypothesis built from a grammar.		
 	"""
 	
-	def __init__(self, grammar, value=None, f=None, start='START', ALPHA=0.9, rrPrior=False, rrAlpha=1.0, maxnodes=25, ll_decay=0.0, args=['x'], proposal_function=None):
+	def __init__(self, grammar, value=None, f=None, start='START', ALPHA=0.9, maxnodes=25, args=('x'), proposal_function=None):
 		"""
 			grammar - a grammar
 			start - how the grammar starts to generate
-			rrPrior - whether we use RR prior or log probability
 			f - if specified, we don't recompile the whole function
 		"""
 		
@@ -67,12 +67,14 @@ class LOTHypothesis(FunctionHypothesis):
 		return self.prior
 		
 	#def compute_likelihood(self, data): # called in FunctionHypothesis.compute_likelihood
-	def compute_single_likelihood(self, datum, response):
+	def compute_single_likelihood(self, datum):
 		"""
 			The data here is from LOTlib.Data and is of the type FunctionData
 			This assumes binary function data -- maybe it should be a BernoulliLOTHypothesis
 		"""
-		return log( self.ALPHA*(response==datum.output) + (1.0-self.ALPHA)/2.0 )
+		assert isinstance(datum, FunctionData)
+		
+		return log( self.ALPHA*(self(*datum.input)==datum.output) + (1.0-self.ALPHA)/2.0 )
 		
 	# must wrap these as SimpleExpressionFunctions
 	def enumerative_proposer(self):

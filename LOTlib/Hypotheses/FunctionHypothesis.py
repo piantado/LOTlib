@@ -30,6 +30,7 @@ class FunctionHypothesis(Hypothesis):
 			Make this callable just like a function. Yay python! 
 		"""
 		assert not any([isinstance(x, FunctionData) for x in vals]), "*** Probably you mean to pass FunctionData.input instead of FunctionData?"
+		assert callable(self.fvalue)
 		
 		try:
 			return self.fvalue(*vals)
@@ -46,8 +47,9 @@ class FunctionHypothesis(Hypothesis):
 		# Risky here to catch all exceptions, but we'll do it and warn on failure
 		try:
 			return evaluate_expression(value, args=self.args)
-		except:
+		except e:
 			print "# Warning: failed to execute evaluate_expression on " + str(value)
+			print "# ", e
 			return lambdaNone
 	
 	def reset_function(self):
@@ -90,7 +92,7 @@ class FunctionHypothesis(Hypothesis):
 			out.append(r) # so we get "None" when things mess up
 		return out
 	
-	def compute_single_likelihood(self, datum, response):
+	def compute_single_likelihood(self, datum):
 		"""
 			A function that must be implemented by subclasses to compute the likelihood of a single datum/response pair
 			This should NOT implement the temperature (that is handled by compute_likelihood)
@@ -99,10 +101,7 @@ class FunctionHypothesis(Hypothesis):
 	
 	def compute_likelihood(self, data):
 		
-		# compute responses to all data
-		responses = self.get_function_responses(data) # get my response to each object
-		
-		self.likelihood = sum(map( self.compute_single_likelihood, data, responses))
+		self.likelihood = sum(map( self.compute_single_likelihood, data))
 		
 		self.posterior_score = self.prior + self.likelihood
 		return self.likelihood

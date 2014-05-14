@@ -36,7 +36,6 @@ class DecayedLikelihoodHypothesis(Hypothesis):
 		NOTE: This is O(N^2) (for power law decays; for geometric it could be linear)
 		returns: a numpy array of the likelihoods
 		
-		- decay - the memory decay
 		- shift_right -- do we insert a "0" at the beginning (corresponding to inferences with 0 data), and then delete one from the end?
 			       - So if you do posterior predictives, you want shift_right=True
 		"""
@@ -67,10 +66,9 @@ class DecayedLikelihoodHypothesis(Hypothesis):
 			This is overwritten, writes to stored_likelihood, and thenc alls get_culmulative_likelihoods
 		"""
 		self.stored_likelihood = map( self.compute_single_likelihood, data)
-		culm_lls = self.get_culmulative_likelihoods(self) # TODO: We don't actually need the entire array--shouldn't pass around!
+		culm_lls = self.get_culmulative_likelihoods() 
 		
 		self.likelihood = culm_lls[-1]/self.likelihood_temperature
-		
 		
 		self.posterior_score = self.prior + self.likelihood
 		

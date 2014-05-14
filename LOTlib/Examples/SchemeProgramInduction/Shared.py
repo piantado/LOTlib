@@ -28,9 +28,14 @@ class SchemeFunction(LOTHypothesis):
 	
 	# Prior, proposals, __init__ are all inherited from LOTHypothesis
 	
-	def compute_single_likelihood(self, datum, response):
-		# We'll just use a string comparison on outputs here, for ease
-		if str(response) == str(datum.output):  
+	def compute_single_likelihood(self, datum):
+		"""
+			Wrap in string for comparisons here. Also, this is a weird pseudo-likelihood (an outlier process)
+			since when we are wrong, it should generate the observed data with some probability that's not going
+			to be 1-ALPHA
+		"""
+		
+		if str(self(datum.input)) == str(datum.output):  
 			return log(self.ALPHA)
 		else:                       
 			return log(1.0-self.ALPHA)

@@ -3,21 +3,33 @@
 	
 	We can use this to see if sampling counts, etc. are what they should be.
 """
+from scipy.stats import chisquare
 
 
 def check_counts( obj2counts, expected, threshold=0.001, verbose=False):
 	"""
 		Here, obj2counts is a dictionary mapping each thing to a count
-		expected is a *function* that takes an object and hands back its expected counts (normalized)
+		expected is a *function* that takes an object and hands back its expected counts (unnormalized), or a dictionary
+		doing the same (unnormalized)
+		
+		TODO: We may want a normalized version?
 	"""
-	from scipy.stats import chisquare
 	
 	objects = obj2counts.keys()
 	
 	actual_counts   = map(lambda o: float(obj2counts[o]), objects)
 	N = sum(actual_counts)
-	expected_counts = map(lambda o: float(expected(o)*N), objects)
 	
+	if isinstance(expected, dict):
+		e = map(lambda o: expected.get(o,0.0), objects)
+	else:
+		assert callable(expected)
+		e = map(lambda o: expected(o), objects)
+		
+	Z = float(sum(e))
+	
+	expected_counts = map(lambda o: float(o*N)/Z, e)
+		
 	chi, p = chisquare(f_obs=actual_counts, f_exp=expected_counts)
 
 	if verbose:

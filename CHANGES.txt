@@ -1,3 +1,8 @@
+May 13 2014:
+	- Changed LOTHypothesis.compute_single_likelihood to require a FunctionData
+	- Altered how functions are passed to LOTHypothesis and FunctionHypothesis -- compute_single_likelihood now takes a single argument, a FunctionData
+	- Fixed RationalRules examples to use new Hypotheses.RationalRulesLOTHypothesis
+	
 May 12 2014:
 	- Added support for types (in the semantic/functional sense), that play nicely with nested lambdas
 	- Major refactoring of Lexicon, into SimpleLexicon, WeightedLexicon, and Examples/Quantifier/GriceanWeightedLexicon
