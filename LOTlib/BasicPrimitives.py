@@ -8,6 +8,7 @@
 	TODO: Include "multiset" objects so that union can either take into account uniqueness or not!
 	
 """
+
 from LOTlib.Miscellaneous import *
 from LOTlib.FunctionNode import isFunctionNode
 import re
@@ -383,7 +384,7 @@ def streq_(x,y): return str(x)==str(y)
 # Set-theoretic primitives
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 @LOTlib_primitive
-def set_(): return set()
+def set_(*args): return set(args)
 
 @LOTlib_primitive
 def set_add_(x,s):
@@ -412,6 +413,18 @@ def select_(A): # choose an element, but don't remove it
 		#A.add(x)
 		#return set([x]) # but return a set
 	#else: return set() # empty set
+
+from random import sample as random_sample
+@LOTlib_primitive
+def sample_unique_(S):
+	return random_sample(S,1)[0]
+
+from random import choice as random_choice
+@LOTlib_primitive
+def sample_(S):
+	if len(S) == 0: return set()
+	else:           return random_choice(list(S))
+
 
 @LOTlib_primitive
 def exhaustive_(A,B): return coextensive(A,B)

@@ -12,6 +12,6 @@ class GaussianLOTHypothesis(LOTHypothesis):
 		LOTHypothesis.__init__(self, G, value=value, f=f, proposal_function=proposal_function)
 		
 		
-	def compute_single_likelihood(self, datum, response):
+	def compute_single_likelihood(self, datum):
 		""" Compute the likelihood with a Gaussian"""
-		return normlogpdf(response, datum.output, datum.ll_sd)
+		return normlogpdf(self(*datum.input), datum.output, datum.ll_sd)

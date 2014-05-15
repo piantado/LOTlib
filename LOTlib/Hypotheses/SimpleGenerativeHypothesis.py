@@ -19,6 +19,9 @@ class SimpleGenerativeHypothesis(LOTHypothesis):
 		
 		LOTHypothesis.__init__(self, G, args=[], **kwargs) # this is simple-generative since args=[] (a thunk)
 	
+	def compute_single_likelihood(self, datum):
+		assert False, "Should not call this!"
+	
 	def compute_likelihood(self, data, sm=0.001):
 		"""
 			sm smoothing counts are added to existing bins of counts (just to prevent badness)

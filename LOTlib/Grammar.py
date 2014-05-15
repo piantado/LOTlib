@@ -340,43 +340,6 @@ class Grammar:
 					for q in self.increment_tree(n, depth-1): yield q
 		else:   raise StopIteration
 			
-	def get_rule_counts(self, t):
-		"""
-			A list of vectors of counts of how often each nonterminal is expanded each way
-			
-			TODO: This is probably not super fast since we use a hash over rule ids, but
-			      it is simple!
-		"""
-		
-		counts = defaultdict(int) # a count for each hash type
-		
-		for ti in listifnot(t):
-			for x in ti:
-				if x.ruleid >= 0: counts[x.ruleid] += 1
-		
-		# and convert into a list of vectors (with the right zero counts)
-		out = []
-		for nt in self.rules.keys():
-			v = np.array([ counts.get(r.rid,0) for r in self.rules[nt] ])
-			out.append(v)
-		return out
-		
-	def RR_prior(self, t, alpha=1.0):
-		"""
-			Compute the rational rules prior from Goodman et al. 
-			
-			NOTE: This has not yet been extensively debugged, so use with caution
-			
-			TODO: Add variable priors (different vectors, etc)
-		"""
-		lp = 0.0
-		
-		for c in self.get_rule_counts(t):
-			theprior = np.array( [alpha] * len(c), dtype=float )
-			#theprior = np.repeat(alpha,len(c)) # Not implemented in numpypy
-			lp += (beta(c+theprior) - beta(theprior))
-		return lp
-	
 	
 	def lp_regenerate_propose_to(self, x, y, xZ=None, yZ=None):
 		"""

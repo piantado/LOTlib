@@ -17,7 +17,7 @@ def prior_sample(h0, data, N):
 	
 	for i in lot_iter(xrange(N)):
 	
-		h = LOTHypothesis(G, start=rt)
+		h = type(h0)(G, start=rt)
 		h.compute_posterior(data)
 		
 		yield h
