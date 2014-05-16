@@ -19,7 +19,8 @@ import LOTlib
 from LOTlib import lot_iter
 from LOTlib.Miscellaneous import *
 from LOTlib.FiniteBestSet import FiniteBestSet
-from LOTlib.BoundedDictionary import BoundedDictionary
+#from LOTlib.BoundedDictionary import BoundedDictionary
+from LOTlib.Memoization import BoundedDictionary
 from MHShared import *
 
 def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_temperature=1.0, ll_temperature=1.0, acceptance_temperature=1.0, trace=False, debug=False, stats=None, memoize=0):
