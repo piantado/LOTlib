@@ -106,12 +106,13 @@ class NumberExpression(LOTHypothesis):
 			
 		return self.prior
 	
-	def compute_single_likelihood(self, datum, response):
+	def compute_single_likelihood(self, datum):
 		"""
 			Computes the likelihood of data.
 			TODO: Make sure this precisely matches the number paper. 
 			
 		"""
+		response = self(*datum.input)
 		if response == 'undef' or response == None: 
 			return log(1.0/10.0) # if undefined, just sample from a base distribution
 		else:   return log( (1.0 - ALPHA)/10.0 + ALPHA * ( response == datum.output ) )
@@ -140,8 +141,7 @@ def get_knower_pattern(ne):
 		This computes a string describing the behavior of this knower-level
 	"""
 	out = ''
-	mydata = [ FunctionData( [set(sample_sets_of_objects(n, all_objects))], '') for n in xrange(1,10) ] 
-	resp = ne.get_function_responses( mydata )
+	resp = [ ne(set(sample_sets_of_objects(n, all_objects))) for n in xrange(1,10)]
 	return ''.join([ str(word_to_number[x]) if (x is not None and x is not 'undef' ) else 'U' for x in resp])
 	
 

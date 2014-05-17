@@ -11,14 +11,14 @@ class FunctionHypothesis(Hypothesis):
 		This can also be called like a function, as in fh(data)!
 	"""
 	
-	def __init__(self, value=None, f=None, args=['x']):
+	def __init__(self, value=None, f=None, args=['x'], **kwargs):
 		"""
 			value - the value of this hypothesis
 			f - defaultly None, in which case this uses self.value2function
 			args - the argumetns to the function
 		"""
 		self.args = args # must come first since below calls value2function
-		Hypothesis.__init__(self,value) # this initializes prior and likleihood variables, so keep it here!
+		Hypothesis.__init__(self,value, **kwargs) # this initializes prior and likleihood variables, so keep it here!
 		self.set_value(value,f)
 		
 	def __copy__(self):
@@ -31,9 +31,12 @@ class FunctionHypothesis(Hypothesis):
 		"""
 		assert not any([isinstance(x, FunctionData) for x in vals]), "*** Probably you mean to pass FunctionData.input instead of FunctionData?"
 		assert callable(self.fvalue)
+		#print "CALL", str(self), vals
 		
 		try:
 			return self.fvalue(*vals)
+		except RecursionDepthException:
+			return None
 		except TypeError:
 			print "TypeError in function call: "+str(self)+"  ;  "+str(vals)
 			raise TypeError
@@ -69,28 +72,29 @@ class FunctionHypothesis(Hypothesis):
 		elif value is None:   self.fvalue = None
 		else:                 self.fvalue = self.value2function(value)
 	
-	def get_function_responses(self, data, *args, **kwargs):
-		""" 
-		Evaluate this function on some data
-		Returns a list of my responses to data, handling exceptions (setting to None)
-		- args, kwargs -- these are just passed to self on evaluation
-		"""
+	## NOTE: get_function_responses will be removed
+	#def get_function_responses(self, data, *args, **kwargs):
+		#""" 
+		#Evaluate this function on some data
+		#Returns a list of my responses to data, handling exceptions (setting to None)
+		#- args, kwargs -- these are just passed to self on evaluation
 		
-		#return map(lambda di: self(*di.args), data)
+		#TODO: CLEAN THIS UP -- SHOULD THIS EVER BE USED?
+		#"""
 		
-		args = list(args) # need this so we can concat with + below
+		#args = list(args) # need this so we can concat with + below
 		
-		out = []
-		for di in data:
-			r = None
-			try:
-				if   isinstance(di, FunctionData):  r = self(*(di.input+args), **kwargs)
-				elif isinstance(di, UtteranceData): r = self(*(di.context+args), **kwargs)
-				else:                               r = self(*(di+args), **kwargs) # otherwise just pass along
-			except RecursionDepthException: pass # If there is a recursion depth exception, just ignore (so r=None)
+		#out = []
+		#for di in data:
+			#r = None
+			#try:
+				#if   isinstance(di, FunctionData):  r = self(*(di.input+args), **kwargs)
+				#elif isinstance(di, UtteranceData): r = self(*(di.context+args), **kwargs)
+				#else:                               r = self(*(di+args), **kwargs) # otherwise just pass along
+			#except RecursionDepthException: pass # If there is a recursion depth exception, just ignore (so r=None)
 			
-			out.append(r) # so we get "None" when things mess up
-		return out
+			#out.append(r) # so we get "None" when things mess up
+		#return out
 	
 	def compute_single_likelihood(self, datum):
 		"""
@@ -101,7 +105,23 @@ class FunctionHypothesis(Hypothesis):
 	
 	def compute_likelihood(self, data):
 		
-		self.likelihood = sum(map( self.compute_single_likelihood, data))
+		self.likelihood = sum(map( self.compute_single_likelihood, data)) / self.likelihood_temperature
 		
 		self.posterior_score = self.prior + self.likelihood
 		return self.likelihood
+
+
+	# ~~~~~~~~~
+	# Make this thing pickleable
+	
+	def __getstate__(self):
+		""" We copy the current dict so that when we pickle, we destroy the function"""
+		dd = copy(self.__dict__)
+		dd['fvalue'] = None # clear the function out
+		return dd
+
+	def __setstate__(self, state):
+		self.__dict__.update(state)
+		self.set_value(self.value) # just re-set the value so that we re-compute the function
+		
+		

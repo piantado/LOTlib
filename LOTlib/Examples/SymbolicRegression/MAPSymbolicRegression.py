@@ -37,19 +37,15 @@ class MAPSymbolicRegressionHypothesis(GaussianLOTHypothesis):
 		This hacks it by defining a self.CONSTANT_VALUES that are automatically read from 
 		get_function_responses (overwritten). We can then change them and repeatedly compute the 
 		likelihood to optimize
-		
 	"""
 	
 	def value2function(self, value):
 		"""
 		Overwrite this from FunctionHypothesis. Here, we add args for the constants so we can use them
 		"""
+		#print ">>", self.args, CONSTANT_NAMES
 		return evaluate_expression(value, args=self.args+CONSTANT_NAMES)
-	
-	
-	def get_function_responses(self, data, *args, **kwargs):
-		return GaussianLOTHypothesis.get_function_responses(self, data, *self.CONSTANT_VALUES) # Pass in the constant names
-	
+		
 	def compute_likelihood(self, data):
 		
 		def llgivenC(fit_params):

@@ -21,7 +21,6 @@ REQUIREMENTS
 - numpy
 - scipy
 - SimpleMPI (if using MPI)
-- cloud (for pickling that supports lambdas)
 - pyparsing (for SimpleLambdaParser)
 
 INSTALLATION

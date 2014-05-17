@@ -9,7 +9,7 @@ class LOTHypothesis(FunctionHypothesis):
 		A FunctionHypothesis built from a grammar.		
 	"""
 	
-	def __init__(self, grammar, value=None, f=None, start='START', ALPHA=0.9, maxnodes=25, args=('x'), proposal_function=None):
+	def __init__(self, grammar, value=None, f=None, start='START', ALPHA=0.9, maxnodes=25, args=['x'], proposal_function=None, **kwargs):
 		"""
 			grammar - a grammar
 			start - how the grammar starts to generate
@@ -20,7 +20,7 @@ class LOTHypothesis(FunctionHypothesis):
 		self.__dict__.update(locals())
 		if value is None: value = grammar.generate(self.start)
 		
-		FunctionHypothesis.__init__(self, value=value, f=f, args=args)
+		FunctionHypothesis.__init__(self, value=value, f=f, args=args, **kwargs)
 		# Save a proposal function
 		## TODO: How to handle this in copying?
 		if proposal_function is None:

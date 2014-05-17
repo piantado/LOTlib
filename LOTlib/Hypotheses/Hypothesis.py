@@ -36,7 +36,7 @@ class Hypothesis(object):
 		
 	def __copy__(self):
 		""" Returns a copy of myself by calling copy() on self.value """
-		return Hypothesis(value=self.value.copy())
+		return Hypothesis(value=self.value.copy(), prior_temperature=self.prior_temperature, likelihood_temperature=self.likelihood_temperature)
 		
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# All instances of this must implement these:

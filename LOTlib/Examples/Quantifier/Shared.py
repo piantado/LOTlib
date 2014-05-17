@@ -149,8 +149,12 @@ TESTING_SET = [MyContext(A=x[0], B=x[1], S=x[2]) for x in all_possible_context_s
 ## Functions for gricean
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-make_my_hypothesis =  lambda : LOTHypothesis(G, args=['context'])
-my_weight_function = Memoize(lambda h: gricean_weight(h, TESTING_SET))
+def make_my_hypothesis():
+	return LOTHypothesis(G, args=['context'])
+
+@Memoize
+def my_weight_function(h):
+	return gricean_weight(h, TESTING_SET)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Define the target
