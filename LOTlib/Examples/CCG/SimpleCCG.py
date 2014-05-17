@@ -3,6 +3,9 @@
 	
 	This just uses brute force parsing. 
 	
+	
+	TODO: Learn that MAN is JOHN or BILL
+	
 """
 from copy import copy
 
@@ -22,7 +25,7 @@ from CCGLexicon import CCGLexicon
 
 SEMANTIC_1PREDICATES = ['SMILED', 'LAUGHED', 'MAN', 'WOMAN']
 SEMANTIC_2PREDICATES = ['SAW', 'LOVED']
-OBJECTS              = ['JOHN', 'MARY', 'SUSAN']
+OBJECTS              = ['JOHN', 'MARY', 'SUSAN', 'BILL']
 
 G = Grammar()
 
@@ -99,8 +102,7 @@ def make_hypothesis():
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-SAMPLES = 10000
-#from LOTlib.Serialization import *
+SAMPLES = 100000
 
 def run(llt=1.0):
 	
@@ -123,17 +125,18 @@ allret = MPI_map(run, map(lambda x: [x], [0.01, 0.1, 0.5, 1.0, 1.5, 2.0] * 10 ))
 
 if is_master_process():
 
-	#allret = map(string2object, allret) # unserialize  ## TODO: CHANGE THIS WHEN DONE
-
 	allfbs = FiniteBestSet(max=True)
 	allfbs.merge(allret)
 
 	H = allfbs.get_all()
-	[h.compute_posterior(data) for h in H]
+	
+	for h in H:
+		h.likelihood_temperature = 0.1
+		h.compute_posterior(data)
 
 	# show the *average* ll for each hypothesis
 	for h in sorted(H, key=lambda h: h.posterior_score):
-		print h.posterior_score, h.prior, h.likelihood
+		print h.posterior_score, h.prior, h.likelihood, h.likelihood_temperature
 		print h
 
 
