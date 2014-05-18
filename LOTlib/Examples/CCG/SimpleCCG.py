@@ -58,30 +58,27 @@ G.add_rule('FUNCTION', 'lambda', ['START'], 1.0, bv_type='BOOL', bv_args=['OBJEC
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Set up the data
 
-objects = ("JOHN", "BILL", "MARY") # All possible objects
 possible_utterances = [] # this will be referenced in every UTteranceData, and at the end we'll use it to do all possible strings
 
 data = [] # For now, some unambiguous data:
-data.append(  UtteranceData( utterance=str2sen('john saw mary'), context=Context(objects, [("SAW", "JOHN", "MARY")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('mary saw john'), context=Context(objects, [("SAW", "MARY", "JOHN")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('mary smiled'), context=Context(objects, [("SMILED", "MARY")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('john smiled'), context=Context(objects, [("SMILED", "JOHN")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('john saw mary'), context=Context(OBJECTS, [("SAW", "JOHN", "MARY")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('mary saw john'), context=Context(OBJECTS, [("SAW", "MARY", "JOHN")]), possible_utterances=possible_utterances  ))
 
-data.append(  UtteranceData( utterance=str2sen('bill smiled'), context=Context(objects, [("SMILED", "MARY")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('susan smiled'), context=Context(objects, [("SMILED", "JOHN")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('mary smiled'), context=Context(OBJECTS, [("SMILED", "MARY")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('john smiled'), context=Context(OBJECTS, [("SMILED", "JOHN")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('bill smiled'), context=Context(OBJECTS, [("SMILED", "BILL")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('susan smiled'), context=Context(OBJECTS, [("SMILED", "SUSAN")]), possible_utterances=possible_utterances  ))
+
+data.append(  UtteranceData( utterance=str2sen('john is man'), context=Context(OBJECTS, [("MAN", "JOHN")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('bill is man'), context=Context(OBJECTS, [("MAN", "BILL")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('mary is woman'), context=Context(OBJECTS, [("WOMAN", "MARY")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('susan is woman'), context=Context(OBJECTS, [("WOMAN", "SUSAN")]), possible_utterances=possible_utterances  ))
 
 
-data.append(  UtteranceData( utterance=str2sen('john is man'), context=Context(objects, [("MAN", "JOHN")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('bill is man'), context=Context(objects, [("MAN", "BILL")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('mary is woman'), context=Context(objects, [("WOMAN", "MARY")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('mary is woman'), context=Context(objects, [("WOMAN", "SUSAN")]), possible_utterances=possible_utterances  ))
-
-
-data.append(  UtteranceData( utterance=str2sen('every man smiled'), context=Context(objects, [("SMILED", "JOHN"),("SMILED", "BILL")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('every woman smiled'), context=Context(objects, [("SMILED", "MARY"),("SMILED", "SUSAN")]), possible_utterances=possible_utterances  ))
-
-data.append(  UtteranceData( utterance=str2sen('every man laughed'), context=Context(objects, [("LAUGHED", "JOHN"),("LAUGHED", "BILL")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('every woman laughed'), context=Context(objects, [("LAUGHED", "MARY"),("LAUGHED", "SUSAN")]), possible_utterances=possible_utterances  ))
+#data.append(  UtteranceData( utterance=str2sen('every man smiled'), context=Context(OBJECTS, [("SMILED", "JOHN"),("SMILED", "BILL")]), possible_utterances=possible_utterances  ))
+#data.append(  UtteranceData( utterance=str2sen('every woman smiled'), context=Context(OBJECTS, [("SMILED", "MARY"),("SMILED", "SUSAN")]), possible_utterances=possible_utterances  ))
+#data.append(  UtteranceData( utterance=str2sen('every man laughed'), context=Context(OBJECTS, [("LAUGHED", "JOHN"),("LAUGHED", "BILL")]), possible_utterances=possible_utterances  ))
+#data.append(  UtteranceData( utterance=str2sen('every woman laughed'), context=Context(OBJECTS, [("LAUGHED", "MARY"),("LAUGHED", "SUSAN")]), possible_utterances=possible_utterances  ))
 
 
 # Just treat each possible utterance as 
@@ -121,7 +118,7 @@ def run(llt=1.0):
 
 from SimpleMPI.MPI_map import MPI_map, is_master_process
 
-allret = MPI_map(run, map(lambda x: [x], [0.01, 0.1, 0.5, 1.0, 1.5, 2.0] * 10 )) 
+allret = MPI_map(run, map(lambda x: [x], [0.01, 0.1, 1.0] * 100 )) 
 
 if is_master_process():
 
@@ -131,7 +128,7 @@ if is_master_process():
 	H = allfbs.get_all()
 	
 	for h in H:
-		h.likelihood_temperature = 0.1
+		h.likelihood_temperature = 0.1 # on what set of data we want?
 		h.compute_posterior(data)
 
 	# show the *average* ll for each hypothesis
