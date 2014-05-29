@@ -4,12 +4,13 @@
 	
 """
 from LOTlib.Miscellaneous import UniquifyFunction
+from LOTlib import lot_iter
 
 def generate_trees(grammar, start='START', N=1000):
 	"""
 		Yield a bunch of unique trees, produced from the grammar
 	"""
-	for _ in xrange(N):
+	for _ in lot_iter(xrange(N)):
 		yield grammar.generate(start)
 
 
@@ -18,7 +19,7 @@ def generate_unique_trees(grammar, start='START', N=1000):
 	"""
 		Yield a bunch of unique trees, produced from the grammar
 	"""
-	for _ in xrange(N):
+	for _ in lot_iter(xrange(N)):
 		t = grammar.generate(start)
 		yield t
 

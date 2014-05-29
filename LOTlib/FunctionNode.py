@@ -54,7 +54,7 @@ class FunctionNode(object):
 		My bv stores the particlar *names* of variables I've introduced
 	"""
 	
-	def __init__(self, returntype, name, args, generation_probability=0.0, resample_p=1.0, bv_name=None, bv_type=None, bv_args=None, bv_prefix=None, ruleid=None):
+	def __init__(self, returntype, name, args, generation_probability=0.0, resample_p=1.0, bv_name=None, bv_type=None, bv_args=None, bv_prefix=None, bv_p=None, ruleid=None):
 		self.__dict__.update(locals())
 		
 	# make all my parts the same as q (not copies)
@@ -71,7 +71,7 @@ class FunctionNode(object):
 		else:
 			newargs = self.args
 		
-		return FunctionNode(self.returntype, self.name, newargs, generation_probability=self.generation_probability, resample_p=self.resample_p, bv_type=self.bv_type, bv_name=self.bv_name, bv_args=deepcopy(self.bv_args), bv_prefix=self.bv_prefix, ruleid=self.ruleid)
+		return FunctionNode(self.returntype, self.name, newargs, generation_probability=self.generation_probability, resample_p=self.resample_p, bv_type=self.bv_type, bv_name=self.bv_name, bv_args=deepcopy(self.bv_args), bv_prefix=self.bv_prefix, bv_p=self.bv_p, ruleid=self.ruleid)
 	
 	def is_nonfunction(self):
 		return (self.args is None)
@@ -241,7 +241,7 @@ class FunctionNode(object):
 	def string_below(self, sep=" "):
 		return sep.join(map(str, self.all_leaves()))
 	
-	def fix_bound_variables(self, d=0, rename=None):
+	def fix_bound_variables(self, d=1, rename=None):
 		"""
 			Fix the naming scheme of bound variables. This happens if we promote or demote some nodes
 			via insert/delete
@@ -252,8 +252,8 @@ class FunctionNode(object):
 		if rename is None: rename = dict()
 				
 		if self.name is not None:
-			if self.islambda() and (self.bv_type is not None) and (self.args is not None): 
-				#assert (self.bv_args is None) # should only add one rule, and it should have no "to"
+			if self.islambda() and (self.bv_type is not None): 
+				assert self.args is not None
 				
 				newname = self.bv_prefix+str(d)
 					
@@ -265,6 +265,8 @@ class FunctionNode(object):
 		
 		# and recurse
 		for k in self.argFunctionNodes():
+			
+			#print "\t\tRENAMING", k, k.bv_prefix, rename
 			k.fix_bound_variables(d+1, rename)
 			
 

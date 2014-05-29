@@ -9,7 +9,7 @@ from math import log
 from LOTlib.Miscellaneous import assert_or_die
 
 class GrammarRule:
-	def __init__(self, nt, name, to, rid, p=1.0, resample_p=1.0, bv_type=None, bv_args=None, bv_prefix="y"):
+	def __init__(self, nt, name, to, rid, p=1.0, resample_p=1.0, bv_type=None, bv_args=None, bv_prefix="y", bv_p=None):
 		"""	
 			nt - the nonterminal
 			name - the name of this function

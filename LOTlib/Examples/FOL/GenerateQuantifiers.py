@@ -21,7 +21,7 @@ G.add_rule('BOOL', 'forall_', ['FUNCTION', 'SET'], 0.50)
 G.add_rule('SET', 'S', None, 1.0)
 
 # And allow us to create a new kind of function
-G.add_rule('FUNCTION', 'lambda', ['BOOL'], 1.0, bv_name='BOOL', bv_args=None) # bvtype means we introduce a bound variable below
+G.add_rule('FUNCTION', 'lambda', ['BOOL'], 1.0, bv_type='BOOL', bv_args=None) # bvtype means we introduce a bound variable below
 G.BV_WEIGHT = 2.0 # When we introduce bound variables, they have this (relative) probability
 
 

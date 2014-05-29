@@ -73,7 +73,7 @@ class Grammar:
 		return self.rules.keys()
 		
 	# these take probs instead of log probs, for simplicity
-	def add_rule(self, nt, name, to, p, resample_p=1.0, bv_type=None, bv_args=None, bv_prefix='y', rid=None):
+	def add_rule(self, nt, name, to, p, resample_p=1.0, bv_type=None, bv_args=None, bv_prefix='y', bv_p=None, rid=None):
 		"""
 			Adds a rule, and returns the added rule (for use by add_bv)
 		"""
@@ -86,7 +86,7 @@ class Grammar:
 			self.bv_count += 1
 			
 		# Create the rule and add it
-		newrule = GrammarRule(nt,name,to, p=p, resample_p=resample_p, bv_type=bv_type, bv_args=bv_args, bv_prefix=bv_prefix, rid=rid)
+		newrule = GrammarRule(nt,name,to, p=p, resample_p=resample_p, bv_type=bv_type, bv_args=bv_args, bv_prefix=bv_prefix, bv_p=bv_p, rid=rid)
 		self.rules[nt].append(newrule)
 		
 		return newrule
@@ -100,11 +100,13 @@ class Grammar:
 		self.rules[r.nt].remove(r)
 	
 	# add a bound variable and return the rule
-	def add_bv_rule(self, nt, args, bv_prefix, d):
+	def add_bv_rule(self, nt, args, bv_prefix, bv_p, d):
 		""" Add an expansion to a bound variable of type t, at depth d. Add it and return it. """
 		self.bv_rule_id += 1 # A unique identifier for each bound variable rule (may get quite large!)
 		
-		return self.add_rule( nt, name=bv_prefix+str(d), to=args, p=self.BV_P, resample_p=self.BV_RESAMPLE_P, rid=-self.bv_rule_id)
+		if bv_p is None: bv_p = self.BV_P # use the default if none
+		
+		return self.add_rule( nt, name=bv_prefix+str(d), to=args, p=bv_p, resample_p=self.BV_RESAMPLE_P, rid=-self.bv_rule_id)
 			
 	
 	############################################################
@@ -142,24 +144,34 @@ class Grammar:
 			
 			r, gp = weighted_sample(self.rules[x], probs=lambda x: x.p, return_probability=True, log=False)
 			
-			#print "SAMPLED:", r
+			#print "SAMPLED:", gp, r
 			
 			if r.bv_type is not None: # adding a rule
-				added = self.add_bv_rule(r.bv_type, r.bv_args, r.bv_prefix, d)
+				added = self.add_bv_rule(r.bv_type, r.bv_args, r.bv_prefix, r.bv_p, d)
 				#print "ADDING", added
 				
-				
-			# expand the "to" part of our rule
-			if r is None:
-				args = None
-			else:
-				args = self.generate(r.to, d=d+1)
-				
+			raise_after = None
+			try: 
+				# expand the "to" part of our rule
+				# We might get a runtime error for going too deep -- we need to be sure we remove those rules,
+				# so we'll catch this error and store it for later (After the rules are removed)
+				if r is None:
+					args = None
+				else:
+					args = self.generate(r.to, d=d+1)
+					
+			except Exception as e: 
+				raise_after = e
+			
 			#print "GENERATED ", args
 			
 			if r.bv_type is not None:
 				#print "REMOVING ", added
 				self.remove_rule(added)
+				
+			
+			if raise_after is not None:
+				raise raise_after
 				
 			# create the new node
 			if r.bv_type is not None:
@@ -204,7 +216,7 @@ class Grammar:
 			#print "iterate subnode: ", t.name, t.bv_type, t
 			
 			if do_bv and t.bv_type is not None:
-				added = self.add_bv_rule( t.bv_type, t.bv_args, t.bv_prefix, d)
+				added = self.add_bv_rule( t.bv_type, t.bv_args, t.bv_prefix, t.bv_p, d)
 			
 			if t.args is not None:
 				for g in self.iterate_subnodes(t.args, d=d+1, do_bv=do_bv, yield_depth=yield_depth, predicate=predicate): # pass up anything from below
