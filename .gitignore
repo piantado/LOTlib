@@ -1,0 +1,5 @@
+# Documentation
+doc/
+
+# Mac dotfile
+.DS_Store
