@@ -3,6 +3,10 @@
 """
 
 	This is a version of what was called "PriorityQueue.py" in LOTlib.VERSION < 0.3. 
+	
+	NOTE: This is terrible. Let's re-do this so everything is nice, we can easily add and remove, max/min is more clear, etc. 
+		-- have it initialize to extract a certain key from hypotheses, or call a certain function
+	
 """
 import heapq
 import operator
@@ -65,16 +69,16 @@ class FiniteBestSet(object):
 	def push(self, x, p=None):
 		self.add(x,p)
 		
-	def add(self, x, p=None):
+	def add(self, x, p=None, store_iterator=False):
 		""" 
 			Add x with priority p to the set.
-			
+			store_iteratore -- if we are supposed to store an iterator (rather than elements from it)
 			If p=None, we use self.key to get the value. 
 			If x is an iterable, we add everything in it.
 		
 		"""
 
-		if isinstance(x, collections.Iterable):
+		if isinstance(x, collections.Iterable) and not store_iterator:
 			assert p==None, "FiniteBestSet.add must have p=None for use with an iterator"
 			
 			for xi in x: self.add(xi)
@@ -96,7 +100,9 @@ class FiniteBestSet(object):
 				# if we have too many elements
 				if len(self) > self.N: 
 					rr = heapq.heappop(self.Q)
-					self.unique_set.remove(rr.x) # clean out the removed from the set
+					
+					if rr.x in self.unique_set:
+						self.unique_set.remove(rr.x) # clean out the removed from the set
 	
 	def get_all(self, **kwargs): 
 		""" Return all elements (arbitrary order). Does NOT return a copy. This uses kwargs so that we can call one 'sorted' """

@@ -22,7 +22,7 @@ from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Memoization import BoundedDictionary
 from MHShared import *
 
-def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_temperature=1.0, ll_temperature=1.0, acceptance_temperature=1.0, trace=False, debug=False, stats=None, memoize=0):
+def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_temperature=1.0, likelihood_temperature=1.0, acceptance_temperature=1.0, trace=False, debug=False, stats=None, memoize=0):
 	"""
 		current_sample - the starting hypothesis
 		data - the conditioning data
@@ -60,8 +60,8 @@ def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_
 				np, nl = p.compute_posterior(data)
 			
 			#print np, nl, current_sample.prior, current_sample.likelihood
-			prop = (np/prior_temperature+nl/ll_temperature)
-			cur  = (current_sample.prior/prior_temperature + current_sample.likelihood/ll_temperature)
+			prop = (np/prior_temperature+nl/likelihood_temperature)
+			cur  = (current_sample.prior/prior_temperature + current_sample.likelihood/likelihood_temperature)
 			
 			if debug: 
 				print "# Proposing: ", prop, cur, fb

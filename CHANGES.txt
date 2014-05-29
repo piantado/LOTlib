@@ -1,3 +1,8 @@
+
+	- Fixed Grammar to delete rules in case an exception gets raised during generation
+	- Grammar.BV_P is now the default, but these can be set for individual rules via bv_p in add_rule
+	- renamed ll_temperature -> likelihood_temperature in MetropolisHastings, to match with prior
+	
 May 17 2014:
 	- Removed Serialization -- reverted to old pickling scheme for FunctionHypothesis because otherwise MPI doesn't work well
 	- Added simple CCG-ish example

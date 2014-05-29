@@ -15,7 +15,7 @@ from LOTlib.Miscellaneous import *
 from LOTlib.FiniteBestSet import FiniteBestSet
 from MHShared import MH_acceptance
 
-def increase_temperature_mh_sample(current_sample, data, steps=float("inf"), proposer=None, skip=0, prior_temperature=1.0, ll_temperature=1.0, temperature=1.0, acceptance_temperature=1.0, trace=False, stats=None, increase_amount=1.1 , memoizer=None):
+def increase_temperature_mh_sample(current_sample, data, steps=float("inf"), proposer=None, skip=0, prior_temperature=1.0, likelihood_temperature=1.0, temperature=1.0, acceptance_temperature=1.0, trace=False, stats=None, increase_amount=1.1 , memoizer=None):
 	"""
 		current_sample - the starting hypothesis
 		data - the conditioning data
@@ -40,13 +40,13 @@ def increase_temperature_mh_sample(current_sample, data, steps=float("inf"), pro
 			# either compute this, or use the memoized version
 			if memoizer is not None:
 				np, nl = mem(p)
-				p.lp = (np/prior_temperature+nl/ll_temperature) / temperature # update this since it won't be set
+				p.lp = (np/prior_temperature+nl/likelihood_temperature) / temperature # update this since it won't be set
 			else:
 				np, nl = p.compute_posterior(data)
 						
 			#print np, nl, current_sample.prior, current_sample.likelihood
-			prop = (np/prior_temperature+nl/ll_temperature) / temperature
-			cur  = (current_sample.prior/prior_temperature + current_sample.likelihood/ll_temperature)/temperature
+			prop = (np/prior_temperature+nl/likelihood_temperature) / temperature
+			cur  = (current_sample.prior/prior_temperature + current_sample.likelihood/likelihood_temperature)/temperature
 			
 			if MH_acceptance(cur, prop, fb, acceptance_temperature=acceptance_temperature):
 				

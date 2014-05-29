@@ -32,3 +32,7 @@ def can_compose(a,b):
 		
 		if afrom == b: return ato
 		else:          return None
+	
+# How we make a hypothesis inside the lexicon
+def make_hypothesis(): 
+	return LOTHypothesis(G, args=['C'])

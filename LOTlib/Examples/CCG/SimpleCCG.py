@@ -60,26 +60,29 @@ G.add_rule('FUNCTION', 'lambda', ['START'], 1.0, bv_type='BOOL', bv_args=['OBJEC
 
 possible_utterances = [] # this will be referenced in every UTteranceData, and at the end we'll use it to do all possible strings
 
+# These are always true
+BASE_FACTS = [("MAN", "JOHN"),("MAN", "BILL"),("WOMAN", "SUSAN"),("WOMAN", "MARY")]
+
+
 data = [] # For now, some unambiguous data:
-data.append(  UtteranceData( utterance=str2sen('john saw mary'), context=Context(OBJECTS, [("SAW", "JOHN", "MARY")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('mary saw john'), context=Context(OBJECTS, [("SAW", "MARY", "JOHN")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('john saw mary'), context=Context(OBJECTS, BASE_FACTS+[("SAW", "JOHN", "MARY")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('mary saw john'), context=Context(OBJECTS, BASE_FACTS+[("SAW", "MARY", "JOHN")]), possible_utterances=possible_utterances  ))
 
-data.append(  UtteranceData( utterance=str2sen('mary smiled'), context=Context(OBJECTS, [("SMILED", "MARY")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('john smiled'), context=Context(OBJECTS, [("SMILED", "JOHN")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('bill smiled'), context=Context(OBJECTS, [("SMILED", "BILL")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('susan smiled'), context=Context(OBJECTS, [("SMILED", "SUSAN")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('mary smiled'), context=Context(OBJECTS, BASE_FACTS+[("SMILED", "MARY")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('john smiled'), context=Context(OBJECTS, BASE_FACTS+[("SMILED", "JOHN")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('bill smiled'), context=Context(OBJECTS, BASE_FACTS+[("SMILED", "BILL")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('susan smiled'), context=Context(OBJECTS, BASE_FACTS+[("SMILED", "SUSAN")]), possible_utterances=possible_utterances  ))
 
-data.append(  UtteranceData( utterance=str2sen('john is man'), context=Context(OBJECTS, [("MAN", "JOHN")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('bill is man'), context=Context(OBJECTS, [("MAN", "BILL")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('mary is woman'), context=Context(OBJECTS, [("WOMAN", "MARY")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('susan is woman'), context=Context(OBJECTS, [("WOMAN", "SUSAN")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('john is man'), context=Context(OBJECTS, BASE_FACTS+[("MAN", "JOHN")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('bill is man'), context=Context(OBJECTS, BASE_FACTS+[("MAN", "BILL")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('mary is woman'), context=Context(OBJECTS, BASE_FACTS+[("WOMAN", "MARY")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('susan is woman'), context=Context(OBJECTS, BASE_FACTS+[("WOMAN", "SUSAN")]), possible_utterances=possible_utterances  ))
 
 
-#data.append(  UtteranceData( utterance=str2sen('every man smiled'), context=Context(OBJECTS, [("SMILED", "JOHN"),("SMILED", "BILL")]), possible_utterances=possible_utterances  ))
-#data.append(  UtteranceData( utterance=str2sen('every woman smiled'), context=Context(OBJECTS, [("SMILED", "MARY"),("SMILED", "SUSAN")]), possible_utterances=possible_utterances  ))
-#data.append(  UtteranceData( utterance=str2sen('every man laughed'), context=Context(OBJECTS, [("LAUGHED", "JOHN"),("LAUGHED", "BILL")]), possible_utterances=possible_utterances  ))
-#data.append(  UtteranceData( utterance=str2sen('every woman laughed'), context=Context(OBJECTS, [("LAUGHED", "MARY"),("LAUGHED", "SUSAN")]), possible_utterances=possible_utterances  ))
-
+data.append(  UtteranceData( utterance=str2sen('every man smiled'), context=Context(OBJECTS, BASE_FACTS+[("SMILED", "JOHN"),("SMILED", "BILL")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('every woman smiled'), context=Context(OBJECTS, BASE_FACTS+[("SMILED", "MARY"),("SMILED", "SUSAN")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('every man laughed'), context=Context(OBJECTS, BASE_FACTS+[("LAUGHED", "JOHN"),("LAUGHED", "BILL")]), possible_utterances=possible_utterances  ))
+data.append(  UtteranceData( utterance=str2sen('every woman laughed'), context=Context(OBJECTS, BASE_FACTS+[("LAUGHED", "MARY"),("LAUGHED", "SUSAN")]), possible_utterances=possible_utterances  ))
 
 # Just treat each possible utterance as 
 for di in data: possible_utterances.append( di.utterance )
@@ -93,9 +96,7 @@ for di in data:
 possible_utterances.append( str2sen('mary smiled'))
 all_words.add('mary')
 
-# How we make a hypothesis inside the lexicon
-def make_hypothesis(): 
-	return LOTHypothesis(G, args=['C'])
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -128,13 +129,27 @@ if is_master_process():
 	H = allfbs.get_all()
 	
 	for h in H:
-		h.likelihood_temperature = 0.1 # on what set of data we want?
+		h.likelihood_temperature = 0.01 # on what set of data we want?
 		h.compute_posterior(data)
 
-	# show the *average* ll for each hypothesis
+	# show each hypothesis, with the correct temperature
 	for h in sorted(H, key=lambda h: h.posterior_score):
 		print h.posterior_score, h.prior, h.likelihood, h.likelihood_temperature
 		print h
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Play around with some different inference schemes
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#h0 = CCGLexicon(make_hypothesis, words=all_words, alpha=0.9, palpha=0.9, likelihood_temperature=0.01)
+#for i, h in lot_iter(enumerate(mh_sample(h0, data, 400000000, skip=0, debug=False))):
+	#print h.posterior_score, h.prior, h.likelihood, qq(re.sub(r"\n", ";", str(h)))
+
+from LOTlib.Inference.IncreaseTemperatureMH import increase_temperature_mh_sample
+
+h0 = CCGLexicon(make_hypothesis, words=all_words, alpha=0.9, palpha=0.9, likelihood_temperature=0.01)
+for i, h in lot_iter(enumerate(increase_temperature_mh_sample(h0, data, 400000000, skip=0, increase_amount=1.50))):
+	print h.posterior_score, h.prior, h.likelihood, qq(re.sub(r"\n", ";", str(h)))
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
