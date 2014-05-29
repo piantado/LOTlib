@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LOTlib.Inference.MHShared &mdash; LOTlib 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="LOTlib 1.0.0 documentation" href="../../../index.html" />
+    <link rel="up" title="LOTlib" href="../../LOTlib.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for LOTlib.Inference.MHShared</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<div class="viewcode-block" id="MHStats"><a class="viewcode-back" href="../../../LOTlib.Inference.html#LOTlib.Inference.MHShared.MHStats">[docs]</a><span class="k">class</span> <span class="nc">MHStats</span><span class="p">(</span><span class="n">defaultdict</span><span class="p">):</span>
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">defaultdict</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+	
+<div class="viewcode-block" id="MHStats.acceptance_ratio"><a class="viewcode-back" href="../../../LOTlib.Inference.html#LOTlib.Inference.MHShared.MHStats.acceptance_ratio">[docs]</a>	<span class="k">def</span> <span class="nf">acceptance_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;total&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;accept&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;total&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+		<span class="k">else</span><span class="p">:</span>   <span class="k">return</span> <span class="bp">None</span>
+</div></div>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log</span><span class="p">,</span> <span class="n">exp</span><span class="p">,</span> <span class="n">isnan</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">random</span>
+
+<div class="viewcode-block" id="MH_acceptance"><a class="viewcode-back" href="../../../LOTlib.Inference.html#LOTlib.Inference.MHShared.MH_acceptance">[docs]</a><span class="k">def</span> <span class="nf">MH_acceptance</span><span class="p">(</span><span class="n">cur</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="n">fb</span><span class="p">,</span> <span class="n">acceptance_temperature</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Handle all the weird corner cases for computing MH acceptance ratios</span>
+<span class="sd">		And then returns a true/false for acceptance</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="k">if</span> <span class="n">isnan</span><span class="p">(</span><span class="n">cur</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">cur</span><span class="o">==</span><span class="nb">float</span><span class="p">(</span><span class="s">&quot;-inf&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">prop</span><span class="o">==</span><span class="nb">float</span><span class="p">(</span><span class="s">&quot;-inf&quot;</span><span class="p">)):</span> <span class="c"># if we get infs or are in a stupid state, let&#39;s just sample from the prior so things don&#39;t get crazy</span>
+		<span class="n">r</span> <span class="o">=</span> <span class="o">-</span><span class="n">log</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span> <span class="c">#  just choose at random -- we can&#39;t sample priors since they may be -inf both</span>
+	<span class="k">elif</span> <span class="n">isnan</span><span class="p">(</span><span class="n">prop</span><span class="p">):</span> <span class="c">#never accept</span>
+		<span class="n">r</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s">&quot;-inf&quot;</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">r</span> <span class="o">=</span> <span class="p">(</span><span class="n">prop</span><span class="o">-</span><span class="n">cur</span><span class="o">-</span><span class="n">fb</span><span class="p">)</span> <span class="o">/</span> <span class="n">acceptance_temperature</span>
+	
+	<span class="c"># And flip</span>
+	<span class="k">return</span> <span class="p">(</span><span class="n">r</span> <span class="o">&gt;=</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">exp</span><span class="p">(</span><span class="n">r</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../LOTlib.html" >LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Steve Piantadosi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

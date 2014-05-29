@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LOTlib.Inference.PriorSample &mdash; LOTlib 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="LOTlib 1.0.0 documentation" href="../../../index.html" />
+    <link rel="up" title="LOTlib" href="../../LOTlib.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for LOTlib.Inference.PriorSample</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Inference - sample from the prior (as a baseline comparison)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">LOTlib.Hypotheses.LOTHypothesis</span> <span class="kn">import</span> <span class="n">LOTHypothesis</span>
+<span class="kn">from</span> <span class="nn">LOTlib</span> <span class="kn">import</span> <span class="n">lot_iter</span>
+
+<div class="viewcode-block" id="prior_sample"><a class="viewcode-back" href="../../../LOTlib.Inference.html#LOTlib.Inference.PriorSample.prior_sample">[docs]</a><span class="k">def</span> <span class="nf">prior_sample</span><span class="p">(</span><span class="n">h0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Just use the grammar and returntype of h0 to sample from the prior</span>
+<span class="sd">		NOTE: Only implemented for LOTHypothesis</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h0</span><span class="p">,</span> <span class="n">LOTHypothesis</span><span class="p">)</span>
+	
+	<span class="c"># extract from the grammar</span>
+	<span class="n">G</span> <span class="o">=</span> <span class="n">h0</span><span class="o">.</span><span class="n">grammar</span> 
+	<span class="n">rt</span> <span class="o">=</span> <span class="n">h0</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">returntype</span>
+	
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">lot_iter</span><span class="p">(</span><span class="nb">xrange</span><span class="p">(</span><span class="n">N</span><span class="p">)):</span>
+	
+		<span class="n">h</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">h0</span><span class="p">)(</span><span class="n">G</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">rt</span><span class="p">)</span>
+		<span class="n">h</span><span class="o">.</span><span class="n">compute_posterior</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+		
+		<span class="k">yield</span> <span class="n">h</span>
+		
+		</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+	
+	<span class="kn">from</span> <span class="nn">LOTlib.Examples.Number.Shared</span> <span class="kn">import</span> <span class="o">*</span>
+	
+	<span class="n">data</span> <span class="o">=</span> <span class="n">generate_data</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+	<span class="n">h0</span> <span class="o">=</span> <span class="n">NumberExpression</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>	
+	<span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">prior_sample</span><span class="p">(</span><span class="n">h0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="mi">10000</span><span class="p">):</span>
+		<span class="c">#h.revert() # undoes the craziness with the prior</span>
+		<span class="k">print</span> <span class="n">q</span><span class="p">(</span><span class="n">get_knower_pattern</span><span class="p">(</span><span class="n">h</span><span class="p">)),</span> <span class="n">h</span><span class="o">.</span><span class="n">posterior_score</span><span class="p">,</span> <span class="n">h</span><span class="o">.</span><span class="n">prior</span><span class="p">,</span> <span class="n">h</span><span class="o">.</span><span class="n">likelihood</span><span class="p">,</span> <span class="n">q</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+		
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../LOTlib.html" >LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Steve Piantadosi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LOTlib.Examples.Number package &mdash; LOTlib 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="LOTlib 1.0.0 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">LOTlib 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="lotlib-examples-number-package">
+<h1>LOTlib.Examples.Number package<a class="headerlink" href="#lotlib-examples-number-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="lotlib-examples-number-adapt-module">
+<h2>LOTlib.Examples.Number.Adapt module<a class="headerlink" href="#lotlib-examples-number-adapt-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="lotlib-examples-number-demo-module">
+<h2>LOTlib.Examples.Number.Demo module<a class="headerlink" href="#lotlib-examples-number-demo-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="lotlib-examples-number-evaluatetop-module">
+<h2>LOTlib.Examples.Number.EvaluateTop module<a class="headerlink" href="#lotlib-examples-number-evaluatetop-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="lotlib-examples-number-nakeddemo-module">
+<h2>LOTlib.Examples.Number.NakedDemo module<a class="headerlink" href="#lotlib-examples-number-nakeddemo-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="lotlib-examples-number-search-module">
+<h2>LOTlib.Examples.Number.Search module<a class="headerlink" href="#lotlib-examples-number-search-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-LOTlib.Examples.Number.Shared">
+<span id="lotlib-examples-number-shared-module"></span><h2>LOTlib.Examples.Number.Shared module<a class="headerlink" href="#module-LOTlib.Examples.Number.Shared" title="Permalink to this headline">¶</a></h2>
+<p>Shared functions and variables for the number learning model.</p>
+<dl class="class">
+<dt id="LOTlib.Examples.Number.Shared.NumberExpression">
+<em class="property">class </em><tt class="descclassname">LOTlib.Examples.Number.Shared.</tt><tt class="descname">NumberExpression</tt><big>(</big><em>G</em>, <em>value=None</em>, <em>f=None</em>, <em>proposal_function=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/Number/Shared.html#NumberExpression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.Number.Shared.NumberExpression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="LOTlib.Hypotheses.html#LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis" title="LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis"><tt class="xref py py-class docutils literal"><span class="pre">LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis</span></tt></a></p>
+<dl class="method">
+<dt id="LOTlib.Examples.Number.Shared.NumberExpression.compute_prior">
+<tt class="descname">compute_prior</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/Number/Shared.html#NumberExpression.compute_prior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.Number.Shared.NumberExpression.compute_prior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the number model prior</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LOTlib.Examples.Number.Shared.NumberExpression.compute_single_likelihood">
+<tt class="descname">compute_single_likelihood</tt><big>(</big><em>datum</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/Number/Shared.html#NumberExpression.compute_single_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.Number.Shared.NumberExpression.compute_single_likelihood" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the likelihood of data.
+TODO: Make sure this precisely matches the number paper.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LOTlib.Examples.Number.Shared.NumberExpression.copy">
+<tt class="descname">copy</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/Number/Shared.html#NumberExpression.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.Number.Shared.NumberExpression.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Must define this else we return &#8220;FunctionHypothesis&#8221; as a copy. We need to return a NumberExpression</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LOTlib.Examples.Number.Shared.NumberExpression.enumerative_proposer">
+<tt class="descname">enumerative_proposer</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/Number/Shared.html#NumberExpression.enumerative_proposer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.Number.Shared.NumberExpression.enumerative_proposer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="LOTlib.Examples.Number.Shared.generate_data">
+<tt class="descclassname">LOTlib.Examples.Number.Shared.</tt><tt class="descname">generate_data</tt><big>(</big><em>data_size</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/Number/Shared.html#generate_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.Number.Shared.generate_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample some data according to the target</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="LOTlib.Examples.Number.Shared.get_knower_pattern">
+<tt class="descclassname">LOTlib.Examples.Number.Shared.</tt><tt class="descname">get_knower_pattern</tt><big>(</big><em>ne</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/Number/Shared.html#get_knower_pattern"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.Number.Shared.get_knower_pattern" title="Permalink to this definition">¶</a></dt>
+<dd><p>This computes a string describing the behavior of this knower-level</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="LOTlib.Examples.Number.Shared.random">
+<tt class="descclassname">LOTlib.Examples.Number.Shared.</tt><tt class="descname">random</tt><big>(</big><big>)</big> &rarr; x in the interval [0, 1).<a class="headerlink" href="#LOTlib.Examples.Number.Shared.random" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-LOTlib.Examples.Number">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-LOTlib.Examples.Number" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">LOTlib.Examples.Number package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#lotlib-examples-number-adapt-module">LOTlib.Examples.Number.Adapt module</a></li>
+<li><a class="reference internal" href="#lotlib-examples-number-demo-module">LOTlib.Examples.Number.Demo module</a></li>
+<li><a class="reference internal" href="#lotlib-examples-number-evaluatetop-module">LOTlib.Examples.Number.EvaluateTop module</a></li>
+<li><a class="reference internal" href="#lotlib-examples-number-nakeddemo-module">LOTlib.Examples.Number.NakedDemo module</a></li>
+<li><a class="reference internal" href="#lotlib-examples-number-search-module">LOTlib.Examples.Number.Search module</a></li>
+<li><a class="reference internal" href="#module-LOTlib.Examples.Number.Shared">LOTlib.Examples.Number.Shared module</a></li>
+<li><a class="reference internal" href="#module-LOTlib.Examples.Number">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/LOTlib.Examples.Number.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">LOTlib 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Steve Piantadosi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

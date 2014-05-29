@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LOTlib.SimpleLambdaParser &mdash; LOTlib 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="LOTlib 1.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="LOTlib" href="../LOTlib.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for LOTlib.SimpleLambdaParser</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">	Parse simplified lambda expressions--enough for ATIS. </span>
+<span class="sd">	</span>
+<span class="sd">	TODO: No quoting etc. supported yet. </span>
+<span class="sd">	</span>
+<span class="sd">	NOTE: This is based on http://pyparsing.wikispaces.com/file/view/sexpParser.py/278417548/sexpParser.py</span>
+<span class="sd">	</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span> <span class="nn">pyparsing</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">LOTlib.FunctionNode</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
+
+<span class="c">#####################################################################</span>
+<span class="c">## Here we define a super simple grammar for lambdas</span>
+
+<span class="n">LPAR</span><span class="p">,</span> <span class="n">RPAR</span><span class="p">,</span> <span class="n">LBRK</span><span class="p">,</span> <span class="n">RBRK</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">Suppress</span><span class="p">,</span> <span class="s">&quot;()[]&quot;</span><span class="p">)</span>
+<span class="n">token</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="n">alphanums</span> <span class="o">+</span> <span class="s">&quot;-./_:*+=!&lt;&gt;$&quot;</span><span class="p">)</span>
+
+<span class="n">sexp</span> <span class="o">=</span> <span class="n">Forward</span><span class="p">()</span>
+<span class="n">sexpList</span> <span class="o">=</span> <span class="n">Group</span><span class="p">(</span><span class="n">LPAR</span> <span class="o">+</span> <span class="n">ZeroOrMore</span><span class="p">(</span><span class="n">sexp</span><span class="p">)</span> <span class="o">+</span> <span class="n">RPAR</span><span class="p">)</span>
+<span class="n">sexp</span> <span class="o">&lt;&lt;</span> <span class="p">(</span> <span class="n">token</span> <span class="o">|</span> <span class="n">sexpList</span> <span class="p">)</span>
+
+<span class="c">#####################################################################</span>
+
+<div class="viewcode-block" id="simpleLambda2List"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.SimpleLambdaParser.simpleLambda2List">[docs]</a><span class="k">def</span> <span class="nf">simpleLambda2List</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Return a list of list of lists... for a string containing a simple lambda expression (no quoting, etc)</span>
+<span class="sd">		NOTE: This converts to lowercase</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="n">x</span> <span class="o">=</span> <span class="n">sexp</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">parseAll</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+	<span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c"># remove that first element</span>
+	<span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">asList</span><span class="p">()</span> <span class="c"># get back as a list rather than a pyparsing.ParseResults</span>
+	<span class="k">return</span> <span class="n">x</span>
+</div>
+<div class="viewcode-block" id="simpleLambda2FunctionNode"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.SimpleLambdaParser.simpleLambda2FunctionNode">[docs]</a><span class="k">def</span> <span class="nf">simpleLambda2FunctionNode</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s">&quot;atis&quot;</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Take a string for lambda expressions and map them to a real FunctionNode tree</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">return</span> <span class="n">list2FunctionNode</span><span class="p">(</span><span class="n">simpleLambda2List</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="n">style</span><span class="p">)</span>
+	</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+
+	<span class="n">test1</span> <span class="o">=</span> <span class="s">&quot;(defun factorial (x) (if (= x 0) 1 (* x (factorial (- x 1)))))&quot;</span>
+	<span class="n">test2</span> <span class="o">=</span> <span class="s">&quot;(lambda $0 e (and (day_arrival $0 thursday:da) (to $0 baltimore:ci) (&lt; (arrival_time $0) 900:ti) (during_day $0 morning:pd) (exists $1 (and (airport $1) (from $0 $1)))))&quot;</span>
+	
+	<span class="n">y</span> <span class="o">=</span> <span class="n">simpleLambda2List</span><span class="p">(</span><span class="n">test1</span><span class="p">)</span>
+	<span class="c">#print y</span>
+	<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">([</span><span class="s">&#39;defun&#39;</span><span class="p">,</span> <span class="s">&#39;factorial&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s">&#39;if&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;=&#39;</span><span class="p">,</span> <span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="s">&#39;0&#39;</span><span class="p">],</span> <span class="s">&#39;1&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;*&#39;</span><span class="p">,</span> <span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;factorial&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;-&#39;</span><span class="p">,</span> <span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="s">&#39;1&#39;</span><span class="p">]]]]])</span>
+	
+	<span class="n">x</span> <span class="o">=</span> <span class="n">simpleLambda2List</span><span class="p">(</span><span class="n">test2</span><span class="p">)</span>
+	<span class="c">#print x</span>
+	<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">([</span><span class="s">&#39;lambda&#39;</span><span class="p">,</span> <span class="s">&#39;$0&#39;</span><span class="p">,</span> <span class="s">&#39;e&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;and&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;day_arrival&#39;</span><span class="p">,</span> <span class="s">&#39;$0&#39;</span><span class="p">,</span> <span class="s">&#39;thursday:da&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s">&#39;to&#39;</span><span class="p">,</span> <span class="s">&#39;$0&#39;</span><span class="p">,</span> <span class="s">&#39;baltimore:ci&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s">&#39;&lt;&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;arrival_time&#39;</span><span class="p">,</span> <span class="s">&#39;$0&#39;</span><span class="p">],</span> <span class="s">&#39;900:ti&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s">&#39;during_day&#39;</span><span class="p">,</span> <span class="s">&#39;$0&#39;</span><span class="p">,</span> <span class="s">&#39;morning:pd&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s">&#39;exists&#39;</span><span class="p">,</span> <span class="s">&#39;$1&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;and&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;airport&#39;</span><span class="p">,</span> <span class="s">&#39;$1&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s">&#39;from&#39;</span><span class="p">,</span> <span class="s">&#39;$0&#39;</span><span class="p">,</span> <span class="s">&#39;$1&#39;</span><span class="p">]]]]])</span>
+	
+	<span class="k">print</span> <span class="n">list2FunctionNode</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+	
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../LOTlib.html" >LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Steve Piantadosi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

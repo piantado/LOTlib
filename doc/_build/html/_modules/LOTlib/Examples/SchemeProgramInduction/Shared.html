@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LOTlib.Examples.SchemeProgramInduction.Shared &mdash; LOTlib 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="LOTlib 1.0.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="LOTlib" href="../../../LOTlib.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for LOTlib.Examples.SchemeProgramInduction.Shared</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">LOTlib.Grammar</span> <span class="kn">import</span> <span class="n">Grammar</span>
+<span class="kn">from</span> <span class="nn">LOTlib.Hypotheses.LOTHypothesis</span> <span class="kn">import</span> <span class="n">LOTHypothesis</span>
+<span class="kn">from</span> <span class="nn">LOTlib.DataAndObjects</span> <span class="kn">import</span> <span class="n">FunctionData</span>
+<span class="kn">from</span> <span class="nn">LOTlib.Inference.MetropolisHastings</span> <span class="kn">import</span> <span class="n">mh_sample</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log</span>
+
+<span class="c"># # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #</span>
+<span class="c"># A simple grammar for scheme, including lambda</span>
+
+<span class="n">G</span> <span class="o">=</span> <span class="n">Grammar</span><span class="p">()</span>
+
+<span class="c"># A very simple version of lambda calculus</span>
+<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;START&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;EXPR&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;apply_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;FUNC&#39;</span><span class="p">,</span> <span class="s">&#39;EXPR&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span>
+<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;FUNC&#39;</span><span class="p">,</span> <span class="s">&#39;lambda&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;EXPR&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">bv_type</span><span class="o">=</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="n">bv_args</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;cons_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;EXPR&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;cdr_&#39;</span><span class="p">,</span>  <span class="p">[</span><span class="s">&#39;EXPR&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;car_&#39;</span><span class="p">,</span>  <span class="p">[</span><span class="s">&#39;EXPR&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
+
+<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;[]&#39;</span><span class="p">,</span>  <span class="bp">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+
+<span class="c"># # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #</span>
+<span class="c"># A class for scheme hypotheses that just computes the input/output pairs with the appropriate probability</span>
+<div class="viewcode-block" id="SchemeFunction"><a class="viewcode-back" href="../../../../LOTlib.Examples.SchemeProgramInduction.html#LOTlib.Examples.SchemeProgramInduction.Shared.SchemeFunction">[docs]</a><span class="k">class</span> <span class="nc">SchemeFunction</span><span class="p">(</span><span class="n">LOTHypothesis</span><span class="p">):</span>
+	
+	<span class="c"># Prior, proposals, __init__ are all inherited from LOTHypothesis</span>
+	
+<div class="viewcode-block" id="SchemeFunction.compute_single_likelihood"><a class="viewcode-back" href="../../../../LOTlib.Examples.SchemeProgramInduction.html#LOTlib.Examples.SchemeProgramInduction.Shared.SchemeFunction.compute_single_likelihood">[docs]</a>	<span class="k">def</span> <span class="nf">compute_single_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Wrap in string for comparisons here. Also, this is a weird pseudo-likelihood (an outlier process)</span>
+<span class="sd">			since when we are wrong, it should generate the observed data with some probability that&#39;s not going</span>
+<span class="sd">			to be 1-ALPHA</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		
+		<span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">(</span><span class="n">datum</span><span class="o">.</span><span class="n">input</span><span class="p">))</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">datum</span><span class="o">.</span><span class="n">output</span><span class="p">):</span>  
+			<span class="k">return</span> <span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ALPHA</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>                       
+			<span class="k">return</span> <span class="n">log</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">ALPHA</span><span class="p">)</span>
+			</div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../LOTlib.html" >LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Steve Piantadosi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
