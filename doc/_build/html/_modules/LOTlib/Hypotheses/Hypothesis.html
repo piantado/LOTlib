@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LOTlib.Hypotheses.Hypothesis &mdash; LOTlib 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="LOTlib 1.0.0 documentation" href="../../../index.html" />
+    <link rel="up" title="LOTlib" href="../../LOTlib.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for LOTlib.Hypotheses.Hypothesis</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	TODO: Split up likelihood so that decayed versions are separate</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span><span class="p">,</span> <span class="n">deepcopy</span>
+<span class="kn">import</span> <span class="nn">LOTlib</span>
+<span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<div class="viewcode-block" id="Hypothesis"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.Hypothesis.Hypothesis">[docs]</a><span class="k">class</span> <span class="nc">Hypothesis</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		A hypothesis is bundles together a value (hypothesis value) with a bunch of remember state, like posterior_score, prior, likelihood</span>
+<span class="sd">		This class is typically a superclass of the thing you really want.</span>
+<span class="sd">		</span>
+<span class="sd">		Temperatures:</span>
+<span class="sd">			A Hypothesis defaulty has a prior_temperature and likelihood_temperature. These are taken into account in setting the </span>
+<span class="sd">			posterior_score (for computer_prior and compute_likelihood), in the values returned by these, AND in the stored values</span>
+<span class="sd">			under self.prior and self.likelihood</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">prior_temperature</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">likelihood_temperature</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="c"># to zero out prior, likelhood, posterior_score</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">likelihood</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">posterior_score</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">Infinity</span><span class="p">,</span> <span class="o">-</span><span class="n">Infinity</span><span class="p">,</span> <span class="o">-</span><span class="n">Infinity</span><span class="p">]</span> 
+		<span class="bp">self</span><span class="o">.</span><span class="n">prior_temperature</span><span class="o">=</span><span class="n">prior_temperature</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">likelihood_temperature</span><span class="o">=</span><span class="n">likelihood_temperature</span>		
+		<span class="bp">self</span><span class="o">.</span><span class="n">stored_likelihood</span> <span class="o">=</span> <span class="bp">None</span>
+		
+		<span class="c"># keep track of some calls (Global variable)</span>
+		<span class="n">POSTERIOR_CALL_COUNTER</span> <span class="o">=</span> <span class="mi">0</span>
+	
+<div class="viewcode-block" id="Hypothesis.set_value"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.Hypothesis.Hypothesis.set_value">[docs]</a>	<span class="k">def</span> <span class="nf">set_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span> 
+		<span class="sd">&quot;&quot;&quot; Sets the (self.)value of this hypothesis to value&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+		</div>
+	<span class="k">def</span> <span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot; Returns a copy of myself by calling copy() on self.value &quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="n">Hypothesis</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">prior_temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prior_temperature</span><span class="p">,</span> <span class="n">likelihood_temperature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">likelihood_temperature</span><span class="p">)</span>
+		
+	<span class="c"># ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+	<span class="c"># All instances of this must implement these:</span>
+		
+<div class="viewcode-block" id="Hypothesis.compute_prior"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.Hypothesis.Hypothesis.compute_prior">[docs]</a>	<span class="k">def</span> <span class="nf">compute_prior</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot; computes the prior and stores it in self.prior&quot;&quot;&quot;</span>
+		<span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;*** Must implement compute_prior&quot;</span>
+</div>
+<div class="viewcode-block" id="Hypothesis.compute_single_likelihood"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.Hypothesis.Hypothesis.compute_single_likelihood">[docs]</a>	<span class="k">def</span> <span class="nf">compute_single_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum</span><span class="p">):</span>
+		<span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;*** Must implement compute_single_likelihood&quot;</span>
+	
+	<span class="c"># And the main likelihood function just maps compute_single_likelihood over the data</span></div>
+<div class="viewcode-block" id="Hypothesis.compute_likelihood"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.Hypothesis.Hypothesis.compute_likelihood">[docs]</a>	<span class="k">def</span> <span class="nf">compute_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">		Compute the likelihood of the *array* d, with the specified likelihood decay</span>
+<span class="sd">		This also stores the *undecayed* non-culmulative likelihood of each data point in self.stored_likelihood</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">likelihood</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_single_likelihood</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">likelihood_temperature</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">posterior_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prior</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">likelihood</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">likelihood</span>
+		
+	<span class="c"># ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+	<span class="c"># Methods for accessing likelihoods etc. on a big arrays of data</span>
+		</div>
+<div class="viewcode-block" id="Hypothesis.propose"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.Hypothesis.Hypothesis.propose">[docs]</a>	<span class="k">def</span> <span class="nf">propose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+		<span class="sd">&quot;&quot;&quot; Generic proposal used by MCMC methods&quot;&quot;&quot;</span>
+		<span class="k">assert</span> <span class="bp">False</span><span class="p">,</span>  <span class="s">&quot;*** Must implement propose&quot;</span>
+	
+	<span class="c"># this updates last_prior and last_likelihood</span></div>
+<div class="viewcode-block" id="Hypothesis.compute_posterior"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.Hypothesis.Hypothesis.compute_posterior">[docs]</a>	<span class="k">def</span> <span class="nf">compute_posterior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+		<span class="n">LOTlib</span><span class="o">.</span><span class="n">BasicPrimitives</span><span class="o">.</span><span class="n">LOCAL_PRIMITIVE_OPS</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># Reset this</span>
+		<span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_prior</span><span class="p">()</span>
+		<span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_likelihood</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">posterior_score</span> <span class="o">=</span> <span class="n">p</span><span class="o">+</span><span class="n">l</span>
+		<span class="k">return</span> <span class="p">[</span><span class="n">p</span><span class="p">,</span><span class="n">l</span><span class="p">]</span>
+		
+	<span class="c"># # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #</span>
+	<span class="c"># optional implementation</span>
+	<span class="c"># if you do gibbs sampling you need:</span></div>
+<div class="viewcode-block" id="Hypothesis.enumerative_proposer"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.Hypothesis.Hypothesis.enumerative_proposer">[docs]</a>	<span class="k">def</span> <span class="nf">enumerative_proposer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">pass</span>
+	
+	<span class="c"># # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #</span>
+	<span class="c">## These are just handy:</span></div>
+	<span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+		
+	<span class="c"># for hashing hypotheses</span>
+	<span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+	<span class="k">def</span> <span class="nf">__cmp__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span> <span class="k">return</span> <span class="nb">cmp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
+	
+	<span class="c"># this is for heapq algorithm in FiniteSample, which uses &lt;= instead of cmp</span>
+	<span class="c"># since python implements a &quot;min heap&quot; we can compar elog probs</span>
+	<span class="k">def</span> <span class="nf">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>     <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">posterior_score</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="o">.</span><span class="n">posterior_score</span><span class="p">)</span>
+	<span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+	<span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">__ne__</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../LOTlib.html" >LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Steve Piantadosi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

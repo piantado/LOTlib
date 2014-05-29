@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LOTlib.FiniteBestSet &mdash; LOTlib 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="LOTlib 1.0.0 documentation" href="../../index.html" />
+    <link rel="up" title="LOTlib" href="../LOTlib.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for LOTlib.FiniteBestSet</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">	This is a version of what was called &quot;PriorityQueue.py&quot; in LOTlib.VERSION &lt; 0.3. </span>
+<span class="sd">	</span>
+<span class="sd">	NOTE: This is terrible. Let&#39;s re-do this so everything is nice, we can easily add and remove, max/min is more clear, etc. </span>
+<span class="sd">		-- have it initialize to extract a certain key from hypotheses, or call a certain function</span>
+<span class="sd">	</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">heapq</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+
+<span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+
+<div class="viewcode-block" id="QueueItem"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FiniteBestSet.QueueItem">[docs]</a><span class="k">class</span> <span class="nc">QueueItem</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		A wrapper to hold items and scores in the queue--just wraps &quot;cmp&quot; on a priority value</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="n">p</span>
+	
+	<span class="k">def</span> <span class="nf">__cmp__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+		<span class="c"># Comparisons are based on priority</span>
+		<span class="k">return</span> <span class="nb">cmp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">priority</span><span class="p">)</span>
+	
+	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+	<span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="FiniteBestSet"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FiniteBestSet.FiniteBestSet">[docs]</a><span class="k">class</span> <span class="nc">FiniteBestSet</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		This class stores the top N (possibly infite) hypotheses it observes, keeping only unique ones.</span>
+<span class="sd">		It works by storing a priority queue (in the opposite order), and popping off the worst as we need to add more</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">Infinity</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			N - the number of hypothese to store</span>
+<span class="sd">			max - True/False -- do we keep the ones closes to +inf (or -inf)</span>
+<span class="sd">			key - if a string (attribute) or function, we used this to access a hypothesis&#39; priority score</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">max_multiplier</span> <span class="o">=</span> <span class="n">ifelse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="c"># invert sign </span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="p">[]</span> <span class="c"># we use heapq to </span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">unique_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+		
+		
+	<span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span> 
+		<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">:</span> 
+			<span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">x</span> <span class="o">==</span> <span class="n">y</span><span class="p">:</span> <span class="k">return</span> <span class="bp">True</span>
+		<span class="k">return</span> <span class="bp">False</span>
+		<span class="c">#return (x in self.Q)</span>
+		
+	<span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all</span><span class="p">():</span> <span class="k">yield</span> <span class="n">x</span>	
+	
+	<span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">)</span>
+	
+	<span class="c"># Another name since I can&#39;t stop using it</span>
+<div class="viewcode-block" id="FiniteBestSet.push"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FiniteBestSet.FiniteBestSet.push">[docs]</a>	<span class="k">def</span> <span class="nf">push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
+		</div>
+<div class="viewcode-block" id="FiniteBestSet.add"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FiniteBestSet.FiniteBestSet.add">[docs]</a>	<span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">store_iterator</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">			Add x with priority p to the set.</span>
+<span class="sd">			store_iteratore -- if we are supposed to store an iterator (rather than elements from it)</span>
+<span class="sd">			If p=None, we use self.key to get the value. </span>
+<span class="sd">			If x is an iterable, we add everything in it.</span>
+<span class="sd">		</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">store_iterator</span><span class="p">:</span>
+			<span class="k">assert</span> <span class="n">p</span><span class="o">==</span><span class="bp">None</span><span class="p">,</span> <span class="s">&quot;FiniteBestSet.add must have p=None for use with an iterator&quot;</span>
+			
+			<span class="k">for</span> <span class="n">xi</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span>
+			
+		<span class="k">else</span><span class="p">:</span>
+			
+			<span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+				<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+				<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="n">p</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+				<span class="k">else</span><span class="p">:</span>                         <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+			
+
+			<span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_set</span><span class="p">):</span> 
+				<span class="k">return</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">heapq</span><span class="o">.</span><span class="n">heappush</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">,</span> <span class="n">QueueItem</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_multiplier</span><span class="o">*</span><span class="n">p</span><span class="p">))</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">unique_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="c"># add to the set </span>
+				
+				<span class="c"># if we have too many elements</span>
+				<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">:</span> 
+					<span class="n">rr</span> <span class="o">=</span> <span class="n">heapq</span><span class="o">.</span><span class="n">heappop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">)</span>
+					
+					<span class="k">if</span> <span class="n">rr</span><span class="o">.</span><span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_set</span><span class="p">:</span>
+						<span class="bp">self</span><span class="o">.</span><span class="n">unique_set</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">rr</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="c"># clean out the removed from the set</span>
+	</div>
+<div class="viewcode-block" id="FiniteBestSet.get_all"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FiniteBestSet.FiniteBestSet.get_all">[docs]</a>	<span class="k">def</span> <span class="nf">get_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> 
+		<span class="sd">&quot;&quot;&quot; Return all elements (arbitrary order). Does NOT return a copy. This uses kwargs so that we can call one &#39;sorted&#39; &quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;sorted&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+			<span class="k">return</span>  <span class="p">[</span> <span class="n">c</span><span class="o">.</span><span class="n">x</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">,</span> <span class="n">reverse</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;decreasing&#39;</span><span class="p">,</span><span class="bp">False</span><span class="p">))]</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">return</span>  <span class="p">[</span> <span class="n">c</span><span class="o">.</span><span class="n">x</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">]</span>
+		
+	<span class="c">##NOTE: NOW DEFUNCT: USE .get_all</span>
+	<span class="c">#def get_sorted(self, decreasing=False): </span>
+		<span class="sd">&quot;&quot;&quot; Return all elements in sorted order. Returns a *copy*  via &#39;sorted&#39; &quot;&quot;&quot;</span>
+		<span class="c">#return [ c.x for c in sorted(self.Q, reverse = not decreasing)]</span>
+		</div>
+<div class="viewcode-block" id="FiniteBestSet.merge"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FiniteBestSet.FiniteBestSet.merge">[docs]</a>	<span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Copy over everything from y. Here, y may be a list of things to merge (e.g. other FiniteBestSets)</span>
+<span class="sd">			This is slightly inefficient becuase we create all new QueueItems, but it&#39;s easiest to deal with min/max</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
+			<span class="k">for</span> <span class="n">yi</span> <span class="ow">in</span> <span class="n">y</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">yi</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">for</span> <span class="n">yi</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">Q</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">yi</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">yi</span><span class="o">.</span><span class="n">priority</span><span class="o">*</span><span class="n">y</span><span class="o">.</span><span class="n">max_multiplier</span><span class="p">)</span> <span class="c"># mult y by y.max_multiplier to convert it back to the original scale</span>
+		</div></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+	
+	<span class="kn">import</span> <span class="nn">random</span>
+	
+	<span class="c"># Check the max</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+		<span class="n">Q</span> <span class="o">=</span> <span class="n">FiniteBestSet</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+		<span class="n">ar</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+		<span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span> 
+		<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ar</span><span class="p">:</span> <span class="n">Q</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
+		
+		<span class="k">assert</span> <span class="nb">set</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">get_all</span><span class="p">())</span><span class="o">.</span><span class="n">issuperset</span><span class="p">(</span> <span class="nb">set</span><span class="p">([</span><span class="mi">90</span><span class="p">,</span><span class="mi">91</span><span class="p">,</span><span class="mi">92</span><span class="p">,</span><span class="mi">93</span><span class="p">,</span><span class="mi">94</span><span class="p">,</span><span class="mi">95</span><span class="p">,</span><span class="mi">96</span><span class="p">,</span><span class="mi">97</span><span class="p">,</span><span class="mi">98</span><span class="p">,</span><span class="mi">99</span><span class="p">]))</span>
+		<span class="k">print</span> <span class="n">Q</span><span class="o">.</span><span class="n">get_all</span><span class="p">()</span>
+	
+	<span class="c"># check the min</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+		<span class="n">Q</span> <span class="o">=</span> <span class="n">FiniteBestSet</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+		<span class="n">ar</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+		<span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span> 
+		<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ar</span><span class="p">:</span> <span class="n">Q</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
+		
+		<span class="k">assert</span> <span class="nb">set</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">get_all</span><span class="p">())</span><span class="o">.</span><span class="n">issuperset</span><span class="p">(</span> <span class="nb">set</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">]))</span>
+		<span class="k">print</span> <span class="n">Q</span><span class="o">.</span><span class="n">get_all</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../LOTlib.html" >LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Steve Piantadosi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
