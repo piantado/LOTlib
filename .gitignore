@@ -1,2 +1,5 @@
 # Mac
 .DS_Store
+
+# Python output files
+*.pyc
