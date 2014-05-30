@@ -20,13 +20,6 @@ LOTlib.Examples.CCG.Shared module
     :undoc-members:
     :show-inheritance:
 
-LOTlib.Examples.CCG.SimpleCCG module
-------------------------------------
-
-.. automodule:: LOTlib.Examples.CCG.SimpleCCG
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 
 Module contents
