@@ -22,7 +22,7 @@ class FunctionHypothesis(Hypothesis):
 		self.set_value(value,f)
 		
 	def __copy__(self):
-		""" Create a copy, only deeply of of value """
+		""" Create a copy, only deeply of f value """
 		return FunctionHypothesis(value=copy(self.value), f=self.fvalue, args=self.args)
 		
 	def __call__(self, *vals):

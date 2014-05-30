@@ -117,17 +117,18 @@ def run(llt=1.0):
 ### MPI map
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from SimpleMPI.MPI_map import MPI_map, is_master_process
+#from SimpleMPI.MPI_map import MPI_map, is_master_process
 
-allret = MPI_map(run, map(lambda x: [x], [0.01, 0.1, 1.0] * 100 )) 
+#allret = MPI_map(run, map(lambda x: [x], [0.01, 0.1, 1.0] * 100 )) 
 
-if is_master_process():
+#if is_master_process():
 
-	allfbs = FiniteBestSet(max=True)
-	allfbs.merge(allret)
+	#allfbs = FiniteBestSet(max=True)
+	#allfbs.merge(allret)
 
-	H = allfbs.get_all()
+	#H = allfbs.get_all()
 	
+<<<<<<< HEAD
 	for h in H:
 		h.likelihood_temperature = 0.01 # on what set of data we want?
 		h.compute_posterior(data)
@@ -136,6 +137,30 @@ if is_master_process():
 	for h in sorted(H, key=lambda h: h.posterior_score):
 		print h.posterior_score, h.prior, h.likelihood, h.likelihood_temperature
 		print h
+=======
+	#for h in H:
+		#h.likelihood_temperature = 0.01 # on what set of data we want?
+		#h.compute_posterior(data)
+
+	## show the *average* ll for each hypothesis
+	#for h in sorted(H, key=lambda h: h.posterior_score):
+		#print h.posterior_score, h.prior, h.likelihood, h.likelihood_temperature
+		#print h
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Play around with some different inference schemes
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#h0 = CCGLexicon(make_hypothesis, words=all_words, alpha=0.9, palpha=0.9, likelihood_temperature=0.01)
+#for i, h in lot_iter(enumerate(mh_sample(h0, data, 400000000, skip=0, debug=False))):
+	#print h.posterior_score, h.prior, h.likelihood, qq(re.sub(r"\n", ";", str(h)))
+
+from LOTlib.Inference.IncreaseTemperatureMH import increase_temperature_mh_sample
+
+h0 = CCGLexicon(make_hypothesis, words=all_words, alpha=0.9, palpha=0.9, likelihood_temperature=0.01)
+for i, h in lot_iter(enumerate(increase_temperature_mh_sample(h0, data, 400000000, skip=0, increase_amount=1.50))):
+	print h.posterior_score, h.prior, h.likelihood, qq(re.sub(r"\n", ";", str(h)))
+>>>>>>> 8dd87d2c8a78e972bd27768dbc02ed52caf60632
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Play around with some different inference schemes
