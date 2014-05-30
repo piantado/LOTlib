@@ -449,7 +449,7 @@ if __name__ == "__main__":
 		#print x.log_probability(), x
 	
 	
-	G = PCFG()
+	G = Grammar()
 	G.add_rule('START', '', ['EXPR'], 1.0)
 	#G.add_rule('EXPR', 'somefunc_', ['EXPR', 'EXPR', 'EXPR'], 1.0, resample_p=5.0)
 	G.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 4.0, resample_p=10.0)
@@ -470,14 +470,14 @@ if __name__ == "__main__":
 	#print "Testing generate (no lambda)"
 	TEST_GEN = dict()
 	TARGET = dict()
-	from LOTlib.Hypothesis import LOTHypothesis
+	from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 	for i in xrange(10000): 
 		t = G.generate('START')
-		#print ">>", t
+		# print ">>", t, ' ', dir(t)
 		TEST_GEN[str(t)] = t
 		
 		if t.count_nodes() < 10:
-			TARGET[LOTHypothesis(G, v=copy(t) )] = t.log_probability()
+			TARGET[LOTHypothesis(G, value=copy(t) )] = t.log_probability()
 		
 		
 	from LOTlib.Testing.Evaluation import evaluate_sampler
