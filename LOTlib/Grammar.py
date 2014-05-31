@@ -478,6 +478,8 @@ if __name__ == "__main__":
 		
 		if t.count_nodes() < 10:
 			TARGET[LOTHypothesis(G, value=copy(t) )] = t.log_probability()
+			# print out log probability and tree
+			print t, ' ', t.log_probability()
 		
 		
 	from LOTlib.Testing.Evaluation import evaluate_sampler

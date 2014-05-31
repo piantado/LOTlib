@@ -60,7 +60,7 @@ class FiniteBestSet(object):
 		#return (x in self.Q)
 		
 	def __iter__(self):
-		for x in self.get_all(): yield x	
+		for x in self.get_all(): yield x
 	
 	def __len__(self):
 		return len(self.Q)
@@ -72,7 +72,7 @@ class FiniteBestSet(object):
 	def add(self, x, p=None, store_iterator=False):
 		""" 
 			Add x with priority p to the set.
-			store_iteratore -- if we are supposed to store an iterator (rather than elements from it)
+			store_iterator -- if we are supposed to store an iterator (rather than elements from it)
 			If p=None, we use self.key to get the value. 
 			If x is an iterable, we add everything in it.
 		
@@ -113,7 +113,7 @@ class FiniteBestSet(object):
 		
 	##NOTE: NOW DEFUNCT: USE .get_all
 	#def get_sorted(self, decreasing=False): 
-		""" Return all elements in sorted order. Returns a *copy*  via 'sorted' """
+		# """ Return all elements in sorted order. Returns a *copy*  via 'sorted' """
 		#return [ c.x for c in sorted(self.Q, reverse = not decreasing)]
 		
 	def merge(self, y):
@@ -152,3 +152,9 @@ if __name__ == "__main__":
 		
 		assert set(Q.get_all()).issuperset( set([0,1,2,3,4,5,6,7,8,9]))
 		print Q.get_all()
+
+
+
+
+
+
