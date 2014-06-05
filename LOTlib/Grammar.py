@@ -189,7 +189,7 @@ class Grammar:
 			
 			return ret
 		else: # must be a terminal
-			assert_or_die(isinstance(x, str), "Terminal must be a string! x="+x)
+			assert isinstance(x, str), ("*** Terminal must be a string! x="+x)
 			
 			return x
 			
@@ -271,7 +271,7 @@ class Grammar:
 			
 			This is constant memory
 		"""
-		assert_or_die( self.bv_count==0, "Error: increment_tree not yet implemented for bound variables." )
+		assert self.bv_count==0, "*** Error: increment_tree not yet implemented for bound variables."
 		
 		if LOTlib.SIG_INTERRUPTED: return # quit if interrupted
 		
@@ -368,7 +368,7 @@ class Grammar:
 		
 		# Wrap for hypotheses instead of trees
 		if isinstance(x, Hypothesis):
-			assert_or_die(isinstance(y, Hypothesis), "If x is a hypothesis, y must be! "+str(y) )
+			assert isinstance(y, Hypothesis), ("*** If x is a hypothesis, y must be! "+str(y) )
 			return self.lp_regenerate_propose_to(x.value,y.value,xZ=xZ, yZ=yZ)
 		
 		RP = -Infinity

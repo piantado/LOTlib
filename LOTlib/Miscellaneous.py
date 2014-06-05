@@ -172,14 +172,6 @@ def display_option_summary(obj):
 	print "####################################################################################################"
 
 	
-def assert_or_die(x,m):
-	""" die and print m if something is false"""
-	if not x: die(m)
-	
-def die(x):
-	""" Say something and exit (via failed Assert) """
-	print "*** " + x
-	assert False
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Genuine Miscellany
