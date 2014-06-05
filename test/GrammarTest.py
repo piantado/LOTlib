@@ -8,6 +8,7 @@ import unittest
 
 from LOTlib.Grammar import *
 import math
+from collections import defaultdict
 
 
 class GrammarTest(unittest.TestCase):
@@ -26,24 +27,60 @@ class GrammarTest(unittest.TestCase):
 		# sample from G 100 times
 		for i in range(100):
 			t = self.G.generate('START')
-			s = t.__str__()
-			# test whether the object is a string (this should be a test for the pystring function in FunctionNode.py)
-			# self.assertEqual(type(t), str)
 			# count probability manually
-			prob = self.countProbability(s)
+			prob = self.countProbability(t)
 			# check that it's equal to .log_probability()
 			self.assertTrue(prob - t.log_probability() < 0.00000001)
-			# print s, t.log_probability()
 
+
+	# tests repeated sampling
+	def test_sampling(self):
+		# sample from G 10,000 times and record the frequency in a dictionary
+		frequencyDictionary = defaultdict(lambda: 0)
+		for i in range(10000):
+			t = self.G.generate('START')
+			frequencyDictionary[t] += 1
+		# compare the log probabilities with the sampling
+		for tree in frequencyDictionary:
+			logProb = tree.log_probability()
+			print log(frequencyDictionary[tree]/10000.), logProb
+			# TODO: come up with/look up a good metric for converting the similarities between counts and log probabilities
+			# into a number that gives us a measure of "how good the sampling went". For this simple grammar, it looks pretty good.
 
 	# counts the probability of the grammar manually
 	# NOTE: not modular at this point, if we change our test grammar this function will return something incorrect
 	# NOTE: also only works if START -> any characters not in NULL (fix)
-	def countProbability(self, string):
+	def countProbability(self, node):
 		# count number of occurrences of A and B
-		a = string.count('A')
-		b = string.count('B')
-		return math.log(0.1**a * 0.3**b * 0.6)
+		ls = node.as_list()
+		# recursively go through the tree, counting up the number of a's and b's
+		counts = self.count(ls)
+		# print ls, counts
+		return math.log(0.1**counts['A '] * 0.3**counts['B '] * 0.6)
+
+
+	# counts the number of occurrences of each element in a nested list of strings
+	# returns a dictionary
+	def count(self, ls):
+		# http://stackoverflow.com/questions/9358983/python-dictionary-and-default-values
+		dictionary = defaultdict(lambda: 0)
+		# recursively flatten the list
+		flattenedList = self.flatten(ls)
+		# count the elements one-by-one
+		for elem in flattenedList:
+			dictionary[elem] += 1
+		# return the dictionary
+		return dictionary
+
+	# flattens a nested list
+	def flatten(self, ls):
+		newlist = []
+		for elem in ls:
+			if type(elem) == list:
+				newlist.extend(self.flatten(elem))
+			else: newlist.append(elem)
+		return newlist
+
 
 
 

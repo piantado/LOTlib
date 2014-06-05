@@ -5,14 +5,26 @@ follows the standards in https://docs.python.org/2/library/unittest.html
 
 import unittest
 
-from LOTlib.FunctionNode import *
+# from LOTlib.FunctionNode import * # THIS THROWS AN ERROR "ImportError: cannot import name isFunctionNode". Is there an import loop?
+from LOTlib.Grammar import *
+
+
 class FunctionNodeTest(unittest.TestCase):
 	
 	# initialization that happens before each test is carried out
 	def setUp(self):
-		pass
+		self.G = Grammar()
+		self.G.add_rule('START', 'A ', ['START'], 0.1)
+		self.G.add_rule('START', 'B ', ['START'], 0.3)
+		self.G.add_rule('START', 'NULL', [], 0.6)
 	
-	
+	# tests the .pystring() method
+	def str(self):
+		t = self.G.generate('START')
+		string = t.pystring()
+		# test whether the object is a string (this should be a test for the pystring function in FunctionNode.py)
+		self.assertEqual(type(string), str)
+		self.assertEqual(type(t.__str__()), str)
 	
 	
 	
