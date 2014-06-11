@@ -18,7 +18,7 @@ class FunctionHypothesis(Hypothesis):
 			args - the argumetns to the function
 		"""
 		self.args = args # must come first since below calls value2function
-		Hypothesis.__init__(self,value, **kwargs) # this initializes prior and likleihood variables, so keep it here!
+		Hypothesis.__init__(self, value, **kwargs) # this initializes prior and likleihood variables, so keep it here!
 		self.set_value(value,f)
 		
 	def __copy__(self):

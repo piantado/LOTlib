@@ -19,7 +19,9 @@ class Hypothesis(object):
 			under self.prior and self.likelihood
 	"""
 	
-	def __init__(self, value=None, prior_temperature=1.0, likelihood_temperature=1.0):
+	def __init__(self, value=None, prior_temperature=1.0, likelihood_temperature=1.0, **kwargs):
+		
+		self.__dict__.update(kwargs)
 		
 		self.set_value(value) # to zero out prior, likelhood, posterior_score
 		self.prior, self.likelihood, self.posterior_score = [-Infinity, -Infinity, -Infinity] 
