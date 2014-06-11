@@ -153,8 +153,31 @@ class FunctionNode(object):
 	def __str__(self): return self.pystring()
 	def __repr__(self): return self.pystring()
 	
-	def __eq__(self, other): return isFunctionNode(other) and (cmp(self, other) == 0)
-	def __ne__(self, other): return not self.__eq__(other)
+	def __ne__(self, other): return (not self.__eq__(other))
+	def __eq__(self, other): 
+		"""
+			Test equality of FunctionNodes. 
+			
+			NOTE That two trees may have identical str(..) but be structured very differently, so this old way is no good:
+					return isFunctionNode(other) and (cmp(self, other) == 0)
+			
+			TODO: MAKE THIS CORRECTLY HANDLE BOUND VARIABLES
+		"""
+		
+		# Some ways to not be equal
+		if (not isFunctionNode(other)) or (self.name != other.name):
+			return False
+		
+		if self.args is None:
+			return other.args is None
+		
+		# so args must be a list
+		for a,b in zip(self.args, other.args):
+			if a != b: return False
+		
+		return True
+		
+	
 	
 	## TODO: overwrite these with something faster
 	# hash trees. This just converts to string -- maybe too slow?
