@@ -35,7 +35,6 @@ class Grammar:
 		NOTE: Bound variables have a rule id < 0
 		
 		This class fixes a bunch of problems that were in earlier versions, such as 
-			
 	"""
 	
 	def __init__(self, BV_P=10.0, BV_RESAMPLE_P=1.0, start='START'):
