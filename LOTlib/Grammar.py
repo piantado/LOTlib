@@ -283,7 +283,7 @@ class Grammar:
 	
 	def sample_node_via_iterate(self, t, predicate=lambdaTrue, do_bv=True):
 		"""
-			This will yield a random node in the middle of it's iteration, allowing us to expand bound variables properly
+			This will yield a random node in the middle of its iteration, allowing us to expand bound variables properly
 			(e.g. when the node is yielded, the state of the grammar is correct)
 			It also yields the probability and the depth
 			
@@ -313,6 +313,10 @@ class Grammar:
 			A lazy version of tree enumeration. Here, we generate all trees, starting from a rule or a nonterminal symbol. 
 			
 			This is constant memory
+
+			*x*: A node in the tree
+
+			*depth*: Depth of the tree
 		"""
 		assert self.bv_count==0, "*** Error: increment_tree not yet implemented for bound variables."
 		
@@ -404,11 +408,14 @@ class Grammar:
 			
 			NOTE: This does NOT take into account insert/delete
 			NOTE: Not so simple because we must count multiple paths
-			 TODO: Can we remove yZ?
+			TODO: Can we remove yZ?
 			TODO: TEST THIS:
 			
 		"""
 		
+		# TODO: Can we remove yZ?
+		# TODO: TEST THIS:
+
 		# Wrap for hypotheses instead of trees
 		if isinstance(x, Hypothesis):
 			assert isinstance(y, Hypothesis), ("*** If x is a hypothesis, y must be! "+str(y) )
