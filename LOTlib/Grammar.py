@@ -402,15 +402,12 @@ class Grammar:
 	
 	def lp_regenerate_propose_to(self, x, y, xZ=None, yZ=None):
 		"""
-			What is the probability of starting at x and ending up at y from a regeneration move?
+			Returns a log probability of starting at x and ending up at y from a regeneration move.
 			Any node is a candidate if the trees are identical except for what's below those nodes
 			(although what's below *can* be identical!)
 			
 			NOTE: This does NOT take into account insert/delete
 			NOTE: Not so simple because we must count multiple paths
-			TODO: Can we remove yZ?
-			TODO: TEST THIS:
-			
 		"""
 		
 		# TODO: Can we remove yZ?
