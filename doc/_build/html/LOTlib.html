@@ -1173,13 +1173,22 @@ TODO: When we generate, we MUST have a START-&gt;EXPR expansion, otherwise the t
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.add_rule">
 <tt class="descname">add_rule</tt><big>(</big><em>nt</em>, <em>name</em>, <em>to</em>, <em>p</em>, <em>resample_p=1.0</em>, <em>bv_type=None</em>, <em>bv_args=None</em>, <em>bv_prefix='y'</em>, <em>bv_p=None</em>, <em>rid=None</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.add_rule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.add_rule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a rule, and returns the added rule (for use by add_bv)</p>
+<dd><p>Adds a rule and returns it.</p>
+<p><em>nt</em> - The Nonterminal. e.g. S in &#8220;S -&gt; NP VP&#8221;
+<em>name</em> - the name of this function
+<em>to</em> - what you expand to (usually a FunctionNode). 
+<em>p</em> - unnormalized probability of expansion
+<em>resample_p</em> - in resampling, what is the probability of choosing this node?            
+<em>bv_type</em> - what bound variable was introduced
+<em>bv_args</em> - what are the args when we use a bv (None is terminals, else a type signature)
+<em>rid</em> - the rule id number</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.display_rules">
 <tt class="descname">display_rules</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.display_rules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.display_rules" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Prints all the rules to the console.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.generate">
@@ -1237,12 +1246,14 @@ NOTE: Not so simple because we must count multiple paths</p>
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.nonterminals">
 <tt class="descname">nonterminals</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.nonterminals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.nonterminals" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns all non-terminals.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.remove_rule">
 <tt class="descname">remove_rule</tt><big>(</big><em>r</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.remove_rule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.remove_rule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove a rule (comparison is done by nt and rid)</p>
+<dd><p>Removes a rule (comparison is done by nt and rid).
+<em>r</em>: Should be a GrammarRule</p>
 </dd></dl>
 
 <dl class="method">
