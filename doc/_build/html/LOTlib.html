@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -13,7 +15,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '1.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -68,8 +70,8 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html">LOTlib.Examples.SchemeProgramInduction package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#module-LOTlib.Examples.SchemeProgramInduction.SchemeFunctionLearn">LOTlib.Examples.SchemeProgramInduction.SchemeFunctionLearn module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#module-LOTlib.Examples.SchemeProgramInduction.SchemeGenerate">LOTlib.Examples.SchemeProgramInduction.SchemeGenerate module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#lotlib-examples-schemeprograminduction-schemefunctionlearn-module">LOTlib.Examples.SchemeProgramInduction.SchemeFunctionLearn module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#lotlib-examples-schemeprograminduction-schemegenerate-module">LOTlib.Examples.SchemeProgramInduction.SchemeGenerate module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#module-LOTlib.Examples.SchemeProgramInduction.Shared">LOTlib.Examples.SchemeProgramInduction.Shared module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#module-LOTlib.Examples.SchemeProgramInduction">Module contents</a></li>
 </ul>
@@ -1058,19 +1060,19 @@ to just be quick</p>
 <dd><p>Generate a random partial subtree of me. So that</p>
 <dl class="docutils">
 <dt>this: </dt>
-<dd>prev_((<a href="#id3"><span class="problematic" id="id4">seven_</span></a> if cardinality1_(x) else next_(next_(L_(x)))))</dd>
+<dd>prev_((<a href="#id5"><span class="problematic" id="id6">seven_</span></a> if cardinality1_(x) else next_(next_(L_(x)))))</dd>
 </dl>
 <p>yeilds:</p>
 <blockquote>
 <div>prev_(WORD)
 prev_(WORD)
-prev_((<a href="#id5"><span class="problematic" id="id6">seven_</span></a> if cardinality1_(x) else WORD))
+prev_((<a href="#id7"><span class="problematic" id="id8">seven_</span></a> if cardinality1_(x) else WORD))
 prev_(WORD)
-prev_((<a href="#id7"><span class="problematic" id="id8">seven_</span></a> if BOOL else next_(next_(L_(SET)))))
+prev_((<a href="#id9"><span class="problematic" id="id10">seven_</span></a> if BOOL else next_(next_(L_(SET)))))
 prev_(WORD)
-prev_((<a href="#id9"><span class="problematic" id="id10">seven_</span></a> if cardinality1_(SET) else next_(WORD)))
+prev_((<a href="#id11"><span class="problematic" id="id12">seven_</span></a> if cardinality1_(SET) else next_(WORD)))
 prev_(WORD)
-prev_((<a href="#id11"><span class="problematic" id="id12">seven_</span></a> if BOOL else next_(WORD)))
+prev_((<a href="#id13"><span class="problematic" id="id14">seven_</span></a> if BOOL else next_(WORD)))
 ...</div></blockquote>
 <p>We do this because there are waay too many unique subtrees to enumerate, 
 and this allows a nice variety of structures
@@ -1167,21 +1169,23 @@ TODO: When we generate, we MUST have a START-&gt;EXPR expansion, otherwise the t
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.add_bv_rule">
 <tt class="descname">add_bv_rule</tt><big>(</big><em>nt</em>, <em>args</em>, <em>bv_prefix</em>, <em>bv_p</em>, <em>d</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.add_bv_rule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.add_bv_rule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add an expansion to a bound variable of type t, at depth d. Add it and return it.</p>
+<dd><p>Add an expansion to a bound variable of type t, at depth d. Add it and return it. 
+<em>nt</em>: The Nonterminal. e.g. S in &#8220;S -&gt; NP VP&#8221;
+<em>args</em>: Arguments of the bound variable</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.add_rule">
 <tt class="descname">add_rule</tt><big>(</big><em>nt</em>, <em>name</em>, <em>to</em>, <em>p</em>, <em>resample_p=1.0</em>, <em>bv_type=None</em>, <em>bv_args=None</em>, <em>bv_prefix='y'</em>, <em>bv_p=None</em>, <em>rid=None</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.add_rule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.add_rule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a rule and returns it.</p>
-<p><em>nt</em> - The Nonterminal. e.g. S in &#8220;S -&gt; NP VP&#8221;
-<em>name</em> - the name of this function
-<em>to</em> - what you expand to (usually a FunctionNode). 
-<em>p</em> - unnormalized probability of expansion
-<em>resample_p</em> - in resampling, what is the probability of choosing this node?            
-<em>bv_type</em> - what bound variable was introduced
-<em>bv_args</em> - what are the args when we use a bv (None is terminals, else a type signature)
-<em>rid</em> - the rule id number</p>
+<p><em>nt</em> - The Nonterminal. e.g. S in &#8220;S -&gt; NP VP&#8221;</p>
+<p><em>name</em> - the name of this function</p>
+<p><em>to</em> - what you expand to (usually a FunctionNode).</p>
+<p><em>p</em> - unnormalized probability of expansion</p>
+<p><em>resample_p</em> - in resampling, what is the probability of choosing this node?</p>
+<p><em>bv_type</em> - what bound variable was introduced</p>
+<p><em>bv_args</em> - what are the args when we use a bv (None is terminals, else a type signature)</p>
+<p><em>rid</em> - the rule id number</p>
 </dd></dl>
 
 <dl class="method">
@@ -1193,10 +1197,7 @@ TODO: When we generate, we MUST have a START-&gt;EXPR expansion, otherwise the t
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.generate">
 <tt class="descname">generate</tt><big>(</big><em>x='*USE_START*'</em>, <em>d=0</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.generate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate from the PCFG &#8211; default is to start from 
-x - either a nonterminal or a FunctionNode</p>
-<p>TODO: We can make this limit the depth, if we want. Maybe that&#8217;s dangerous?
-TODO: Add a check that we don&#8217;t have any leftover bound variable rules, when d==0</p>
+<dd><p>Generate from the PCFG &#8211; default is to start from x - either a nonterminal or a FunctionNode</p>
 </dd></dl>
 
 <dl class="method">
@@ -1220,14 +1221,14 @@ TODO: Add a check that we don&#8217;t have any leftover bound variable rules, wh
 
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.iterate_subnodes">
-<tt class="descname">iterate_subnodes</tt><big>(</big><em>t</em>, <em>d=0</em>, <em>predicate=&lt;function lambdaTrue at 0x10327d500&gt;</em>, <em>do_bv=True</em>, <em>yield_depth=False</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.iterate_subnodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.iterate_subnodes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Iterate through all subnodes of t, while updating my added rules (bound variables)
-so that at each subnode, the grammar is accurate to what it was</p>
-<p>if We set do_bu=False, we don&#8217;t do bound variables (useful for things like counting nodes, instead of having to update the grammar)</p>
-<p>yield_depth &#8211; if True, we return (node, depth) instead of node
-predicate &#8211; filter only the ones that match this</p>
-<p># NOTE: if you DON&#8217;T iterate all the way through, you end up acculmulating bv rules
-# so NEVER stop this iteration in the middle!</p>
+<tt class="descname">iterate_subnodes</tt><big>(</big><em>t</em>, <em>d=0</em>, <em>predicate=&lt;function lambdaTrue at 0x2d3db18&gt;</em>, <em>do_bv=True</em>, <em>yield_depth=False</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.iterate_subnodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.iterate_subnodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate through all subnodes of node <em>t</em>, while updating the added rules (bound variables)
+so that at each subnode, the grammar is accurate to what it was.</p>
+<p>if <a href="#id3"><span class="problematic" id="id4">*</span></a>do_bv*=False, we don&#8217;t do bound variables (useful for things like counting nodes, instead of having to update the grammar)</p>
+<p><em>yield_depth</em>: if True, we return (node, depth) instead of node
+<em>predicate</em>: filter only the ones that match this</p>
+<p>NOTE: if you DON&#8217;T iterate all the way through, you end up acculmulating bv rules
+so NEVER stop this iteration in the middle!</p>
 </dd></dl>
 
 <dl class="method">
@@ -1258,12 +1259,13 @@ NOTE: Not so simple because we must count multiple paths</p>
 
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.resample_normalizer">
-<tt class="descname">resample_normalizer</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x10327d500&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.resample_normalizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.resample_normalizer" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<tt class="descname">resample_normalizer</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x2d3db18&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.resample_normalizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.resample_normalizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the sum of all of the non-normalized probabilities.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.sample_node_via_iterate">
-<tt class="descname">sample_node_via_iterate</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x10327d500&gt;</em>, <em>do_bv=True</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.sample_node_via_iterate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.sample_node_via_iterate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">sample_node_via_iterate</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x2d3db18&gt;</em>, <em>do_bv=True</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.sample_node_via_iterate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.sample_node_via_iterate" title="Permalink to this definition">¶</a></dt>
 <dd><p>This will yield a random node in the middle of it&#8217;s iteration, allowing us to expand bound variables properly
 (e.g. when the node is yielded, the state of the grammar is correct)
 It also yields the probability and the depth</p>
@@ -1791,7 +1793,7 @@ so that we can implement only propose_t classes for subclasses, that generate tr
 <p>The default in LOTHypothesis</p>
 <dl class="method">
 <dt id="LOTlib.Proposals.RegenerationProposal.propose_tree">
-<tt class="descname">propose_tree</tt><big>(</big><em>t</em>, <em>separate_fb=False</em>, <em>predicate=&lt;function lambdaTrue at 0x10327d500&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Proposals.html#RegenerationProposal.propose_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Proposals.RegenerationProposal.propose_tree" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">propose_tree</tt><big>(</big><em>t</em>, <em>separate_fb=False</em>, <em>predicate=&lt;function lambdaTrue at 0x2d3db18&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Proposals.html#RegenerationProposal.propose_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Proposals.RegenerationProposal.propose_tree" title="Permalink to this definition">¶</a></dt>
 <dd><p>If separate_fb=True &#8211; return [newt, f, b], instead of [newt,f-b]</p>
 </dd></dl>
 
@@ -1881,7 +1883,9 @@ OR how many leaves (from partial trees) have the same returntype</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">LOTlib package</a><ul>
-<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+</ul>
+</li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-LOTlib.BasicPrimitives">LOTlib.BasicPrimitives module</a></li>
 <li><a class="reference internal" href="#module-LOTlib.DataAndObjects">LOTlib.DataAndObjects module</a></li>
@@ -1936,7 +1940,7 @@ OR how many leaves (from partial trees) have the same returntype</p>
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>
