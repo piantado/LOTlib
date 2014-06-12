@@ -39,11 +39,6 @@ for h in LOTlib.Inference.MetropolisHastings.mh_sample(initial_hyp, data, STEPS,
 	# add h to our priority queue, with priority of its log probability, h.posterior_score
 	allhyp.push(h, h.posterior_score)
 
-# save these hypotheses
-
-from LOTlib.Serialization import serialize2file
-serialize2file(allfs, "demo-hypotheses.pkl") # save this in a file
-
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 ## now re-evaluate everything we found on new data
 #huge_data = generate_data(LARGE_DATA_SIZE)

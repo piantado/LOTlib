@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
+"""
 
+	TODO: BOUNDED_MEMOIZE SHOULD BE REPLACED BY FUNCTOOLS.lru_cache
+	      PROBABLY MEMOIZE TOO
+	      
+	      
+	   
+"""
 class Memoize(dict):
 	"""
 		Provide a memoization class to wrap a *function*

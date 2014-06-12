@@ -75,9 +75,10 @@ allret = MPI_map(run, map(lambda x: [x], options.DATA_AMOUNTS * options.CHAINS))
 allfs = FiniteBestSet(max=True)
 allfs.merge(allret)
 
-from LOTlib.Serialization import serialize2file
-serialize2file(allfs, options.OUT_PATH) # save this in a file
-
+import pickle
+with open(options.OUT_PATH, 'w') as f:
+	pickle.dump(allfs, f)
+	
 ## If we want to print the summary with the "large" data size (average posterior score computed empirically)
 if options.LARGE_DATA_SIZE > 0 and is_master_process():
 	

@@ -50,3 +50,15 @@ A good starting place is the FOL folder, which contains a simple example to gene
 The best reference for learning how to create/modify grammars is FunctionNodeDemo in Examples. It contains all of the syntax for various parts of grammars. 
 
 More examples are provided in the "Examples" folder. These include simple symbolic regression, the recursive number learning model, a quantifier learning model. The "tests" folder may also be useful, as this runs some simple models to check for, e.g., correct sampling and inference. The Number demo has syntax for a number of different sampling and inference schemes included in LOTlib.
+
+Citation:
+---------
+
+This software may be cited as:
+
+	@misc{piantadosi2014lotlib,
+	author={Steven T. Piantadosi},
+	title={ LOTlib: Learning and Inference in the Language of Thought},
+	year={2014},
+	howpublished={available from https://github.com/piantado/LOTlib}
+	}
