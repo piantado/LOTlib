@@ -35,26 +35,28 @@ class Grammar:
 		NOTE: Bound variables have a rule id < 0
 		
 		This class fixes a bunch of problems that were in earlier versions, such as 
-			
 	"""
 	
 	def __init__(self, BV_P=10.0, BV_RESAMPLE_P=1.0, start='START'):
 		self.__dict__.update(locals())
 		
-		self.rules = defaultdict(list) # a dict from nonterminals to lists of GrammarRules
+		self.rules = defaultdict(list) # A dict from nonterminals to lists of GrammarRules
 		self.rule_count = 0
-		self.bv_count = 0 # how many ruls in the grammar introduce bound variables?
-		self.bv_rule_id = 0 # a unique idenifier for each bv rule id (may get quite large)	. The actual stored rule are negative this
+		self.bv_count = 0 # How many rules in the grammar introduce bound variables?
+		self.bv_rule_id = 0 # A unique idenifier for each bv rule id (may get quite large)	. The actual stored rule are negative this
 	
 	def is_nonterminal(self, x): 
 		""" A nonterminal is just something that is a key for self.rules"""
+
+		       #if x is a string       #if x is a key
 		return isinstance(x, str) and (x in self.rules)
 		
 	def is_terminal(self, x):    
 		""" Check conditions for something to be a terminal """
 		
 		# Nonterminals are not terminals
-		if self.is_nonterminal(x): return False
+		if self.is_nonterminal(x): 
+			return False
 		
 		if isFunctionNode(x): 
 			# You can be a terminal if you are a function with all non-FunctionNode arguments
@@ -65,19 +67,38 @@ class Grammar:
 		
 		
 	def display_rules(self):
+		"""
+			Prints all the rules to the console.
+		"""
 		for k in self.rules.keys():
 			for r in self.rules[k]:
 				print r
 	
 	def nonterminals(self):
+		"""
+			Returns all non-terminals. 
+		"""
 		return self.rules.keys()
 		
 	# these take probs instead of log probs, for simplicity
+					   #>
+					   #|       #>The name of the function
 	def add_rule(self, nt, name, to, p, resample_p=1.0, bv_type=None, bv_args=None, bv_prefix='y', bv_p=None, rid=None):
 		"""
-			Adds a rule, and returns the added rule (for use by add_bv)
+			Adds a rule and returns it.
+
+			*nt* - The Nonterminal. e.g. S in "S -> NP VP"
+			*name* - the name of this function
+			*to* - what you expand to (usually a FunctionNode). 
+			*p* - unnormalized probability of expansion
+			*resample_p* - in resampling, what is the probability of choosing this node?		
+			*bv_type* - what bound variable was introduced
+			*bv_args* - what are the args when we use a bv (None is terminals, else a type signature)
+			*rid* - the rule id number
+			
 		"""
 		
+		#Assigns a serialized rule number
 		if rid is None: 
 			rid = self.rule_count
 			self.rule_count += 1
@@ -85,7 +106,7 @@ class Grammar:
 		if name is not None and (name.lower() == 'lambda'):
 			self.bv_count += 1
 			
-		# Create the rule and add it
+		# Creates the rule and add it
 		newrule = GrammarRule(nt,name,to, p=p, resample_p=resample_p, bv_type=bv_type, bv_args=bv_args, bv_prefix=bv_prefix, bv_p=bv_p, rid=rid)
 		self.rules[nt].append(newrule)
 		
@@ -96,10 +117,13 @@ class Grammar:
 	############################################################
 	
 	def remove_rule(self, r):
-		""" Remove a rule (comparison is done by nt and rid) """
+		""" 
+			Removes a rule (comparison is done by nt and rid).
+			*r*: Should be a GrammarRule
+		"""
 		self.rules[r.nt].remove(r)
 	
-	# add a bound variable and return the rule
+	# Add a bound variable and return the rule
 	def add_bv_rule(self, nt, args, bv_prefix, bv_p, d):
 		""" Add an expansion to a bound variable of type t, at depth d. Add it and return it. """
 		self.bv_rule_id += 1 # A unique identifier for each bound variable rule (may get quite large!)

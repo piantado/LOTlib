@@ -4,5 +4,8 @@
 # Python output files
 *.pyc
 
-#testing generator
+# testing generator
 test_generator.py
+
+# Notes
+*.note
