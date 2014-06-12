@@ -873,7 +873,7 @@ It works by storing a priority queue (in the opposite order), and popping off th
 <dt id="LOTlib.FiniteBestSet.FiniteBestSet.add">
 <tt class="descname">add</tt><big>(</big><em>x</em>, <em>p=None</em>, <em>store_iterator=False</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FiniteBestSet.html#FiniteBestSet.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FiniteBestSet.FiniteBestSet.add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add x with priority p to the set.
-store_iteratore &#8211; if we are supposed to store an iterator (rather than elements from it)
+store_iterator &#8211; if we are supposed to store an iterator (rather than elements from it)
 If p=None, we use self.key to get the value. 
 If x is an iterable, we add everything in it.</p>
 </dd></dl>
@@ -1211,7 +1211,7 @@ TODO: Add a check that we don&#8217;t have any leftover bound variable rules, wh
 
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.iterate_subnodes">
-<tt class="descname">iterate_subnodes</tt><big>(</big><em>t</em>, <em>d=0</em>, <em>predicate=&lt;function lambdaTrue at 0x1036b2758&gt;</em>, <em>do_bv=True</em>, <em>yield_depth=False</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.iterate_subnodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.iterate_subnodes" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">iterate_subnodes</tt><big>(</big><em>t</em>, <em>d=0</em>, <em>predicate=&lt;function lambdaTrue at 0x10327d500&gt;</em>, <em>do_bv=True</em>, <em>yield_depth=False</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.iterate_subnodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.iterate_subnodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Iterate through all subnodes of t, while updating my added rules (bound variables)
 so that at each subnode, the grammar is accurate to what it was</p>
 <p>if We set do_bu=False, we don&#8217;t do bound variables (useful for things like counting nodes, instead of having to update the grammar)</p>
@@ -1247,12 +1247,12 @@ NOTE: Not so simple because we must count multiple paths</p>
 
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.resample_normalizer">
-<tt class="descname">resample_normalizer</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x1036b2758&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.resample_normalizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.resample_normalizer" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">resample_normalizer</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x10327d500&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.resample_normalizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.resample_normalizer" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.sample_node_via_iterate">
-<tt class="descname">sample_node_via_iterate</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x1036b2758&gt;</em>, <em>do_bv=True</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.sample_node_via_iterate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.sample_node_via_iterate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">sample_node_via_iterate</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x10327d500&gt;</em>, <em>do_bv=True</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.sample_node_via_iterate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.sample_node_via_iterate" title="Permalink to this definition">¶</a></dt>
 <dd><p>This will yield a random node in the middle of it&#8217;s iteration, allowing us to expand bound variables properly
 (e.g. when the node is yielded, the state of the grammar is correct)
 It also yields the probability and the depth</p>
@@ -1285,6 +1285,10 @@ The &#8220;for&#8221; is nice so that it will yield back and clean up the bv</p>
 </div>
 <div class="section" id="module-LOTlib.Memoization">
 <span id="lotlib-memoization-module"></span><h2>LOTlib.Memoization module<a class="headerlink" href="#module-LOTlib.Memoization" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>TODO: BOUNDED_MEMOIZE SHOULD BE REPLACED BY FUNCTOOLS.lru_cache</dt>
+<dd>PROBABLY MEMOIZE TOO</dd>
+</dl>
 <dl class="class">
 <dt id="LOTlib.Memoization.BoundedDictionary">
 <em class="property">class </em><tt class="descclassname">LOTlib.Memoization.</tt><tt class="descname">BoundedDictionary</tt><big>(</big><em>N=1000</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Memoization.html#BoundedDictionary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Memoization.BoundedDictionary" title="Permalink to this definition">¶</a></dt>
@@ -1375,21 +1379,9 @@ properties. This acts like a dictionary (inhering from dict) and a function</p>
 <dd></dd></dl>
 
 <dl class="function">
-<dt id="LOTlib.Miscellaneous.assert_or_die">
-<tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">assert_or_die</tt><big>(</big><em>x</em>, <em>m</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#assert_or_die"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.assert_or_die" title="Permalink to this definition">¶</a></dt>
-<dd><p>die and print m if something is false</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="LOTlib.Miscellaneous.beta">
 <tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">beta</tt><big>(</big><em>a</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#beta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.beta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Here a is a vector (of ints or floats) and this computes the Beta normalizing function,</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Miscellaneous.die">
-<tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">die</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#die"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.die" title="Permalink to this definition">¶</a></dt>
-<dd><p>Say something and exit (via failed Assert)</p>
 </dd></dl>
 
 <dl class="function">
@@ -1788,7 +1780,7 @@ so that we can implement only propose_t classes for subclasses, that generate tr
 <p>The default in LOTHypothesis</p>
 <dl class="method">
 <dt id="LOTlib.Proposals.RegenerationProposal.propose_tree">
-<tt class="descname">propose_tree</tt><big>(</big><em>t</em>, <em>separate_fb=False</em>, <em>predicate=&lt;function lambdaTrue at 0x1036b2758&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Proposals.html#RegenerationProposal.propose_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Proposals.RegenerationProposal.propose_tree" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">propose_tree</tt><big>(</big><em>t</em>, <em>separate_fb=False</em>, <em>predicate=&lt;function lambdaTrue at 0x10327d500&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Proposals.html#RegenerationProposal.propose_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Proposals.RegenerationProposal.propose_tree" title="Permalink to this definition">¶</a></dt>
 <dd><p>If separate_fb=True &#8211; return [newt, f, b], instead of [newt,f-b]</p>
 </dd></dl>
 
