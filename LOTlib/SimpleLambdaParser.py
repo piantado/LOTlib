@@ -1,11 +1,9 @@
 """
-
 	Parse simplified lambda expressions--enough for ATIS. 
 	
 	TODO: No quoting etc. supported yet. 
 	
 	NOTE: This is based on http://pyparsing.wikispaces.com/file/view/sexpParser.py/278417548/sexpParser.py
-	
 """
 
 
