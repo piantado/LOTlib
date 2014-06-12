@@ -125,7 +125,11 @@ class Grammar:
 	
 	# Add a bound variable and return the rule
 	def add_bv_rule(self, nt, args, bv_prefix, bv_p, d):
-		""" Add an expansion to a bound variable of type t, at depth d. Add it and return it. """
+		""" 
+			Add an expansion to a bound variable of type t, at depth d. Add it and return it. 
+			*nt*: The Nonterminal. e.g. S in "S -> NP VP"
+			*args*: Arguments of the bound variable
+		"""
 		self.bv_rule_id += 1 # A unique identifier for each bound variable rule (may get quite large!)
 		
 		if bv_p is None: bv_p = self.BV_P # use the default if none
@@ -134,33 +138,38 @@ class Grammar:
 			
 	
 	############################################################
-	## generation
+	## Generation
 	############################################################
 
 	def generate(self, x='*USE_START*', d=0):
 		"""
-			Generate from the PCFG -- default is to start from 
-			x - either a nonterminal or a FunctionNode
+			Generate from the PCFG -- default is to start from x - either a nonterminal or a FunctionNode
 			
-			TODO: We can make this limit the depth, if we want. Maybe that's dangerous?
-			TODO: Add a check that we don't have any leftover bound variable rules, when d==0
 		"""
+		# TODO: We can make this limit the depth, if we want. Maybe that's dangerous?
+		# TODO: Add a check that we don't have any leftover bound variable rules, when d==0
+
 		if x == '*USE_START*': x = self.start
 		
 		if isinstance(x,list):
-			
 			# If we get a list, just map along it to generate. We don't count lists as depth--only FunctionNodes
 			return map(lambda xi: self.generate(x=xi, d=d), x)
-		elif x=='*gaussian*': ## TODO: HIGHLY EXPERIMENTAL!! Wow this is really terrible for mixing...
+
+		elif x=='*gaussian*': 
+			# TODO: HIGHLY EXPERIMENTAL!! 
+			# Wow this is really terrible for mixing...
 			v = np.random.normal()
 			gp = normlogpdf(v, 0.0, 1.0)
 			return FunctionNode(returntype=x, name=str(v), args=None, generation_probability=gp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
+		
 		elif x=='*uniform*':
 			v = np.random.rand()
 			gp = 0.0
 			return FunctionNode(returntype=x, name=str(v), args=None, generation_probability=gp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
+		
 		elif x is None:
 			return None
+		
 		elif self.is_nonterminal(x):
 			# if we generate a nonterminal, then sample a GrammarRule, convert it to a FunctionNode
 			# via nt->returntype, name->name, to->args, 
@@ -220,16 +229,16 @@ class Grammar:
 		
 	def iterate_subnodes(self, t, d=0, predicate=lambdaTrue, do_bv=True, yield_depth=False):
 		"""
-			Iterate through all subnodes of t, while updating my added rules (bound variables)
-			so that at each subnode, the grammar is accurate to what it was 
+			Iterate through all subnodes of node *t*, while updating the added rules (bound variables)
+			so that at each subnode, the grammar is accurate to what it was. 
 			
-			if We set do_bu=False, we don't do bound variables (useful for things like counting nodes, instead of having to update the grammar)
+			if *do_bv*=False, we don't do bound variables (useful for things like counting nodes, instead of having to update the grammar)
 			
-			yield_depth -- if True, we return (node, depth) instead of node
-			predicate -- filter only the ones that match this
+			*yield_depth*: if True, we return (node, depth) instead of node
+			*predicate*: filter only the ones that match this
 			
-			# NOTE: if you DON'T iterate all the way through, you end up acculmulating bv rules
-			# so NEVER stop this iteration in the middle!
+			NOTE: if you DON'T iterate all the way through, you end up acculmulating bv rules
+			so NEVER stop this iteration in the middle!
 		"""
 		
 		if isFunctionNode(t):
@@ -256,6 +265,9 @@ class Grammar:
 					yield g
 		
 	def resample_normalizer(self, t, predicate=lambdaTrue):
+		"""
+			Returns the sum of all of the non-normalized probabilities.
+		"""
 		Z = 0.0
 		for ti in self.iterate_subnodes(t, do_bv=True, predicate=predicate):
 			Z += ti.resample_p 
