@@ -20,7 +20,7 @@ class GrammarTest(unittest.TestCase):
 		self.G = Grammar()
 		self.G.add_rule('START', 'A ', ['START'], 0.1)
 		self.G.add_rule('START', 'B ', ['START'], 0.3)
-		self.G.add_rule('START', 'NULL', [], 0.6)
+		self.G.add_rule('START', 'NULL', None, 0.6)
 	
 	# tests .log_probability() function
 	def test_log_probability(self):

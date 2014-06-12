@@ -21,10 +21,11 @@ class MemoizationTest(unittest.TestCase):
 			self.d.__setitem__(i, 2*i)
 			# make sure self.d contains i
 			self.d.__contains__(i)
-			# make sure self.d contains the correct number of items
-			self.assertEqual(self.d.dict_size, i+1)
+			# make sure self.d contains the correct number of items (should empty the dictionary after 201 adds)
+			self.assertEqual(self.d.dict_size, (i+1)%201)
 			# make sure self.d contains the correct last counts
-			self.assertEqual(self.d.last_count[i], 0)
+			if (i+1)%201 != 0:
+				self.assertEqual(self.d.last_count[i], 0)
 
 	# test BoundedDictionary __getitem__
 	def test__getitem__(self):

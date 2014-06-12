@@ -22,7 +22,7 @@ class FunctionNodeTest(unittest.TestCase):
 	def str(self):
 		t = self.G.generate('START')
 		string = t.pystring()
-		# test whether the object is a string (this should be a test for the pystring function in FunctionNode.py)
+		# test whether the object is a string
 		self.assertEqual(type(string), str)
 		self.assertEqual(type(t.__str__()), str)
 	
