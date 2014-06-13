@@ -45,7 +45,7 @@ def isFunctionNode(x):
 
 def cleanFunctionNodeString(x):
 	"""
-		Make FunctionNode strings easier to read
+		Makes FunctionNode strings easier to read
 	"""
 	s = re.sub("lambda", u"\u03BB", str(x)) # make lambdas the single char
 	s = re.sub("_", '', s) # remove underscores
@@ -62,10 +62,25 @@ class FunctionNode(object):
 	"""
 	
 	def __init__(self, returntype, name, args, generation_probability=0.0, resample_p=1.0, bv_name=None, bv_type=None, bv_args=None, bv_prefix=None, bv_p=None, ruleid=None):
+		"""
+			*returntype* - The return type of the FunctionNode
+			*name* - The name of the function
+			*args* - Arguments of the function
+			*generation_probability* - 
+			*resample_p* - The probability of choosing this node in an expansion. Takes a number in the range [0.0,1.0]
+			*bv_name* - Name of the Bound Variable
+			*bv_type* - Which bound variable
+			*bv_args* - Arguments of the Bound Variable. "None" implies this is a terminal, otherwise  a type signature.
+			*bv_prefix* - Bound variable Prefix
+			*bv_p* - ?
+			*ruleid* - The rule ID number
+		"""
 		self.__dict__.update(locals())
 		
-	# make all my parts the same as q (not copies)
 	def setto(self, q):
+		"""
+			Makes all the parts the same as *q*, not copies.
+		"""
 		self.__dict__.update(q.__dict__)
 			
 	def __copy__(self, shallow=False):
@@ -81,14 +96,22 @@ class FunctionNode(object):
 		return FunctionNode(self.returntype, self.name, newargs, generation_probability=self.generation_probability, resample_p=self.resample_p, bv_type=self.bv_type, bv_name=self.bv_name, bv_args=deepcopy(self.bv_args), bv_prefix=self.bv_prefix, bv_p=self.bv_p, ruleid=self.ruleid)
 	
 	def is_nonfunction(self):
+		"""
+			Returns True if the Node contains no function arguments, False otherwise.
+		"""
 		return (self.args is None)
+
 	def is_function(self):
+		"""
+			Returns True if the Node contains function arguments, False otherwise.
+		"""
 		return not self.is_nonfunction()
 	
 	def as_list(self):
 		"""
-			This returns ourself structured as a lisp (with function/self.name first)
-			NOTE: This does ot handle BV yet
+			Returns a list representation of the FunctionNode with function/self.name as the first element.
+
+			NOTE: This does not handle BV yet
 		"""
 		x = [self.name] if self.name != '' else []
 		if self.args is not None:
@@ -97,7 +120,7 @@ class FunctionNode(object):
 	
 	def islambda(self):
 		"""
-			Is this a lambda node? Using this function allows us to potentially 
+			Is this a lambda node? Using this function allows us to potentially...
 		"""
 		ret = (self.name is not None) and (self.name.lower() == 'lambda')
 		
@@ -140,6 +163,7 @@ class FunctionNode(object):
 		if self.args is None:
 			return str(self.name) # simple call
 		else:
+			# Using + on strings is very slow, this needs changing.
 			return str(self.name)+' '+','.join(map(str,self.args)) 
 		
 	def fullprint(self, d=0):
