@@ -4,8 +4,9 @@
 # Python output files
 *.pyc
 
-# testing generator
+# testing and header generators
 test_generator.py
+header_generator.py
 
 # Notes
 *.note
