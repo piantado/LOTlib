@@ -1,8 +1,8 @@
 """
-	This class defines different types of data for models. 
+	Defines different classes for different types of data and models.
 	It also provides "Obj"s for bundling together features
 	
-	For functions, we have a data object consisting of the [output, args]
+	For functions, we have a data object of the form [output, args]
 
 """
 from copy import deepcopy
@@ -19,6 +19,9 @@ class FunctionData:
 	"""
 	
 	def __init__(self, input, output, **kwargs):
+		"""
+			Creates a new FunctionData object. input must be either a list or a tuple.
+		"""
 		assert isinstance(input, list) or isinstance(input, tuple) ## since we apply to this
 		self.input = input
 		self.output = output
@@ -30,9 +33,19 @@ class FunctionData:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class UtteranceData:
 	"""
-		A wrapper for utterances. An utterance data point is a word, in a context, with some set of possible words we could have said
+		A wrapper for utterances.
+		An utterance data point is a word, in a context, with some set of possible words we could have said.
 	"""
 	def __init__(self, utterance, context, possible_utterances):
+		"""
+			Creates a new Utterance.
+
+			*utterance* - the word that's spoken
+
+			*context* - the environmental/linguistic context in which the word is spoken
+
+			*possible_utterances* - a set of other words we could have spoken, given the context
+		"""
 		self.__dict__.update(locals())
 		
 	def __repr__(self):
@@ -63,8 +76,9 @@ class Obj:
 
 def make_all_objects(**f):
 	"""
-	This takes a list of lists and crosses them into all objects
-	e.g. make_all_objects( size=[1,2,3], color=['red', 'green', 'blue'] )
+		This takes a list of lists and crosses them into all objects
+		e.g. make_all_objects( size=[1,2,3], color=['red', 'green', 'blue'] ) will return a list of 9 (3x3) objects,
+		each of which will have a different pair of size and color attributes
 	"""
 
 	keys = f.keys()
