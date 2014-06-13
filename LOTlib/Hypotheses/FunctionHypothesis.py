@@ -1,3 +1,11 @@
+"""
+	A special type of hypothesis whose value is a function. 
+	The function is automatically eval-ed when we set_value, and is automatically hidden and unhidden when we pickle
+	This can also be called like a function, as in fh(data)!
+"""
+
+
+
 from Hypothesis import Hypothesis
 
 from LOTlib.Miscellaneous import *
@@ -15,7 +23,7 @@ class FunctionHypothesis(Hypothesis):
 		"""
 			value - the value of this hypothesis
 			f - defaultly None, in which case this uses self.value2function
-			args - the argumetns to the function
+			args - the arguments to the function
 		"""
 		self.args = args # must come first since below calls value2function
 		Hypothesis.__init__(self, value, **kwargs) # this initializes prior and likleihood variables, so keep it here!
@@ -27,7 +35,7 @@ class FunctionHypothesis(Hypothesis):
 		
 	def __call__(self, *vals):
 		""" 
-			Make this callable just like a function. Yay python! 
+			Make this callable just like a function (as in: myFunction(data)). Yay python!
 		"""
 		assert not any([isinstance(x, FunctionData) for x in vals]), "*** Probably you mean to pass FunctionData.input instead of FunctionData?"
 		assert callable(self.fvalue)
@@ -62,8 +70,9 @@ class FunctionHypothesis(Hypothesis):
 	
 	def set_value(self, value, f=None):
 		"""
-		The the value. You optionally can send f, and not write (this is for some speed considerations) but you better be sure f is correct
-		since an error will not be caught!
+			Sets the value for the hypothesis. 
+			Another option: send f, and not write (this is for some speed considerations) but you better be sure f is correct
+			since an error will not be caught!
 		"""
 		
 		Hypothesis.set_value(self,value)
@@ -98,13 +107,15 @@ class FunctionHypothesis(Hypothesis):
 	
 	def compute_single_likelihood(self, datum):
 		"""
-			A function that must be implemented by subclasses to compute the likelihood of a single datum/response pair
+			A function that must be implemented by subclasses to compute the likelihood of a single datum/response pair.
 			This should NOT implement the temperature (that is handled by compute_likelihood)
 		"""
 		assert False, "*** compute_single_likelihood must be overwritten in a lower class"
 	
 	def compute_likelihood(self, data):
-		
+		"""
+			Computes the likelihood. Pretty self-explanatory :)
+		"""
 		self.likelihood = sum(map( self.compute_single_likelihood, data)) / self.likelihood_temperature
 		
 		self.posterior_score = self.prior + self.likelihood
@@ -121,7 +132,17 @@ class FunctionHypothesis(Hypothesis):
 		return dd
 
 	def __setstate__(self, state):
+		"""
+			sets the state of the hypothesis (when we unpickle)
+		"""
 		self.__dict__.update(state)
 		self.set_value(self.value) # just re-set the value so that we re-compute the function
+
+
+
+
+
+
+
 		
 		
