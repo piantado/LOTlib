@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-	TODO: Allow PCFG to take another tree of FunctionNodes in generation. It then recurses and only genreates the leaves
+    TODO: Allow PCFG to take another tree of FunctionNodes in generation. It then recurses and only genreates the leaves
 	TODO: When we generate, we MUST have a START->EXPR expansion, otherwise the top level doesn't get searched
 """
 
@@ -480,7 +480,7 @@ class Grammar:
 					#yield t.copy() # now the pointers are updated so we can yield this
 			#ti.name, lp = [old_name, old_lp]
 			
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 if __name__ == "__main__":
 	
 	#AB_GRAMMAR = PCFG()

@@ -312,8 +312,7 @@ class FunctionNode(object):
 
 			*rename* - a dictionary to store how we should rename
 		"""
-		if 
-		 is None: rename = dict()
+		if rename is None: rename = dict()
 				
 		if self.name is not None:
 			if self.islambda() and (self.bv_type is not None): 

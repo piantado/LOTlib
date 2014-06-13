@@ -57,8 +57,22 @@
 <div class="section" id="lotlib-examples-schemeprograminduction-schemegenerate-module">
 <h2>LOTlib.Examples.SchemeProgramInduction.SchemeGenerate module<a class="headerlink" href="#lotlib-examples-schemeprograminduction-schemegenerate-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="lotlib-examples-schemeprograminduction-shared-module">
-<h2>LOTlib.Examples.SchemeProgramInduction.Shared module<a class="headerlink" href="#lotlib-examples-schemeprograminduction-shared-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-LOTlib.Examples.SchemeProgramInduction.Shared">
+<span id="lotlib-examples-schemeprograminduction-shared-module"></span><h2>LOTlib.Examples.SchemeProgramInduction.Shared module<a class="headerlink" href="#module-LOTlib.Examples.SchemeProgramInduction.Shared" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="LOTlib.Examples.SchemeProgramInduction.Shared.SchemeFunction">
+<em class="property">class </em><tt class="descclassname">LOTlib.Examples.SchemeProgramInduction.Shared.</tt><tt class="descname">SchemeFunction</tt><big>(</big><em>grammar, value=None, f=None, start='START', ALPHA=0.9, maxnodes=25, args=['x'], proposal_function=None, **kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/SchemeProgramInduction/Shared.html#SchemeFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.SchemeProgramInduction.Shared.SchemeFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="LOTlib.Hypotheses.html#LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis" title="LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis"><tt class="xref py py-class docutils literal"><span class="pre">LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis</span></tt></a></p>
+<dl class="method">
+<dt id="LOTlib.Examples.SchemeProgramInduction.Shared.SchemeFunction.compute_single_likelihood">
+<tt class="descname">compute_single_likelihood</tt><big>(</big><em>datum</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/SchemeProgramInduction/Shared.html#SchemeFunction.compute_single_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.SchemeProgramInduction.Shared.SchemeFunction.compute_single_likelihood" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrap in string for comparisons here. Also, this is a weird pseudo-likelihood (an outlier process)
+since when we are wrong, it should generate the observed data with some probability that&#8217;s not going
+to be 1-ALPHA</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-LOTlib.Examples.SchemeProgramInduction">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-LOTlib.Examples.SchemeProgramInduction" title="Permalink to this headline">¶</a></h2>
@@ -77,7 +91,7 @@
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#lotlib-examples-schemeprograminduction-schemefunctionlearn-module">LOTlib.Examples.SchemeProgramInduction.SchemeFunctionLearn module</a></li>
 <li><a class="reference internal" href="#lotlib-examples-schemeprograminduction-schemegenerate-module">LOTlib.Examples.SchemeProgramInduction.SchemeGenerate module</a></li>
-<li><a class="reference internal" href="#lotlib-examples-schemeprograminduction-shared-module">LOTlib.Examples.SchemeProgramInduction.Shared module</a></li>
+<li><a class="reference internal" href="#module-LOTlib.Examples.SchemeProgramInduction.Shared">LOTlib.Examples.SchemeProgramInduction.Shared module</a></li>
 <li><a class="reference internal" href="#module-LOTlib.Examples.SchemeProgramInduction">Module contents</a></li>
 </ul>
 </li>
