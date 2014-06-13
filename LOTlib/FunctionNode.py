@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
-	A function node -- a tree part representing a function and its arguments. 
-	Also used for PCFG rules, where the arguments are nonterminal symbols. 
+	A function node -- a tree part representing a function and its arguments.
+	Also used for PCFG rules, where the arguments are nonterminal symbols.
 	
 	A Functionnode defaultly iterates over its subnodes
 	
@@ -234,7 +234,7 @@ class FunctionNode(object):
 	
 	def log_probability(self):
 		"""
-		Compute the log probability of a tree
+			Compute the log probability of a tree
 		"""
 		lp = self.generation_probability # the probability of my rule
 		
@@ -284,6 +284,9 @@ class FunctionNode(object):
 				for ssn,dd in a.iterdepth(): yield (ssn,dd+1)
 
 	def all_leaves(self):
+		"""
+			Returns a generator for all leaves of the subtree rooted at the instantiated FunctionNode.
+		"""
 		if self.args is not None:
 			for i in range(len(self.args)): # loop through kids
 				if isFunctionNode(self.args[i]):
@@ -293,6 +296,11 @@ class FunctionNode(object):
 					yield self.args[i]
 
 	def string_below(self, sep=" "):
+		"""
+			The string of terminals (leaves) below the current FunctionNode in the parse tree.
+
+			*sep* is the delimiter between terminals. E.g. sep="," => "the,fuzzy,cat"
+		"""
 		return sep.join(map(str, self.all_leaves()))
 	
 	def fix_bound_variables(self, d=1, rename=None):
@@ -300,10 +308,12 @@ class FunctionNode(object):
 			Fix the naming scheme of bound variables. This happens if we promote or demote some nodes
 			via insert/delete
 			
-			d - current depth
-			rename - a dictionary to store how we should rename
+			*d* - Current depth.
+
+			*rename* - a dictionary to store how we should rename
 		"""
-		if rename is None: rename = dict()
+		if 
+		 is None: rename = dict()
 				
 		if self.name is not None:
 			if self.islambda() and (self.bv_type is not None): 
@@ -330,20 +340,29 @@ class FunctionNode(object):
 	
 	def contains_function(self, x):
 		"""
-			Check if this contains x as function below
+			Checks if the FunctionNode contains *x* as function below
 		"""
 		for n in self:
 			if n.name == x: return True
 		return False
 	
-	def count_nodes(self): return self.count_subnodes()
+	def count_nodes(self): 
+		"""
+			Returns the subnode count.
+		"""
+		return self.count_subnodes()
+
 	def count_subnodes(self):
+		"""
+			Returns the subnode count.
+		"""
 		c = 0
 		for n in self: 
 			c = c + 1
 		return c
 	
 	def depth(self):
+
 		depths = [ a.depth() for a in self.argFunctionNodes() ] 
 		depths.append(-1) # for no function nodes (+1=0)
 		return max(depths)+1
@@ -352,8 +371,9 @@ class FunctionNode(object):
 	# if collapse_terminal then we just map non-FunctionNodes to "TERMINAL"
 	def type(self):
 		"""
-			The type of a functionNode is defined to be it's returntype if it's not a lambda,
-			or the correct (recursive) lambda structure if it is a lambda. For instance (lambda x. lambda y . (and (empty? x) y))
+			The type of a FunctionNode is defined to be its returntype if it's not a lambda,
+			or is defined to be the correct (recursive) lambda structure if it is a lambda. 
+			For instance (lambda x. lambda y . (and (empty? x) y))
 			is a (SET (BOOL BOOL)), where in types, (A B) is something that takes an A and returns a B
 		"""
 		
@@ -372,16 +392,16 @@ class FunctionNode(object):
 				
 			return (self.args[0].type(), t)
 		
-		"""
-		ts = [self.returntype, self.bv_type, self.bv_args]
-		if self.args is not None:
-			for i in range(len(self.args)):
-				if isFunctionNode(self.args[i]):
-					ts.append(self.args[i].returntype)
-				else: 
-					ts.append(self.args[i])
-		return ts
-		"""
+		
+		# ts = [self.returntype, self.bv_type, self.bv_args]
+		# if self.args is not None:
+		# 	for i in range(len(self.args)):
+		# 		if isFunctionNode(self.args[i]):
+		# 			ts.append(self.args[i].returntype)
+		# 		else: 
+		# 			ts.append(self.args[i])
+		# return ts
+		
 		
 	def is_replicating(self):
 		"""
@@ -392,7 +412,8 @@ class FunctionNode(object):
 
 	def is_canonical_order(self, symmetric_ops):
 		"""
-			Takes a set of symmetric ops (plus, minus, times, etc, not divide) and asserts that the LHS ordering is less than the right (to prevent)
+			Takes a set of symmetric ops (plus, minus, times, etc, not divide) and asserts that the 
+			LHS ordering is less than the right (to prevent)
 		"""
 		if self.args is None or len(self.args) == 0: return True
 		
@@ -454,7 +475,7 @@ class FunctionNode(object):
 				
 	def replace_subnodes(self, find, replace):
 		"""
-			Replace subnodes
+			*find*s subnodes and *replace*s it.
 			NOTE: NOT THE FASTEST!
 			NOTE: Defaultly only makes copies of replace
 		"""
@@ -465,7 +486,7 @@ class FunctionNode(object):
 	
 	def partial_subtree_root_match(self, y):
 		"""
-			Does y match from my root? 
+			Does *y* match from my root? 
 			
 			A partial tree here is one with some nonterminals (see random_partial_subtree) that
 			are not expanded
@@ -494,7 +515,7 @@ class FunctionNode(object):
 				
 	def partial_subtree_match(self, y):
 		"""
-			Does y match anywhere?
+			Does *y* match a subtree anywhere?
 		"""
 		for x in self:
 			if x.partial_subtree_root_match(y): return True
@@ -539,5 +560,3 @@ class FunctionNode(object):
 		ret.args = newargs
 		
 		return ret
-		
-		
