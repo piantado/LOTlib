@@ -3,3 +3,9 @@
 
 # Python output files
 *.pyc
+
+# testing generator
+test_generator.py
+
+# Notes
+*.note

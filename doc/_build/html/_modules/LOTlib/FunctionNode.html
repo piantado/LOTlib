@@ -203,8 +203,31 @@
 	<span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pystring</span><span class="p">()</span>
 	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pystring</span><span class="p">()</span>
 	
-	<span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="n">isFunctionNode</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">cmp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-	<span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+	<span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+	<span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> 
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Test equality of FunctionNodes. </span>
+<span class="sd">			</span>
+<span class="sd">			NOTE That two trees may have identical str(..) but be structured very differently, so this old way is no good:</span>
+<span class="sd">					return isFunctionNode(other) and (cmp(self, other) == 0)</span>
+<span class="sd">			</span>
+<span class="sd">			TODO: MAKE THIS CORRECTLY HANDLE BOUND VARIABLES</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		
+		<span class="c"># Some ways to not be equal</span>
+		<span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">isFunctionNode</span><span class="p">(</span><span class="n">other</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+			<span class="k">return</span> <span class="bp">False</span>
+		
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+			<span class="k">return</span> <span class="n">other</span><span class="o">.</span><span class="n">args</span> <span class="ow">is</span> <span class="bp">None</span>
+		
+		<span class="c"># so args must be a list</span>
+		<span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">args</span><span class="p">):</span>
+			<span class="k">if</span> <span class="n">a</span> <span class="o">!=</span> <span class="n">b</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
+		
+		<span class="k">return</span> <span class="bp">True</span>
+		
+	
 	
 	<span class="c">## TODO: overwrite these with something faster</span>
 	<span class="c"># hash trees. This just converts to string -- maybe too slow?</span>

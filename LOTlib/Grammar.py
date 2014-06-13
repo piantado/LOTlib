@@ -35,26 +35,28 @@ class Grammar:
 		NOTE: Bound variables have a rule id < 0
 		
 		This class fixes a bunch of problems that were in earlier versions, such as 
-			
 	"""
 	
 	def __init__(self, BV_P=10.0, BV_RESAMPLE_P=1.0, start='START'):
 		self.__dict__.update(locals())
 		
-		self.rules = defaultdict(list) # a dict from nonterminals to lists of GrammarRules
+		self.rules = defaultdict(list) # A dict from nonterminals to lists of GrammarRules
 		self.rule_count = 0
-		self.bv_count = 0 # how many ruls in the grammar introduce bound variables?
-		self.bv_rule_id = 0 # a unique idenifier for each bv rule id (may get quite large)	. The actual stored rule are negative this
+		self.bv_count = 0 # How many rules in the grammar introduce bound variables?
+		self.bv_rule_id = 0 # A unique idenifier for each bv rule id (may get quite large)	. The actual stored rule are negative this
 	
 	def is_nonterminal(self, x): 
 		""" A nonterminal is just something that is a key for self.rules"""
+
+		       #if x is a string       #if x is a key
 		return isinstance(x, str) and (x in self.rules)
 		
 	def is_terminal(self, x):    
 		""" Check conditions for something to be a terminal """
 		
 		# Nonterminals are not terminals
-		if self.is_nonterminal(x): return False
+		if self.is_nonterminal(x): 
+			return False
 		
 		if isFunctionNode(x): 
 			# You can be a terminal if you are a function with all non-FunctionNode arguments
@@ -65,19 +67,45 @@ class Grammar:
 		
 		
 	def display_rules(self):
+		"""
+			Prints all the rules to the console.
+		"""
 		for k in self.rules.keys():
 			for r in self.rules[k]:
 				print r
 	
 	def nonterminals(self):
+		"""
+			Returns all non-terminals. 
+		"""
 		return self.rules.keys()
 		
 	# these take probs instead of log probs, for simplicity
+					   #>
+					   #|       #>The name of the function
 	def add_rule(self, nt, name, to, p, resample_p=1.0, bv_type=None, bv_args=None, bv_prefix='y', bv_p=None, rid=None):
 		"""
-			Adds a rule, and returns the added rule (for use by add_bv)
+			Adds a rule and returns it.
+			
+			*nt* - The Nonterminal. e.g. S in "S -> NP VP"
+			
+			*name* - the name of this function 
+			
+			*to* - what you expand to (usually a FunctionNode). 
+			
+			*p* - unnormalized probability of expansion
+			
+			*resample_p* - in resampling, what is the probability of choosing this node?		
+			
+			*bv_type* - what bound variable was introduced
+			
+			*bv_args* - what are the args when we use a bv (None is terminals, else a type signature)
+			
+			*rid* - the rule id number
+			
 		"""
 		
+		#Assigns a serialized rule number
 		if rid is None: 
 			rid = self.rule_count
 			self.rule_count += 1
@@ -85,7 +113,7 @@ class Grammar:
 		if name is not None and (name.lower() == 'lambda'):
 			self.bv_count += 1
 			
-		# Create the rule and add it
+		# Creates the rule and add it
 		newrule = GrammarRule(nt,name,to, p=p, resample_p=resample_p, bv_type=bv_type, bv_args=bv_args, bv_prefix=bv_prefix, bv_p=bv_p, rid=rid)
 		self.rules[nt].append(newrule)
 		
@@ -96,12 +124,19 @@ class Grammar:
 	############################################################
 	
 	def remove_rule(self, r):
-		""" Remove a rule (comparison is done by nt and rid) """
+		""" 
+			Removes a rule (comparison is done by nt and rid).
+			*r*: Should be a GrammarRule
+		"""
 		self.rules[r.nt].remove(r)
 	
-	# add a bound variable and return the rule
+	# Add a bound variable and return the rule
 	def add_bv_rule(self, nt, args, bv_prefix, bv_p, d):
-		""" Add an expansion to a bound variable of type t, at depth d. Add it and return it. """
+		""" 
+			Add an expansion to a bound variable of type t, at depth d. Add it and return it. 
+			*nt*: The Nonterminal. e.g. S in "S -> NP VP"
+			*args*: Arguments of the bound variable
+		"""
 		self.bv_rule_id += 1 # A unique identifier for each bound variable rule (may get quite large!)
 		
 		if bv_p is None: bv_p = self.BV_P # use the default if none
@@ -110,33 +145,38 @@ class Grammar:
 			
 	
 	############################################################
-	## generation
+	## Generation
 	############################################################
 
 	def generate(self, x='*USE_START*', d=0):
 		"""
-			Generate from the PCFG -- default is to start from 
-			x - either a nonterminal or a FunctionNode
+			Generate from the PCFG -- default is to start from x - either a nonterminal or a FunctionNode
 			
-			TODO: We can make this limit the depth, if we want. Maybe that's dangerous?
-			TODO: Add a check that we don't have any leftover bound variable rules, when d==0
 		"""
+		# TODO: We can make this limit the depth, if we want. Maybe that's dangerous?
+		# TODO: Add a check that we don't have any leftover bound variable rules, when d==0
+
 		if x == '*USE_START*': x = self.start
 		
 		if isinstance(x,list):
-			
 			# If we get a list, just map along it to generate. We don't count lists as depth--only FunctionNodes
 			return map(lambda xi: self.generate(x=xi, d=d), x)
-		elif x=='*gaussian*': ## TODO: HIGHLY EXPERIMENTAL!! Wow this is really terrible for mixing...
+
+		elif x=='*gaussian*': 
+			# TODO: HIGHLY EXPERIMENTAL!! 
+			# Wow this is really terrible for mixing...
 			v = np.random.normal()
 			gp = normlogpdf(v, 0.0, 1.0)
 			return FunctionNode(returntype=x, name=str(v), args=None, generation_probability=gp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
+		
 		elif x=='*uniform*':
 			v = np.random.rand()
 			gp = 0.0
 			return FunctionNode(returntype=x, name=str(v), args=None, generation_probability=gp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
+		
 		elif x is None:
 			return None
+		
 		elif self.is_nonterminal(x):
 			# if we generate a nonterminal, then sample a GrammarRule, convert it to a FunctionNode
 			# via nt->returntype, name->name, to->args, 
@@ -189,23 +229,23 @@ class Grammar:
 			
 			return ret
 		else: # must be a terminal
-			assert_or_die(isinstance(x, str), "Terminal must be a string! x="+x)
+			assert isinstance(x, str), ("*** Terminal must be a string! x="+x)
 			
 			return x
 			
 		
 	def iterate_subnodes(self, t, d=0, predicate=lambdaTrue, do_bv=True, yield_depth=False):
 		"""
-			Iterate through all subnodes of t, while updating my added rules (bound variables)
-			so that at each subnode, the grammar is accurate to what it was 
+			Iterate through all subnodes of node *t*, while updating the added rules (bound variables)
+			so that at each subnode, the grammar is accurate to what it was. 
 			
-			if We set do_bu=False, we don't do bound variables (useful for things like counting nodes, instead of having to update the grammar)
+			if *do_bv*=False, we don't do bound variables (useful for things like counting nodes, instead of having to update the grammar)
 			
-			yield_depth -- if True, we return (node, depth) instead of node
-			predicate -- filter only the ones that match this
+			*yield_depth*: if True, we return (node, depth) instead of node
+			*predicate*: filter only the ones that match this
 			
-			# NOTE: if you DON'T iterate all the way through, you end up acculmulating bv rules
-			# so NEVER stop this iteration in the middle!
+			NOTE: if you DON'T iterate all the way through, you end up acculmulating bv rules
+			so NEVER stop this iteration in the middle!
 		"""
 		
 		if isFunctionNode(t):
@@ -232,6 +272,9 @@ class Grammar:
 					yield g
 		
 	def resample_normalizer(self, t, predicate=lambdaTrue):
+		"""
+			Returns the sum of all of the non-normalized probabilities.
+		"""
 		Z = 0.0
 		for ti in self.iterate_subnodes(t, do_bv=True, predicate=predicate):
 			Z += ti.resample_p 
@@ -240,7 +283,7 @@ class Grammar:
 	
 	def sample_node_via_iterate(self, t, predicate=lambdaTrue, do_bv=True):
 		"""
-			This will yield a random node in the middle of it's iteration, allowing us to expand bound variables properly
+			This will yield a random node in the middle of its iteration, allowing us to expand bound variables properly
 			(e.g. when the node is yielded, the state of the grammar is correct)
 			It also yields the probability and the depth
 			
@@ -270,8 +313,12 @@ class Grammar:
 			A lazy version of tree enumeration. Here, we generate all trees, starting from a rule or a nonterminal symbol. 
 			
 			This is constant memory
+
+			*x*: A node in the tree
+
+			*depth*: Depth of the tree
 		"""
-		assert_or_die( self.bv_count==0, "Error: increment_tree not yet implemented for bound variables." )
+		assert self.bv_count==0, "*** Error: increment_tree not yet implemented for bound variables."
 		
 		if LOTlib.SIG_INTERRUPTED: return # quit if interrupted
 		
@@ -355,20 +402,20 @@ class Grammar:
 	
 	def lp_regenerate_propose_to(self, x, y, xZ=None, yZ=None):
 		"""
-			What is the probability of starting at x and ending up at y from a regeneration move?
+			Returns a log probability of starting at x and ending up at y from a regeneration move.
 			Any node is a candidate if the trees are identical except for what's below those nodes
 			(although what's below *can* be identical!)
 			
 			NOTE: This does NOT take into account insert/delete
 			NOTE: Not so simple because we must count multiple paths
-			 TODO: Can we remove yZ?
-			TODO: TEST THIS:
-			
 		"""
 		
+		# TODO: Can we remove yZ?
+		# TODO: TEST THIS:
+
 		# Wrap for hypotheses instead of trees
 		if isinstance(x, Hypothesis):
-			assert_or_die(isinstance(y, Hypothesis), "If x is a hypothesis, y must be! "+str(y) )
+			assert isinstance(y, Hypothesis), ("*** If x is a hypothesis, y must be! "+str(y) )
 			return self.lp_regenerate_propose_to(x.value,y.value,xZ=xZ, yZ=yZ)
 		
 		RP = -Infinity
@@ -449,7 +496,7 @@ if __name__ == "__main__":
 		#print x.log_probability(), x
 	
 	
-	G = PCFG()
+	G = Grammar()
 	G.add_rule('START', '', ['EXPR'], 1.0)
 	#G.add_rule('EXPR', 'somefunc_', ['EXPR', 'EXPR', 'EXPR'], 1.0, resample_p=5.0)
 	G.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 4.0, resample_p=10.0)
@@ -470,14 +517,16 @@ if __name__ == "__main__":
 	#print "Testing generate (no lambda)"
 	TEST_GEN = dict()
 	TARGET = dict()
-	from LOTlib.Hypothesis import LOTHypothesis
+	from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 	for i in xrange(10000): 
 		t = G.generate('START')
-		#print ">>", t
+		# print ">>", t, ' ', dir(t)
 		TEST_GEN[str(t)] = t
 		
 		if t.count_nodes() < 10:
-			TARGET[LOTHypothesis(G, v=copy(t) )] = t.log_probability()
+			TARGET[LOTHypothesis(G, value=copy(t) )] = t.log_probability()
+			# print out log probability and tree
+			print t, ' ', t.log_probability()
 		
 		
 	from LOTlib.Testing.Evaluation import evaluate_sampler

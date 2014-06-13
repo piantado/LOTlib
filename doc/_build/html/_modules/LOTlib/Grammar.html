@@ -85,26 +85,28 @@
 <span class="sd">		NOTE: Bound variables have a rule id &lt; 0</span>
 <span class="sd">		</span>
 <span class="sd">		This class fixes a bunch of problems that were in earlier versions, such as </span>
-<span class="sd">			</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
 	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">BV_P</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">BV_RESAMPLE_P</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="s">&#39;START&#39;</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span>
 		
-		<span class="bp">self</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span> <span class="c"># a dict from nonterminals to lists of GrammarRules</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span> <span class="c"># A dict from nonterminals to lists of GrammarRules</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">rule_count</span> <span class="o">=</span> <span class="mi">0</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">bv_count</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># how many ruls in the grammar introduce bound variables?</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">bv_rule_id</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># a unique idenifier for each bv rule id (may get quite large)	. The actual stored rule are negative this</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">bv_count</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># How many rules in the grammar introduce bound variables?</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">bv_rule_id</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># A unique idenifier for each bv rule id (may get quite large)	. The actual stored rule are negative this</span>
 	
 <div class="viewcode-block" id="Grammar.is_nonterminal"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.is_nonterminal">[docs]</a>	<span class="k">def</span> <span class="nf">is_nonterminal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span> 
 		<span class="sd">&quot;&quot;&quot; A nonterminal is just something that is a key for self.rules&quot;&quot;&quot;</span>
+
+		       <span class="c">#if x is a string       #if x is a key</span>
 		<span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">)</span>
 		</div>
 <div class="viewcode-block" id="Grammar.is_terminal"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.is_terminal">[docs]</a>	<span class="k">def</span> <span class="nf">is_terminal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>    
 		<span class="sd">&quot;&quot;&quot; Check conditions for something to be a terminal &quot;&quot;&quot;</span>
 		
 		<span class="c"># Nonterminals are not terminals</span>
-		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_nonterminal</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="k">return</span> <span class="bp">False</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_nonterminal</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> 
+			<span class="k">return</span> <span class="bp">False</span>
 		
 		<span class="k">if</span> <span class="n">isFunctionNode</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> 
 			<span class="c"># You can be a terminal if you are a function with all non-FunctionNode arguments</span>
@@ -115,19 +117,45 @@
 		
 		</div>
 <div class="viewcode-block" id="Grammar.display_rules"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.display_rules">[docs]</a>	<span class="k">def</span> <span class="nf">display_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Prints all the rules to the console.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
 			<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
 				<span class="k">print</span> <span class="n">r</span>
 	</div>
 <div class="viewcode-block" id="Grammar.nonterminals"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.nonterminals">[docs]</a>	<span class="k">def</span> <span class="nf">nonterminals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Returns all non-terminals. </span>
+<span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
 		
-	<span class="c"># these take probs instead of log probs, for simplicity</span></div>
+	<span class="c"># these take probs instead of log probs, for simplicity</span>
+					   <span class="c">#&gt;</span>
+					   <span class="c">#|       #&gt;The name of the function</span></div>
 <div class="viewcode-block" id="Grammar.add_rule"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.add_rule">[docs]</a>	<span class="k">def</span> <span class="nf">add_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nt</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">to</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">resample_p</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">bv_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bv_args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bv_prefix</span><span class="o">=</span><span class="s">&#39;y&#39;</span><span class="p">,</span> <span class="n">bv_p</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rid</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">			Adds a rule, and returns the added rule (for use by add_bv)</span>
+<span class="sd">			Adds a rule and returns it.</span>
+<span class="sd">			</span>
+<span class="sd">			*nt* - The Nonterminal. e.g. S in &quot;S -&gt; NP VP&quot;</span>
+<span class="sd">			</span>
+<span class="sd">			*name* - the name of this function </span>
+<span class="sd">			</span>
+<span class="sd">			*to* - what you expand to (usually a FunctionNode). </span>
+<span class="sd">			</span>
+<span class="sd">			*p* - unnormalized probability of expansion</span>
+<span class="sd">			</span>
+<span class="sd">			*resample_p* - in resampling, what is the probability of choosing this node?		</span>
+<span class="sd">			</span>
+<span class="sd">			*bv_type* - what bound variable was introduced</span>
+<span class="sd">			</span>
+<span class="sd">			*bv_args* - what are the args when we use a bv (None is terminals, else a type signature)</span>
+<span class="sd">			</span>
+<span class="sd">			*rid* - the rule id number</span>
+<span class="sd">			</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		
+		<span class="c">#Assigns a serialized rule number</span>
 		<span class="k">if</span> <span class="n">rid</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> 
 			<span class="n">rid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rule_count</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">rule_count</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -135,7 +163,7 @@
 		<span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;lambda&#39;</span><span class="p">):</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">bv_count</span> <span class="o">+=</span> <span class="mi">1</span>
 			
-		<span class="c"># Create the rule and add it</span>
+		<span class="c"># Creates the rule and add it</span>
 		<span class="n">newrule</span> <span class="o">=</span> <span class="n">GrammarRule</span><span class="p">(</span><span class="n">nt</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">to</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">resample_p</span><span class="o">=</span><span class="n">resample_p</span><span class="p">,</span> <span class="n">bv_type</span><span class="o">=</span><span class="n">bv_type</span><span class="p">,</span> <span class="n">bv_args</span><span class="o">=</span><span class="n">bv_args</span><span class="p">,</span> <span class="n">bv_prefix</span><span class="o">=</span><span class="n">bv_prefix</span><span class="p">,</span> <span class="n">bv_p</span><span class="o">=</span><span class="n">bv_p</span><span class="p">,</span> <span class="n">rid</span><span class="o">=</span><span class="n">rid</span><span class="p">)</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">[</span><span class="n">nt</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newrule</span><span class="p">)</span>
 		
@@ -146,12 +174,19 @@
 	<span class="c">############################################################</span>
 	</div>
 <div class="viewcode-block" id="Grammar.remove_rule"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.remove_rule">[docs]</a>	<span class="k">def</span> <span class="nf">remove_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; Remove a rule (comparison is done by nt and rid) &quot;&quot;&quot;</span>
+		<span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">			Removes a rule (comparison is done by nt and rid).</span>
+<span class="sd">			*r*: Should be a GrammarRule</span>
+<span class="sd">		&quot;&quot;&quot;</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">nt</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
 	
-	<span class="c"># add a bound variable and return the rule</span></div>
+	<span class="c"># Add a bound variable and return the rule</span></div>
 <div class="viewcode-block" id="Grammar.add_bv_rule"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.add_bv_rule">[docs]</a>	<span class="k">def</span> <span class="nf">add_bv_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nt</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">bv_prefix</span><span class="p">,</span> <span class="n">bv_p</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot; Add an expansion to a bound variable of type t, at depth d. Add it and return it. &quot;&quot;&quot;</span>
+		<span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">			Add an expansion to a bound variable of type t, at depth d. Add it and return it. </span>
+<span class="sd">			*nt*: The Nonterminal. e.g. S in &quot;S -&gt; NP VP&quot;</span>
+<span class="sd">			*args*: Arguments of the bound variable</span>
+<span class="sd">		&quot;&quot;&quot;</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">bv_rule_id</span> <span class="o">+=</span> <span class="mi">1</span> <span class="c"># A unique identifier for each bound variable rule (may get quite large!)</span>
 		
 		<span class="k">if</span> <span class="n">bv_p</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">bv_p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">BV_P</span> <span class="c"># use the default if none</span>
@@ -160,33 +195,38 @@
 			
 	
 	<span class="c">############################################################</span>
-	<span class="c">## generation</span>
+	<span class="c">## Generation</span>
 	<span class="c">############################################################</span>
 </div>
 <div class="viewcode-block" id="Grammar.generate"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.generate">[docs]</a>	<span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s">&#39;*USE_START*&#39;</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">			Generate from the PCFG -- default is to start from </span>
-<span class="sd">			x - either a nonterminal or a FunctionNode</span>
+<span class="sd">			Generate from the PCFG -- default is to start from x - either a nonterminal or a FunctionNode</span>
 <span class="sd">			</span>
-<span class="sd">			TODO: We can make this limit the depth, if we want. Maybe that&#39;s dangerous?</span>
-<span class="sd">			TODO: Add a check that we don&#39;t have any leftover bound variable rules, when d==0</span>
 <span class="sd">		&quot;&quot;&quot;</span>
+		<span class="c"># TODO: We can make this limit the depth, if we want. Maybe that&#39;s dangerous?</span>
+		<span class="c"># TODO: Add a check that we don&#39;t have any leftover bound variable rules, when d==0</span>
+
 		<span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s">&#39;*USE_START*&#39;</span><span class="p">:</span> <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span>
 		
 		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="nb">list</span><span class="p">):</span>
-			
 			<span class="c"># If we get a list, just map along it to generate. We don&#39;t count lists as depth--only FunctionNodes</span>
 			<span class="k">return</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">xi</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xi</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">),</span> <span class="n">x</span><span class="p">)</span>
-		<span class="k">elif</span> <span class="n">x</span><span class="o">==</span><span class="s">&#39;*gaussian*&#39;</span><span class="p">:</span> <span class="c">## TODO: HIGHLY EXPERIMENTAL!! Wow this is really terrible for mixing...</span>
+
+		<span class="k">elif</span> <span class="n">x</span><span class="o">==</span><span class="s">&#39;*gaussian*&#39;</span><span class="p">:</span> 
+			<span class="c"># TODO: HIGHLY EXPERIMENTAL!! </span>
+			<span class="c"># Wow this is really terrible for mixing...</span>
 			<span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">()</span>
 			<span class="n">gp</span> <span class="o">=</span> <span class="n">normlogpdf</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
 			<span class="k">return</span> <span class="n">FunctionNode</span><span class="p">(</span><span class="n">returntype</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">generation_probability</span><span class="o">=</span><span class="n">gp</span><span class="p">,</span> <span class="n">ruleid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">resample_p</span><span class="o">=</span><span class="n">CONSTANT_RESAMPLE_P</span> <span class="p">)</span> <span class="c">##TODO: FIX THE ruleid</span>
+		
 		<span class="k">elif</span> <span class="n">x</span><span class="o">==</span><span class="s">&#39;*uniform*&#39;</span><span class="p">:</span>
 			<span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">()</span>
 			<span class="n">gp</span> <span class="o">=</span> <span class="mf">0.0</span>
 			<span class="k">return</span> <span class="n">FunctionNode</span><span class="p">(</span><span class="n">returntype</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">generation_probability</span><span class="o">=</span><span class="n">gp</span><span class="p">,</span> <span class="n">ruleid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">resample_p</span><span class="o">=</span><span class="n">CONSTANT_RESAMPLE_P</span> <span class="p">)</span> <span class="c">##TODO: FIX THE ruleid</span>
+		
 		<span class="k">elif</span> <span class="n">x</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
 			<span class="k">return</span> <span class="bp">None</span>
+		
 		<span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_nonterminal</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
 			<span class="c"># if we generate a nonterminal, then sample a GrammarRule, convert it to a FunctionNode</span>
 			<span class="c"># via nt-&gt;returntype, name-&gt;name, to-&gt;args, </span>
@@ -239,23 +279,23 @@
 			
 			<span class="k">return</span> <span class="n">ret</span>
 		<span class="k">else</span><span class="p">:</span> <span class="c"># must be a terminal</span>
-			<span class="n">assert_or_die</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="s">&quot;Terminal must be a string! x=&quot;</span><span class="o">+</span><span class="n">x</span><span class="p">)</span>
+			<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="p">(</span><span class="s">&quot;*** Terminal must be a string! x=&quot;</span><span class="o">+</span><span class="n">x</span><span class="p">)</span>
 			
 			<span class="k">return</span> <span class="n">x</span>
 			
 		</div>
 <div class="viewcode-block" id="Grammar.iterate_subnodes"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.iterate_subnodes">[docs]</a>	<span class="k">def</span> <span class="nf">iterate_subnodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="n">lambdaTrue</span><span class="p">,</span> <span class="n">do_bv</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">yield_depth</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">			Iterate through all subnodes of t, while updating my added rules (bound variables)</span>
-<span class="sd">			so that at each subnode, the grammar is accurate to what it was </span>
+<span class="sd">			Iterate through all subnodes of node *t*, while updating the added rules (bound variables)</span>
+<span class="sd">			so that at each subnode, the grammar is accurate to what it was. </span>
 <span class="sd">			</span>
-<span class="sd">			if We set do_bu=False, we don&#39;t do bound variables (useful for things like counting nodes, instead of having to update the grammar)</span>
+<span class="sd">			if *do_bv*=False, we don&#39;t do bound variables (useful for things like counting nodes, instead of having to update the grammar)</span>
 <span class="sd">			</span>
-<span class="sd">			yield_depth -- if True, we return (node, depth) instead of node</span>
-<span class="sd">			predicate -- filter only the ones that match this</span>
+<span class="sd">			*yield_depth*: if True, we return (node, depth) instead of node</span>
+<span class="sd">			*predicate*: filter only the ones that match this</span>
 <span class="sd">			</span>
-<span class="sd">			# NOTE: if you DON&#39;T iterate all the way through, you end up acculmulating bv rules</span>
-<span class="sd">			# so NEVER stop this iteration in the middle!</span>
+<span class="sd">			NOTE: if you DON&#39;T iterate all the way through, you end up acculmulating bv rules</span>
+<span class="sd">			so NEVER stop this iteration in the middle!</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		
 		<span class="k">if</span> <span class="n">isFunctionNode</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
@@ -282,6 +322,9 @@
 					<span class="k">yield</span> <span class="n">g</span>
 		</div>
 <div class="viewcode-block" id="Grammar.resample_normalizer"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.resample_normalizer">[docs]</a>	<span class="k">def</span> <span class="nf">resample_normalizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="n">lambdaTrue</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Returns the sum of all of the non-normalized probabilities.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">Z</span> <span class="o">=</span> <span class="mf">0.0</span>
 		<span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterate_subnodes</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">do_bv</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="n">predicate</span><span class="p">):</span>
 			<span class="n">Z</span> <span class="o">+=</span> <span class="n">ti</span><span class="o">.</span><span class="n">resample_p</span> 
@@ -290,7 +333,7 @@
 	</div>
 <div class="viewcode-block" id="Grammar.sample_node_via_iterate"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.sample_node_via_iterate">[docs]</a>	<span class="k">def</span> <span class="nf">sample_node_via_iterate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="n">lambdaTrue</span><span class="p">,</span> <span class="n">do_bv</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">			This will yield a random node in the middle of it&#39;s iteration, allowing us to expand bound variables properly</span>
+<span class="sd">			This will yield a random node in the middle of its iteration, allowing us to expand bound variables properly</span>
 <span class="sd">			(e.g. when the node is yielded, the state of the grammar is correct)</span>
 <span class="sd">			It also yields the probability and the depth</span>
 <span class="sd">			</span>
@@ -320,8 +363,12 @@
 <span class="sd">			A lazy version of tree enumeration. Here, we generate all trees, starting from a rule or a nonterminal symbol. </span>
 <span class="sd">			</span>
 <span class="sd">			This is constant memory</span>
+
+<span class="sd">			*x*: A node in the tree</span>
+
+<span class="sd">			*depth*: Depth of the tree</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		<span class="n">assert_or_die</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">bv_count</span><span class="o">==</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;Error: increment_tree not yet implemented for bound variables.&quot;</span> <span class="p">)</span>
+		<span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">bv_count</span><span class="o">==</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;*** Error: increment_tree not yet implemented for bound variables.&quot;</span>
 		
 		<span class="k">if</span> <span class="n">LOTlib</span><span class="o">.</span><span class="n">SIG_INTERRUPTED</span><span class="p">:</span> <span class="k">return</span> <span class="c"># quit if interrupted</span>
 		
@@ -405,20 +452,20 @@
 	</div>
 <div class="viewcode-block" id="Grammar.lp_regenerate_propose_to"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.lp_regenerate_propose_to">[docs]</a>	<span class="k">def</span> <span class="nf">lp_regenerate_propose_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xZ</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">yZ</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">			What is the probability of starting at x and ending up at y from a regeneration move?</span>
+<span class="sd">			Returns a log probability of starting at x and ending up at y from a regeneration move.</span>
 <span class="sd">			Any node is a candidate if the trees are identical except for what&#39;s below those nodes</span>
 <span class="sd">			(although what&#39;s below *can* be identical!)</span>
 <span class="sd">			</span>
 <span class="sd">			NOTE: This does NOT take into account insert/delete</span>
 <span class="sd">			NOTE: Not so simple because we must count multiple paths</span>
-<span class="sd">			 TODO: Can we remove yZ?</span>
-<span class="sd">			TODO: TEST THIS:</span>
-<span class="sd">			</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		
+		<span class="c"># TODO: Can we remove yZ?</span>
+		<span class="c"># TODO: TEST THIS:</span>
+
 		<span class="c"># Wrap for hypotheses instead of trees</span>
 		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Hypothesis</span><span class="p">):</span>
-			<span class="n">assert_or_die</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">Hypothesis</span><span class="p">),</span> <span class="s">&quot;If x is a hypothesis, y must be! &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="p">)</span>
+			<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">Hypothesis</span><span class="p">),</span> <span class="p">(</span><span class="s">&quot;*** If x is a hypothesis, y must be! &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="p">)</span>
 			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lp_regenerate_propose_to</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="n">y</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="n">xZ</span><span class="o">=</span><span class="n">xZ</span><span class="p">,</span> <span class="n">yZ</span><span class="o">=</span><span class="n">yZ</span><span class="p">)</span>
 		
 		<span class="n">RP</span> <span class="o">=</span> <span class="o">-</span><span class="n">Infinity</span>
@@ -499,7 +546,7 @@
 		<span class="c">#print x.log_probability(), x</span>
 	
 	
-	<span class="n">G</span> <span class="o">=</span> <span class="n">PCFG</span><span class="p">()</span>
+	<span class="n">G</span> <span class="o">=</span> <span class="n">Grammar</span><span class="p">()</span>
 	<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;START&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;EXPR&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
 	<span class="c">#G.add_rule(&#39;EXPR&#39;, &#39;somefunc_&#39;, [&#39;EXPR&#39;, &#39;EXPR&#39;, &#39;EXPR&#39;], 1.0, resample_p=5.0)</span>
 	<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;plus_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;EXPR&#39;</span><span class="p">],</span> <span class="mf">4.0</span><span class="p">,</span> <span class="n">resample_p</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
@@ -520,14 +567,16 @@
 	<span class="c">#print &quot;Testing generate (no lambda)&quot;</span>
 	<span class="n">TEST_GEN</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 	<span class="n">TARGET</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-	<span class="kn">from</span> <span class="nn">LOTlib.Hypothesis</span> <span class="kn">import</span> <span class="n">LOTHypothesis</span>
+	<span class="kn">from</span> <span class="nn">LOTlib.Hypotheses.LOTHypothesis</span> <span class="kn">import</span> <span class="n">LOTHypothesis</span>
 	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">10000</span><span class="p">):</span> 
 		<span class="n">t</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="s">&#39;START&#39;</span><span class="p">)</span>
-		<span class="c">#print &quot;&gt;&gt;&quot;, t</span>
+		<span class="c"># print &quot;&gt;&gt;&quot;, t, &#39; &#39;, dir(t)</span>
 		<span class="n">TEST_GEN</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">)]</span> <span class="o">=</span> <span class="n">t</span>
 		
 		<span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">count_nodes</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
-			<span class="n">TARGET</span><span class="p">[</span><span class="n">LOTHypothesis</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="n">copy</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="p">)]</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">log_probability</span><span class="p">()</span>
+			<span class="n">TARGET</span><span class="p">[</span><span class="n">LOTHypothesis</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">copy</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="p">)]</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">log_probability</span><span class="p">()</span>
+			<span class="c"># print out log probability and tree</span>
+			<span class="k">print</span> <span class="n">t</span><span class="p">,</span> <span class="s">&#39; &#39;</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">log_probability</span><span class="p">()</span>
 		
 		
 	<span class="kn">from</span> <span class="nn">LOTlib.Testing.Evaluation</span> <span class="kn">import</span> <span class="n">evaluate_sampler</span>
