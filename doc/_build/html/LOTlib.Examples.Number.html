@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -13,7 +15,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '1.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -52,56 +54,8 @@
 <div class="section" id="lotlib-examples-number-nakeddemo-module">
 <h2>LOTlib.Examples.Number.NakedDemo module<a class="headerlink" href="#lotlib-examples-number-nakeddemo-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-LOTlib.Examples.Number.Shared">
-<span id="lotlib-examples-number-shared-module"></span><h2>LOTlib.Examples.Number.Shared module<a class="headerlink" href="#module-LOTlib.Examples.Number.Shared" title="Permalink to this headline">¶</a></h2>
-<p>Shared functions and variables for the number learning model.</p>
-<dl class="class">
-<dt id="LOTlib.Examples.Number.Shared.NumberExpression">
-<em class="property">class </em><tt class="descclassname">LOTlib.Examples.Number.Shared.</tt><tt class="descname">NumberExpression</tt><big>(</big><em>G</em>, <em>value=None</em>, <em>f=None</em>, <em>proposal_function=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/Number/Shared.html#NumberExpression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.Number.Shared.NumberExpression" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="LOTlib.Hypotheses.html#LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis" title="LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis"><tt class="xref py py-class docutils literal"><span class="pre">LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis</span></tt></a></p>
-<dl class="method">
-<dt id="LOTlib.Examples.Number.Shared.NumberExpression.compute_prior">
-<tt class="descname">compute_prior</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/Number/Shared.html#NumberExpression.compute_prior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.Number.Shared.NumberExpression.compute_prior" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute the number model prior</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LOTlib.Examples.Number.Shared.NumberExpression.compute_single_likelihood">
-<tt class="descname">compute_single_likelihood</tt><big>(</big><em>datum</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/Number/Shared.html#NumberExpression.compute_single_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.Number.Shared.NumberExpression.compute_single_likelihood" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the likelihood of data.
-TODO: Make sure this precisely matches the number paper.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LOTlib.Examples.Number.Shared.NumberExpression.copy">
-<tt class="descname">copy</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/Number/Shared.html#NumberExpression.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.Number.Shared.NumberExpression.copy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Must define this else we return &#8220;FunctionHypothesis&#8221; as a copy. We need to return a NumberExpression</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LOTlib.Examples.Number.Shared.NumberExpression.enumerative_proposer">
-<tt class="descname">enumerative_proposer</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/Number/Shared.html#NumberExpression.enumerative_proposer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.Number.Shared.NumberExpression.enumerative_proposer" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Examples.Number.Shared.generate_data">
-<tt class="descclassname">LOTlib.Examples.Number.Shared.</tt><tt class="descname">generate_data</tt><big>(</big><em>data_size</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/Number/Shared.html#generate_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.Number.Shared.generate_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sample some data according to the target</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Examples.Number.Shared.get_knower_pattern">
-<tt class="descclassname">LOTlib.Examples.Number.Shared.</tt><tt class="descname">get_knower_pattern</tt><big>(</big><em>ne</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/Number/Shared.html#get_knower_pattern"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.Number.Shared.get_knower_pattern" title="Permalink to this definition">¶</a></dt>
-<dd><p>This computes a string describing the behavior of this knower-level</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Examples.Number.Shared.random">
-<tt class="descclassname">LOTlib.Examples.Number.Shared.</tt><tt class="descname">random</tt><big>(</big><big>)</big> &rarr; x in the interval [0, 1).<a class="headerlink" href="#LOTlib.Examples.Number.Shared.random" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<div class="section" id="lotlib-examples-number-shared-module">
+<h2>LOTlib.Examples.Number.Shared module<a class="headerlink" href="#lotlib-examples-number-shared-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-LOTlib.Examples.Number">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-LOTlib.Examples.Number" title="Permalink to this headline">¶</a></h2>
@@ -119,7 +73,7 @@ TODO: Make sure this precisely matches the number paper.</p>
 <li><a class="reference internal" href="#">LOTlib.Examples.Number package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#lotlib-examples-number-nakeddemo-module">LOTlib.Examples.Number.NakedDemo module</a></li>
-<li><a class="reference internal" href="#module-LOTlib.Examples.Number.Shared">LOTlib.Examples.Number.Shared module</a></li>
+<li><a class="reference internal" href="#lotlib-examples-number-shared-module">LOTlib.Examples.Number.Shared module</a></li>
 <li><a class="reference internal" href="#module-LOTlib.Examples.Number">Module contents</a></li>
 </ul>
 </li>
@@ -161,7 +115,7 @@ TODO: Make sure this precisely matches the number paper.</p>
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -13,7 +15,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '1.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -149,30 +151,11 @@ memoize - if &gt; 0, we memoize this many</p>
 <dd></dd></dl>
 
 </div>
-<div class="section" id="module-LOTlib.Inference.PriorSample">
-<span id="lotlib-inference-priorsample-module"></span><h2>LOTlib.Inference.PriorSample module<a class="headerlink" href="#module-LOTlib.Inference.PriorSample" title="Permalink to this headline">¶</a></h2>
-<p>Inference - sample from the prior (as a baseline comparison)</p>
-<dl class="function">
-<dt id="LOTlib.Inference.PriorSample.prior_sample">
-<tt class="descclassname">LOTlib.Inference.PriorSample.</tt><tt class="descname">prior_sample</tt><big>(</big><em>h0</em>, <em>data</em>, <em>N</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/PriorSample.html#prior_sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.PriorSample.prior_sample" title="Permalink to this definition">¶</a></dt>
-<dd><p>Just use the grammar and returntype of h0 to sample from the prior
-NOTE: Only implemented for LOTHypothesis</p>
-</dd></dl>
-
+<div class="section" id="lotlib-inference-priorsample-module">
+<h2>LOTlib.Inference.PriorSample module<a class="headerlink" href="#lotlib-inference-priorsample-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-LOTlib.Inference.ProbTaboo">
-<span id="lotlib-inference-probtaboo-module"></span><h2>LOTlib.Inference.ProbTaboo module<a class="headerlink" href="#module-LOTlib.Inference.ProbTaboo" title="Permalink to this headline">¶</a></h2>
-<p>The more times we visit a hypothesis, the more we decrease its prior</p>
-<p>TODO: Try version where penalty decreases with time!
-TODO: This currently only extends LOTHypotheses, since we have to handle casting</p>
-<blockquote>
-<div>inside of h0 to WrapperClass. HOWEVER, we could make WrapperClass just dispatch the right methods 
-if they don&#8217;t exist</div></blockquote>
-<dl class="function">
-<dt id="LOTlib.Inference.ProbTaboo.ptaboo_search">
-<tt class="descclassname">LOTlib.Inference.ProbTaboo.</tt><tt class="descname">ptaboo_search</tt><big>(</big><em>h0</em>, <em>data</em>, <em>steps</em>, <em>skip=0</em>, <em>noisy_memoize=1000</em>, <em>seen_penalty=1.0</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/ProbTaboo.html#ptaboo_search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.ProbTaboo.ptaboo_search" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<div class="section" id="lotlib-inference-probtaboo-module">
+<h2>LOTlib.Inference.ProbTaboo module<a class="headerlink" href="#lotlib-inference-probtaboo-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-LOTlib.Inference.StochasticOptimization">
 <span id="lotlib-inference-stochasticoptimization-module"></span><h2>LOTlib.Inference.StochasticOptimization module<a class="headerlink" href="#module-LOTlib.Inference.StochasticOptimization" title="Permalink to this headline">¶</a></h2>
@@ -228,8 +211,8 @@ data_weight &#8211; weight each single data point as len(data)*this</p>
 <li><a class="reference internal" href="#module-LOTlib.Inference.MHShared">LOTlib.Inference.MHShared module</a></li>
 <li><a class="reference internal" href="#module-LOTlib.Inference.MetropolisHastings">LOTlib.Inference.MetropolisHastings module</a></li>
 <li><a class="reference internal" href="#module-LOTlib.Inference.ParallelTempering">LOTlib.Inference.ParallelTempering module</a></li>
-<li><a class="reference internal" href="#module-LOTlib.Inference.PriorSample">LOTlib.Inference.PriorSample module</a></li>
-<li><a class="reference internal" href="#module-LOTlib.Inference.ProbTaboo">LOTlib.Inference.ProbTaboo module</a></li>
+<li><a class="reference internal" href="#lotlib-inference-priorsample-module">LOTlib.Inference.PriorSample module</a></li>
+<li><a class="reference internal" href="#lotlib-inference-probtaboo-module">LOTlib.Inference.ProbTaboo module</a></li>
 <li><a class="reference internal" href="#module-LOTlib.Inference.StochasticOptimization">LOTlib.Inference.StochasticOptimization module</a></li>
 <li><a class="reference internal" href="#module-LOTlib.Inference.TemperedTransitions">LOTlib.Inference.TemperedTransitions module</a></li>
 <li><a class="reference internal" href="#module-LOTlib.Inference">Module contents</a></li>
@@ -273,7 +256,7 @@ data_weight &#8211; weight each single data point as len(data)*this</p>
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>
