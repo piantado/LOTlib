@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -51,23 +53,32 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	This class is a wrapper for representing &quot;rules&quot; in the grammar. </span>
 <span class="sd">	</span>
-<span class="sd">	TODO: One day we will change &quot;nt&quot; to returntype to match with the FunctionNodes</span>
+
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="c"># TODO: One day we will change &quot;nt&quot; to returntype to match with the FunctionNodes</span>
 
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log</span>
 
 <span class="k">class</span> <span class="nc">GrammarRule</span><span class="p">:</span>
 <div class="viewcode-block" id="GrammarRule"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.GrammarRule.GrammarRule">[docs]</a>	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nt</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">to</span><span class="p">,</span> <span class="n">rid</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">resample_p</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">bv_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bv_args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bv_prefix</span><span class="o">=</span><span class="s">&quot;y&quot;</span><span class="p">,</span> <span class="n">bv_p</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;	</span>
-<span class="sd">			nt - the nonterminal</span>
-<span class="sd">			name - the name of this function</span>
-<span class="sd">			to - what you expand to (usually a FunctionNode). </span>
-<span class="sd">			rid - the rule id number</span>
-<span class="sd">			p - unnormalized probability of expansion</span>
-<span class="sd">			resample_p - in resampling, what is the probability of choosing this node?		</span>
-<span class="sd">			bv_type - what bound variable was introduced</span>
-<span class="sd">			bv_args - what are the args when we use a bv (None is terminals, else a type signature)</span>
-<span class="sd">			</span>
+<span class="sd">			*nt* - the nonterminal</span>
+
+<span class="sd">			*name* - the name of this function</span>
+
+<span class="sd">			*to* - what you expand to (usually a FunctionNode). </span>
+
+<span class="sd">			*rid* - the rule id number</span>
+
+<span class="sd">			*p* - unnormalized probability of expansion</span>
+
+<span class="sd">			*resample_p* - the probability of choosing this node in an expansion	</span>
+
+<span class="sd">			*bv_type* - what bound variable was introduced</span>
+
+<span class="sd">			*bv_args* - what are the args when we use a bv (None is terminals, else a type signature)</span>
+
+<span class="sd">			Examples:</span>
 <span class="sd">			A rule where &quot;to&quot; is a nonempty list is a real expansion:</span>
 <span class="sd">				GrammarRule( &quot;EXPR&quot;, &quot;plus&quot;, [&quot;EXPR&quot;, &quot;EXPR&quot;], ...) -&gt; plus(EXPR,EXPR)</span>
 <span class="sd">			A rule where &quot;to&quot; is [] is a thunk </span>
@@ -131,7 +142,7 @@
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

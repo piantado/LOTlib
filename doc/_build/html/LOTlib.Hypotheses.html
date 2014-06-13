@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -13,7 +15,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '1.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -105,6 +107,9 @@ N - how many total data points</p>
 </div>
 <div class="section" id="module-LOTlib.Hypotheses.FunctionHypothesis">
 <span id="lotlib-hypotheses-functionhypothesis-module"></span><h2>LOTlib.Hypotheses.FunctionHypothesis module<a class="headerlink" href="#module-LOTlib.Hypotheses.FunctionHypothesis" title="Permalink to this headline">¶</a></h2>
+<p>A special type of hypothesis whose value is a function. 
+The function is automatically eval-ed when we set_value, and is automatically hidden and unhidden when we pickle
+This can also be called like a function, as in fh(data)!</p>
 <dl class="class">
 <dt id="LOTlib.Hypotheses.FunctionHypothesis.FunctionHypothesis">
 <em class="property">class </em><tt class="descclassname">LOTlib.Hypotheses.FunctionHypothesis.</tt><tt class="descname">FunctionHypothesis</tt><big>(</big><em>value=None, f=None, args=['x'], **kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/FunctionHypothesis.html#FunctionHypothesis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.FunctionHypothesis.FunctionHypothesis" title="Permalink to this definition">¶</a></dt>
@@ -115,12 +120,13 @@ This can also be called like a function, as in fh(data)!</p>
 <dl class="method">
 <dt id="LOTlib.Hypotheses.FunctionHypothesis.FunctionHypothesis.compute_likelihood">
 <tt class="descname">compute_likelihood</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/FunctionHypothesis.html#FunctionHypothesis.compute_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.FunctionHypothesis.FunctionHypothesis.compute_likelihood" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Computes the likelihood. Pretty self-explanatory :)</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.Hypotheses.FunctionHypothesis.FunctionHypothesis.compute_single_likelihood">
 <tt class="descname">compute_single_likelihood</tt><big>(</big><em>datum</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/FunctionHypothesis.html#FunctionHypothesis.compute_single_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.FunctionHypothesis.FunctionHypothesis.compute_single_likelihood" title="Permalink to this definition">¶</a></dt>
-<dd><p>A function that must be implemented by subclasses to compute the likelihood of a single datum/response pair
+<dd><p>A function that must be implemented by subclasses to compute the likelihood of a single datum/response pair.
 This should NOT implement the temperature (that is handled by compute_likelihood)</p>
 </dd></dl>
 
@@ -133,7 +139,8 @@ This should NOT implement the temperature (that is handled by compute_likelihood
 <dl class="method">
 <dt id="LOTlib.Hypotheses.FunctionHypothesis.FunctionHypothesis.set_value">
 <tt class="descname">set_value</tt><big>(</big><em>value</em>, <em>f=None</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/FunctionHypothesis.html#FunctionHypothesis.set_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.FunctionHypothesis.FunctionHypothesis.set_value" title="Permalink to this definition">¶</a></dt>
-<dd><p>The the value. You optionally can send f, and not write (this is for some speed considerations) but you better be sure f is correct
+<dd><p>Sets the value for the hypothesis. 
+Another option: send f, and not write (this is for some speed considerations) but you better be sure f is correct
 since an error will not be caught!</p>
 </dd></dl>
 
@@ -151,39 +158,21 @@ since an error will not be caught!</p>
 <dd></dd></dl>
 
 </div>
-<div class="section" id="module-LOTlib.Hypotheses.GaussianLOTHypothesis">
-<span id="lotlib-hypotheses-gaussianlothypothesis-module"></span><h2>LOTlib.Hypotheses.GaussianLOTHypothesis module<a class="headerlink" href="#module-LOTlib.Hypotheses.GaussianLOTHypothesis" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="LOTlib.Hypotheses.GaussianLOTHypothesis.GaussianLOTHypothesis">
-<em class="property">class </em><tt class="descclassname">LOTlib.Hypotheses.GaussianLOTHypothesis.</tt><tt class="descname">GaussianLOTHypothesis</tt><big>(</big><em>G</em>, <em>value=None</em>, <em>f=None</em>, <em>prior_temperature=1.0</em>, <em>proposal_function=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/GaussianLOTHypothesis.html#GaussianLOTHypothesis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.GaussianLOTHypothesis.GaussianLOTHypothesis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis" title="LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis"><tt class="xref py py-class docutils literal"><span class="pre">LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis</span></tt></a></p>
-<p>Like LOTHypothesis but has a Gaussian likelihood</p>
-<dl class="method">
-<dt id="LOTlib.Hypotheses.GaussianLOTHypothesis.GaussianLOTHypothesis.compute_single_likelihood">
-<tt class="descname">compute_single_likelihood</tt><big>(</big><em>datum</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/GaussianLOTHypothesis.html#GaussianLOTHypothesis.compute_single_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.GaussianLOTHypothesis.GaussianLOTHypothesis.compute_single_likelihood" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute the likelihood with a Gaussian</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Hypotheses.GaussianLOTHypothesis.random">
-<tt class="descclassname">LOTlib.Hypotheses.GaussianLOTHypothesis.</tt><tt class="descname">random</tt><big>(</big><big>)</big> &rarr; x in the interval [0, 1).<a class="headerlink" href="#LOTlib.Hypotheses.GaussianLOTHypothesis.random" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<div class="section" id="lotlib-hypotheses-gaussianlothypothesis-module">
+<h2>LOTlib.Hypotheses.GaussianLOTHypothesis module<a class="headerlink" href="#lotlib-hypotheses-gaussianlothypothesis-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-LOTlib.Hypotheses.Hypothesis">
 <span id="lotlib-hypotheses-hypothesis-module"></span><h2>LOTlib.Hypotheses.Hypothesis module<a class="headerlink" href="#module-LOTlib.Hypotheses.Hypothesis" title="Permalink to this headline">¶</a></h2>
-<p>TODO: Split up likelihood so that decayed versions are separate</p>
+<p>Hypothesis &#8211; superclass for constructing hypotheses about a dataset.</p>
 <dl class="class">
 <dt id="LOTlib.Hypotheses.Hypothesis.Hypothesis">
 <em class="property">class </em><tt class="descclassname">LOTlib.Hypotheses.Hypothesis.</tt><tt class="descname">Hypothesis</tt><big>(</big><em>value=None</em>, <em>prior_temperature=1.0</em>, <em>likelihood_temperature=1.0</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/Hypothesis.html#Hypothesis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.Hypothesis.Hypothesis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
-<p>A hypothesis is bundles together a value (hypothesis value) with a bunch of remember state, like posterior_score, prior, likelihood
+<p>A hypothesis bundles together a value (hypothesis value) with a bunch of remember states, like posterior_score, prior, likelihood
 This class is typically a superclass of the thing you really want.</p>
 <dl class="docutils">
 <dt>Temperatures:</dt>
-<dd>A Hypothesis defaulty has a prior_temperature and likelihood_temperature. These are taken into account in setting the 
+<dd>By default, a Hypothesis has a prior_temperature and likelihood_temperature. These are taken into account in setting the 
 posterior_score (for computer_prior and compute_likelihood), in the values returned by these, AND in the stored values
 under self.prior and self.likelihood</dd>
 </dl>
@@ -197,28 +186,33 @@ This also stores the <em>undecayed</em> non-culmulative likelihood of each data 
 <dl class="method">
 <dt id="LOTlib.Hypotheses.Hypothesis.Hypothesis.compute_posterior">
 <tt class="descname">compute_posterior</tt><big>(</big><em>d</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/Hypothesis.html#Hypothesis.compute_posterior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.Hypothesis.Hypothesis.compute_posterior" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Computes the posterior score by computing the prior and likelihood scores</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.Hypotheses.Hypothesis.Hypothesis.compute_prior">
 <tt class="descname">compute_prior</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/Hypothesis.html#Hypothesis.compute_prior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.Hypothesis.Hypothesis.compute_prior" title="Permalink to this definition">¶</a></dt>
-<dd><p>computes the prior and stores it in self.prior</p>
+<dd><p>computes the prior and stores it in self.prior
+Note: This method must be implemented when writing subclasses of Hypothesis</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.Hypotheses.Hypothesis.Hypothesis.compute_single_likelihood">
 <tt class="descname">compute_single_likelihood</tt><big>(</big><em>datum</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/Hypothesis.html#Hypothesis.compute_single_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.Hypothesis.Hypothesis.compute_single_likelihood" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Note: This method must be implemented when writing subclasses of Hypothesis</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.Hypotheses.Hypothesis.Hypothesis.enumerative_proposer">
 <tt class="descname">enumerative_proposer</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/Hypothesis.html#Hypothesis.enumerative_proposer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.Hypothesis.Hypothesis.enumerative_proposer" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Note: This method must be implemented when performing Gibbs sampling</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.Hypotheses.Hypothesis.Hypothesis.propose">
 <tt class="descname">propose</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/Hypothesis.html#Hypothesis.propose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.Hypothesis.Hypothesis.propose" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generic proposal used by MCMC methods</p>
+<dd><p>Generic proposal used by MCMC methods
+Note: This method must be implemented when writing subclasses of Hypothesis</p>
 </dd></dl>
 
 <dl class="method">
@@ -235,105 +229,14 @@ This also stores the <em>undecayed</em> non-culmulative likelihood of each data 
 <dd></dd></dl>
 
 </div>
-<div class="section" id="module-LOTlib.Hypotheses.LOTHypothesis">
-<span id="lotlib-hypotheses-lothypothesis-module"></span><h2>LOTlib.Hypotheses.LOTHypothesis module<a class="headerlink" href="#module-LOTlib.Hypotheses.LOTHypothesis" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis">
-<em class="property">class </em><tt class="descclassname">LOTlib.Hypotheses.LOTHypothesis.</tt><tt class="descname">LOTHypothesis</tt><big>(</big><em>grammar, value=None, f=None, start='START', ALPHA=0.9, maxnodes=25, args=['x'], proposal_function=None, **kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/LOTHypothesis.html#LOTHypothesis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#LOTlib.Hypotheses.FunctionHypothesis.FunctionHypothesis" title="LOTlib.Hypotheses.FunctionHypothesis.FunctionHypothesis"><tt class="xref py py-class docutils literal"><span class="pre">LOTlib.Hypotheses.FunctionHypothesis.FunctionHypothesis</span></tt></a></p>
-<p>A FunctionHypothesis built from a grammar.</p>
-<dl class="method">
-<dt id="LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis.compute_prior">
-<tt class="descname">compute_prior</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/LOTHypothesis.html#LOTHypothesis.compute_prior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis.compute_prior" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis.compute_single_likelihood">
-<tt class="descname">compute_single_likelihood</tt><big>(</big><em>datum</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/LOTHypothesis.html#LOTHypothesis.compute_single_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis.compute_single_likelihood" title="Permalink to this definition">¶</a></dt>
-<dd><p>The data here is from LOTlib.Data and is of the type FunctionData
-This assumes binary function data &#8211; maybe it should be a BernoulliLOTHypothesis</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis.enumerative_proposer">
-<tt class="descname">enumerative_proposer</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/LOTHypothesis.html#LOTHypothesis.enumerative_proposer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis.enumerative_proposer" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis.propose">
-<tt class="descname">propose</tt><big>(</big><em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/LOTHypothesis.html#LOTHypothesis.propose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis.propose" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis.type">
-<tt class="descname">type</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/LOTHypothesis.html#LOTHypothesis.type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis.type" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Hypotheses.LOTHypothesis.random">
-<tt class="descclassname">LOTlib.Hypotheses.LOTHypothesis.</tt><tt class="descname">random</tt><big>(</big><big>)</big> &rarr; x in the interval [0, 1).<a class="headerlink" href="#LOTlib.Hypotheses.LOTHypothesis.random" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<div class="section" id="lotlib-hypotheses-lothypothesis-module">
+<h2>LOTlib.Hypotheses.LOTHypothesis module<a class="headerlink" href="#lotlib-hypotheses-lothypothesis-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-LOTlib.Hypotheses.RationalRulesLOTHypothesis">
-<span id="lotlib-hypotheses-rationalruleslothypothesis-module"></span><h2>LOTlib.Hypotheses.RationalRulesLOTHypothesis module<a class="headerlink" href="#module-LOTlib.Hypotheses.RationalRulesLOTHypothesis" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="LOTlib.Hypotheses.RationalRulesLOTHypothesis.RR_prior">
-<tt class="descclassname">LOTlib.Hypotheses.RationalRulesLOTHypothesis.</tt><tt class="descname">RR_prior</tt><big>(</big><em>grammar</em>, <em>t</em>, <em>alpha=1.0</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/RationalRulesLOTHypothesis.html#RR_prior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.RationalRulesLOTHypothesis.RR_prior" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute the rational rules prior from Goodman et al.</p>
-<p>NOTE: This has not yet been extensively debugged, so use with caution</p>
-<p>TODO: Add variable priors (different vectors, etc)</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="LOTlib.Hypotheses.RationalRulesLOTHypothesis.RationalRulesLOTHypothesis">
-<em class="property">class </em><tt class="descclassname">LOTlib.Hypotheses.RationalRulesLOTHypothesis.</tt><tt class="descname">RationalRulesLOTHypothesis</tt><big>(</big><em>grammar</em>, <em>rrAlpha=1.0</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/RationalRulesLOTHypothesis.html#RationalRulesLOTHypothesis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.RationalRulesLOTHypothesis.RationalRulesLOTHypothesis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis" title="LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis"><tt class="xref py py-class docutils literal"><span class="pre">LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis</span></tt></a></p>
-<p>A FunctionHypothesis built from a grammar.
-Implement a Rational Rules (Goodman et al 2008)-style grammar over Boolean expressions.</p>
-<dl class="method">
-<dt id="LOTlib.Hypotheses.RationalRulesLOTHypothesis.RationalRulesLOTHypothesis.compute_prior">
-<tt class="descname">compute_prior</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/RationalRulesLOTHypothesis.html#RationalRulesLOTHypothesis.compute_prior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.RationalRulesLOTHypothesis.RationalRulesLOTHypothesis.compute_prior" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Hypotheses.RationalRulesLOTHypothesis.get_rule_counts">
-<tt class="descclassname">LOTlib.Hypotheses.RationalRulesLOTHypothesis.</tt><tt class="descname">get_rule_counts</tt><big>(</big><em>grammar</em>, <em>t</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/RationalRulesLOTHypothesis.html#get_rule_counts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.RationalRulesLOTHypothesis.get_rule_counts" title="Permalink to this definition">¶</a></dt>
-<dd><p>A list of vectors of counts of how often each nonterminal is expanded each way</p>
-<dl class="docutils">
-<dt>TODO: This is probably not super fast since we use a hash over rule ids, but</dt>
-<dd>it is simple!</dd>
-</dl>
-</dd></dl>
-
+<div class="section" id="lotlib-hypotheses-rationalruleslothypothesis-module">
+<h2>LOTlib.Hypotheses.RationalRulesLOTHypothesis module<a class="headerlink" href="#lotlib-hypotheses-rationalruleslothypothesis-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-LOTlib.Hypotheses.SimpleGenerativeHypothesis">
-<span id="lotlib-hypotheses-simplegenerativehypothesis-module"></span><h2>LOTlib.Hypotheses.SimpleGenerativeHypothesis module<a class="headerlink" href="#module-LOTlib.Hypotheses.SimpleGenerativeHypothesis" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="LOTlib.Hypotheses.SimpleGenerativeHypothesis.SimpleGenerativeHypothesis">
-<em class="property">class </em><tt class="descclassname">LOTlib.Hypotheses.SimpleGenerativeHypothesis.</tt><tt class="descname">SimpleGenerativeHypothesis</tt><big>(</big><em>G</em>, <em>nsamples=100</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/SimpleGenerativeHypothesis.html#SimpleGenerativeHypothesis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.SimpleGenerativeHypothesis.SimpleGenerativeHypothesis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis" title="LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis"><tt class="xref py py-class docutils literal"><span class="pre">LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis</span></tt></a></p>
-<p>Here, the data is a hash from strings to counts. 
-Each function eval results in a string, and the likelihood is the probability of generating the 
-observed data. The function eval results in a thunk</p>
-<p>NOTE: FOR NOW, Insert/Delete moves are taken off because of some weirdness with the lambda thunks</p>
-<dl class="method">
-<dt id="LOTlib.Hypotheses.SimpleGenerativeHypothesis.SimpleGenerativeHypothesis.compute_likelihood">
-<tt class="descname">compute_likelihood</tt><big>(</big><em>data</em>, <em>sm=0.001</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/SimpleGenerativeHypothesis.html#SimpleGenerativeHypothesis.compute_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.SimpleGenerativeHypothesis.SimpleGenerativeHypothesis.compute_likelihood" title="Permalink to this definition">¶</a></dt>
-<dd><p>sm smoothing counts are added to existing bins of counts (just to prevent badness)</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="LOTlib.Hypotheses.SimpleGenerativeHypothesis.SimpleGenerativeHypothesis.compute_single_likelihood">
-<tt class="descname">compute_single_likelihood</tt><big>(</big><em>datum</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/SimpleGenerativeHypothesis.html#SimpleGenerativeHypothesis.compute_single_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.SimpleGenerativeHypothesis.SimpleGenerativeHypothesis.compute_single_likelihood" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+<div class="section" id="lotlib-hypotheses-simplegenerativehypothesis-module">
+<h2>LOTlib.Hypotheses.SimpleGenerativeHypothesis module<a class="headerlink" href="#lotlib-hypotheses-simplegenerativehypothesis-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-LOTlib.Hypotheses.VectorHypothesis">
 <span id="lotlib-hypotheses-vectorhypothesis-module"></span><h2>LOTlib.Hypotheses.VectorHypothesis module<a class="headerlink" href="#module-LOTlib.Hypotheses.VectorHypothesis" title="Permalink to this headline">¶</a></h2>
@@ -367,11 +270,11 @@ observed data. The function eval results in a thunk</p>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-LOTlib.Hypotheses.DecayedLikelihoodHypothesis">LOTlib.Hypotheses.DecayedLikelihoodHypothesis module</a></li>
 <li><a class="reference internal" href="#module-LOTlib.Hypotheses.FunctionHypothesis">LOTlib.Hypotheses.FunctionHypothesis module</a></li>
-<li><a class="reference internal" href="#module-LOTlib.Hypotheses.GaussianLOTHypothesis">LOTlib.Hypotheses.GaussianLOTHypothesis module</a></li>
+<li><a class="reference internal" href="#lotlib-hypotheses-gaussianlothypothesis-module">LOTlib.Hypotheses.GaussianLOTHypothesis module</a></li>
 <li><a class="reference internal" href="#module-LOTlib.Hypotheses.Hypothesis">LOTlib.Hypotheses.Hypothesis module</a></li>
-<li><a class="reference internal" href="#module-LOTlib.Hypotheses.LOTHypothesis">LOTlib.Hypotheses.LOTHypothesis module</a></li>
-<li><a class="reference internal" href="#module-LOTlib.Hypotheses.RationalRulesLOTHypothesis">LOTlib.Hypotheses.RationalRulesLOTHypothesis module</a></li>
-<li><a class="reference internal" href="#module-LOTlib.Hypotheses.SimpleGenerativeHypothesis">LOTlib.Hypotheses.SimpleGenerativeHypothesis module</a></li>
+<li><a class="reference internal" href="#lotlib-hypotheses-lothypothesis-module">LOTlib.Hypotheses.LOTHypothesis module</a></li>
+<li><a class="reference internal" href="#lotlib-hypotheses-rationalruleslothypothesis-module">LOTlib.Hypotheses.RationalRulesLOTHypothesis module</a></li>
+<li><a class="reference internal" href="#lotlib-hypotheses-simplegenerativehypothesis-module">LOTlib.Hypotheses.SimpleGenerativeHypothesis module</a></li>
 <li><a class="reference internal" href="#module-LOTlib.Hypotheses.VectorHypothesis">LOTlib.Hypotheses.VectorHypothesis module</a></li>
 <li><a class="reference internal" href="#module-LOTlib.Hypotheses">Module contents</a></li>
 </ul>
@@ -414,7 +317,7 @@ observed data. The function eval results in a thunk</p>
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>
