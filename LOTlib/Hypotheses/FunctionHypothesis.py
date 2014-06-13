@@ -21,9 +21,11 @@ class FunctionHypothesis(Hypothesis):
 	
 	def __init__(self, value=None, f=None, args=['x'], **kwargs):
 		"""
-			value - the value of this hypothesis
-			f - defaultly None, in which case this uses self.value2function
-			args - the arguments to the function
+			*value* - the value of this hypothesis
+
+			*f* - defaultly None, in which case this uses self.value2function
+
+			*args* - the arguments to the function
 		"""
 		self.args = args # must come first since below calls value2function
 		Hypothesis.__init__(self, value, **kwargs) # this initializes prior and likleihood variables, so keep it here!

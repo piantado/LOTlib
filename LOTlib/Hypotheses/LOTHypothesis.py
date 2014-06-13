@@ -1,3 +1,9 @@
+"""
+	A FunctionHypothesis built from a grammar.		
+"""
+
+
+
 from FunctionHypothesis import FunctionHypothesis
 from copy import copy, deepcopy
 from LOTlib.Proposals import RegenerationProposal
@@ -11,9 +17,22 @@ class LOTHypothesis(FunctionHypothesis):
 	
 	def __init__(self, grammar, value=None, f=None, start='START', ALPHA=0.9, maxnodes=25, args=['x'], proposal_function=None, **kwargs):
 		"""
-			grammar - a grammar
-			start - how the grammar starts to generate
-			f - if specified, we don't recompile the whole function
+			*grammar* - The grammar for the hypothesis (specified in Grammar.py)
+
+			*value* - the value for the hypothesis
+
+			*f* - if specified, we don't recompile the whole function
+
+			*start* - The start symbol for the grammar
+
+			*ALPHA* - parameter for compute_single_likelihood that
+
+			*maxnodes* - the maximum amount of nodes that the grammar can have
+
+			*args* - The arguments to the function
+
+			*proposal_function* - function that tells the program how to transition from one tree to another
+			(by default, it uses the RegenerationProposal function)
 		"""
 		
 		# save all of our keywords (though we don't need v)
@@ -47,14 +66,18 @@ class LOTHypothesis(FunctionHypothesis):
 		return thecopy
 
 			
-	def propose(self, **kwargs): 
+	def propose(self, **kwargs):
+		"""
+			Computes a very similar derivation from the current derivation, using the proposal function we specified
+			as an option when we created an instance of LOTHypothesis
+		"""
 		ret = self.proposal_function(self, **kwargs)
 		ret[0].posterior_score = "<must compute posterior!>" # Catch use of proposal.posterior_score, without posteriors!
 		return ret
 	
 	def compute_prior(self): 
 		"""
-		
+			Compute the log of the prior probability
 		"""
 		if self.value.count_subnodes() > self.maxnodes: 
 			self.prior = -Infinity
@@ -69,6 +92,8 @@ class LOTHypothesis(FunctionHypothesis):
 	#def compute_likelihood(self, data): # called in FunctionHypothesis.compute_likelihood
 	def compute_single_likelihood(self, datum):
 		"""
+			Computes the likelihood of the data
+
 			The data here is from LOTlib.Data and is of the type FunctionData
 			This assumes binary function data -- maybe it should be a BernoulliLOTHypothesis
 		"""
@@ -78,5 +103,9 @@ class LOTHypothesis(FunctionHypothesis):
 		
 	# must wrap these as SimpleExpressionFunctions
 	def enumerative_proposer(self):
+		"""
+			Returns a generator, where the elements in the generator are instances of LOTHypothesis
+			 that can be gotten to from the current LOTHypothesis.
+		"""
 		for k in grammar.enumerate_pointwise(self.value):
 			yield LOTHypothesis(self.grammar, value=k)
