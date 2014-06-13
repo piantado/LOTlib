@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
+
 """
 	A function node -- a tree part representing a function and its arguments. 
 	Also used for PCFG rules, where the arguments are nonterminal symbols. 
 	
 	A Functionnode defaultly iterates over its subnodes
 	
-	TODO: This could use some renaming FunctionNode.bv is not really a bound variable--its a list of rules that were added
 """
+# TODO: This could use some renaming FunctionNode.bv is not really a bound variable--its a list of rules that were added
 
 import re
 
@@ -15,8 +16,9 @@ from LOTlib.Miscellaneous import *
 
 def list2FunctionNode(l, style="atis"):
 	"""
-		Take a list and map it to a function node. 
-		This will take lambda arguments of some given style (e.g. atis, scheme, etc)
+		Takes a list *l* of lambda arguments and maps it to a function node. 
+
+		The *style* of lambda arguments could be "atis", "scheme", etc.
 	"""
 	
 	if isinstance(l, list): 
@@ -33,12 +35,17 @@ def list2FunctionNode(l, style="atis"):
 	else: # for non-list
 		return l
 
-# just because this is nicer, and allows us to map, etc. 
-def isFunctionNode(x): return isinstance(x, FunctionNode)
+
+def isFunctionNode(x): 
+	# just because this is nicer, and allows us to map, etc. 
+	"""
+		Returns true if *x* is of type FunctionNode.
+	"""
+	return isinstance(x, FunctionNode)
 
 def cleanFunctionNodeString(x):
 	"""
-		Make functionNode strings easier to read
+		Make FunctionNode strings easier to read
 	"""
 	s = re.sub("lambda", u"\u03BB", str(x)) # make lambdas the single char
 	s = re.sub("_", '', s) # remove underscores
