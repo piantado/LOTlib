@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -13,7 +15,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '1.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -49,134 +51,11 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-LOTlib.Examples.SymbolicRegression.Galileo">
-<span id="lotlib-examples-symbolicregression-galileo-module"></span><h2>LOTlib.Examples.SymbolicRegression.Galileo module<a class="headerlink" href="#module-LOTlib.Examples.SymbolicRegression.Galileo" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="LOTlib.Examples.SymbolicRegression.Galileo.random">
-<tt class="descclassname">LOTlib.Examples.SymbolicRegression.Galileo.</tt><tt class="descname">random</tt><big>(</big><big>)</big> &rarr; x in the interval [0, 1).<a class="headerlink" href="#LOTlib.Examples.SymbolicRegression.Galileo.random" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Examples.SymbolicRegression.Galileo.run">
-<tt class="descclassname">LOTlib.Examples.SymbolicRegression.Galileo.</tt><tt class="descname">run</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/SymbolicRegression/Galileo.html#run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.SymbolicRegression.Galileo.run" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<div class="section" id="lotlib-examples-symbolicregression-galileo-module">
+<h2>LOTlib.Examples.SymbolicRegression.Galileo module<a class="headerlink" href="#lotlib-examples-symbolicregression-galileo-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression">
-<span id="lotlib-examples-symbolicregression-mapsymbolicregression-module"></span><h2>LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression module<a class="headerlink" href="#module-LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression" title="Permalink to this headline">¶</a></h2>
-<p>Symbolic regression that fits parameters using a MAP estimate of the continuous parameters.
-We put a simple bayesian prior on these constants, and use it to compute MAPs</p>
-<dl class="class">
-<dt id="LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression.MAPSymbolicRegressionHypothesis">
-<em class="property">class </em><tt class="descclassname">LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression.</tt><tt class="descname">MAPSymbolicRegressionHypothesis</tt><big>(</big><em>G</em>, <em>value=None</em>, <em>f=None</em>, <em>prior_temperature=1.0</em>, <em>proposal_function=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/SymbolicRegression/MAPSymbolicRegression.html#MAPSymbolicRegressionHypothesis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression.MAPSymbolicRegressionHypothesis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="LOTlib.Hypotheses.html#LOTlib.Hypotheses.GaussianLOTHypothesis.GaussianLOTHypothesis" title="LOTlib.Hypotheses.GaussianLOTHypothesis.GaussianLOTHypothesis"><tt class="xref py py-class docutils literal"><span class="pre">LOTlib.Hypotheses.GaussianLOTHypothesis.GaussianLOTHypothesis</span></tt></a></p>
-<p>This is a quick hack to try out symbolic regression with constants just fit. 
-This hacks it by defining a self.CONSTANT_VALUES that are automatically read from 
-get_function_responses (overwritten). We can then change them and repeatedly compute the 
-likelihood to optimize</p>
-<dl class="method">
-<dt id="LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression.MAPSymbolicRegressionHypothesis.compute_likelihood">
-<tt class="descname">compute_likelihood</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/SymbolicRegression/MAPSymbolicRegression.html#MAPSymbolicRegressionHypothesis.compute_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression.MAPSymbolicRegressionHypothesis.compute_likelihood" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression.MAPSymbolicRegressionHypothesis.value2function">
-<tt class="descname">value2function</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/SymbolicRegression/MAPSymbolicRegression.html#MAPSymbolicRegressionHypothesis.value2function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression.MAPSymbolicRegressionHypothesis.value2function" title="Permalink to this definition">¶</a></dt>
-<dd><p>Overwrite this from FunctionHypothesis. Here, we add args for the constants so we can use them</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression.generate_data">
-<tt class="descclassname">LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression.</tt><tt class="descname">generate_data</tt><big>(</big><em>data_size</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/SymbolicRegression/MAPSymbolicRegression.html#generate_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression.generate_data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression.normal">
-<tt class="descclassname">LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression.</tt><tt class="descname">normal</tt><big>(</big><em>loc=0.0</em>, <em>scale=1.0</em>, <em>size=None</em><big>)</big><a class="headerlink" href="#LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression.normal" title="Permalink to this definition">¶</a></dt>
-<dd><p>Draw random samples from a normal (Gaussian) distribution.</p>
-<p>The probability density function of the normal distribution, first
-derived by De Moivre and 200 years later by both Gauss and Laplace
-independently <a class="footnote-reference" href="#id5" id="id1">[2]</a>, is often called the bell curve because of
-its characteristic shape (see the example below).</p>
-<p>The normal distributions occurs often in nature.  For example, it
-describes the commonly occurring distribution of samples influenced
-by a large number of tiny, random disturbances, each with its own
-unique distribution <a class="footnote-reference" href="#id5" id="id2">[2]</a>.</p>
-<dl class="docutils">
-<dt>loc <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Mean (&#8220;centre&#8221;) of the distribution.</dd>
-<dt>scale <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Standard deviation (spread or &#8220;width&#8221;) of the distribution.</dd>
-<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">tuple of ints</span></dt>
-<dd>Output shape.  If the given shape is, e.g., <tt class="docutils literal"><span class="pre">(m,</span> <span class="pre">n,</span> <span class="pre">k)</span></tt>, then
-<tt class="docutils literal"><span class="pre">m</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">k</span></tt> samples are drawn.</dd>
-</dl>
-<dl class="docutils">
-<dt>scipy.stats.distributions.norm <span class="classifier-delimiter">:</span> <span class="classifier">probability density function,</span></dt>
-<dd>distribution or cumulative density function, etc.</dd>
-</dl>
-<p>The probability density for the Gaussian distribution is</p>
-<p>where  is the mean and  the standard deviation.
-The square of the standard deviation, , is called the
-variance.</p>
-<p>The function has its peak at the mean, and its &#8220;spread&#8221; increases with
-the standard deviation (the function reaches 0.607 times its maximum at
- and  <a class="footnote-reference" href="#id5" id="id3">[2]</a>).  This implies that
-<cite>numpy.random.normal</cite> is more likely to return samples lying close to the
-mean, rather than those far away.</p>
-<table class="docutils footnote" frame="void" id="id4" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label">[1]</td><td>Wikipedia, &#8220;Normal distribution&#8221;,
-<a class="reference external" href="http://en.wikipedia.org/wiki/Normal_distribution">http://en.wikipedia.org/wiki/Normal_distribution</a></td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="id5" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label">[2]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id2">2</a>, <a class="fn-backref" href="#id3">3</a>)</em> P. R. Peebles Jr., &#8220;Central Limit Theorem&#8221; in &#8220;Probability, Random
-Variables and Random Signal Principles&#8221;, 4th ed., 2001,
-pp. 51, 51, 125.</td></tr>
-</tbody>
-</table>
-<p>Draw samples from the distribution:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span> <span class="c"># mean and standard deviation</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Verify the mean and the variance:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">abs</span><span class="p">(</span><span class="n">mu</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">s</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">0.01</span>
-<span class="go">True</span>
-</pre></div>
-</div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">abs</span><span class="p">(</span><span class="n">sigma</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">0.01</span>
-<span class="go">True</span>
-</pre></div>
-</div>
-<p>Display the histogram of the samples, along with
-the probability density function:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">count</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">ignored</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">normed</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span> <span class="o">*</span>
-<span class="gp">... </span>               <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="o">-</span> <span class="p">(</span><span class="n">bins</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="p">),</span>
-<span class="gp">... </span>         <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression.random">
-<tt class="descclassname">LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression.</tt><tt class="descname">random</tt><big>(</big><big>)</big> &rarr; x in the interval [0, 1).<a class="headerlink" href="#LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression.random" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression.target">
-<tt class="descclassname">LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression.</tt><tt class="descname">target</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression.target" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<div class="section" id="lotlib-examples-symbolicregression-mapsymbolicregression-module">
+<h2>LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression module<a class="headerlink" href="#lotlib-examples-symbolicregression-mapsymbolicregression-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-LOTlib.Examples.SymbolicRegression.Shared">
 <span id="lotlib-examples-symbolicregression-shared-module"></span><h2>LOTlib.Examples.SymbolicRegression.Shared module<a class="headerlink" href="#module-LOTlib.Examples.SymbolicRegression.Shared" title="Permalink to this headline">¶</a></h2>
@@ -187,29 +66,8 @@ the probability density function:</p>
 <dd></dd></dl>
 
 </div>
-<div class="section" id="module-LOTlib.Examples.SymbolicRegression.SymbolicRegression">
-<span id="lotlib-examples-symbolicregression-symbolicregression-module"></span><h2>LOTlib.Examples.SymbolicRegression.SymbolicRegression module<a class="headerlink" href="#module-LOTlib.Examples.SymbolicRegression.SymbolicRegression" title="Permalink to this headline">¶</a></h2>
-<p>A simple symbolic regression demo</p>
-<dl class="function">
-<dt id="LOTlib.Examples.SymbolicRegression.SymbolicRegression.generate_data">
-<tt class="descclassname">LOTlib.Examples.SymbolicRegression.SymbolicRegression.</tt><tt class="descname">generate_data</tt><big>(</big><em>data_size</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/SymbolicRegression/SymbolicRegression.html#generate_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.SymbolicRegression.SymbolicRegression.generate_data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Examples.SymbolicRegression.SymbolicRegression.random">
-<tt class="descclassname">LOTlib.Examples.SymbolicRegression.SymbolicRegression.</tt><tt class="descname">random</tt><big>(</big><big>)</big> &rarr; x in the interval [0, 1).<a class="headerlink" href="#LOTlib.Examples.SymbolicRegression.SymbolicRegression.random" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Examples.SymbolicRegression.SymbolicRegression.run">
-<tt class="descclassname">LOTlib.Examples.SymbolicRegression.SymbolicRegression.</tt><tt class="descname">run</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/SymbolicRegression/SymbolicRegression.html#run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.SymbolicRegression.SymbolicRegression.run" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Examples.SymbolicRegression.SymbolicRegression.target">
-<tt class="descclassname">LOTlib.Examples.SymbolicRegression.SymbolicRegression.</tt><tt class="descname">target</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#LOTlib.Examples.SymbolicRegression.SymbolicRegression.target" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<div class="section" id="lotlib-examples-symbolicregression-symbolicregression-module">
+<h2>LOTlib.Examples.SymbolicRegression.SymbolicRegression module<a class="headerlink" href="#lotlib-examples-symbolicregression-symbolicregression-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-LOTlib.Examples.SymbolicRegression">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-LOTlib.Examples.SymbolicRegression" title="Permalink to this headline">¶</a></h2>
@@ -226,10 +84,10 @@ the probability density function:</p>
   <ul>
 <li><a class="reference internal" href="#">LOTlib.Examples.SymbolicRegression package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-LOTlib.Examples.SymbolicRegression.Galileo">LOTlib.Examples.SymbolicRegression.Galileo module</a></li>
-<li><a class="reference internal" href="#module-LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression">LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression module</a></li>
+<li><a class="reference internal" href="#lotlib-examples-symbolicregression-galileo-module">LOTlib.Examples.SymbolicRegression.Galileo module</a></li>
+<li><a class="reference internal" href="#lotlib-examples-symbolicregression-mapsymbolicregression-module">LOTlib.Examples.SymbolicRegression.MAPSymbolicRegression module</a></li>
 <li><a class="reference internal" href="#module-LOTlib.Examples.SymbolicRegression.Shared">LOTlib.Examples.SymbolicRegression.Shared module</a></li>
-<li><a class="reference internal" href="#module-LOTlib.Examples.SymbolicRegression.SymbolicRegression">LOTlib.Examples.SymbolicRegression.SymbolicRegression module</a></li>
+<li><a class="reference internal" href="#lotlib-examples-symbolicregression-symbolicregression-module">LOTlib.Examples.SymbolicRegression.SymbolicRegression module</a></li>
 <li><a class="reference internal" href="#module-LOTlib.Examples.SymbolicRegression">Module contents</a></li>
 </ul>
 </li>
@@ -271,7 +129,7 @@ the probability density function:</p>
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

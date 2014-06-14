@@ -1,7 +1,7 @@
 """
 
 	Procedures for extracting and manipulating subtrees
-	
+
 """
 from LOTlib.Miscellaneous import UniquifyFunction
 from LOTlib import lot_iter

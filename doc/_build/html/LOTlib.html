@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -13,7 +15,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '1.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -68,7 +70,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html">LOTlib.Examples.SchemeProgramInduction package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#module-LOTlib.Examples.SchemeProgramInduction.SchemeFunctionLearn">LOTlib.Examples.SchemeProgramInduction.SchemeFunctionLearn module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#lotlib-examples-schemeprograminduction-schemefunctionlearn-module">LOTlib.Examples.SchemeProgramInduction.SchemeFunctionLearn module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#lotlib-examples-schemeprograminduction-schemegenerate-module">LOTlib.Examples.SchemeProgramInduction.SchemeGenerate module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#module-LOTlib.Examples.SchemeProgramInduction.Shared">LOTlib.Examples.SchemeProgramInduction.Shared module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#module-LOTlib.Examples.SchemeProgramInduction">Module contents</a></li>
@@ -913,10 +915,9 @@ This is slightly inefficient becuase we create all new QueueItems, but it&#8217;
 </div>
 <div class="section" id="module-LOTlib.FunctionNode">
 <span id="lotlib-functionnode-module"></span><h2>LOTlib.FunctionNode module<a class="headerlink" href="#module-LOTlib.FunctionNode" title="Permalink to this headline">¶</a></h2>
-<p>A function node &#8211; a tree part representing a function and its arguments. 
+<p>A function node &#8211; a tree part representing a function and its arguments.
 Also used for PCFG rules, where the arguments are nonterminal symbols.</p>
 <p>A Functionnode defaultly iterates over its subnodes</p>
-<p>TODO: This could use some renaming FunctionNode.bv is not really a bound variable&#8211;its a list of rules that were added</p>
 <dl class="class">
 <dt id="LOTlib.FunctionNode.FunctionNode">
 <em class="property">class </em><tt class="descclassname">LOTlib.FunctionNode.</tt><tt class="descname">FunctionNode</tt><big>(</big><em>returntype</em>, <em>name</em>, <em>args</em>, <em>generation_probability=0.0</em>, <em>resample_p=1.0</em>, <em>bv_name=None</em>, <em>bv_type=None</em>, <em>bv_args=None</em>, <em>bv_prefix=None</em>, <em>bv_p=None</em>, <em>ruleid=None</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode" title="Permalink to this definition">¶</a></dt>
@@ -927,7 +928,8 @@ Also used for PCFG rules, where the arguments are nonterminal symbols.</p>
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.all_leaves">
 <tt class="descname">all_leaves</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.all_leaves"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.all_leaves" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns a generator for all leaves of the subtree rooted at the instantiated FunctionNode.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.argFunctionNodes">
@@ -939,25 +941,27 @@ Also handles args is None, so we don&#8217;t have to check constantly</p>
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.as_list">
 <tt class="descname">as_list</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.as_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.as_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>This returns ourself structured as a lisp (with function/self.name first)
-NOTE: This does ot handle BV yet</p>
+<dd><p>Returns a list representation of the FunctionNode with function/self.name as the first element.</p>
+<p>NOTE: This does not handle BV yet</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.contains_function">
 <tt class="descname">contains_function</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.contains_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.contains_function" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check if this contains x as function below</p>
+<dd><p>Checks if the FunctionNode contains <em>x</em> as function below</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.count_nodes">
 <tt class="descname">count_nodes</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.count_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.count_nodes" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns the subnode count.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.count_subnodes">
 <tt class="descname">count_subnodes</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.count_subnodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.count_subnodes" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns the subnode count.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.depth">
@@ -969,8 +973,8 @@ NOTE: This does ot handle BV yet</p>
 <tt class="descname">fix_bound_variables</tt><big>(</big><em>d=1</em>, <em>rename=None</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.fix_bound_variables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.fix_bound_variables" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fix the naming scheme of bound variables. This happens if we promote or demote some nodes
 via insert/delete</p>
-<p>d - current depth
-rename - a dictionary to store how we should rename</p>
+<p><em>d</em> - Current depth.</p>
+<p><em>rename</em> - a dictionary to store how we should rename</p>
 </dd></dl>
 
 <dl class="method">
@@ -982,18 +986,21 @@ rename - a dictionary to store how we should rename</p>
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.is_canonical_order">
 <tt class="descname">is_canonical_order</tt><big>(</big><em>symmetric_ops</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.is_canonical_order"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.is_canonical_order" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a set of symmetric ops (plus, minus, times, etc, not divide) and asserts that the LHS ordering is less than the right (to prevent)</p>
+<dd><p>Takes a set of symmetric ops (plus, minus, times, etc, not divide) and asserts that the 
+LHS ordering is less than the right (to prevent)</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.is_function">
 <tt class="descname">is_function</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.is_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.is_function" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns True if the Node contains function arguments, False otherwise.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.is_nonfunction">
 <tt class="descname">is_nonfunction</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.is_nonfunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.is_nonfunction" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns True if the Node contains no function arguments, False otherwise.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.is_replicating">
@@ -1004,7 +1011,7 @@ rename - a dictionary to store how we should rename</p>
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.islambda">
 <tt class="descname">islambda</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.islambda"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.islambda" title="Permalink to this definition">¶</a></dt>
-<dd><p>Is this a lambda node? Using this function allows us to potentially</p>
+<dd><p>Is this a lambda node? Using this function allows us to potentially...</p>
 </dd></dl>
 
 <dl class="method">
@@ -1022,13 +1029,13 @@ rename - a dictionary to store how we should rename</p>
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.partial_subtree_match">
 <tt class="descname">partial_subtree_match</tt><big>(</big><em>y</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.partial_subtree_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.partial_subtree_match" title="Permalink to this definition">¶</a></dt>
-<dd><p>Does y match anywhere?</p>
+<dd><p>Does <em>y</em> match a subtree anywhere?</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.partial_subtree_root_match">
 <tt class="descname">partial_subtree_root_match</tt><big>(</big><em>y</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.partial_subtree_root_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.partial_subtree_root_match" title="Permalink to this definition">¶</a></dt>
-<dd><p>Does y match from my root?</p>
+<dd><p>Does <em>y</em> match from my root?</p>
 <p>A partial tree here is one with some nonterminals (see random_partial_subtree) that
 are not expanded</p>
 </dd></dl>
@@ -1058,19 +1065,19 @@ to just be quick</p>
 <dd><p>Generate a random partial subtree of me. So that</p>
 <dl class="docutils">
 <dt>this: </dt>
-<dd>prev_((<a href="#id5"><span class="problematic" id="id6">seven_</span></a> if cardinality1_(x) else next_(next_(L_(x)))))</dd>
+<dd>prev_((<a href="#id9"><span class="problematic" id="id10">seven_</span></a> if cardinality1_(x) else next_(next_(L_(x)))))</dd>
 </dl>
 <p>yeilds:</p>
 <blockquote>
 <div>prev_(WORD)
 prev_(WORD)
-prev_((<a href="#id7"><span class="problematic" id="id8">seven_</span></a> if cardinality1_(x) else WORD))
+prev_((<a href="#id11"><span class="problematic" id="id12">seven_</span></a> if cardinality1_(x) else WORD))
 prev_(WORD)
-prev_((<a href="#id9"><span class="problematic" id="id10">seven_</span></a> if BOOL else next_(next_(L_(SET)))))
+prev_((<a href="#id13"><span class="problematic" id="id14">seven_</span></a> if BOOL else next_(next_(L_(SET)))))
 prev_(WORD)
-prev_((<a href="#id11"><span class="problematic" id="id12">seven_</span></a> if cardinality1_(SET) else next_(WORD)))
+prev_((<a href="#id15"><span class="problematic" id="id16">seven_</span></a> if cardinality1_(SET) else next_(WORD)))
 prev_(WORD)
-prev_((<a href="#id13"><span class="problematic" id="id14">seven_</span></a> if BOOL else next_(WORD)))
+prev_((<a href="#id17"><span class="problematic" id="id18">seven_</span></a> if BOOL else next_(WORD)))
 ...</div></blockquote>
 <p>We do this because there are waay too many unique subtrees to enumerate, 
 and this allows a nice variety of structures
@@ -1080,7 +1087,7 @@ NOTE: Partial here means that we include nonterminals with probability p</p>
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.replace_subnodes">
 <tt class="descname">replace_subnodes</tt><big>(</big><em>find</em>, <em>replace</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.replace_subnodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.replace_subnodes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Replace subnodes
+<dd><p><a href="#id3"><span class="problematic" id="id4">*</span></a>find*s subnodes and <a href="#id5"><span class="problematic" id="id6">*</span></a>replace*s it.
 NOTE: NOT THE FASTEST!
 NOTE: Defaultly only makes copies of replace</p>
 </dd></dl>
@@ -1088,12 +1095,15 @@ NOTE: Defaultly only makes copies of replace</p>
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.setto">
 <tt class="descname">setto</tt><big>(</big><em>q</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.setto"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.setto" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Makes all the parts the same as <em>q</em>, not copies.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.string_below">
 <tt class="descname">string_below</tt><big>(</big><em>sep=' '</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.string_below"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.string_below" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The string of terminals (leaves) below the current FunctionNode in the parse tree.</p>
+<p><em>sep</em> is the delimiter between terminals. E.g. sep=&#8221;,&#8221; =&gt; &#8220;the,fuzzy,cat&#8221;</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.subnodes">
@@ -1106,8 +1116,9 @@ Useful for modifying</p>
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.type">
 <tt class="descname">type</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.type" title="Permalink to this definition">¶</a></dt>
-<dd><p>The type of a functionNode is defined to be it&#8217;s returntype if it&#8217;s not a lambda,
-or the correct (recursive) lambda structure if it is a lambda. For instance (lambda x. lambda y . (and (empty? x) y))
+<dd><p>The type of a FunctionNode is defined to be its returntype if it&#8217;s not a lambda,
+or is defined to be the correct (recursive) lambda structure if it is a lambda. 
+For instance (lambda x. lambda y . (and (empty? x) y))
 is a (SET (BOOL BOOL)), where in types, (A B) is something that takes an A and returns a B</p>
 </dd></dl>
 
@@ -1116,19 +1127,20 @@ is a (SET (BOOL BOOL)), where in types, (A B) is something that takes an A and r
 <dl class="function">
 <dt id="LOTlib.FunctionNode.cleanFunctionNodeString">
 <tt class="descclassname">LOTlib.FunctionNode.</tt><tt class="descname">cleanFunctionNodeString</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#cleanFunctionNodeString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.cleanFunctionNodeString" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make functionNode strings easier to read</p>
+<dd><p>Makes FunctionNode strings easier to read</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="LOTlib.FunctionNode.isFunctionNode">
 <tt class="descclassname">LOTlib.FunctionNode.</tt><tt class="descname">isFunctionNode</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#isFunctionNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.isFunctionNode" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns true if <em>x</em> is of type FunctionNode.</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="LOTlib.FunctionNode.list2FunctionNode">
 <tt class="descclassname">LOTlib.FunctionNode.</tt><tt class="descname">list2FunctionNode</tt><big>(</big><em>l</em>, <em>style='atis'</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#list2FunctionNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.list2FunctionNode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Take a list and map it to a function node. 
-This will take lambda arguments of some given style (e.g. atis, scheme, etc)</p>
+<dd><p>Takes a list <em>l</em> of lambda arguments and maps it to a function node.</p>
+<p>The <em>style</em> of lambda arguments could be &#8220;atis&#8221;, &#8220;scheme&#8221;, etc.</p>
 </dd></dl>
 
 <dl class="function">
@@ -1139,8 +1151,10 @@ This will take lambda arguments of some given style (e.g. atis, scheme, etc)</p>
 </div>
 <div class="section" id="module-LOTlib.Grammar">
 <span id="lotlib-grammar-module"></span><h2>LOTlib.Grammar module<a class="headerlink" href="#module-LOTlib.Grammar" title="Permalink to this headline">¶</a></h2>
-<p>TODO: Allow PCFG to take another tree of FunctionNodes in generation. It then recurses and only genreates the leaves
-TODO: When we generate, we MUST have a START-&gt;EXPR expansion, otherwise the top level doesn&#8217;t get searched</p>
+<dl class="docutils">
+<dt>TODO: Allow PCFG to take another tree of FunctionNodes in generation. It then recurses and only genreates the leaves</dt>
+<dd>TODO: When we generate, we MUST have a START-&gt;EXPR expansion, otherwise the top level doesn&#8217;t get searched</dd>
+</dl>
 <dl class="class">
 <dt id="LOTlib.Grammar.Grammar">
 <em class="property">class </em><tt class="descclassname">LOTlib.Grammar.</tt><tt class="descname">Grammar</tt><big>(</big><em>BV_P=10.0</em>, <em>BV_RESAMPLE_P=1.0</em>, <em>start='START'</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar" title="Permalink to this definition">¶</a></dt>
@@ -1221,10 +1235,10 @@ TODO: When we generate, we MUST have a START-&gt;EXPR expansion, otherwise the t
 
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.iterate_subnodes">
-<tt class="descname">iterate_subnodes</tt><big>(</big><em>t</em>, <em>d=0</em>, <em>predicate=&lt;function lambdaTrue at 0x103205c08&gt;</em>, <em>do_bv=True</em>, <em>yield_depth=False</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.iterate_subnodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.iterate_subnodes" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">iterate_subnodes</tt><big>(</big><em>t</em>, <em>d=0</em>, <em>predicate=&lt;function lambdaTrue at 0x28e0500&gt;</em>, <em>do_bv=True</em>, <em>yield_depth=False</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.iterate_subnodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.iterate_subnodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Iterate through all subnodes of node <em>t</em>, while updating the added rules (bound variables)
 so that at each subnode, the grammar is accurate to what it was.</p>
-<p>if <a href="#id3"><span class="problematic" id="id4">*</span></a>do_bv*=False, we don&#8217;t do bound variables (useful for things like counting nodes, instead of having to update the grammar)</p>
+<p>if <a href="#id7"><span class="problematic" id="id8">*</span></a>do_bv*=False, we don&#8217;t do bound variables (useful for things like counting nodes, instead of having to update the grammar)</p>
 <p><em>yield_depth</em>: if True, we return (node, depth) instead of node
 <em>predicate</em>: filter only the ones that match this</p>
 <p>NOTE: if you DON&#8217;T iterate all the way through, you end up acculmulating bv rules
@@ -1256,13 +1270,13 @@ NOTE: Not so simple because we must count multiple paths</p>
 
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.resample_normalizer">
-<tt class="descname">resample_normalizer</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x103205c08&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.resample_normalizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.resample_normalizer" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">resample_normalizer</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x28e0500&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.resample_normalizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.resample_normalizer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the sum of all of the non-normalized probabilities.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.sample_node_via_iterate">
-<tt class="descname">sample_node_via_iterate</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x103205c08&gt;</em>, <em>do_bv=True</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.sample_node_via_iterate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.sample_node_via_iterate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">sample_node_via_iterate</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x28e0500&gt;</em>, <em>do_bv=True</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.sample_node_via_iterate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.sample_node_via_iterate" title="Permalink to this definition">¶</a></dt>
 <dd><p>This will yield a random node in the middle of its iteration, allowing us to expand bound variables properly
 (e.g. when the node is yielded, the state of the grammar is correct)
 It also yields the probability and the depth</p>
@@ -1286,7 +1300,6 @@ The &#8220;for&#8221; is nice so that it will yield back and clean up the bv</p>
 <div class="section" id="module-LOTlib.GrammarRule">
 <span id="lotlib-grammarrule-module"></span><h2>LOTlib.GrammarRule module<a class="headerlink" href="#module-LOTlib.GrammarRule" title="Permalink to this headline">¶</a></h2>
 <p>This class is a wrapper for representing &#8220;rules&#8221; in the grammar.</p>
-<p>TODO: One day we will change &#8220;nt&#8221; to returntype to match with the FunctionNodes</p>
 <dl class="class">
 <dt id="LOTlib.GrammarRule.GrammarRule">
 <em class="property">class </em><tt class="descclassname">LOTlib.GrammarRule.</tt><tt class="descname">GrammarRule</tt><big>(</big><em>nt</em>, <em>name</em>, <em>to</em>, <em>rid</em>, <em>p=1.0</em>, <em>resample_p=1.0</em>, <em>bv_type=None</em>, <em>bv_args=None</em>, <em>bv_prefix='y'</em>, <em>bv_p=None</em><big>)</big><a class="reference internal" href="_modules/LOTlib/GrammarRule.html#GrammarRule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.GrammarRule.GrammarRule" title="Permalink to this definition">¶</a></dt>
@@ -1790,7 +1803,7 @@ so that we can implement only propose_t classes for subclasses, that generate tr
 <p>The default in LOTHypothesis</p>
 <dl class="method">
 <dt id="LOTlib.Proposals.RegenerationProposal.propose_tree">
-<tt class="descname">propose_tree</tt><big>(</big><em>t</em>, <em>separate_fb=False</em>, <em>predicate=&lt;function lambdaTrue at 0x103205c08&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Proposals.html#RegenerationProposal.propose_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Proposals.RegenerationProposal.propose_tree" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">propose_tree</tt><big>(</big><em>t</em>, <em>separate_fb=False</em>, <em>predicate=&lt;function lambdaTrue at 0x28e0500&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Proposals.html#RegenerationProposal.propose_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Proposals.RegenerationProposal.propose_tree" title="Permalink to this definition">¶</a></dt>
 <dd><p>If separate_fb=True &#8211; return [newt, f, b], instead of [newt,f-b]</p>
 </dd></dl>
 
@@ -1880,7 +1893,9 @@ OR how many leaves (from partial trees) have the same returntype</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">LOTlib package</a><ul>
-<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+</ul>
+</li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-LOTlib.BasicPrimitives">LOTlib.BasicPrimitives module</a></li>
 <li><a class="reference internal" href="#module-LOTlib.DataAndObjects">LOTlib.DataAndObjects module</a></li>
@@ -1935,7 +1950,7 @@ OR how many leaves (from partial trees) have the same returntype</p>
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

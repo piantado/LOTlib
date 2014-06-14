@@ -1,6 +1,7 @@
 """
-	TODO: Split up likelihood so that decayed versions are separate
+	Hypothesis -- superclass for constructing hypotheses about a dataset.
 """
+# TODO: Split up likelihood so that decayed versions are separate
 
 import numpy
 from copy import copy, deepcopy
@@ -10,16 +11,25 @@ from LOTlib.Miscellaneous import *
 
 class Hypothesis(object):
 	"""
-		A hypothesis is bundles together a value (hypothesis value) with a bunch of remember state, like posterior_score, prior, likelihood
+		A hypothesis bundles together a value (hypothesis value) with a bunch of remember states, like posterior_score, prior, likelihood
 		This class is typically a superclass of the thing you really want.
 		
 		Temperatures:
-			A Hypothesis defaulty has a prior_temperature and likelihood_temperature. These are taken into account in setting the 
+			By default, a Hypothesis has a prior_temperature and likelihood_temperature. These are taken into account in setting the 
 			posterior_score (for computer_prior and compute_likelihood), in the values returned by these, AND in the stored values
 			under self.prior and self.likelihood
 	"""
 	
 	def __init__(self, value=None, prior_temperature=1.0, likelihood_temperature=1.0, **kwargs):
+		"""
+			Constructs a new Hypothesis with the following parameters:
+
+			*value* - the default value for the hypothesis
+
+			*prior_temperature* - temperature used when running compute_prior
+
+			*likelihood_temperature* - temperature used when running compute_likelihood
+		"""
 		
 		self.__dict__.update(kwargs)
 		
@@ -37,17 +47,22 @@ class Hypothesis(object):
 		self.value = value
 		
 	def __copy__(self):
-		""" Returns a copy of myself by calling copy() on self.value """
+		""" Returns a copy of the Hypothesis object by calling copy() on self.value """
 		return Hypothesis(value=self.value.copy(), prior_temperature=self.prior_temperature, likelihood_temperature=self.likelihood_temperature)
 		
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# All instances of this must implement these:
 		
 	def compute_prior(self):
-		""" computes the prior and stores it in self.prior"""
+		""" computes the prior and stores it in self.prior
+			Note: This method must be implemented when writing subclasses of Hypothesis
+		"""
 		assert False, "*** Must implement compute_prior"
 
 	def compute_single_likelihood(self, datum):
+		"""
+			Note: This method must be implemented when writing subclasses of Hypothesis
+		"""
 		assert False, "*** Must implement compute_single_likelihood"
 	
 	# And the main likelihood function just maps compute_single_likelihood over the data
@@ -65,11 +80,16 @@ class Hypothesis(object):
 	# Methods for accessing likelihoods etc. on a big arrays of data
 		
 	def propose(self): 
-		""" Generic proposal used by MCMC methods"""
+		""" Generic proposal used by MCMC methods
+			Note: This method must be implemented when writing subclasses of Hypothesis
+		"""
 		assert False,  "*** Must implement propose"
 	
 	# this updates last_prior and last_likelihood
 	def compute_posterior(self, d):
+		"""
+			Computes the posterior score by computing the prior and likelihood scores
+		"""
 		LOTlib.BasicPrimitives.LOCAL_PRIMITIVE_OPS = 0 # Reset this
 		p = self.compute_prior()
 		l = self.compute_likelihood(d)
@@ -79,7 +99,11 @@ class Hypothesis(object):
 	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 	# optional implementation
 	# if you do gibbs sampling you need:
-	def enumerative_proposer(self): pass
+	def enumerative_proposer(self):
+		"""
+			Note: This method must be implemented when performing Gibbs sampling
+		"""
+		pass
 	
 	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 	## These are just handy:
