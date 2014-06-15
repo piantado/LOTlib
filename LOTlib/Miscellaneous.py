@@ -77,6 +77,17 @@ def make_immutable(x):
 	elif isinstance(x, list): return tuple(x)
 	else: return x
 
+def unlist_singleton(x):
+	"""
+		Remove any sequences of nested lists with one element. 
+		
+		e.g. [[[1,3,4]]] -> [1,3,4]
+	"""
+	if isinstance(x,list) and len(x) == 1:
+		return unlist_singleton(x[0])
+	else:
+		return x
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Display functions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
