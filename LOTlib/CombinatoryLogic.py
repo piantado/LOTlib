@@ -20,6 +20,7 @@ class CombinatorReduceException(Exception):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # evaluate combinators
+
 def combinator_reduce(lst, depth=MAX_DEPTH):
 	"""
 		Reduce combinatory logic list of lists. 

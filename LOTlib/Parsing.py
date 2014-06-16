@@ -50,7 +50,7 @@ def list2FunctionNode(l, style="atis"):
 			else:
 				return FunctionNode(l[0], l[0], map(rec, l[1:]), generation_probability=0.0)
 		elif sytle is 'scheme':
-			pass #TODO: Add this scheme functionality -- basically differnet handling of lambda bound variables
+			assert False #TODO: Add this scheme functionality -- basically differnet handling of lambda bound variables
 			
 	else: # for non-list
 		return l

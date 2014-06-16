@@ -22,7 +22,7 @@ class FunctionData:
 		"""
 			Creates a new FunctionData object. input must be either a list or a tuple.
 		"""
-		assert isinstance(input, list) or isinstance(input, tuple) ## since we apply to this
+		assert isinstance(input, list) or isinstance(input, tuple), "FunctionData.input must be a list!" ## since we apply to this
 		self.input = input
 		self.output = output
 		self.__dict__.update(kwargs)
