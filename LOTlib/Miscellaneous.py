@@ -12,8 +12,6 @@ except ImportError: import numpypy as np
 from random import random, sample, randint
 import itertools
 from math import exp, log, sqrt, pi, e
-import functools # for memoize
-import os
 import sys
 import math
 import collections
@@ -77,11 +75,26 @@ def unlist_singleton(x):
 	else:
 		return x
 
+def list2sexpstr(lst):
+	"""
+		Prints a python list-of-lists as an s-expression
+		
+		[['K', 'K'], [['S', 'K'], ['I', 'I']]] --> ((K K) ((S K)(I I)))
+	"""
+	s = re.sub(r'[\'\",]', r'', str(lst))
+	s = re.sub(r'\[', r'(', s)
+	s = re.sub(r'\]', r')', s)
+	return s
+	
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Display functions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		
 def q(x, quote='\''): 
+	"""
+		Quotes a string
+	"""
 	if isinstance(x,str) or isinstance(x, unicode):
 		return quote+x+quote
 	else:
@@ -113,6 +126,7 @@ def display_option_summary(obj):
 		This takes in an OptionParser object as an argument. As in, (options, args) = parser.parse_args()
 	"""
 	from time import strftime, time, localtime
+	import os
 	
 	print "####################################################################################################"
 	try: print "# Username: ", os.getlogin()

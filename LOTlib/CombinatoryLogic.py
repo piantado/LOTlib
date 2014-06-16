@@ -5,6 +5,10 @@
 	which maps to a new lists. This is slower than implementing them directly as functions, 
 	but lets us see what they reduce to. 
 	
+	Relevant functions in Miscellaneous are:
+		- LOTlib.Miscellaneous.unlist_singleton  (removes extraneous lists)
+		- LOTlib.Miscellaneous.list2sexpstr      (converts a list of lists into an S-expression string)
+	
 	Much much faster scheme code is available from Steve. 
 """
 from LOTlib.Miscellaneous import unlist_singleton

@@ -168,7 +168,8 @@ class FunctionNode(object):
 	
 	def liststring(self, cons="cons_"):
 		"""
-			This "evals" cons_ so that we can conveniently build lists (of lists) without having to eval
+			This "evals" cons_ so that we can conveniently build lists (of lists) without having to eval.
+			Mainly useful for combinatory logic, or "pure" trees
 		"""
 		if self.args is None:
 			return self.name
