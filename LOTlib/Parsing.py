@@ -7,7 +7,7 @@
 """
 
 
-from pyparsing import *
+from pyparsing import Suppress, alphanums, Group, Forward, ZeroOrMore, Word
 from LOTlib.FunctionNode import FunctionNode
 from LOTlib.Miscellaneous import unlist_singleton
 import pprint
