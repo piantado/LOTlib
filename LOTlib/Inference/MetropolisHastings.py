@@ -19,7 +19,7 @@ import LOTlib
 from LOTlib import lot_iter
 from LOTlib.Miscellaneous import *
 from LOTlib.FiniteBestSet import FiniteBestSet
-from LOTlib.Memoization import BoundedDictionary
+#from LOTlib.Memoization import BoundedDictionary
 from MHShared import *
 
 def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_temperature=1.0, likelihood_temperature=1.0, acceptance_temperature=1.0, trace=False, debug=False, stats=None, memoize=0):
@@ -35,7 +35,9 @@ def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_
 	"""
 	
 	if memoize > 0:
-		mem = BoundedDictionary(N=memoize)
+		from cachetools import LRUCache
+		 
+		mem = LRUCache(maxsize=memoize)
 		
 	for mhi in lot_iter(xrange(steps)):
 	
