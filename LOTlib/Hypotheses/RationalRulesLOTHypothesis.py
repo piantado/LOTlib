@@ -3,7 +3,7 @@ from copy import copy
 import numpy
 
 from LOTHypothesis import LOTHypothesis
-from LOTlib.Miscellaneous import Infinity, listifnot, beta
+from LOTlib.Miscellaneous import Infinity, beta
 
 from collections import defaultdict
 
@@ -17,9 +17,8 @@ def get_rule_counts(grammar, t):
 	
 	counts = defaultdict(int) # a count for each hash type
 	
-	for ti in listifnot(t):
-		for x in ti:
-			if x.ruleid >= 0: counts[x.ruleid] += 1
+	for x in ti:
+		if x.ruleid >= 0: counts[x.ruleid] += 1
 	
 	# and convert into a list of vectors (with the right zero counts)
 	out = []

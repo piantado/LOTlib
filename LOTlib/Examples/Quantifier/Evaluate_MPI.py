@@ -43,7 +43,7 @@ parser.add_option("--chains", dest="CHAINS", type="int", default=1,
 
 #one run with these parameters
 def run(*args):
-	dprintn(8, "# Generating data")
+	#print "# Running data"
 	
 	global hypotheses
 
@@ -56,16 +56,16 @@ def run(*args):
 	p_representation_presup = defaultdict(int) # how often do you get the right representation
 	p_response_presup = defaultdict(int) # how often do you get the right response?
 	
-	dprintn(8, "# Generating data")
+	#print "# Generating data"
 	data = generate_data(data_size)
 	
 	# recompute these
-	dprintn(8, "# Computing posterior")
+	#print "# Computing posterior"
 	#[ x.unclear_functions() for x in hypotheses ]
 	[ x.compute_posterior(data) for x in hypotheses ]
 	
 	# normalize the posterior in fs
-	dprintn(8, "# Computing normalizer")
+	#print "# Computing normalizer"
 	Z = logsumexp([x.posterior_score for x in hypotheses])
 	
 	# and output the top hypotheses
@@ -76,7 +76,7 @@ def run(*args):
 			fprintn(8, data_size, i, w, h.posterior_score, q(h.value[w]), f=options.OUT_PATH+"-hypotheses."+str(get_rank())+".txt")
 	
 	# and compute the probability of being correct
-	dprintn(8, "# Computing correct probability")
+	#print "# Computing correct probability"
 	for h in hypotheses:
 		hstr = str(h)
 		#print data_size, len(data), exp(h.posterior_score), correct[ str(h)+":"+w ]
@@ -93,7 +93,7 @@ def run(*args):
 			p_response_presup[w]  += p * agree_pct_presup[key]
 			p_response_literal[w] += p * agree_pct_literal[key]
 			
-	dprintn(8, "# Outputting")
+	#print "# Outputting"
 	
 
 	for w in words:

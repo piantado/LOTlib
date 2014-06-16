@@ -71,31 +71,24 @@ LOTlib.Miscellaneous.DEBUG_LEVEL = options.DEBUG_LEVEL
 
 ########################################################################
 # Define Run and a function mapping vectorized lexicon to normal 
-dprintn(5, "# Running: ", options)
 
 # Main run function
 def run(data_size):
 	"""
 		A function to run on a given data size. We call this below either locally or for MPI
 	"""
-	#dprintn(8, "# Running ", data_size, "on rank ", MPI.COMM_WORLD.Get_rank() )
-	#print my_finite_trees
 	
 	data = generate_data(data_size)
-	dprintn(8, "# Done generating data", data_size)
 	
 	# the prior for each tree
 	prior = np.array([ x.compute_prior() for x in my_finite_trees])
 	prior = prior - logsumexp(prior)
-	dprintn(8, "# Done computing priors", data_size)
 	
 	## the likelihood weights for each hypothesis
 	weights = np.array([ my_gricean_weight(h) for h in my_finite_trees ])
-	dprintn(8, "# Done computing weights", data_size)
 	
 	# response[h,di] gives the response of the h'th tree to data di
 	response = np.array( [ mapto012(t.get_function_responses(data)) for t in my_finite_trees] )
-	dprintn(8, "# Done computing responses", data_size)
 	
 	# reformat the data to make it vectory
 	uttered_word_index = [word2index[d.word] for d in data]
@@ -117,10 +110,7 @@ def run(data_size):
 	
 	
 	for g in generator:
-		dprintn(10, data_size, g.posterior_score, g.prior, g.likelihood, g.word_idx)
-		dprintn(15, g) # and show the lexicon
 		hypset.push(VectorizedLexicon_to_SimpleLexicon(g), g.posterior_score)
-		dprintn(15, mhstats.acceptance_ratio())
 		mhstats.clear()
 
 	return hypset
@@ -131,12 +121,12 @@ def run(data_size):
 # and filter by conservative, etc. 
 
 my_finite_trees = load_finite_trees(options.IN_PATH)
-dprintn(5, "# Done loading", len(my_finite_trees), "trees")	
+print "# Done loading", len(my_finite_trees), "trees"	
 
 if options.ONLY_CONSERVATIVE: my_finite_trees = filter(is_conservative, my_finite_trees)
 hyp2target = create_hyp2target(my_finite_trees) # A hash from each of these trees to what target word they match, if any
 if options.ONLY_CORRECT: my_finite_trees = filter(lambda x: hyp2target[x] is not None,  my_finite_trees )
-dprintn(5, "# Filtered to", len(my_finite_trees), "trees")
+print "# Filtered to", len(my_finite_trees), "trees"
 
 ####################################################################################
 ## A bunch of things for computing distances and gradients, etc
@@ -149,7 +139,6 @@ for i,h in enumerate(my_finite_trees):
 if not options.gibbs: # if we aren't doing gibbs,
 	DISTANCE_CACHE = "/home/piantado/Desktop/mit/Libraries/LOTlib/examples/Quantifier/cache/cache-"+os.path.basename(options.IN_PATH)
 	if options.recomputecache or not os.path.exists(DISTANCE_CACHE): 
-		dprintn(5, "# Recomputing proposal matrix cache")
 		SCALE = 0.75 # tuned to give a reasonable acceptance ratio
 		#TOP_N = len(my_finite_trees)
 		TOP_N = 1000 # store only the top this many
@@ -160,19 +149,17 @@ if not options.gibbs: # if we aren't doing gibbs,
 		for i, x in enumerate(my_finite_trees): 
 			RM[i,:] = numpy.array(mapto012(x.get_function_responses(data)))
 		RM = numpy.matrix(RM)
-		dprintn(5, "# Done computing the response matrix for proposals")
-
+		
 		# Okay now convert to each of the kinds of agreement we want
 		# NOTE: (RM==1)+0 Gives an integer matrix, 0/1 for whether RM==1
 		# NOTE: we need to do these as += because otherwise we can get memory errors
 		agree  = ((RM==1)+0) * ((RM==1)+0).transpose() # How often do we agree on 1s (yay matrix math)
 		agree += ((RM==-1)+0) * ((RM==-1)+0).transpose() # how often do we agree on -1s
 		agree += ((RM==0)+0) * ((RM==0)+0).transpose() # how often do we agree on undefs?
-		dprintn(5, "# Done computing agreement matrix for proprosals")
+		print "# Done computing agreement matrix for proprosals"
 
 		proposal_probability = numpy.exp( - SCALE * (len(data)-agree) ) # the more you disagree, the less you are proposed to
-		dprintn(5, "# Done computing probabilities for proposals")
-
+		
 		# now we have to sort:
 		mftlen = len(my_finite_trees)
 		proposal_to =  numpy.zeros( (mftlen,TOP_N) ) 
@@ -182,7 +169,7 @@ if not options.gibbs: # if we aren't doing gibbs,
 		for i in xrange(len(my_finite_trees)):
 			
 			r = numpy.array( proposal_probability[ i, : ].tolist()[0] )
-			#dprintn(50, "# Soring and normalizing ", i, " for proposals")
+			
 			r[i] = 0.0 # never propose to ourself
 			
 			# now sort
@@ -197,10 +184,8 @@ if not options.gibbs: # if we aren't doing gibbs,
 		if not options.nosavecache:
 			pickle.dump( [proposal_to, proposal_probs, proposal_Z], open( DISTANCE_CACHE, "wb" ) )
 	else:
-		dprintn(5, "# Loading proposal matrix cache")
 		proposal_to, proposal_probs, proposal_Z = pickle.load( open( DISTANCE_CACHE, "rb" ) )
 		
-	dprintn(5, "# Done sorting and normalizing for proposals")
 	
 def distance_based_proposer(x):
 	y,lp = weighted_sample(proposal_to[x,:], probs=proposal_probs[x,:], Z=proposal_Z[x], return_probability=True, log=False)
@@ -248,7 +233,6 @@ else:
 ## combine into a single hypothesis set and save --- only for rank  0 since all others are eaten by MPI_map
 outhyp = FiniteBestSet(max=True)
 for r in allret: 
-	dprintn(5, "# Merging ", len(r.Q))
 	outhyp.merge(r)
 outhyp.options = options ## Save these so that the output data has our options as a field
 outhyp.save(options.OUT_PATH)

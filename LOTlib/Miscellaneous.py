@@ -2,19 +2,9 @@
 
 """
 	Miscellaneous functions for LOTlib
-	
-	Steve Piantadosi - Sept 2011
 """
 
-
-# Special handilng for numpypy that doesn't use gammaln, assertion error otherwise
-try: 
-	from scipy.special import gammaln
-except ImportError: 
-	# Die if we try to use this in numpypy
-	def gammaln(*args, **kwargs): assert False
-
-
+# Special handling to deal with numpypy (which actually tends to be slower for LOTlib)
 try:                import numpy as np
 except ImportError: import numpypy as np
 
@@ -90,43 +80,6 @@ def unlist_singleton(x):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Display functions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-## for printing wiht debug levels. 
-## Here we have a global variable (defaults to 10) we print all statements with l <= DEBUG_LEVEL
-## Library internal debugging should have level >= 100, I think
-from multiprocessing import Process # this forces prints to be flushed, so we can flush with dprint below to prevent threads from interrupting each other
-global DEBUG_LEVEL
-DEBUG_LEVEL = 10
-def dprintn(l, *args):
-	args = list(args)
-	args.append("\n")
-	dprint(l,*args)
-def dprint(l, *args):
-	global DEBUG_LEVEL
-	if DEBUG_LEVEL >= l:
-		for a in args: 
-			print str(a),
-	sys.stdout.flush()
-
-def dprinterr(l, *args):
-	global DEBUG_LEVEL
-	if DEBUG_LEVEL >= l:
-		for a in args: 
-			print >>sys.stderr, str(a),
-	sys.stderr.flush()
-
-	
-def fprintn(dl, *args, **kwargs):
-	
-	f = kwargs.get('f',sys.stdout)
-	
-	if DEBUG_LEVEL >= dl:
-		o = open(f, 'a')
-		for a in args: 
-			print >>o, str(a),
-		print >>o, "\n",
-		if f is not sys.stdout: o.close()
 		
 def q(x, quote='\''): 
 	if isinstance(x,str) or isinstance(x, unicode):
@@ -153,16 +106,15 @@ def tf201(x):
 	else: return 0
 
 
-from time import gmtime, strftime, time, localtime
 ## Functions for I/O
 def display_option_summary(obj):
 	"""
 		Prints out a friendly format of all options -- for headers of output files
 		This takes in an OptionParser object as an argument. As in, (options, args) = parser.parse_args()
 	"""
+	from time import strftime, time, localtime
 	
 	print "####################################################################################################"
-	
 	try: print "# Username: ", os.getlogin()
 	except OSError: pass
 	
@@ -187,21 +139,12 @@ def display_option_summary(obj):
 # Genuine Miscellany
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def list2str(x, sep=' '):
-	return sep.join(x)
-
 # a wrapper so we can call this in the below weirdo composition
 def raise_exception(e): raise e
 
 def ifelse(x,y,z):
 	if x: return y
 	else: return z
-	
-# add to a hash list
-def hashplus(d, k, v=1):
-	if not k in d: d[k] = v
-	else: d[k] = d[k] + v
-
 
 def unique(gen):
 	"""
@@ -221,16 +164,6 @@ def UniquifyFunction(gen):
 		for x in unique(gen(*args, **kwargs)): 
 			yield x
 	return f
-	
-	
-def listifnot(x):
-	if isinstance(x,list): return x
-	else:                  return [x]
-
-
-def all_binary_vectors(N):
-	return [  [ (x>>n)&0x1 for n in xrange(N)] for x in xrange(0,2**N) ]
-	
 	
 def flatten(expr): 
 	"""
@@ -279,7 +212,13 @@ def weave(*iterables):
 # Math functions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
+# Special handilng for numpypy that doesn't use gammaln, assertion error otherwise
+try: 
+	from scipy.special import gammaln
+except ImportError: 
+	# Die if we try to use this in numpypy
+	def gammaln(*args, **kwargs): assert False
+	
 ## This is just a wrapper to avoid logsumexp([-inf, -inf, -inf...]) warnings
 try:			
 	from scipy.misc import logsumexp as scipy_logsumexp
@@ -313,10 +252,6 @@ def beta(a):
 	""" Here a is a vector (of ints or floats) and this computes the Beta normalizing function,"""
 	return np.sum(gammaln(np.array(a, dtype=float))) - gammaln(float(sum(a)))
 		
-
-
-def islist(x): return isinstance(x,list)
-
 
 def normlogpdf(x, mu, sigma):
 	""" The log pdf of a normal distribution """
@@ -374,7 +309,7 @@ def log1mexp(a):
 def sample1(*args): return sample_one(*args)
 def sample_one(*args): 
 	if len(args) == 1: return sample(args[0],1)[0] # use the list you were given
-	else:             return sample(args, 1)[0]   # treat the arguments as a list
+	else:              return sample(args, 1)[0]   # treat the arguments as a list
 
 def flip(p): return (random() < p)
 
