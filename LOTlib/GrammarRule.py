@@ -43,7 +43,8 @@ class GrammarRule:
 		
 		self.__dict__.update(locals())
 		
-		if name == '': assert len(to) == 1, "*** GrammarRules with empty names must have only 1 argument"
+		if name == '': 
+			assert (to is None) or (len(to) == 1), "*** GrammarRules with empty names must have only 1 argument"
 		
 		
 	def __repr__(self):

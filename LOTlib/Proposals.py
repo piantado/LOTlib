@@ -8,7 +8,7 @@
 	
 """
 
-from LOTlib.Miscellaneous import weighted_sample
+from LOTlib.Miscellaneous import weighted_sample, lambdaTrue
 from LOTlib.FunctionNode import *
 from copy import copy
 from math import log

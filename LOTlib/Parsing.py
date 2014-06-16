@@ -24,7 +24,7 @@ sexp << ( token | sexpList )
 
 #####################################################################
 
-def simpleLambda2List(s):
+def parseScheme(s):
 	"""
 		Return a list of list of lists... for a string containing a simple lambda expression (no quoting, etc)
 		NOTE: This converts to lowercase
@@ -62,11 +62,11 @@ if __name__ == '__main__':
 	test1 = "(defun factorial (x) (if (= x 0) 1 (* x (factorial (- x 1)))))"
 	test2 = "(lambda $0 e (and (day_arrival $0 thursday:da) (to $0 baltimore:ci) (< (arrival_time $0) 900:ti) (during_day $0 morning:pd) (exists $1 (and (airport $1) (from $0 $1)))))"
 	
-	y = simpleLambda2List(test1)
+	y = parseScheme(test1)
 	#print y
 	assert str(y) == str(['defun', 'factorial', ['x'], ['if', ['=', 'x', '0'], '1', ['*', 'x', ['factorial', ['-', 'x', '1']]]]])
 	
-	x = simpleLambda2List(test2)
+	x = parseScheme(test2)
 	#print x
 	assert str(x) == str(['lambda', '$0', 'e', ['and', ['day_arrival', '$0', 'thursday:da'], ['to', '$0', 'baltimore:ci'], ['<', ['arrival_time', '$0'], '900:ti'], ['during_day', '$0', 'morning:pd'], ['exists', '$1', ['and', ['airport', '$1'], ['from', '$0', '$1']]]]])
 	

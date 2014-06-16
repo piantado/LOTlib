@@ -8,8 +8,11 @@
 	
 """
 # TODO: This could use some renaming FunctionNode.bv is not really a bound variable--its a list of rules that were added
+## TODO: We should be able to eval list-builders like cons_ and list_ without calling python eval -- should be as fast as mapping to strings!
+
 
 import re
+from LOTlib.Miscellaneous import None2Empty
 
 from copy import copy, deepcopy
 
@@ -152,10 +155,16 @@ class FunctionNode(object):
 				if isFunctionNode(a): a.fullprint(d+1)
 				else:                 print tabstr, a
 			
-	#def schemestring(self):
-		#if self.args == []: # a terminal
-			#return str(self.name)
-		#else: return '('+self.name + ' '+commalist( [ str(x) for x in self.args], sep1=' ', sep2=' ')+' )'
+	def schemestring(self):
+		"""
+			Print out in scheme format (+ 3 (- 4 5)).
+			This "evals" cons_ so that you don't have to eval for simple list builders (although you may want to)
+		"""
+		if self.args is None:
+			return self.name
+		else:
+			return '('+self.name + ' ' + ' '.join(map(lambda x: x.schemestring(), None2Empty(self.args)))+')'
+	
 	
 	# NOTE: in the future we may want to change this to do fancy things
 	def __str__(self): return self.pystring()
