@@ -12,29 +12,6 @@
 import re
 
 from copy import copy, deepcopy
-from LOTlib.Miscellaneous import *
-
-def list2FunctionNode(l, style="atis"):
-	"""
-		Takes a list *l* of lambda arguments and maps it to a function node. 
-
-		The *style* of lambda arguments could be "atis", "scheme", etc.
-	"""
-	
-	if isinstance(l, list): 
-		if len(l) == 0: return None
-		elif style is 'atis':
-			rec = lambda x: list2FunctionNode(x, style=style) # a wrapper to my recursive self
-			if l[0] == 'lambda':
-				return FunctionNode('FUNCTION', 'lambda', [rec(l[3])], generation_probability=0.0, bv_type=l[1], bv_args=None ) ## TOOD: HMM WHAT IS THE BV?
-			else:
-				return FunctionNode(l[0], l[0], map(rec, l[1:]), generation_probability=0.0)
-		elif sytle is 'scheme':
-			pass #TODO: Add this scheme functionality -- basically differnet handling of lambda bound variables
-			
-	else: # for non-list
-		return l
-
 
 def isFunctionNode(x): 
 	# just because this is nicer, and allows us to map, etc. 

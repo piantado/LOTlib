@@ -8,13 +8,14 @@
 
 
 from pyparsing import *
-from LOTlib.FunctionNode import *
+from LOTlib.FunctionNode import FunctionNode
+from LOTlib.Miscellaneous import unlist_singleton
 import pprint
 
 #####################################################################
 ## Here we define a super simple grammar for lambdas
 
-LPAR, RPAR, LBRK, RBRK = map(Suppress, "()[]")
+LPAR, RPAR = map(Suppress, "()")
 token = Word(alphanums + "-./_:*+=!<>$")
 
 sexp = Forward()
@@ -30,16 +31,38 @@ def simpleLambda2List(s):
 	"""
 	
 	x = sexp.parseString(s, parseAll=True)
-	x = x[0] # remove that first element
-	x = x.asList() # get back as a list rather than a pyparsing.ParseResults
-	return x
+	return unlist_singleton( x.asList() ) # get back as a list rather than a pyparsing.ParseResults
 
 def simpleLambda2FunctionNode(s, style="atis"):
 	"""
 		Take a string for lambda expressions and map them to a real FunctionNode tree
 	"""
 	return list2FunctionNode(simpleLambda2List(s), style=style)
+
+
+def list2FunctionNode(l, style="atis"):
+	"""
+		Takes a list *l* of lambda arguments and maps it to a function node. 
+
+		The *style* of lambda arguments could be "atis", "scheme", etc.
+	"""
 	
+	if isinstance(l, list): 
+		if len(l) == 0: return None
+		elif style is 'atis':
+			rec = lambda x: list2FunctionNode(x, style=style) # a wrapper to my recursive self
+			if l[0] == 'lambda':
+				return FunctionNode('FUNCTION', 'lambda', [rec(l[3])], generation_probability=0.0, bv_type=l[1], bv_args=None ) ## TOOD: HMM WHAT IS THE BV?
+			else:
+				return FunctionNode(l[0], l[0], map(rec, l[1:]), generation_probability=0.0)
+		elif sytle is 'scheme':
+			pass #TODO: Add this scheme functionality -- basically differnet handling of lambda bound variables
+			
+	else: # for non-list
+		return l
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
 if __name__ == '__main__':
 
 	test1 = "(defun factorial (x) (if (= x 0) 1 (* x (factorial (- x 1)))))"
