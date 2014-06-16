@@ -166,6 +166,17 @@ class FunctionNode(object):
 			return '('+self.name + ' ' + ' '.join(map(lambda x: x.schemestring(), None2Empty(self.args)))+')'
 	
 	
+	def liststring(self, cons="cons_"):
+		"""
+			This "evals" cons_ so that we can conveniently build lists (of lists) without having to eval
+		"""
+		if self.args is None:
+			return self.name
+		elif self.name == cons:
+			return map(lambda x: x.liststring(), self.args)
+		else:
+			assert False, "FunctionNode must only use cons to call liststring!"
+	
 	# NOTE: in the future we may want to change this to do fancy things
 	def __str__(self): return self.pystring()
 	def __repr__(self): return self.pystring()

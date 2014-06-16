@@ -12,15 +12,16 @@ G = Grammar()
 
 G.add_rule('START', 'cons_', ['START', 'START'], 2.0)
 
-G.add_rule('START', q('I'), None, 1.0)
-G.add_rule('START', q('S'), None, 1.0)
-G.add_rule('START', q('K'), None, 1.0)
+G.add_rule('START', 'I', None, 1.0)
+G.add_rule('START', 'S', None, 1.0)
+G.add_rule('START', 'K', None, 1.0)
 
 from LOTlib.CombinatoryLogic import combinator_reduce, CombinatorReduceException
 
 for _ in range(10000):
 	t = G.generate()
-	lst = eval(str(t))
+	
+	lst = t.liststring()
 	
 	print lst, "\t->\t",
 	try:

@@ -62,7 +62,7 @@ class MAPSymbolicRegressionHypothesis(GaussianLOTHypothesis):
 	
 	def compute_likelihood(self, data):
 		
-		def tomaximize(fit_params):
+		def toMaximize(fit_params):
 			self.CONSTANT_VALUES = fit_params.tolist() # set these
 			# And return the original likelihood, which by get_function_responses above uses this
 			constant_prior = sum(map(lambda x: normlogpdf(x,0.0,CONSTANT_SD), self.CONSTANT_VALUES))
@@ -70,13 +70,15 @@ class MAPSymbolicRegressionHypothesis(GaussianLOTHypothesis):
 
 		for init in xrange(MAX_INITIALIZE):
 			p0 = normal(0.0, CONSTANT_SD, NCONSTANTS)
-			res = fmin(tomaximize, p0, disp=False, maxiter=MAXITER)
-			if tomaximize(res) < Infinity: break
+			res = fmin(toMaximize, p0, disp=False, maxiter=MAXITER)
+			if toMaximize(res) < Infinity: break
 		
+		
+		maxval = toMaximize(res)
 		self.CONSTANT_VALUES = res
 		
-		if tomaximize(res) < Infinity:  self.likelihood = -tomaximize(res) ## must invert since it's a negative
-		else:                         self.likelihood = -Infinity
+		if maxval < Infinity:  self.likelihood = -maxval ## must invert since it's a negative
+		else:                  self.likelihood = -Infinity
 			
 		self.posterior_score = self.prior + self.likelihood
 		return self.likelihood

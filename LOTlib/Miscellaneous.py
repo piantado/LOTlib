@@ -23,7 +23,6 @@ from random import random, sample, randint
 import itertools
 from math import exp, log, sqrt, pi, e
 import functools # for memoize
-import pickle
 import os
 import sys
 import math

@@ -83,29 +83,9 @@ class FunctionHypothesis(Hypothesis):
 		elif value is None:   self.fvalue = None
 		else:                 self.fvalue = self.value2function(value)
 	
-	## NOTE: get_function_responses will be removed
-	#def get_function_responses(self, data, *args, **kwargs):
-		#""" 
-		#Evaluate this function on some data
-		#Returns a list of my responses to data, handling exceptions (setting to None)
-		#- args, kwargs -- these are just passed to self on evaluation
-		
-		#TODO: CLEAN THIS UP -- SHOULD THIS EVER BE USED?
-		#"""
-		
-		#args = list(args) # need this so we can concat with + below
-		
-		#out = []
-		#for di in data:
-			#r = None
-			#try:
-				#if   isinstance(di, FunctionData):  r = self(*(di.input+args), **kwargs)
-				#elif isinstance(di, UtteranceData): r = self(*(di.context+args), **kwargs)
-				#else:                               r = self(*(di+args), **kwargs) # otherwise just pass along
-			#except RecursionDepthException: pass # If there is a recursion depth exception, just ignore (so r=None)
-			
-			#out.append(r) # so we get "None" when things mess up
-		#return out
+	def force_function(self, f):
+		self.value = "<FORCED_FUNCTION>"
+		self.fvalue=f
 	
 	def compute_single_likelihood(self, datum):
 		"""
