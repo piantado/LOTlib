@@ -33,12 +33,6 @@ def simpleLambda2List(s):
 	x = sexp.parseString(s, parseAll=True)
 	return unlist_singleton( x.asList() ) # get back as a list rather than a pyparsing.ParseResults
 
-def simpleLambda2FunctionNode(s, style="atis"):
-	"""
-		Take a string for lambda expressions and map them to a real FunctionNode tree
-	"""
-	return list2FunctionNode(simpleLambda2List(s), style=style)
-
 
 def list2FunctionNode(l, style="atis"):
 	"""
