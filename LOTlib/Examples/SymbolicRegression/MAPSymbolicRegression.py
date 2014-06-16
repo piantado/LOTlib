@@ -46,9 +46,23 @@ class MAPSymbolicRegressionHypothesis(GaussianLOTHypothesis):
 		#print ">>", self.args, CONSTANT_NAMES
 		return evaluate_expression(value, args=self.args+CONSTANT_NAMES)
 		
+	def __call__(self, *vals):
+		"""
+			Must overwrite call in order to include the constants
+		"""
+		vals = list(vals)
+		vals.extend(self.CONSTANT_VALUES)
+		return GaussianLOTHypothesis.__call__(self, *vals)
+	
+	def compute_prior(self):
+		self.prior = GaussianLOTHypothesis.compute_prior(self)
+		self.prior += sum(map(lambda x: normlogpdf(x,0.0,CONSTANT_SD), self.CONSTANT_VALUES))
+		self.posterior_score = self.prior + self.likelihood
+		return self.prior
+	
 	def compute_likelihood(self, data):
 		
-		def llgivenC(fit_params):
+		def tomaximize(fit_params):
 			self.CONSTANT_VALUES = fit_params.tolist() # set these
 			# And return the original likelihood, which by get_function_responses above uses this
 			constant_prior = sum(map(lambda x: normlogpdf(x,0.0,CONSTANT_SD), self.CONSTANT_VALUES))
@@ -56,12 +70,12 @@ class MAPSymbolicRegressionHypothesis(GaussianLOTHypothesis):
 
 		for init in xrange(MAX_INITIALIZE):
 			p0 = normal(0.0, CONSTANT_SD, NCONSTANTS)
-			res = fmin(llgivenC, p0, disp=False, maxiter=MAXITER)
-			if llgivenC(res) < Infinity: break
+			res = fmin(tomaximize, p0, disp=False, maxiter=MAXITER)
+			if tomaximize(res) < Infinity: break
 		
 		self.CONSTANT_VALUES = res
 		
-		if llgivenC(res) < Infinity:  self.likelihood = -llgivenC(res) ## must invert since it's a negative
+		if tomaximize(res) < Infinity:  self.likelihood = -tomaximize(res) ## must invert since it's a negative
 		else:                         self.likelihood = -Infinity
 			
 		self.posterior_score = self.prior + self.likelihood
