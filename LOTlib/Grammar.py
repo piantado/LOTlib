@@ -64,8 +64,6 @@ class Grammar:
 		else:
 			return True # non-functionNodes must be terminals
 		
-		
-		
 	def display_rules(self):
 		"""
 			Prints all the rules to the console.
