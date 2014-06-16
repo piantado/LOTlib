@@ -4,9 +4,7 @@
 """
 
 import re
-from copy import copy
 
-import LOTlib
 from LOTlib import lot_iter
 from LOTlib.Grammar import Grammar
 from LOTlib.FunctionNode import isFunctionNode

@@ -57,14 +57,16 @@ class Hypothesis(object):
 		""" computes the prior and stores it in self.prior
 			Note: This method must be implemented when writing subclasses of Hypothesis
 		"""
-		assert False, "*** Must implement compute_prior"
-
+		raise NotImplementedError
+		
+		
 	def compute_single_likelihood(self, datum):
 		"""
 			Note: This method must be implemented when writing subclasses of Hypothesis
 		"""
-		assert False, "*** Must implement compute_single_likelihood"
-	
+		raise NotImplementedError
+		
+		
 	# And the main likelihood function just maps compute_single_likelihood over the data
 	def compute_likelihood(self, data):
 		""" 
@@ -83,7 +85,7 @@ class Hypothesis(object):
 		""" Generic proposal used by MCMC methods
 			Note: This method must be implemented when writing subclasses of Hypothesis
 		"""
-		assert False,  "*** Must implement propose"
+		raise NotImplementedError
 	
 	# this updates last_prior and last_likelihood
 	def compute_posterior(self, d):

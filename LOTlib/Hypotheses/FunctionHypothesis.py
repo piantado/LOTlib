@@ -92,7 +92,7 @@ class FunctionHypothesis(Hypothesis):
 			A function that must be implemented by subclasses to compute the likelihood of a single datum/response pair.
 			This should NOT implement the temperature (that is handled by compute_likelihood)
 		"""
-		assert False, "*** compute_single_likelihood must be overwritten in a lower class"
+		raise NotImplementedError
 	
 	def compute_likelihood(self, data):
 		"""
