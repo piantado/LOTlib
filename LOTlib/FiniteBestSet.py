@@ -9,12 +9,7 @@
 	
 """
 import heapq
-import operator
 import collections
-
-from LOTlib.Miscellaneous import *
-from collections import deque
-from copy import deepcopy
 
 class QueueItem(object):
 	"""
@@ -40,14 +35,14 @@ class FiniteBestSet(object):
 	
 	def __init__(self, N=Infinity, max=True, key=None):
 		"""
-			N - the number of hypothese to store
+			N - the number of hypotheses to store
 			max - True/False -- do we keep the ones closes to +inf (or -inf)
 			key - if a string (attribute) or function, we used this to access a hypothesis' priority score
 		"""
 		
 		self.__dict__.update(locals())
 		
-		self.max_multiplier = ifelse(self.max, 1, -1) # invert sign 
+		self.max_multiplier = (1 if self.max else -1) # invert sign 
 		
 		self.Q = [] # we use heapq to 
 		self.unique_set = set()
@@ -119,7 +114,7 @@ class FiniteBestSet(object):
 	def merge(self, y):
 		"""
 			Copy over everything from y. Here, y may be a list of things to merge (e.g. other FiniteBestSets)
-			This is slightly inefficient becuase we create all new QueueItems, but it's easiest to deal with min/max
+			This is slightly inefficient because we create all new QueueItems, but it's easiest to deal with min/max
 		"""
 		if isinstance(y, list) or isinstance(y, tuple) or isinstance(y, set):
 			for yi in y: self.merge(yi)
