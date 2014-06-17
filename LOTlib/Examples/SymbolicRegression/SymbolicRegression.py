@@ -9,7 +9,7 @@ from math import sin
 CHAINS = 4
 STEPS = 50000
 SKIP = 0
-LL_SD = 0.10 # the SD of the likelihood
+data_sd = 0.10 # the SD of the likelihood
 
 ## The target function for symbolic regression 
 target = lambda x: x + sin(1.0/x)
@@ -21,7 +21,7 @@ def generate_data(data_size):
 	data = []
 	for i in range(data_size): 
 		x = random()
-		data.append( FunctionData(input=[x], output=target(x), ll_sd=LL_SD) )
+		data.append( FunctionData(input=[x], output=target(x), ll_sd=data_sd) )
 	
 	return data
 	
@@ -34,7 +34,7 @@ data = generate_data(50) # how many data points?
 #one run with these parameters
 def run(*args):
 	# starting hypothesis -- here this generates at random
-	h0 = GaussianLOTHypothesis(G)
+	h0 = GaussianLOTHypothesis(grammar)
 	
 	# We store the top 100 from each run
 	fs = FiniteBestSet(10, max=True, key="posterior_score") 
