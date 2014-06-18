@@ -13,8 +13,9 @@
 
 import re
 from LOTlib.Miscellaneous import None2Empty
-
 from copy import copy, deepcopy
+from math import log
+
 
 def isFunctionNode(x): 
 	# just because this is nicer, and allows us to map, etc. 
@@ -22,6 +23,7 @@ def isFunctionNode(x):
 		Returns true if *x* is of type FunctionNode.
 	"""
 	return isinstance(x, FunctionNode)
+
 
 def cleanFunctionNodeString(x):
 	"""
@@ -153,8 +155,10 @@ class FunctionNode(object):
 		print tabstr, self.returntype, self.name, self.bv_type, self.bv_name, self.bv_args, self.bv_prefix, "\t", self.generation_probability # "\t", self.resample_p 
 		if self.args is not None:
 			for a in self.args: 
-				if isFunctionNode(a): a.fullprint(d+1)
-				else:                 print tabstr, a
+				if isFunctionNode(a):
+					a.fullprint(d+1)
+				else:
+					print tabstr, a
 			
 	def schemestring(self):
 		"""
@@ -207,7 +211,8 @@ class FunctionNode(object):
 		
 		# so args must be a list
 		for a,b in zip(self.args, other.args):
-			if a != b: return False
+			if a != b:
+				return False
 		
 		return True
 		
@@ -273,7 +278,8 @@ class FunctionNode(object):
 		
 		if self.args is not None:
 			for a in self.argFunctionNodes():
-				for ssn in a: yield ssn
+				for ssn in a:
+					yield ssn
 	
 	def iterdepth(self):
 		"""
