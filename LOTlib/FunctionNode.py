@@ -69,7 +69,7 @@ class FunctionNode(object):
 			shallow - if True, this does not copy the children (self.to points to the same as what we return)
 		"""
 		if (not shallow) and self.args is not None:
-			newargs = map(copy, self.args) 
+			newargs = map(copy, self.args)
 		else:
 			newargs = self.args
 		
@@ -105,7 +105,8 @@ class FunctionNode(object):
 		ret = (self.name is not None) and (self.name.lower() == 'lambda')
 		
 		# A nice place to keep this--will get checked a lot!
-		if ret: assert len(self.args) == 1, "*** Lambdas must have exactly 1 arg"
+		if ret:
+			assert len(self.args) == 1, "*** Lambdas must have exactly 1 arg"
 		
 		return ret
 	
@@ -149,7 +150,7 @@ class FunctionNode(object):
 	def fullprint(self, d=0):
 		""" A handy printer for debugging"""
 		tabstr = "  .  " * d
-		print tabstr, self.returntype, self.name, self.bv_type, self.bv_name, self.bv_args, self.bv_prefix, "\t", self.generation_probability #"\t", self.resample_p 
+		print tabstr, self.returntype, self.name, self.bv_type, self.bv_name, self.bv_args, self.bv_prefix, "\t", self.generation_probability # "\t", self.resample_p 
 		if self.args is not None:
 			for a in self.args: 
 				if isFunctionNode(a): a.fullprint(d+1)
@@ -165,7 +166,6 @@ class FunctionNode(object):
 		else:
 			return '('+self.name + ' ' + ' '.join(map(lambda x: x.schemestring(), None2Empty(self.args)))+')'
 	
-	
 	def liststring(self, cons="cons_"):
 		"""
 			This "evals" cons_ so that we can conveniently build lists (of lists) without having to eval.
@@ -179,10 +179,15 @@ class FunctionNode(object):
 			assert False, "FunctionNode must only use cons to call liststring!"
 	
 	# NOTE: in the future we may want to change this to do fancy things
-	def __str__(self): return self.pystring()
-	def __repr__(self): return self.pystring()
-	
-	def __ne__(self, other): return (not self.__eq__(other))
+	def __str__(self):
+		return self.pystring()
+
+	def __repr__(self):
+		return self.pystring()
+
+	def __ne__(self, other):
+		return (not self.__eq__(other))
+
 	def __eq__(self, other): 
 		"""
 			Test equality of FunctionNodes. 
@@ -206,8 +211,6 @@ class FunctionNode(object):
 		
 		return True
 		
-	
-	
 	## TODO: overwrite these with something faster
 	# hash trees. This just converts to string -- maybe too slow?
 	def __hash__(self):
@@ -225,10 +228,11 @@ class FunctionNode(object):
 		# use a quicker string hash		
 		#return hash(self.quickstring())
 		
-		
-	def __cmp__(self, x): return cmp(str(self), str(x))
+	def __cmp__(self, x):
+		return cmp(str(self), str(x))
 	
-	def __len__(self): return len([a for a in self])
+	def __len__(self):
+		return len([a for a in self])
 	
 	def log_probability(self):
 		"""
@@ -279,7 +283,8 @@ class FunctionNode(object):
 		
 		if self.args is not None:
 			for a in self.argFunctionNodes():
-				for ssn,dd in a.iterdepth(): yield (ssn,dd+1)
+				for ssn,dd in a.iterdepth():
+					yield (ssn,dd+1)
 
 	def all_leaves(self):
 		"""
@@ -310,7 +315,8 @@ class FunctionNode(object):
 
 			*rename* - a dictionary to store how we should rename
 		"""
-		if rename is None: rename = dict()
+		if rename is None:
+			rename = dict()
 				
 		if self.name is not None:
 			if self.islambda() and (self.bv_type is not None): 
@@ -330,7 +336,6 @@ class FunctionNode(object):
 			#print "\t\tRENAMING", k, k.bv_prefix, rename
 			k.fix_bound_variables(d+1, rename)
 			
-
 	############################################################
 	## Derived functions that build on the above core
 	############################################################
@@ -340,7 +345,8 @@ class FunctionNode(object):
 			Checks if the FunctionNode contains *x* as function below
 		"""
 		for n in self:
-			if n.name == x: return True
+			if n.name == x:
+				return True
 		return False
 	
 	def count_nodes(self): 
@@ -389,7 +395,6 @@ class FunctionNode(object):
 				
 			return (self.args[0].type(), t)
 		
-		
 		# ts = [self.returntype, self.bv_type, self.bv_args]
 		# if self.args is not None:
 		# 	for i in range(len(self.args)):
@@ -399,27 +404,27 @@ class FunctionNode(object):
 		# 			ts.append(self.args[i])
 		# return ts
 		
-		
 	def is_replicating(self):
 		"""
 			A function node is replicating (by definition) if one of its children is of the same type
 		"""
 		return any([ x.returntype == self.returntype for x in self.argFunctionNodes() ])
 		
-
 	def is_canonical_order(self, symmetric_ops):
 		"""
 			Takes a set of symmetric ops (plus, minus, times, etc, not divide) and asserts that the 
 			LHS ordering is less than the right (to prevent)
 		"""
-		if self.args is None or len(self.args) == 0: return True
+		if self.args is None or len(self.args) == 0:
+			return True
 		
 		if self.name in symmetric_ops:
 			
 			# Then we must check children
 			if self.args is not None:
 				for i in xrange(len(self.args)-1):
-					if self.args[i].name > self.args[i+1].name: return False
+					if self.args[i].name > self.args[i+1].name:
+						return False
 			
 		# Now check the children, whether or not we are symmetrical
 		return all([x.is_canonical_order(symmetric_ops) for x in self.args if self.args is not None])

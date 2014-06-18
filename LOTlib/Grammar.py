@@ -79,32 +79,29 @@ class Grammar:
 		return self.rules.keys()
 		
 	# these take probs instead of log probs, for simplicity
-					   #>
-					   #|       #>The name of the function
-	def add_rule(self, nt, name, to, p, resample_p=1.0, bv_type=None, bv_args=None, bv_prefix='y', bv_p=None, rid=None):
+	def add_rule(self, nt, name, expansion, p, resample_p=1.0, bv_type=None, bv_args=None, bv_prefix='y', bv_p=None, rid=None):
 		"""
 			Adds a rule and returns it.
 			
 			*nt* - The Nonterminal. e.g. S in "S -> NP VP"
 			
-			*name* - the name of this function 
+			*name* - the name of this function
 			
-			*to* - what you expand to (usually a FunctionNode). 
+			*expansion* - what you expand to (usually a FunctionNode).
 			
 			*p* - unnormalized probability of expansion
 			
-			*resample_p* - in resampling, what is the probability of choosing this node?		
+			*resample_p* - in resampling, what is the probability of choosing this node?
 			
 			*bv_type* - what bound variable was introduced
 			
 			*bv_args* - what are the args when we use a bv (None is terminals, else a type signature)
 			
 			*rid* - the rule id number
-			
 		"""
 		
 		#Assigns a serialized rule number
-		if rid is None: 
+		if rid is None:
 			rid = self.rule_count
 			self.rule_count += 1
 		
@@ -112,7 +109,7 @@ class Grammar:
 			self.bv_count += 1
 			
 		# Creates the rule and add it
-		newrule = GrammarRule(nt,name,to, p=p, resample_p=resample_p, bv_type=bv_type, bv_args=bv_args, bv_prefix=bv_prefix, bv_p=bv_p, rid=rid)
+		newrule = GrammarRule(nt,name,expansion, p=p, resample_p=resample_p, bv_type=bv_type, bv_args=bv_args, bv_prefix=bv_prefix, bv_p=bv_p, rid=rid)
 		self.rules[nt].append(newrule)
 		
 		return newrule
@@ -122,7 +119,7 @@ class Grammar:
 	############################################################
 	
 	def remove_rule(self, r):
-		""" 
+		"""
 			Removes a rule (comparison is done by nt and rid).
 			*r*: Should be a GrammarRule
 		"""
@@ -130,7 +127,7 @@ class Grammar:
 	
 	# Add a bound variable and return the rule
 	def add_bv_rule(self, nt, args, bv_prefix, bv_p, d):
-		""" 
+		"""
 			Add an expansion to a bound variable of type t, at depth d. Add it and return it. 
 			*nt*: The Nonterminal. e.g. S in "S -> NP VP"
 			*args*: Arguments of the bound variable
@@ -223,10 +220,10 @@ class Grammar:
 			
 			ret = copy(x)
 			
-			ret.to = self.generate(ret.to, d=d+1) # re-generate below -- importantly the "to" points are re-generated, not copied
+			ret.to = self.generate(ret.to, d=d+1)  # re-generate below -- importantly the "to" points are re-generated, not copied
 			
 			return ret
-		else: # must be a terminal
+		else:  # must be a terminal
 			assert isinstance(x, str), ("*** Terminal must be a string! x="+x)
 			
 			return x
