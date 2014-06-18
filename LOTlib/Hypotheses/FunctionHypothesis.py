@@ -8,9 +8,11 @@
 
 from Hypothesis import Hypothesis
 
-from LOTlib.Miscellaneous import *
+from LOTlib.Evaluation.Eval import evaluate_expression
+from LOTlib.Evaluation.EvaluationException import EvaluationException
+from LOTlib.Miscellaneous import lambdaNone
 from LOTlib.DataAndObjects import FunctionData,UtteranceData
-from copy import copy, deepcopy
+from copy import copy
 
 class FunctionHypothesis(Hypothesis):
 	"""
@@ -45,7 +47,7 @@ class FunctionHypothesis(Hypothesis):
 		
 		try:
 			return self.fvalue(*vals)
-		except RecursionDepthException:
+		except EvaluationException:
 			return None
 		except TypeError:
 			print "TypeError in function call: "+str(self)+"  ;  "+str(vals)
@@ -60,7 +62,7 @@ class FunctionHypothesis(Hypothesis):
 		# Risky here to catch all exceptions, but we'll do it and warn on failure
 		try:
 			return evaluate_expression(value, args=self.args)
-		except e:
+		except Exception as e:
 			print "# Warning: failed to execute evaluate_expression on " + str(value)
 			print "# ", e
 			return lambdaNone

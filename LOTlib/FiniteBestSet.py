@@ -10,6 +10,7 @@
 """
 import heapq
 import collections
+from LOTlib.Miscellaneous import Infinity
 
 class QueueItem(object):
 	"""

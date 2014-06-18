@@ -19,39 +19,39 @@ from LOTlib.BasicPrimitives import *
 from LOTlib.FunctionNode import cleanFunctionNodeString
 import itertools
 
-G = Grammar()
+grammar = Grammar()
 
-G.add_rule('START', '', ['Pabstraction'], 1.0) # a predicate abstraction
+grammar.add_rule('START', '', ['Pabstraction'], 1.0) # a predicate abstraction
 
 # lambdaUsePredicate is where you can use the predicate defined in lambdaDefinePredicate
-G.add_rule('Pabstraction',  'apply_', ['lambdaUsePredicate', 'lambdaDefinePredicate'], 1.0, )
-G.add_rule('lambdaUsePredicate', 'lambda', ['INNER-BOOL'],    5.0, bv_type='INNER-BOOL', bv_args=['OBJECT'], bv_prefix='F')
-G.add_rule('lambdaUsePredicate', 'lambda', ['Pabstraction'], 1.0,  bv_type='INNER-BOOL', bv_args=['OBJECT'], bv_prefix='F')
+grammar.add_rule('Pabstraction',  'apply_', ['lambdaUsePredicate', 'lambdaDefinePredicate'], 1.0, )
+grammar.add_rule('lambdaUsePredicate', 'lambda', ['INNER-BOOL'],    5.0, bv_type='INNER-BOOL', bv_args=['OBJECT'], bv_prefix='F')
+grammar.add_rule('lambdaUsePredicate', 'lambda', ['Pabstraction'], 1.0,  bv_type='INNER-BOOL', bv_args=['OBJECT'], bv_prefix='F')
 
 # Define a predicate that will just check if something is in a BASE-SET
-G.add_rule('lambdaDefinePredicate', 'lambda', ['lambdaDefinePredicateINNER'], 1.0,  bv_type='OBJECT', bv_args=None, bv_prefix='z')
+grammar.add_rule('lambdaDefinePredicate', 'lambda', ['lambdaDefinePredicateINNER'], 1.0,  bv_type='OBJECT', bv_args=None, bv_prefix='z')
 # the function on objects, that allows them to be put into classes (analogous to a logical model here)
-G.add_rule('lambdaDefinePredicateINNER', 'is_in_', ['OBJECT', 'BASE-SET'], 1.0)
+grammar.add_rule('lambdaDefinePredicateINNER', 'is_in_', ['OBJECT', 'BASE-SET'], 1.0)
 
 # After we've defined F, these are used to construct the concept
-G.add_rule('INNER-BOOL', 'and_', ['INNER-BOOL', 'INNER-BOOL'], 1.0)
-G.add_rule('INNER-BOOL', 'or_', ['INNER-BOOL', 'INNER-BOOL'], 1.0)
-G.add_rule('INNER-BOOL', 'not_', ['INNER-BOOL'], 1.0)
+grammar.add_rule('INNER-BOOL', 'and_', ['INNER-BOOL', 'INNER-BOOL'], 1.0)
+grammar.add_rule('INNER-BOOL', 'or_', ['INNER-BOOL', 'INNER-BOOL'], 1.0)
+grammar.add_rule('INNER-BOOL', 'not_', ['INNER-BOOL'], 1.0)
 
-G.add_rule('OBJECT', 'x', None, 1.0)
-G.add_rule('OBJECT', 'y', None, 1.0)
+grammar.add_rule('OBJECT', 'x', None, 1.0)
+grammar.add_rule('OBJECT', 'y', None, 1.0)
 
 # BASE-SET is here a set of BASE-OBJECTS (non-args)
-G.add_rule('BASE-SET', 'set_add_', ['BASE-OBJECT', 'BASE-SET'], 1.0)
-G.add_rule('BASE-SET', 'set_', [], 1.0)
+grammar.add_rule('BASE-SET', 'set_add_', ['BASE-OBJECT', 'BASE-SET'], 1.0)
+grammar.add_rule('BASE-SET', 'set_', [], 1.0)
 
 objects = [ t+str(i) for t,i in itertools.product('pnx', range(3)) ] 
 
 for o in objects:
-	G.add_rule('BASE-OBJECT', qq(o), None, 1.0)
+	grammar.add_rule('BASE-OBJECT', qq(o), None, 1.0)
 
 #from LOTlib.Subtrees import *
-#for t in generate_trees(G):
+#for t in generate_trees(grammar):
 	#print t
 	
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -73,10 +73,10 @@ for a,b in itertools.product(objects, objects):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from LOTlib.Proposals import *
-mp = MixtureProposal(G, [RegenerationProposal(G), InsertDeleteProposal(G)] )
+mp = MixtureProposal(grammar, [RegenerationProposal(grammar), InsertDeleteProposal(grammar)] )
 
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-h0 = LOTHypothesis(G, args=['x', 'y'], ALPHA=0.999, proposal_function=mp) # alpha here trades off with the amount of data. Currently assuming no noise, but that's not necessary
+h0 = LOTHypothesis(grammar, args=['x', 'y'], ALPHA=0.999, proposal_function=mp) # alpha here trades off with the amount of data. Currently assuming no noise, but that's not necessary
 
 from LOTlib.Inference.MetropolisHastings import mh_sample
 for h in mh_sample(h0, data, 4000000, skip=100):

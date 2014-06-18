@@ -17,7 +17,7 @@ def get_rule_counts(grammar, t):
 	
 	counts = defaultdict(int) # a count for each hash type
 	
-	for x in ti:
+	for x in t:
 		if x.ruleid >= 0: counts[x.ruleid] += 1
 	
 	# and convert into a list of vectors (with the right zero counts)

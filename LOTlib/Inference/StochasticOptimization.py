@@ -51,7 +51,7 @@ if __name__ == "__main__":
 	data = generate_data(200)
 
 	# A starting hypothesis (later ones are created by .propose, called in LOTlib.MetropolisHastings
-	initial_hyp = NumberExpression(G)
+	initial_hyp = NumberExpression(grammar)
 
 	for h in datawise_optimize(initial_hyp, data):
 		#pass

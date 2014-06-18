@@ -12,12 +12,12 @@ class SimpleGenerativeHypothesis(LOTHypothesis):
 		
 		NOTE: FOR NOW, Insert/Delete moves are taken off because of some weirdness with the lambda thunks
 	"""
-	def __init__(self, G, nsamples=100, **kwargs): 
+	def __init__(self, grammar, nsamples=100, **kwargs): 
 		""" kwargs should include ll_sd """
 		assert kwargs.get('args', None) is None, "Cannot specify args to SimpleGenerativeHypothesis"
 		self.nsamples=nsamples
 		
-		LOTHypothesis.__init__(self, G, args=[], **kwargs) # this is simple-generative since args=[] (a thunk)
+		LOTHypothesis.__init__(self, grammar, args=[], **kwargs) # this is simple-generative since args=[] (a thunk)
 	
 	def compute_single_likelihood(self, datum):
 		assert False, "Should not call this!"

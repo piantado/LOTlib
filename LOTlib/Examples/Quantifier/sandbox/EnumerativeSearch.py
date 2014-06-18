@@ -10,25 +10,25 @@ show_baseline_distribution()
 print "\n\n"
 
 def random_lexicon():
-	ret = GriceanSimpleLexicon(G, args=['A', 'B', 'S'])
-	for w in target.all_words(): ret.set_word(w, G.generate('START'))
+	ret = GriceanSimpleLexicon(grammar, args=['A', 'B', 'S'])
+	for w in target.all_words(): ret.set_word(w, grammar.generate('START'))
 	return ret
 	
 
 # intialize a learner lexicon, at random
 #learner = random_lexicon()
 #for w in target.all_words():
-	#learner.set_word(w, G.generate('START')) # eahc word returns a true, false, or undef (None)
+	#learner.set_word(w, grammar.generate('START')) # eahc word returns a true, false, or undef (None)
 
 ## sample the target data
 data = generate_data(1500)
 
 nt_moves = dict() # hash from nonterminals to a *list* of possible moves
-for nt in G.nonterminals():
+for nt in grammar.nonterminals():
 	
 	fs = UniquePriorityQueue(N=100, max=True)
 	for i in xrange(50000):
-		g = G.generate(nt)
+		g = grammar.generate(nt)
 		fs.push(g, g.log_probability())
 	
 	nt_moves[nt] = fs.get_all()

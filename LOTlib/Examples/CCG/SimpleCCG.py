@@ -7,6 +7,9 @@
 	TODO: Learn that MAN is JOHN or BILL
 	
 """
+
+import re
+
 from LOTlib import lot_iter
 from LOTlib.Miscellaneous import qq
 from LOTlib.FiniteBestSet import FiniteBestSet

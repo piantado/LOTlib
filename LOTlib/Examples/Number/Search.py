@@ -55,7 +55,7 @@ def run(data_size):
 	data = generate_data(data_size)
 	
 	# starting hypothesis -- here this generates at random
-	h0 = NumberExpression(G)
+	h0 = NumberExpression(grammar)
 	
 	hyps = FiniteBestSet(max=True, N=options.TOP_COUNT, key="posterior_score") 
 	hyps.add( mh_sample(h0, data, options.STEPS, trace=False) )

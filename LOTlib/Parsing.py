@@ -49,8 +49,8 @@ def list2FunctionNode(l, style="atis"):
 				return FunctionNode('FUNCTION', 'lambda', [rec(l[3])], generation_probability=0.0, bv_type=l[1], bv_args=None ) ## TOOD: HMM WHAT IS THE BV?
 			else:
 				return FunctionNode(l[0], l[0], map(rec, l[1:]), generation_probability=0.0)
-		elif sytle is 'scheme':
-			assert False #TODO: Add this scheme functionality -- basically differnet handling of lambda bound variables
+		elif style is 'scheme':
+			raise NotImplementedError
 			
 	else: # for non-list
 		return l

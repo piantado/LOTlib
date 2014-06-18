@@ -50,10 +50,10 @@ data = generate_data(data_size)
 all_words = target.all_words()
 
 # intialize a learner lexicon, at random
-learner = GibbsyGriceanSimpleLexicon(G, args=['A', 'B', 'S'])
+learner = GibbsyGriceanSimpleLexicon(grammar, args=['A', 'B', 'S'])
 
 for w in all_words: 
-	learner.set_word(w, G.generate('START')) # eahc word returns a true, false, or undef (None)
+	learner.set_word(w, grammar.generate('START')) # eahc word returns a true, false, or undef (None)
 
 
 for g in LOTlib.MetropolisHastings.gibbs_sample(learner, data, STEPS, dimensions=all_words):

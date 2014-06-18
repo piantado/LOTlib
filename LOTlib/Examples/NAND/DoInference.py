@@ -26,7 +26,7 @@ all_hypotheses = FiniteBestSet()
 for i, f in enumerate(TARGET_CONCEPTS):
 	
 	# Set up the hypothesis
-	h0 = LOTHypothesis(G, start='START', args=['x'])
+	h0 = LOTHypothesis(grammar, start='START', args=['x'])
 
 	# Set up some data
 	data = generate_data(NDATA, f)

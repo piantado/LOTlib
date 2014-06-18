@@ -4,15 +4,16 @@
 	These are really just functions that allow us to initialize and store some state (like a grammar)
 	They all return [proposal, forwardp-backwardp] for use in MH.
 	
-	TODO: MixtureProposal only works correctly if boht are ergodic. If not, we may need something special to do forward/backward
+	TODO: MixtureProposal only works correctly if both are ergodic. If not, we may need something special to do forward/backward
 	
+	NOTE TODO: INSERt/DELETE DOES NOT WORK -- MAY NOT MATCH CORRECTLY WITH BV_NAME NOW
 """
 
-from LOTlib.Miscellaneous import weighted_sample, lambdaTrue
+from LOTlib.Miscellaneous import weighted_sample, lambdaTrue, sample1
 from LOTlib.FunctionNode import *
 from copy import copy
 from math import log
-from random import random
+from random import random, randint
 import numpy
 
 class LOTProposal(object):

@@ -8,6 +8,7 @@ from copy import copy, deepcopy
 import LOTlib
 from LOTlib.Miscellaneous import *
 
+import LOTlib.BasicPrimitives 
 
 class Hypothesis(object):
 	"""

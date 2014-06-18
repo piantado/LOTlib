@@ -35,7 +35,7 @@ def add_to_collapsed_trees(t):
 
 ############################################
 ### Now actually enumarate trees
-for t in G.increment_tree('START',DEPTH):
+for t in grammar.increment_tree('START',DEPTH):
 	if t.count_subnodes() <= MAX_NODES: 	
 		add_to_collapsed_trees(t)
 		all_tree_count += 1
@@ -44,7 +44,7 @@ for t in G.increment_tree('START',DEPTH):
 ## for kinder saving and unsaving:
 upq = FiniteBestSet(max=True)
 for k in collapsed_forms.values(): 
-	upq.push(LOTHypothesis(G, k, args=['A', 'B', 'S']), 0.0)
+	upq.push(LOTHypothesis(grammar, k, args=['A', 'B', 'S']), 0.0)
 upq.save(OUT)
 
 print "Total tree count: ", all_tree_count

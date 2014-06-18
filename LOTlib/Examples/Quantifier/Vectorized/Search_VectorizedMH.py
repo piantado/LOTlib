@@ -210,7 +210,7 @@ class VectorizedLexicon_DistanceMetricProposal(VectorizedLexicon):
 		return new, fb
 
 def VectorizedLexicon_to_SimpleLexicon(vl):
-	L = SimpleLexicon(G, args=['A', 'B', 'S']) ## REALLY THIS SHOULD BE GRICEAN
+	L = SimpleLexicon(grammar, args=['A', 'B', 'S']) ## REALLY THIS SHOULD BE GRICEAN
 	for i, wi in enumerate(vl.word_idx):
 		L.set_word(index2word[i], vl.finite_trees[wi])
 	

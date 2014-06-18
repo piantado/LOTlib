@@ -13,19 +13,19 @@ from LOTlib.DataAndObjects import FunctionData
 from LOTlib.Inference.MetropolisHastings import mh_sample
 from LOTlib.Miscellaneous import qq
 
-G = Grammar()
+grammar = Grammar()
 
-G.add_rule('START', '', ['EXPR'], 1.0) 
+grammar.add_rule('START', '', ['EXPR'], 1.0) 
 
-G.add_rule('EXPR', 'star_', ['EXPR'], 1.0)
-G.add_rule('EXPR', 'question_', ['EXPR'], 1.0)
-G.add_rule('EXPR', 'plus_', ['EXPR'], 1.0)
-G.add_rule('EXPR', 'or_', ['EXPR', 'EXPR'], 1.0) 
-G.add_rule('EXPR', 'str_append_', ['TERMINAL', 'EXPR'], 5.0) 
-G.add_rule('EXPR', 'terminal_', ['TERMINAL'], 5.0) 
+grammar.add_rule('EXPR', 'star_', ['EXPR'], 1.0)
+grammar.add_rule('EXPR', 'question_', ['EXPR'], 1.0)
+grammar.add_rule('EXPR', 'plus_', ['EXPR'], 1.0)
+grammar.add_rule('EXPR', 'or_', ['EXPR', 'EXPR'], 1.0) 
+grammar.add_rule('EXPR', 'str_append_', ['TERMINAL', 'EXPR'], 5.0) 
+grammar.add_rule('EXPR', 'terminal_', ['TERMINAL'], 5.0) 
 
 for v in 'abc.':
-	G.add_rule('TERMINAL', v, None, 1.0)
+	grammar.add_rule('TERMINAL', v, None, 1.0)
 	
 	
 	
@@ -69,7 +69,7 @@ data = [ FunctionData(input=['aaaa'], output=True),\
 	 FunctionData(input=['aaca'], output=True),\
 	 FunctionData(input=['a'],    output=True) ]
 
-h0 = RegexHypothesis(G, ALPHA=0.999)
+h0 = RegexHypothesis(grammar, ALPHA=0.999)
 for h in lot_iter(mh_sample(h0, data, 10000)):
 	print h.posterior_score, h.prior, h.likelihood, qq(h)
 	

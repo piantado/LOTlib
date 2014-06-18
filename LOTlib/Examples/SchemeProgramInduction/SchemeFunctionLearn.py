@@ -27,7 +27,7 @@ data = [
        #]  
        
 # And run
-h0 = SchemeFunction(G, ALPHA=ALPHA)       
+h0 = SchemeFunction(grammar, ALPHA=ALPHA)       
 for x in mh_sample(h0, data, STEPS):
 	
 	print x.posterior_score, x

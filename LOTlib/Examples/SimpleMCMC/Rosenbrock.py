@@ -12,9 +12,9 @@ import numpy
 
 class RosenbrockSampler(VectorHypothesis):
 	
-	def __init__(self, v=None):
-		if v is None: v = numpy.array([0.0, 0.0])
-		VectorHypothesis.__init__(self, v=v, N=2, proposal=numpy.eye(2)*0.1)
+	def __init__(self, value=None):
+		if value is None: value = numpy.array([0.0, 0.0])
+		VectorHypothesis.__init__(self, value=value, N=2, proposal=numpy.eye(2)*0.1)
 		
 	"""
 		MCMC plays nicest if we have defined prior and likelihood, and just don't touch compute_posterior
@@ -25,7 +25,7 @@ class RosenbrockSampler(VectorHypothesis):
 		return self.likelihood
 		
 	def compute_prior(self):
-		x,y = self.v
+		x,y = self.value
 		self.prior = -((1.0-x)**2.0 + 100.0*(y-x**2.0)**2.0)
 		self.posterior_score = self.prior + self.likelihood
 		return self.prior
@@ -33,8 +33,8 @@ class RosenbrockSampler(VectorHypothesis):
 	
 	def propose(self):
 		## NOTE: Does not copy proposal
-		newv = numpy.random.multivariate_normal(self.v, self.proposal)
-		return RosenbrockSampler(v=newv), 0.0 # from symmetric proposals
+		newv = numpy.random.multivariate_normal(self.value, self.proposal)
+		return RosenbrockSampler(value=newv), 0.0 # from symmetric proposals
 		
 if __name__ == "__main__":
 	

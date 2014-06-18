@@ -248,7 +248,7 @@ class NumberExpression():
 		self.set_value(v) # to zero out prior, likelhood, lp
 		self.prior, self.likelihood, self.lp = [-Infinity, -Infinity, -Infinity] # this should live here in case we overwrite self_value
 		
-		if v is None: self.set_value(G.generate('WORD'))
+		if v is None: self.set_value(grammar.generate('WORD'))
 		else:         self.set_value(v)
 	
 	# use this because it updates prior, likelihood, and lp
@@ -263,7 +263,7 @@ class NumberExpression():
 		
 	def propose(self): 
 		p = self.copy()
-		ph, fb = G.propose(self.value)
+		ph, fb = grammar.propose(self.value)
 		p.set_value(ph)
 		return p, fb
 		
@@ -349,48 +349,48 @@ class NumberExpression():
 ## Define the grammar
 #################################################
 
-G = PCFG()
+grammar = PCFG()
 
-G.add_rule('BOOL', 'and_',    ['BOOL', 'BOOL'], 1.0)
-G.add_rule('BOOL', 'or_',     ['BOOL', 'BOOL'], 1.0)
-G.add_rule('BOOL', 'not_',    ['BOOL'], 1.0)
+grammar.add_rule('BOOL', 'and_',    ['BOOL', 'BOOL'], 1.0)
+grammar.add_rule('BOOL', 'or_',     ['BOOL', 'BOOL'], 1.0)
+grammar.add_rule('BOOL', 'not_',    ['BOOL'], 1.0)
 
-G.add_rule('BOOL', 'True',    [], 1.0)
-G.add_rule('BOOL', 'False',   [], 1.0)
-G.add_rule('BOOL', 'equal_word_',   [], 1.0)
+grammar.add_rule('BOOL', 'True',    [], 1.0)
+grammar.add_rule('BOOL', 'False',   [], 1.0)
+grammar.add_rule('BOOL', 'equal_word_',   [], 1.0)
 
 ## note that this can take basically any types for return values
-G.add_rule('WORD', 'if_',    ['BOOL', 'WORD', 'WORD'], 0.5)
-G.add_rule('WORD', 'ifU_',    ['BOOL', 'WORD'], 0.5) # if returning undef if condition not met
+grammar.add_rule('WORD', 'if_',    ['BOOL', 'WORD', 'WORD'], 0.5)
+grammar.add_rule('WORD', 'ifU_',    ['BOOL', 'WORD'], 0.5) # if returning undef if condition not met
 
-G.add_rule('BOOL', 'cardinality1_',    ['SET'], 1.0)
-G.add_rule('BOOL', 'cardinality2_',    ['SET'], 1.0)
-G.add_rule('BOOL', 'cardinality3_',    ['SET'], 1.0)
+grammar.add_rule('BOOL', 'cardinality1_',    ['SET'], 1.0)
+grammar.add_rule('BOOL', 'cardinality2_',    ['SET'], 1.0)
+grammar.add_rule('BOOL', 'cardinality3_',    ['SET'], 1.0)
 
-G.add_rule('BOOL', 'equal_',    ['WORD', 'WORD'], 1.0)
-G.add_rule('WORD', 'L_',        ['SET'], 1.0) 
+grammar.add_rule('BOOL', 'equal_',    ['WORD', 'WORD'], 1.0)
+grammar.add_rule('WORD', 'L_',        ['SET'], 1.0) 
 
-G.add_rule('SET', 'x',     [], 10.0)
+grammar.add_rule('SET', 'x',     [], 10.0)
 
-G.add_rule('SET', 'union_',     ['SET', 'SET'], 1.0)
-G.add_rule('SET', 'intersection_',     ['SET', 'SET'], 1.0)
-G.add_rule('SET', 'setdifference_',     ['SET', 'SET'], 1.0)
-G.add_rule('SET', 'select_',     ['SET'], 1.0)
+grammar.add_rule('SET', 'union_',     ['SET', 'SET'], 1.0)
+grammar.add_rule('SET', 'intersection_',     ['SET', 'SET'], 1.0)
+grammar.add_rule('SET', 'setdifference_',     ['SET', 'SET'], 1.0)
+grammar.add_rule('SET', 'select_',     ['SET'], 1.0)
 
-G.add_rule('WORD', 'next_', ['WORD'], 1.0)
-G.add_rule('WORD', 'prev_', ['WORD'], 1.0)
+grammar.add_rule('WORD', 'next_', ['WORD'], 1.0)
+grammar.add_rule('WORD', 'prev_', ['WORD'], 1.0)
 
-G.add_rule('WORD', 'undef', [], 1.0)
-G.add_rule('WORD', 'one_', [], 0.10)
-G.add_rule('WORD', 'two_', [], 0.10)
-G.add_rule('WORD', 'three_', [], 0.10)
-G.add_rule('WORD', 'four_', [], 0.10)
-G.add_rule('WORD', 'five_', [], 0.10)
-G.add_rule('WORD', 'six_', [], 0.10)
-G.add_rule('WORD', 'seven_', [], 0.10)
-G.add_rule('WORD', 'eight_', [], 0.10)
-G.add_rule('WORD', 'nine_', [], 0.10)
-G.add_rule('WORD', 'ten_', [], 0.10)
+grammar.add_rule('WORD', 'undef', [], 1.0)
+grammar.add_rule('WORD', 'one_', [], 0.10)
+grammar.add_rule('WORD', 'two_', [], 0.10)
+grammar.add_rule('WORD', 'three_', [], 0.10)
+grammar.add_rule('WORD', 'four_', [], 0.10)
+grammar.add_rule('WORD', 'five_', [], 0.10)
+grammar.add_rule('WORD', 'six_', [], 0.10)
+grammar.add_rule('WORD', 'seven_', [], 0.10)
+grammar.add_rule('WORD', 'eight_', [], 0.10)
+grammar.add_rule('WORD', 'nine_', [], 0.10)
+grammar.add_rule('WORD', 'ten_', [], 0.10)
 
 def get_knower_pattern(ne):
 	"""

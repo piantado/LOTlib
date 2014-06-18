@@ -494,22 +494,22 @@ if __name__ == "__main__":
 		#print x.log_probability(), x
 	
 	
-	G = Grammar()
-	G.add_rule('START', '', ['EXPR'], 1.0)
-	#G.add_rule('EXPR', 'somefunc_', ['EXPR', 'EXPR', 'EXPR'], 1.0, resample_p=5.0)
-	G.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 4.0, resample_p=10.0)
-	G.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 3.0, resample_p=5.0)
-	G.add_rule('EXPR', 'divide_', ['EXPR', 'EXPR'], 2.0)
-	G.add_rule('EXPR', 'subtract_', ['EXPR', 'EXPR'], 1.0)
-	G.add_rule('EXPR', 'x', [], 15.0) # these terminals should have None for their function type; the literals
-	G.add_rule('EXPR', '1.0', [], 3.0)
-	G.add_rule('EXPR', '13.0', [], 2.0)
+	grammar = Grammar()
+	grammar.add_rule('START', '', ['EXPR'], 1.0)
+	#grammar.add_rule('EXPR', 'somefunc_', ['EXPR', 'EXPR', 'EXPR'], 1.0, resample_p=5.0)
+	grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 4.0, resample_p=10.0)
+	grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 3.0, resample_p=5.0)
+	grammar.add_rule('EXPR', 'divide_', ['EXPR', 'EXPR'], 2.0)
+	grammar.add_rule('EXPR', 'subtract_', ['EXPR', 'EXPR'], 1.0)
+	grammar.add_rule('EXPR', 'x', [], 15.0) # these terminals should have None for their function type; the literals
+	grammar.add_rule('EXPR', '1.0', [], 3.0)
+	grammar.add_rule('EXPR', '13.0', [], 2.0)
 	
 	## We generate a few ways, mapping strings to the actual things
 	#print "Testing increment (no lambda)"
 	#TEST_INC = dict()
 	
-	#for t in G.increment_tree('START',3): 
+	#for t in grammar.increment_tree('START',3): 
 		#TEST_INC[str(t)] = t
 	
 	#print "Testing generate (no lambda)"
@@ -517,12 +517,12 @@ if __name__ == "__main__":
 	TARGET = dict()
 	from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 	for i in xrange(10000): 
-		t = G.generate('START')
+		t = grammar.generate('START')
 		# print ">>", t, ' ', dir(t)
 		TEST_GEN[str(t)] = t
 		
 		if t.count_nodes() < 10:
-			TARGET[LOTHypothesis(G, value=copy(t) )] = t.log_probability()
+			TARGET[LOTHypothesis(grammar, value=copy(t) )] = t.log_probability()
 			# print out log probability and tree
 			print t, ' ', t.log_probability()
 		
@@ -530,7 +530,7 @@ if __name__ == "__main__":
 	from LOTlib.Testing.Evaluation import evaluate_sampler
 	import LOTlib.MetropolisHastings
 	
-	hyp = LOTHypothesis(G)
+	hyp = LOTHypothesis(grammar)
 	evaluate_sampler(TARGET, LOTlib.MetropolisHastings.mh_sample(hyp, [], 10000000), trace=False)
 	quit()
 	
@@ -539,7 +539,7 @@ if __name__ == "__main__":
 	#MCMC_STEPS = 10000
 	#import LOTlib.MetropolisHastings
 	#from LOTlib.Hypothesis import LOTHypothesis
-	#hyp = LOTHypothesis(G)
+	#hyp = LOTHypothesis(grammar)
 	#for x in LOTlib.MetropolisHastings.mh_sample(hyp, [], MCMC_STEPS): 
 		##print ">>", x
 		#TEST_MCMC[str(x.value)] = copy(x.value)
@@ -561,13 +561,13 @@ if __name__ == "__main__":
 	### And now do a version with bound variables
 	## # # # # # # # # # # # # # # # 
 
-	G.add_rule('EXPR', 'apply', ['FUNCTION', 'EXPR'], 5.0)
-	G.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0, bv_type='EXPR', bv_args=None) # bvtype means we introduce a bound variable below
+	grammar.add_rule('EXPR', 'apply', ['FUNCTION', 'EXPR'], 5.0)
+	grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0, bv_type='EXPR', bv_args=None) # bvtype means we introduce a bound variable below
 	
 	print "Testing generate (lambda)" 
 	TEST_GEN = dict()
 	for i in xrange(10000): 
-		x = G.generate('START')
+		x = grammar.generate('START')
 		TEST_GEN[str(x)] = x
 		#print x
 		#x.fullprint()
@@ -578,12 +578,12 @@ if __name__ == "__main__":
 	MCMC_STEPS = 50000
 	import LOTlib.MetropolisHastings
 	from LOTlib.Hypothesis import LOTHypothesis
-	hyp = LOTHypothesis(G)
+	hyp = LOTHypothesis(grammar)
 	for x in LOTlib.MetropolisHastings.mh_sample(hyp, [], MCMC_STEPS): 
 		TEST_MCMC[str(x.value)] = copy(x.value)
 		TEST_MCMC_COUNT[str(x.value)] += 1 # keep track of these
 		#print x
-		#for kk in G.iterate_subnodes(x.value, do_bv=True, yield_depth=True):
+		#for kk in grammar.iterate_subnodes(x.value, do_bv=True, yield_depth=True):
 			#print ">>\t", kk
 		#print "\n"
 		#x.value.fullprint()
@@ -623,15 +623,15 @@ if __name__ == "__main__":
 	# To check the computation of lp_regenerate_propose_to, which should return how likely we are to propose
 	# from one tree to another
 	#from LOTlib.Examples.Number.Shared import *
-	#x = NumberExpression(G).value
+	#x = NumberExpression(grammar).value
 	#NN = 100000
 	#d = defaultdict(int)
 	#for i in xrange(NN):
-		#y,_ = G.propose(x, insert_delete_probability=0.0)
+		#y,_ = grammar.propose(x, insert_delete_probability=0.0)
 		#d[y] += 1
 	## Show counts and expected counts
 	#for y in sorted( d.keys(), key=lambda z: d[z]):
-		#EC = round(exp(G.lp_regenerate_propose_to(x,y))*NN)
+		#EC = round(exp(grammar.lp_regenerate_propose_to(x,y))*NN)
 		#if d[y] > 10 or EC > 10: # print only highish prob things
 			#print d[y], EC, y
 	#print ">>", x
