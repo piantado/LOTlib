@@ -79,7 +79,7 @@ class Grammar:
 		return self.rules.keys()
 		
 	# these take probs instead of log probs, for simplicity
-	def add_rule(self, nt, name, expansion, p, resample_p=1.0, bv_type=None, bv_args=None, bv_prefix='y', bv_p=None, rid=None):
+	def add_rule(self, nt, name, to, p, resample_p=1.0, bv_type=None, bv_args=None, bv_prefix='y', bv_p=None, rid=None):
 		"""
 			Adds a rule and returns it.
 			
@@ -87,7 +87,7 @@ class Grammar:
 			
 			*name* - the name of this function
 			
-			*expansion* - what you expand to (usually a FunctionNode).
+			*to* - what you expand to (usually a FunctionNode).
 			
 			*p* - unnormalized probability of expansion
 			
@@ -109,7 +109,7 @@ class Grammar:
 			self.bv_count += 1
 			
 		# Creates the rule and add it
-		newrule = GrammarRule(nt,name,expansion, p=p, resample_p=resample_p, bv_type=bv_type, bv_args=bv_args, bv_prefix=bv_prefix, bv_p=bv_p, rid=rid)
+		newrule = GrammarRule(nt,name,to, p=p, resample_p=resample_p, bv_type=bv_type, bv_args=bv_args, bv_prefix=bv_prefix, bv_p=bv_p, rid=rid)
 		self.rules[nt].append(newrule)
 		
 		return newrule
@@ -134,11 +134,11 @@ class Grammar:
 		"""
 		self.bv_rule_id += 1 # A unique identifier for each bound variable rule (may get quite large!)
 		
-		if bv_p is None: bv_p = self.BV_P # use the default if none
+		if bv_p is None:
+			bv_p = self.BV_P # use the default if none
 		
 		return self.add_rule( nt, name=bv_prefix+str(d), to=args, p=bv_p, resample_p=self.BV_RESAMPLE_P, rid=-self.bv_rule_id)
 			
-	
 	############################################################
 	## Generation
 	############################################################
@@ -151,7 +151,8 @@ class Grammar:
 		# TODO: We can make this limit the depth, if we want. Maybe that's dangerous?
 		# TODO: Add a check that we don't have any leftover bound variable rules, when d==0
 
-		if x == '*USE_START*': x = self.start
+		if x == '*USE_START*':
+			x = self.start
 		
 		if isinstance(x,list):
 			# If we get a list, just map along it to generate. We don't count lists as depth--only FunctionNodes
@@ -162,12 +163,12 @@ class Grammar:
 			# Wow this is really terrible for mixing...
 			v = np.random.normal()
 			gp = normlogpdf(v, 0.0, 1.0)
-			return FunctionNode(returntype=x, name=str(v), args=None, generation_probability=gp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
+			return FunctionNode(returntype=x, name=str(v), args=None, generation_probability=gp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) # #TODO: FIX THE ruleid
 		
 		elif x=='*uniform*':
 			v = np.random.rand()
 			gp = 0.0
-			return FunctionNode(returntype=x, name=str(v), args=None, generation_probability=gp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) ##TODO: FIX THE ruleid
+			return FunctionNode(returntype=x, name=str(v), args=None, generation_probability=gp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) # #TODO: FIX THE ruleid
 		
 		elif x is None:
 			return None
@@ -204,7 +205,6 @@ class Grammar:
 				#print "REMOVING ", added
 				self.remove_rule(added)
 				
-			
 			if raise_after is not None:
 				raise raise_after
 				
@@ -315,7 +315,8 @@ class Grammar:
 		"""
 		assert self.bv_count==0, "*** Error: increment_tree not yet implemented for bound variables."
 		
-		if LOTlib.SIG_INTERRUPTED: return # quit if interrupted
+		if LOTlib.SIG_INTERRUPTED:
+			return # quit if interrupted
 		
 		if isFunctionNode(x) and depth >= 0 and x.args is not None: 
 			#print "FN:", x, depth
@@ -330,12 +331,14 @@ class Grammar:
 			
 			# go all odometer on the kids below::
 			iters = [self.increment_tree(y,depth) if self.is_nonterminal(y) else None for y in x.args]
-			if len(iters) == 0: yield copy(x)
+			if len(iters) == 0:
+				yield copy(x)
 			else:
 				
 				# First, initialize the arguments
 				for i in xrange(len(iters)):
-					if iters[i] is not None: x.args[i] = iters[i].next()
+					if iters[i] is not None:
+						x.args[i] = iters[i].next()
 				
 				# the index of the last terminal symbol (may not be len(iters)-1),
 				last_terminal_idx = max( [i if iters[i] is not None else -1 for i in xrange(len(iters))] )
@@ -392,7 +395,8 @@ class Grammar:
 				for r in nonterminals:
 					n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), generation_probability=(log(r.p) - Z), bv_type=r.bv_type, bv_args=r.bv_args, ruleid=r.rid )
 					for q in self.increment_tree(n, depth-1): yield q
-		else:   raise StopIteration
+		else:
+			raise StopIteration
 			
 	
 	def lp_regenerate_propose_to(self, x, y, xZ=None, yZ=None):
@@ -430,13 +434,13 @@ class Grammar:
 				mismatch_count, mismatch_index = 0, 0
 				
 				if x.args is not None:
-					for i, xa, ya in zip(xrange(len(x.args)), x.args if x.args is not None else [], \
+					for i, xa, ya in zip(xrange(len(x.args)), x.args if x.args is not None else [], 
 										  y.args if y.args is not None else []):
 						if xa != ya: # checks whole subtree!
 							mismatch_count += 1
 							mismatch_index = i
 						
-				if   mismatch_count > 1: # We have to have only selected x,y to regenerate
+				if mismatch_count > 1: # We have to have only selected x,y to regenerate
 					pass
 				elif mismatch_count == 1: # we could propose to x, or x.args[mismatch_index], but nothing else (nothing else will fix the mismatch)
 					RP = logplusexp(RP, self.lp_regenerate_propose_to(x.args[mismatch_index], y.args[mismatch_index], xZ=xZ, yZ=yZ))
@@ -589,11 +593,11 @@ if __name__ == "__main__":
 	for x in TEST_GEN.values():
 		
 		# We'll only check values that appear in all
-		if str(x) not in TEST_MCMC : continue
+		if str(x) not in TEST_MCMC: continue
 			
 		#print TEST_GEN[str(x)].log_probability(),  TEST_MCMC[str(x)].log_probability(), x
 		
-		if abs( TEST_GEN[str(x)].log_probability() -  TEST_MCMC[str(x)].log_probability()) > 1e-9:
+		if abs( TEST_GEN[str(x)].log_probability() - TEST_MCMC[str(x)].log_probability()) > 1e-9:
 			print "----------------------------------------------------------------"
 			print "--- Mismatch in tree probabilities:                          ---"
 			print "----------------------------------------------------------------"
@@ -602,7 +606,7 @@ if __name__ == "__main__":
 			TEST_MCMC[str(x)].fullprint()
 			print "----------------------------------------------------------------"
 		
-		assert abs( TEST_GEN[str(x)].log_probability() -  TEST_MCMC[str(x)].log_probability()) < 1e-9
+		assert abs( TEST_GEN[str(x)].log_probability() - TEST_MCMC[str(x)].log_probability()) < 1e-9
 
 	# Now check that the MCMC actually visits the nodes the right number of time
 	keys = [x for x in TEST_MCMC.keys() if TEST_MCMC[x].count_nodes() <= 8 ] # get a set of common trees

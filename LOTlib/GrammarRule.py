@@ -6,13 +6,13 @@
 
 
 class GrammarRule:
-	def __init__(self, nt, name, expansion, rid, p=1.0, resample_p=1.0, bv_type=None, bv_args=None, bv_prefix="y", bv_p=None):
+	def __init__(self, nt, name, to, rid, p=1.0, resample_p=1.0, bv_type=None, bv_args=None, bv_prefix="y", bv_p=None):
 		"""
 			*nt* - the nonterminal
 
 			*name* - the name of this function
 
-			*expansion* - what you expand to (usually a FunctionNode).
+			*to* - what you expand to (usually a FunctionNode).
 
 			*rid* - the rule id number
 

@@ -54,7 +54,7 @@ class FunctionNode(object):
 			*bv_type* - Which bound variable
 			*bv_args* - Arguments of the Bound Variable. "None" implies this is a terminal, otherwise  a type signature.
 			*bv_prefix* - Bound variable Prefix
-			*bv_p* - ?
+			*bv_p* - Probability of the rule expanding to the bound variable.
 			*ruleid* - The rule ID number
 		"""
 		self.__dict__.update(locals())

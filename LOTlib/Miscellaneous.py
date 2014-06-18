@@ -335,8 +335,7 @@ def flip(p): return (random() < p)
 # NOTE: This now can take probs as a function, which is then mapped!
 def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, returnlist=False, Z=None):
 	"""
-	
-		when we return_probability, it is *always* a log probability
+		When we return_probability, it is *always* a log probability
 	"""
 	# check how probabilities are specified
 	# either as an argument, or attribute of objs (either probability or lp
