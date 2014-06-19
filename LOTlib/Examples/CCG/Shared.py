@@ -1,4 +1,10 @@
 import re
+from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+
+# What are the objects we may use?
+OBJECTS              = ['JOHN', 'MARY', 'SUSAN', 'BILL']
+SEMANTIC_1PREDICATES = ['SMILED', 'LAUGHED', 'MAN', 'WOMAN']
+SEMANTIC_2PREDICATES = ['SAW', 'LOVED']
 
 class Context:
 	"""
@@ -33,6 +39,3 @@ def can_compose(a,b):
 		if afrom == b: return ato
 		else:          return None
 	
-# How we make a hypothesis inside the lexicon
-def make_hypothesis(): 
-	return LOTHypothesis(G, args=['C'])

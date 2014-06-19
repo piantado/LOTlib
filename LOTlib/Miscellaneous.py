@@ -396,89 +396,31 @@ def lambdaTrue(*x): return True
 def lambdaFalse(*x): return True
 def lambdaNAN(*x): return float("nan")
 
-"""
-The Y combinator
-#example:
-#fac = lambda f: lambda n: (1 if n<2 else n*(f(n-1)))
-#Y(fac)(10)
-"""
-Y = lambda f: (lambda x: x(x)) (lambda y : f(lambda *args: y(y)(*args)) )
-
-
-class RecursionDepthException(Exception):
-	# An exception class for recursing too deep
-	def __init__(self): pass
-
-
-MAX_RECURSION = 25
-def Y_bounded(f):
+def lambda_str(fn):
 	"""
-	A fancy fixed point iterator that only goes MAX_RECURSION deep, else throwing a a RecusionDepthException
+		A nicer printer for pure lambda calculus
 	"""
-	return (lambda x, n: x(x, n)) (lambda y, n: f(lambda *args: y(y, n+1)(*args)) if n < MAX_RECURSION else raise_exception(RecursionDepthException()), 0)
-
-
-
-
-def Ystar(*l):
-	"""
-	The Y* combinator for mutually recursive functions. Holy shit.
-	
-	(define (Y* . l)
-          ((lambda (u) (u u))
-            (lambda (p) (map (lambda (li) (lambda x (apply (apply li (p p)) x))) l))))
-	
-	http://okmij.org/ftp/Computation/fixed-point-combinators.html]
-	
-	http://stackoverflow.com/questions/4899113/fixed-point-combinator-for-mutually-recursive-functions
-	
-	
-	Here is even/odd:
-	
-	
-	even,odd = Ystar( lambda e,o: lambda x: (x==0) or o(x-1), \
-                          lambda e,o: lambda x: (not x==0) and e(x-1) )
-                          
-        Note that we require a lambda e,o on the outside so that these can have names inside.
-	"""
-	
-	return (lambda u: u(u))(lambda p: map(lambda li: lambda x: apply(li, p(p))(x), l))
-
-
-
-"""
-	Evaluation of expressions
-"""
-
-def evaluate_expression(e, args=['x'], recurse="L_", addlambda=True):
-	"""
-	This evaluates an expression. If 
-	- e         - the expression itself -- either a str or something that can be made a str
-	- addlambda - should we include wrapping lambda arguments in args? lambda x: ...
-	- recurse   - if addlambda, this is a special primitive name for recursion
-	- args      - if addlambda, a list of all arguments to be added
-	
-	g = evaluate_expression("x*L(x-1) if x > 1 else 1")
-	g(12)
-	"""
-	
-	if not isinstance(e,str): e = str(e)
-	f = None # the function
-	
-	try:
-		if addlambda:
-			f = eval('lambda ' + recurse + ': lambda ' + ','.join(args) + ' :' + e)
-			return Y_bounded(f)
-		else: 
-			f = eval(e)
-			return f
-	except:
-		print "Error in evaluate_expression:", e
-		raise RuntimeError
-		exit(1)
+	if fn is None: # just pass these through -- simplifies a lot
+		return None
+	elif fn.name == '': 
+		assert len(fn.args)==1
+		return lambda_str(fn.args[0])
+	elif fn.name == 'lambda':
+		assert len(fn.args)==1
+		#return u"\u03BB%s.%s" % (fn.bv_name, lambda_str(fn.args[0]))
+		return "L%s.%s" % (fn.bv_name, lambda_str(fn.args[0]))
+	elif fn.name == 'apply_':
+		assert len(fn.args)==2
+		if fn.args[0].name == 'lambda':
+			return "((%s)(%s))" % tuple(map(lambda_str, fn.args))
+		else:
+			return "(%s(%s))" % tuple(map(lambda_str, fn.args))
+	else:
+		assert fn.args is None		
+		return str(fn.name)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #  And import the primitives for "eval"
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from LOTlib.BasicPrimitives import * # Needed for calling "eval"
+#from LOTlib.BasicPrimitives import * # Needed for calling "eval"

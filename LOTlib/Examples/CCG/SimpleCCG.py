@@ -7,97 +7,18 @@
 	TODO: Learn that MAN is JOHN or BILL
 	
 """
-from copy import copy
 
-import LOTlib
+import re
+
 from LOTlib import lot_iter
-from LOTlib.Miscellaneous import unique, qq
-from LOTlib.Grammar import Grammar
-from LOTlib.DataAndObjects import UtteranceData
-from LOTlib.FunctionNode import cleanFunctionNodeString
-from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-from LOTlib.Hypotheses.SimpleLexicon import SimpleLexicon
-from LOTlib.Inference.MetropolisHastings import mh_sample
+from LOTlib.Miscellaneous import qq
 from LOTlib.FiniteBestSet import FiniteBestSet
-from Shared import *
 from CCGLexicon import CCGLexicon
-
-
-SEMANTIC_1PREDICATES = ['SMILED', 'LAUGHED', 'MAN', 'WOMAN']
-SEMANTIC_2PREDICATES = ['SAW', 'LOVED']
-OBJECTS              = ['JOHN', 'MARY', 'SUSAN', 'BILL']
-
-G = Grammar()
-
-G.add_rule('START', '', ['FUNCTION'], 2.0) 
-G.add_rule('START', '', ['BOOL'], 1.0) 
-G.add_rule('START', '', ['OBJECT'], 1.0) 
-
-for m in SEMANTIC_1PREDICATES: 
-	G.add_rule('BOOL', 'C.relation_', [ qq(m), 'OBJECT'], 1.0)
-	
-for m in SEMANTIC_2PREDICATES: 
-	G.add_rule('BOOL', 'C.relation_', [ qq(m), 'OBJECT', 'OBJECT'], 1.0)
-
-for o in OBJECTS:
-	G.add_rule('OBJECT', qq(o), None, 1.0)
-
-G.add_rule('BOOL', 'exists_', ['FUNCTION.O2B', 'C.objects'], 1.00) # can quantify over objects->bool functions
-G.add_rule('BOOL', 'forall_', ['FUNCTION.O2B', 'C.objects'], 1.00)
-G.add_rule('FUNCTION.O2B', 'lambda', ['BOOL'], 1.0, bv_type='OBJECT') 
-
-G.add_rule('BOOL', 'and_', ['BOOL', 'BOOL'], 1.0)
-G.add_rule('BOOL', 'or_', ['BOOL', 'BOOL'], 1.0)
-G.add_rule('BOOL', 'not_', ['BOOL'], 1.0)
-
-# And for outermost functions
-G.add_rule('FUNCTION', 'lambda', ['START'], 1.0, bv_type='OBJECT')
-G.add_rule('FUNCTION', 'lambda', ['START'], 1.0, bv_type='BOOL', bv_args=['OBJECT'])
-G.add_rule('FUNCTION', 'lambda', ['START'], 1.0, bv_type='BOOL', bv_args=['OBJECT', 'OBJECT'])
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Set up the data
-
-possible_utterances = [] # this will be referenced in every UTteranceData, and at the end we'll use it to do all possible strings
-
-# These are always true
-BASE_FACTS = [("MAN", "JOHN"),("MAN", "BILL"),("WOMAN", "SUSAN"),("WOMAN", "MARY")]
-
-
-data = [] # For now, some unambiguous data:
-data.append(  UtteranceData( utterance=str2sen('john saw mary'), context=Context(OBJECTS, BASE_FACTS+[("SAW", "JOHN", "MARY")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('mary saw john'), context=Context(OBJECTS, BASE_FACTS+[("SAW", "MARY", "JOHN")]), possible_utterances=possible_utterances  ))
-
-data.append(  UtteranceData( utterance=str2sen('mary smiled'), context=Context(OBJECTS, BASE_FACTS+[("SMILED", "MARY")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('john smiled'), context=Context(OBJECTS, BASE_FACTS+[("SMILED", "JOHN")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('bill smiled'), context=Context(OBJECTS, BASE_FACTS+[("SMILED", "BILL")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('susan smiled'), context=Context(OBJECTS, BASE_FACTS+[("SMILED", "SUSAN")]), possible_utterances=possible_utterances  ))
-
-data.append(  UtteranceData( utterance=str2sen('john is man'), context=Context(OBJECTS, BASE_FACTS+[("MAN", "JOHN")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('bill is man'), context=Context(OBJECTS, BASE_FACTS+[("MAN", "BILL")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('mary is woman'), context=Context(OBJECTS, BASE_FACTS+[("WOMAN", "MARY")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('susan is woman'), context=Context(OBJECTS, BASE_FACTS+[("WOMAN", "SUSAN")]), possible_utterances=possible_utterances  ))
-
-
-data.append(  UtteranceData( utterance=str2sen('every man smiled'), context=Context(OBJECTS, BASE_FACTS+[("SMILED", "JOHN"),("SMILED", "BILL")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('every woman smiled'), context=Context(OBJECTS, BASE_FACTS+[("SMILED", "MARY"),("SMILED", "SUSAN")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('every man laughed'), context=Context(OBJECTS, BASE_FACTS+[("LAUGHED", "JOHN"),("LAUGHED", "BILL")]), possible_utterances=possible_utterances  ))
-data.append(  UtteranceData( utterance=str2sen('every woman laughed'), context=Context(OBJECTS, BASE_FACTS+[("LAUGHED", "MARY"),("LAUGHED", "SUSAN")]), possible_utterances=possible_utterances  ))
-
-# Just treat each possible utterance as 
-for di in data: possible_utterances.append( di.utterance )
-
-
-# keep track of all the words
-all_words = set()
-for di in data: 
-	for w in di.utterance: all_words.add(w)
-
-possible_utterances.append( str2sen('mary smiled'))
-all_words.add('mary')
+from Grammar import make_hypothesis
 
 
 
+from Data import all_words, data
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 SAMPLES = 100000
@@ -107,6 +28,7 @@ def run(llt=1.0):
 	h0 = CCGLexicon(make_hypothesis, words=all_words, alpha=0.9, palpha=0.9, likelihood_temperature=llt)
 
 	fbs = FiniteBestSet(N=10)
+	from LOTlib.Inference.MetropolisHastings import mh_sample
 	for h in lot_iter(mh_sample(h0, data, SAMPLES)):
 		fbs.add(h, h.posterior_score)
 	

@@ -12,12 +12,12 @@ def prior_sample(h0, data, N):
 	assert isinstance(h0, LOTHypothesis)
 	
 	# extract from the grammar
-	G = h0.grammar 
+	grammar = h0.grammar 
 	rt = h0.value.returntype
 	
 	for i in lot_iter(xrange(N)):
 	
-		h = type(h0)(G, start=rt)
+		h = type(h0)(grammar, start=rt)
 		h.compute_posterior(data)
 		
 		yield h
@@ -28,7 +28,7 @@ if __name__ == "__main__":
 	from LOTlib.Examples.Number.Shared import *
 	
 	data = generate_data(500)
-	h0 = NumberExpression(G)	
+	h0 = NumberExpression(grammar)	
 	for h in prior_sample(h0, data, 10000):
 		#h.revert() # undoes the craziness with the prior
 		print q(get_knower_pattern(h)), h.posterior_score, h.prior, h.likelihood, q(h)

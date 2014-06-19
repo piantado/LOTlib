@@ -72,9 +72,9 @@ if __name__ == '__main__':
 	
 	from LOTlib.Examples.Number.Shared import *
 	
-	#for t in generate_unique_trees(G, start='WORD'): print t
+	#for t in generate_unique_trees(grammar, start='WORD'): print t
 	
-	#for t in generate_unique_complete_subtrees(G, start='WORD'): print t
+	#for t in generate_unique_complete_subtrees(grammar, start='WORD'): print t
 
-	for t in generate_unique_partial_subtrees(G, start='WORD'): print t
+	for t in generate_unique_partial_subtrees(grammar, start='WORD'): print t
 	

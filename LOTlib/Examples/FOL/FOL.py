@@ -8,38 +8,38 @@ from LOTlib.Miscellaneous import unique
 from LOTlib.Grammar import Grammar
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
-G = Grammar()
+grammar = Grammar()
 
-G.add_rule('START', '', ['QUANT'], 1.0)
+grammar.add_rule('START', '', ['QUANT'], 1.0)
 
 # Very simple -- one allowed quantifier
-G.add_rule('QUANT', 'exists_', ['FUNCTION', 'SET'], 1.00)
-G.add_rule('QUANT', 'forall_', ['FUNCTION', 'SET'], 1.00) 
+grammar.add_rule('QUANT', 'exists_', ['FUNCTION', 'SET'], 1.00)
+grammar.add_rule('QUANT', 'forall_', ['FUNCTION', 'SET'], 1.00) 
 
 # The thing we are a function of
-G.add_rule('SET', 'S', None, 1.0)
+grammar.add_rule('SET', 'S', None, 1.0)
 
 # And allow us to create a new kind of function
-G.add_rule('FUNCTION', 'lambda', ['BOOL'], 1.0, bv_type='OBJECT')
-G.add_rule('BOOL', 'and_', ['BOOL', 'BOOL'], 1.0)
-G.add_rule('BOOL', 'or_', ['BOOL', 'BOOL'], 1.0)
-G.add_rule('BOOL', 'not_', ['BOOL'], 1.0)
+grammar.add_rule('FUNCTION', 'lambda', ['BOOL'], 1.0, bv_type='OBJECT')
+grammar.add_rule('BOOL', 'and_', ['BOOL', 'BOOL'], 1.0)
+grammar.add_rule('BOOL', 'or_', ['BOOL', 'BOOL'], 1.0)
+grammar.add_rule('BOOL', 'not_', ['BOOL'], 1.0)
 
 # non-terminal arguments get passed as normal python arguments
-G.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'red\''],   5.00) # --> is_color_(OBJECT, 'red') --> OBJECT.color == 'red'
-G.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'blue\''],  5.00) 
-G.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'green\''], 5.00) 
+grammar.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'red\''],   5.00) # --> is_color_(OBJECT, 'red') --> OBJECT.color == 'red'
+grammar.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'blue\''],  5.00) 
+grammar.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'green\''], 5.00) 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Just generate from this grammar
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #for i in xrange(100):
-	#print G.generate()
+	#print grammar.generate()
 
 # Or we can make them as hypotheses (functions of S):
 #for i in xrange(100):
-	#print LOTHypothesis(G, args=['S'])
+	#print LOTHypothesis(grammar, args=['S'])
 	
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -55,11 +55,11 @@ data = [ FunctionData(input=[ {Obj(color='red'), Obj(color='red'), Obj(color='gr
 	              output=True) ]
 
 # Create an initial hypothesis
-h0 = LOTHypothesis(G, args=['S'])
+h0 = LOTHypothesis(grammar, args=['S'])
 
 # OR if we want to specify and use insert/delete proposals
 #from LOTlib.Proposals import *
-#h0 = LOTHypothesis(G, proposal_function=MixtureProposal(G, [RegenerationProposal(G), InsertDeleteProposal(G)] ) )
+#h0 = LOTHypothesis(grammar, proposal_function=MixtureProposal(grammar, [RegenerationProposal(grammar), InsertDeleteProposal(grammar)] ) )
 
 
 # MCMC!

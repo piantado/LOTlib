@@ -107,7 +107,7 @@ if __name__ == "__main__":
 	from LOTlib.Examples.Number.Shared import *
 	
 	data = generate_data(500)
-	h0 = NumberExpression(G)	
+	h0 = NumberExpression(grammar)	
 	for h in mh_sample(h0, data, 10000):
 		print q(get_knower_pattern(h)), h.lp, h.prior, h.likelihood, q(h)
 		  

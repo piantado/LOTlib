@@ -37,7 +37,7 @@ def ptaboo_search(h0, data, steps, skip=0, noisy_memoize=1000, seen_penalty=1.0)
 			self.prior = self.rawprior
 			self.lp = self.prior + self.likelihood
 	
-	myh0 = WrapperClass(h0.grammar, v=h0.value) ## TODO: NOTE HERE WE ASSUME G IS TAKEN!
+	myh0 = WrapperClass(h0.grammar, v=h0.value) ## TODO: NOTE HERE WE ASSUME grammar IS TAKEN!
 	
 	# Now just run standard MCMC:
 	for h in lot_iter(mh_sample(myh0, data, steps, skip=skip)):
@@ -61,7 +61,7 @@ if __name__ == "__main__":
 	from LOTlib.Examples.Number.Shared import *
 	
 	data = generate_data(500)
-	h0 = NumberExpression(G)	
+	h0 = NumberExpression(grammar)	
 	for h in ptaboo_search(h0, data, 10000):
 		#h.revert() # undoes the craziness with the prior
 		print q(get_knower_pattern(h)), h.lp, h.prior, h.likelihood, q(h)

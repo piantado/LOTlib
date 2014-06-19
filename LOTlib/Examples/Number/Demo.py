@@ -19,7 +19,7 @@ SKIP = 1
 data = generate_data(DATA_SIZE)
 
 # A starting hypothesis (later ones are created by .propose, called in LOTlib.MetropolisHastings
-initial_hyp = NumberExpression(G)
+initial_hyp = NumberExpression(grammar)
 
 # store hypotheses we've found
 allhyp = FiniteBestSet(max=True,N=1000)

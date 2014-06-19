@@ -4,8 +4,6 @@
 	A function node -- a tree part representing a function and its arguments.
 	Also used for PCFG rules, where the arguments are nonterminal symbols.
 	
-	A Functionnode defaultly iterates over its subnodes
-	
 """
 # TODO: This could use some renaming FunctionNode.bv is not really a bound variable--its a list of rules that were added
 ## TODO: We should be able to eval list-builders like cons_ and list_ without calling python eval -- should be as fast as mapping to strings!

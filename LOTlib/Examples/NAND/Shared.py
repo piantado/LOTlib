@@ -29,17 +29,17 @@ TARGET_CONCEPTS = [lambda x: and_(is_shape_(x,'square'), is_color_(x,'blue')), \
 # ------------------------------------------------------------------
 FEATURE_WEIGHT = 2. # Probability of expanding to a terminal
 
-G = Grammar()
+grammar = Grammar()
 
-G.add_rule('START', '', ['BOOL'], 1.0)
+grammar.add_rule('START', '', ['BOOL'], 1.0)
 
-G.add_rule('BOOL', 'nand_', ['BOOL', 'BOOL'], 1.0/3.)
-G.add_rule('BOOL', 'nand_', ['True', 'BOOL'], 1.0/3.)
-G.add_rule('BOOL', 'nand_', ['False', 'BOOL'], 1.0/3.)
+grammar.add_rule('BOOL', 'nand_', ['BOOL', 'BOOL'], 1.0/3.)
+grammar.add_rule('BOOL', 'nand_', ['True', 'BOOL'], 1.0/3.)
+grammar.add_rule('BOOL', 'nand_', ['False', 'BOOL'], 1.0/3.)
 
 # And finally, add the primitives
-for s in SHAPES: G.add_rule('BOOL', 'is_shape_', ['x', q(s)], FEATURE_WEIGHT)
-for c in COLORS: G.add_rule('BOOL', 'is_color_', ['x', q(c)], FEATURE_WEIGHT)
+for s in SHAPES: grammar.add_rule('BOOL', 'is_shape_', ['x', q(s)], FEATURE_WEIGHT)
+for c in COLORS: grammar.add_rule('BOOL', 'is_color_', ['x', q(c)], FEATURE_WEIGHT)
 
 # ------------------------------------------------------------------
 # Set up the objects

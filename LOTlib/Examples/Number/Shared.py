@@ -28,48 +28,48 @@ WORDS = ['one_', 'two_', 'three_', 'four_', 'five_', 'six_', 'seven_', 'eight_',
 ## The priors here are somewhat hierarchical by type in generation, tuned to be a little more efficient
 ## (but the actual RR prior does not care about these probabilities)
 
-G = Grammar()
+grammar = Grammar()
 
-G.add_rule('BOOL', 'and_',    ['BOOL', 'BOOL'], 1./3.)
-G.add_rule('BOOL', 'or_',     ['BOOL', 'BOOL'], 1./3.)
-G.add_rule('BOOL', 'not_',    ['BOOL'], 1./3.)
+grammar.add_rule('BOOL', 'and_',    ['BOOL', 'BOOL'], 1./3.)
+grammar.add_rule('BOOL', 'or_',     ['BOOL', 'BOOL'], 1./3.)
+grammar.add_rule('BOOL', 'not_',    ['BOOL'], 1./3.)
 
-G.add_rule('BOOL', 'True',    None, 1.0/2.)
-G.add_rule('BOOL', 'False',   None, 1.0/2.)
+grammar.add_rule('BOOL', 'True',    None, 1.0/2.)
+grammar.add_rule('BOOL', 'False',   None, 1.0/2.)
 
 ## note that this can take basically any types for return values
-G.add_rule('WORD', 'if_',    ['BOOL', 'WORD', 'WORD'], 0.5)
-G.add_rule('WORD', 'ifU_',    ['BOOL', 'WORD'], 0.5) # if returning undef if condition not met
+grammar.add_rule('WORD', 'if_',    ['BOOL', 'WORD', 'WORD'], 0.5)
+grammar.add_rule('WORD', 'ifU_',    ['BOOL', 'WORD'], 0.5) # if returning undef if condition not met
 
-G.add_rule('BOOL', 'cardinality1_',    ['SET'], 1.0)
-G.add_rule('BOOL', 'cardinality2_',    ['SET'], 1.0)
-G.add_rule('BOOL', 'cardinality3_',    ['SET'], 1.0)
+grammar.add_rule('BOOL', 'cardinality1_',    ['SET'], 1.0)
+grammar.add_rule('BOOL', 'cardinality2_',    ['SET'], 1.0)
+grammar.add_rule('BOOL', 'cardinality3_',    ['SET'], 1.0)
 
-G.add_rule('BOOL', 'equal_',    ['WORD', 'WORD'], 1.0)
+grammar.add_rule('BOOL', 'equal_',    ['WORD', 'WORD'], 1.0)
 
-G.add_rule('SET', 'union_',     ['SET', 'SET'], 1./3.)
-G.add_rule('SET', 'intersection_',     ['SET', 'SET'], 1./3.)
-G.add_rule('SET', 'setdifference_',     ['SET', 'SET'], 1./3.)
-G.add_rule('SET', 'select_',     ['SET'], 1.0)
+grammar.add_rule('SET', 'union_',     ['SET', 'SET'], 1./3.)
+grammar.add_rule('SET', 'intersection_',     ['SET', 'SET'], 1./3.)
+grammar.add_rule('SET', 'setdifference_',     ['SET', 'SET'], 1./3.)
+grammar.add_rule('SET', 'select_',     ['SET'], 1.0)
 
-G.add_rule('SET', 'x',     None, 4.0)
+grammar.add_rule('SET', 'x',     None, 4.0)
 
-G.add_rule('WORD', 'L_',        ['SET'], 1.0) 
+grammar.add_rule('WORD', 'L_',        ['SET'], 1.0) 
 
-G.add_rule('WORD', 'next_', ['WORD'], 1.0)
-G.add_rule('WORD', 'prev_', ['WORD'], 1.0)
+grammar.add_rule('WORD', 'next_', ['WORD'], 1.0)
+grammar.add_rule('WORD', 'prev_', ['WORD'], 1.0)
 
-#G.add_rule('WORD', 'undef', None, 1.0)
-G.add_rule('WORD', 'one_', None, 0.10)
-G.add_rule('WORD', 'two_', None, 0.10)
-G.add_rule('WORD', 'three_', None, 0.10)
-G.add_rule('WORD', 'four_', None, 0.10)
-G.add_rule('WORD', 'five_', None, 0.10)
-G.add_rule('WORD', 'six_', None, 0.10)
-G.add_rule('WORD', 'seven_', None, 0.10)
-G.add_rule('WORD', 'eight_', None, 0.10)
-G.add_rule('WORD', 'nine_', None, 0.10)
-G.add_rule('WORD', 'ten_', None, 0.10)
+#grammar.add_rule('WORD', 'undef', None, 1.0)
+grammar.add_rule('WORD', 'one_', None, 0.10)
+grammar.add_rule('WORD', 'two_', None, 0.10)
+grammar.add_rule('WORD', 'three_', None, 0.10)
+grammar.add_rule('WORD', 'four_', None, 0.10)
+grammar.add_rule('WORD', 'five_', None, 0.10)
+grammar.add_rule('WORD', 'six_', None, 0.10)
+grammar.add_rule('WORD', 'seven_', None, 0.10)
+grammar.add_rule('WORD', 'eight_', None, 0.10)
+grammar.add_rule('WORD', 'nine_', None, 0.10)
+grammar.add_rule('WORD', 'ten_', None, 0.10)
 
 ##########################################################
 #Define a class for running MH
@@ -77,15 +77,15 @@ G.add_rule('WORD', 'ten_', None, 0.10)
 class NumberExpression(LOTHypothesis):
 	#__module__ = os.path.splitext(os.path.basename(__file__))[0]  # So that when we pickle this, we know where to read from
  	
-	def __init__(self, G, value=None, f=None, proposal_function=None, **kwargs): 
-		LOTHypothesis.__init__(self,G,proposal_function=proposal_function, **kwargs)
+	def __init__(self, grammar, value=None, f=None, proposal_function=None, **kwargs): 
+		LOTHypothesis.__init__(self,grammar,proposal_function=proposal_function, **kwargs)
 		
-		if value is None: self.set_value(G.generate('WORD'), f)
+		if value is None: self.set_value(grammar.generate('WORD'), f)
 		else:             self.set_value(value, f)
 		
 	def copy(self):
 		""" Must define this else we return "FunctionHypothesis" as a copy. We need to return a NumberExpression """
-		return NumberExpression(G, value=self.value.copy(), prior_temperature=self.prior_temperature)
+		return NumberExpression(grammar, value=self.value.copy(), prior_temperature=self.prior_temperature)
 		
 	def compute_prior(self): 
 		"""
@@ -98,7 +98,7 @@ class NumberExpression(LOTHypothesis):
 			else:                                  recursion_penalty = LG_1MGAMMA
 			
 			if USE_RR_PRIOR: # compute the prior with either RR or not.
-				self.prior = (recursion_penalty + G.RR_prior(self.value))  / self.prior_temperature
+				self.prior = (recursion_penalty + grammar.RR_prior(self.value))  / self.prior_temperature
 			else:
 				self.prior = (recursion_penalty + self.value.log_probability())  / self.prior_temperature
 			
@@ -120,7 +120,7 @@ class NumberExpression(LOTHypothesis):
 	
 	# must wrap these as SimpleExpressionFunctions
 	def enumerative_proposer(self):
-		for k in G.enumerate_pointwise(self.value):
+		for k in grammar.enumerate_pointwise(self.value):
 			yield NumberExpression(value=k)
 	
 

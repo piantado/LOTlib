@@ -6,7 +6,7 @@ from LOTlib.Grammar import Grammar
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
 from LOTlib.Miscellaneous import q
-from LOTlib.Miscellaneous import cons_ # for evaling
+from LOTlib.BasicPrimitives import cons_ # for evaling
 
 G = Grammar()
 
@@ -16,9 +16,11 @@ G.add_rule('START', 'I', None, 1.0)
 G.add_rule('START', 'S', None, 1.0)
 G.add_rule('START', 'K', None, 1.0)
 
-from LOTlib.CombinatoryLogic import combinator_reduce, CombinatorReduceException
+from LOTlib.Evaluation.CombinatoryLogic import combinator_reduce
+from LOTlib.Evaluation.EvaluationException import EvaluationException
 
 for _ in range(10000):
+	
 	t = G.generate()
 	
 	lst = t.liststring()
@@ -26,6 +28,6 @@ for _ in range(10000):
 	print lst, "\t->\t",
 	try:
 		print combinator_reduce(lst)
-	except CombinatorReduceException as e:
-		print "NON-HALT"
+	except EvaluationException as e:
+		print "*Probable-NON-HALT*"
 	
