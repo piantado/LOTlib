@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    TODO: Allow PCFG to take another tree of FunctionNodes in generation. It then recurses and only genreates the leaves
-	TODO: When we generate, we MUST have a START->EXPR expansion, otherwise the top level doesn't get searched
+TODO: Allow PCFG to take another tree of FunctionNodes in generation. It then recurses and only genreates the leaves
+TODO: When we generate, we MUST have a START->EXPR expansion, otherwise the top level doesn't get searched
 """
 
 try:                import numpy as np
@@ -28,9 +28,9 @@ class Grammar:
 
 			TODO: Implement this:
 			- This has a few special values of returntype, which are expected on the rhs of rules, and then generate continuous values
-				- *uniform* -- when the name is this, the value printed and evaled is a uniform random sample of [0,1) (which can be resampled via the PCFG)
-				- *normal*  -- 0 mean, 1 sd
-				- *exponential* - rate = 1
+				- \*uniform\* - when the name is this, the value printed and evaled is a uniform random sample of [0,1) (which can be resampled via the PCFG)
+				- \*normal\*  - 0 mean, 1 sd
+				- \*exponential\* - rate = 1
 				
 		NOTE: Bound variables have a rule id < 0
 		
