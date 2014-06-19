@@ -129,8 +129,15 @@ class Grammar:
 	def add_bv_rule(self, nt, args, bv_prefix, bv_p, d):
 		"""
 			Add an expansion to a bound variable of type t, at depth d. Add it and return it. 
-			*nt*: The Nonterminal. e.g. S in "S -> NP VP"
-			*args*: Arguments of the bound variable
+
+			*nt*
+				The Nonterminal. e.g. S in "S -> NP VP"
+
+			*args*
+				Arguments of the bound variable
+
+			*bv_prefix*
+				Bound variable Prefix e.g. the 'y' in y1, y2, y3...
 		"""
 		self.bv_rule_id += 1 # A unique identifier for each bound variable rule (may get quite large!)
 		
