@@ -9,21 +9,21 @@ try:                import numpy as np
 except ImportError: import numpypy as np
 
 
-from random import random, sample, randint
-import itertools
-from math import exp, log, sqrt, pi, e
+from random import random, sample
+from math import exp, log, pi
 import sys
 import math
 import collections
 
 import types # for checking if something is a function: isinstance(f, types.FunctionType)
+import re
 
 ## Some useful constants
 Infinity = float("inf")
 inf = Infinity
 Inf = Infinity
 Null = []
-TAU = 6.28318530718 #fuck pi
+TAU = 6.28318530718 # fuck pi
 
 ## For R-friendly
 T=True
@@ -82,8 +82,8 @@ def list2sexpstr(lst):
 		[['K', 'K'], [['S', 'K'], ['I', 'I']]] --> ((K K) ((S K)(I I)))
 	"""
 	s = re.sub(r'[\'\",]', r'', str(lst))
-	s = re.sub(r'\[', r'(', s)
-	s = re.sub(r'\]', r')', s)
+	s = re.sub(r'\[', '(', s) # changed r'(' to '('
+	s = re.sub(r'\]', ')', s) # changed r')' to ')'
 	return s
 	
 
@@ -350,13 +350,13 @@ def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, 
 	myprobs = None
 	if probs is None: # defaultly, we use .lp
 		myprobs = [1.0] * len(objs) # sample uniform
-	elif isinstance(probs, types.FunctionType): #NOTE: this does not work for class instance methods
+	elif isinstance(probs, types.FunctionType): # NOTE: this does not work for class instance methods
 		myprobs = map(probs, objs)
 	else: 
 		myprobs = map(float, probs)
 	
 	# Now normalize and run
-	if Z == None:
+	if Z is None:
 		if log: Z = logsumexp(myprobs)
 		else: Z = sum(myprobs)
 	#print log, myprobs, Z
@@ -380,7 +380,7 @@ def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, 
 					out.append( objs[i] )
 					break
 					
-	if N == 1 and (not returnlist): return out[0]  #don't give back a list if you just want one
+	if N == 1 and (not returnlist): return out[0]  # don't give back a list if you just want one
 	else:      return out
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
