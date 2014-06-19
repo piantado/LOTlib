@@ -10,7 +10,6 @@
 from pyparsing import Suppress, alphanums, Group, Forward, ZeroOrMore, Word
 from LOTlib.FunctionNode import FunctionNode
 from LOTlib.Miscellaneous import unlist_singleton
-import pprint
 
 #####################################################################
 ## Here we define a super simple grammar for lambdas
@@ -27,7 +26,9 @@ sexp << ( token | sexpList )
 def parseScheme(s):
 	"""
 		Return a list of list of lists... for a string containing a simple lambda expression (no quoting, etc)
-		NOTE: This converts to lowercase
+		Keeps uppercase and lowercase letters exactly the same
+
+		e.g. parseScheme("(S (K (S I)) (S (K K) I) x y)") --> ['S', ['K', ['S', 'I']], ['S', ['K', 'K'], 'I'], 'x', 'y']
 	"""
 	
 	x = sexp.parseString(s, parseAll=True)
@@ -46,7 +47,7 @@ def list2FunctionNode(l, style="atis"):
 		elif style is 'atis':
 			rec = lambda x: list2FunctionNode(x, style=style) # a wrapper to my recursive self
 			if l[0] == 'lambda':
-				return FunctionNode('FUNCTION', 'lambda', [rec(l[3])], generation_probability=0.0, bv_type=l[1], bv_args=None ) ## TOOD: HMM WHAT IS THE BV?
+				return FunctionNode('FUNCTION', 'lambda', [rec(l[3])], generation_probability=0.0, bv_type=l[1], bv_args=None ) # TOOD: HMM WHAT IS THE BV?
 			else:
 				return FunctionNode(l[0], l[0], map(rec, l[1:]), generation_probability=0.0)
 		elif style is 'scheme':
@@ -68,7 +69,8 @@ if __name__ == '__main__':
 	
 	x = parseScheme(test2)
 	#print x
-	assert str(x) == str(['lambda', '$0', 'e', ['and', ['day_arrival', '$0', 'thursday:da'], ['to', '$0', 'baltimore:ci'], ['<', ['arrival_time', '$0'], '900:ti'], ['during_day', '$0', 'morning:pd'], ['exists', '$1', ['and', ['airport', '$1'], ['from', '$0', '$1']]]]])
+	assert str(x) == str(['lambda', '$0', 'e', ['and', ['day_arrival', '$0', 'thursday:da'],
+		['to', '$0', 'baltimore:ci'], ['<', ['arrival_time', '$0'], '900:ti'], 
+		['during_day', '$0', 'morning:pd'], ['exists', '$1', ['and', ['airport', '$1'], ['from', '$0', '$1']]]]])
 	
 	print list2FunctionNode(x)
-	
