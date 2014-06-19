@@ -13,7 +13,8 @@ import re
 from LOTlib.Miscellaneous import None2Empty
 from copy import copy, deepcopy
 from math import log
-
+from scipy.misc import logsumexp
+from random import random
 
 def isFunctionNode(x): 
 	# just because this is nicer, and allows us to map, etc. 
@@ -59,13 +60,11 @@ class FunctionNode(object):
 		NOTE: If a node has [ None ] as args, it is treated as a thunk
 		
 		bv - stores the actual *rule* that was added (so that we can re-add it when we loop through the tree)
-
-		My bv stores the particlar *names* of variables I've introduced
 	"""
 	
-	def __init__(self, returntype, name, args, generation_probability=0.0, resample_p=1.0, bv_name=None, bv_type=None, bv_args=None, bv_prefix=None, bv_p=None, ruleid=None):
-		"""
-		"""
+	def __init__(self, returntype, name, args, generation_probability=0.0,
+					resample_p=1.0, bv_name=None, bv_type=None, bv_args=None,
+					bv_prefix=None, bv_p=None, ruleid=None):
 		self.__dict__.update(locals())
 		
 	def setto(self, q):
@@ -111,7 +110,10 @@ class FunctionNode(object):
 	
 	def islambda(self):
 		"""
-			Is this a lambda node? Using this function allows us to potentially...
+			Is this a lambda node? Right now it
+			just checks if the name is 'lambda' (but in the future, we might want to
+			allow different types of lambdas or something, which is why its nice to
+			have this function)
 		"""
 		ret = (self.name is not None) and (self.name.lower() == 'lambda')
 		
@@ -121,9 +123,13 @@ class FunctionNode(object):
 		
 		return ret
 	
-	# output a string that can be evaluated by python
-	## NOTE: Here we do a little fanciness -- with "if" -- we convert it to the "correct" python form with short circuiting instead of our fancy ifelse function
+
+	# NOTE: Here we do a little fanciness -- with "if" -- we convert it to the "correct" python 
+	# form with short circuiting instead of our fancy ifelse function
 	def pystring(self): 
+		"""
+		Outputs a string that can be evaluated by python
+		"""
 		#print ">>", self.name
 		if self.is_nonfunction(): # a terminal
 			return str(self.name)
@@ -427,8 +433,19 @@ class FunctionNode(object):
 		
 	def is_canonical_order(self, symmetric_ops):
 		"""
-			Takes a set of symmetric ops (plus, minus, times, etc, not divide) and asserts that the 
-			LHS ordering is less than the right (to prevent)
+			Takes a set of symmetric (commutative) ops (plus, minus, times, etc, not divide) 
+			and asserts that the LHS ordering is less than the right (to prevent)
+
+			This is useful for removing duplicates of nodes. For instance,
+
+				AND(X, OR(Y,Z))
+
+			is logically the same as
+
+				AND(OR(Y,Z), X)
+
+			This function essentially checks if the tree is in sorted (alphbetical)
+			order, but only for functions whose name is in symmetric_ops. 
 		"""
 		if self.args is None or len(self.args) == 0:
 			return True
@@ -486,7 +503,7 @@ class FunctionNode(object):
 				# Well if there's one mismatch, it lies below a or b,
 				# so we must propose in a along this subtree
 				m = log(len(a)) + pself # choose uniformly from this subtree, as individual nodes are adjusted later TODO: IM NOT SURE THIS IS RIGHT 
-				return logsumexp([m + a.proposal_probability_to(b) , pself + y.log_probability()])
+				return logsumexp([m + a.proposal_probability_to(b), pself + y.log_probability()])
 			
 			else: return pself + y.log_probability() # We have to generate from ourselves
 				
@@ -573,7 +590,7 @@ class FunctionNode(object):
 			else: 
 				newargs.append(a) # string or something else
 				
-		ret =  self.__copy__(shallow=True) # don't copy kids
+		ret = self.__copy__(shallow=True) # don't copy kids
 		ret.args = newargs
 		
 		return ret
