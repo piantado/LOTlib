@@ -34,26 +34,37 @@ def cleanFunctionNodeString(x):
 
 class FunctionNode(object):
 	"""
+		*returntype* - The return type of the FunctionNode
+
+		*name* - The name of the function
+
+		*args* - Arguments of the function
+
+		*generation_probability* - Unnormalized probability of 
+
+		*resample_p* - The probability of choosing this node in an expansion. Takes a number in the range [0.0,1.0]
+
+		*bv_name* - Name of the Bound Variable e.g. y1, y2, y3...
+
+		*bv_type* - Bound variable type
+
+		*bv_args* - Arguments of the Bound Variable. "None" implies this is a terminal, otherwise  a type signature.
+
+		*bv_prefix* - Bound variable Prefix e.g. the 'y' in y1, y2, y3...
+
+		*bv_p* - Unnormalized probability of the rule expanding to the bound variable.
+
+		*ruleid* - The rule ID number
+
 		NOTE: If a node has [ None ] as args, it is treated as a thunk
 		
 		bv - stores the actual *rule* that was added (so that we can re-add it when we loop through the tree)
-		
+
 		My bv stores the particlar *names* of variables I've introduced
 	"""
 	
 	def __init__(self, returntype, name, args, generation_probability=0.0, resample_p=1.0, bv_name=None, bv_type=None, bv_args=None, bv_prefix=None, bv_p=None, ruleid=None):
 		"""
-			*returntype* - The return type of the FunctionNode
-			*name* - The name of the function
-			*args* - Arguments of the function
-			*generation_probability* - 
-			*resample_p* - The probability of choosing this node in an expansion. Takes a number in the range [0.0,1.0]
-			*bv_name* - Name of the Bound Variable
-			*bv_type* - Which bound variable
-			*bv_args* - Arguments of the Bound Variable. "None" implies this is a terminal, otherwise  a type signature.
-			*bv_prefix* - Bound variable Prefix
-			*bv_p* - Probability of the rule expanding to the bound variable.
-			*ruleid* - The rule ID number
 		"""
 		self.__dict__.update(locals())
 		

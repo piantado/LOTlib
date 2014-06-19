@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -50,8 +52,8 @@
   <h1>Source code for LOTlib.Grammar</h1><div class="highlight"><pre>
 <span class="c"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    TODO: Allow PCFG to take another tree of FunctionNodes in generation. It then recurses and only genreates the leaves</span>
-<span class="sd">	TODO: When we generate, we MUST have a START-&gt;EXPR expansion, otherwise the top level doesn&#39;t get searched</span>
+<span class="sd">TODO: Allow PCFG to take another tree of FunctionNodes in generation. It then recurses and only genreates the leaves</span>
+<span class="sd">TODO: When we generate, we MUST have a START-&gt;EXPR expansion, otherwise the top level doesn&#39;t get searched</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="k">try</span><span class="p">:</span>                <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
@@ -78,9 +80,9 @@
 
 <span class="sd">			TODO: Implement this:</span>
 <span class="sd">			- This has a few special values of returntype, which are expected on the rhs of rules, and then generate continuous values</span>
-<span class="sd">				- *uniform* -- when the name is this, the value printed and evaled is a uniform random sample of [0,1) (which can be resampled via the PCFG)</span>
-<span class="sd">				- *normal*  -- 0 mean, 1 sd</span>
-<span class="sd">				- *exponential* - rate = 1</span>
+<span class="sd">				- \*uniform\* - when the name is this, the value printed and evaled is a uniform random sample of [0,1) (which can be resampled via the PCFG)</span>
+<span class="sd">				- \*normal\*  - 0 mean, 1 sd</span>
+<span class="sd">				- \*exponential\* - rate = 1</span>
 <span class="sd">				</span>
 <span class="sd">		NOTE: Bound variables have a rule id &lt; 0</span>
 <span class="sd">		</span>
@@ -774,7 +776,7 @@
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>
