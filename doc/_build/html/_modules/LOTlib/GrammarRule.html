@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>LOTlib.GrammarRule &mdash; LOTlib 1.0.0 documentation</title>
+    <title>LOTlib.GrammarRule &mdash; LOTlib 0.2.0 documentation</title>
     
     <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -16,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0',
+        VERSION:     '0.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +23,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="LOTlib 1.0.0 documentation" href="../../index.html" />
+    <link rel="top" title="LOTlib 0.2.0 documentation" href="../../index.html" />
     <link rel="up" title="LOTlib" href="../LOTlib.html" /> 
   </head>
   <body>
@@ -38,7 +36,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
       </ul>
@@ -51,57 +49,59 @@
             
   <h1>Source code for LOTlib.GrammarRule</h1><div class="highlight"><pre>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">	This class is a wrapper for representing &quot;rules&quot; in the grammar. </span>
-<span class="sd">	</span>
-
+<span class="sd">	This class is a wrapper for representing &quot;rules&quot; in the grammar.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="c"># TODO: One day we will change &quot;nt&quot; to returntype to match with the FunctionNodes</span>
 
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log</span>
 
 <span class="k">class</span> <span class="nc">GrammarRule</span><span class="p">:</span>
 <div class="viewcode-block" id="GrammarRule"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.GrammarRule.GrammarRule">[docs]</a>	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nt</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">to</span><span class="p">,</span> <span class="n">rid</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">resample_p</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">bv_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bv_args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bv_prefix</span><span class="o">=</span><span class="s">&quot;y&quot;</span><span class="p">,</span> <span class="n">bv_p</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;	</span>
+		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">			*nt* - the nonterminal</span>
 
 <span class="sd">			*name* - the name of this function</span>
 
-<span class="sd">			*to* - what you expand to (usually a FunctionNode). </span>
+<span class="sd">			*to* - what you expand to (usually a FunctionNode).</span>
 
 <span class="sd">			*rid* - the rule id number</span>
 
 <span class="sd">			*p* - unnormalized probability of expansion</span>
 
-<span class="sd">			*resample_p* - the probability of choosing this node in an expansion	</span>
+<span class="sd">			*resample_p* - the probability of choosing this node in an expansion</span>
 
 <span class="sd">			*bv_type* - what bound variable was introduced</span>
 
 <span class="sd">			*bv_args* - what are the args when we use a bv (None is terminals, else a type signature)</span>
 
 <span class="sd">			Examples:</span>
-<span class="sd">			A rule where &quot;to&quot; is a nonempty list is a real expansion:</span>
+<span class="sd">			A rule where &quot;expansion&quot; is a nonempty list is a real expansion:</span>
 <span class="sd">				GrammarRule( &quot;EXPR&quot;, &quot;plus&quot;, [&quot;EXPR&quot;, &quot;EXPR&quot;], ...) -&gt; plus(EXPR,EXPR)</span>
-<span class="sd">			A rule where &quot;to&quot; is [] is a thunk </span>
+<span class="sd">			A rule where &quot;expansion&quot; is [] is a thunk</span>
+
 <span class="sd">				GrammarRule( &quot;EXPR&quot;, &quot;plus&quot;, [], ...) -&gt; plus()</span>
-<span class="sd">			A rule where &quot;to&quot; is [] is a real terminal (non-thunk)</span>
+<span class="sd">			A rule where &quot;expansion&quot; is [] is a real terminal (non-thunk)</span>
 <span class="sd">				GrammarRule( &quot;EXPR&quot;, &quot;five&quot;, None, ...) -&gt; five</span>
-<span class="sd">			A rule where &quot;name&quot; is &#39;&#39; expands without parens:	</span>
-<span class="sd">				GrammarRule( &quot;EXPR&quot;, &#39;&#39;, &quot;SUBEXPR&quot;, ...) -&gt; EXPR-&gt;SUBEXPR				</span>
-<span class="sd">						</span>
-<span class="sd">			NOTE: The rule id (rid) is very important -- it&#39;s what we use to determine equality</span>
+<span class="sd">			A rule where &quot;name&quot; is &#39;&#39; expands without parens:</span>
+<span class="sd">				GrammarRule( &quot;EXPR&quot;, &#39;&#39;, &quot;SUBEXPR&quot;, ...) -&gt; EXPR-&gt;SUBEXPR</span>
+
+<span class="sd">			NOTE: The rule id (rid) is very important -- it&#39;s what we use expansion determine equality</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		<span class="n">p</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="c"># make sure these are floats</span>
+		<span class="n">p</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>  <span class="c"># make sure these are floats</span>
 		
 		<span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span>
 		
-		<span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span> <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">to</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&quot;*** GrammarRules with empty names must have only 1 argument&quot;</span>
-		
-		
+		<span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+
+			<span class="k">assert</span> <span class="p">(</span><span class="n">to</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">),</span> <span class="s">&quot;*** GrammarRules with empty names must have only 1 argument&quot;</span>
+
 	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nt</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot; -&gt; &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="s">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t\t</span><span class="s">[p=&quot;</span> <span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">)</span><span class="o">+</span> <span class="s">&quot;; resample_p=&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resample_p</span><span class="p">)</span> <span class="o">+</span><span class="s">&quot;]&quot;</span> <span class="o">+</span> <span class="s">&quot;&lt;BV:&quot;</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bv_type</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;;&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bv_args</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;;&quot;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">bv_prefix</span><span class="o">+</span><span class="s">&quot;&gt;&quot;</span>
 
-	<span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">rid</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">rid</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nt</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">nt</span><span class="p">)</span>
-	<span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+	<span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+		<span class="k">return</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">rid</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">rid</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nt</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">nt</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+		<span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 </pre></div></div>
 
           </div>
@@ -135,14 +135,14 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../LOTlib.html" >LOTlib</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

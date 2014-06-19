@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>LOTlib.FunctionNode &mdash; LOTlib 1.0.0 documentation</title>
+    <title>LOTlib.FunctionNode &mdash; LOTlib 0.2.0 documentation</title>
     
     <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -16,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0',
+        VERSION:     '0.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +23,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="LOTlib 1.0.0 documentation" href="../../index.html" />
+    <link rel="top" title="LOTlib 0.2.0 documentation" href="../../index.html" />
     <link rel="up" title="LOTlib" href="../LOTlib.html" /> 
   </head>
   <body>
@@ -38,7 +36,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
       </ul>
@@ -56,44 +54,24 @@
 <span class="sd">	A function node -- a tree part representing a function and its arguments.</span>
 <span class="sd">	Also used for PCFG rules, where the arguments are nonterminal symbols.</span>
 <span class="sd">	</span>
-<span class="sd">	A Functionnode defaultly iterates over its subnodes</span>
-<span class="sd">	</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="c"># TODO: This could use some renaming FunctionNode.bv is not really a bound variable--its a list of rules that were added</span>
+<span class="c">## TODO: We should be able to eval list-builders like cons_ and list_ without calling python eval -- should be as fast as mapping to strings!</span>
+
 
 <span class="kn">import</span> <span class="nn">re</span>
-
+<span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="n">None2Empty</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span><span class="p">,</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log</span>
 
-<div class="viewcode-block" id="list2FunctionNode"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FunctionNode.list2FunctionNode">[docs]</a><span class="k">def</span> <span class="nf">list2FunctionNode</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s">&quot;atis&quot;</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Takes a list *l* of lambda arguments and maps it to a function node. </span>
 
-<span class="sd">		The *style* of lambda arguments could be &quot;atis&quot;, &quot;scheme&quot;, etc.</span>
-<span class="sd">	&quot;&quot;&quot;</span>
-	
-	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span> 
-		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">return</span> <span class="bp">None</span>
-		<span class="k">elif</span> <span class="n">style</span> <span class="ow">is</span> <span class="s">&#39;atis&#39;</span><span class="p">:</span>
-			<span class="n">rec</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">list2FunctionNode</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">style</span><span class="p">)</span> <span class="c"># a wrapper to my recursive self</span>
-			<span class="k">if</span> <span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;lambda&#39;</span><span class="p">:</span>
-				<span class="k">return</span> <span class="n">FunctionNode</span><span class="p">(</span><span class="s">&#39;FUNCTION&#39;</span><span class="p">,</span> <span class="s">&#39;lambda&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">rec</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="mi">3</span><span class="p">])],</span> <span class="n">generation_probability</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">bv_type</span><span class="o">=</span><span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bv_args</span><span class="o">=</span><span class="bp">None</span> <span class="p">)</span> <span class="c">## TOOD: HMM WHAT IS THE BV?</span>
-			<span class="k">else</span><span class="p">:</span>
-				<span class="k">return</span> <span class="n">FunctionNode</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">map</span><span class="p">(</span><span class="n">rec</span><span class="p">,</span> <span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">:]),</span> <span class="n">generation_probability</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-		<span class="k">elif</span> <span class="n">sytle</span> <span class="ow">is</span> <span class="s">&#39;scheme&#39;</span><span class="p">:</span>
-			<span class="k">pass</span> <span class="c">#TODO: Add this scheme functionality -- basically differnet handling of lambda bound variables</span>
-			
-	<span class="k">else</span><span class="p">:</span> <span class="c"># for non-list</span>
-		<span class="k">return</span> <span class="n">l</span>
-
-</div>
 <div class="viewcode-block" id="isFunctionNode"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FunctionNode.isFunctionNode">[docs]</a><span class="k">def</span> <span class="nf">isFunctionNode</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> 
 	<span class="c"># just because this is nicer, and allows us to map, etc. </span>
 	<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Returns true if *x* is of type FunctionNode.</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">FunctionNode</span><span class="p">)</span>
+
 </div>
 <div class="viewcode-block" id="cleanFunctionNodeString"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FunctionNode.cleanFunctionNodeString">[docs]</a><span class="k">def</span> <span class="nf">cleanFunctionNodeString</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
@@ -124,7 +102,7 @@
 <span class="sd">			*bv_type* - Which bound variable</span>
 <span class="sd">			*bv_args* - Arguments of the Bound Variable. &quot;None&quot; implies this is a terminal, otherwise  a type signature.</span>
 <span class="sd">			*bv_prefix* - Bound variable Prefix</span>
-<span class="sd">			*bv_p* - ?</span>
+<span class="sd">			*bv_p* - Probability of the rule expanding to the bound variable.</span>
 <span class="sd">			*ruleid* - The rule ID number</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span>
@@ -141,7 +119,7 @@
 <span class="sd">			shallow - if True, this does not copy the children (self.to points to the same as what we return)</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">shallow</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-			<span class="n">newargs</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span> 
+			<span class="n">newargs</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
 		<span class="k">else</span><span class="p">:</span>
 			<span class="n">newargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span>
 		
@@ -177,7 +155,8 @@
 		<span class="n">ret</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;lambda&#39;</span><span class="p">)</span>
 		
 		<span class="c"># A nice place to keep this--will get checked a lot!</span>
-		<span class="k">if</span> <span class="n">ret</span><span class="p">:</span> <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&quot;*** Lambdas must have exactly 1 arg&quot;</span>
+		<span class="k">if</span> <span class="n">ret</span><span class="p">:</span>
+			<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&quot;*** Lambdas must have exactly 1 arg&quot;</span>
 		
 		<span class="k">return</span> <span class="n">ret</span>
 	
@@ -221,22 +200,46 @@
 <div class="viewcode-block" id="FunctionNode.fullprint"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FunctionNode.FunctionNode.fullprint">[docs]</a>	<span class="k">def</span> <span class="nf">fullprint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot; A handy printer for debugging&quot;&quot;&quot;</span>
 		<span class="n">tabstr</span> <span class="o">=</span> <span class="s">&quot;  .  &quot;</span> <span class="o">*</span> <span class="n">d</span>
-		<span class="k">print</span> <span class="n">tabstr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">returntype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bv_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bv_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bv_args</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bv_prefix</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">generation_probability</span> <span class="c">#&quot;\t&quot;, self.resample_p </span>
+		<span class="k">print</span> <span class="n">tabstr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">returntype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bv_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bv_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bv_args</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bv_prefix</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">generation_probability</span> <span class="c"># &quot;\t&quot;, self.resample_p </span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
 			<span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">:</span> 
-				<span class="k">if</span> <span class="n">isFunctionNode</span><span class="p">(</span><span class="n">a</span><span class="p">):</span> <span class="n">a</span><span class="o">.</span><span class="n">fullprint</span><span class="p">(</span><span class="n">d</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-				<span class="k">else</span><span class="p">:</span>                 <span class="k">print</span> <span class="n">tabstr</span><span class="p">,</span> <span class="n">a</span>
-			
-	<span class="c">#def schemestring(self):</span>
-		<span class="c">#if self.args == []: # a terminal</span>
-			<span class="c">#return str(self.name)</span>
-		<span class="c">#else: return &#39;(&#39;+self.name + &#39; &#39;+commalist( [ str(x) for x in self.args], sep1=&#39; &#39;, sep2=&#39; &#39;)+&#39; )&#39;</span>
+				<span class="k">if</span> <span class="n">isFunctionNode</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+					<span class="n">a</span><span class="o">.</span><span class="n">fullprint</span><span class="p">(</span><span class="n">d</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="k">print</span> <span class="n">tabstr</span><span class="p">,</span> <span class="n">a</span>
+			</div>
+<div class="viewcode-block" id="FunctionNode.schemestring"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FunctionNode.FunctionNode.schemestring">[docs]</a>	<span class="k">def</span> <span class="nf">schemestring</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Print out in scheme format (+ 3 (- 4 5)).</span>
+<span class="sd">			This &quot;evals&quot; cons_ so that you don&#39;t have to eval for simple list builders (although you may want to)</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">return</span> <span class="s">&#39;(&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">schemestring</span><span class="p">(),</span> <span class="n">None2Empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)))</span><span class="o">+</span><span class="s">&#39;)&#39;</span>
+	</div>
+<div class="viewcode-block" id="FunctionNode.liststring"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FunctionNode.FunctionNode.liststring">[docs]</a>	<span class="k">def</span> <span class="nf">liststring</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cons</span><span class="o">=</span><span class="s">&quot;cons_&quot;</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			This &quot;evals&quot; cons_ so that we can conveniently build lists (of lists) without having to eval.</span>
+<span class="sd">			Mainly useful for combinatory logic, or &quot;pure&quot; trees</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+		<span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">cons</span><span class="p">:</span>
+			<span class="k">return</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">liststring</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;FunctionNode must only use cons to call liststring!&quot;</span>
 	
 	<span class="c"># NOTE: in the future we may want to change this to do fancy things</span></div>
-	<span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pystring</span><span class="p">()</span>
-	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pystring</span><span class="p">()</span>
-	
-	<span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+	<span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pystring</span><span class="p">()</span>
+
+	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pystring</span><span class="p">()</span>
+
+	<span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+		<span class="k">return</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+
 	<span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> 
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">			Test equality of FunctionNodes. </span>
@@ -256,12 +259,11 @@
 		
 		<span class="c"># so args must be a list</span>
 		<span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">args</span><span class="p">):</span>
-			<span class="k">if</span> <span class="n">a</span> <span class="o">!=</span> <span class="n">b</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
+			<span class="k">if</span> <span class="n">a</span> <span class="o">!=</span> <span class="n">b</span><span class="p">:</span>
+				<span class="k">return</span> <span class="bp">False</span>
 		
 		<span class="k">return</span> <span class="bp">True</span>
 		
-	
-	
 	<span class="c">## TODO: overwrite these with something faster</span>
 	<span class="c"># hash trees. This just converts to string -- maybe too slow?</span>
 	<span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -279,10 +281,11 @@
 		<span class="c"># use a quicker string hash		</span>
 		<span class="c">#return hash(self.quickstring())</span>
 		
-		
-	<span class="k">def</span> <span class="nf">__cmp__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span> <span class="k">return</span> <span class="nb">cmp</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+	<span class="k">def</span> <span class="nf">__cmp__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+		<span class="k">return</span> <span class="nb">cmp</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 	
-	<span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">len</span><span class="p">([</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">])</span>
+	<span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="k">return</span> <span class="nb">len</span><span class="p">([</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">])</span>
 	
 <div class="viewcode-block" id="FunctionNode.log_probability"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FunctionNode.FunctionNode.log_probability">[docs]</a>	<span class="k">def</span> <span class="nf">log_probability</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
@@ -323,7 +326,8 @@
 		
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
 			<span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">argFunctionNodes</span><span class="p">():</span>
-				<span class="k">for</span> <span class="n">ssn</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span> <span class="k">yield</span> <span class="n">ssn</span>
+				<span class="k">for</span> <span class="n">ssn</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
+					<span class="k">yield</span> <span class="n">ssn</span>
 	
 <div class="viewcode-block" id="FunctionNode.iterdepth"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FunctionNode.FunctionNode.iterdepth">[docs]</a>	<span class="k">def</span> <span class="nf">iterdepth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
@@ -333,7 +337,8 @@
 		
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
 			<span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">argFunctionNodes</span><span class="p">():</span>
-				<span class="k">for</span> <span class="n">ssn</span><span class="p">,</span><span class="n">dd</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">iterdepth</span><span class="p">():</span> <span class="k">yield</span> <span class="p">(</span><span class="n">ssn</span><span class="p">,</span><span class="n">dd</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+				<span class="k">for</span> <span class="n">ssn</span><span class="p">,</span><span class="n">dd</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">iterdepth</span><span class="p">():</span>
+					<span class="k">yield</span> <span class="p">(</span><span class="n">ssn</span><span class="p">,</span><span class="n">dd</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="FunctionNode.all_leaves"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FunctionNode.FunctionNode.all_leaves">[docs]</a>	<span class="k">def</span> <span class="nf">all_leaves</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
@@ -364,7 +369,8 @@
 
 <span class="sd">			*rename* - a dictionary to store how we should rename</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		<span class="k">if</span> <span class="n">rename</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">rename</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+		<span class="k">if</span> <span class="n">rename</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+			<span class="n">rename</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 				
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
 			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">islambda</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bv_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span> 
@@ -384,7 +390,6 @@
 			<span class="c">#print &quot;\t\tRENAMING&quot;, k, k.bv_prefix, rename</span>
 			<span class="n">k</span><span class="o">.</span><span class="n">fix_bound_variables</span><span class="p">(</span><span class="n">d</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">rename</span><span class="p">)</span>
 			
-
 	<span class="c">############################################################</span>
 	<span class="c">## Derived functions that build on the above core</span>
 	<span class="c">############################################################</span>
@@ -394,7 +399,8 @@
 <span class="sd">			Checks if the FunctionNode contains *x* as function below</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
-			<span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">x</span><span class="p">:</span> <span class="k">return</span> <span class="bp">True</span>
+			<span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">x</span><span class="p">:</span>
+				<span class="k">return</span> <span class="bp">True</span>
 		<span class="k">return</span> <span class="bp">False</span>
 	</div>
 <div class="viewcode-block" id="FunctionNode.count_nodes"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FunctionNode.FunctionNode.count_nodes">[docs]</a>	<span class="k">def</span> <span class="nf">count_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
@@ -443,7 +449,6 @@
 				
 			<span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="p">(),</span> <span class="n">t</span><span class="p">)</span>
 		
-		
 		<span class="c"># ts = [self.returntype, self.bv_type, self.bv_args]</span>
 		<span class="c"># if self.args is not None:</span>
 		<span class="c"># 	for i in range(len(self.args)):</span>
@@ -452,28 +457,28 @@
 		<span class="c"># 		else: </span>
 		<span class="c"># 			ts.append(self.args[i])</span>
 		<span class="c"># return ts</span>
-		
 		</div>
 <div class="viewcode-block" id="FunctionNode.is_replicating"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FunctionNode.FunctionNode.is_replicating">[docs]</a>	<span class="k">def</span> <span class="nf">is_replicating</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">			A function node is replicating (by definition) if one of its children is of the same type</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">return</span> <span class="nb">any</span><span class="p">([</span> <span class="n">x</span><span class="o">.</span><span class="n">returntype</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">returntype</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">argFunctionNodes</span><span class="p">()</span> <span class="p">])</span>
-		
-</div>
+		</div>
 <div class="viewcode-block" id="FunctionNode.is_canonical_order"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FunctionNode.FunctionNode.is_canonical_order">[docs]</a>	<span class="k">def</span> <span class="nf">is_canonical_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symmetric_ops</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">			Takes a set of symmetric ops (plus, minus, times, etc, not divide) and asserts that the </span>
 <span class="sd">			LHS ordering is less than the right (to prevent)</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">return</span> <span class="bp">True</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="k">return</span> <span class="bp">True</span>
 		
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">symmetric_ops</span><span class="p">:</span>
 			
 			<span class="c"># Then we must check children</span>
 			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
 				<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-					<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
+					<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+						<span class="k">return</span> <span class="bp">False</span>
 			
 		<span class="c"># Now check the children, whether or not we are symmetrical</span>
 		<span class="k">return</span> <span class="nb">all</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">is_canonical_order</span><span class="p">(</span><span class="n">symmetric_ops</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">])</span>
@@ -644,14 +649,14 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../LOTlib.html" >LOTlib</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

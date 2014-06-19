@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>LOTlib package &mdash; LOTlib 1.0.0 documentation</title>
+    <title>LOTlib package &mdash; LOTlib 0.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '1.0.0',
+        URL_ROOT:    './',
+        VERSION:     '0.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LOTlib 1.0.0 documentation" href="index.html" /> 
+    <link rel="top" title="LOTlib 0.2.0 documentation" href="index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -37,7 +35,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">LOTlib 1.0.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LOTlib 0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -70,8 +68,8 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html">LOTlib.Examples.SchemeProgramInduction package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#lotlib-examples-schemeprograminduction-schemefunctionlearn-module">LOTlib.Examples.SchemeProgramInduction.SchemeFunctionLearn module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#lotlib-examples-schemeprograminduction-schemegenerate-module">LOTlib.Examples.SchemeProgramInduction.SchemeGenerate module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#module-LOTlib.Examples.SchemeProgramInduction.SchemeFunctionLearn">LOTlib.Examples.SchemeProgramInduction.SchemeFunctionLearn module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#module-LOTlib.Examples.SchemeProgramInduction.SchemeGenerate">LOTlib.Examples.SchemeProgramInduction.SchemeGenerate module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#module-LOTlib.Examples.SchemeProgramInduction.Shared">LOTlib.Examples.SchemeProgramInduction.Shared module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="LOTlib.Examples.SchemeProgramInduction.html#module-LOTlib.Examples.SchemeProgramInduction">Module contents</a></li>
 </ul>
@@ -817,9 +815,9 @@ def f(...):</p>
 </div>
 <div class="section" id="module-LOTlib.DataAndObjects">
 <span id="lotlib-dataandobjects-module"></span><h2>LOTlib.DataAndObjects module<a class="headerlink" href="#module-LOTlib.DataAndObjects" title="Permalink to this headline">¶</a></h2>
-<p>This class defines different types of data for models. 
+<p>Defines different classes for different types of data and models.
 It also provides &#8220;Obj&#8221;s for bundling together features</p>
-<p>For functions, we have a data object consisting of the [output, args]</p>
+<p>For functions, we have a data object of the form [output, args]</p>
 <dl class="class">
 <dt id="LOTlib.DataAndObjects.FunctionData">
 <em class="property">class </em><tt class="descclassname">LOTlib.DataAndObjects.</tt><tt class="descname">FunctionData</tt><big>(</big><em>input</em>, <em>output</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/DataAndObjects.html#FunctionData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.DataAndObjects.FunctionData" title="Permalink to this definition">¶</a></dt>
@@ -837,20 +835,23 @@ So when you have functional hypotheses, this is a convenient form of data</p>
 <dl class="class">
 <dt id="LOTlib.DataAndObjects.UtteranceData">
 <em class="property">class </em><tt class="descclassname">LOTlib.DataAndObjects.</tt><tt class="descname">UtteranceData</tt><big>(</big><em>utterance</em>, <em>context</em>, <em>possible_utterances</em><big>)</big><a class="reference internal" href="_modules/LOTlib/DataAndObjects.html#UtteranceData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.DataAndObjects.UtteranceData" title="Permalink to this definition">¶</a></dt>
-<dd><p>A wrapper for utterances. An utterance data point is a word, in a context, with some set of possible words we could have said</p>
+<dd><p>A wrapper for utterances.</p>
+<p>An utterance data point is a word, in a context, with some set of possible words we could have said.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="LOTlib.DataAndObjects.make_all_objects">
 <tt class="descclassname">LOTlib.DataAndObjects.</tt><tt class="descname">make_all_objects</tt><big>(</big><em>**f</em><big>)</big><a class="reference internal" href="_modules/LOTlib/DataAndObjects.html#make_all_objects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.DataAndObjects.make_all_objects" title="Permalink to this definition">¶</a></dt>
 <dd><p>This takes a list of lists and crosses them into all objects
-e.g. make_all_objects( size=[1,2,3], color=[&#8216;red&#8217;, &#8216;green&#8217;, &#8216;blue&#8217;] )</p>
+e.g. make_all_objects( size=[1,2,3], color=[&#8216;red&#8217;, &#8216;green&#8217;, &#8216;blue&#8217;] ) will return a list of 9 (3x3) objects,
+each of which will have a different pair of size and color attributes</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="LOTlib.DataAndObjects.sample_sets_of_objects">
 <tt class="descclassname">LOTlib.DataAndObjects.</tt><tt class="descname">sample_sets_of_objects</tt><big>(</big><em>N</em>, <em>objs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/DataAndObjects.html#sample_sets_of_objects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.DataAndObjects.sample_sets_of_objects" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Makes a set of size N appropriate to using &#8220;set&#8221; functions on &#8211; this means it must contain copies, not duplicate references</p>
+</dd></dl>
 
 </div>
 <div class="section" id="module-LOTlib.DefaultGrammars">
@@ -874,10 +875,9 @@ It works by storing a priority queue (in the opposite order), and popping off th
 <dl class="method">
 <dt id="LOTlib.FiniteBestSet.FiniteBestSet.add">
 <tt class="descname">add</tt><big>(</big><em>x</em>, <em>p=None</em>, <em>store_iterator=False</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FiniteBestSet.html#FiniteBestSet.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FiniteBestSet.FiniteBestSet.add" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add x with priority p to the set.
-store_iterator &#8211; if we are supposed to store an iterator (rather than elements from it)
-If p=None, we use self.key to get the value. 
-If x is an iterable, we add everything in it.</p>
+<dd><p>Add <em>x</em> with priority p to the set. If x is an iterable, we add everything in it.</p>
+<p>If p=None, we use self.key to get the value.</p>
+<p><em>store_iterator</em> - if we are supposed to store an iterator (rather than elements from it)</p>
 </dd></dl>
 
 <dl class="method">
@@ -890,7 +890,7 @@ If x is an iterable, we add everything in it.</p>
 <dt id="LOTlib.FiniteBestSet.FiniteBestSet.merge">
 <tt class="descname">merge</tt><big>(</big><em>y</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FiniteBestSet.html#FiniteBestSet.merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FiniteBestSet.FiniteBestSet.merge" title="Permalink to this definition">¶</a></dt>
 <dd><p>Copy over everything from y. Here, y may be a list of things to merge (e.g. other FiniteBestSets)
-This is slightly inefficient becuase we create all new QueueItems, but it&#8217;s easiest to deal with min/max</p>
+This is slightly inefficient because we create all new QueueItems, but it&#8217;s easiest to deal with min/max</p>
 </dd></dl>
 
 <dl class="method">
@@ -907,17 +907,11 @@ This is slightly inefficient becuase we create all new QueueItems, but it&#8217;
 <p>A wrapper to hold items and scores in the queue&#8211;just wraps &#8220;cmp&#8221; on a priority value</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="LOTlib.FiniteBestSet.random">
-<tt class="descclassname">LOTlib.FiniteBestSet.</tt><tt class="descname">random</tt><big>(</big><big>)</big> &rarr; x in the interval [0, 1).<a class="headerlink" href="#LOTlib.FiniteBestSet.random" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </div>
 <div class="section" id="module-LOTlib.FunctionNode">
 <span id="lotlib-functionnode-module"></span><h2>LOTlib.FunctionNode module<a class="headerlink" href="#module-LOTlib.FunctionNode" title="Permalink to this headline">¶</a></h2>
 <p>A function node &#8211; a tree part representing a function and its arguments.
 Also used for PCFG rules, where the arguments are nonterminal symbols.</p>
-<p>A Functionnode defaultly iterates over its subnodes</p>
 <dl class="class">
 <dt id="LOTlib.FunctionNode.FunctionNode">
 <em class="property">class </em><tt class="descclassname">LOTlib.FunctionNode.</tt><tt class="descname">FunctionNode</tt><big>(</big><em>returntype</em>, <em>name</em>, <em>args</em>, <em>generation_probability=0.0</em>, <em>resample_p=1.0</em>, <em>bv_name=None</em>, <em>bv_type=None</em>, <em>bv_args=None</em>, <em>bv_prefix=None</em>, <em>bv_p=None</em>, <em>ruleid=None</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode" title="Permalink to this definition">¶</a></dt>
@@ -1021,6 +1015,13 @@ LHS ordering is less than the right (to prevent)</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="LOTlib.FunctionNode.FunctionNode.liststring">
+<tt class="descname">liststring</tt><big>(</big><em>cons='cons_'</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.liststring"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.liststring" title="Permalink to this definition">¶</a></dt>
+<dd><p>This &#8220;evals&#8221; <a href="#id9"><span class="problematic" id="id10">cons_</span></a> so that we can conveniently build lists (of lists) without having to eval.
+Mainly useful for combinatory logic, or &#8220;pure&#8221; trees</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.log_probability">
 <tt class="descname">log_probability</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.log_probability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.log_probability" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the log probability of a tree</p>
@@ -1065,19 +1066,19 @@ to just be quick</p>
 <dd><p>Generate a random partial subtree of me. So that</p>
 <dl class="docutils">
 <dt>this: </dt>
-<dd>prev_((<a href="#id9"><span class="problematic" id="id10">seven_</span></a> if cardinality1_(x) else next_(next_(L_(x)))))</dd>
+<dd>prev_((<a href="#id11"><span class="problematic" id="id12">seven_</span></a> if cardinality1_(x) else next_(next_(L_(x)))))</dd>
 </dl>
 <p>yeilds:</p>
 <blockquote>
 <div>prev_(WORD)
 prev_(WORD)
-prev_((<a href="#id11"><span class="problematic" id="id12">seven_</span></a> if cardinality1_(x) else WORD))
+prev_((<a href="#id13"><span class="problematic" id="id14">seven_</span></a> if cardinality1_(x) else WORD))
 prev_(WORD)
-prev_((<a href="#id13"><span class="problematic" id="id14">seven_</span></a> if BOOL else next_(next_(L_(SET)))))
+prev_((<a href="#id15"><span class="problematic" id="id16">seven_</span></a> if BOOL else next_(next_(L_(SET)))))
 prev_(WORD)
-prev_((<a href="#id15"><span class="problematic" id="id16">seven_</span></a> if cardinality1_(SET) else next_(WORD)))
+prev_((<a href="#id17"><span class="problematic" id="id18">seven_</span></a> if cardinality1_(SET) else next_(WORD)))
 prev_(WORD)
-prev_((<a href="#id17"><span class="problematic" id="id18">seven_</span></a> if BOOL else next_(WORD)))
+prev_((<a href="#id19"><span class="problematic" id="id20">seven_</span></a> if BOOL else next_(WORD)))
 ...</div></blockquote>
 <p>We do this because there are waay too many unique subtrees to enumerate, 
 and this allows a nice variety of structures
@@ -1090,6 +1091,13 @@ NOTE: Partial here means that we include nonterminals with probability p</p>
 <dd><p><a href="#id3"><span class="problematic" id="id4">*</span></a>find*s subnodes and <a href="#id5"><span class="problematic" id="id6">*</span></a>replace*s it.
 NOTE: NOT THE FASTEST!
 NOTE: Defaultly only makes copies of replace</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LOTlib.FunctionNode.FunctionNode.schemestring">
+<tt class="descname">schemestring</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.schemestring"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.schemestring" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print out in scheme format (+ 3 (- 4 5)).
+This &#8220;evals&#8221; <a href="#id21"><span class="problematic" id="id22">cons_</span></a> so that you don&#8217;t have to eval for simple list builders (although you may want to)</p>
 </dd></dl>
 
 <dl class="method">
@@ -1135,18 +1143,6 @@ is a (SET (BOOL BOOL)), where in types, (A B) is something that takes an A and r
 <tt class="descclassname">LOTlib.FunctionNode.</tt><tt class="descname">isFunctionNode</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#isFunctionNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.isFunctionNode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns true if <em>x</em> is of type FunctionNode.</p>
 </dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.FunctionNode.list2FunctionNode">
-<tt class="descclassname">LOTlib.FunctionNode.</tt><tt class="descname">list2FunctionNode</tt><big>(</big><em>l</em>, <em>style='atis'</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#list2FunctionNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.list2FunctionNode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a list <em>l</em> of lambda arguments and maps it to a function node.</p>
-<p>The <em>style</em> of lambda arguments could be &#8220;atis&#8221;, &#8220;scheme&#8221;, etc.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.FunctionNode.random">
-<tt class="descclassname">LOTlib.FunctionNode.</tt><tt class="descname">random</tt><big>(</big><big>)</big> &rarr; x in the interval [0, 1).<a class="headerlink" href="#LOTlib.FunctionNode.random" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 </div>
 <div class="section" id="module-LOTlib.Grammar">
@@ -1235,7 +1231,7 @@ is a (SET (BOOL BOOL)), where in types, (A B) is something that takes an A and r
 
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.iterate_subnodes">
-<tt class="descname">iterate_subnodes</tt><big>(</big><em>t</em>, <em>d=0</em>, <em>predicate=&lt;function lambdaTrue at 0x28e0500&gt;</em>, <em>do_bv=True</em>, <em>yield_depth=False</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.iterate_subnodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.iterate_subnodes" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">iterate_subnodes</tt><big>(</big><em>t</em>, <em>d=0</em>, <em>predicate=&lt;function lambdaTrue at 0x1033b47d0&gt;</em>, <em>do_bv=True</em>, <em>yield_depth=False</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.iterate_subnodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.iterate_subnodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Iterate through all subnodes of node <em>t</em>, while updating the added rules (bound variables)
 so that at each subnode, the grammar is accurate to what it was.</p>
 <p>if <a href="#id7"><span class="problematic" id="id8">*</span></a>do_bv*=False, we don&#8217;t do bound variables (useful for things like counting nodes, instead of having to update the grammar)</p>
@@ -1270,13 +1266,13 @@ NOTE: Not so simple because we must count multiple paths</p>
 
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.resample_normalizer">
-<tt class="descname">resample_normalizer</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x28e0500&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.resample_normalizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.resample_normalizer" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">resample_normalizer</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x1033b47d0&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.resample_normalizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.resample_normalizer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the sum of all of the non-normalized probabilities.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.sample_node_via_iterate">
-<tt class="descname">sample_node_via_iterate</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x28e0500&gt;</em>, <em>do_bv=True</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.sample_node_via_iterate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.sample_node_via_iterate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">sample_node_via_iterate</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x1033b47d0&gt;</em>, <em>do_bv=True</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.sample_node_via_iterate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.sample_node_via_iterate" title="Permalink to this definition">¶</a></dt>
 <dd><p>This will yield a random node in the middle of its iteration, allowing us to expand bound variables properly
 (e.g. when the node is yielded, the state of the grammar is correct)
 It also yields the probability and the depth</p>
@@ -1314,30 +1310,30 @@ The &#8220;for&#8221; is nice so that it will yield back and clean up the bv</p>
 </dl>
 <dl class="class">
 <dt id="LOTlib.Memoization.BoundedDictionary">
-<em class="property">class </em><tt class="descclassname">LOTlib.Memoization.</tt><tt class="descname">BoundedDictionary</tt><big>(</big><em>N=1000</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Memoization.html#BoundedDictionary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Memoization.BoundedDictionary" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">LOTlib.Memoization.</tt><tt class="descname">BoundedDictionary</tt><big>(</big><em>N=1000</em><big>)</big><a class="headerlink" href="#LOTlib.Memoization.BoundedDictionary" title="Permalink to this definition">¶</a></dt>
 <dd><p>This provides the back end for memoizing, storing the most recently used, 
 and cleaning up by half when we exceed N&gt;2</p>
 <dl class="method">
 <dt id="LOTlib.Memoization.BoundedDictionary.repr">
-<tt class="descname">repr</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Memoization.html#BoundedDictionary.repr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Memoization.BoundedDictionary.repr" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">repr</tt><big>(</big><big>)</big><a class="headerlink" href="#LOTlib.Memoization.BoundedDictionary.repr" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.Memoization.BoundedDictionary.str">
-<tt class="descname">str</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Memoization.html#BoundedDictionary.str"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Memoization.BoundedDictionary.str" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">str</tt><big>(</big><big>)</big><a class="headerlink" href="#LOTlib.Memoization.BoundedDictionary.str" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="LOTlib.Memoization.BoundedMemoize">
-<em class="property">class </em><tt class="descclassname">LOTlib.Memoization.</tt><tt class="descname">BoundedMemoize</tt><big>(</big><em>f</em>, <em>N=1000</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Memoization.html#BoundedMemoize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Memoization.BoundedMemoize" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">LOTlib.Memoization.</tt><tt class="descname">BoundedMemoize</tt><big>(</big><em>f</em>, <em>N=1000</em><big>)</big><a class="headerlink" href="#LOTlib.Memoization.BoundedMemoize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#LOTlib.Memoization.BoundedDictionary" title="LOTlib.Memoization.BoundedDictionary"><tt class="xref py py-class docutils literal"><span class="pre">LOTlib.Memoization.BoundedDictionary</span></tt></a>, <a class="reference internal" href="#LOTlib.Memoization.Memoize" title="LOTlib.Memoization.Memoize"><tt class="xref py py-class docutils literal"><span class="pre">LOTlib.Memoization.Memoize</span></tt></a></p>
 </dd></dl>
 
 <dl class="class">
 <dt id="LOTlib.Memoization.Memoize">
-<em class="property">class </em><tt class="descclassname">LOTlib.Memoization.</tt><tt class="descname">Memoize</tt><big>(</big><em>f</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Memoization.html#Memoize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Memoization.Memoize" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">LOTlib.Memoization.</tt><tt class="descname">Memoize</tt><big>(</big><em>f</em><big>)</big><a class="headerlink" href="#LOTlib.Memoization.Memoize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">dict</span></tt></p>
 <p>Provide a memoization class to wrap a <em>function</em>
 This inherits from dictionary, so if we subclass as something else, we will get other dictionary
@@ -1348,58 +1344,16 @@ properties. This acts like a dictionary (inhering from dict) and a function</p>
 <div class="section" id="module-LOTlib.Miscellaneous">
 <span id="lotlib-miscellaneous-module"></span><h2>LOTlib.Miscellaneous module<a class="headerlink" href="#module-LOTlib.Miscellaneous" title="Permalink to this headline">¶</a></h2>
 <p>Miscellaneous functions for LOTlib</p>
-<p>Steve Piantadosi - Sept 2011</p>
 <dl class="function">
 <dt id="LOTlib.Miscellaneous.None2Empty">
 <tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">None2Empty</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#None2Empty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.None2Empty" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-
-<dl class="exception">
-<dt id="LOTlib.Miscellaneous.RecursionDepthException">
-<em class="property">exception </em><tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">RecursionDepthException</tt><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#RecursionDepthException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.RecursionDepthException" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></p>
-</dd></dl>
 
 <dl class="function">
 <dt id="LOTlib.Miscellaneous.UniquifyFunction">
 <tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">UniquifyFunction</tt><big>(</big><em>gen</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#UniquifyFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.UniquifyFunction" title="Permalink to this definition">¶</a></dt>
 <dd><p>A decorator to make a function only return unique values</p>
 </dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Miscellaneous.Y">
-<tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">Y</tt><big>(</big><em>f</em><big>)</big><a class="headerlink" href="#LOTlib.Miscellaneous.Y" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Miscellaneous.Y_bounded">
-<tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">Y_bounded</tt><big>(</big><em>f</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#Y_bounded"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.Y_bounded" title="Permalink to this definition">¶</a></dt>
-<dd><p>A fancy fixed point iterator that only goes MAX_RECURSION deep, else throwing a a RecusionDepthException</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Miscellaneous.Ystar">
-<tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">Ystar</tt><big>(</big><em>*l</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#Ystar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.Ystar" title="Permalink to this definition">¶</a></dt>
-<dd><p>The Y* combinator for mutually recursive functions. Holy shit.</p>
-<dl class="docutils">
-<dt>(define (Y* . l)</dt>
-<dd><dl class="first last docutils">
-<dt>((lambda (u) (u u))</dt>
-<dd>(lambda (p) (map (lambda (li) (lambda x (apply (apply li (p p)) x))) l))))</dd>
-</dl>
-</dd>
-</dl>
-<p><a class="reference external" href="http://okmij.org/ftp/Computation/fixed-point-combinators.html">http://okmij.org/ftp/Computation/fixed-point-combinators.html</a>]</p>
-<p><a class="reference external" href="http://stackoverflow.com/questions/4899113/fixed-point-combinator-for-mutually-recursive-functions">http://stackoverflow.com/questions/4899113/fixed-point-combinator-for-mutually-recursive-functions</a></p>
-<p>Here is even/odd:</p>
-<p>even,odd = Ystar( lambda e,o: lambda x: (x==0) or o(x-1),                           lambda e,o: lambda x: (not x==0) and e(x-1) )</p>
-<p>Note that we require a lambda e,o on the outside so that these can have names inside.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Miscellaneous.all_binary_vectors">
-<tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">all_binary_vectors</tt><big>(</big><em>N</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#all_binary_vectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.all_binary_vectors" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="function">
 <dt id="LOTlib.Miscellaneous.beta">
@@ -1420,21 +1374,6 @@ This takes in an OptionParser object as an argument. As in, (options, args) = pa
 </dd></dl>
 
 <dl class="function">
-<dt id="LOTlib.Miscellaneous.dprint">
-<tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">dprint</tt><big>(</big><em>l</em>, <em>*args</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#dprint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.dprint" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Miscellaneous.dprinterr">
-<tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">dprinterr</tt><big>(</big><em>l</em>, <em>*args</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#dprinterr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.dprinterr" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Miscellaneous.dprintn">
-<tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">dprintn</tt><big>(</big><em>l</em>, <em>*args</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#dprintn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.dprintn" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
 <dt id="LOTlib.Miscellaneous.dropfirst">
 <tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">dropfirst</tt><big>(</big><em>g</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#dropfirst"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.dropfirst" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return all but the first element</p>
@@ -1444,18 +1383,6 @@ This takes in an OptionParser object as an argument. As in, (options, args) = pa
 <dt id="LOTlib.Miscellaneous.eighth">
 <tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">eighth</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#eighth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.eighth" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Miscellaneous.evaluate_expression">
-<tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">evaluate_expression</tt><big>(</big><em>e, args=['x'], recurse='L_', addlambda=True</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#evaluate_expression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.evaluate_expression" title="Permalink to this definition">¶</a></dt>
-<dd><p>This evaluates an expression. If 
-- e         - the expression itself &#8211; either a str or something that can be made a str
-- addlambda - should we include wrapping lambda arguments in args? lambda x: ...
-- recurse   - if addlambda, this is a special primitive name for recursion
-- args      - if addlambda, a list of all arguments to be added</p>
-<p>g = evaluate_expression(&#8220;x*L(x-1) if x &gt; 1 else 1&#8221;)
-g(12)</p>
-</dd></dl>
 
 <dl class="function">
 <dt id="LOTlib.Miscellaneous.fifth">
@@ -1489,29 +1416,14 @@ g(12)</p>
 <dd></dd></dl>
 
 <dl class="function">
-<dt id="LOTlib.Miscellaneous.fprintn">
-<tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">fprintn</tt><big>(</big><em>dl</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#fprintn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.fprintn" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
 <dt id="LOTlib.Miscellaneous.geometric_ldensity">
 <tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">geometric_ldensity</tt><big>(</big><em>n</em>, <em>p</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#geometric_ldensity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.geometric_ldensity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Log density of a geomtric distribution</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="LOTlib.Miscellaneous.hashplus">
-<tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">hashplus</tt><big>(</big><em>d</em>, <em>k</em>, <em>v=1</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#hashplus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.hashplus" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
 <dt id="LOTlib.Miscellaneous.ifelse">
 <tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">ifelse</tt><big>(</big><em>x</em>, <em>y</em>, <em>z</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#ifelse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.ifelse" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Miscellaneous.islist">
-<tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">islist</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#islist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.islist" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -1550,14 +1462,17 @@ g(12)</p>
 <dd></dd></dl>
 
 <dl class="function">
-<dt id="LOTlib.Miscellaneous.list2str">
-<tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">list2str</tt><big>(</big><em>x</em>, <em>sep=' '</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#list2str"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.list2str" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="LOTlib.Miscellaneous.lambda_str">
+<tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">lambda_str</tt><big>(</big><em>fn</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#lambda_str"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.lambda_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>A nicer printer for pure lambda calculus</p>
+</dd></dl>
 
 <dl class="function">
-<dt id="LOTlib.Miscellaneous.listifnot">
-<tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">listifnot</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#listifnot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.listifnot" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="LOTlib.Miscellaneous.list2sexpstr">
+<tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">list2sexpstr</tt><big>(</big><em>lst</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#list2sexpstr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.list2sexpstr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints a python list-of-lists as an s-expression</p>
+<p>[[&#8216;K&#8217;, &#8216;K&#8217;], [[&#8216;S&#8217;, &#8216;K&#8217;], [&#8216;I&#8217;, &#8216;I&#8217;]]] &#8211;&gt; ((K K) ((S K)(I I)))</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="LOTlib.Miscellaneous.log1mexp">
@@ -1621,7 +1536,8 @@ steps - number of steps between. When 1, only mx is returned</p>
 <dl class="function">
 <dt id="LOTlib.Miscellaneous.q">
 <tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">q</tt><big>(</big><em>x</em>, <em>quote=&quot;'&quot;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#q"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.q" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Quotes a string</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="LOTlib.Miscellaneous.qq">
@@ -1700,6 +1616,13 @@ steps - number of steps between. When 1, only mx is returned</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="LOTlib.Miscellaneous.unlist_singleton">
+<tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">unlist_singleton</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#unlist_singleton"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.unlist_singleton" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove any sequences of nested lists with one element.</p>
+<p>e.g. [[[1,3,4]]] -&gt; [1,3,4]</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="LOTlib.Miscellaneous.weave">
 <tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">weave</tt><big>(</big><em>*iterables</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#weave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.weave" title="Permalink to this definition">¶</a></dt>
 <dd><p>Intersperse several iterables, until all are exhausted.
@@ -1710,7 +1633,7 @@ This nicely will weave together multiple chains</p>
 <dl class="function">
 <dt id="LOTlib.Miscellaneous.weighted_sample">
 <tt class="descclassname">LOTlib.Miscellaneous.</tt><tt class="descname">weighted_sample</tt><big>(</big><em>objs</em>, <em>N=1</em>, <em>probs=None</em>, <em>log=False</em>, <em>return_probability=False</em>, <em>returnlist=False</em>, <em>Z=None</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Miscellaneous.html#weighted_sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Miscellaneous.weighted_sample" title="Permalink to this definition">¶</a></dt>
-<dd><p>when we return_probability, it is <em>always</em> a log probability</p>
+<dd><p>When we return_probability, it is <em>always</em> a log probability</p>
 </dd></dl>
 
 </div>
@@ -1719,7 +1642,8 @@ This nicely will weave together multiple chains</p>
 <p>Proposal classes for LOTlib.</p>
 <p>These are really just functions that allow us to initialize and store some state (like a grammar)
 They all return [proposal, forwardp-backwardp] for use in MH.</p>
-<p>TODO: MixtureProposal only works correctly if boht are ergodic. If not, we may need something special to do forward/backward</p>
+<p>TODO: MixtureProposal only works correctly if both are ergodic. If not, we may need something special to do forward/backward</p>
+<p>NOTE TODO: INSERt/DELETE DOES NOT WORK &#8211; MAY NOT MATCH CORRECTLY WITH BV_NAME NOW</p>
 <dl class="class">
 <dt id="LOTlib.Proposals.InsertDeleteProposal">
 <em class="property">class </em><tt class="descclassname">LOTlib.Proposals.</tt><tt class="descname">InsertDeleteProposal</tt><big>(</big><em>grammar</em>, <em>insert_delete_probability=0.5</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Proposals.html#InsertDeleteProposal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Proposals.InsertDeleteProposal" title="Permalink to this definition">¶</a></dt>
@@ -1803,7 +1727,7 @@ so that we can implement only propose_t classes for subclasses, that generate tr
 <p>The default in LOTHypothesis</p>
 <dl class="method">
 <dt id="LOTlib.Proposals.RegenerationProposal.propose_tree">
-<tt class="descname">propose_tree</tt><big>(</big><em>t</em>, <em>separate_fb=False</em>, <em>predicate=&lt;function lambdaTrue at 0x28e0500&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Proposals.html#RegenerationProposal.propose_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Proposals.RegenerationProposal.propose_tree" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">propose_tree</tt><big>(</big><em>t</em>, <em>separate_fb=False</em>, <em>predicate=&lt;function lambdaTrue at 0x1033b47d0&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Proposals.html#RegenerationProposal.propose_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Proposals.RegenerationProposal.propose_tree" title="Permalink to this definition">¶</a></dt>
 <dd><p>If separate_fb=True &#8211; return [newt, f, b], instead of [newt,f-b]</p>
 </dd></dl>
 
@@ -1821,19 +1745,14 @@ so that we can implement only propose_t classes for subclasses, that generate tr
 <p>TODO: No quoting etc. supported yet.</p>
 <p>NOTE: This is based on <a class="reference external" href="http://pyparsing.wikispaces.com/file/view/sexpParser.py/278417548/sexpParser.py">http://pyparsing.wikispaces.com/file/view/sexpParser.py/278417548/sexpParser.py</a></p>
 <dl class="function">
-<dt id="LOTlib.SimpleLambdaParser.random">
-<tt class="descclassname">LOTlib.SimpleLambdaParser.</tt><tt class="descname">random</tt><big>(</big><big>)</big> &rarr; x in the interval [0, 1).<a class="headerlink" href="#LOTlib.SimpleLambdaParser.random" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
 <dt id="LOTlib.SimpleLambdaParser.simpleLambda2FunctionNode">
-<tt class="descclassname">LOTlib.SimpleLambdaParser.</tt><tt class="descname">simpleLambda2FunctionNode</tt><big>(</big><em>s</em>, <em>style='atis'</em><big>)</big><a class="reference internal" href="_modules/LOTlib/SimpleLambdaParser.html#simpleLambda2FunctionNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.SimpleLambdaParser.simpleLambda2FunctionNode" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">LOTlib.SimpleLambdaParser.</tt><tt class="descname">simpleLambda2FunctionNode</tt><big>(</big><em>s</em>, <em>style='atis'</em><big>)</big><a class="headerlink" href="#LOTlib.SimpleLambdaParser.simpleLambda2FunctionNode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Take a string for lambda expressions and map them to a real FunctionNode tree</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="LOTlib.SimpleLambdaParser.simpleLambda2List">
-<tt class="descclassname">LOTlib.SimpleLambdaParser.</tt><tt class="descname">simpleLambda2List</tt><big>(</big><em>s</em><big>)</big><a class="reference internal" href="_modules/LOTlib/SimpleLambdaParser.html#simpleLambda2List"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.SimpleLambdaParser.simpleLambda2List" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">LOTlib.SimpleLambdaParser.</tt><tt class="descname">simpleLambda2List</tt><big>(</big><em>s</em><big>)</big><a class="headerlink" href="#LOTlib.SimpleLambdaParser.simpleLambda2List" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a list of list of lists... for a string containing a simple lambda expression (no quoting, etc)
 NOTE: This converts to lowercase</p>
 </dd></dl>
@@ -1893,9 +1812,7 @@ OR how many leaves (from partial trees) have the same returntype</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">LOTlib package</a><ul>
-<li><a class="reference internal" href="#subpackages">Subpackages</a><ul>
-</ul>
-</li>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-LOTlib.BasicPrimitives">LOTlib.BasicPrimitives module</a></li>
 <li><a class="reference internal" href="#module-LOTlib.DataAndObjects">LOTlib.DataAndObjects module</a></li>
@@ -1945,12 +1862,12 @@ OR how many leaves (from partial trees) have the same returntype</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">LOTlib 1.0.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LOTlib 0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

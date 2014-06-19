@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>LOTlib.Hypotheses.FunctionHypothesis &mdash; LOTlib 1.0.0 documentation</title>
+    <title>LOTlib.Hypotheses.FunctionHypothesis &mdash; LOTlib 0.2.0 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -16,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '1.0.0',
+        VERSION:     '0.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +23,7 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="LOTlib 1.0.0 documentation" href="../../../index.html" />
+    <link rel="top" title="LOTlib 0.2.0 documentation" href="../../../index.html" />
     <link rel="up" title="LOTlib" href="../../LOTlib.html" /> 
   </head>
   <body>
@@ -38,7 +36,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li>
           <li><a href="../../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
       </ul>
@@ -60,9 +58,11 @@
 
 <span class="kn">from</span> <span class="nn">Hypothesis</span> <span class="kn">import</span> <span class="n">Hypothesis</span>
 
-<span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">LOTlib.Evaluation.Eval</span> <span class="kn">import</span> <span class="n">evaluate_expression</span>
+<span class="kn">from</span> <span class="nn">LOTlib.Evaluation.EvaluationException</span> <span class="kn">import</span> <span class="n">EvaluationException</span>
+<span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="n">lambdaNone</span>
 <span class="kn">from</span> <span class="nn">LOTlib.DataAndObjects</span> <span class="kn">import</span> <span class="n">FunctionData</span><span class="p">,</span><span class="n">UtteranceData</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span><span class="p">,</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
 
 <div class="viewcode-block" id="FunctionHypothesis"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.FunctionHypothesis.FunctionHypothesis">[docs]</a><span class="k">class</span> <span class="nc">FunctionHypothesis</span><span class="p">(</span><span class="n">Hypothesis</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
@@ -97,7 +97,7 @@
 		
 		<span class="k">try</span><span class="p">:</span>
 			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fvalue</span><span class="p">(</span><span class="o">*</span><span class="n">vals</span><span class="p">)</span>
-		<span class="k">except</span> <span class="n">RecursionDepthException</span><span class="p">:</span>
+		<span class="k">except</span> <span class="n">EvaluationException</span><span class="p">:</span>
 			<span class="k">return</span> <span class="bp">None</span>
 		<span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
 			<span class="k">print</span> <span class="s">&quot;TypeError in function call: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;  ;  &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
@@ -112,7 +112,7 @@
 		<span class="c"># Risky here to catch all exceptions, but we&#39;ll do it and warn on failure</span>
 		<span class="k">try</span><span class="p">:</span>
 			<span class="k">return</span> <span class="n">evaluate_expression</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
-		<span class="k">except</span> <span class="n">e</span><span class="p">:</span>
+		<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
 			<span class="k">print</span> <span class="s">&quot;# Warning: failed to execute evaluate_expression on &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 			<span class="k">print</span> <span class="s">&quot;# &quot;</span><span class="p">,</span> <span class="n">e</span>
 			<span class="k">return</span> <span class="n">lambdaNone</span>
@@ -134,37 +134,17 @@
 		<span class="k">if</span> <span class="n">f</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>     <span class="bp">self</span><span class="o">.</span><span class="n">fvalue</span> <span class="o">=</span> <span class="n">f</span>
 		<span class="k">elif</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>   <span class="bp">self</span><span class="o">.</span><span class="n">fvalue</span> <span class="o">=</span> <span class="bp">None</span>
 		<span class="k">else</span><span class="p">:</span>                 <span class="bp">self</span><span class="o">.</span><span class="n">fvalue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value2function</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-	
-	<span class="c">## NOTE: get_function_responses will be removed</span>
-	<span class="c">#def get_function_responses(self, data, *args, **kwargs):</span>
-		<span class="c">#&quot;&quot;&quot; </span>
-		<span class="c">#Evaluate this function on some data</span>
-		<span class="c">#Returns a list of my responses to data, handling exceptions (setting to None)</span>
-		<span class="c">#- args, kwargs -- these are just passed to self on evaluation</span>
-		
-		<span class="c">#TODO: CLEAN THIS UP -- SHOULD THIS EVER BE USED?</span>
-		<span class="c">#&quot;&quot;&quot;</span>
-		
-		<span class="c">#args = list(args) # need this so we can concat with + below</span>
-		
-		<span class="c">#out = []</span>
-		<span class="c">#for di in data:</span>
-			<span class="c">#r = None</span>
-			<span class="c">#try:</span>
-				<span class="c">#if   isinstance(di, FunctionData):  r = self(*(di.input+args), **kwargs)</span>
-				<span class="c">#elif isinstance(di, UtteranceData): r = self(*(di.context+args), **kwargs)</span>
-				<span class="c">#else:                               r = self(*(di+args), **kwargs) # otherwise just pass along</span>
-			<span class="c">#except RecursionDepthException: pass # If there is a recursion depth exception, just ignore (so r=None)</span>
-			
-			<span class="c">#out.append(r) # so we get &quot;None&quot; when things mess up</span>
-		<span class="c">#return out</span>
+	</div>
+<div class="viewcode-block" id="FunctionHypothesis.force_function"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.FunctionHypothesis.FunctionHypothesis.force_function">[docs]</a>	<span class="k">def</span> <span class="nf">force_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s">&quot;&lt;FORCED_FUNCTION&gt;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fvalue</span><span class="o">=</span><span class="n">f</span>
 	</div>
 <div class="viewcode-block" id="FunctionHypothesis.compute_single_likelihood"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.FunctionHypothesis.FunctionHypothesis.compute_single_likelihood">[docs]</a>	<span class="k">def</span> <span class="nf">compute_single_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">			A function that must be implemented by subclasses to compute the likelihood of a single datum/response pair.</span>
 <span class="sd">			This should NOT implement the temperature (that is handled by compute_likelihood)</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		<span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;*** compute_single_likelihood must be overwritten in a lower class&quot;</span>
+		<span class="k">raise</span> <span class="ne">NotImplementedError</span>
 	</div>
 <div class="viewcode-block" id="FunctionHypothesis.compute_likelihood"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.FunctionHypothesis.FunctionHypothesis.compute_likelihood">[docs]</a>	<span class="k">def</span> <span class="nf">compute_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
@@ -233,14 +213,14 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li>
           <li><a href="../../LOTlib.html" >LOTlib</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

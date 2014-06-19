@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>LOTlib.Examples.SymbolicRegression.Shared &mdash; LOTlib 1.0.0 documentation</title>
+    <title>LOTlib.Examples.SymbolicRegression.Shared &mdash; LOTlib 0.2.0 documentation</title>
     
     <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -16,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../../',
-        VERSION:     '1.0.0',
+        VERSION:     '0.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +23,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="LOTlib 1.0.0 documentation" href="../../../../index.html" />
+    <link rel="top" title="LOTlib 0.2.0 documentation" href="../../../../index.html" />
     <link rel="up" title="LOTlib" href="../../../LOTlib.html" /> 
   </head>
   <body>
@@ -38,7 +36,7 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+        <li><a href="../../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
           <li><a href="../../../index.html" >Module code</a> &raquo;</li>
           <li><a href="../../../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
       </ul>
@@ -61,7 +59,7 @@
 <span class="kn">from</span> <span class="nn">LOTlib.FiniteBestSet</span> <span class="kn">import</span> <span class="n">FiniteBestSet</span>
 <span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">LOTlib.DataAndObjects</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">LOTlib.Hypotheses.GaussianLOTHypothesis</span> <span class="kn">import</span> <span class="n">GaussianLOTHypothesis</span>
+
 
 <span class="c">#from SimpleMPI import MPI_map</span>
 
@@ -69,25 +67,7 @@
 
 <span class="c">## The grammar</span>
 
-<span class="n">G</span> <span class="o">=</span> <span class="n">Grammar</span><span class="p">()</span>
-<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;START&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;EXPR&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
 
-<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;plus_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;EXPR&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
-<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;times_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;EXPR&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
-<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;divide_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;EXPR&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
-<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;subtract_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;EXPR&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
-
-<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;exp_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;EXPR&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
-<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;log_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;EXPR&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
-<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;pow_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;EXPR&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span> <span class="c"># including this gives lots of overflow</span>
-
-<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;sin_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;EXPR&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
-<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;cos_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;EXPR&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
-<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;tan_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;EXPR&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
-
-<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span> <span class="c"># these terminals should have None for their function type; the literals</span>
-
-<span class="n">G</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;EXPR&#39;</span><span class="p">,</span> <span class="s">&#39;1.0&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span>
 
 <span class="c">#G.add_rule(&#39;CONSTANT&#39;, &#39;&#39;, [&#39;*gaussian*&#39;], 10.0) ##TODO: HIGHLY EXPERIMENTAL</span>
 
@@ -131,14 +111,14 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+        <li><a href="../../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
           <li><a href="../../../index.html" >Module code</a> &raquo;</li>
           <li><a href="../../../LOTlib.html" >LOTlib</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

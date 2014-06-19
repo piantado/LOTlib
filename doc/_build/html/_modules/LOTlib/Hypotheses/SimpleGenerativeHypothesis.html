@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>LOTlib.Hypotheses.SimpleGenerativeHypothesis &mdash; LOTlib 1.0.0 documentation</title>
+    <title>LOTlib.Hypotheses.SimpleGenerativeHypothesis &mdash; LOTlib 0.2.0 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -16,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '1.0.0',
+        VERSION:     '0.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +23,7 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="LOTlib 1.0.0 documentation" href="../../../index.html" />
+    <link rel="top" title="LOTlib 0.2.0 documentation" href="../../../index.html" />
     <link rel="up" title="LOTlib" href="../../LOTlib.html" /> 
   </head>
   <body>
@@ -38,7 +36,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li>
           <li><a href="../../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
       </ul>
@@ -64,12 +62,12 @@
 <span class="sd">		</span>
 <span class="sd">		NOTE: FOR NOW, Insert/Delete moves are taken off because of some weirdness with the lambda thunks</span>
 <span class="sd">	&quot;&quot;&quot;</span>
-	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">nsamples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> 
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">nsamples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> 
 		<span class="sd">&quot;&quot;&quot; kwargs should include ll_sd &quot;&quot;&quot;</span>
 		<span class="k">assert</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;args&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&quot;Cannot specify args to SimpleGenerativeHypothesis&quot;</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span><span class="o">=</span><span class="n">nsamples</span>
 		
-		<span class="n">LOTHypothesis</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="c"># this is simple-generative since args=[] (a thunk)</span>
+		<span class="n">LOTHypothesis</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="c"># this is simple-generative since args=[] (a thunk)</span>
 	
 <div class="viewcode-block" id="SimpleGenerativeHypothesis.compute_single_likelihood"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.SimpleGenerativeHypothesis.SimpleGenerativeHypothesis.compute_single_likelihood">[docs]</a>	<span class="k">def</span> <span class="nf">compute_single_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum</span><span class="p">):</span>
 		<span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;Should not call this!&quot;</span>
@@ -126,14 +124,14 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li>
           <li><a href="../../LOTlib.html" >LOTlib</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

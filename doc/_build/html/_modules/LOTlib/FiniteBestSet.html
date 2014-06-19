@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>LOTlib.FiniteBestSet &mdash; LOTlib 1.0.0 documentation</title>
+    <title>LOTlib.FiniteBestSet &mdash; LOTlib 0.2.0 documentation</title>
     
     <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -16,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0',
+        VERSION:     '0.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +23,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="LOTlib 1.0.0 documentation" href="../../index.html" />
+    <link rel="top" title="LOTlib 0.2.0 documentation" href="../../index.html" />
     <link rel="up" title="LOTlib" href="../LOTlib.html" /> 
   </head>
   <body>
@@ -38,7 +36,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
       </ul>
@@ -61,12 +59,8 @@
 <span class="sd">	</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">heapq</span>
-<span class="kn">import</span> <span class="nn">operator</span>
 <span class="kn">import</span> <span class="nn">collections</span>
-
-<span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="n">Infinity</span>
 
 <div class="viewcode-block" id="QueueItem"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FiniteBestSet.QueueItem">[docs]</a><span class="k">class</span> <span class="nc">QueueItem</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
@@ -92,14 +86,14 @@
 	
 	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">Infinity</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">			N - the number of hypothese to store</span>
+<span class="sd">			N - the number of hypotheses to store</span>
 <span class="sd">			max - True/False -- do we keep the ones closes to +inf (or -inf)</span>
 <span class="sd">			key - if a string (attribute) or function, we used this to access a hypothesis&#39; priority score</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		
 		<span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span>
 		
-		<span class="bp">self</span><span class="o">.</span><span class="n">max_multiplier</span> <span class="o">=</span> <span class="n">ifelse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="c"># invert sign </span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">max_multiplier</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="c"># invert sign </span>
 		
 		<span class="bp">self</span><span class="o">.</span><span class="n">Q</span> <span class="o">=</span> <span class="p">[]</span> <span class="c"># we use heapq to </span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">unique_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -123,15 +117,15 @@
 		</div>
 <div class="viewcode-block" id="FiniteBestSet.add"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FiniteBestSet.FiniteBestSet.add">[docs]</a>	<span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">store_iterator</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot; </span>
-<span class="sd">			Add x with priority p to the set.</span>
-<span class="sd">			store_iterator -- if we are supposed to store an iterator (rather than elements from it)</span>
+<span class="sd">			Add *x* with priority p to the set. If x is an iterable, we add everything in it.</span>
+
 <span class="sd">			If p=None, we use self.key to get the value. </span>
-<span class="sd">			If x is an iterable, we add everything in it.</span>
-<span class="sd">		</span>
+
+<span class="sd">			*store_iterator* - if we are supposed to store an iterator (rather than elements from it)</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 
 		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">store_iterator</span><span class="p">:</span>
-			<span class="k">assert</span> <span class="n">p</span><span class="o">==</span><span class="bp">None</span><span class="p">,</span> <span class="s">&quot;FiniteBestSet.add must have p=None for use with an iterator&quot;</span>
+			<span class="k">assert</span> <span class="n">p</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&quot;FiniteBestSet.add must have p=None for use with an iterator&quot;</span>
 			
 			<span class="k">for</span> <span class="n">xi</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span>
 			
@@ -159,9 +153,9 @@
 <div class="viewcode-block" id="FiniteBestSet.get_all"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FiniteBestSet.FiniteBestSet.get_all">[docs]</a>	<span class="k">def</span> <span class="nf">get_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span> 
 		<span class="sd">&quot;&quot;&quot; Return all elements (arbitrary order). Does NOT return a copy. This uses kwargs so that we can call one &#39;sorted&#39; &quot;&quot;&quot;</span>
 		<span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;sorted&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
-			<span class="k">return</span>  <span class="p">[</span> <span class="n">c</span><span class="o">.</span><span class="n">x</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">,</span> <span class="n">reverse</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;decreasing&#39;</span><span class="p">,</span><span class="bp">False</span><span class="p">))]</span>
+			<span class="k">return</span> <span class="p">[</span> <span class="n">c</span><span class="o">.</span><span class="n">x</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;decreasing&#39;</span><span class="p">,</span><span class="bp">False</span><span class="p">))]</span>
 		<span class="k">else</span><span class="p">:</span>
-			<span class="k">return</span>  <span class="p">[</span> <span class="n">c</span><span class="o">.</span><span class="n">x</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">]</span>
+			<span class="k">return</span> <span class="p">[</span> <span class="n">c</span><span class="o">.</span><span class="n">x</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">]</span>
 		
 	<span class="c">##NOTE: NOW DEFUNCT: USE .get_all</span>
 	<span class="c">#def get_sorted(self, decreasing=False): </span>
@@ -171,7 +165,7 @@
 <div class="viewcode-block" id="FiniteBestSet.merge"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FiniteBestSet.FiniteBestSet.merge">[docs]</a>	<span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">			Copy over everything from y. Here, y may be a list of things to merge (e.g. other FiniteBestSets)</span>
-<span class="sd">			This is slightly inefficient becuase we create all new QueueItems, but it&#39;s easiest to deal with min/max</span>
+<span class="sd">			This is slightly inefficient because we create all new QueueItems, but it&#39;s easiest to deal with min/max</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
 			<span class="k">for</span> <span class="n">yi</span> <span class="ow">in</span> <span class="n">y</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">yi</span><span class="p">)</span>
@@ -237,14 +231,14 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">LOTlib 1.0.0 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../LOTlib.html" >LOTlib</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

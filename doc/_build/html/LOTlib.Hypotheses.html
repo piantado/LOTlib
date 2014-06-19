@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>LOTlib.Hypotheses package &mdash; LOTlib 1.0.0 documentation</title>
+    <title>LOTlib.Hypotheses package &mdash; LOTlib 0.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '1.0.0',
+        URL_ROOT:    './',
+        VERSION:     '0.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LOTlib 1.0.0 documentation" href="index.html" /> 
+    <link rel="top" title="LOTlib 0.2.0 documentation" href="index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -37,7 +35,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">LOTlib 1.0.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LOTlib 0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -131,6 +129,11 @@ This should NOT implement the temperature (that is handled by compute_likelihood
 </dd></dl>
 
 <dl class="method">
+<dt id="LOTlib.Hypotheses.FunctionHypothesis.FunctionHypothesis.force_function">
+<tt class="descname">force_function</tt><big>(</big><em>f</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/FunctionHypothesis.html#FunctionHypothesis.force_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.FunctionHypothesis.FunctionHypothesis.force_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="LOTlib.Hypotheses.FunctionHypothesis.FunctionHypothesis.reset_function">
 <tt class="descname">reset_function</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/FunctionHypothesis.html#FunctionHypothesis.reset_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.FunctionHypothesis.FunctionHypothesis.reset_function" title="Permalink to this definition">¶</a></dt>
 <dd><p>re-construct the function from the value &#8211; useful after pickling</p>
@@ -152,17 +155,12 @@ since an error will not be caught!</p>
 
 </dd></dl>
 
-<dl class="function">
-<dt id="LOTlib.Hypotheses.FunctionHypothesis.random">
-<tt class="descclassname">LOTlib.Hypotheses.FunctionHypothesis.</tt><tt class="descname">random</tt><big>(</big><big>)</big> &rarr; x in the interval [0, 1).<a class="headerlink" href="#LOTlib.Hypotheses.FunctionHypothesis.random" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </div>
 <div class="section" id="module-LOTlib.Hypotheses.GaussianLOTHypothesis">
 <span id="lotlib-hypotheses-gaussianlothypothesis-module"></span><h2>LOTlib.Hypotheses.GaussianLOTHypothesis module<a class="headerlink" href="#module-LOTlib.Hypotheses.GaussianLOTHypothesis" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="LOTlib.Hypotheses.GaussianLOTHypothesis.GaussianLOTHypothesis">
-<em class="property">class </em><tt class="descclassname">LOTlib.Hypotheses.GaussianLOTHypothesis.</tt><tt class="descname">GaussianLOTHypothesis</tt><big>(</big><em>G</em>, <em>value=None</em>, <em>f=None</em>, <em>prior_temperature=1.0</em>, <em>proposal_function=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/GaussianLOTHypothesis.html#GaussianLOTHypothesis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.GaussianLOTHypothesis.GaussianLOTHypothesis" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">LOTlib.Hypotheses.GaussianLOTHypothesis.</tt><tt class="descname">GaussianLOTHypothesis</tt><big>(</big><em>grammar</em>, <em>value=None</em>, <em>f=None</em>, <em>prior_temperature=1.0</em>, <em>proposal_function=None</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/GaussianLOTHypothesis.html#GaussianLOTHypothesis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.GaussianLOTHypothesis.GaussianLOTHypothesis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis" title="LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis"><tt class="xref py py-class docutils literal"><span class="pre">LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis</span></tt></a></p>
 <p>Like LOTHypothesis but has a Gaussian likelihood</p>
 <dl class="method">
@@ -272,8 +270,10 @@ This assumes binary function data &#8211; maybe it should be a BernoulliLOTHypot
 <dl class="method">
 <dt id="LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis.enumerative_proposer">
 <tt class="descname">enumerative_proposer</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/LOTHypothesis.html#LOTHypothesis.enumerative_proposer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis.enumerative_proposer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a generator, where the elements in the generator are instances of LOTHypothesis
-that can be gotten to from the current LOTHypothesis.</p>
+<dd><dl class="docutils">
+<dt>Returns a generator, where the elements in the generator are instances of LOTHypothesis</dt>
+<dd>that can be gotten to from the current LOTHypothesis.</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -334,7 +334,7 @@ Implement a Rational Rules (Goodman et al 2008)-style grammar over Boolean expre
 <span id="lotlib-hypotheses-simplegenerativehypothesis-module"></span><h2>LOTlib.Hypotheses.SimpleGenerativeHypothesis module<a class="headerlink" href="#module-LOTlib.Hypotheses.SimpleGenerativeHypothesis" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="LOTlib.Hypotheses.SimpleGenerativeHypothesis.SimpleGenerativeHypothesis">
-<em class="property">class </em><tt class="descclassname">LOTlib.Hypotheses.SimpleGenerativeHypothesis.</tt><tt class="descname">SimpleGenerativeHypothesis</tt><big>(</big><em>G</em>, <em>nsamples=100</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/SimpleGenerativeHypothesis.html#SimpleGenerativeHypothesis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.SimpleGenerativeHypothesis.SimpleGenerativeHypothesis" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">LOTlib.Hypotheses.SimpleGenerativeHypothesis.</tt><tt class="descname">SimpleGenerativeHypothesis</tt><big>(</big><em>grammar</em>, <em>nsamples=100</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Hypotheses/SimpleGenerativeHypothesis.html#SimpleGenerativeHypothesis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Hypotheses.SimpleGenerativeHypothesis.SimpleGenerativeHypothesis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis" title="LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis"><tt class="xref py py-class docutils literal"><span class="pre">LOTlib.Hypotheses.LOTHypothesis.LOTHypothesis</span></tt></a></p>
 <p>Here, the data is a hash from strings to counts. 
 Each function eval results in a string, and the likelihood is the probability of generating the 
@@ -428,12 +428,12 @@ observed data. The function eval results in a thunk</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">LOTlib 1.0.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LOTlib 0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>
