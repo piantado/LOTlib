@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -65,7 +63,8 @@
 <span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="n">None2Empty</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span><span class="p">,</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log</span>
-
+<span class="kn">from</span> <span class="nn">scipy.misc</span> <span class="kn">import</span> <span class="n">logsumexp</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">random</span>
 
 <div class="viewcode-block" id="isFunctionNode"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FunctionNode.isFunctionNode">[docs]</a><span class="k">def</span> <span class="nf">isFunctionNode</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> 
 	<span class="c"># just because this is nicer, and allows us to map, etc. </span>
@@ -86,37 +85,36 @@
 </div>
 <div class="viewcode-block" id="FunctionNode"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FunctionNode.FunctionNode">[docs]</a><span class="k">class</span> <span class="nc">FunctionNode</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		*returntype* - The return type of the FunctionNode</span>
+
+<span class="sd">		*name* - The name of the function</span>
+
+<span class="sd">		*args* - Arguments of the function</span>
+
+<span class="sd">		*generation_probability* - Unnormalized probability of </span>
+
+<span class="sd">		*resample_p* - The probability of choosing this node in an expansion. Takes a number in the range [0.0,1.0]</span>
+
+<span class="sd">		*bv_name* - Name of the Bound Variable e.g. y1, y2, y3...</span>
+
+<span class="sd">		*bv_type* - Bound variable type</span>
+
+<span class="sd">		*bv_args* - Arguments of the Bound Variable. &quot;None&quot; implies this is a terminal, otherwise  a type signature.</span>
+
+<span class="sd">		*bv_prefix* - Bound variable Prefix e.g. the &#39;y&#39; in y1, y2, y3...</span>
+
+<span class="sd">		*bv_p* - Unnormalized probability of the rule expanding to the bound variable.</span>
+
+<span class="sd">		*ruleid* - The rule ID number</span>
+
 <span class="sd">		NOTE: If a node has [ None ] as args, it is treated as a thunk</span>
 <span class="sd">		</span>
 <span class="sd">		bv - stores the actual *rule* that was added (so that we can re-add it when we loop through the tree)</span>
-<span class="sd">		</span>
-<span class="sd">		My bv stores the particlar *names* of variables I&#39;ve introduced</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	
-	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">returntype</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">generation_probability</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">resample_p</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">bv_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bv_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bv_args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bv_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bv_p</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ruleid</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">			*returntype* - The return type of the FunctionNode</span>
-
-<span class="sd">			*name* - The name of the function</span>
-
-<span class="sd">			*args* - Arguments of the function</span>
-
-<span class="sd">			*generation_probability* - Unnormalized probability of </span>
-
-<span class="sd">			*resample_p* - The probability of choosing this node in an expansion. Takes a number in the range [0.0,1.0]</span>
-
-<span class="sd">			*bv_name* - Name of the Bound Variable e.g. y1, y2, y3...</span>
-
-<span class="sd">			*bv_type* - Which bound variable</span>
-
-<span class="sd">			*bv_args* - Arguments of the Bound Variable. &quot;None&quot; implies this is a terminal, otherwise  a type signature.</span>
-
-<span class="sd">			*bv_prefix* - Bound variable Prefix e.g. the &#39;y&#39; in y1, y2, y3...</span>
-
-<span class="sd">			*bv_p* - Unnormalized probability of the rule expanding to the bound variable.</span>
-
-<span class="sd">			*ruleid* - The rule ID number</span>
-<span class="sd">		&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">returntype</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">generation_probability</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+					<span class="n">resample_p</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">bv_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bv_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bv_args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+					<span class="n">bv_prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bv_p</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ruleid</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span>
 		
 <div class="viewcode-block" id="FunctionNode.setto"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FunctionNode.FunctionNode.setto">[docs]</a>	<span class="k">def</span> <span class="nf">setto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
@@ -162,7 +160,10 @@
 	</div>
 <div class="viewcode-block" id="FunctionNode.islambda"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FunctionNode.FunctionNode.islambda">[docs]</a>	<span class="k">def</span> <span class="nf">islambda</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">			Is this a lambda node? Using this function allows us to potentially...</span>
+<span class="sd">			Is this a lambda node? Right now it</span>
+<span class="sd">			just checks if the name is &#39;lambda&#39; (but in the future, we might want to</span>
+<span class="sd">			allow different types of lambdas or something, which is why its nice to</span>
+<span class="sd">			have this function)</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">ret</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;lambda&#39;</span><span class="p">)</span>
 		
@@ -172,9 +173,13 @@
 		
 		<span class="k">return</span> <span class="n">ret</span>
 	
-	<span class="c"># output a string that can be evaluated by python</span>
-	<span class="c">## NOTE: Here we do a little fanciness -- with &quot;if&quot; -- we convert it to the &quot;correct&quot; python form with short circuiting instead of our fancy ifelse function</span></div>
+
+	<span class="c"># NOTE: Here we do a little fanciness -- with &quot;if&quot; -- we convert it to the &quot;correct&quot; python </span>
+	<span class="c"># form with short circuiting instead of our fancy ifelse function</span></div>
 <div class="viewcode-block" id="FunctionNode.pystring"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FunctionNode.FunctionNode.pystring">[docs]</a>	<span class="k">def</span> <span class="nf">pystring</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Outputs a string that can be evaluated by python</span>
+<span class="sd">		&quot;&quot;&quot;</span>
 		<span class="c">#print &quot;&gt;&gt;&quot;, self.name</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_nonfunction</span><span class="p">():</span> <span class="c"># a terminal</span>
 			<span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -478,8 +483,19 @@
 		</div>
 <div class="viewcode-block" id="FunctionNode.is_canonical_order"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.FunctionNode.FunctionNode.is_canonical_order">[docs]</a>	<span class="k">def</span> <span class="nf">is_canonical_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symmetric_ops</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">			Takes a set of symmetric ops (plus, minus, times, etc, not divide) and asserts that the </span>
-<span class="sd">			LHS ordering is less than the right (to prevent)</span>
+<span class="sd">			Takes a set of symmetric (commutative) ops (plus, minus, times, etc, not divide) </span>
+<span class="sd">			and asserts that the LHS ordering is less than the right (to prevent)</span>
+
+<span class="sd">			This is useful for removing duplicates of nodes. For instance,</span>
+
+<span class="sd">				AND(X, OR(Y,Z))</span>
+
+<span class="sd">			is logically the same as</span>
+
+<span class="sd">				AND(OR(Y,Z), X)</span>
+
+<span class="sd">			This function essentially checks if the tree is in sorted (alphbetical)</span>
+<span class="sd">			order, but only for functions whose name is in symmetric_ops. </span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
 			<span class="k">return</span> <span class="bp">True</span>
@@ -537,7 +553,7 @@
 				<span class="c"># Well if there&#39;s one mismatch, it lies below a or b,</span>
 				<span class="c"># so we must propose in a along this subtree</span>
 				<span class="n">m</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="o">+</span> <span class="n">pself</span> <span class="c"># choose uniformly from this subtree, as individual nodes are adjusted later TODO: IM NOT SURE THIS IS RIGHT </span>
-				<span class="k">return</span> <span class="n">logsumexp</span><span class="p">([</span><span class="n">m</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">proposal_probability_to</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="p">,</span> <span class="n">pself</span> <span class="o">+</span> <span class="n">y</span><span class="o">.</span><span class="n">log_probability</span><span class="p">()])</span>
+				<span class="k">return</span> <span class="n">logsumexp</span><span class="p">([</span><span class="n">m</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">proposal_probability_to</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="n">pself</span> <span class="o">+</span> <span class="n">y</span><span class="o">.</span><span class="n">log_probability</span><span class="p">()])</span>
 			
 			<span class="k">else</span><span class="p">:</span> <span class="k">return</span> <span class="n">pself</span> <span class="o">+</span> <span class="n">y</span><span class="o">.</span><span class="n">log_probability</span><span class="p">()</span> <span class="c"># We have to generate from ourselves</span>
 				</div>
@@ -624,7 +640,7 @@
 			<span class="k">else</span><span class="p">:</span> 
 				<span class="n">newargs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="c"># string or something else</span>
 				
-		<span class="n">ret</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">__copy__</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="c"># don&#39;t copy kids</span>
+		<span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__copy__</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="c"># don&#39;t copy kids</span>
 		<span class="n">ret</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">newargs</span>
 		
 		<span class="k">return</span> <span class="n">ret</span></div></div>
@@ -668,7 +684,7 @@
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>
