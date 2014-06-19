@@ -9,7 +9,7 @@ except ImportError: import numpypy as np
 	
 from copy import copy, deepcopy
 from collections import defaultdict
-from random import randint, random, sample
+from random import random
 
 import LOTlib
 from LOTlib.Miscellaneous import *
