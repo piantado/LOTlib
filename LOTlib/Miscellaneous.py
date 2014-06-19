@@ -82,8 +82,8 @@ def list2sexpstr(lst):
 		[['K', 'K'], [['S', 'K'], ['I', 'I']]] --> ((K K) ((S K)(I I)))
 	"""
 	s = re.sub(r'[\'\",]', r'', str(lst))
-	s = re.sub(r'\[', '(', s)
-	s = re.sub(r'\]', r')', s)
+	s = re.sub(r'\[', '(', s) # changed r'(' to '('
+	s = re.sub(r'\]', ')', s) # changed r')' to ')'
 	return s
 	
 
