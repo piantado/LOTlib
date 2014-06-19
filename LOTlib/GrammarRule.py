@@ -43,10 +43,10 @@ class GrammarRule:
 		
 		if name == '':
 
-			assert (expansion is None) or (len(expansion) == 1), "*** GrammarRules with empty names must have only 1 argument"
+			assert (to is None) or (len(to) == 1), "*** GrammarRules with empty names must have only 1 argument"
 
 	def __repr__(self):
-		return str(self.nt) + " -> " + self.name + (str(self.expansion) if self.expansion is not None else '') + "\t\t[p=" +str(self.p)+ "; resample_p=" + str(self.resample_p) +"]" + "<BV:"+ str(self.bv_type)+";"+str(self.bv_args)+";"+self.bv_prefix+">"
+		return str(self.nt) + " -> " + self.name + (str(self.to) if self.to is not None else '') + "\t\t[p=" +str(self.p)+ "; resample_p=" + str(self.resample_p) +"]" + "<BV:"+ str(self.bv_type)+";"+str(self.bv_args)+";"+self.bv_prefix+">"
 
 	def __eq__(self, other):
 		return ( self.rid == other.rid and self.nt == other.nt)

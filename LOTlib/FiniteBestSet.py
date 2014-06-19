@@ -71,15 +71,15 @@ class FiniteBestSet(object):
 		
 	def add(self, x, p=None, store_iterator=False):
 		""" 
-			Add x with priority p to the set.
-			store_iterator -- if we are supposed to store an iterator (rather than elements from it)
+			Add *x* with priority p to the set. If x is an iterable, we add everything in it.
+
 			If p=None, we use self.key to get the value. 
-			If x is an iterable, we add everything in it.
-		
+
+			*store_iterator* - if we are supposed to store an iterator (rather than elements from it)
 		"""
 
 		if isinstance(x, collections.Iterable) and not store_iterator:
-			assert p==None, "FiniteBestSet.add must have p=None for use with an iterator"
+			assert p is None, "FiniteBestSet.add must have p=None for use with an iterator"
 			
 			for xi in x: self.add(xi)
 			
@@ -107,9 +107,9 @@ class FiniteBestSet(object):
 	def get_all(self, **kwargs): 
 		""" Return all elements (arbitrary order). Does NOT return a copy. This uses kwargs so that we can call one 'sorted' """
 		if kwargs.get('sorted', False):
-			return  [ c.x for c in sorted(self.Q, reverse = kwargs.get('decreasing',False))]
+			return [ c.x for c in sorted(self.Q, reverse=kwargs.get('decreasing',False))]
 		else:
-			return  [ c.x for c in self.Q]
+			return [ c.x for c in self.Q]
 		
 	##NOTE: NOW DEFUNCT: USE .get_all
 	#def get_sorted(self, decreasing=False): 
@@ -152,9 +152,3 @@ if __name__ == "__main__":
 		
 		assert set(Q.get_all()).issuperset( set([0,1,2,3,4,5,6,7,8,9]))
 		print Q.get_all()
-
-
-
-
-
-
