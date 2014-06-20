@@ -687,7 +687,3 @@ if __name__ == "__main__":
 		#print x.log_probability(), ARITHMETIC_GRAMMAR.RR_prior(x), x
 		#for xi in ARITHMETIC_GRAMMAR.iterate_subnodes(x):
 			#print "\t", xi
-		
-	
-
-	
