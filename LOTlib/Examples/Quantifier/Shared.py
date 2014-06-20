@@ -7,11 +7,9 @@ from LOTlib import lot_iter
 
 from LOTlib.Grammar import Grammar
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-from LOTlib.BasicPrimitives import *
 from LOTlib.Inference.MetropolisHastings import mh_sample
 from LOTlib.Miscellaneous import *
 from LOTlib.DataAndObjects import *
-from LOTlib.Memoization import *
 from LOTlib.FunctionNode import FunctionNode
 from LOTlib.FiniteBestSet import FiniteBestSet
 
@@ -152,7 +150,9 @@ TESTING_SET = [MyContext(A=x[0], B=x[1], S=x[2]) for x in all_possible_context_s
 def make_my_hypothesis():
 	return LOTHypothesis(grammar, args=['context'])
 
-@Memoize
+from cachetools import lru_cache
+
+@lru_cache
 def my_weight_function(h):
 	return gricean_weight(h, TESTING_SET)
 
@@ -160,6 +160,7 @@ def my_weight_function(h):
 ## Define the target
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from LOTlib.Primitives.Semantics import *
 ## Write this out as a dictionary so that we can load it into a GriceanSimpleLexicon easier
 target_functions = { 'every' : lambda context: presup_(nonempty_(context.A), subset_(context.A,context.B)),\
 		     'some'  : lambda context: presup_(nonempty_(context.A), nonempty_(intersection_(context.A,context.B))),\

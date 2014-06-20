@@ -7,11 +7,10 @@
 	 This searches over probabilistic generating functions, running them forward to estimate
 	 the likelihood of the data. Very very simple. 
 """
-
+import LOTlib.Miscellaneous
 from LOTlib.Grammar import Grammar
-from LOTlib.BasicPrimitives import *
 from LOTlib.Inference.MetropolisHastings import mh_sample
-from LOTlib.Miscellaneous import *
+from LOTlib.Miscellaneous import q
 from LOTlib.Hypotheses.SimpleGenerativeHypothesis import SimpleGenerativeHypothesis
 
 NDATA = 50 # How many of each data point have we seen?
@@ -22,6 +21,14 @@ data = {
         'D N V N'   : NDATA,
         'D N V D N' : NDATA,         
 }
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # #
+## Here is an example of using define_for_evaluator
+
+from LOTlib.Evaluation.Eval import define_for_evaluator # this creates new defines
+
+# And this calls them:
+define_for_evaluator("flatten2str", LOTlib.Miscellaneous.flatten2str)
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 TERMINAL_WEIGHT = 5.

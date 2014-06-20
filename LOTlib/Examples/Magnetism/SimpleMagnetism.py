@@ -84,7 +84,8 @@ data = [ FunctionData(input=[ "p1", "n1" ], output=True), \
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from LOTlib.Proposals import *
-mp = MixtureProposal(grammar, [RegenerationProposal(grammar), InsertDeleteProposal(grammar)] )
+#mp = MixtureProposal(grammar, [RegenerationProposal(grammar), InsertDeleteProposal(grammar)] )
+mp = RegenerationProposal(grammar)
 
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 h0 = LOTHypothesis(grammar, args=['x', 'y'], ALPHA=0.999, proposal_function=mp) # alpha here trades off with the amount of data. Currently assuming no noise, but that's not necessary
