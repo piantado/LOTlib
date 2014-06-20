@@ -18,6 +18,15 @@ MAX_DEPTH = 25
 MAX_LENGTH = 10
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# exceptions for combinators
+
+class CombinatorEvaluationException(EvaluationException): pass
+
+class CombinatorEvaluationDepthException(CombinatorEvaluationException): pass
+
+class CombinatorEvaluationLengthException(CombinatorEvaluationException): pass
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # evaluate combinators
 
 def combinator_reduce(lst, depth=MAX_DEPTH):
@@ -29,8 +38,8 @@ def combinator_reduce(lst, depth=MAX_DEPTH):
 	
 	if not isinstance(lst, list): return lst
 	elif len(lst) == 0: return list()
-	elif (depth < 0): raise EvaluationException("Max depth exceeded")
-	elif (len(lst) > MAX_LENGTH): raise EvaluationException("Max length exceeded")
+	elif (depth < 0): raise CombinatorEvaluationDepthException
+	elif (len(lst) > MAX_LENGTH): CombinatorEvaluationLengthException
 	else:
 		op, args = lst[0], lst[1:]
 		newdepth = depth-1
@@ -52,6 +61,7 @@ def combinator_reduce(lst, depth=MAX_DEPTH):
 			else:              return [op,]+rest
 
 if __name__ == "__main__":
+	
 	from LOTlib.Parsing import parseScheme 
 	
 	print combinator_reduce( parseScheme("(S (K (S I)) (S (K K) I) x y)"))
