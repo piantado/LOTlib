@@ -19,7 +19,7 @@ from LOTlib.Primitives.Trees import *
 from LOTlib.Primitives.Stochastics import *
 
 import sys
-def define_for_evaluator(name,function):
+def register_primitive(name,function):
     """
         This function allows us to load new functions into the evaluation environment. 
         Defaultly all in LOTlib.Primitives are imported. However, we may want to add our
@@ -27,7 +27,7 @@ def define_for_evaluator(name,function):
         
         as in,
         
-        define_for_evaluator('flatten', flatten)
+        register_primitive('flatten', flatten)
         
         where flatten is a function that is defined in the calling context
         

@@ -1,3 +1,6 @@
+June 20 2014
+	- Created Evaluation to implement different virtual machines for evaluating FunctionNodes. The most basic if Eval, whcih calls python eval. 
+	- Refactored BasicPrimitives to LOTlib.Primitives; added ability to add new primitives
 June 15 2014
 	- Deleted Memoization
 	- Added CombinatoryLogic

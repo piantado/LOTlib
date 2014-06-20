@@ -25,10 +25,10 @@ data = {
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 ## Here is an example of using define_for_evaluator
 
-from LOTlib.Evaluation.Eval import define_for_evaluator # this creates new defines
+from LOTlib.Evaluation.Eval import register_primitive # this creates new defines
 
 # And this calls them:
-define_for_evaluator("flatten2str", LOTlib.Miscellaneous.flatten2str)
+register_primitive("flatten2str", LOTlib.Miscellaneous.flatten2str)
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 TERMINAL_WEIGHT = 5.
