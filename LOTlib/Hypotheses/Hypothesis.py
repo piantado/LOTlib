@@ -8,7 +8,7 @@ from copy import copy, deepcopy
 import LOTlib
 from LOTlib.Miscellaneous import *
 
-import LOTlib.BasicPrimitives 
+import LOTlib.Primitives.Primitives
 
 class Hypothesis(object):
 	"""
@@ -93,7 +93,7 @@ class Hypothesis(object):
 		"""
 			Computes the posterior score by computing the prior and likelihood scores
 		"""
-		LOTlib.BasicPrimitives.LOCAL_PRIMITIVE_OPS = 0 # Reset this
+		LOTlib.Primitives.Primitives.LOCAL_PRIMITIVE_OPS = 0 # Reset this
 		p = self.compute_prior()
 		l = self.compute_likelihood(d)
 		self.posterior_score = p+l
