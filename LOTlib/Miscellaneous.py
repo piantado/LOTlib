@@ -394,7 +394,7 @@ def lambdaOne(*x): return 1
 def lambdaNull(*x): return []
 def lambdaNone(*x): return None
 def lambdaTrue(*x): return True
-def lambdaFalse(*x): return True
+def lambdaFalse(*x): return False
 def lambdaNAN(*x): return float("nan")
 
 def lambda_str(fn):

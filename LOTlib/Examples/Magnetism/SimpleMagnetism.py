@@ -10,8 +10,7 @@
 	This is simple because there's only two types of things, and you observe all interactions. See ComplexMagnetism.py for a more complex case...
 """
 
-import LOTlib
-from LOTlib.Miscellaneous import unique, qq
+from LOTlib.Miscellaneous import qq
 from LOTlib.Grammar import Grammar
 from LOTlib.DataAndObjects import FunctionData
 from LOTlib.BasicPrimitives import *
@@ -58,26 +57,25 @@ grammar.add_rule('BASE-OBJECT', qq('n2'), None, 1.0)
 # Set up data -- true output means attraction (p=positive; n=negative)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-data = [ FunctionData(input=[ "p1", "n1" ], output=True), \
-	 FunctionData(input=[ "p1", "n2" ], output=True), \
-	 FunctionData(input=[ "p1", "p1" ], output=False), \
-	 FunctionData(input=[ "p1", "p2" ], output=False), \
+data = [ FunctionData(input=[ "p1", "n1" ], output=True), 
+	 FunctionData(input=[ "p1", "n2" ], output=True), 
+	 FunctionData(input=[ "p1", "p1" ], output=False), 
+	 FunctionData(input=[ "p1", "p2" ], output=False), 
 	 
-         FunctionData(input=[ "p2", "n1" ], output=True), \
-	 FunctionData(input=[ "p2", "n2" ], output=True), \
-	 FunctionData(input=[ "p2", "p1" ], output=False), \
-	 FunctionData(input=[ "p2", "p2" ], output=False), \
+         FunctionData(input=[ "p2", "n1" ], output=True), 
+	 FunctionData(input=[ "p2", "n2" ], output=True), 
+	 FunctionData(input=[ "p2", "p1" ], output=False), 
+	 FunctionData(input=[ "p2", "p2" ], output=False), 
 		 
-	 FunctionData(input=[ "n1", "n1" ], output=False), \
-	 FunctionData(input=[ "n1", "n2" ], output=False), \
-	 FunctionData(input=[ "n1", "p1" ], output=True), \
-	 FunctionData(input=[ "n1", "p2" ], output=True), \
+	 FunctionData(input=[ "n1", "n1" ], output=False), 
+	 FunctionData(input=[ "n1", "n2" ], output=False), 
+	 FunctionData(input=[ "n1", "p1" ], output=True), 
+	 FunctionData(input=[ "n1", "p2" ], output=True), 
 		 
-	 FunctionData(input=[ "n2", "n1" ], output=False), \
-	 FunctionData(input=[ "n2", "n2" ], output=False), \
-	 FunctionData(input=[ "n2", "p1" ], output=True), \
-	 FunctionData(input=[ "n2", "p2" ], output=True), \
-	]
+	 FunctionData(input=[ "n2", "n1" ], output=False), 
+	 FunctionData(input=[ "n2", "n2" ], output=False), 
+	 FunctionData(input=[ "n2", "p1" ], output=True), 
+	 FunctionData(input=[ "n2", "p2" ], output=True)]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run mcmc
