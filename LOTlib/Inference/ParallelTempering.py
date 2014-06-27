@@ -6,6 +6,7 @@ from copy import copy
 from random import randint, random
 from math import exp
 from random import random
+from copy import copy
 
 #def temperature_ladder(min=1.0,max=1.5,steps=5,log=True)
 
@@ -25,7 +26,7 @@ def parallel_tempering_sample(inh, data, steps, proposer=None, within_steps=10, 
 		for i in xrange(len(temperatures)):
 			
 			# update this sample
-			for s in mh_sample(samples[i], data, within_steps, proposer=proposer, skip=0, temperature=temperatures[i]):
+			for s in mh_sample(samples[i], data, within_steps, proposer=proposer, skip=0, likelihood_temperature=temperatures[i]):
 				if yield_all: yield s
 				samples[i] = s # should only be called once, since we skip within step 
 		
@@ -33,7 +34,7 @@ def parallel_tempering_sample(inh, data, steps, proposer=None, within_steps=10, 
 			frm = randint(0, len(temperatures)-2)
 			
 			# get the joint probability -- since temperature is only on the likelihood, everything cancels
-			r = (samples[frm].lp) / temperatures[frm+1] + (samples[frm+1].lp) / temperatures[frm] - (samples[frm].lp) / temperatures[frm] + (samples[frm+1].lp) / temperatures[frm+1]
+			r = (samples[frm].posterior_score) / temperatures[frm+1] + (samples[frm+1].posterior_score) / temperatures[frm] - (samples[frm].posterior_score) / temperatures[frm] + (samples[frm+1].posterior_score) / temperatures[frm+1]
 			
 			if r>0 or random() < exp(r):
 				samples[frm], samples[frm+1] = samples[frm+1], samples[frm]

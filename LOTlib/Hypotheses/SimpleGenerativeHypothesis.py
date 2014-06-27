@@ -34,7 +34,7 @@ class SimpleGenerativeHypothesis(LOTHypothesis):
 		for i in xrange(self.nsamples):
 			self.llcounts[ self() ] += 1
 		
-		self.likelihood = sum([ data[k] * (log(self.llcounts[k] + sm)-log(self.nsamples + sm*len(data.keys())) ) for k in data.keys() ])
+		self.likelihood = sum([ data[k] * (log(self.llcounts[k] + sm)-log(self.nsamples + sm*len(data.keys())) ) for k in data.keys() ]) / self.likelihood_temperature
 		
 		self.posterior_score = self.likelihood + self.prior
 		

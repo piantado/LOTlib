@@ -1,1 +1,0 @@
-And compare when running multiple chains -- since it may be better to be higher entropy with lots of chains!

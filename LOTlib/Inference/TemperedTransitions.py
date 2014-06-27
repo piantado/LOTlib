@@ -14,7 +14,7 @@ def tempered_transitions_sample(inh, data, steps, proposer=None, skip=0, tempera
 	# this allows diff. temps for top and bottom
 	def tt_helper(xi, data, tnew, told, proposer):
 		if proposer is None: xinew, fb = xi.propose()
-		else:                xinew, fb = propose(xi)
+		else:                xinew, fb = proposer(xi)
 		xinew.compute_posterior(data)
 		r = (xinew.prior + xinew.likelihood) / tnew - (xi.prior + xi.likelihood) / told - fb
 		if r > 0.0 or random() < exp(r):
