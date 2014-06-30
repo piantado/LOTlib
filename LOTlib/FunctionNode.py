@@ -298,7 +298,7 @@ class FunctionNode(object):
 	
 	def iterdepth(self):
 		"""
-			Iterate subnodes, yielding node and depth
+			Iterates subnodes, yielding node and depth
 		"""
 		yield (self,0)
 		
