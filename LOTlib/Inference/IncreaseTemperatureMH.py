@@ -8,6 +8,7 @@
 import time
 from random import random
 from math import log, exp, isnan
+from copy import copy
 
 import LOTlib
 from LOTlib import lot_iter
@@ -39,8 +40,7 @@ def increase_temperature_mh_sample(current_sample, data, steps=float("inf"), pro
 			
 			# either compute this, or use the memoized version
 			if memoizer is not None:
-				np, nl = mem(p)
-				p.lp = (np/prior_temperature+nl/likelihood_temperature) / temperature # update this since it won't be set
+				raise NotImplementedError
 			else:
 				np, nl = p.compute_posterior(data)
 						
@@ -71,15 +71,6 @@ def increase_temperature_mh_sample(current_sample, data, steps=float("inf"), pro
 		
 	#print mem.hits, mem.misses
 			
-# this does out special mix of mh and gibbs steps
-def mhgibbs_sample(inh, data, steps, proposer=None, mh_steps=10, gibbs_steps=10, skip=0, temperature=1.0):
-	current_sample = inh
-	for mhi in lot_iter(xrange(steps)):
-		for skp in xrange(skip+1):
-			for k in mh_sample(current_sample, data, 1, proposer=proposer, skip=mh_steps, temperature=temperature): current_sample = k
-			for k in gibbs_sample(current_sample, data, 1, skip=gibbs_steps, temperature=temperature): current_sample = k
-		yield current_sample
-
 		
 
 	

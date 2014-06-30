@@ -5,90 +5,63 @@
 	
 		MAYBE USE: #LOTlib.Hypothesis.POSTERIOR_CALL_COUNTER and report how many calls we've made
 """
-import LOTlib
-from LOTlib import lot_iter
-from SimpleMPI.ParallelBufferedIO import ParallelBufferedIO
-from LOTlib.Miscellaneous import *
-from collections import defaultdict
-from math import log, exp
-from scipy.stats import chisquare
-import numpy
-from time import time
 
-def evaluate_sampler(target, sampler, print_every=250, steps=1000000, chains=1, name="", trace=False, output=sys.stdout):
+from collections import defaultdict
+from time import time
+from numpy import mean, diff
+import sys
+
+from LOTlib import lot_iter
+from LOTlib.Miscellaneous import logsumexp, r3, r5
+
+
+def mydisplay(lst,n=10):
+	# A nice display of the first n, guaranteeing that there will be n
+	ret = map(r3, lst[:n])
+	
+	# Make it the right lenght, in case its too short 
+	## TODO: CAN DO THIS FASTER WITHOUT THE WHILE
+	while len(ret) < n: ret.append("NA")
+	
+	
+	return ret
+
+def evaluate_sampler(my_sampler, print_every=1000, out_hypotheses=sys.stdout, out_aggregate=sys.stdout, trace=False, prefix=""):
 	"""
-		target - a hash from hypotheses to lps. The keys of this are the only things we 
-		sampler - a sampler we wish to evaluate_sampler
-		print_every -- print out every this many samples
-		steps -- how many total samples to draw
-		prefix -- anything to print before
-		trace - should we print a hypothesis every step?
-		assertion - assertion fail if the chi squared doesn't work out
-		chains - how many outside chains to run?
+		Print the stats for a single sampler run
 		
-		print a trace of stats:
-			- prefix
-			- what chain
-			- how many samples
-			- KL (via counts)
-			- percent of hypotheses found
-			- percent of probability mass found
-			- number of target 
-			- length of found samples
-			- target normalizer (log)
-			- count of samples overlapping with target
-			- count of samples NOT overlapping with target
-			- chi squared statistic
-			- p value
-			
-		NOTE: You may get no output if there isn't any overlap between samples and target
+		*my_sampler* -- a generator of samples
+		print_every -- display the output every this many steps
+		out_hypothesis -- where we put hypothesis stats
+		out_aggregate  -- where we put aggregate stats
+		
+		trace -- print every sample
+		prefix -- display before lines
 	"""
-	
-	hypotheses = target.keys()
-	tZ = logsumexp(target.values()) # get the normalizer
-	
-	for chain_i in lot_iter(xrange(chains)):
-		samples = defaultdict(int) # keep track of samples
+	visited_at = defaultdict(list)
+
+	startt = time()
+	for n, s in lot_iter(enumerate(my_sampler)): # each sample should have an .posterior_score defined
+		if trace: print "#", n, s in  s.posterior_score, s
 		
-		startt = time()
-		for n, s in lot_iter(enumerate(sampler)): # each sample should have an .lp defined
+		visited_at[s].append(n)
+		
+		if (n%print_every)==0 and n>0:
+			post =  sorted([x.posterior_score for x in visited_at.keys()], reverse=True) # the unnormalized posteriors of everything found
+			ll   =  sorted([x.likelihood for x in visited_at.keys()], reverse=True)
+			Z = logsumexp(post) # just compute total probability mass found -- the main measure
 			
-			samples[s] += 1
+			out_aggregate.write('\t'.join(map(str, [prefix, n, time()-startt, r5(Z), len(post)]+mydisplay(post)+mydisplay(ll))) + '\n')
 			
-			if trace: print "#", n, s in target, s.lp, s
-			
-			if (n%print_every)==0 and n>0:
-				
-				# the sum of everything in hypotheses
-				sm = sum( [samples[x] for x in hypotheses ] )
-				if sm == 0: continue
-				
-				# the counts of things outside of hypotheses
-				sm_out = n - sm 
-				sZ = log(sm)
-				
-				if sm > 0:
-					KL = 0.0
-				
-					for h in hypotheses:
-						Q = target[h] - tZ
-						sh = samples[h]
-						if sh > 0:
-							P = log( sh ) - sZ
-							KL += (P - Q) * exp( P )
-				else:
-					KL = float("inf")
-					
-				# And compute the percentage found
-				percent_found = float(sum([ (samples[x]>0) for x in hypotheses]))/ float(len(hypotheses))
-				pm_found = logsumexp([target[x] for x in hypotheses if samples[x] > 0])
-								
-				# compute chi squared counts
-				#fobs = numpy.array( [samples[h] for h in hypotheses] )
-				#fexp = numpy.array( [ numpy.exp(target[h]-tZ) * sm for h in hypotheses])
-				#chi,p = chisquare(fobs, f_exp=fexp)  ## TODO: check ddof
-				
-				output.write('\t'.join(map(str, [name, chain_i, n, time()-startt, r3(KL), r3(percent_found), r4(pm_found-tZ), len(hypotheses), len(samples.keys()), r4(tZ)]  )) + '\n')
-			
-			if n > steps: break
+	# Now once we're done, output the hypothesis stats
+	for k,v in visited_at.items():
+		
+		mean_diff = "NA"
+		if len(v) > 1: mean_diff = mean(diff(v))
+		
+		out_hypotheses.write('\t'.join(map(str, [prefix, k.posterior_score, k.prior, k.likelihood, len(v), min(v), max(v), mean_diff, sum(diff(v)==0) ])) +'\n') # number of rejects from this
 	
+	return 0.0
+	
+	
+# 	

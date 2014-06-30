@@ -1,10 +1,10 @@
 """
     Routines for evaling 
 """
+import sys
 
 from LOTlib.Miscellaneous import raise_exception
 from EvaluationException import EvaluationException
-
 
 # All of these are defaulty in the context for eval. 
 from LOTlib.Primitives.Arithmetic import *
@@ -18,21 +18,28 @@ from LOTlib.Primitives.SetTheory import *
 from LOTlib.Primitives.Trees import *
 from LOTlib.Primitives.Stochastics import *
 
-import sys
-def register_primitive(name,function):
+
+def register_primitive(function, name=None):
     """
-        This function allows us to load new functions into the evaluation environment. 
+        This allows us to load new functions into the evaluation environment. 
         Defaultly all in LOTlib.Primitives are imported. However, we may want to add our
-        own functions, and this makes that possible
+        own functions, and this makes that possible. As in,
         
-        as in,
+        register_primitive(flatten)
         
-        register_primitive('flatten', flatten)
+        or 
         
-        where flatten is a function that is defined in the calling context
+        register_primitive(flatten, name="myflatten")
+        
+        where flatten is a function that is defined in the calling context and name
+        specifies that it takes a different name when evaled in LOTlib
         
         TODO: Add more convenient means for importing more methods
     """
+    
+    if name is None:
+        name = function.__name__
+    
     sys.modules['__builtin__'].__dict__[name] = function 
 
 
@@ -62,14 +69,12 @@ def Ystar(*l):
     (define (Y* . l)
           ((lambda (u) (u u))
             (lambda (p) (map (lambda (li) (lambda x (apply (apply li (p p)) x))) l))))
-    
+   
+    See: 
     http://okmij.org/ftp/Computation/fixed-point-combinators.html]
-    
     http://stackoverflow.com/questions/4899113/fixed-point-combinator-for-mutually-recursive-functions
     
-    
-    Here is even/odd:
-    
+    E.g., here is even/odd:
     
     even,odd = Ystar( lambda e,o: lambda x: (x==0) or o(x-1), \
                           lambda e,o: lambda x: (not x==0) and e(x-1) )
@@ -97,9 +102,9 @@ def evaluate_expression(e, args=['x'], recurse="L_", addlambda=True):
     g(12)
     """
     
-    if not isinstance(e,str): e = str(e)
-    f = None # the function
-    
+    if not isinstance(e,str): # TODO: Or assert? 
+        e = str(e)
+   
     try:
         if addlambda:
             f = eval('lambda ' + recurse + ': lambda ' + ','.join(args) + ' :' + e)
@@ -107,7 +112,8 @@ def evaluate_expression(e, args=['x'], recurse="L_", addlambda=True):
         else: 
             f = eval(e)
             return f
-    except:
+    except Exception as e:
         print "Error in evaluate_expression:", e
-        raise RuntimeError
-        exit(1)
+        raise e
+    
+    
