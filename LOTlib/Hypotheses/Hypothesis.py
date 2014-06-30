@@ -7,7 +7,6 @@ import numpy
 from copy import copy, deepcopy
 import LOTlib
 from LOTlib.Miscellaneous import *
-
 from LOTlib.Primitives import Primitives
 
 class Hypothesis(object):
