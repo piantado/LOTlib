@@ -35,27 +35,38 @@ def cleanFunctionNodeString(x):
 
 class FunctionNode(object):
 	"""
-		*returntype* - The return type of the FunctionNode
+		*returntype*
+			The return type of the FunctionNode
 
-		*name* - The name of the function
+		*name*
+			The name of the function 
 
-		*args* - Arguments of the function
+		*args*
+			Arguments of the function
 
-		*generation_probability* - Unnormalized probability of 
+		*generation_probability*
+			Unnormalized generation probability.
 
-		*resample_p* - The probability of choosing this node in an expansion. Takes a number in the range [0.0,1.0]
+		*resample_p*
+			The probability of choosing this node in an expansion. Takes a number in the range [0.0,1.0]
 
-		*bv_name* - Name of the Bound Variable e.g. y1, y2, y3...
+		*bv_name*
+			Name of the Bound Variable e.g. y1, y2, y3...
 
-		*bv_type* - Bound variable type
+		*bv_type*
+			Bound variable type
 
-		*bv_args* - Arguments of the Bound Variable. "None" implies this is a terminal, otherwise  a type signature.
+		*bv_args*
+			Arguments of the Bound Variable. "None" implies this is a terminal, otherwise  a type signature.
 
-		*bv_prefix* - Bound variable Prefix e.g. the 'y' in y1, y2, y3...
+		*bv_prefix*
+			Bound variable Prefix e.g. the 'y' in y1, y2, y3...
 
-		*bv_p* - Unnormalized probability of the rule expanding to the bound variable.
+		*bv_p*
+			Unnormalized probability of the rule expanding to the bound variable.
 
-		*ruleid* - The rule ID number
+		*ruleid*
+			The rule ID number
 
 		NOTE: If a node has [ None ] as args, it is treated as a thunk
 		

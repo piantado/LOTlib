@@ -918,20 +918,32 @@ Also used for PCFG rules, where the arguments are nonterminal symbols.</p>
 <dt id="LOTlib.FunctionNode.FunctionNode">
 <em class="property">class </em><tt class="descclassname">LOTlib.FunctionNode.</tt><tt class="descname">FunctionNode</tt><big>(</big><em>returntype</em>, <em>name</em>, <em>args</em>, <em>generation_probability=0.0</em>, <em>resample_p=1.0</em>, <em>bv_name=None</em>, <em>bv_type=None</em>, <em>bv_args=None</em>, <em>bv_prefix=None</em>, <em>bv_p=None</em>, <em>ruleid=None</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
-<p><em>returntype</em> - The return type of the FunctionNode</p>
-<p><em>name</em> - The name of the function</p>
-<p><em>args</em> - Arguments of the function</p>
-<p><em>generation_probability</em> - Unnormalized probability of</p>
-<p><em>resample_p</em> - The probability of choosing this node in an expansion. Takes a number in the range [0.0,1.0]</p>
-<p><em>bv_name</em> - Name of the Bound Variable e.g. y1, y2, y3...</p>
-<p><em>bv_type</em> - Which bound variable</p>
-<p><em>bv_args</em> - Arguments of the Bound Variable. &#8220;None&#8221; implies this is a terminal, otherwise  a type signature.</p>
-<p><em>bv_prefix</em> - Bound variable Prefix e.g. the &#8216;y&#8217; in y1, y2, y3...</p>
-<p><em>bv_p</em> - Unnormalized probability of the rule expanding to the bound variable.</p>
-<p><em>ruleid</em> - The rule ID number</p>
+<dl class="docutils">
+<dt><em>returntype</em></dt>
+<dd>The return type of the FunctionNode</dd>
+<dt><em>name</em></dt>
+<dd>The name of the function</dd>
+<dt><em>args</em></dt>
+<dd>Arguments of the function</dd>
+<dt><em>generation_probability</em></dt>
+<dd>Unnormalized generation probability.</dd>
+<dt><em>resample_p</em></dt>
+<dd>The probability of choosing this node in an expansion. Takes a number in the range [0.0,1.0]</dd>
+<dt><em>bv_name</em></dt>
+<dd>Name of the Bound Variable e.g. y1, y2, y3...</dd>
+<dt><em>bv_type</em></dt>
+<dd>Bound variable type</dd>
+<dt><em>bv_args</em></dt>
+<dd>Arguments of the Bound Variable. &#8220;None&#8221; implies this is a terminal, otherwise  a type signature.</dd>
+<dt><em>bv_prefix</em></dt>
+<dd>Bound variable Prefix e.g. the &#8216;y&#8217; in y1, y2, y3...</dd>
+<dt><em>bv_p</em></dt>
+<dd>Unnormalized probability of the rule expanding to the bound variable.</dd>
+<dt><em>ruleid</em></dt>
+<dd>The rule ID number</dd>
+</dl>
 <p>NOTE: If a node has [ None ] as args, it is treated as a thunk</p>
 <p>bv - stores the actual <em>rule</em> that was added (so that we can re-add it when we loop through the tree)</p>
-<p>My bv stores the particlar <em>names</em> of variables I&#8217;ve introduced</p>
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.all_leaves">
 <tt class="descname">all_leaves</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.all_leaves"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.all_leaves" title="Permalink to this definition">¶</a></dt>
@@ -993,8 +1005,16 @@ via insert/delete</p>
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.is_canonical_order">
 <tt class="descname">is_canonical_order</tt><big>(</big><em>symmetric_ops</em><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.is_canonical_order"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.is_canonical_order" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a set of symmetric ops (plus, minus, times, etc, not divide) and asserts that the 
-LHS ordering is less than the right (to prevent)</p>
+<dd><p>Takes a set of symmetric (commutative) ops (plus, minus, times, etc, not divide) 
+and asserts that the LHS ordering is less than the right (to prevent)</p>
+<p>This is useful for removing duplicates of nodes. For instance,</p>
+<blockquote>
+<div>AND(X, OR(Y,Z))</div></blockquote>
+<p>is logically the same as</p>
+<blockquote>
+<div>AND(OR(Y,Z), X)</div></blockquote>
+<p>This function essentially checks if the tree is in sorted (alphbetical)
+order, but only for functions whose name is in symmetric_ops.</p>
 </dd></dl>
 
 <dl class="method">
@@ -1018,7 +1038,10 @@ LHS ordering is less than the right (to prevent)</p>
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.islambda">
 <tt class="descname">islambda</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.islambda"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.islambda" title="Permalink to this definition">¶</a></dt>
-<dd><p>Is this a lambda node? Using this function allows us to potentially...</p>
+<dd><p>Is this a lambda node? Right now it
+just checks if the name is &#8216;lambda&#8217; (but in the future, we might want to
+allow different types of lambdas or something, which is why its nice to
+have this function)</p>
 </dd></dl>
 
 <dl class="method">
@@ -1064,7 +1087,8 @@ are not expanded</p>
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.pystring">
 <tt class="descname">pystring</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/FunctionNode.html#FunctionNode.pystring"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.FunctionNode.FunctionNode.pystring" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Outputs a string that can be evaluated by python</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.FunctionNode.FunctionNode.quickstring">
@@ -1157,6 +1181,11 @@ is a (SET (BOOL BOOL)), where in types, (A B) is something that takes an A and r
 <dd><p>Returns true if <em>x</em> is of type FunctionNode.</p>
 </dd></dl>
 
+<dl class="function">
+<dt id="LOTlib.FunctionNode.random">
+<tt class="descclassname">LOTlib.FunctionNode.</tt><tt class="descname">random</tt><big>(</big><big>)</big> &rarr; x in the interval [0, 1).<a class="headerlink" href="#LOTlib.FunctionNode.random" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
 <div class="section" id="module-LOTlib.Grammar">
 <span id="lotlib-grammar-module"></span><h2>LOTlib.Grammar module<a class="headerlink" href="#module-LOTlib.Grammar" title="Permalink to this headline">¶</a></h2>
@@ -1242,7 +1271,7 @@ TODO: When we generate, we MUST have a START-&gt;EXPR expansion, otherwise the t
 
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.iterate_subnodes">
-<tt class="descname">iterate_subnodes</tt><big>(</big><em>t</em>, <em>d=0</em>, <em>predicate=&lt;function lambdaTrue at 0x249b1b8&gt;</em>, <em>do_bv=True</em>, <em>yield_depth=False</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.iterate_subnodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.iterate_subnodes" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">iterate_subnodes</tt><big>(</big><em>t</em>, <em>d=0</em>, <em>predicate=&lt;function lambdaTrue at 0x282c578&gt;</em>, <em>do_bv=True</em>, <em>yield_depth=False</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.iterate_subnodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.iterate_subnodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Iterate through all subnodes of node <em>t</em>, while updating the added rules (bound variables)
 so that at each subnode, the grammar is accurate to what it was.</p>
 <p>if <a href="#id7"><span class="problematic" id="id8">*</span></a>do_bv*=False, we don&#8217;t do bound variables (useful for things like counting nodes, instead of having to update the grammar)</p>
@@ -1277,13 +1306,13 @@ NOTE: Not so simple because we must count multiple paths</p>
 
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.resample_normalizer">
-<tt class="descname">resample_normalizer</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x249b1b8&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.resample_normalizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.resample_normalizer" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">resample_normalizer</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x282c578&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.resample_normalizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.resample_normalizer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the sum of all of the non-normalized probabilities.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="LOTlib.Grammar.Grammar.sample_node_via_iterate">
-<tt class="descname">sample_node_via_iterate</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x249b1b8&gt;</em>, <em>do_bv=True</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.sample_node_via_iterate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.sample_node_via_iterate" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">sample_node_via_iterate</tt><big>(</big><em>t</em>, <em>predicate=&lt;function lambdaTrue at 0x282c578&gt;</em>, <em>do_bv=True</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Grammar.html#Grammar.sample_node_via_iterate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Grammar.Grammar.sample_node_via_iterate" title="Permalink to this definition">¶</a></dt>
 <dd><p>This will yield a random node in the middle of its iteration, allowing us to expand bound variables properly
 (e.g. when the node is yielded, the state of the grammar is correct)
 It also yields the probability and the depth</p>
@@ -1654,7 +1683,7 @@ This nicely will weave together multiple chains</p>
 <p>These are really just functions that allow us to initialize and store some state (like a grammar)
 They all return [proposal, forwardp-backwardp] for use in MH.</p>
 <p>TODO: MixtureProposal only works correctly if both are ergodic. If not, we may need something special to do forward/backward</p>
-<p>NOTE TODO: INSERt/DELETE DOES NOT WORK &#8211; MAY NOT MATCH CORRECTLY WITH BV_NAME NOW</p>
+<p>NOTE TODO: INSERT/DELETE DOES NOT WORK &#8211; MAY NOT MATCH CORRECTLY WITH BV_NAME NOW</p>
 <dl class="class">
 <dt id="LOTlib.Proposals.InsertDeleteProposal">
 <em class="property">class </em><tt class="descclassname">LOTlib.Proposals.</tt><tt class="descname">InsertDeleteProposal</tt><big>(</big><em>grammar</em>, <em>insert_delete_probability=0.5</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Proposals.html#InsertDeleteProposal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Proposals.InsertDeleteProposal" title="Permalink to this definition">¶</a></dt>
@@ -1738,7 +1767,7 @@ so that we can implement only propose_t classes for subclasses, that generate tr
 <p>The default in LOTHypothesis</p>
 <dl class="method">
 <dt id="LOTlib.Proposals.RegenerationProposal.propose_tree">
-<tt class="descname">propose_tree</tt><big>(</big><em>t</em>, <em>separate_fb=False</em>, <em>predicate=&lt;function lambdaTrue at 0x249b1b8&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Proposals.html#RegenerationProposal.propose_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Proposals.RegenerationProposal.propose_tree" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">propose_tree</tt><big>(</big><em>t</em>, <em>separate_fb=False</em>, <em>predicate=&lt;function lambdaTrue at 0x282c578&gt;</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Proposals.html#RegenerationProposal.propose_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Proposals.RegenerationProposal.propose_tree" title="Permalink to this definition">¶</a></dt>
 <dd><p>If separate_fb=True &#8211; return [newt, f, b], instead of [newt,f-b]</p>
 </dd></dl>
 
@@ -1755,6 +1784,11 @@ so that we can implement only propose_t classes for subclasses, that generate tr
 <p>Parse simplified lambda expressions&#8211;enough for ATIS.</p>
 <p>TODO: No quoting etc. supported yet.</p>
 <p>NOTE: This is based on <a class="reference external" href="http://pyparsing.wikispaces.com/file/view/sexpParser.py/278417548/sexpParser.py">http://pyparsing.wikispaces.com/file/view/sexpParser.py/278417548/sexpParser.py</a></p>
+<dl class="function">
+<dt id="LOTlib.SimpleLambdaParser.random">
+<tt class="descclassname">LOTlib.SimpleLambdaParser.</tt><tt class="descname">random</tt><big>(</big><big>)</big> &rarr; x in the interval [0, 1).<a class="headerlink" href="#LOTlib.SimpleLambdaParser.random" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="function">
 <dt id="LOTlib.SimpleLambdaParser.simpleLambda2FunctionNode">
 <tt class="descclassname">LOTlib.SimpleLambdaParser.</tt><tt class="descname">simpleLambda2FunctionNode</tt><big>(</big><em>s</em>, <em>style='atis'</em><big>)</big><a class="headerlink" href="#LOTlib.SimpleLambdaParser.simpleLambda2FunctionNode" title="Permalink to this definition">¶</a></dt>

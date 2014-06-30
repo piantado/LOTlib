@@ -61,26 +61,27 @@
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span> <span class="kn">import</span> <span class="nn">numpypy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 
-<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">random</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="n">randint</span>
-<span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">exp</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">e</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">random</span><span class="p">,</span> <span class="n">sample</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">exp</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">pi</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">collections</span>
 
 <span class="kn">import</span> <span class="nn">types</span> <span class="c"># for checking if something is a function: isinstance(f, types.FunctionType)</span>
+<span class="kn">import</span> <span class="nn">re</span>
 
 <span class="c">## Some useful constants</span>
 <span class="n">Infinity</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s">&quot;inf&quot;</span><span class="p">)</span>
 <span class="n">inf</span> <span class="o">=</span> <span class="n">Infinity</span>
 <span class="n">Inf</span> <span class="o">=</span> <span class="n">Infinity</span>
 <span class="n">Null</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="n">TAU</span> <span class="o">=</span> <span class="mf">6.28318530718</span> <span class="c">#fuck pi</span>
+<span class="n">TAU</span> <span class="o">=</span> <span class="mf">6.28318530718</span> <span class="c"># fuck pi</span>
 
 <span class="c">## For R-friendly</span>
 <span class="n">T</span><span class="o">=</span><span class="bp">True</span>
 <span class="n">F</span><span class="o">=</span><span class="bp">False</span>
 
+<span class="c"># does not check whether array has fewer elements than needed</span>
 <div class="viewcode-block" id="first"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Miscellaneous.first">[docs]</a><span class="k">def</span> <span class="nf">first</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="k">return</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 <div class="viewcode-block" id="second"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Miscellaneous.second">[docs]</a><span class="k">def</span> <span class="nf">second</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="k">return</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
 <div class="viewcode-block" id="third"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Miscellaneous.third">[docs]</a><span class="k">def</span> <span class="nf">third</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>  <span class="k">return</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span></div>
@@ -134,8 +135,8 @@
 <span class="sd">		[[&#39;K&#39;, &#39;K&#39;], [[&#39;S&#39;, &#39;K&#39;], [&#39;I&#39;, &#39;I&#39;]]] --&gt; ((K K) ((S K)(I I)))</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;[</span><span class="se">\&#39;</span><span class="s">\&quot;,]&#39;</span><span class="p">,</span> <span class="s">r&#39;&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">lst</span><span class="p">))</span>
-	<span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\[&#39;</span><span class="p">,</span> <span class="s">r&#39;(&#39;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
-	<span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\]&#39;</span><span class="p">,</span> <span class="s">r&#39;)&#39;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+	<span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\[&#39;</span><span class="p">,</span> <span class="s">&#39;(&#39;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="c"># changed r&#39;(&#39; to &#39;(&#39;</span>
+	<span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;\]&#39;</span><span class="p">,</span> <span class="s">&#39;)&#39;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="c"># changed r&#39;)&#39; to &#39;)&#39;</span>
 	<span class="k">return</span> <span class="n">s</span>
 	
 
@@ -402,13 +403,13 @@
 	<span class="n">myprobs</span> <span class="o">=</span> <span class="bp">None</span>
 	<span class="k">if</span> <span class="n">probs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="c"># defaultly, we use .lp</span>
 		<span class="n">myprobs</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">objs</span><span class="p">)</span> <span class="c"># sample uniform</span>
-	<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">probs</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">FunctionType</span><span class="p">):</span> <span class="c">#NOTE: this does not work for class instance methods</span>
+	<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">probs</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">FunctionType</span><span class="p">):</span> <span class="c"># NOTE: this does not work for class instance methods</span>
 		<span class="n">myprobs</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">probs</span><span class="p">,</span> <span class="n">objs</span><span class="p">)</span>
 	<span class="k">else</span><span class="p">:</span> 
 		<span class="n">myprobs</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">probs</span><span class="p">)</span>
 	
 	<span class="c"># Now normalize and run</span>
-	<span class="k">if</span> <span class="n">Z</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+	<span class="k">if</span> <span class="n">Z</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
 		<span class="k">if</span> <span class="n">log</span><span class="p">:</span> <span class="n">Z</span> <span class="o">=</span> <span class="n">logsumexp</span><span class="p">(</span><span class="n">myprobs</span><span class="p">)</span>
 		<span class="k">else</span><span class="p">:</span> <span class="n">Z</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">myprobs</span><span class="p">)</span>
 	<span class="c">#print log, myprobs, Z</span>
@@ -432,7 +433,7 @@
 					<span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">objs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="p">)</span>
 					<span class="k">break</span>
 					
-	<span class="k">if</span> <span class="n">N</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">returnlist</span><span class="p">):</span> <span class="k">return</span> <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c">#don&#39;t give back a list if you just want one</span>
+	<span class="k">if</span> <span class="n">N</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">returnlist</span><span class="p">):</span> <span class="k">return</span> <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c"># don&#39;t give back a list if you just want one</span>
 	<span class="k">else</span><span class="p">:</span>      <span class="k">return</span> <span class="n">out</span>
 
 <span class="c"># ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>

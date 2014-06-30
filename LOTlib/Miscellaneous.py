@@ -29,6 +29,7 @@ TAU = 6.28318530718 # fuck pi
 T=True
 F=False
 
+# does not check whether array has fewer elements than needed
 def first(x): return x[0]
 def second(x): return x[1]
 def third(x):  return x[2]

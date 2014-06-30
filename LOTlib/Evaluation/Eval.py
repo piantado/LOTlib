@@ -4,6 +4,38 @@
 
 from LOTlib.Miscellaneous import raise_exception
 from EvaluationException import EvaluationException
+
+
+# All of these are defaulty in the context for eval. 
+from LOTlib.Primitives.Arithmetic import *
+from LOTlib.Primitives.Combinators import *
+from LOTlib.Primitives.Features import *
+from LOTlib.Primitives.Functional import *
+from LOTlib.Primitives.Logic import *
+from LOTlib.Primitives.Number import *
+from LOTlib.Primitives.Semantics import *
+from LOTlib.Primitives.SetTheory import *
+from LOTlib.Primitives.Trees import *
+from LOTlib.Primitives.Stochastics import *
+
+import sys
+def register_primitive(name,function):
+    """
+        This function allows us to load new functions into the evaluation environment. 
+        Defaultly all in LOTlib.Primitives are imported. However, we may want to add our
+        own functions, and this makes that possible
+        
+        as in,
+        
+        register_primitive('flatten', flatten)
+        
+        where flatten is a function that is defined in the calling context
+        
+        TODO: Add more convenient means for importing more methods
+    """
+    sys.modules['__builtin__'].__dict__[name] = function 
+
+
 """
 The Y combinator
 #example:
@@ -52,7 +84,6 @@ def Ystar(*l):
 """
     Evaluation of expressions
 """
-from LOTlib.BasicPrimitives import *
 
 def evaluate_expression(e, args=['x'], recurse="L_", addlambda=True):
     """

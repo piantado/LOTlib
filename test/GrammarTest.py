@@ -97,7 +97,3 @@ class GrammarTest(unittest.TestCase):
 # main code to run the test
 if __name__ == '__main__':
 	unittest.main()
-
-
-
-
