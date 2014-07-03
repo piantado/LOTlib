@@ -27,7 +27,7 @@ def ptaboo_search(h0, data, steps, skip=0, noisy_memoize=1000, seen_penalty=1.0)
 	
 			self.rawprior =  type(h0).compute_prior(self) # save the prior for use if we want to convert back
 			self.prior = self.rawprior - seen_count[self]*seen_penalty
-			self.lp = self.prior + self.likelihood
+			self.posterior_score = self.prior + self.likelihood
 			return self.prior
 		
 		def fixlp(self):
@@ -35,7 +35,7 @@ def ptaboo_search(h0, data, steps, skip=0, noisy_memoize=1000, seen_penalty=1.0)
 				Temporarily fix our log probability returned
 			"""
 			self.prior = self.rawprior
-			self.lp = self.prior + self.likelihood
+			self.posterior_score = self.prior + self.likelihood
 	
 	myh0 = WrapperClass(h0.grammar, v=h0.value) ## TODO: NOTE HERE WE ASSUME grammar IS TAKEN!
 	

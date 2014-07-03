@@ -28,7 +28,7 @@ data = {
 from LOTlib.Evaluation.Eval import register_primitive # this creates new defines
 
 # And this calls them:
-register_primitive("flatten2str", LOTlib.Miscellaneous.flatten2str)
+register_primitive(LOTlib.Miscellaneous.flatten2str)
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 TERMINAL_WEIGHT = 5.

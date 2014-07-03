@@ -15,6 +15,7 @@ import sys
 import math
 import collections
 
+import re
 import types # for checking if something is a function: isinstance(f, types.FunctionType)
 import re
 
