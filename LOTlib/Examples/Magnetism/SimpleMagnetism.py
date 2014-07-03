@@ -58,24 +58,6 @@ grammar.add_rule('BASE-OBJECT', qq('n2'), None, 1.0)
 data = [ FunctionData(input=[ "p1", "n1" ], output=True), 
 	 FunctionData(input=[ "p1", "n2" ], output=True), 
 	 FunctionData(input=[ "p1", "p1" ], output=False), 
-<<<<<<< HEAD
-	 FunctionData(input=[ "p1", "p2" ], output=False), 
-	 
-         FunctionData(input=[ "p2", "n1" ], output=True), 
-	 FunctionData(input=[ "p2", "n2" ], output=True), 
-	 FunctionData(input=[ "p2", "p1" ], output=False), 
-	 FunctionData(input=[ "p2", "p2" ], output=False), 
-		 
-	 FunctionData(input=[ "n1", "n1" ], output=False), 
-	 FunctionData(input=[ "n1", "n2" ], output=False), 
-	 FunctionData(input=[ "n1", "p1" ], output=True), 
-	 FunctionData(input=[ "n1", "p2" ], output=True), 
-		 
-	 FunctionData(input=[ "n2", "n1" ], output=False), 
-	 FunctionData(input=[ "n2", "n2" ], output=False), 
-	 FunctionData(input=[ "n2", "p1" ], output=True), 
-	 FunctionData(input=[ "n2", "p2" ], output=True)]
-=======
 	 FunctionData(input=[ "p1", "p2" ], output=False),
 	 
          FunctionData(input=[ "p2", "n1" ], output=True),
@@ -91,9 +73,7 @@ data = [ FunctionData(input=[ "p1", "n1" ], output=True),
 	 FunctionData(input=[ "n2", "n1" ], output=False),
 	 FunctionData(input=[ "n2", "n2" ], output=False),
 	 FunctionData(input=[ "n2", "p1" ], output=True),
-	 FunctionData(input=[ "n2", "p2" ], output=True),
-	]
->>>>>>> 04a59f5ef2179a8efba18d92a5d1a291d5cd4db1
+	 FunctionData(input=[ "n2", "p2" ], output=True) ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run mcmc
@@ -111,5 +91,3 @@ for h in mh_sample(h0, data, 4000000, skip=100):
 	print h.posterior_score, h.likelihood, h.prior,  cleanFunctionNodeString(h)
 	print map( lambda d: h(*d.input), data)
 	print "\n"
-
-	
