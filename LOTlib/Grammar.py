@@ -81,21 +81,21 @@ class Grammar:
 	# these take probs instead of log probs, for simplicity
 	def add_rule(self, nt, name, to, p, resample_p=1.0, bv_type=None, bv_args=None, bv_prefix='y', bv_p=None, rid=None):
 		"""
-			Adds a rule and returns it.
+			Adds a rule and returns the added rule.
 			
 			*nt* - The Nonterminal. e.g. S in "S -> NP VP"
 			
-			*name* - the name of this function
+			*name* - The name of this function
 			
-			*to* - what you expand to (usually a FunctionNode).
+			*to* - What you expand to (usually a FunctionNode).
 			
-			*p* - unnormalized probability of expansion
+			*p* - Unnormalized probability of expansion
 			
-			*resample_p* - in resampling, what is the probability of choosing this node?
+			*resample_p* - In resampling, what is the probability of choosing this node?
 			
-			*bv_type* - what bound variable was introduced
+			*bv_type* - What bound variable was introduced
 			
-			*bv_args* - what are the args when we use a bv (None is terminals, else a type signature)
+			*bv_args* - What are the args when we use a bv (None is terminals, else a type signature)
 			
 			*rid* - the rule id number
 		"""
