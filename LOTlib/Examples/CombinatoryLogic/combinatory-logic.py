@@ -3,6 +3,10 @@
 """
 
 from LOTlib.Grammar import Grammar
+from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+
+from LOTlib.Miscellaneous import q
+from LOTlib.BasicPrimitives import cons_ # for evaling
 
 G = Grammar()
 
@@ -26,3 +30,4 @@ for _ in range(10000):
 		print combinator_reduce(lst)
 	except EvaluationException as e:
 		print "*Probable-NON-HALT*"
+	

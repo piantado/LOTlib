@@ -18,11 +18,12 @@
 
 from Shared import *
 from Utilities import *
-from SimpleMPI.MPI_map import MPI_map, get_rank
+from SimpleMPI.MPI_map import MPI_map, is_master_process, get_rank
 from LOTlib.Miscellaneous import logsumexp
 from collections import defaultdict
 import numpy as np
 from optparse import OptionParser
+from SimpleMPI.MPI_map import MPI_map,is_master_process
 
 DATA_RANGE = range(0, 2050, 100) # Don't need an option for this right now
 parser = OptionParser()
@@ -103,7 +104,7 @@ def run(*args):
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # MPI interface  
 
-if True: # not is_master_process(): # only load if you aren't zero (else we must wait for zero to load!!
+if True: #not is_master_process(): # only load if you aren't zero (else we must wait for zero to load!!
 	
 	from LOTlib.Serialization import *
 	fs = file2object(options.LOAD_HYPOTHESES_PATH)
@@ -138,3 +139,4 @@ if True: # not is_master_process(): # only load if you aren't zero (else we must
 allret = MPI_map(run, [ [x] for x in DATA_RANGE ] * options.CHAINS ) # pass an array of lists of arguments
 
 print "Complete."
+

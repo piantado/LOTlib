@@ -1,5 +1,7 @@
 
+from LOTlib.Miscellaneous import unique
 from LOTlib.Grammar import Grammar
+from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
 G = Grammar()
 
@@ -20,3 +22,5 @@ for i in xrange(100):
 	t = G.generate()
 	tstr = str(t)
 	print t.log_probability(), tstr
+
+	

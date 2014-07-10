@@ -22,3 +22,7 @@ for i in xrange(10000):
 		print x.log_probability(), x
 		for ei in example_input:
 			print "\t", ei, " -> ", f(ei)
+
+
+
+

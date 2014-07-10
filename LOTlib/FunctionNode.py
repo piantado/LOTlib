@@ -526,7 +526,7 @@ class FunctionNode(object):
 		"""
 		
 		# now go through and modify
-		for g in filter(lambda x: x==find, self.subnodes() ): # NOTE: must use subnodes since we are modfiying
+		for g in filter(lambda x: x==find, self.subnodes() ): #NOTE: must use subnodes since we are modfiying
 			g.setto(copy(replace))
 	
 	def partial_subtree_root_match(self, y):

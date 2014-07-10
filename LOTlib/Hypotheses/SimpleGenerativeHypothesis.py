@@ -1,6 +1,7 @@
 from LOTHypothesis import LOTHypothesis
+from copy import copy, deepcopy
 from collections import defaultdict
-from math import log
+from math import log, exp
 
 
 class SimpleGenerativeHypothesis(LOTHypothesis):
@@ -38,3 +39,5 @@ class SimpleGenerativeHypothesis(LOTHypothesis):
 		self.posterior_score = self.likelihood + self.prior
 		
 		return self.likelihood
+		
+		

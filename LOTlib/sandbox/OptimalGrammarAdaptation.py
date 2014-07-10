@@ -9,6 +9,10 @@
 """
 
 
+from collections import defaultdict
+import itertools
+
+from copy import copy
 
 import numpy
 import scipy
@@ -17,7 +21,7 @@ import scipy.optimize
 import LOTlib
 from LOTlib import lot_iter
 from LOTlib.Miscellaneous import *
-from numpy import log, exp, sum
+from numpy import log, exp, sqrt, sum
 
 from LOTlib.Subtrees import *
 

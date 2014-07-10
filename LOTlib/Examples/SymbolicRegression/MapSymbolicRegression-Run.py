@@ -8,12 +8,14 @@ import numpy
 from math import sin
 
 
+from LOTlib.DataAndObjects import FunctionData
+from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Miscellaneous import qq
 
 from MAPSymbolicRegressionHypothesis import MAPSymbolicRegressionHypothesis, grammar
 
 from Data import generate_data
-from Grammar import NCONSTANTS
+from Grammar import grammar, NCONSTANTS
 
 STEPS = 500000
 SKIP = 0
@@ -29,8 +31,9 @@ target = lambda x: 3.*x + sin(4.3/x)
 
 data = generate_data(target, NDATA, data_sd) # generate some data
 h0 = MAPSymbolicRegressionHypothesis(grammar)
-h0.CONSTANT_VALUES = numpy.zeros(NCONSTANTS) # TODO: Move this to an itializer
+h0.CONSTANT_VALUES = numpy.zeros(NCONSTANTS) ## TODO: Move this to an itializer
 
 from LOTlib.Inference.MetropolisHastings import mh_sample
 for h in mh_sample(h0, data, STEPS, skip=SKIP, trace=False, debug=False, memoize=MEMOIZE):
     print h.posterior_score, h.likelihood, h.prior, h.CONSTANT_VALUES, qq(h)
+    

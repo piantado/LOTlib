@@ -7,10 +7,14 @@ from LOTlib import lot_iter
 
 from LOTlib.Grammar import Grammar
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+from LOTlib.Inference.MetropolisHastings import mh_sample
 from LOTlib.Miscellaneous import *
 from LOTlib.DataAndObjects import *
+from LOTlib.FunctionNode import FunctionNode
+from LOTlib.FiniteBestSet import FiniteBestSet
 
 from random import randint
+from copy import copy
 
 from GriceanWeightedLexicon import *
 from Utilities import *
@@ -40,9 +44,9 @@ def sample_context():
 	# get the objects in the current set
 	si = sample_sets_of_objects(set_size, all_objects)
 	
-	return MyContext(A=set([o for o in si if o.shape=='man']),
-		             B=set([o for o in si if o.job=='pirate']),
-		             S=set(si))
+	return MyContext( A=set([o for o in si if o.shape=='man']),\
+		          B=set([o for o in si if o.job=='pirate']),\
+		          S=set(si))
 
 def generate_data(data_size):
 
@@ -95,7 +99,7 @@ grammar.add_rule('SET', 'setdifference_', ['SET', 'SET'], 1.0)
 # These will just be attributes of the current context
 grammar.add_rule('SET', 'context.A', None, 10.0)
 grammar.add_rule('SET', 'context.B', None, 10.0)
-grammar.add_rule('SET', 'context.S', None, 10.0) # Must include this or else we can't get complement
+grammar.add_rule('SET', 'context.S', None, 10.0) ## Must include this or else we can't get complement
 
 # Cardinality operations
 grammar.add_rule('BOOL', 'cardinalityeq_', ['SET', 'SET'], 1.0)
@@ -158,25 +162,27 @@ def my_weight_function(h):
 
 from LOTlib.Primitives.Semantics import *
 ## Write this out as a dictionary so that we can load it into a GriceanSimpleLexicon easier
-target_functions = {'every': lambda context: presup_(nonempty_(context.A), subset_(context.A,context.B)),
-		     'some': lambda context: presup_(nonempty_(context.A), nonempty_(intersection_(context.A,context.B))),
-		     'a': lambda context: presup_(True, nonempty_(intersection_(context.A,context.B))),
-		     'the': lambda context: presup_(cardinality1_(context.A), subset_(context.A,context.B)),
-		     'no': lambda context: presup_(nonempty_(context.A), empty_(intersection_(context.A,context.B))),
-		     'both': lambda context: presup_(cardinality2_(context.A), subset_(context.A,context.B)),
-		     'neither':lambda context: presup_(cardinality2_(context.A), empty_(intersection_(context.A,context.B))),
-		     #'either': lambda context: presup_(cardinality2_(context.A), cardinality1_(intersection_(context.A,context.B))),
-		     #'one':lambda context: presup_(True, cardinality1_(intersection_(context.A,context.B))),
-		     #'two':lambda context: presup_(True, cardinality2_(intersection_(context.A,context.B))),
-		     #'three':lambda context: presup_(True, cardinality3_(intersection_(context.A,context.B))),
+target_functions = { 'every' : lambda context: presup_(nonempty_(context.A), subset_(context.A,context.B)),\
+		     'some'  : lambda context: presup_(nonempty_(context.A), nonempty_(intersection_(context.A,context.B))),\
+		     'a': lambda context: presup_(True, nonempty_(intersection_(context.A,context.B))),\
+		     'the': lambda context: presup_(cardinality1_(context.A), subset_(context.A,context.B)),\
+		     'no': lambda context: presup_(nonempty_(context.A), empty_(intersection_(context.A,context.B))),\
+		     'both': lambda context: presup_(cardinality2_(context.A), subset_(context.A,context.B)),\
+		     'neither':lambda context: presup_(cardinality2_(context.A), empty_(intersection_(context.A,context.B))),\
+		     #'either': lambda context: presup_(cardinality2_(context.A), cardinality1_(intersection_(context.A,context.B))),\
+		     #'one':lambda context: presup_(True, cardinality1_(intersection_(context.A,context.B))),\
+		     #'two':lambda context: presup_(True, cardinality2_(intersection_(context.A,context.B))),\
+		     #'three':lambda context: presup_(True, cardinality3_(intersection_(context.A,context.B))),\
 		     #'most':lambda context: presup_(nonempty_(context.A), cardinalitygt_(intersection_(context.A,context.B), setdifference_(context.A,context.B)))
 	     
 		     #'few':lambda context: presup_(True, cardinalitygt_(3, intersection_(context.A,context.B))),
 		     #'many':lambda context: presup_(True, cardinalitygt_(intersection_(context.A,context.B), 3)),
 		     #'half':lambda context: presup_(nonempty_(context.A), cardinalityeq_(intersection_(context.A,context.B), setdifference_(context.A,context.B)))
-}
+		     }		    
 
 target = GriceanQuantifierLexicon(make_my_hypothesis, my_weight_function)
 
 for w, f in target_functions.items():
 	target.set_word(w, LOTHypothesis(grammar, value='SET_IN_TARGET', f=f))
+
+

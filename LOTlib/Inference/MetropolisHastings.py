@@ -11,15 +11,18 @@
 
 """
 
+import time
+from random import random
+from math import log, exp, isnan
 
 import LOTlib
 from LOTlib import lot_iter
 from LOTlib.Miscellaneous import *
+from LOTlib.FiniteBestSet import FiniteBestSet
 #from LOTlib.Memoization import BoundedDictionary
 from MHShared import *
 
-def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0,
-	prior_temperature=1.0, likelihood_temperature=1.0, acceptance_temperature=1.0, trace=False, debug=False, stats=None, memoize=0):
+def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_temperature=1.0, likelihood_temperature=1.0, acceptance_temperature=1.0, trace=False, debug=False, stats=None, memoize=0):
 	"""
 		current_sample - the starting hypothesis
 		data - the conditioning data
@@ -77,7 +80,7 @@ def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0,
 			
 			if stats is not None: stats['total'] += 1
 			
-			if debug: print "\n\n"
+			if debug: print "\n\n";
 		
 		if trace: 
 			print current_sample.posterior_score, current_sample.likelihood, current_sample.prior, qq(current_sample)
@@ -107,3 +110,6 @@ if __name__ == "__main__":
 	h0 = NumberExpression(grammar)	
 	for h in mh_sample(h0, data, 10000):
 		print q(get_knower_pattern(h)), h.lp, h.prior, h.likelihood, q(h)
+		  
+	
+

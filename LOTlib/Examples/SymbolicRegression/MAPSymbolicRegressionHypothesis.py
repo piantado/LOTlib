@@ -4,12 +4,12 @@ from scipy.optimize import fmin
 from LOTlib.Hypotheses.GaussianLOTHypothesis import GaussianLOTHypothesis
 from LOTlib.Miscellaneous import evaluate_expression, normlogpdf, Infinity
 
-from Grammar import CONSTANT_NAMES
+from Grammar import grammar, CONSTANT_NAMES
 
 MAXITER=100 # max iterations for the optimization to run
 MAX_INITIALIZE=25 # max number of random numbers to try initializing with
 
-CONSTANT_SD = 1.0 # TODO: Put this as an attribute
+CONSTANT_SD = 1.0 ## TODO: Put this as an attribute
 
 class MAPSymbolicRegressionHypothesis(GaussianLOTHypothesis):
     """
@@ -57,8 +57,9 @@ class MAPSymbolicRegressionHypothesis(GaussianLOTHypothesis):
         maxval = toMaximize(res)
         self.CONSTANT_VALUES = res
         
-        if maxval < Infinity:  self.likelihood = -maxval # must invert since it's a negative
+        if maxval < Infinity:  self.likelihood = -maxval ## must invert since it's a negative
         else:                  self.likelihood = -Infinity
             
         self.posterior_score = self.prior + self.likelihood
         return self.likelihood
+

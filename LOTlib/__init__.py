@@ -28,7 +28,7 @@ def lot_iter(g, multi_break=False):
 	import LOTlib # WOW, this is weird scoping, but it doesn't work if you treat this as a local variable (you can't from LOTlib import lot_iter)
 	
 	for x in g:
-		global SIG_INTERRUPTED
+		#global SIG_INTERRUPTED
 		if LOTlib.SIG_INTERRUPTED: 
 			
 			# reset if we should
@@ -39,3 +39,4 @@ def lot_iter(g, multi_break=False):
 		else:
 			 
 			yield x
+		

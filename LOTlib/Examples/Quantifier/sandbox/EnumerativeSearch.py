@@ -77,6 +77,6 @@ start = [ random_lexicon() for i in xrange(10) ]
 print "Done generating start states."
 
 
-for l, s in enumerative_search( start, next_states, score, N=100000, breakout=1000):
+for l, s in enumerative_search( start , next_states, score, N=100000, breakout=1000):
 	print s, l.compute_prior(), l.compute_likelihood(data)
 	print l

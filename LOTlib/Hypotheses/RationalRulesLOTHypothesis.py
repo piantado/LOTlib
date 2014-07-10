@@ -87,3 +87,7 @@ class RationalRulesLOTHypothesis(LOTHypothesis):
 		self.posterior_score = self.prior + self.likelihood
 			
 		return self.prior
+
+
+
+		

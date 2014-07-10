@@ -3,8 +3,7 @@
 	Try a pseudolikelihood -- score just present/absent for each word, ignoring the size principle. 
 	This does terribly.. you really need a full size principle likelihood. 
 	
-	We could probably prove that any likelihood function that does not consider alternatives will not arrive at the correct set of meanings.
-	Any function only of the truth value, which does not include others, will fail...
+	We could probably prove that any likelihood function that does not consider alternatives will not arrive at the correct set of meanings. Any function only of the truth value, which does not include others, will fail...
 	That the truth values of X are not enough to determine meaning if the subset problem is there....
 """
 
@@ -19,8 +18,7 @@ data = generate_data(DATA_SIZE)
 
 W = 'every'
 
-# Now to use it as a LOTHypothesis, we need data to have an "output" field which is true/false for whether its the target word.
-# This is then used by LOTHypothesis.compute_likelihood to see if we match or not with whether a word was said (ignoring the other words -- that's why its a pseudolikelihood)
+# Now to use it as a LOTHypothesis, we need data to have an "output" field which is true/false for whether its the target word. This is then used by LOTHypothesis.compute_likelihood to see if we match or not with whether a word was said (ignoring the other words -- that's why its a pseudolikelihood)
 for di in data: 
 	di.output = (di.word == W)
 	#print (di.word == W)
@@ -35,3 +33,6 @@ for s in LOTlib.MetropolisHastings.mh_sample(H, data, SAMPLES, skip=10):
 	
 for k in reversed(FBS.get_sorted()):
 	print k.lp, k.prior, k.likelihood, k
+	
+
+	

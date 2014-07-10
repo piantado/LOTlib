@@ -11,7 +11,7 @@ from Hypothesis import Hypothesis
 from LOTlib.Evaluation.Eval import evaluate_expression
 from LOTlib.Evaluation.EvaluationException import EvaluationException
 from LOTlib.Miscellaneous import lambdaNone
-from LOTlib.DataAndObjects import FunctionData
+from LOTlib.DataAndObjects import FunctionData,UtteranceData
 from copy import copy
 
 class FunctionHypothesis(Hypothesis):
@@ -121,3 +121,12 @@ class FunctionHypothesis(Hypothesis):
 		"""
 		self.__dict__.update(state)
 		self.set_value(self.value) # just re-set the value so that we re-compute the function
+
+
+
+
+
+
+
+		
+		

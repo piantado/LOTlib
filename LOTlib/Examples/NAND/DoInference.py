@@ -9,6 +9,7 @@
 	to show the best subtrees to define for minimizing KL between the prior and posterior
 	
 """
+from random import randint, sample
 
 from LOTlib.Inference.MetropolisHastings import mh_sample
 from Shared import *
@@ -37,3 +38,15 @@ for i, f in enumerate(TARGET_CONCEPTS):
 	all_hypotheses.merge(fs)
 	
 pickle_save(all_hypotheses, OUTFILE)
+
+
+
+
+
+
+
+
+
+
+
+

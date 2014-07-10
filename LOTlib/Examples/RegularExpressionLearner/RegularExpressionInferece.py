@@ -40,7 +40,7 @@ def to_regex(fn):
 	elif fn.name == 'question_':   return '(%s)?'% to_regex(fn.args[0])
 	elif fn.name == 'or_':         return '(%s|%s)'% tuple(map(to_regex, fn.args))
 	elif fn.name == 'str_append_': return '%s%s'% (fn.args[0], to_regex(fn.args[1]))
-	elif fn.name == 'terminal_':   return '%s'% fn.args[0]
+	elif fn.name == 'terminal_':   return '%s'%fn.args[0]
 	elif fn.name == '':            return to_regex(fn.args[0])
 	else:                         
 		assert False, fn
@@ -61,14 +61,15 @@ class RegexHypothesis(LOTHypothesis):
 	def __str__(self):
 		return to_regex(self.value)
 	
-data = [ FunctionData(input=['aaaa'], output=True),
-	 FunctionData(input=['aaab'], output=False),
-	 FunctionData(input=['aabb'], output=False),
-	 FunctionData(input=['aaba'], output=False),
-	 FunctionData(input=['aca'],  output=True),
-	 FunctionData(input=['aaca'], output=True),
-	 FunctionData(input=['a'],    output=True)]
+data = [ FunctionData(input=['aaaa'], output=True),\
+	 FunctionData(input=['aaab'], output=False),\
+	 FunctionData(input=['aabb'], output=False),\
+	 FunctionData(input=['aaba'], output=False),\
+	 FunctionData(input=['aca'],  output=True),\
+	 FunctionData(input=['aaca'], output=True),\
+	 FunctionData(input=['a'],    output=True) ]
 
 h0 = RegexHypothesis(grammar, ALPHA=0.999)
 for h in lot_iter(mh_sample(h0, data, 10000)):
 	print h.posterior_score, h.prior, h.likelihood, qq(h)
+	

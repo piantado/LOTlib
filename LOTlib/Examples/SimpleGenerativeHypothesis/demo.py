@@ -15,10 +15,12 @@ from LOTlib.Hypotheses.SimpleGenerativeHypothesis import SimpleGenerativeHypothe
 
 NDATA = 50 # How many of each data point have we seen?
 
-data = {'N V': NDATA,
-    'D N V': NDATA,
-    'D N V N': NDATA,
-    'D N V D N': NDATA}
+data = {
+        'N V'       : NDATA,
+        'D N V'     : NDATA,
+        'D N V N'   : NDATA,
+        'D N V D N' : NDATA,         
+}
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 ## Here is an example of using define_for_evaluator
@@ -71,3 +73,5 @@ h0 = SimpleGenerativeHypothesis(grammar )
 for h in mh_sample(h0, data, 100000, skip=100):
 	print h.posterior_score, h.prior, h.likelihood, h
 	print h.llcounts
+	
+        

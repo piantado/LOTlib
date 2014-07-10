@@ -5,14 +5,18 @@
 	TODO: ADD MEMOIZATION
 """
 
+import time
+from random import random
+from math import log, exp, isnan
+from copy import copy
 
 import LOTlib
 from LOTlib import lot_iter
 from LOTlib.Miscellaneous import *
+from LOTlib.FiniteBestSet import FiniteBestSet
 from MHShared import MH_acceptance
 
-def increase_temperature_mh_sample(current_sample, data, steps=float("inf"),
-	proposer=None, skip=0, prior_temperature=1.0, likelihood_temperature=1.0, temperature=1.0, acceptance_temperature=1.0, trace=False, stats=None, increase_amount=1.1, memoizer=None):
+def increase_temperature_mh_sample(current_sample, data, steps=float("inf"), proposer=None, skip=0, prior_temperature=1.0, likelihood_temperature=1.0, temperature=1.0, acceptance_temperature=1.0, trace=False, stats=None, increase_amount=1.1 , memoizer=None):
 	"""
 		current_sample - the starting hypothesis
 		data - the conditioning data
@@ -66,3 +70,8 @@ def increase_temperature_mh_sample(current_sample, data, steps=float("inf"),
 		mhi += 1
 		
 	#print mem.hits, mem.misses
+			
+		
+
+	
+

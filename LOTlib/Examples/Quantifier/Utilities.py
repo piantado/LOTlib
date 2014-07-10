@@ -62,3 +62,4 @@ def collapse_undefs(resp):
 		if is_undef(k): out.append("undef")
 		else:           out.append(k)
 	return out
+	

@@ -34,3 +34,7 @@ for h in mh_sample(h0, data, 10000000, skip=0):
 	
 	#for t in data:
 		#print h(t.utterance, t.context), t
+	
+	
+
+	

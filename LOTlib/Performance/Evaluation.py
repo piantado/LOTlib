@@ -42,13 +42,13 @@ def evaluate_sampler(my_sampler, print_every=1000, out_hypotheses=sys.stdout, ou
 
 	startt = time()
 	for n, s in lot_iter(enumerate(my_sampler)): # each sample should have an .posterior_score defined
-		if trace: print "#", n, s in s.posterior_score, s
+		if trace: print "#", n, s in  s.posterior_score, s
 		
 		visited_at[s].append(n)
 		
-		if (n% print_every)==0 and n>0:
-			post = sorted([x.posterior_score for x in visited_at.keys()], reverse=True) # the unnormalized posteriors of everything found
-			ll   = sorted([x.likelihood for x in visited_at.keys()], reverse=True)
+		if (n%print_every)==0 and n>0:
+			post =  sorted([x.posterior_score for x in visited_at.keys()], reverse=True) # the unnormalized posteriors of everything found
+			ll   =  sorted([x.likelihood for x in visited_at.keys()], reverse=True)
 			Z = logsumexp(post) # just compute total probability mass found -- the main measure
 			
 			out_aggregate.write('\t'.join(map(str, [prefix, n, time()-startt, r5(Z), len(post)]+mydisplay(post)+mydisplay(ll))) + '\n')
@@ -62,3 +62,6 @@ def evaluate_sampler(my_sampler, print_every=1000, out_hypotheses=sys.stdout, ou
 		out_hypotheses.write('\t'.join(map(str, [prefix, k.posterior_score, k.prior, k.likelihood, len(v), min(v), max(v), mean_diff, sum(diff(v)==0) ])) +'\n') # number of rejects from this
 	
 	return 0.0
+	
+	
+# 	

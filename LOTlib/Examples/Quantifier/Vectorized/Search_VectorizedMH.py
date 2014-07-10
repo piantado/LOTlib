@@ -11,7 +11,10 @@
 	
 	
 """
+import sys
 import os
+from random import randint
+from copy import copy
 import numpy as np
 from LOTlib.MetropolisHastings import MHStats
 
@@ -60,8 +63,7 @@ if options.DATA == -1: options.DATA_AMOUNTS = range(options.DATA_MIN,options.DAT
 else:                  options.DATA_AMOUNTS = [ options.DATA ]
 
 if not options.RUN_MPI: display_option_summary(options)
-# get our MPI_map function, which will execute run() on as many processors as we pass to mpiexec # import before we set DEBUG_LEVEL
-if options.RUN_MPI: from SimpleMPI.MPI_map import MPI_map
+if options.RUN_MPI: from SimpleMPI.MPI_map import MPI_map, is_master_process # get our MPI_map function, which will execute run() on as many processors as we pass to mpiexec # import before we set DEBUG_LEVEL
 
 # manage how much we print
 if options.QUIET: options.DEBUG_LEVEL = 0
@@ -160,9 +162,9 @@ if not options.gibbs: # if we aren't doing gibbs,
 		
 		# now we have to sort:
 		mftlen = len(my_finite_trees)
-		proposal_to = numpy.zeros( (mftlen,TOP_N) ) 
-		proposal_probs = numpy.zeros( (mftlen,TOP_N) )
-		proposal_Z = numpy.zeros( (mftlen,1) )  
+		proposal_to =  numpy.zeros( (mftlen,TOP_N) ) 
+		proposal_probs =  numpy.zeros( (mftlen,TOP_N) )
+		proposal_Z =  numpy.zeros( (mftlen,1) )  
 		myrange = range(len(my_finite_trees))
 		for i in xrange(len(my_finite_trees)):
 			
@@ -172,7 +174,7 @@ if not options.gibbs: # if we aren't doing gibbs,
 			
 			# now sort
 			r = -r # so we sort correctly, max first
-			idx = r.argsort(kind='mergesort')[0:TOP_N] # Sort and take the first TOP_N
+			idx = r.argsort(kind='mergesort')[0:TOP_N] #Sort and take the first TOP_N
 			r = -r 
 			proposal_Z[i] = numpy.sum(r[idx]) # necessary since we take a subset
 			proposal_to[i, :]   = idx
@@ -196,8 +198,7 @@ def distance_based_proposer(x):
 class VectorizedLexicon_DistanceMetricProposal(VectorizedLexicon):
 	
 	def __init__(self, *args, **kwargs): VectorizedLexicon.__init__(self, *args, **kwargs)
-
-	def copy(self): return VectorizedLexicon_DistanceMetricProposal(self.target_words, self.finite_trees, self.priorlist, word_idx=np.copy(self.word_idx), ALPHA=self.ALPHA, PALPHA=self.PALPHA)
+	def copy(self):	return VectorizedLexicon_DistanceMetricProposal(self.target_words, self.finite_trees, self.priorlist, word_idx=np.copy(self.word_idx), ALPHA=self.ALPHA, PALPHA=self.PALPHA)
 	
 	def propose(self):
 		new = self.copy()
@@ -209,7 +210,7 @@ class VectorizedLexicon_DistanceMetricProposal(VectorizedLexicon):
 		return new, fb
 
 def VectorizedLexicon_to_SimpleLexicon(vl):
-	L = SimpleLexicon(grammar, args=['A', 'B', 'S']) # REALLY THIS SHOULD BE GRICEAN
+	L = SimpleLexicon(grammar, args=['A', 'B', 'S']) ## REALLY THIS SHOULD BE GRICEAN
 	for i, wi in enumerate(vl.word_idx):
 		L.set_word(index2word[i], vl.finite_trees[wi])
 	
@@ -233,10 +234,11 @@ else:
 outhyp = FiniteBestSet(max=True)
 for r in allret: 
 	outhyp.merge(r)
-outhyp.options = options # Save these so that the output data has our options as a field
+outhyp.options = options ## Save these so that the output data has our options as a field
 outhyp.save(options.OUT_PATH)
 
 # for debugging:
 #learner.compute_likelihood()
 #for g in LOTlib.MetropolisHastings.gibbs_sample(learner, data, options.STEPS, dimensions=xrange(len(target.all_words()))):
 	#print g.posterior_score, g.prior, g.likelihood, g.word_idx, "\n", g
+	

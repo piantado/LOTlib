@@ -14,7 +14,7 @@ STEPS = 100000
 
 ALPHA = 0.75
 GAMMA = -20.0 # the log probability penalty for recursion
-LG_1MGAMMA = log(1.0-exp(GAMMA)) # NOTE: not numerically great
+LG_1MGAMMA = log(1.0-exp(GAMMA)) #NOTE: not numerically great
 USE_RR_PRIOR = True # if false, we just use log probability
 
 #################################################
@@ -61,13 +61,9 @@ class FunctionNode:
 	
 	# NOTE: in the future we may want to change this to do fancy things
 	def __str__(self): return self.pystring()
-
 	def __repr__(self): return self.pystring()
-
 	def __hash__(self): return hash(str(self))
-
 	def __cmp__(self, x): return cmp(str(self), str(x))
-
 	def __eq__(self, other): return (cmp(self, other) == 0)
 	
 	def log_probability(self):
@@ -86,7 +82,7 @@ class FunctionNode:
 	# NOTE: To do anything fancy, we should use PCFG.iterate_subnodes in order to update the grammar, resample, etc. 
 	def all_subnodes(self):
 
-		yield self  # I am a subnode of myself
+		yield self;  # I am a subnode of myself
 		
 		for i in range(len(self.args)): # loop through kids
 			if isinstance(self.args[i],FunctionNode):
@@ -106,7 +102,6 @@ class FunctionNode:
 		return False
 	
 	def count_nodes(self): return self.count_subnodes()
-
 	def count_subnodes(self):
 		c = 0
 		for n in self: 
@@ -179,7 +174,7 @@ class PCFG:
 		
 		if isinstance(x, FunctionNode): 
 			
-			# addedrule = None # Temporarily disabled here
+			addedrule = None ## Temporarily disabled here
 			
 			f = x.copy()
 			f.args = [ self.generate(k, d=d+1) for k in x.args ] # update the kids
@@ -315,7 +310,7 @@ class NumberExpression():
 		responses = self.get_function_responses(data) # get my response to everything
 		for r, di in zip(responses, data):
 			w = di[0]
-			if r == 'undef' or r is None: 
+			if r == 'undef' or r == None: 
 				lp += log(1.0/10.0) # if undefined, just sample from a base distribution
 			else:   lp += log( (1.0 - ALPHA)/10.0 + ALPHA * ( r == w ) )
 			
@@ -343,13 +338,9 @@ class NumberExpression():
 	## These are just handy:
 	
 	def __hash__(self): return hash(str(self.value))
-
 	def __eq__(self, other): return self.value.__eq__(other.value)
-
 	def __str__(self): return str(self.value)
-
 	def __repr__(self): return str(self)
-
 	def __cmp__(self, other): return cmp(self.value,other)
 
 
@@ -405,7 +396,7 @@ def get_knower_pattern(ne):
 	"""
 		This computes a string describing the behavior of this knower-level
 	"""
-	# out = ''
+	out = ''
 	mydata = [ ('', set(sample_sets_of_objects(n, all_objects))) for n in xrange(1,10) ] 
 	resp = ne.get_function_responses( mydata )
 	return ''.join([ str(word_to_number[x]) if (x is not None and x is not 'undef' ) else 'U' for x in resp])
@@ -422,7 +413,7 @@ target = NumberExpression("one_ if cardinality1_(x) else next_(L_(setdifference_
 all_objects = make_all_objects(shape=['duck'])  
 
 # all possible data sets
-all_possible_data = [ ('', set(sample_sets_of_objects(n, all_objects))) for n in xrange(1,10) ] # must NOT be just the pointers sampled, since then set() operations will collapse them!
+all_possible_data = [ ('', set(sample_sets_of_objects(n, all_objects))) for n in xrange(1,10) ] #must NOT be just the pointers sampled, since then set() operations will collapse them!
 	
 	
 # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -442,15 +433,16 @@ for i in range(DATA_SIZE):
 hyp = NumberExpression()
 
 current_sample = NumberExpression() # generate a number expression
-for mhi in xrange(1000000): # how many steps
+for mhi in xrange(1000000): #how many steps
 		
-	p, fb = current_sample.propose() # a proposal and a forward-back probability
+	p, fb = current_sample.propose() #  a proposal and a forward-back probability
 	np, nl = p.compute_posterior(data)
 		
-	r = (np+nl)-(current_sample.prior + current_sample.likelihood)-fb
+	r =  (np+nl)-(current_sample.prior + current_sample.likelihood)-fb
 	
 	if r > 0.0 or random() < exp(r):  # keep the sample if its good
 		current_sample = p
 	
 	# now we have a new sample--print it out
 	print q(get_knower_pattern(current_sample)), current_sample.prior, current_sample.likelihood, q(current_sample)
+

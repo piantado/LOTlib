@@ -16,6 +16,6 @@ def K_(x): # constant function
     return (lambda y: x)
     
 @LOTlib_primitive    
-def S_(x): # (S x y z) = (x z (y z))
+def S_(x): #(S x y z) = (x z (y z))
     # (S x) --> lambda y lambda z: 
     return lambda y: lambda z: x(z)( y(z) )

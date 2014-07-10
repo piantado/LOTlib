@@ -1,4 +1,5 @@
 from Hypothesis import Hypothesis
+from copy import copy, deepcopy
 import numpy
 
 class VectorHypothesis(Hypothesis):

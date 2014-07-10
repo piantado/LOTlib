@@ -7,7 +7,7 @@ To install on my system, I had to build mpich2, mpi4py and set up ubunut with th
 	https://help.ubuntu.com/community/MpichCluster
 
 To run on MPI:
-$ time mpiexec -hostfile /home/piantado/Desktop/mit/Libraries/LOTlib/hosts.mpich2 -n 36 python Search.py --steps=10000 --top=50 --chains=25 --large=1000 --dmin=0 --dmax=300 --dstep=10 --mpi --out=/home/mpiu/tmp.pkl
+$time mpiexec -hostfile /home/piantado/Desktop/mit/Libraries/LOTlib/hosts.mpich2 -n 36 python Search.py --steps=10000 --top=50 --chains=25 --large=1000 --dmin=0 --dmax=300 --dstep=10 --mpi --out=/home/mpiu/tmp.pkl
 """
 
 from SimpleMPI.MPI_map import MPI_map, is_master_process
@@ -17,7 +17,7 @@ from Shared import *
 from optparse import OptionParser
 
 parser = OptionParser()
-parser.add_option("--out", dest="OUT_PATH", type="string",   help="Output file (a pickle of FiniteBestSet)", default="/home/piantado/Desktop/mit/Libraries/LOTlib/LOTlib/Examples/Number/mpi-run.pkl")
+parser.add_option("--out", dest="OUT_PATH", type="string",                  help="Output file (a pickle of FiniteBestSet)", default="/home/piantado/Desktop/mit/Libraries/LOTlib/LOTlib/Examples/Number/mpi-run.pkl")
          
 parser.add_option("--steps", dest="STEPS", type="int", default=200000,       help="Number of samples to run")
 parser.add_option("--top", dest="TOP_COUNT", type="int", default=1000,       help="Top number of hypotheses to store")

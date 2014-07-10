@@ -5,7 +5,7 @@
 
 
 from FunctionHypothesis import FunctionHypothesis
-from copy import copy
+from copy import copy, deepcopy
 from LOTlib.Proposals import RegenerationProposal
 from LOTlib.Miscellaneous import *
 from LOTlib.DataAndObjects import FunctionData

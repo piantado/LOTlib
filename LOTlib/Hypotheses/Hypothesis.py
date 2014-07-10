@@ -3,8 +3,11 @@
 """
 # TODO: Split up likelihood so that decayed versions are separate
 
+import numpy
+from copy import copy, deepcopy
 import LOTlib
 from LOTlib.Miscellaneous import *
+from LOTlib.Primitives import Primitives
 
 class Hypothesis(object):
 	"""
@@ -37,7 +40,6 @@ class Hypothesis(object):
 		self.stored_likelihood = None
 		
 		# keep track of some calls (Global variable)
-		global POSTERIOR_CALL_COUNTER
 		POSTERIOR_CALL_COUNTER = 0
 	
 	def set_value(self, value): 
@@ -109,18 +111,16 @@ class Hypothesis(object):
 	## These are just handy:
 	def __str__(self):
 		return str(self.value)
-
 	def __repr__(self): return str(self)
 		
 	# for hashing hypotheses
 	def __hash__(self): return hash(self.value)
-
 	def __cmp__(self, x): return cmp(self.value,x)
 	
 	# this is for heapq algorithm in FiniteSample, which uses <= instead of cmp
 	# since python implements a "min heap" we can compar elog probs
 	def __le__(self, x):     return (self.posterior_score <= x.posterior_score)
-
 	def __eq__(self, other): return (self.value.__eq__(other.value))
-
 	def __ne__(self, other): return (self.value.__ne__(other.value))
+
+

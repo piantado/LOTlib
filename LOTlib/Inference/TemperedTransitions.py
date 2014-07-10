@@ -26,7 +26,7 @@ def tempered_transitions_sample(inh, data, steps, proposer=None, skip=0, tempera
 		for skp in xrange(skip+1):
 		
 			xi = current_sample # do not need to copy this
-			totlp = 0.0 # (xi.lp / temperatures[1]) - (xi.lp / temperatures[0])
+			totlp = 0.0 #(xi.lp / temperatures[1]) - (xi.lp / temperatures[0])
 			
 			for i in xrange(0,LT-2): # go up
 				xi = tt_helper(xi, data, temperatures[i+1], temperatures[i], proposer)
@@ -43,3 +43,4 @@ def tempered_transitions_sample(inh, data, steps, proposer=None, skip=0, tempera
 				current_sample = xi # copy this over
 
 		yield current_sample
+
