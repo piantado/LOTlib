@@ -17,16 +17,15 @@ G.add_rule('TWO_CONCEPT_START', 'if_', ['(concept==\'A\')', 'START', 'START'], 1
 from LOTlib.DataAndObjects import *
 
 # The argumetns are [concept,object]
-data = [ FunctionData( ['A', Obj(shape='square', color='red')],    True), \
-	 FunctionData( ['A', Obj(shape='square', color='blue')],   False), \
-	 FunctionData( ['A', Obj(shape='triangle', color='blue')], False), \
-	 FunctionData( ['A', Obj(shape='triangle', color='red')],  False), \
+data = [ FunctionData( ['A', Obj(shape='square', color='red')],    True), 
+	 FunctionData( ['A', Obj(shape='square', color='blue')],   False), 
+	 FunctionData( ['A', Obj(shape='triangle', color='blue')], False), 
+	 FunctionData( ['A', Obj(shape='triangle', color='red')],  False), 
 	 
-	 FunctionData( ['B', Obj(shape='square', color='red')],    False), \
-	 FunctionData( ['B', Obj(shape='square', color='blue')],   True), \
-	 FunctionData( ['B', Obj(shape='triangle', color='blue')], True), \
-	 FunctionData( ['B', Obj(shape='triangle', color='red')],  True)
-	] * 10 ## How many data points exactly like these?
+	 FunctionData( ['B', Obj(shape='square', color='red')],    False), 
+	 FunctionData( ['B', Obj(shape='square', color='blue')],   True), 
+	 FunctionData( ['B', Obj(shape='triangle', color='blue')], True), 
+	 FunctionData( ['B', Obj(shape='triangle', color='red')],  True)] * 10 # How many data points exactly like these?
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Create an initial hypothesis
@@ -47,5 +46,3 @@ from LOTlib.Inference.MetropolisHastings import mh_sample
 # this prints out posterior (posterior_score), prior, likelihood, 
 for h in mh_sample(h0, data, 10000, skip=100):
 	print h.posterior_score, h.prior, h.likelihood, q(h)
-	
-	

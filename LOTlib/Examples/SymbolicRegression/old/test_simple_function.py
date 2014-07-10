@@ -14,7 +14,6 @@ from Lexicon import *
 from Objects import *
 from Hypothesis import *
 
-from random import randint
 
 G = PCFG()
 G.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1.0)
@@ -37,7 +36,7 @@ class SimpleExpressionFunction(Hypothesis):
 	
 	def __init__(self, v=None): 
 		Hypothesis.__init__(self)
-		if v == None: self.set_value(G.generate('EXPR'))
+		if v is None: self.set_value(G.generate('EXPR'))
 		else: self.set_value(v)
 		
 	def propose(self): 
@@ -46,12 +45,14 @@ class SimpleExpressionFunction(Hypothesis):
 		ph, fb = G.propose(self.value)
 		p.set_value(ph)
 		return [p, fb]
+
 	def compute_prior(self): 
 		if self.value.count_subnodes() > 10:
 			self.prior = -Infinity
 		else: self.prior = self.value.log_probability()
 		self.lp = self.prior + self.likelihood
 		return self.prior
+
 	def compute_likelihood(self, data):
 		self.likelihood = gaussian_likelihood(data,self.value)
 		self.lp = self.prior + self.likelihood
@@ -79,13 +80,13 @@ s = SimpleExpressionFunction()
 d = dict()
 for i in range(1000):
 	
-	for si in  LOTlib.MetropolisHastings.mh_sample(s, data, 1, skip=10): s = si
+	for si in LOTlib.MetropolisHastings.mh_sample(s, data, 1, skip=10): s = si
 	
 	#print "==>", s
 	
-	for gi in  LOTlib.MetropolisHastings.gibbs_sample(s, data, steps=1): s = gi
+	for gi in LOTlib.MetropolisHastings.gibbs_sample(s, data, steps=1): s = gi
 	
-	hashplus(d, s)#print ph
+	hashplus(d, s) # print ph
 		
 		
-test_expected_counts(d)	
+test_expected_counts(d)

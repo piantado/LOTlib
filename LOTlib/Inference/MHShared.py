@@ -19,8 +19,8 @@ def MH_acceptance(cur, prop, fb, acceptance_temperature=1.0):
 	"""
 	
 	if isnan(cur) or (cur==float("-inf") and prop==float("-inf")): # if we get infs or are in a stupid state, let's just sample from the prior so things don't get crazy
-		r = -log(2.0) #  just choose at random -- we can't sample priors since they may be -inf both
-	elif isnan(prop): #never accept
+		r = -log(2.0) # just choose at random -- we can't sample priors since they may be -inf both
+	elif isnan(prop): # never accept
 		r = float("-inf")
 	else:
 		r = (prop-cur-fb) / acceptance_temperature

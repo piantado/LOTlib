@@ -1,5 +1,4 @@
 import re
-from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
 # What are the objects we may use?
 OBJECTS              = ['JOHN', 'MARY', 'SUSAN', 'BILL']
@@ -31,11 +30,10 @@ def can_compose(a,b):
 	"""
 	
 	# We can't compose if a is not a function (it's type is not a list)
-	if not isinstance(a, tuple): ## TODO: NOTE THAT WE don't allow other iterables than tuples (not even lists)
+	if not isinstance(a, tuple): # TODO: NOTE THAT WE don't allow other iterables than tuples (not even lists)
 		return None
 	else:
 		ato, afrom = a
 		
 		if afrom == b: return ato
 		else:          return None
-	

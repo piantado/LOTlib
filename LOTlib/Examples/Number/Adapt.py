@@ -29,7 +29,7 @@ print "# Rescored hypotheses!"
 subtrees = set()
 for h in lot_iter(hypotheses):
 	for x in h.value: # for each subtree
-		for i in xrange(N_SUBTREES_PER_NODE):  #take subtree_multiplier random partial subtrees
+		for i in xrange(N_SUBTREES_PER_NODE):  # take subtree_multiplier random partial subtrees
 			subtrees.add(   x.random_partial_subtree(p=SUBTREE_P)   )
 print "# Generated", len(subtrees), "subtrees"
 

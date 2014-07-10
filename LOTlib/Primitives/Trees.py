@@ -1,7 +1,7 @@
 from Primitives import LOTlib_primitive
 from LOTlib.FunctionNode import FunctionNode, isFunctionNode
 
-import re ## TODO: WHY? PROBABLY BAD FORM
+import re # TODO: WHY? PROBABLY BAD FORM
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Tree operations
@@ -147,7 +147,7 @@ def tree_is_(x,y): return (x is y)
 @LOTlib_primitive
 def co_refers_(x,y): return co_refers(x,y)
 
-coref_matcher = re.compile(r".+\.([0-9]+)$") ## Co-reference (via strings)
+coref_matcher = re.compile(r".+\.([0-9]+)$") # Co-reference (via strings)
 def co_refers(x,y):
 	
 	if x is y: return False # By stipulation, nothing co-refers to itself

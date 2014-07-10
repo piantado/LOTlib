@@ -42,5 +42,3 @@ def gricean_weight(h, testing_set, nu=1.0):
 	#pct = pct = float(sum(map(lambda s: ifelse(collapse_undef(f(*s)), 1.0, 0.0), testing_set) )) / len(testing_set) # pul out the context sets and apply f
 		
 	return 1.0 / (nu + pct)
-	
-	

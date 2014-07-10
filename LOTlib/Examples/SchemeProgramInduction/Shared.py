@@ -1,7 +1,5 @@
-from LOTlib.DataAndObjects import FunctionData
 from LOTlib.Grammar import Grammar
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-from LOTlib.Inference.MetropolisHastings import mh_sample
 from math import log
 
 
@@ -39,4 +37,3 @@ class SchemeFunction(LOTHypothesis):
 			return log(self.ALPHA)
 		else:                       
 			return log(1.0-self.ALPHA)
-			

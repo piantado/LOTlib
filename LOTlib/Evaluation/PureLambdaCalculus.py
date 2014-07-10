@@ -31,7 +31,7 @@ def lambda_reduce_(fn, depth=1):
 		if f.name != 'lambda':
 			#print "\tREDUCING ", copy(f)
 			# first try to reduce the inner arg until it's a lambda
-			f = lambda_reduce_(f, depth+1) ## TODO: Copy necessary?
+			f = lambda_reduce_(f, depth+1) # TODO: Copy necessary?
 		
 		assert f.name == 'lambda' and len(f.args)==1
 		
@@ -102,5 +102,3 @@ if __name__=="__main__":
 		except EvaluationException as e:
 			print "***", e, lambda_str(t)
 		print "\n"
-		
-		

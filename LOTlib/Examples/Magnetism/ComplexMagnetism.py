@@ -12,7 +12,7 @@
 """
 
 import LOTlib
-from LOTlib.Miscellaneous import unique, qq
+from LOTlib.Miscellaneous import qq
 from LOTlib.Grammar import Grammar
 from LOTlib.DataAndObjects import FunctionData
 from LOTlib.BasicPrimitives import *
@@ -84,5 +84,3 @@ for h in mh_sample(h0, data, 4000000, skip=100):
 	print h.posterior_score, h.likelihood, h.prior, cleanFunctionNodeString(h)
 	#print map( lambda d: h(*d.input), data)
 	#print "\n"
-
-	

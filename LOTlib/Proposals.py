@@ -80,7 +80,8 @@ class InsertDeleteProposal(LOTProposal):
 			you can't remove the AND, meaning you will just make it some subtree equal to "True" -- 
 			e.g. this allows AND(T, True)  -> T, which is what you want. Otherwise, you have trouble moving out of those
 		
-		NOTE: This does not go on lambdas -- they're too hard to think about for now.. But even "not" doing them, there are asymmetries--we want to not treat them as "replicating rules", so we can't have sampled them, and also can't delete them
+		NOTE: This does not go on lambdas -- they're too hard to think about for now.. 
+        But even "not" doing them, there are asymmetries--we want to not treat them as "replicating rules", so we can't have sampled them, and also can't delete them
 			
 	"""
 	
@@ -129,10 +130,10 @@ class InsertDeleteProposal(LOTProposal):
 				for x in r.to:
 					if x == ni.returntype:
 						if replace_i == 0: args.append( copy(ni) ) # if it's the one we replace into
-						else:              args.append( self.grammar.generate(x, d=di+1) ) #else generate like normalized
+						else:              args.append( self.grammar.generate(x, d=di+1) ) # else generate like normalized
 						replace_i -= 1
 					else:              
-						args.append( self.grammar.generate(x, d=di+1) ) #else generate like normal	
+						args.append( self.grammar.generate(x, d=di+1) ) # else generate like normal	
 							
 				# Now we must count the multiple ways we could go forward or back
 				after_same_children = [ x for x in args if x==ni] # how many are the same after?
@@ -147,7 +148,8 @@ class InsertDeleteProposal(LOTProposal):
 				new_lp_below = sum(map(lambda z: z.log_probability(), filter(isFunctionNode, args))) - ni.log_probability()
 				
 				newZ = self.grammar.resample_normalizer(newt)
-				# To sample forward: choose the node ni, choose the replicating rule, choose which "to" to expand (we could have put it on any of the replicating rules that are identical), and genreate the rest of the tree
+				# To sample forward: choose the node ni, choose the replicating rule, 
+				# choose which "to" to expand (we could have put it on any of the replicating rules that are identical), and genreate the rest of the tree
 				f = (log(resample_p) - log(resample_Z)) + -log(len(replicating_rules)) + (log(len(after_same_children))-log(nrhs)) + new_lp_below
 				# To go backwards, choose the inserted rule, and any of the identical children, out of all replicators
 				b = (log(ni.resample_p) - log(newZ)) + (log(len(after_same_children)) - log(nrhs))
@@ -263,9 +265,10 @@ class InverseInlineThunk(LOTProposal):
 		# TODO: REALLY IT CAN'T CONTAIN ANY HIGHER yi
 		is_extractable = lambda x: is_replacetype(x) and all([ not re_variable.match(y.name) for y in x.subnodes()])
 	
-		is_apply = lambda x: (x.name == 'apply_') and (len(x.args)==2) and (x.args[0].name is 'lambda') and (x.args[0].bv_args is not None) and (len(x.args[0].bv_args) == 0) and (x.args[1].name is 'lambda') and (x.args[1].bv_type is None)
+		# is_apply = lambda x: ((x.name == 'apply_') and (len(x.args)==2) and (x.args[0].name is 'lambda') and (x.args[0].bv_args is not None) and (len(x.args[0].bv_args) == 0) 
+        # and (x.args[1].name is 'lambda') and (x.args[1].bv_type is None))
 		
-		if random() < 0.5: #INSERT MOVE
+		if random() < 0.5: # INSERT MOVE
 			
 			
 			# sample a node

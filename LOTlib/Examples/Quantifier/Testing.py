@@ -28,7 +28,3 @@ for _ in xrange(N_SAMPLES):
 	#print w, float(c)/float(N_SAMPLES), exp(target.compute_single_likelihood( UtteranceData(utterance=w, possible_utterances=target.all_words(), context=context)))
 	
 print check_counts( cnt, lambda w: exp(target.compute_single_likelihood( UtteranceData(utterance=w, possible_utterances=target.all_words(), context=context))))
-
-
-
-

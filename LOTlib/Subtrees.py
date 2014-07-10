@@ -60,8 +60,7 @@ def count_identical_nonterminals(t,x):
 		OR how many leaves (from partial trees) have the same returntype
 	"""
 	
-	return sum([tt.returntype==t for tt in x]) +\
-	       sum([tt==t for tt in x.all_leaves()])
+	return sum([tt.returntype==t for tt in x]) + sum([tt==t for tt in x.all_leaves()])
 
 def count_subtree_matches(t, x):
 	return sum(map(lambda tt: tt.partial_subtree_root_match(t), x))
@@ -77,4 +76,3 @@ if __name__ == '__main__':
 	#for t in generate_unique_complete_subtrees(grammar, start='WORD'): print t
 
 	for t in generate_unique_partial_subtrees(grammar, start='WORD'): print t
-	

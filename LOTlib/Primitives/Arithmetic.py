@@ -107,4 +107,4 @@ def pow2_(x):
 @LOTlib_primitive
 def mod_(x,y):
     if y==0.0: return float("nan")
-    return (x%y)
+    return (x% y)

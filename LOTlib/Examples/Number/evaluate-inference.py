@@ -3,7 +3,6 @@
 	Simple evaluation of number schemes -- read LOTlib.Performance.Evaluation to see what the output is
 """
 
-from LOTlib import lot_iter
 from Shared import *
 import os
 from itertools import product
@@ -30,13 +29,12 @@ from LOTlib.Performance.Evaluation import evaluate_sampler
 
 
 from LOTlib.Inference.IncreaseTemperatureMH import increase_temperature_mh_sample
-from LOTlib.Inference.TemperedTransitions import tempered_transitions_sample
 from LOTlib.Inference.ParallelTempering import parallel_tempering_sample
 from LOTlib.Inference.MetropolisHastings import mh_sample
 from LOTlib.Inference.ProbTaboo import ptaboo_search
 
 # Where we store the output
-out_hypotheses = open(os.devnull,'w') #ParallelBufferedIO(options.OUT + "-hypotheses.txt")
+out_hypotheses = open(os.devnull,'w') # ParallelBufferedIO(options.OUT + "-hypotheses.txt")
 out_aggregate  = ParallelBufferedIO(options.OUT + "-aggregate.txt")
 
 def run_one(prefix, s):
@@ -78,4 +76,3 @@ MPI_map(run_one, params)
 
 out_hypotheses.close()
 out_aggregate.close()
-
