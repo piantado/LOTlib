@@ -17,7 +17,6 @@ import collections
 
 import re
 import types # for checking if something is a function: isinstance(f, types.FunctionType)
-import re
 
 ## Some useful constants
 Infinity = float("inf")

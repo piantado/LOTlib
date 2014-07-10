@@ -29,4 +29,3 @@ for i in xrange(1000):
 	x = grammar.generate('BOOL')
 	
 	print x.log_probability(), x
-	

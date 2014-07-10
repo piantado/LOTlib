@@ -20,4 +20,3 @@ def generate_data(target, data_size, sd):
         data.append( FunctionData(input=[x], output=y, ll_sd=sd) )
     
     return data
-    

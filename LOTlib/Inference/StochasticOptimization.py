@@ -7,13 +7,10 @@
 	NOTE: Wow, doesn't work at all!
 """
 
-from random import random
-from math import log, exp, isnan
 
 import LOTlib
 from LOTlib import lot_iter
 from LOTlib.Miscellaneous import *
-from LOTlib.FiniteBestSet import FiniteBestSet
 from MetropolisHastings import mh_sample
 from MHShared import *
 
@@ -58,4 +55,3 @@ if __name__ == "__main__":
 		g = copy(h)
 		#g.compute_posterior(data)
 		print h.lp, "\t", h
-	

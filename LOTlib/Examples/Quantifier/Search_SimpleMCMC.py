@@ -12,8 +12,8 @@
 from Shared import *
 from SimpleMPI.MPI_map import MPI_map
 
-CHAINS = 3  #how many times do we run?
-DATA_AMOUNTS = range(0,300, 100) #range(0,1500,100)
+CHAINS = 3  # how many times do we run?
+DATA_AMOUNTS = range(0,300, 100) # range(0,1500,100)
 SAMPLES = 1 # 1000000
 TOP_COUNT = 50
 OUT_PATH = "/home/piantado/Desktop/mit/Libraries/LOTlib/LOTlib/Examples/Quantifier/data/mcmc-run.pkl"

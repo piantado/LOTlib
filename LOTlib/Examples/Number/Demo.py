@@ -6,7 +6,6 @@
 """
 
 from Shared import *
-from LOTlib.Primitives.Number import word_to_number
 
 LARGE_DATA_SIZE = 10000 # this is what we compute the average LL on
 DATA_SIZE = 300
@@ -53,7 +52,3 @@ for h in LOTlib.Inference.MetropolisHastings.mh_sample(h0, data, STEPS, skip=SKI
 # show the *average* ll for each hypothesis, at this data size
 #for h in H:
 	#print h.prior, h.likelihood/float(LARGE_DATA_SIZE), q(get_knower_pattern(h)),  q(h) # a quoted x
-
-
-
-

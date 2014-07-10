@@ -3,7 +3,6 @@
 """
 	Enumerate all possible trees (as FunctionHypotheses), saving them to a file (for later gibbs as in Search_UnoptimizedGibbs and Search_VectorizedGibbs)
 """
-import sys
 
 from Shared import *
 
@@ -48,4 +47,3 @@ for k in collapsed_forms.values():
 upq.save(OUT)
 
 print "Total tree count: ", all_tree_count
-

@@ -31,6 +31,7 @@ class GibbsyGriceanSimpleLexicon(GriceanSimpleLexicon):
 			new = self.copy()
 			new.set_word(wd, k)
 			yield new
+
 	def copy(self):
 		"""
 			Overwritten to work correctly for this type!
@@ -59,4 +60,3 @@ for w in all_words:
 for g in LOTlib.MetropolisHastings.gibbs_sample(learner, data, STEPS, dimensions=all_words):
 	
 	print g.lp, g.compute_likelihood(data), target.compute_likelihood(data), g
-	

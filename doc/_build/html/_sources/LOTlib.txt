@@ -18,85 +18,85 @@ Subpackages
 Submodules
 ----------
 
-.. LOTlib.DataAndObjects module
-.. ----------------------------
+LOTlib.DataAndObjects module
+----------------------------
 
-.. .. automodule:: LOTlib.DataAndObjects
-..     :members:
-..     :undoc-members:
-..     :show-inheritance:
+.. automodule:: LOTlib.DataAndObjects
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
-.. LOTlib.DefaultGrammars module
-.. -----------------------------
+LOTlib.DefaultGrammars module
+-----------------------------
 
-.. .. automodule:: LOTlib.DefaultGrammars
-..     :members:
-..     :undoc-members:
-..     :show-inheritance:
+.. automodule:: LOTlib.DefaultGrammars
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
-.. LOTlib.FiniteBestSet module
-.. ---------------------------
+LOTlib.FiniteBestSet module
+---------------------------
 
-.. .. automodule:: LOTlib.FiniteBestSet
-..     :members:
-..     :undoc-members:
-..     :show-inheritance:
+.. automodule:: LOTlib.FiniteBestSet
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
-.. LOTlib.FunctionNode module
-.. --------------------------
+LOTlib.FunctionNode module
+--------------------------
 
-.. .. automodule:: LOTlib.FunctionNode
-..     :members:
-..     :undoc-members:
-..     :show-inheritance:
+.. automodule:: LOTlib.FunctionNode
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
-.. LOTlib.Grammar module
-.. ---------------------
+LOTlib.Grammar module
+---------------------
 
-.. .. automodule:: LOTlib.Grammar
-..     :members:
-..     :undoc-members:
-..     :show-inheritance:
+.. automodule:: LOTlib.Grammar
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
-.. LOTlib.GrammarRule module
-.. -------------------------
+LOTlib.GrammarRule module
+-------------------------
 
-.. .. automodule:: LOTlib.GrammarRule
-..     :members:
-..     :undoc-members:
-..     :show-inheritance:
+.. automodule:: LOTlib.GrammarRule
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
-.. LOTlib.Miscellaneous module
-.. ---------------------------
+LOTlib.Miscellaneous module
+---------------------------
 
-.. .. automodule:: LOTlib.Miscellaneous
-..     :members:
-..     :undoc-members:
-..     :show-inheritance:
+.. automodule:: LOTlib.Miscellaneous
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
-.. LOTlib.Parsing module
-.. ---------------------
+LOTlib.Parsing module
+---------------------
 
-.. .. automodule:: LOTlib.Parsing
-..     :members:
-..     :undoc-members:
-..     :show-inheritance:
+.. automodule:: LOTlib.Parsing
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
-.. LOTlib.Proposals module
-.. -----------------------
+LOTlib.Proposals module
+-----------------------
 
-.. .. automodule:: LOTlib.Proposals
-..     :members:
-..     :undoc-members:
-..     :show-inheritance:
+.. automodule:: LOTlib.Proposals
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
-.. LOTlib.Subtrees module
-.. ----------------------
+LOTlib.Subtrees module
+----------------------
 
-.. .. automodule:: LOTlib.Subtrees
-..     :members:
-..     :undoc-members:
-..     :show-inheritance:
+.. automodule:: LOTlib.Subtrees
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 
 Module contents

@@ -40,5 +40,3 @@ def check_counts( obj2counts, expected, threshold=0.001, verbose=False):
 	assert p > threshold, "*** Chi squared test fail with chi=%f, p=%f" % (chi,p)
 	
 	return True
-	
-		

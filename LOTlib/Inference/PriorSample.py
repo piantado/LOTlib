@@ -32,4 +32,3 @@ if __name__ == "__main__":
 	for h in prior_sample(h0, data, 10000):
 		#h.revert() # undoes the craziness with the prior
 		print q(get_knower_pattern(h)), h.posterior_score, h.prior, h.likelihood, q(h)
-		

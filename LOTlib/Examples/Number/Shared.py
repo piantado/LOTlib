@@ -4,16 +4,11 @@
 """
 
 import LOTlib
-from LOTlib import lot_iter
 from LOTlib.Grammar import Grammar
-import LOTlib.Inference.ParallelTempering
-from LOTlib.Inference.MetropolisHastings import mh_sample
-from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Miscellaneous import *
 from LOTlib.DataAndObjects import *
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Primitives.Number import word_to_number
-from random import randint
 
 ALPHA = 0.75 # the probability of uttering something true
 GAMMA = -30.0 # the log probability penalty for recursion
@@ -113,7 +108,7 @@ class NumberExpression(LOTHypothesis):
 			
 		"""
 		response = self(*datum.input)
-		if response == 'undef' or response == None: 
+		if response == 'undef' or response is None: 
 			return log(1.0/10.0) # if undefined, just sample from a base distribution
 		else:   return log( (1.0 - ALPHA)/10.0 + ALPHA * ( response == datum.output ) )
 		
@@ -140,7 +135,7 @@ def get_knower_pattern(ne):
 	"""
 		This computes a string describing the behavior of this knower-level
 	"""
-	out = ''
+	# out = ''
 	resp = [ ne(set(sample_sets_of_objects(n, all_objects))) for n in xrange(1,10)]
 	return ''.join([ str(word_to_number[x]) if (x is not None and x is not 'undef' ) else 'U' for x in resp])
 	
@@ -173,4 +168,3 @@ all_objects = make_all_objects(shape=['duck'])
 
 # all possible data sets on 10 objects
 all_possible_data = [ ('', set(sample_sets_of_objects(n, all_objects))) for n in xrange(1,10) ] 
-

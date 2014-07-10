@@ -1,5 +1,9 @@
+
+
+
+
 NCONSTANTS = 4
-CONSTANT_NAMES = ['C%i'%i for i in xrange(NCONSTANTS) ] 
+CONSTANT_NAMES = ['C%i'% i for i in xrange(NCONSTANTS) ] 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Define the grammar

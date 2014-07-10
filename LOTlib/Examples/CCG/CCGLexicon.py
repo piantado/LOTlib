@@ -1,6 +1,5 @@
 from LOTlib.Hypotheses.WeightedLexicon import WeightedLexicon
 from LOTlib.DataAndObjects import UtteranceData
-from LOTlib.Miscellaneous import flip
 from copy import copy
 
 from math import log
@@ -45,9 +44,8 @@ class CCGLexicon(WeightedLexicon):
 						return inner_parse(sprime, tprime, mprime)
 			return False
 		
-		return inner_parse(sentence, \
-			           map(lambda x: self.value[x].type(), sentence),\
-			           map(lambda x: self.value[x], sentence))
+		return inner_parse(sentence, 
+						   map(lambda x: self.value[x].type(), sentence), map(lambda x: self.value[x], sentence))
 	#def propose(self):
 		#""" 
 			#A proposal function that proposes to many things simultaneously, flipping a coin.
@@ -84,7 +82,7 @@ class CCGLexicon(WeightedLexicon):
 		# Unliked WeightedLexicon, this doesn't play nicely with the case where we are generating and 
 		# sometimes trues or mets are empty
 		w = self.weightfunction(u, udi.context) # the current word weight
-		if   (u in trues):  p = self.palpha * (self.alpha * w / true_weights + (1.0 - self.alpha) * w / met_weights) + (1.0 - self.palpha) * w / all_weights # choose from the trues
+		if (u in trues):    p = self.palpha * (self.alpha * w / true_weights + (1.0 - self.alpha) * w / met_weights) + (1.0 - self.palpha) * w / all_weights # choose from the trues
 		elif (u in falses): p = self.palpha * (1.0-self.alpha) * w / met_weights + (1.0 - self.palpha) * w / all_weights # choose from the trues
 		else:               p = (1.0 - self.palpha) * w / all_weights
 		
@@ -103,4 +101,3 @@ class CCGLexicon(WeightedLexicon):
 			
 			return f(context)
 		return None
-	

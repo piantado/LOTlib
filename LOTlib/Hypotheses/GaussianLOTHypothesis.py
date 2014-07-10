@@ -1,6 +1,5 @@
 from LOTHypothesis import LOTHypothesis
 from LOTlib.Miscellaneous import *
-from copy import copy, deepcopy
 
 class GaussianLOTHypothesis(LOTHypothesis):
 	"""

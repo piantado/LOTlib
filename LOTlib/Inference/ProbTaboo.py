@@ -13,8 +13,6 @@ from collections import defaultdict
 import LOTlib
 from LOTlib import lot_iter
 from LOTlib.Inference.MetropolisHastings import mh_sample
-from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-from copy import copy
 
 def ptaboo_search(h0, data, steps, skip=0, noisy_memoize=1000, seen_penalty=1.0):
 
@@ -25,7 +23,7 @@ def ptaboo_search(h0, data, steps, skip=0, noisy_memoize=1000, seen_penalty=1.0)
 	
 		def compute_prior(self):
 	
-			self.rawprior =  type(h0).compute_prior(self) # save the prior for use if we want to convert back
+			self.rawprior = type(h0).compute_prior(self) # save the prior for use if we want to convert back
 			self.prior = self.rawprior - seen_count[self]*seen_penalty
 			self.posterior_score = self.prior + self.likelihood
 			return self.prior
@@ -37,7 +35,7 @@ def ptaboo_search(h0, data, steps, skip=0, noisy_memoize=1000, seen_penalty=1.0)
 			self.prior = self.rawprior
 			self.posterior_score = self.prior + self.likelihood
 	
-	myh0 = WrapperClass(h0.grammar, v=h0.value) ## TODO: NOTE HERE WE ASSUME grammar IS TAKEN!
+	myh0 = WrapperClass(h0.grammar, v=h0.value) # TODO: NOTE HERE WE ASSUME grammar IS TAKEN!
 	
 	# Now just run standard MCMC:
 	for h in lot_iter(mh_sample(myh0, data, steps, skip=skip)):
@@ -65,7 +63,3 @@ if __name__ == "__main__":
 	for h in ptaboo_search(h0, data, 10000):
 		#h.revert() # undoes the craziness with the prior
 		print q(get_knower_pattern(h)), h.lp, h.prior, h.likelihood, q(h)
-		
-		
-	
-		

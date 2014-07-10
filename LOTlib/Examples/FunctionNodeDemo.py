@@ -94,10 +94,3 @@ for _ in xrange(1000):
 	
 	print t # will call x.__str__ and display as a pythonesque string
 	print map(f, range(0,10))
-
-
-
-
-
-
-

@@ -106,4 +106,3 @@ def subset_(A,B):
 @LOTlib_primitive
 def is_in_(x,S):
     return (x in S)
-
