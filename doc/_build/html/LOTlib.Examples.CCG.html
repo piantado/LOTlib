@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -15,7 +13,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    './',
         VERSION:     '0.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -34,9 +32,6 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
         <li><a href="index.html">LOTlib 0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -54,36 +49,20 @@
 <div class="section" id="lotlib-examples-ccg-ccglexicon-module">
 <h2>LOTlib.Examples.CCG.CCGLexicon module<a class="headerlink" href="#lotlib-examples-ccg-ccglexicon-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-LOTlib.Examples.CCG.Shared">
-<span id="lotlib-examples-ccg-shared-module"></span><h2>LOTlib.Examples.CCG.Shared module<a class="headerlink" href="#module-LOTlib.Examples.CCG.Shared" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="LOTlib.Examples.CCG.Shared.Context">
-<em class="property">class </em><tt class="descclassname">LOTlib.Examples.CCG.Shared.</tt><tt class="descname">Context</tt><big>(</big><em>objects</em>, <em>relations</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/CCG/Shared.html#Context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.CCG.Shared.Context" title="Permalink to this definition">¶</a></dt>
-<dd><p>A context stores a list of objects and list of N-ary relations, represented as tuples,
-as in relations = [  (happy, john), (loved, mary, john) ], with ( <a href="#id1"><span class="problematic" id="id2">*</span></a>args, function)</p>
-<dl class="method">
-<dt id="LOTlib.Examples.CCG.Shared.Context.relation_">
-<tt class="descname">relation_</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/CCG/Shared.html#Context.relation_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.CCG.Shared.Context.relation_" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Examples.CCG.Shared.can_compose">
-<tt class="descclassname">LOTlib.Examples.CCG.Shared.</tt><tt class="descname">can_compose</tt><big>(</big><em>a</em>, <em>b</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/CCG/Shared.html#can_compose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.CCG.Shared.can_compose" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes two TYPES, and returns the result of a(b)
-IF this is not possible (due to the types), return None.</p>
-<p>NOTE: No currying, type-raising or anything fancy (yet)</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="LOTlib.Examples.CCG.Shared.str2sen">
-<tt class="descclassname">LOTlib.Examples.CCG.Shared.</tt><tt class="descname">str2sen</tt><big>(</big><em>s</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/CCG/Shared.html#str2sen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.CCG.Shared.str2sen" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<div class="section" id="lotlib-examples-ccg-data-module">
+<h2>LOTlib.Examples.CCG.Data module<a class="headerlink" href="#lotlib-examples-ccg-data-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-LOTlib.Examples.CCG">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-LOTlib.Examples.CCG" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="lotlib-examples-ccg-grammar-module">
+<h2>LOTlib.Examples.CCG.Grammar module<a class="headerlink" href="#lotlib-examples-ccg-grammar-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="lotlib-examples-ccg-shared-module">
+<h2>LOTlib.Examples.CCG.Shared module<a class="headerlink" href="#lotlib-examples-ccg-shared-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="lotlib-examples-ccg-simpleccg-module">
+<h2>LOTlib.Examples.CCG.SimpleCCG module<a class="headerlink" href="#lotlib-examples-ccg-simpleccg-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-contents">
+<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
@@ -98,8 +77,11 @@ IF this is not possible (due to the types), return None.</p>
 <li><a class="reference internal" href="#">LOTlib.Examples.CCG package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#lotlib-examples-ccg-ccglexicon-module">LOTlib.Examples.CCG.CCGLexicon module</a></li>
-<li><a class="reference internal" href="#module-LOTlib.Examples.CCG.Shared">LOTlib.Examples.CCG.Shared module</a></li>
-<li><a class="reference internal" href="#module-LOTlib.Examples.CCG">Module contents</a></li>
+<li><a class="reference internal" href="#lotlib-examples-ccg-data-module">LOTlib.Examples.CCG.Data module</a></li>
+<li><a class="reference internal" href="#lotlib-examples-ccg-grammar-module">LOTlib.Examples.CCG.Grammar module</a></li>
+<li><a class="reference internal" href="#lotlib-examples-ccg-shared-module">LOTlib.Examples.CCG.Shared module</a></li>
+<li><a class="reference internal" href="#lotlib-examples-ccg-simpleccg-module">LOTlib.Examples.CCG.SimpleCCG module</a></li>
+<li><a class="reference internal" href="#module-contents">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -132,15 +114,13 @@ IF this is not possible (due to the types), return None.</p>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
         <li><a href="index.html">LOTlib 0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Last updated on Jul 10, 2014.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>
