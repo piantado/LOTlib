@@ -141,7 +141,7 @@ html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-html_last_updated_fmt = '%b %d, %Y'
+#html_last_updated_fmt = '%b %d, %Y'
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
@@ -245,7 +245,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    ('index', 'LOTlib', u'LOTlib Documentation',
+  ('index', 'LOTlib', u'LOTlib Documentation',
    u'Steve Piantadosi', 'LOTlib', 'One line description of project.',
    'Miscellaneous'),
 ]
