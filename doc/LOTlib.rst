@@ -6,21 +6,17 @@ Subpackages
 
 .. toctree::
 
+    LOTlib.Evaluation
     LOTlib.Examples
     LOTlib.Hypotheses
     LOTlib.Inference
+    LOTlib.Performance
+    LOTlib.Primitives
+    LOTlib.Testing
     LOTlib.sandbox
 
 Submodules
 ----------
-
-LOTlib.BasicPrimitives module
------------------------------
-
-.. automodule:: LOTlib.BasicPrimitives
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 LOTlib.DataAndObjects module
 ----------------------------
@@ -70,14 +66,6 @@ LOTlib.GrammarRule module
     :undoc-members:
     :show-inheritance:
 
-LOTlib.Memoization module
--------------------------
-
-.. automodule:: LOTlib.Memoization
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 LOTlib.Miscellaneous module
 ---------------------------
 
@@ -86,18 +74,18 @@ LOTlib.Miscellaneous module
     :undoc-members:
     :show-inheritance:
 
-LOTlib.Proposals module
------------------------
+LOTlib.Parsing module
+---------------------
 
-.. automodule:: LOTlib.Proposals
+.. automodule:: LOTlib.Parsing
     :members:
     :undoc-members:
     :show-inheritance:
 
-LOTlib.SimpleLambdaParser module
---------------------------------
+LOTlib.Proposals module
+-----------------------
 
-.. automodule:: LOTlib.SimpleLambdaParser
+.. automodule:: LOTlib.Proposals
     :members:
     :undoc-members:
     :show-inheritance:
