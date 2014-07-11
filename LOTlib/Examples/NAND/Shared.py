@@ -1,10 +1,12 @@
-#from LOTlib.Grammar import Gramma
+
 import LOTlib
 from LOTlib.DataAndObjects import *
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Grammar import Grammar
 from LOTlib.Miscellaneous import *
+from LOTlib.Primitives.Logic import *
+from LOTlib.Primitives.Features import *
 
 
 SHAPES = ['square', 'triangle', 'rectangle']
