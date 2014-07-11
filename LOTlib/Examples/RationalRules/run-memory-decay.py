@@ -4,6 +4,7 @@
 
 from Shared import *
 
+G = grammar
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Create an initial hypothesis
 # This is where we set a number of relevant variables -- whether to use RR, alpha, etc. 

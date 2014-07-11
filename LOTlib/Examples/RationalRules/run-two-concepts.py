@@ -6,6 +6,8 @@
 
 from Shared import *
 
+
+G = grammar
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # somewhat weirdly, we'll make an upper node above "START" for the two concepts
 # and require it to check if concept (an argument below) is 'A'
