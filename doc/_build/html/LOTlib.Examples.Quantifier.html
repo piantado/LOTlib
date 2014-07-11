@@ -32,6 +32,9 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li><a href="index.html">LOTlib 0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -52,13 +55,13 @@
 <li class="toctree-l2"><a class="reference internal" href="LOTlib.Examples.Quantifier.Vectorized.html#lotlib-examples-quantifier-vectorized-enumeratetrees-module">LOTlib.Examples.Quantifier.Vectorized.EnumerateTrees module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LOTlib.Examples.Quantifier.Vectorized.html#lotlib-examples-quantifier-vectorized-search-unoptimizedgibbs-module">LOTlib.Examples.Quantifier.Vectorized.Search_UnoptimizedGibbs module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LOTlib.Examples.Quantifier.Vectorized.html#lotlib-examples-quantifier-vectorized-search-vectorizedmh-module">LOTlib.Examples.Quantifier.Vectorized.Search_VectorizedMH module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="LOTlib.Examples.Quantifier.Vectorized.html#module-contents">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LOTlib.Examples.Quantifier.Vectorized.html#module-LOTlib.Examples.Quantifier.Vectorized">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="LOTlib.Examples.Quantifier.sandbox.html">LOTlib.Examples.Quantifier.sandbox package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="LOTlib.Examples.Quantifier.sandbox.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="LOTlib.Examples.Quantifier.sandbox.html#lotlib-examples-quantifier-sandbox-enumerativesearch-module">LOTlib.Examples.Quantifier.sandbox.EnumerativeSearch module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="LOTlib.Examples.Quantifier.sandbox.html#module-contents">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LOTlib.Examples.Quantifier.sandbox.html#module-LOTlib.Examples.Quantifier.sandbox">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -91,11 +94,46 @@
 <div class="section" id="lotlib-examples-quantifier-testing-module">
 <h2>LOTlib.Examples.Quantifier.Testing module<a class="headerlink" href="#lotlib-examples-quantifier-testing-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="lotlib-examples-quantifier-utilities-module">
-<h2>LOTlib.Examples.Quantifier.Utilities module<a class="headerlink" href="#lotlib-examples-quantifier-utilities-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-LOTlib.Examples.Quantifier.Utilities">
+<span id="lotlib-examples-quantifier-utilities-module"></span><h2>LOTlib.Examples.Quantifier.Utilities module<a class="headerlink" href="#module-LOTlib.Examples.Quantifier.Utilities" title="Permalink to this headline">¶</a></h2>
+<p>Move out some functions from Shared &#8211; things that aren&#8217;t part of the core model specification</p>
+<dl class="function">
+<dt id="LOTlib.Examples.Quantifier.Utilities.collapse_undefs">
+<tt class="descclassname">LOTlib.Examples.Quantifier.Utilities.</tt><tt class="descname">collapse_undefs</tt><big>(</big><em>resp</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/Quantifier/Utilities.html#collapse_undefs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.Quantifier.Utilities.collapse_undefs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collapse together our multiple kinds of undefs so that we can compare vectors</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="LOTlib.Examples.Quantifier.Utilities.extract_literal">
+<tt class="descclassname">LOTlib.Examples.Quantifier.Utilities.</tt><tt class="descname">extract_literal</tt><big>(</big><em>resp</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/Quantifier/Utilities.html#extract_literal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.Quantifier.Utilities.extract_literal" title="Permalink to this definition">¶</a></dt>
+<dd><p>From a bunch of responses, extract the T/F literals</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="LOTlib.Examples.Quantifier.Utilities.extract_presup">
+<tt class="descclassname">LOTlib.Examples.Quantifier.Utilities.</tt><tt class="descname">extract_presup</tt><big>(</big><em>resp</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/Quantifier/Utilities.html#extract_presup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.Quantifier.Utilities.extract_presup" title="Permalink to this definition">¶</a></dt>
+<dd><p>From a bunch of responses, extract the T/F presups</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="LOTlib.Examples.Quantifier.Utilities.is_conservative">
+<tt class="descclassname">LOTlib.Examples.Quantifier.Utilities.</tt><tt class="descname">is_conservative</tt><big>(</big><em>h</em>, <em>testing_set</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/Quantifier/Utilities.html#is_conservative"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.Quantifier.Utilities.is_conservative" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a hypothesis (funciton node) is conservative or not</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="LOTlib.Examples.Quantifier.Utilities.random">
+<tt class="descclassname">LOTlib.Examples.Quantifier.Utilities.</tt><tt class="descname">random</tt><big>(</big><big>)</big> &rarr; x in the interval [0, 1).<a class="headerlink" href="#LOTlib.Examples.Quantifier.Utilities.random" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="LOTlib.Examples.Quantifier.Utilities.show_baseline_distribution">
+<tt class="descclassname">LOTlib.Examples.Quantifier.Utilities.</tt><tt class="descname">show_baseline_distribution</tt><big>(</big><em>testing_set</em>, <em>N=1000</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Examples/Quantifier/Utilities.html#show_baseline_distribution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Examples.Quantifier.Utilities.show_baseline_distribution" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
-<div class="section" id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-LOTlib.Examples.Quantifier">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-LOTlib.Examples.Quantifier" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
@@ -118,8 +156,8 @@
 <li><a class="reference internal" href="#lotlib-examples-quantifier-shared-module">LOTlib.Examples.Quantifier.Shared module</a></li>
 <li><a class="reference internal" href="#lotlib-examples-quantifier-test-pseudolikelihood-module">LOTlib.Examples.Quantifier.Test-PseudoLikelihood module</a></li>
 <li><a class="reference internal" href="#lotlib-examples-quantifier-testing-module">LOTlib.Examples.Quantifier.Testing module</a></li>
-<li><a class="reference internal" href="#lotlib-examples-quantifier-utilities-module">LOTlib.Examples.Quantifier.Utilities module</a></li>
-<li><a class="reference internal" href="#module-contents">Module contents</a></li>
+<li><a class="reference internal" href="#module-LOTlib.Examples.Quantifier.Utilities">LOTlib.Examples.Quantifier.Utilities module</a></li>
+<li><a class="reference internal" href="#module-LOTlib.Examples.Quantifier">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -152,12 +190,15 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li><a href="index.html">LOTlib 0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Last updated on Jul 10, 2014.
+      Last updated on Jul 11, 2014.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>

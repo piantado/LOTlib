@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -58,6 +56,7 @@
 <span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span><span class="p">,</span> <span class="n">random</span>
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">exp</span>
 <span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">random</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
 
 <span class="c">#def temperature_ladder(min=1.0,max=1.5,steps=5,log=True)</span>
 
@@ -77,7 +76,7 @@
 		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">temperatures</span><span class="p">)):</span>
 			
 			<span class="c"># update this sample</span>
-			<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">mh_sample</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">data</span><span class="p">,</span> <span class="n">within_steps</span><span class="p">,</span> <span class="n">proposer</span><span class="o">=</span><span class="n">proposer</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="n">temperatures</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+			<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">mh_sample</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">data</span><span class="p">,</span> <span class="n">within_steps</span><span class="p">,</span> <span class="n">proposer</span><span class="o">=</span><span class="n">proposer</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">likelihood_temperature</span><span class="o">=</span><span class="n">temperatures</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
 				<span class="k">if</span> <span class="n">yield_all</span><span class="p">:</span> <span class="k">yield</span> <span class="n">s</span>
 				<span class="n">samples</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span> <span class="c"># should only be called once, since we skip within step </span>
 		
@@ -85,7 +84,7 @@
 			<span class="n">frm</span> <span class="o">=</span> <span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">temperatures</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
 			
 			<span class="c"># get the joint probability -- since temperature is only on the likelihood, everything cancels</span>
-			<span class="n">r</span> <span class="o">=</span> <span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">frm</span><span class="p">]</span><span class="o">.</span><span class="n">lp</span><span class="p">)</span> <span class="o">/</span> <span class="n">temperatures</span><span class="p">[</span><span class="n">frm</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">frm</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lp</span><span class="p">)</span> <span class="o">/</span> <span class="n">temperatures</span><span class="p">[</span><span class="n">frm</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">frm</span><span class="p">]</span><span class="o">.</span><span class="n">lp</span><span class="p">)</span> <span class="o">/</span> <span class="n">temperatures</span><span class="p">[</span><span class="n">frm</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">frm</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lp</span><span class="p">)</span> <span class="o">/</span> <span class="n">temperatures</span><span class="p">[</span><span class="n">frm</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+			<span class="n">r</span> <span class="o">=</span> <span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">frm</span><span class="p">]</span><span class="o">.</span><span class="n">posterior_score</span><span class="p">)</span> <span class="o">/</span> <span class="n">temperatures</span><span class="p">[</span><span class="n">frm</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">frm</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">posterior_score</span><span class="p">)</span> <span class="o">/</span> <span class="n">temperatures</span><span class="p">[</span><span class="n">frm</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">frm</span><span class="p">]</span><span class="o">.</span><span class="n">posterior_score</span><span class="p">)</span> <span class="o">/</span> <span class="n">temperatures</span><span class="p">[</span><span class="n">frm</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="n">frm</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">posterior_score</span><span class="p">)</span> <span class="o">/</span> <span class="n">temperatures</span><span class="p">[</span><span class="n">frm</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
 			
 			<span class="k">if</span> <span class="n">r</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">exp</span><span class="p">(</span><span class="n">r</span><span class="p">):</span>
 				<span class="n">samples</span><span class="p">[</span><span class="n">frm</span><span class="p">],</span> <span class="n">samples</span><span class="p">[</span><span class="n">frm</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="n">frm</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">samples</span><span class="p">[</span><span class="n">frm</span><span class="p">]</span>
@@ -132,7 +131,8 @@
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Last updated on Jul 11, 2014.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

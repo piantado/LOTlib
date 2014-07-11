@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -59,8 +57,7 @@
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span><span class="p">,</span> <span class="n">deepcopy</span>
 <span class="kn">import</span> <span class="nn">LOTlib</span>
 <span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="o">*</span>
-
-<span class="kn">import</span> <span class="nn">LOTlib.BasicPrimitives</span> 
+<span class="kn">from</span> <span class="nn">LOTlib.Primitives</span> <span class="kn">import</span> <span class="n">Primitives</span>
 
 <div class="viewcode-block" id="Hypothesis"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.Hypothesis.Hypothesis">[docs]</a><span class="k">class</span> <span class="nc">Hypothesis</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;</span>
@@ -145,7 +142,7 @@
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">			Computes the posterior score by computing the prior and likelihood scores</span>
 <span class="sd">		&quot;&quot;&quot;</span>
-		<span class="n">LOTlib</span><span class="o">.</span><span class="n">BasicPrimitives</span><span class="o">.</span><span class="n">LOCAL_PRIMITIVE_OPS</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># Reset this</span>
+		<span class="n">LOTlib</span><span class="o">.</span><span class="n">Primitives</span><span class="o">.</span><span class="n">Primitives</span><span class="o">.</span><span class="n">LOCAL_PRIMITIVE_OPS</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># Reset this</span>
 		<span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_prior</span><span class="p">()</span>
 		<span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_likelihood</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">posterior_score</span> <span class="o">=</span> <span class="n">p</span><span class="o">+</span><span class="n">l</span>
@@ -215,7 +212,8 @@
     </div>
     <div class="footer">
         &copy; Copyright 2014, Steve Piantadosi.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Last updated on Jul 11, 2014.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

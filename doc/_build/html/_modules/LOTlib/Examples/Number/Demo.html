@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LOTlib.Examples.Number.Demo &mdash; LOTlib 0.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="LOTlib 0.2.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="LOTlib" href="../../../LOTlib.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for LOTlib.Examples.Number.Demo</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	A quick demo of the number model. </span>
+<span class="sd">	</span>
+<span class="sd">	Note: CTRL-C breaks out of the MCMC loop, and the processes at the bottom with average likelihood for each hypothesis. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">Shared</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">LOTlib.Primitives.Number</span> <span class="kn">import</span> <span class="n">word_to_number</span>
+
+<span class="n">LARGE_DATA_SIZE</span> <span class="o">=</span> <span class="mi">10000</span> <span class="c"># this is what we compute the average LL on</span>
+<span class="n">DATA_SIZE</span> <span class="o">=</span> <span class="mi">300</span>
+<span class="n">TRACE</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">STEPS</span> <span class="o">=</span> <span class="mi">1000000</span> 
+<span class="n">SKIP</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="c"># # # # # # # # # # # # # # # # # # # # # # # # #</span>
+<span class="c"># Generate some data</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">generate_data</span><span class="p">(</span><span class="n">DATA_SIZE</span><span class="p">)</span>
+
+<span class="c"># A starting hypothesis (later ones are created by .propose, called in LOTlib.MetropolisHastings</span>
+<span class="n">h0</span> <span class="o">=</span> <span class="n">NumberExpression</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+
+<span class="c"># store hypotheses we&#39;ve found</span>
+<span class="n">allhyp</span> <span class="o">=</span> <span class="n">FiniteBestSet</span><span class="p">(</span><span class="nb">max</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">N</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+
+<span class="c">#from LOTlib.Memoization.Memoizer import BoundedMemoize</span>
+
+<span class="kn">import</span> <span class="nn">LOTlib.Inference</span>
+<span class="kn">import</span> <span class="nn">LOTlib.Inference.TemperedTransitions</span>
+
+<span class="c"># A bunch of different MCMC algorithms to try. mh_sample is from the Rational Rules paper and generally works very well. </span>
+<span class="c">#for h in  LOTlib.Inference.TemperedTransitions.tempered_transitions_sample(initial_hyp, data, 500000, skip=0, temperatures=[1.0, 1.25, 1.5]):		</span>
+<span class="c">#for h in  LOTlib.Inference.ParallelTempering.parallel_tempering_sample(initial_hyp, data, STEPS, within_steps=10, yield_all=True, temperatures=[1.0,1.05, 1.1]):</span>
+<span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">LOTlib</span><span class="o">.</span><span class="n">Inference</span><span class="o">.</span><span class="n">MetropolisHastings</span><span class="o">.</span><span class="n">mh_sample</span><span class="p">(</span><span class="n">h0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">STEPS</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="n">SKIP</span><span class="p">):</span>
+	<span class="k">if</span> <span class="n">TRACE</span><span class="p">:</span> 
+		<span class="k">print</span> <span class="n">q</span><span class="p">(</span><span class="n">get_knower_pattern</span><span class="p">(</span><span class="n">h</span><span class="p">)),</span> <span class="n">h</span><span class="o">.</span><span class="n">compute_prior</span><span class="p">(),</span> <span class="n">h</span><span class="o">.</span><span class="n">compute_likelihood</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">q</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+		
+	<span class="c"># add h to our priority queue, with priority of its log probability, h.posterior_score</span>
+	<span class="n">allhyp</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">h</span><span class="o">.</span><span class="n">posterior_score</span><span class="p">)</span>
+
+<span class="c"># # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #</span>
+<span class="c">## now re-evaluate everything we found on new data</span>
+<span class="c">#huge_data = generate_data(LARGE_DATA_SIZE)</span>
+	
+<span class="c">#save this with a huge data set -- eval with average ll </span>
+<span class="c">#H = allhyp.get_sorted()</span>
+
+<span class="c"># compute the posterior for each hypothesis</span>
+<span class="c">#[ h.compute_posterior(huge_data) for h in H]</span>
+	
+<span class="c"># show the *average* ll for each hypothesis, at this data size</span>
+<span class="c">#for h in H:</span>
+	<span class="c">#print h.prior, h.likelihood/float(LARGE_DATA_SIZE), q(get_knower_pattern(h)),  q(h) # a quoted x</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../LOTlib.html" >LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Steve Piantadosi.
+      Last updated on Jul 11, 2014.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
