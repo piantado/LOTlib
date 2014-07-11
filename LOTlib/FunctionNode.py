@@ -57,7 +57,7 @@ class FunctionNode(object):
 			Bound variable type
 
 		*bv_args*
-			Arguments of the Bound Variable. "None" implies this is a terminal, otherwise  a type signature.
+			Arguments of the Bound Variable. "None" implies this is a terminal, otherwise a type signature.
 
 		*bv_prefix*
 			Bound variable Prefix e.g. the 'y' in y1, y2, y3...
