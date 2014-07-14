@@ -1,12 +1,12 @@
 """
-class to test SimpleLambdaParser.py
+class to test Parsing.py
 follows the standards in https://docs.python.org/2/library/unittest.html
 """
 
 import unittest
 
-from LOTlib.SimpleLambdaParser import *
-class SimpleLambdaParserTest(unittest.TestCase):
+from LOTlib.Parsing import *
+class ParsingTest(unittest.TestCase):
 	
 	# initialization that happens before each test is carried out
 	def setUp(self):

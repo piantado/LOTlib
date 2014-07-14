@@ -6,7 +6,7 @@ from LOTlib.Grammar import Grammar
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
 from LOTlib.Miscellaneous import q
-from LOTlib.BasicPrimitives import cons_ # for evaling
+from LOTlib.Primitives.Functional import cons_ # for evaling
 
 G = Grammar()
 

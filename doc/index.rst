@@ -9,8 +9,7 @@ Welcome to LOTlib's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 3
- 
+   :maxdepth: 3 
 
 
 

@@ -38,15 +38,3 @@ for i, f in enumerate(TARGET_CONCEPTS):
 	all_hypotheses.merge(fs)
 	
 pickle_save(all_hypotheses, OUTFILE)
-
-
-
-
-
-
-
-
-
-
-
-

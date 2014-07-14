@@ -4,6 +4,7 @@
 	Use optimal adaptation code to adapt show possible adpatations to the NAND grammar
 
 """
+import pickle
 from Shared import *
 from LOTlib.Subtrees import *
 
@@ -15,7 +16,7 @@ SUBTREE_P = 0.5 # when we generate a partial subtree, how likely are we to take 
 datas = [generate_data(NDATA, f) for f in TARGET_CONCEPTS]
 
 # Load hypotheses from previous run
-hypotheses = pickle_load("hypotheses.pkl").get_all()
+hypotheses = pickle.load(open("hypotheses.pkl", 'r')).get_all()
 print "# Loaded hypotheses ", len(hypotheses)
 
 # Clean out ones with 0 probability, or else KL computation in print_subtree_adaptations goes to hell

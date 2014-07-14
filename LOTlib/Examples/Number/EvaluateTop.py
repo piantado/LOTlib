@@ -3,6 +3,7 @@
 	A quick script to load some large data and re-run-evaluate it to generate a file readable by plot_learning_curve.R
 """
 
+import pickle
 from Shared import *
 
 LARGE_DATA_SIZE = 1000
@@ -11,7 +12,7 @@ LARGE_DATA_SIZE = 1000
 huge_data = generate_data(LARGE_DATA_SIZE)
 print "# Generated data!"
 
-allfs = pickle.load(open("/home/piantado/Desktop/mit/Libraries/LOTlib/LOTlib/Examples/Number/mpi-run.pkl"))
+allfs = pickle.load(open("runs/2014Feb10_small.pkl")) # for now, use data from the run on February 10
 print "# Loaded!"
 
 # save this with a huge data set -- eval with average ll 

@@ -12,6 +12,7 @@ from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Miscellaneous import *
 from LOTlib.DataAndObjects import *
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+from LOTlib.Primitives.Number import word_to_number
 from random import randint
 
 ALPHA = 0.75 # the probability of uttering something true
