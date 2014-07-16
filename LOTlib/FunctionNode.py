@@ -44,27 +44,27 @@ class FunctionNode(object):
 			*returntype* - The return type of the FunctionNode
 			*name* - The name of the function
 			*args* - Arguments of the function
-			*generation_probability* - 
+			*generation_probability* - the probability of the rule generating me
 			*resample_p* - The probability of choosing this node in an expansion. Takes a number in the range [0.0,1.0]
 			*bv_name* - Name of the Bound Variable
 			*bv_type* - Which bound variable
 			*bv_args* - Arguments of the Bound Variable. "None" implies this is a terminal, otherwise  a type signature.
 			*bv_prefix* - Bound variable Prefix
-			*bv_p* - ?
+			*bv_p* - If this is a bound variable, what's the probability of the bound variable it introduces?
 			*ruleid* - The rule ID number
 		"""
 		self.__dict__.update(locals())
 		
 	def setto(self, q):
 		"""
-			Makes all the parts the same as *q*, not copies.
+			Makes all the parts the same as q, not copies.
 		"""
 		self.__dict__.update(q.__dict__)
 			
 	def __copy__(self, shallow=False):
 		"""
 			Copy a function node
-			shallow - if True, this does not copy the children (self.to points to the same as what we return)
+			shallow - if True, this does not copy the children (self.args points to the same as what we return)
 		"""
 		if (not shallow) and self.args is not None:
 			newargs = map(copy, self.args) 
@@ -156,7 +156,6 @@ class FunctionNode(object):
 	def schemestring(self):
 		"""
 			Print out in scheme format (+ 3 (- 4 5)).
-			This "evals" cons_ so that you don't have to eval for simple list builders (although you may want to)
 		"""
 		if self.args is None:
 			return self.name
@@ -335,7 +334,7 @@ class FunctionNode(object):
 	
 	def contains_function(self, x):
 		"""
-			Checks if the FunctionNode contains *x* as function below
+			Checks if the FunctionNode contains x as function below
 		"""
 		for n in self:
 			if n.name == x: return True
@@ -352,12 +351,14 @@ class FunctionNode(object):
 			Returns the subnode count.
 		"""
 		c = 0
-		for n in self: 
+		for _ in self: 
 			c = c + 1
 		return c
 	
 	def depth(self):
-
+		"""
+			Returns the depth of the tree (how many embeddings below)
+		"""	
 		depths = [ a.depth() for a in self.argFunctionNodes() ] 
 		depths.append(-1) # for no function nodes (+1=0)
 		return max(depths)+1
