@@ -154,9 +154,7 @@ class Grammar:
 			# If we get a list, just map along it to generate. We don't count lists as depth--only FunctionNodes
 			return map(lambda xi: self.generate(x=xi, d=d), x)
 
-		elif x is None:
-            
-			return None
+		elif x is None: return None
 		
 		elif self.is_nonterminal(x):
 			# if we generate a nonterminal, then sample a GrammarRule, convert it to a FunctionNode

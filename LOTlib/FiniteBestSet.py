@@ -34,7 +34,7 @@ class FiniteBestSet(object):
 		It works by storing a priority queue (in the opposite order), and popping off the worst as we need to add more
 	"""
 	
-	def __init__(self, N=Infinity, max=True, key=None):
+	def __init__(self, N=Infinity, max=True, key='posterior_score'):
 		"""
 			N - the number of hypotheses to store
 			max - True/False -- do we keep the ones closes to +inf (or -inf)

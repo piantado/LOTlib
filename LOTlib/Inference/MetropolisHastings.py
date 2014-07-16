@@ -10,19 +10,12 @@
 	#See Geyer & Thompson 1994 - http://www.stat.tamu.edu/~fliang/Geyer.pdf
 
 """
-
-import time
-from random import random
-from math import log, exp, isnan
-
-import LOTlib
 from LOTlib import lot_iter
 from LOTlib.Miscellaneous import *
-from LOTlib.FiniteBestSet import FiniteBestSet
 #from LOTlib.Memoization import BoundedDictionary
-from MHShared import *
+from MHShared import MH_acceptance
 
-def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_temperature=1.0, likelihood_temperature=1.0, acceptance_temperature=1.0, trace=False, debug=False, stats=None, memoize=0):
+def mh_sample(current_sample, data, steps=99999999999, proposer=None, skip=0, prior_temperature=1.0, likelihood_temperature=1.0, acceptance_temperature=1.0, trace=False, debug=False, stats=None, memoize=0):
 	"""
 		current_sample - the starting hypothesis
 		data - the conditioning data
@@ -36,9 +29,8 @@ def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_
 	
 	if memoize > 0:
 		from cachetools import LRUCache
-		 
 		mem = LRUCache(maxsize=memoize)
-		
+	
 	for mhi in lot_iter(xrange(steps)):
 	
 		for skp in lot_iter(xrange(skip+1)):
@@ -89,9 +81,9 @@ def mh_sample(current_sample, data, steps=1000000, proposer=None, skip=0, prior_
 		
 		
 
-	#print mem.hits, mem.misses
-			
+"""
 # this does out special mix of mh and gibbs steps
+# OLD CODE -- DELETE EVENTUALLY
 def mhgibbs_sample(inh, data, steps, proposer=None, mh_steps=10, gibbs_steps=10, skip=0, temperature=1.0):
 	current_sample = inh
 	for mhi in lot_iter(xrange(steps)):
@@ -99,17 +91,93 @@ def mhgibbs_sample(inh, data, steps, proposer=None, mh_steps=10, gibbs_steps=10,
 			for k in mh_sample(current_sample, data, 1, proposer=proposer, skip=mh_steps, temperature=temperature): current_sample = k
 			for k in gibbs_sample(current_sample, data, 1, skip=gibbs_steps, temperature=temperature): current_sample = k
 		yield current_sample
+"""
+import itertools
 
+class MHSampler():
+	"""
+		A class to implement MH sampling
+	"""
+	def __init__(self, current_sample, data, steps=Infinity, proposer=None, skip=0, prior_temperature=1.0, likelihood_temperature=1.0, acceptance_temperature=1.0, trace=False, memoize=0):
+		self.__dict__.update(locals())
+		
+		# Defaulty call the hypothesis's propose function
+		if proposer is None:
+			self.proposer = lambda x: x.propose()
+		
+		if memoize > 0:
+			from cachetools import LRUCache
+			self.mem = LRUCache(maxsize=memoize)
+		
+		self.reset_counters()
+		
+	def reset_counters(self):
+		"""
+			Reset our acceptance and proposal counters
+		"""
+		self.acceptance_count = 0
+		self.proposal_count = 0
+	
+	def acceptance_ratio(self):
+		"""
+			Returns the proportion of proposals that have been accepted
+		"""
+		return float(self.acceptance_count) / float(self.proposal_count)
+		
+	def __iter__(self):
+		for mhi in lot_iter(itertools.count()): # itertools.count will count to infinity
+			if mhi > self.steps: break
+			
+			for _ in lot_iter(xrange(self.skip+1)):
+			
+				self.proposal, fb = self.proposer(self.current_sample)
+					
+				# either compute this, or use the memoized version
+				if self.memoize > 0:
+					if self.proposal in self.mem:
+						np, nl = self.mem[self.proposal]
+						self.proposal.posterior_score = (np+nl) # update this since it won't be set inside proposal
+					else: 
+						np, nl = self.proposal.compute_posterior(data)
+						self.mem[self.proposal] = (np,nl)
+				else:
+					np, nl = self.proposal.compute_posterior(data)
+					
+				#print np, nl, current_sample.prior, current_sample.likelihood
+				prop = (np/self.prior_temperature+nl/self.likelihood_temperature)
+				cur  = (self.current_sample.prior/self.prior_temperature + self.current_sample.likelihood/self.likelihood_temperature)
+				
+				if MH_acceptance(cur, prop, fb, acceptance_temperature=self.acceptance_temperature):
+					self.current_sample = self.proposal
+					
+					self.acceptance_count += 1
+				self.proposal_count += 1
+				
+			if self.trace: 
+				print self.current_sample.posterior_score, self.current_sample.likelihood, self.current_sample.prior, qq(self.current_sample)
+			
+			yield self.current_sample
+		
 		
 	
 if __name__ == "__main__":
-	
-	from LOTlib.Examples.Number.Shared import *
+	from LOTlib.Examples.Number.Shared import generate_data, NumberExpression, grammar, get_knower_pattern
 	
 	data = generate_data(500)
 	h0 = NumberExpression(grammar)	
-	for h in mh_sample(h0, data, 10000):
-		print q(get_knower_pattern(h)), h.lp, h.prior, h.likelihood, q(h)
+	sampler = MHSampler(h0, data, 10000)
+	for h in sampler:
+		print q(get_knower_pattern(h)), h.posterior_score, h.prior, h.likelihood, q(h), sampler.acceptance_count, sampler.acceptance_ratio()
 		  
 	
+
+
+# 	from LOTlib.Examples.Number.Shared import generate_data, NumberExpression, grammar, get_knower_pattern
+# 	
+# 	data = generate_data(500)
+# 	h0 = NumberExpression(grammar)	
+# 	for h in mh_sample(h0, data, 10000):
+# 		print q(get_knower_pattern(h)), h.lp, h.prior, h.likelihood, q(h)
+# 		  
+# 	
 

@@ -25,7 +25,7 @@ class RealValueGrammar(Grammar):
         if x == '*USE_START*': 
             x = self.start
             
-        elif x=='*gaussian*': 
+        if x=='*gaussian*': 
             # TODO: HIGHLY EXPERIMENTAL!! 
             # Wow this is really terrible for mixing...
             v = np.random.normal()

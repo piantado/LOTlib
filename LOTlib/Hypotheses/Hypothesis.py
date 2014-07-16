@@ -7,8 +7,6 @@ from copy import copy, deepcopy
 import LOTlib
 from LOTlib.Miscellaneous import *
 
-import LOTlib.Primitives.Primitives
-
 class Hypothesis(object):
 	"""
 		A hypothesis bundles together a value (hypothesis value) with a bunch of remembered states, like posterior_score, prior, likelihood
