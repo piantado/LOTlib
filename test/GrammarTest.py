@@ -21,6 +21,8 @@ class GrammarTest(unittest.TestCase):
 		self.G.add_rule('START', 'A ', ['START'], 0.1)
 		self.G.add_rule('START', 'B ', ['START'], 0.3)
 		self.G.add_rule('START', 'NULL', None, 0.6)
+
+	# tests .lp_regenerate_propose_to() function
 	
 	# tests .log_probability() function
 	def test_log_probability(self):
