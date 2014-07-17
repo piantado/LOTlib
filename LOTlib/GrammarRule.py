@@ -28,7 +28,6 @@ class GrammarRule:
 			A rule where "expansion" is a nonempty list is a real expansion:
 				GrammarRule( "EXPR", "plus", ["EXPR", "EXPR"], ...) -> plus(EXPR,EXPR)
 			A rule where "expansion" is [] is a thunk
-
 				GrammarRule( "EXPR", "plus", [], ...) -> plus()
 			A rule where "expansion" is [] is a real terminal (non-thunk)
 				GrammarRule( "EXPR", "five", None, ...) -> five
