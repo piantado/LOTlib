@@ -471,52 +471,6 @@ class FunctionNode(object):
 			
 		# Now check the children, whether or not we are symmetrical
 		return all([x.is_canonical_order(symmetric_ops) for x in self.args if self.args is not None])
-		
-	def proposal_probability_to(self, y):
-		"""
-			Proposal probability from self to y
-		
-			TODO: NOT HEAVILY TESTED/DEBUGGED. PLEASE CHECK
-		"""
-		
-		# We could do this node:
-		pself = -log(len(self))	
-		
-		if( self.returntype != y.returntype):
-			
-			return float("-inf")
-		
-		elif(self.name != y.name):
-			
-			# if names are not equal (but return types are) we must generate from the return type, using the root node
-			return pself + y.log_probability() 
-		
-		else:
-			# we have the same name and returntype, so we may generate children
-			
-			# Compute the arguments and see how mismatched we are
-			mismatches = []
-			if self.args is not None:
-				for a,b in zip(self.args, y.args):
-					if a != b: mismatches.append( [a,b] )
-			
-			# Now act depending on the mismatches
-			if len(mismatches) == 0: # we are identical below
-				
-				# We are the same below here, so we can propose to any subnode, which 
-				# each happens with prob pself
-				return logsumexp( [pself + t.log_probability() for t in self] )
-			
-			elif len(mismatches) == 1:
-				
-				a,b = mismatches[0]
-				
-				# Well if there's one mismatch, it lies below a or b,
-				# so we must propose in a along this subtree
-				m = log(len(a)) + pself # choose uniformly from this subtree, as individual nodes are adjusted later TODO: IM NOT SURE THIS IS RIGHT 
-				return logsumexp([m + a.proposal_probability_to(b), pself + y.log_probability()])
-			
-			else: return pself + y.log_probability() # We have to generate from ourselves
 				
 	def replace_subnodes(self, find, replace):
 		"""
@@ -526,7 +480,7 @@ class FunctionNode(object):
 		"""
 		
 		# now go through and modify
-		for g in filter(lambda x: x==find, self.subnodes() ): #NOTE: must use subnodes since we are modfiying
+		for g in filter(lambda x: x==find, self.subnodes() ): # NOTE: must use subnodes since we are modfiying
 			g.setto(copy(replace))
 	
 	def partial_subtree_root_match(self, y):
