@@ -13,8 +13,8 @@ from optparse import OptionParser
 
 parser = OptionParser()
 parser.add_option("--out", dest="OUT", type="string", help="Output prefix", default="./evaluation-inference")
-parser.add_option("--samples", dest="SAMPLES", type="int", default=10000, help="Number of samples to run")
-parser.add_option("--ndata", dest="NDATA", type="int", default=100, help="Number of data points")
+parser.add_option("--samples", dest="SAMPLES", type="int", default=100000, help="Number of samples to run")
+parser.add_option("--ndata", dest="NDATA", type="int", default=300, help="Number of data points")
 options, _ = parser.parse_args()
 
 # Load the data
@@ -29,11 +29,12 @@ from SimpleMPI.ParallelBufferedIO import ParallelBufferedIO
 from LOTlib.Performance.Evaluation import evaluate_sampler
 
 
-from LOTlib.Inference.IncreaseTemperatureMH import increase_temperature_mh_sample
 from LOTlib.Inference.TemperedTransitions import tempered_transitions_sample
 from LOTlib.Inference.ParallelTempering import parallel_tempering_sample
 from LOTlib.Inference.MetropolisHastings import mh_sample
-from LOTlib.Inference.ProbTaboo import ptaboo_search
+from LOTlib.Inference.TabooMCMC import TabooMCMC
+from LOTlib.Inference.ParticleSwarm import ParticleSwarm
+from LOTlib.Inference.MultipleChainMCMC import MultipleChainMCMC
 
 # Where we store the output
 out_hypotheses = open(os.devnull,'w') #ParallelBufferedIO(options.OUT + "-hypotheses.txt")
@@ -44,20 +45,26 @@ def run_one(prefix, s):
 	
 	# make a new hypothesis
 	h0 = NumberExpression(grammar)
+	generate_h0 = lambda: NumberExpression(grammar)
 
 	# Create a sampler
 	if s == 'mh_sample_A':               sampler = mh_sample(h0, data, options.SAMPLES,  likelihood_temperature=1.0)
-	elif s == 'mh_sample_B':             sampler = mh_sample(h0, data, options.SAMPLES,  likelihood_temperature=2.0, )
-	elif s == 'mh_sample_C':             sampler = mh_sample(h0, data, options.SAMPLES,  likelihood_temperature=10.0 )
+	elif s == 'mh_sample_B':             sampler = mh_sample(h0, data, options.SAMPLES,  likelihood_temperature=1.1)
+	elif s == 'mh_sample_C':             sampler = mh_sample(h0, data, options.SAMPLES,  likelihood_temperature=1.25)
+	elif s == 'mh_sample_D':             sampler = mh_sample(h0, data, options.SAMPLES,  likelihood_temperature=2.0 )
+	elif s == 'mh_sample_E':             sampler = mh_sample(h0, data, options.SAMPLES,  likelihood_temperature=5.0 )
+	elif s == 'particle_swarm_A':        sampler = ParticleSwarm(generate_h0, data, steps=options.SAMPLES, within_steps=10)
+	elif s == 'particle_swarm_B':        sampler = ParticleSwarm(generate_h0, data, steps=options.SAMPLES, within_steps=100)
+	elif s == 'particle_swarm_C':        sampler = ParticleSwarm(generate_h0, data, steps=options.SAMPLES, within_steps=200)
+	elif s == 'multiple_chains_A':       sampler = MultipleChainMCMC(generate_h0, data, steps=options.SAMPLES, chains=10)
+	elif s == 'multiple_chains_B':       sampler = MultipleChainMCMC(generate_h0, data, steps=options.SAMPLES, chains=100)
+	elif s == 'multiple_chains_C':       sampler = MultipleChainMCMC(generate_h0, data, steps=options.SAMPLES, chains=1000)
 	elif s == 'parallel_tempering_A':    sampler = parallel_tempering_sample(h0, data, options.SAMPLES, within_steps=10, temperatures=[1.0, 1.025, 1.05], swaps=1)
 	elif s == 'parallel_tempering_B':    sampler = parallel_tempering_sample(h0, data, options.SAMPLES, within_steps=10, temperatures=[1.0, 1.05, 1.1], swaps=1)
 	elif s == 'parallel_tempering_C':    sampler = parallel_tempering_sample(h0, data, options.SAMPLES, within_steps=10, temperatures=[1.0, 1.25, 1.5], swaps=1)
-	elif s == 'increase_temperature_A':  sampler = increase_temperature_mh_sample( h0, data, steps=options.SAMPLES, skip=0, increase_amount=1.0)
-	elif s == 'increase_temperature_B':  sampler = increase_temperature_mh_sample( h0, data, steps=options.SAMPLES, skip=0, increase_amount=1.05)
-	elif s == 'increase_temperature_C':  sampler = increase_temperature_mh_sample( h0, data, steps=options.SAMPLES, skip=0, increase_amount=1.1)
-	elif s == 'ptaboo_A':                sampler = ptaboo_search( h0, data, steps=options.SAMPLES, skip=0, seen_penalty=1.0)
-	elif s == 'ptaboo_B':                sampler = ptaboo_search( h0, data, steps=options.SAMPLES, skip=0, seen_penalty=10.0)
-	elif s == 'ptaboo_C':                sampler = ptaboo_search( h0, data, steps=options.SAMPLES, skip=0, seen_penalty=10.0)
+	elif s == 'taboo_A':                 sampler = TabooMCMC( h0, data, steps=options.SAMPLES, skip=0, penalty=.10)
+	elif s == 'taboo_B':                 sampler = TabooMCMC( h0, data, steps=options.SAMPLES, skip=0, penalty=1.0)
+	elif s == 'taboo_C':                 sampler = TabooMCMC( h0, data, steps=options.SAMPLES, skip=0, penalty=10.0)
 	else: assert False, s
 	
 	# Run evaluate on it, printing to the right locations
@@ -67,14 +74,17 @@ def run_one(prefix, s):
 # For each process, create the lsit of parameter
 #params = [ list(g) for g in product(range(100), [1.0], [0.1, 0.2, 0.5, 0.75, 0.9, 1.0, 1.1, 1.25, 1.5, 2.0, 5.0, 10.0, 100.0] )]
 
-params = [ list(g) for g in product(range(100), ['mh_sample_A', 'mh_sample_B', 'mh_sample_C', 
-											   'parallel_tempering_A', 'parallel_tempering_B', 'parallel_tempering_C',
-											   'increase_temperature_A', 'increase_temperature_B', 'increase_temperature_C',
-											   'ptaboo_A', 'ptaboo_B', 'ptaboo_C']) ]
-
+params = [ list(g) for g in product(range(100), ['multiple_chains_A', 'multiple_chains_B', 'multiple_chains_C', 
+												'taboo_A', 'taboo_B', 'taboo_C', 
+												'particle_swarm_A', 'particle_swarm_B', 'particle_swarm_C', 
+												'mh_sample_A', 'mh_sample_B', 'mh_sample_C', 'mh_sample_D', 'mh_sample_E',
+												 'parallel_tempering_A', 'parallel_tempering_B', 'parallel_tempering_C',
+												])]
+"""								
+"""
 from SimpleMPI.MPI_map import MPI_map
 
-MPI_map(run_one, params)
+MPI_map(run_one, params, random_order=False)
 
 out_hypotheses.close()
 out_aggregate.close()

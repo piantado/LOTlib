@@ -1,3 +1,7 @@
+"""
+	TODO: RECAST THIS IN THE OO FORMAT OF MetropolisHastings
+"""
+
 import LOTlib
 from LOTlib import lot_iter
 from MetropolisHastings import mh_sample

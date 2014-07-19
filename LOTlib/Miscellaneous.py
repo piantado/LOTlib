@@ -422,7 +422,16 @@ def lambda_str(fn):
 		return str(fn.name)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#  And import the primitives for "eval"
+# Convenient functions on sets of hypotheses
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-#from LOTlib.BasicPrimitives import * # Needed for calling "eval"
+"""
+def MAP(s, key="posterior_score"):
+	best_score, best_h = -Infinity, None
+	for h in s:
+		v = getattr(h,key)
+		if v > best_score:
+			best_score, best_h = v, h
+	return best_h 
+"""	
+		
+		

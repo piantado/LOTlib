@@ -1,14 +1,4 @@
 from collections import defaultdict
-
-class MHStats(defaultdict):
-	def __init__(self):
-		defaultdict.__init__(self, int)
-	
-	def acceptance_ratio(self):
-		if self.get('total') > 0:
-			return float(self.get('accept',0)) / float(self.get('total',1))
-		else:   return None
-
 from math import log, exp, isnan
 from random import random
 
