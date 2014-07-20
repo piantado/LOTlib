@@ -1,3 +1,5 @@
+July 20 2014
+	- Refactored Inference.* to use classes rather than functions. This way, samplers can save states, be resumed, etc. 
 June 20 2014
 	- Created Evaluation to implement different virtual machines for evaluating FunctionNodes. The most basic if Eval, whcih calls python eval. 
 	- Refactored BasicPrimitives to LOTlib.Primitives; added ability to add new primitives
