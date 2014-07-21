@@ -9,27 +9,28 @@ try:                import numpy as np
 except ImportError: import numpypy as np
 
 
-from random import random, sample, randint
-import itertools
-from math import exp, log, sqrt, pi, e
+from random import random, sample
+from math import exp, log, pi
 import sys
 import math
 import collections
 
 import re
 import types # for checking if something is a function: isinstance(f, types.FunctionType)
+import re
 
 ## Some useful constants
 Infinity = float("inf")
 inf = Infinity
 Inf = Infinity
 Null = []
-TAU = 6.28318530718 #fuck pi
+TAU = 6.28318530718 # fuck pi
 
 ## For R-friendly
 T=True
 F=False
 
+# does not check whether array has fewer elements than needed
 def first(x): return x[0]
 def second(x): return x[1]
 def third(x):  return x[2]
@@ -83,8 +84,8 @@ def list2sexpstr(lst):
 		[['K', 'K'], [['S', 'K'], ['I', 'I']]] --> ((K K) ((S K)(I I)))
 	"""
 	s = re.sub(r'[\'\",]', r'', str(lst))
-	s = re.sub(r'\[', r'(', s)
-	s = re.sub(r'\]', r')', s)
+	s = re.sub(r'\[', '(', s) # changed r'(' to '('
+	s = re.sub(r'\]', ')', s) # changed r')' to ')'
 	return s
 	
 
@@ -236,22 +237,26 @@ except ImportError:
 	
 ## This is just a wrapper to avoid logsumexp([-inf, -inf, -inf...]) warnings
 try:			
-	from scipy.misc import logsumexp as scipy_logsumexp
+	from scipy.misc import logsumexp as logsumexp_base
 except ImportError:	
 	try:
-		from scipy.maxentropy import logsumexp as scipy_logsumexp
+		from scipy.maxentropy import logsumexp as logsumexp_base
 	except ImportError:
 		# fine, our own version, no numpy
-		def scipy_logsumexp(v):
+		def logsumexp_base(v):
 			m = max(v)
 			return m+log(sum(map( lambda x: exp(x-m), v)))
 			
 def logsumexp(v):
 	"""
-		Logsumexp - our own version wraps the scipy to handle -infs
+		logsumexp - our own version wraps the version defined about (logsumexp_base)
 	"""
-	if max(v) > -Infinity: return scipy_logsumexp(v)
-	else: return -Infinity
+	if len(v) == 0:
+		return -Infinity
+	elif max(v) > -Infinity:
+		return logsumexp_base(v)
+	else:
+		return -Infinity
 
 def lognormalize(v):
 	return v - logsumexp(v)
@@ -336,8 +341,7 @@ def flip(p): return (random() < p)
 # NOTE: This now can take probs as a function, which is then mapped!
 def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, returnlist=False, Z=None):
 	"""
-	
-		when we return_probability, it is *always* a log probability
+		When we return_probability, it is *always* a log probability
 	"""
 	# check how probabilities are specified
 	# either as an argument, or attribute of objs (either probability or lp
@@ -352,13 +356,13 @@ def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, 
 	myprobs = None
 	if probs is None: # defaultly, we use .lp
 		myprobs = [1.0] * len(objs) # sample uniform
-	elif isinstance(probs, types.FunctionType): #NOTE: this does not work for class instance methods
+	elif isinstance(probs, types.FunctionType): # NOTE: this does not work for class instance methods
 		myprobs = map(probs, objs)
 	else: 
 		myprobs = map(float, probs)
 	
 	# Now normalize and run
-	if Z == None:
+	if Z is None:
 		if log: Z = logsumexp(myprobs)
 		else: Z = sum(myprobs)
 	#print log, myprobs, Z
@@ -382,7 +386,7 @@ def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, 
 					out.append( objs[i] )
 					break
 					
-	if N == 1 and (not returnlist): return out[0]  #don't give back a list if you just want one
+	if N == 1 and (not returnlist): return out[0]  # don't give back a list if you just want one
 	else:      return out
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -395,7 +399,7 @@ def lambdaOne(*x): return 1
 def lambdaNull(*x): return []
 def lambdaNone(*x): return None
 def lambdaTrue(*x): return True
-def lambdaFalse(*x): return True
+def lambdaFalse(*x): return False
 def lambdaNAN(*x): return float("nan")
 
 def lambda_str(fn):

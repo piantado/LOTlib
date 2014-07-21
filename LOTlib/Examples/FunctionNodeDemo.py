@@ -5,7 +5,7 @@ from LOTlib.Miscellaneous import evaluate_expression
 """
 	 A simple demo for how to define FunctionNodes
 	 
-	 All of these primitives are defined in LOTlib.BasicPrimitives, as well as many others.
+	 All of these primitives are defined in the LOTlib.Primitives package, as well as many others.
 	 In general, the PCFG generates FunctionNode trees via "generate" and then these are printed
 	 via __str__ in a pythonesque way that can be evaled. 
 
@@ -32,7 +32,7 @@ grammar.add_rule('EXPR', 'e', None, 3.0)
 # This gets named as the argument in evaluate_expression below
 grammar.add_rule('EXPR', 'x', None, 10.0) 
 
-# A thunk function (lambdaZero is defined in BasicPrimitives)
+# A thunk function (lambdaZero is defined in Miscellaneous)
 # We write these with [None] insead of []. The FunctionNode str function knows to print these with parens
 # This notation keeps it simple since on a FunctionNode, the children ("to") are always a list. 
 grammar.add_rule('EXPR', 'lambdaZero', [], 1.0) 

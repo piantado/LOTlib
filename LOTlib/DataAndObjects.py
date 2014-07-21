@@ -3,11 +3,11 @@
 	It also provides "Obj"s for bundling together features
 	
 	For functions, we have a data object of the form [output, args]
-
 """
 from copy import deepcopy
 
 from LOTlib.Miscellaneous import weighted_sample, qq
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -22,7 +22,7 @@ class FunctionData:
 		"""
 			Creates a new FunctionData object. input must be either a list or a tuple.
 		"""
-		assert isinstance(input, list) or isinstance(input, tuple), "FunctionData.input must be a list!" ## since we apply to this
+		assert isinstance(input, list) or isinstance(input, tuple), "FunctionData.input must be a list!" # # since we apply to this
 		self.input = input
 		self.output = output
 		self.__dict__.update(kwargs)
@@ -30,10 +30,13 @@ class FunctionData:
 	def __repr__(self): 
 		return '<' + ','.join(map(str, self.input)) + " -> " + str(self.output) + '>'
 
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 class UtteranceData:
 	"""
 		A wrapper for utterances.
+
 		An utterance data point is a word, in a context, with some set of possible words we could have said.
 	"""
 	def __init__(self, utterance, context, possible_utterances):
@@ -50,6 +53,7 @@ class UtteranceData:
 		
 	def __repr__(self):
 		return qq(str(self.utterance))+' in '+ str(self.context) + " from " + str(self.possible_utterances)
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -73,6 +77,7 @@ class Obj:
 	# We may or may not want these, depending on whether we keep Objs in sets...
 	#def __eq__(self, other): return str(self) == str(other) 
 	#def __hash__(self): return hash(str(self))
+
 
 def make_all_objects(**f):
 	"""
@@ -99,8 +104,10 @@ def make_all_objects(**f):
 	return out_objs
 
 
-# make a set of size N appropriate to using "set" functions on -- this means it must contain copies, not duplicate references
+
 def sample_sets_of_objects(N, objs):
+	"""
+	Makes a set of size N appropriate to using "set" functions on -- this means it must contain copies, not duplicate references
+	"""
 	s = weighted_sample(objs, N=N, returnlist=True) # the set of objects
 	return map(deepcopy, s) # the set must NOT be just the pointers sampled, since then set() operations will collapse them!
-	

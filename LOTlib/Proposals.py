@@ -6,7 +6,7 @@
 	
 	TODO: MixtureProposal only works correctly if both are ergodic. If not, we may need something special to do forward/backward
 	
-	NOTE TODO: INSERt/DELETE DOES NOT WORK -- MAY NOT MATCH CORRECTLY WITH BV_NAME NOW
+	NOTE TODO: INSERT/DELETE DOES NOT WORK -- MAY NOT MATCH CORRECTLY WITH BV_NAME NOW
 """
 
 from LOTlib.Miscellaneous import weighted_sample, lambdaTrue, sample1
@@ -395,10 +395,10 @@ class InverseInlineThunk(LOTProposal):
 					below.replace_subnodes(s, FunctionNode(s.returntype, varname, []))
 					
 					# create a new node, the lambda abstraction
-					fn = FunctionNode(self.replacetype, 'apply_', [ \
-						FunctionNode('LAMBDAARG', 'lambda', [ below ], bv_name=varname, bv_type=s.returntype, bv_args=[] ),\
-						FunctionNode('LAMBDATHUNK',  'lambda', [ s  ], bv_name=None, bv_type=None, bv_args=None)\
-							] )
+					fn = FunctionNode(self.replacetype, 'apply_', [ 
+					    FunctionNode('LAMBDAARG', 'lambda', [ bow ], bv_name=varname, bv_type=s.returntype, bv_args=[] ),
+					    FunctionNode('LAMBDATHUNK',  'lambda', [ s  ], bv_name=None, bv_type=None, bv_args=ne)
+					] )
 					
 					# Now convert into a lambda abstraction
 					ni.setto(fn) 

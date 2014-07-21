@@ -16,7 +16,6 @@ from LOTlib.Primitives.Number import *
 from LOTlib.Primitives.Semantics import *
 from LOTlib.Primitives.SetTheory import *
 from LOTlib.Primitives.Trees import *
-from LOTlib.Primitives.Stochastics import *
 
 
 def register_primitive(function, name=None):
@@ -49,7 +48,7 @@ The Y combinator
 #fac = lambda f: lambda n: (1 if n<2 else n*(f(n-1)))
 #Y(fac)(10)
 """
-Y = lambda f: (lambda x: x(x)) (lambda y : f(lambda *args: y(y)(*args)) )
+Y = lambda f: (lambda x: x(x))(lambda y: f(lambda *args: y(y)(*args)) )
 
 
 MAX_RECURSION = 25
@@ -57,7 +56,7 @@ def Y_bounded(f):
     """
     A fancy fixed point iterator that only goes MAX_RECURSION deep, else throwing a a RecusionDepthException
     """
-    return (lambda x, n: x(x, n)) (lambda y, n: f(lambda *args: y(y, n+1)(*args)) if n < MAX_RECURSION else raise_exception(EvaluationException()), 0)
+    return (lambda x, n: x(x, n))(lambda y, n: f(lambda *args: y(y, n+1)(*args)) if n < MAX_RECURSION else raise_exception(EvaluationException()), 0)
 
 
 

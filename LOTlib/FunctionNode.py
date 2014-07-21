@@ -11,8 +11,10 @@
 
 import re
 from LOTlib.Miscellaneous import None2Empty
-
 from copy import copy, deepcopy
+from math import log
+from LOTlib.Miscellaneous import logsumexp
+from random import random
 
 def isFunctionNode(x): 
 	# just because this is nicer, and allows us to map, etc. 
@@ -20,6 +22,7 @@ def isFunctionNode(x):
 		Returns true if *x* is of type FunctionNode.
 	"""
 	return isinstance(x, FunctionNode)
+
 
 def cleanFunctionNodeString(x):
 	"""
@@ -32,27 +35,47 @@ def cleanFunctionNodeString(x):
 
 class FunctionNode(object):
 	"""
+		*returntype*
+			The return type of the FunctionNode
+
+		*name*
+			The name of the function 
+
+		*args*
+			Arguments of the function
+
+		*generation_probability*
+			Unnormalized generation probability.
+
+		*resample_p*
+			The probability of choosing this node in an expansion. Takes a number in the range [0.0,1.0]
+
+		*bv_name*
+			Name of the Bound Variable e.g. y1, y2, y3...
+
+		*bv_type*
+			Bound variable type
+
+		*bv_args*
+			Arguments of the Bound Variable. "None" implies this is a terminal, otherwise a type signature.
+
+		*bv_prefix*
+			Bound variable Prefix e.g. the 'y' in y1, y2, y3...
+
+		*bv_p*
+			Unnormalized probability of the rule expanding to the bound variable.
+
+		*ruleid*
+			The rule ID number
+
 		NOTE: If a node has [ None ] as args, it is treated as a thunk
 		
 		bv - stores the actual *rule* that was added (so that we can re-add it when we loop through the tree)
-		
-		My bv stores the particlar *names* of variables I've introduced
 	"""
 	
-	def __init__(self, returntype, name, args, generation_probability=0.0, resample_p=1.0, bv_name=None, bv_type=None, bv_args=None, bv_prefix=None, bv_p=None, ruleid=None):
-		"""
-			*returntype* - The return type of the FunctionNode
-			*name* - The name of the function
-			*args* - Arguments of the function
-			*generation_probability* - the probability of the rule generating me
-			*resample_p* - The probability of choosing this node in an expansion. Takes a number in the range [0.0,1.0]
-			*bv_name* - Name of the Bound Variable
-			*bv_type* - Which bound variable
-			*bv_args* - Arguments of the Bound Variable. "None" implies this is a terminal, otherwise  a type signature.
-			*bv_prefix* - Bound variable Prefix
-			*bv_p* - If this is a bound variable, what's the probability of the bound variable it introduces?
-			*ruleid* - The rule ID number
-		"""
+	def __init__(self, returntype, name, args, generation_probability=0.0,
+					resample_p=1.0, bv_name=None, bv_type=None, bv_args=None,
+					bv_prefix=None, bv_p=None, ruleid=None):
 		self.__dict__.update(locals())
 		
 	def setto(self, q):
@@ -67,7 +90,7 @@ class FunctionNode(object):
 			shallow - if True, this does not copy the children (self.args points to the same as what we return)
 		"""
 		if (not shallow) and self.args is not None:
-			newargs = map(copy, self.args) 
+			newargs = map(copy, self.args)
 		else:
 			newargs = self.args
 		
@@ -98,18 +121,26 @@ class FunctionNode(object):
 	
 	def islambda(self):
 		"""
-			Is this a lambda node? Using this function allows us to potentially...
+			Is this a lambda node? Right now it
+			just checks if the name is 'lambda' (but in the future, we might want to
+			allow different types of lambdas or something, which is why its nice to
+			have this function)
 		"""
 		ret = (self.name is not None) and (self.name.lower() == 'lambda')
 		
 		# A nice place to keep this--will get checked a lot!
-		if ret: assert len(self.args) == 1, "*** Lambdas must have exactly 1 arg"
+		if ret:
+			assert len(self.args) == 1, "*** Lambdas must have exactly 1 arg"
 		
 		return ret
 	
-	# output a string that can be evaluated by python
-	## NOTE: Here we do a little fanciness -- with "if" -- we convert it to the "correct" python form with short circuiting instead of our fancy ifelse function
+
+	# NOTE: Here we do a little fanciness -- with "if" -- we convert it to the "correct" python 
+	# form with short circuiting instead of our fancy ifelse function
 	def pystring(self): 
+		"""
+		Outputs a string that can be evaluated by python
+		"""
 		#print ">>", self.name
 		if self.is_nonfunction(): # a terminal
 			return str(self.name)
@@ -147,11 +178,13 @@ class FunctionNode(object):
 	def fullprint(self, d=0):
 		""" A handy printer for debugging"""
 		tabstr = "  .  " * d
-		print tabstr, self.returntype, self.name, self.bv_type, self.bv_name, self.bv_args, self.bv_prefix, "\t", self.generation_probability #"\t", self.resample_p 
+		print tabstr, self.returntype, self.name, self.bv_type, self.bv_name, self.bv_args, self.bv_prefix, "\t", self.generation_probability # "\t", self.resample_p 
 		if self.args is not None:
 			for a in self.args: 
-				if isFunctionNode(a): a.fullprint(d+1)
-				else:                 print tabstr, a
+				if isFunctionNode(a):
+					a.fullprint(d+1)
+				else:
+					print tabstr, a
 			
 	def schemestring(self):
 		"""
@@ -161,7 +194,6 @@ class FunctionNode(object):
 			return self.name
 		else:
 			return '('+self.name + ' ' + ' '.join(map(lambda x: x.schemestring(), None2Empty(self.args)))+')'
-	
 	
 	def liststring(self, cons="cons_"):
 		"""
@@ -176,10 +208,15 @@ class FunctionNode(object):
 			assert False, "FunctionNode must only use cons to call liststring!"
 	
 	# NOTE: in the future we may want to change this to do fancy things
-	def __str__(self): return self.pystring()
-	def __repr__(self): return self.pystring()
-	
-	def __ne__(self, other): return (not self.__eq__(other))
+	def __str__(self):
+		return self.pystring()
+
+	def __repr__(self):
+		return self.pystring()
+
+	def __ne__(self, other):
+		return (not self.__eq__(other))
+
 	def __eq__(self, other): 
 		"""
 			Test equality of FunctionNodes. 
@@ -199,12 +236,11 @@ class FunctionNode(object):
 		
 		# so args must be a list
 		for a,b in zip(self.args, other.args):
-			if a != b: return False
+			if a != b:
+				return False
 		
 		return True
 		
-	
-	
 	## TODO: overwrite these with something faster
 	# hash trees. This just converts to string -- maybe too slow?
 	def __hash__(self):
@@ -222,10 +258,11 @@ class FunctionNode(object):
 		# use a quicker string hash		
 		#return hash(self.quickstring())
 		
-		
-	def __cmp__(self, x): return cmp(str(self), str(x))
+	def __cmp__(self, x):
+		return cmp(str(self), str(x))
 	
-	def __len__(self): return len([a for a in self])
+	def __len__(self):
+		return len([a for a in self])
 	
 	def log_probability(self):
 		"""
@@ -266,17 +303,19 @@ class FunctionNode(object):
 		
 		if self.args is not None:
 			for a in self.argFunctionNodes():
-				for ssn in a: yield ssn
+				for ssn in a:
+					yield ssn
 	
 	def iterdepth(self):
 		"""
-			Iterate subnodes, yielding node and depth
+			Iterates subnodes, yielding node and depth
 		"""
 		yield (self,0)
 		
 		if self.args is not None:
 			for a in self.argFunctionNodes():
-				for ssn,dd in a.iterdepth(): yield (ssn,dd+1)
+				for ssn,dd in a.iterdepth():
+					yield (ssn,dd+1)
 
 	def all_leaves(self):
 		"""
@@ -307,7 +346,8 @@ class FunctionNode(object):
 
 			*rename* - a dictionary to store how we should rename
 		"""
-		if rename is None: rename = dict()
+		if rename is None:
+			rename = dict()
 				
 		if self.name is not None:
 			if self.islambda() and (self.bv_type is not None): 
@@ -327,7 +367,6 @@ class FunctionNode(object):
 			#print "\t\tRENAMING", k, k.bv_prefix, rename
 			k.fix_bound_variables(d+1, rename)
 			
-
 	############################################################
 	## Derived functions that build on the above core
 	############################################################
@@ -337,7 +376,8 @@ class FunctionNode(object):
 			Checks if the FunctionNode contains x as function below
 		"""
 		for n in self:
-			if n.name == x: return True
+			if n.name == x:
+				return True
 		return False
 	
 	def count_nodes(self): 
@@ -388,7 +428,6 @@ class FunctionNode(object):
 				
 			return (self.args[0].type(), t)
 		
-		
 		# ts = [self.returntype, self.bv_type, self.bv_args]
 		# if self.args is not None:
 		# 	for i in range(len(self.args)):
@@ -398,27 +437,38 @@ class FunctionNode(object):
 		# 			ts.append(self.args[i])
 		# return ts
 		
-		
 	def is_replicating(self):
 		"""
 			A function node is replicating (by definition) if one of its children is of the same type
 		"""
 		return any([ x.returntype == self.returntype for x in self.argFunctionNodes() ])
 		
-
 	def is_canonical_order(self, symmetric_ops):
 		"""
-			Takes a set of symmetric ops (plus, minus, times, etc, not divide) and asserts that the 
-			LHS ordering is less than the right (to prevent)
+			Takes a set of symmetric (commutative) ops (plus, minus, times, etc, not divide) 
+			and asserts that the LHS ordering is less than the right (to prevent)
+
+			This is useful for removing duplicates of nodes. For instance,
+
+				AND(X, OR(Y,Z))
+
+			is logically the same as
+
+				AND(OR(Y,Z), X)
+
+			This function essentially checks if the tree is in sorted (alphbetical)
+			order, but only for functions whose name is in symmetric_ops. 
 		"""
-		if self.args is None or len(self.args) == 0: return True
+		if self.args is None or len(self.args) == 0:
+			return True
 		
 		if self.name in symmetric_ops:
 			
 			# Then we must check children
 			if self.args is not None:
 				for i in xrange(len(self.args)-1):
-					if self.args[i].name > self.args[i+1].name: return False
+					if self.args[i].name > self.args[i+1].name:
+						return False
 			
 		# Now check the children, whether or not we are symmetrical
 		return all([x.is_canonical_order(symmetric_ops) for x in self.args if self.args is not None])
@@ -465,7 +515,7 @@ class FunctionNode(object):
 				# Well if there's one mismatch, it lies below a or b,
 				# so we must propose in a along this subtree
 				m = log(len(a)) + pself # choose uniformly from this subtree, as individual nodes are adjusted later TODO: IM NOT SURE THIS IS RIGHT 
-				return logsumexp([m + a.proposal_probability_to(b) , pself + y.log_probability()])
+				return logsumexp([m + a.proposal_probability_to(b), pself + y.log_probability()])
 			
 			else: return pself + y.log_probability() # We have to generate from ourselves
 				
@@ -552,7 +602,7 @@ class FunctionNode(object):
 			else: 
 				newargs.append(a) # string or something else
 				
-		ret =  self.__copy__(shallow=True) # don't copy kids
+		ret = self.__copy__(shallow=True) # don't copy kids
 		ret.args = newargs
 		
 		return ret

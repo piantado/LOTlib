@@ -5,7 +5,14 @@ library(ggplot2)
 
 # d <- read.table("evaluation-temperatures-aggregate.txt")
 d <- read.table("ei.txt")
+names(d)[1:5] <- c("iteration", "method.param", "steps", "time", "Z")
 
-p <- ggplot(d, aes(x=V3, y=V5, color=as.character(V2))) + stat_summary(fun.y=mean, geom="line", size=2)
+d$method <- gsub("_[A-Z]$", "", d$method.param, perl=TRUE)
+# d$parameter <- 
 
+p <- ggplot(d, aes(x=steps, y=Z, color=method, group=method.param)) + 
+	stat_summary(fun.y=mean, geom="line", size=2) 
+	
 p
+
+

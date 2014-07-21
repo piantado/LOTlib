@@ -2,8 +2,6 @@
 	Hypothesis -- superclass for hypotheses in Bayesian inference. A Hypothesis mainly supports .compute_prior() and .compute_likelihood(data), which are called by sampling and search algorithms. 
 """
 
-import numpy
-from copy import copy, deepcopy
 import LOTlib
 from LOTlib.Miscellaneous import *
 

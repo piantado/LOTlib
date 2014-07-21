@@ -10,8 +10,7 @@
 	This is simple because there's only two types of things, and you observe all interactions. See ComplexMagnetism.py for a more complex case...
 """
 
-import LOTlib
-from LOTlib.Miscellaneous import unique, qq
+from LOTlib.Miscellaneous import qq
 from LOTlib.Grammar import Grammar
 from LOTlib.DataAndObjects import FunctionData
 from LOTlib.FunctionNode import cleanFunctionNodeString
@@ -74,8 +73,7 @@ data = [ FunctionData(input=[ "p1", "n1" ], output=True),
 	 FunctionData(input=[ "n2", "n1" ], output=False),
 	 FunctionData(input=[ "n2", "n2" ], output=False),
 	 FunctionData(input=[ "n2", "p1" ], output=True),
-	 FunctionData(input=[ "n2", "p2" ], output=True),
-	]
+	 FunctionData(input=[ "n2", "p2" ], output=True) ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run mcmc
@@ -93,5 +91,3 @@ for h in mh_sample(h0, data, 4000000, skip=100):
 	print h.posterior_score, h.likelihood, h.prior,  cleanFunctionNodeString(h)
 	print map( lambda d: h(*d.input), data)
 	print "\n"
-
-	

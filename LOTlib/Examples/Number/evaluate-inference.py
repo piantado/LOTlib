@@ -7,6 +7,7 @@ from LOTlib import lot_iter
 from Shared import *
 import os
 from itertools import product
+from SimpleMPI.MPI_map import MPI_map, synchronize_variable
 
 
 from optparse import OptionParser
@@ -18,7 +19,8 @@ parser.add_option("--ndata", dest="NDATA", type="int", default=300, help="Number
 options, _ = parser.parse_args()
 
 # Load the data
-data = generate_data(options.NDATA)
+data = synchornize_variable( lambda : generate_data(options.NDATA)  )
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # MPI run mh_sample
@@ -82,7 +84,6 @@ params = [ list(g) for g in product(range(100), ['multiple_chains_A', 'multiple_
 												])]
 """								
 """
-from SimpleMPI.MPI_map import MPI_map
 
 MPI_map(run_one, params, random_order=False)
 

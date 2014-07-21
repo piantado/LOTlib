@@ -7,8 +7,18 @@ Subpackages
 .. toctree::
 
     LOTlib.Examples.CCG
+    LOTlib.Examples.CombinatoryLogic
+    LOTlib.Examples.FOL
+    LOTlib.Examples.Magnetism
+    LOTlib.Examples.NAND
     LOTlib.Examples.Number
+    LOTlib.Examples.Quantifier
+    LOTlib.Examples.RationalRules
+    LOTlib.Examples.RegularExpressionLearner
     LOTlib.Examples.SchemeProgramInduction
+    LOTlib.Examples.SimpleGenerativeHypothesis
+    LOTlib.Examples.SimpleMCMC
+    LOTlib.Examples.SymbolicRegression
 
 Submodules
 ----------
