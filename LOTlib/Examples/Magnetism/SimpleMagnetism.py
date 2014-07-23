@@ -75,19 +75,20 @@ data = [ FunctionData(input=[ "p1", "n1" ], output=True),
 	 FunctionData(input=[ "n2", "p1" ], output=True),
 	 FunctionData(input=[ "n2", "p2" ], output=True) ]
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Run mcmc
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-from LOTlib.Proposals import *
-#mp = MixtureProposal(grammar, [RegenerationProposal(grammar), InsertDeleteProposal(grammar)] )
-mp = RegenerationProposal(grammar)
-
-from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-h0 = LOTHypothesis(grammar, args=['x', 'y'], ALPHA=0.999, proposal_function=mp) # alpha here trades off with the amount of data. Currently assuming no noise, but that's not necessary
-
-from LOTlib.Inference.MetropolisHastings import mh_sample
-for h in mh_sample(h0, data, 4000000, skip=100):
-	print h.posterior_score, h.likelihood, h.prior,  cleanFunctionNodeString(h)
-	print map( lambda d: h(*d.input), data)
-	print "\n"
+if __name__ == "__main__":
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	# Run mcmc
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	from LOTlib.Proposals import *
+	#mp = MixtureProposal(grammar, [RegenerationProposal(grammar), InsertDeleteProposal(grammar)] )
+	mp = RegenerationProposal(grammar)
+	
+	from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+	h0 = LOTHypothesis(grammar, args=['x', 'y'], ALPHA=0.999, proposal_function=mp) # alpha here trades off with the amount of data. Currently assuming no noise, but that's not necessary
+	
+	from LOTlib.Inference.MetropolisHastings import mh_sample
+	for h in mh_sample(h0, data, 4000000, skip=100):
+		print h.posterior_score, h.likelihood, h.prior,  cleanFunctionNodeString(h)
+		print map( lambda d: h(*d.input), data)
+		print "\n"

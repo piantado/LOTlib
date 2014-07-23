@@ -293,6 +293,14 @@ class Grammar:
 				foundit=True
 				yield [ni, di, ni.resample_p, Z]
 				
+	def increment_tree_NEW(self, x):
+		if LOTlib.SIG_INTERRUPTED:
+			raise StopIteration
+		elif isFunctionNode(x):
+			pass	
+		
+		
+					
 	def increment_tree(self, x, depth):
 		""" 
 			A lazy version of tree enumeration. Here, we generate all trees, starting from a rule or a nonterminal symbol. 
@@ -362,7 +370,6 @@ class Grammar:
 			
 			## TODO: somewhat inefficient since we do this each time:
 			## Here we change the order of rules to be terminals *first*
-			## else we don't enumerate small to large, which is clearly insane
 			terminals = []
 			nonterminals = []
 			for k in self.rules[x]:

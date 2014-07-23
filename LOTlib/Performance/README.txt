@@ -1,1 +1,1 @@
-"Standardized" test sets on simple MCMC problems. 
+Standardized tests on simple MCMC problems. 

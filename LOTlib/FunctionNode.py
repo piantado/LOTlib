@@ -48,7 +48,7 @@ class FunctionNode(object):
 			Unnormalized generation probability.
 
 		*resample_p*
-			The probability of choosing this node in an expansion. Takes a number in the range [0.0,1.0]
+			The probability of choosing this node in resampling. Takes any number >0 (all are normalized)
 
 		*bv_name*
 			Name of the Bound Variable e.g. y1, y2, y3...
@@ -107,6 +107,13 @@ class FunctionNode(object):
 			Returns True if the Node contains function arguments, False otherwise.
 		"""
 		return not self.is_nonfunction()
+	
+	def is_leaf(self):
+		"""
+			Returns True if none of the kids are FunctionNodes, meaning that this should be considered a "leaf" 
+			NOTE: A leaf may be a function, but its args are specified in the grammar.
+		"""
+		return (self.args is None) or all([ not isFunctionNode(c) for c in self.args])
 	
 	def as_list(self):
 		"""
@@ -178,7 +185,7 @@ class FunctionNode(object):
 	def fullprint(self, d=0):
 		""" A handy printer for debugging"""
 		tabstr = "  .  " * d
-		print tabstr, self.returntype, self.name, self.bv_type, self.bv_name, self.bv_args, self.bv_prefix, "\t", self.generation_probability # "\t", self.resample_p 
+		print tabstr, self.returntype, self.name, self.bv_type, self.bv_name, self.bv_args, self.bv_prefix, "\t", self.generation_probability, "\t", self.resample_p 
 		if self.args is not None:
 			for a in self.args: 
 				if isFunctionNode(a):
