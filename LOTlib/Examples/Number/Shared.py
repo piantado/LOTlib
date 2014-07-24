@@ -14,6 +14,7 @@ from LOTlib.DataAndObjects import *
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Primitives.Number import word_to_number
 from random import randint
+from LOTlib.Primitives.Number import *
 
 ALPHA = 0.75 # the probability of uttering something true
 GAMMA = -30.0 # the log probability penalty for recursion

@@ -9,15 +9,12 @@ except ImportError: import numpypy as np
 	
 from copy import copy, deepcopy
 from collections import defaultdict
-from random import random
 
 import LOTlib
 from LOTlib.Miscellaneous import *
 from LOTlib.FunctionNode import FunctionNode, isFunctionNode
 from LOTlib.GrammarRule import GrammarRule
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
-
-CONSTANT_RESAMPLE_P = 1.0
 
 class Grammar:
 	"""
@@ -48,7 +45,7 @@ class Grammar:
 	def is_nonterminal(self, x): 
 		""" A nonterminal is just something that is a key for self.rules"""
 
-		       #if x is a string       #if x is a key
+	    #       if x is a string       if x is a key
 		return isinstance(x, str) and (x in self.rules)
 		
 	def is_terminal(self, x):    
@@ -78,7 +75,6 @@ class Grammar:
 		"""
 		return self.rules.keys()
 		
-	# these take probs instead of log probs, for simplicity
 	def add_rule(self, nt, name, to, p, resample_p=1.0, bv_type=None, bv_args=None, bv_prefix='y', bv_p=None, rid=None):
 		"""
 			Adds a rule and returns the added rule.
@@ -96,8 +92,8 @@ class Grammar:
 			*bv_type* - What bound variable was introduced
 			
 			*bv_args* - What are the args when we use a bv (None is terminals, else a type signature)
-			
-			*rid* - the rule id number
+
+			*rid* - the rule id number -- negative if this introduces a bound variable; otherwise positive
 		"""
 		
 		#Assigns a serialized rule number
@@ -164,21 +160,8 @@ class Grammar:
 		if isinstance(x,list):
 			# If we get a list, just map along it to generate. We don't count lists as depth--only FunctionNodes
 			return map(lambda xi: self.generate(x=xi, d=d), x)
-
-		elif x=='*gaussian*': 
-			# TODO: HIGHLY EXPERIMENTAL!! 
-			# Wow this is really terrible for mixing...
-			v = np.random.normal()
-			gp = normlogpdf(v, 0.0, 1.0)
-			return FunctionNode(returntype=x, name=str(v), args=None, generation_probability=gp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) # #TODO: FIX THE ruleid
 		
-		elif x=='*uniform*':
-			v = np.random.rand()
-			gp = 0.0
-			return FunctionNode(returntype=x, name=str(v), args=None, generation_probability=gp, ruleid=0, resample_p=CONSTANT_RESAMPLE_P ) # #TODO: FIX THE ruleid
-		
-		elif x is None:
-			return None
+		elif x is None: return None
 		
 		elif self.is_nonterminal(x):
 			# if we generate a nonterminal, then sample a GrammarRule, convert it to a FunctionNode
@@ -221,7 +204,7 @@ class Grammar:
 				return FunctionNode(returntype=r.nt, name=r.name, args=args, generation_probability=gp, bv_type=r.bv_type, bv_name=added.name, bv_args=r.bv_args, bv_prefix=r.bv_prefix, ruleid=r.rid )
 			else:
 				return FunctionNode(returntype=r.nt, name=r.name, args=args, generation_probability=gp, ruleid=r.rid )
-			return fn
+			
 		elif isFunctionNode(x):
 			#for function Nodes, we are able to generate by copying and expanding the children
 			
@@ -488,7 +471,8 @@ class Grammar:
 			
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 if __name__ == "__main__":
-	
+	pass
+"""
 	#AB_GRAMMAR = PCFG()
 	#AB_GRAMMAR.add_rule('START', '', ['EXPR'], 1.0)
 	#AB_GRAMMAR.add_rule('EXPR', '', ['A', 'EXPR'], 1.0)
@@ -535,13 +519,8 @@ if __name__ == "__main__":
 			print t, ' ', t.log_probability()
 		
 		
-	from LOTlib.Testing.Evaluation import evaluate_sampler
-	import LOTlib.MetropolisHastings
 	
-	hyp = LOTHypothesis(grammar)
-	evaluate_sampler(TARGET, LOTlib.MetropolisHastings.mh_sample(hyp, [], 10000000), trace=False)
-	quit()
-	
+
 	#print "Testing MCMC (no counts) (no lambda)"
 	#TEST_MCMC = dict()
 	#MCMC_STEPS = 10000
@@ -687,3 +666,4 @@ if __name__ == "__main__":
 		#print x.log_probability(), ARITHMETIC_GRAMMAR.RR_prior(x), x
 		#for xi in ARITHMETIC_GRAMMAR.iterate_subnodes(x):
 			#print "\t", xi
+"""

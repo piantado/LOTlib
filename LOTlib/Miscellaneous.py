@@ -237,22 +237,26 @@ except ImportError:
 	
 ## This is just a wrapper to avoid logsumexp([-inf, -inf, -inf...]) warnings
 try:			
-	from scipy.misc import logsumexp as scipy_logsumexp
+	from scipy.misc import logsumexp as logsumexp_base
 except ImportError:	
 	try:
-		from scipy.maxentropy import logsumexp as scipy_logsumexp
+		from scipy.maxentropy import logsumexp as logsumexp_base
 	except ImportError:
 		# fine, our own version, no numpy
-		def scipy_logsumexp(v):
+		def logsumexp_base(v):
 			m = max(v)
 			return m+log(sum(map( lambda x: exp(x-m), v)))
 			
 def logsumexp(v):
 	"""
-		Logsumexp - our own version wraps the scipy to handle -infs
+		logsumexp - our own version wraps the version defined about (logsumexp_base)
 	"""
-	if max(v) > -Infinity: return scipy_logsumexp(v)
-	else: return -Infinity
+	if len(v) == 0:
+		return -Infinity
+	elif max(v) > -Infinity:
+		return logsumexp_base(v)
+	else:
+		return -Infinity
 
 def lognormalize(v):
 	return v - logsumexp(v)
@@ -422,7 +426,16 @@ def lambda_str(fn):
 		return str(fn.name)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#  And import the primitives for "eval"
+# Convenient functions on sets of hypotheses
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-#from LOTlib.BasicPrimitives import * # Needed for calling "eval"
+"""
+def MAP(s, key="posterior_score"):
+	best_score, best_h = -Infinity, None
+	for h in s:
+		v = getattr(h,key)
+		if v > best_score:
+			best_score, best_h = v, h
+	return best_h 
+"""	
+		
+		

@@ -1,20 +1,16 @@
 """
-	Hypothesis -- superclass for constructing hypotheses about a dataset.
+	Hypothesis -- superclass for hypotheses in Bayesian inference. A Hypothesis mainly supports .compute_prior() and .compute_likelihood(data), which are called by sampling and search algorithms. 
 """
-# TODO: Split up likelihood so that decayed versions are separate
 
-import numpy
-from copy import copy, deepcopy
 import LOTlib
 from LOTlib.Miscellaneous import *
-from LOTlib.Primitives import Primitives
 
 class Hypothesis(object):
 	"""
-		A hypothesis bundles together a value (hypothesis value) with a bunch of remember states, like posterior_score, prior, likelihood
+		A hypothesis bundles together a value (hypothesis value) with a bunch of remembered states, like posterior_score, prior, likelihood
 		This class is typically a superclass of the thing you really want.
 		
-		Temperatures:
+		*Temperatures*:
 			By default, a Hypothesis has a prior_temperature and likelihood_temperature. These are taken into account in setting the 
 			posterior_score (for computer_prior and compute_likelihood), in the values returned by these, AND in the stored values
 			under self.prior and self.likelihood
@@ -62,6 +58,8 @@ class Hypothesis(object):
 		
 	def compute_single_likelihood(self, datum):
 		"""
+			Compute the likelihood of a single data point datum, under this hypothesis. 
+			
 			Note: This method must be implemented when writing subclasses of Hypothesis
 		"""
 		raise NotImplementedError
@@ -70,8 +68,9 @@ class Hypothesis(object):
 	# And the main likelihood function just maps compute_single_likelihood over the data
 	def compute_likelihood(self, data):
 		""" 
-		Compute the likelihood of the *array* d, with the specified likelihood decay
-		This also stores the *undecayed* non-culmulative likelihood of each data point in self.stored_likelihood
+		Compute the likelihood of the iterable of data. This is typically NOT subclassed, as compute_single_likelihood is what subclasses should implement. 
+		
+		Versions using decayed likelihood can be found in Hypothesis.DecayedLikelihoodHypothesis
 		"""
 		self.likelihood = sum(map( self.compute_single_likelihood, data))/self.likelihood_temperature
 		
@@ -82,12 +81,12 @@ class Hypothesis(object):
 	# Methods for accessing likelihoods etc. on a big arrays of data
 		
 	def propose(self): 
-		""" Generic proposal used by MCMC methods
+		""" Generic proposal used by MCMC methods. This should return a list fb, newh, where fb is the forward-minus-backward log probability of the proposal, and newh is the proposal itself (of the same type as self)
+		
 			Note: This method must be implemented when writing subclasses of Hypothesis
 		"""
 		raise NotImplementedError
 	
-	# this updates last_prior and last_likelihood
 	def compute_posterior(self, d):
 		"""
 			Computes the posterior score by computing the prior and likelihood scores
