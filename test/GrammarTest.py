@@ -75,15 +75,12 @@ class GrammarTest(unittest.TestCase):
 	# tests that the generation and regeneration of trees is consistent with the probabilities
 	# that are output by lp_regenerate_propose_to
 	def test_generation(self):
-		# Enumerate the top 20 trees based on their probability of being generated
-		# put each of the top 20 trees in its own category, and the rest in another category
-		categories = self.get_top_trees(20) # this should return an array of 20 trees
-		expected_counts = self.get_expected_counts(categories) # this should return a dictionary of 21 expected "counts"
-		actual_counts = {tree: 0 for tree in categories}
-		actual_counts[None] = 0 # for the 21st category
-		# Generate 1000 trees at random
-		trees = []
+		# Sample 1000 trees from the grammar, and run a chi-squared test for each of them
 		for i in range(1000):
+			# keep track of expected and actual counts
+			expected_counts = {} # a dictionary whose keys are trees and values are the expected number of times 
+			actual_counts = {}
+			actual_counts[None] = 0 # for the 21st category
 			tree = self.G.generate('START')
 			trees.append(tree)
 			if tree in categories:
