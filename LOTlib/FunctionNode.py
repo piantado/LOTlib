@@ -13,7 +13,7 @@ import re
 from LOTlib.Miscellaneous import None2Empty
 from copy import copy, deepcopy
 from math import log
-from scipy.misc import logsumexp
+from LOTlib.Miscellaneous import logsumexp
 from random import random
 
 def isFunctionNode(x): 
@@ -80,15 +80,19 @@ class FunctionNode(object):
 		
 	def setto(self, q):
 		"""
-			Makes all the parts the same as *q*, not copies.
+			Makes all the parts the same as q, not copies.
 		"""
 		self.__dict__.update(q.__dict__)
 			
 	def __copy__(self, shallow=False):
 		"""
 			Copy a function node
+<<<<<<< HEAD
 			
 			*shallow* - if True, this does not copy the children (self.to points to the same as what we return)
+=======
+			shallow - if True, this does not copy the children (self.args points to the same as what we return)
+>>>>>>> 38ed7b59c3788fff1a3b87a5cc7e509383ef24ba
 		"""
 		if (not shallow) and self.args is not None:
 			newargs = map(copy, self.args)
@@ -190,7 +194,6 @@ class FunctionNode(object):
 	def schemestring(self):
 		"""
 			Print out in scheme format (+ 3 (- 4 5)).
-			This "evals" cons_ so that you don't have to eval for simple list builders (although you may want to)
 		"""
 		if self.args is None:
 			return self.name
@@ -375,7 +378,7 @@ class FunctionNode(object):
 	
 	def contains_function(self, x):
 		"""
-			Checks if the FunctionNode contains *x* as function below
+			Checks if the FunctionNode contains x as function below
 		"""
 		for n in self:
 			if n.name == x:
@@ -393,12 +396,14 @@ class FunctionNode(object):
 			Returns the subnode count.
 		"""
 		c = 0
-		for n in self: 
+		for _ in self: 
 			c = c + 1
 		return c
 	
 	def depth(self):
-
+		"""
+			Returns the depth of the tree (how many embeddings below)
+		"""	
 		depths = [ a.depth() for a in self.argFunctionNodes() ] 
 		depths.append(-1) # for no function nodes (+1=0)
 		return max(depths)+1
@@ -472,52 +477,6 @@ class FunctionNode(object):
 			
 		# Now check the children, whether or not we are symmetrical
 		return all([x.is_canonical_order(symmetric_ops) for x in self.args if self.args is not None])
-		
-	def proposal_probability_to(self, y):
-		"""
-			Proposal probability from self to y
-		
-			TODO: NOT HEAVILY TESTED/DEBUGGED. PLEASE CHECK
-		"""
-		
-		# We could do this node:
-		pself = -log(len(self))	
-		
-		if( self.returntype != y.returntype):
-			
-			return float("-inf")
-		
-		elif(self.name != y.name):
-			
-			# if names are not equal (but return types are) we must generate from the return type, using the root node
-			return pself + y.log_probability() 
-		
-		else:
-			# we have the same name and returntype, so we may generate children
-			
-			# Compute the arguments and see how mismatched we are
-			mismatches = []
-			if self.args is not None:
-				for a,b in zip(self.args, y.args):
-					if a != b: mismatches.append( [a,b] )
-			
-			# Now act depending on the mismatches
-			if len(mismatches) == 0: # we are identical below
-				
-				# We are the same below here, so we can propose to any subnode, which 
-				# each happens with prob pself
-				return logsumexp( [pself + t.log_probability() for t in self] )
-			
-			elif len(mismatches) == 1:
-				
-				a,b = mismatches[0]
-				
-				# Well if there's one mismatch, it lies below a or b,
-				# so we must propose in a along this subtree
-				m = log(len(a)) + pself # choose uniformly from this subtree, as individual nodes are adjusted later TODO: IM NOT SURE THIS IS RIGHT 
-				return logsumexp([m + a.proposal_probability_to(b), pself + y.log_probability()])
-			
-			else: return pself + y.log_probability() # We have to generate from ourselves
 				
 	def replace_subnodes(self, find, replace):
 		"""
