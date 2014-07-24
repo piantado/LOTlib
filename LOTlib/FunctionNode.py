@@ -57,7 +57,7 @@ class FunctionNode(object):
 			Bound variable type
 
 		*bv_args*
-			Arguments of the Bound Variable. "None" implies this is a terminal, otherwise  a type signature.
+			Arguments of the Bound Variable. "None" implies this is a terminal, otherwise a type signature.
 
 		*bv_prefix*
 			Bound variable Prefix e.g. the 'y' in y1, y2, y3...
@@ -87,7 +87,8 @@ class FunctionNode(object):
 	def __copy__(self, shallow=False):
 		"""
 			Copy a function node
-			shallow - if True, this does not copy the children (self.to points to the same as what we return)
+			
+			*shallow* - if True, this does not copy the children (self.to points to the same as what we return)
 		"""
 		if (not shallow) and self.args is not None:
 			newargs = map(copy, self.args)
@@ -526,7 +527,7 @@ class FunctionNode(object):
 		"""
 		
 		# now go through and modify
-		for g in filter(lambda x: x==find, self.subnodes() ): #NOTE: must use subnodes since we are modfiying
+		for g in filter(lambda x: x==find, self.subnodes() ): # NOTE: must use subnodes since we are modfiying
 			g.setto(copy(replace))
 	
 	def partial_subtree_root_match(self, y):

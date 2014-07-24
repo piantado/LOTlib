@@ -6,7 +6,7 @@
 """
 
 from Shared import *
-from LOTlib.Primitives.Number import word_to_number
+
 
 LARGE_DATA_SIZE = 10000 # this is what we compute the average LL on
 DATA_SIZE = 300
