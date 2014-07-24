@@ -87,7 +87,8 @@ class FunctionNode(object):
 	def __copy__(self, shallow=False):
 		"""
 			Copy a function node
-			shallow - if True, this does not copy the children (self.args points to the same as what we return)
+			
+			*shallow* - if True, this does not copy the children (self.to points to the same as what we return)
 		"""
 		if (not shallow) and self.args is not None:
 			newargs = map(copy, self.args)
