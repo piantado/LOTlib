@@ -10,6 +10,8 @@ from LOTlib.Grammar import *
 from LOTlib.Proposals import RegenerationProposal
 import math
 from collections import defaultdict
+from scipy.stats import chisquare
+
 
 
 class GrammarTest(unittest.TestCase):
@@ -50,87 +52,58 @@ class GrammarTest(unittest.TestCase):
 		self.G.add_rule('START', 'B ', ['START'], 0.3)
 		self.G.add_rule('START', 'NULL', None, 0.6)
 
-
-	# tests .lp_regenerate_propose_to function
-	def test_lp_regenerate_propose_to(self):
-		# run the test 100 times
-		for i in range(1):
-			# generate two trees X and Y
-			X = self.G.generate('START')
-			Y = self.G.generate('START')
-			# the number of times tree regenerated from X matches tree Y
-			num = 0
-			# the RegenerationProposal class
-			rp = RegenerationProposal(self.G)
-			# call propose_tree on x 1000 times
-			for j in range(1000):
-				tree = rp.propose_tree(X)[0]
-				print 'trees are: ', X, tree, Y
-				# see if the tree matches Y
-				if Y.__eq__(tree): num += 1
-			print num
-			# TODO: check with a chi-square test
-			# (but chi-square tests can only be done with finite grammars) (as they are over a finite distribution)
-
 	# tests that the generation and regeneration of trees is consistent with the probabilities
 	# that are output by lp_regenerate_propose_to
-	def test_generation(self):
+	def test_lp_regenerate_propose_to(self):
+		# the RegenerationProposal class
+		rp = RegenerationProposal(self.G)
 		# Sample 1000 trees from the grammar, and run a chi-squared test for each of them
 		for i in range(1000):
 			# keep track of expected and actual counts
-			expected_counts = {} # a dictionary whose keys are trees and values are the expected number of times 
-			actual_counts = {}
-			actual_counts[None] = 0 # for the 21st category
+			# expected_counts = defaultdict(int) # a dictionary whose keys are trees and values are the expected number of times we should be proposing to this tree
+			actual_counts = defaultdict(int) # same as expected_counts, but stores the actual number of times we proposed to a given tree
 			tree = self.G.generate('START')
-			trees.append(tree)
-			if tree in categories:
-				actual_counts[tree] += 1
-			else:
-				actual_counts[None] += 1
-		# see if the frequency with which each category of trees is generated matches the
-		# expected counts using a chi-squared test
-		chi_squared_statistic, p = self.get_chi_squared_statistic(expected_counts, actual_counts)
-		# if p > 0.01, test passes
-		self.assertTrue(p > 0.01, "Trees are not being generated according to the expected log probabilities")
-		# If this test passes, for each 1000 trees:
-		p_values = []
-		for tree in trees:
-			# Enumerate the top 20 trees that could be generated and put them in separate categories (with the rest of the trees in another category)
-			tree_categories = self.get_top_trees(20, tree=tree)
-			tree_expected_counts = self.get_expected_counts(tree_categories, tree=tree)
-			tree_actual_counts = {newtree: 0 for newtree in tree_categories}
-			tree_actual_counts[None] = 0
+			
 			# Regenerate 1000 trees at random
-			newtrees = []
+			# trees = []
 			for i in range(1000):
 				newtree = rp.propose_tree(tree)[0]
-				newtrees.append(newtree)
-				if newtree in tree_categories:
-					tree_actual_counts[newtree] += 1
-				else:
-					tree_actual_counts[None] += 1
-			# see if the frequency with which each category of trees is generated matches
-			# the expected counts using a chi-squared test (generate a p-value)
-			css, pvalue = self.get_chi_squared_statistic(tree_expected_counts, tree_actual_counts)
-			p_values.append(pvalue)
-		# See if these 1000 p-values follow a uniform distribution by generating another "master" p-value
-		master_p_value = self.get_uniform_statistic(p_values)
-		# if p > 0.01, test passes
-		self.assertTrue(master_p_value > 0.01, "Trees are not being regenerated according to their expected log probabilities")
+				# trees.append(newtree)
+				actual_counts[newtree] += 1
+			# see if the frequency with which each category of trees is generated matches the
+			# expected counts using a chi-squared test
+			chisquared, p = self.get_pvalue(tree, actual_counts)
+			print chisquared, p
+			# if p > 0.01/1000, test passes
+			self.assertTrue(p > 0.01/1000, "Trees are not being generated according to the expected log probabilities")
 	
-	# FUNCTIONS TO IMPLEMENT:
-	def get_top_trees(self, num, tree=None):
-		# TODO: implement generating one layer of a tree in Grammar (i.e. function that only replaces one node)
-		pass
-
-	def get_expected_counts(self, tree_categories, tree=None):
-		pass
-
-	def get_chi_squared_statistic(self, expected_counts, actual_counts):
-		pass
-
-	def get_uniform_statistic(self, p_values):
-		pass
+	# computes a p-value for regeneration, given the expected and actual counts
+	# first computes the chi-squared statistic
+	def get_pvalue(self, tree, actual_counts):
+		# compute a list of expected counts
+		expected_counts = defaultdict(int)
+		# and keep track of the sum of all probabilities for trees we've seen
+		prob_sum = 0
+		# now that we've generated all trees, compute the expected number of times we should have proposed
+		# to each tree that we've proposed to
+		for newtree in actual_counts.keys():
+			prob = (math.e ** self.G.lp_regenerate_propose_to(tree, newtree))
+			prob_sum += prob
+			expected_counts[newtree] = prob * 1000
+		# the probabilities should sum to less than 1
+		self.assertTrue(prob_sum < 1, "Probabilities don't sum to less than 1! " + str(prob_sum))
+		# add the "rest of the trees"
+		expected_counts[None] = 1 - prob_sum
+		actual_counts[None] = 0
+		# transform the expected and actual counts dictionaries into arrays
+		assert sorted(expected_counts.keys()) == sorted(actual_counts.keys()), "Keys don't match"
+		expected_values, actual_values = [], []
+		for newtree in actual_counts.keys():
+			expected_values.append(expected_counts[newtree])
+			actual_values.append(actual_counts[newtree])
+		print expected_counts, actual_counts
+		# get the p-value
+		return chisquare(actual_values, f_exp=expected_values)
 
 	# tests .log_probability() function
 	def test_log_probability(self):
@@ -148,20 +121,6 @@ class GrammarTest(unittest.TestCase):
 			# check that it's equal to .log_probability()
 			self.assertTrue(prob - t.log_probability() < 0.00000001)
 
-
-	# tests repeated sampling
-	def test_sampling(self):
-		# sample from G 10,000 times and record the frequency in a dictionary
-		frequencyDictionary = defaultdict(lambda: 0)
-		for i in range(10000):
-			t = self.G.generate('START')
-			frequencyDictionary[t] += 1
-		# compare the log probabilities with the sampling
-		for tree in frequencyDictionary:
-			logProb = tree.log_probability()
-			# print log(frequencyDictionary[tree]/10000.), logProb
-			# TODO: come up with/look up a good metric for converting the similarities between counts and log probabilities
-			# into a number that gives us a measure of "how good the sampling went". For this simple grammar, it looks pretty good.
 
 	# counts the probability of the grammar manually
 	# NOTE: not modular at this point, if we change our test grammar this function will return something incorrect
