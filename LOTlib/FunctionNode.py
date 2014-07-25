@@ -93,7 +93,12 @@ class FunctionNode(object):
 		else:
 			newargs = self.args
 		
-		return FunctionNode(self.returntype, self.name, newargs, generation_probability=self.generation_probability, resample_p=self.resample_p, bv_type=self.bv_type, bv_name=self.bv_name, bv_args=deepcopy(self.bv_args), bv_prefix=self.bv_prefix, bv_p=self.bv_p, ruleid=self.ruleid)
+		return FunctionNode(self.returntype, self.name, newargs,
+			generation_probability=self.generation_probability,
+			resample_p=self.resample_p, bv_type=self.bv_type,
+			bv_name=self.bv_name, bv_args=deepcopy(self.bv_args),
+			bv_prefix=self.bv_prefix, bv_p=self.bv_p,
+			ruleid=self.ruleid)
 	
 	def is_nonfunction(self):
 		"""
@@ -136,7 +141,7 @@ class FunctionNode(object):
 
 	# NOTE: Here we do a little fanciness -- with "if" -- we convert it to the "correct" python 
 	# form with short circuiting instead of our fancy ifelse function
-	def pystring(self): 
+	def pystring(self, serialize_bvs=False): 
 		"""
 		Outputs a string that can be evaluated by python
 		"""

@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from random import sample
-from copy import deepcopy, copy
+from copy import copy
 from LOTlib.Miscellaneous import flip, weighted_sample, ifelse, log
 from LOTlib.DataAndObjects import UtteranceData
 
@@ -81,9 +80,14 @@ class WeightedLexicon(SimpleLexicon):
 		met_weights  = sum(map( lambda u: self.weightfunction(u, udi.context), falses)) + true_weights
 			
 		w = self.weightfunction(u, udi.context) # the current word weight
-		if   (u in trues):  p = self.palpha * self.alpha * w / true_weights + self.palpha * (1.0 - self.alpha) * w / met_weights + (1.0 - self.palpha) * w / all_weights # choose from the trues
-		elif (u in falses): p = ifelse(true_weights==0, 1.0, 1.0-self.alpha) * self.palpha * w / met_weights + (1.0 - self.palpha) * w / all_weights # choose from the trues
-		else:               p = ifelse(met_weights==0, 1.0, (1.0 - self.palpha)) * w / all_weights
+		if(u in trues):
+			p = self.palpha * self.alpha * w / true_weights + self.palpha *  \
+			(1.0 - self.alpha) * w / met_weights + (1.0 - self.palpha) * w / \
+			all_weights # choose from the trues
+		elif (u in falses):
+			p = ifelse(true_weights==0, 1.0, 1.0-self.alpha) * self.palpha * w / met_weights + (1.0 - self.palpha) * w / all_weights # choose from the trues
+		else:
+			p = ifelse(met_weights==0, 1.0, (1.0 - self.palpha)) * w / all_weights
 		
 		"""
 		TODO: WHY NOT THIS WAY, IGNORING tre_weights==0? Because if we sample, then we have 0 chance of getting a true when true_weights is like that. This causes problems in CCGLexicon
