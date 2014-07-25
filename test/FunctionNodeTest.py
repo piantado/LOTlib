@@ -17,6 +17,7 @@ class FunctionNodeTest(unittest.TestCase):
 		self.G.add_rule('NP', 'NV', ['DET', 'N'], 0.6)
 		self.G.add_rule('NP', 'NV', ['DET', 'ADJ', 'N'], 0.4)
 		self.G.add_rule('NP', 'NV', ['PN'], 0.3)
+		self.G.add_rule('NP', 'lambda', ['N'], 0.5,  bv_type="N", bv_args=None)
 		self.G.add_rule('VP', 'NV', ['V', 'NP'], 0.5)
 		self.G.add_rule('N', 'ball', None, 0.2)
 		self.G.add_rule('N', 'computer', None, 0.2)
@@ -36,6 +37,7 @@ class FunctionNodeTest(unittest.TestCase):
 		self.G.add_rule('ADJ', 'happy', None, 0.4)
 		self.G.add_rule('DET', 'the', None, 0.5)
 		self.G.add_rule('DET', 'a', None, 0.5)
+
 	
 	# tests the .pystring() method
 	def test_str(self):
@@ -46,13 +48,16 @@ class FunctionNodeTest(unittest.TestCase):
 		self.assertEqual(type(t.__str__()), str)
 	
 	def test_eq(self):
-
-		for i in xrange(10000):	
+		counter = 0
+		for i in xrange(100000):	
 			x = self.G.generate()
 			y = self.G.generate()
 
 			if x.pystring() == y.pystring():
+				counter += 1
+				print(counter)
 				print(x.pystring()+'\n'+y.pystring()+'\n')
+
 			self.assertEqual(x.pystring() == y.pystring(), x == y, "Without bvs, the pystrings should be the same")
 
 	

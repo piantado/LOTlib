@@ -221,7 +221,7 @@ class FunctionNode(object):
 	def __ne__(self, other):
 		return (not self.__eq__(other))
 
-	def __eq__(self, other, bv_dict=None): 
+	def __eq__(self, other, bv_dict=dict()): 
 		"""
 			Test equality of FunctionNodes. 
 			
@@ -245,9 +245,19 @@ class FunctionNode(object):
 		if other.args is not None and len(self.args) != len(other.args):
 			return False
 
+		# If the bound variable already exists in the dict, see if 
+		# they're the same
+		if self.name in bv_dict:
+			if bv_dict[self.name] != other.name:
+				return False
+
+		# If it doesn't exist in the dict, add it.
+		if self.islambda() and other.islambda:
+			bv_dict[self.bv_name]=other.bv_name
+
 		# so args must be a list
 		for a,b in zip(self.args, other.args):
-			if a != b:
+			if not a.__eq__(b, bv_dict):
 				return False
 		
 		return True

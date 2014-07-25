@@ -148,7 +148,8 @@ class Grammar:
 
 	def generate(self, x='*USE_START*', d=0):
 		"""
-			Generate from the PCFG -- default is to start from x - either a nonterminal or a FunctionNode
+			Generate from the PCFG -- default is to start from x - either a 
+			nonterminal or a FunctionNode
 			
 		"""
 		# TODO: We can make this limit the depth, if we want. Maybe that's dangerous?
