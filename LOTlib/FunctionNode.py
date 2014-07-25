@@ -93,7 +93,12 @@ class FunctionNode(object):
 		else:
 			newargs = self.args
 		
-		return FunctionNode(self.returntype, self.name, newargs, generation_probability=self.generation_probability, resample_p=self.resample_p, bv_type=self.bv_type, bv_name=self.bv_name, bv_args=deepcopy(self.bv_args), bv_prefix=self.bv_prefix, bv_p=self.bv_p, ruleid=self.ruleid)
+		return FunctionNode(self.returntype, self.name, newargs,
+			generation_probability=self.generation_probability,
+			resample_p=self.resample_p, bv_type=self.bv_type,
+			bv_name=self.bv_name, bv_args=deepcopy(self.bv_args),
+			bv_prefix=self.bv_prefix, bv_p=self.bv_p,
+			ruleid=self.ruleid)
 	
 	def is_nonfunction(self):
 		"""
@@ -136,7 +141,7 @@ class FunctionNode(object):
 
 	# NOTE: Here we do a little fanciness -- with "if" -- we convert it to the "correct" python 
 	# form with short circuiting instead of our fancy ifelse function
-	def pystring(self): 
+	def pystring(self, serialize_bvs=False): 
 		"""
 		Outputs a string that can be evaluated by python
 		"""
@@ -216,7 +221,7 @@ class FunctionNode(object):
 	def __ne__(self, other):
 		return (not self.__eq__(other))
 
-	def __eq__(self, other, bv_dict=None): 
+	def __eq__(self, other, bv_dict=dict()): 
 		"""
 			Test equality of FunctionNodes. 
 			
@@ -240,9 +245,19 @@ class FunctionNode(object):
 		if other.args is not None and len(self.args) != len(other.args):
 			return False
 
+		# If the bound variable already exists in the dict, see if 
+		# they're the same
+		if self.name in bv_dict:
+			if bv_dict[self.name] != other.name:
+				return False
+
+		# If it doesn't exist in the dict, add it.
+		if self.islambda() and other.islambda:
+			bv_dict[self.bv_name]=other.bv_name
+
 		# so args must be a list
 		for a,b in zip(self.args, other.args):
-			if a != b:
+			if not a.__eq__(b, bv_dict):
 				return False
 		
 		return True
