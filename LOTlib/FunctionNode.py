@@ -223,9 +223,11 @@ class FunctionNode(object):
 
 	def __eq__(self, other, bv_dict=dict()): 
 		"""
-			Test equality of FunctionNodes. 
+			Tests equality of FunctionNodes up to bound variables.
+
+			NOTE: BV equality has not been tested yet.
 			
-			NOTE That two trees may have identical str(..) but be structured very differently, so this old way is no good:
+			NOTE: That two trees may have identical str(..) but be structured very differently, so this old way is no good:
 					return isFunctionNode(other) and (cmp(self, other) == 0)
 		"""
 		
