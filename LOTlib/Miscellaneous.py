@@ -17,7 +17,7 @@ import collections
 
 import re
 import types # for checking if something is a function: isinstance(f, types.FunctionType)
-import re
+import re # should this be imported twice???
 
 ## Some useful constants
 Infinity = float("inf")
@@ -436,6 +436,4 @@ def MAP(s, key="posterior_score"):
 		if v > best_score:
 			best_score, best_h = v, h
 	return best_h 
-"""	
-		
-		
+"""
