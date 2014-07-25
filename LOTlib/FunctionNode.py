@@ -12,8 +12,6 @@
 import re
 from LOTlib.Miscellaneous import None2Empty
 from copy import copy, deepcopy
-from math import log
-from LOTlib.Miscellaneous import logsumexp
 from random import random
 
 def isFunctionNode(x): 
@@ -229,7 +227,11 @@ class FunctionNode(object):
 		# If they have different names, they aren't equal
 		if (not isFunctionNode(other)) or (self.name != other.name):
 			return False
+<<<<<<< HEAD
 
+=======
+		
+>>>>>>> a9836615b04b832d593e298c5b7e28fdacf21d75
 		# If both don't have args, they are equal.
 		if self.args is None:
 			return other.args is None
@@ -238,6 +240,10 @@ class FunctionNode(object):
 		if other.args is not None and len(self.args) != len(other.args):
 			return False
 		
+		# If they have a different number of args, they aren't equal
+		if other.args is not None and len(self.args) != len(other.args):
+			return False
+
 		# so args must be a list
 		for a,b in zip(self.args, other.args):
 			if a != b:
