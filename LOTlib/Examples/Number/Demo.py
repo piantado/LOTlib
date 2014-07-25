@@ -25,8 +25,6 @@ h0 = NumberExpression(grammar)
 # store hypotheses we've found
 allhyp = FiniteBestSet(max=True,N=1000)
 
-#from LOTlib.Memoization.Memoizer import BoundedMemoize
-
 import LOTlib.Inference
 import LOTlib.Inference.TemperedTransitions
 
