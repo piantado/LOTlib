@@ -254,8 +254,10 @@ class FunctionNode(object):
 				return False
 
 		# If it doesn't exist in the dict, add it.
-		if self.islambda() and other.islambda:
+		if self.islambda() and other.islambda():
 			bv_dict[self.bv_name]=other.bv_name
+		elif self.islambda() != other.islambda():
+			return False
 
 		# so args must be a list
 		for a,b in zip(self.args, other.args):
