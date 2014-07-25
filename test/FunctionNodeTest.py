@@ -14,7 +14,6 @@ class FunctionNodeTest(unittest.TestCase):
 	def setUp(self):
 		self.G = Grammar()
 		self.G.add_rule('START', 'S', ['NP', 'VP'], 0.1)
-		self.G.add_rule('START', 'S', ['INTERJECTION'], 0.3)
 		self.G.add_rule('NP', 'NV', ['DET', 'N'], 0.6)
 		self.G.add_rule('NP', 'NV', ['DET', 'ADJ', 'N'], 0.4)
 		self.G.add_rule('NP', 'NV', ['PN'], 0.3)
@@ -52,6 +51,8 @@ class FunctionNodeTest(unittest.TestCase):
 			x = self.G.generate()
 			y = self.G.generate()
 
+			if x.pystring() == y.pystring():
+				print(x.pystring()+'\n'+y.pystring()+'\n')
 			self.assertEqual(x.pystring() == y.pystring(), x == y, "Without bvs, the pystrings should be the same")
 
 	
