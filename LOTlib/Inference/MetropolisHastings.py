@@ -89,6 +89,7 @@ class MHSampler():
 				np, nl = self.compute_posterior(self.proposal, self.data)
 					
 				#print np, nl, current_sample.prior, current_sample.likelihood
+				# NOTE: IT is important that we re-compute from the temperature since these may be altered externally from ParallelTempering and others 
 				prop = (np/self.prior_temperature+nl/self.likelihood_temperature)
 				cur  = (self.current_sample.prior/self.prior_temperature + self.current_sample.likelihood/self.likelihood_temperature)
 				

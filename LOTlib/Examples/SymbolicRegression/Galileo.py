@@ -53,6 +53,11 @@ grammar.add_rule('EXPR', 'x', None, 5.0) # these terminals should have None for 
 
 grammar.add_rule('EXPR', '1.0', None, 5.0)
 
+# # # # # # # # # # # # # # # # # # # # # # # # #
+# Standard exports
+
+make_h0 = lambda:  GaussianLOTHypothesis(grammar)
+
 if __name__ == "__main__":
 	
 	# # # # # # # # # # # # # # # # # # # # # # # # # # # #

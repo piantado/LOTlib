@@ -69,7 +69,12 @@ data = [ FunctionData(input=['aaaa'], output=True),\
 	 FunctionData(input=['aaca'], output=True),\
 	 FunctionData(input=['a'],    output=True) ]
 
-h0 = RegexHypothesis(grammar, ALPHA=0.999)
-for h in lot_iter(mh_sample(h0, data, 10000)):
-	print h.posterior_score, h.prior, h.likelihood, qq(h)
+make_h0 = lambda:  RegexHypothesis(grammar, ALPHA=0.999)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if __name__ == "__main__":	
 	
+	h0 = make_h0()
+	for h in lot_iter(mh_sample(h0, data, 10000)):
+		print h.posterior_score, h.prior, h.likelihood, qq(h)
+		

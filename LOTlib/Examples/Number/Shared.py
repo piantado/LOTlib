@@ -29,7 +29,7 @@ WORDS = ['one_', 'two_', 'three_', 'four_', 'five_', 'six_', 'seven_', 'eight_',
 ## The priors here are somewhat hierarchical by type in generation, tuned to be a little more efficient
 ## (but the actual RR prior does not care about these probabilities)
 
-grammar = Grammar()
+grammar = Grammar(start='WORD')
 
 grammar.add_rule('BOOL', 'and_',    ['BOOL', 'BOOL'], 1./3.)
 grammar.add_rule('BOOL', 'or_',     ['BOOL', 'BOOL'], 1./3.)
@@ -174,4 +174,9 @@ all_objects = make_all_objects(shape=['duck'])
 
 # all possible data sets on 10 objects
 all_possible_data = [ ('', set(sample_sets_of_objects(n, all_objects))) for n in xrange(1,10) ] 
+
+# # # # # # # # # # # # # # # # # # # # # # # # #
+# Standard exports
+
+make_h0 = lambda: NumberExpression(grammar)
 

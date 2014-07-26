@@ -42,3 +42,10 @@ data = [ FunctionData( [Obj(shape='square', color='red')], True), \
 	 FunctionData( [Obj(shape='triangle', color='blue')], False), \
 	 FunctionData( [Obj(shape='triangle', color='red')], False), \
 	 ]
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Other standard exports
+
+from LOTlib.Hypotheses.RationalRulesLOTHypothesis import RationalRulesLOTHypothesis
+
+make_h0 = lambda: RationalRulesLOTHypothesis(grammar=DNF, rrAlpha=1.0)
