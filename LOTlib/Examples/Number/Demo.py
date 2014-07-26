@@ -6,7 +6,7 @@
 """
 
 from Shared import *
-from LOTlib.Primitives.Number import word_to_number
+
 
 LARGE_DATA_SIZE = 10000 # this is what we compute the average LL on
 DATA_SIZE = 300
@@ -24,8 +24,6 @@ h0 = NumberExpression(grammar)
 
 # store hypotheses we've found
 allhyp = FiniteBestSet(max=True,N=1000)
-
-#from LOTlib.Memoization.Memoizer import BoundedMemoize
 
 import LOTlib.Inference
 import LOTlib.Inference.TemperedTransitions

@@ -148,7 +148,8 @@ class Grammar:
 
 	def generate(self, x='*USE_START*', d=0):
 		"""
-			Generate from the PCFG -- default is to start from x - either a nonterminal or a FunctionNode
+			Generate from the PCFG -- default is to start from x - either a 
+			nonterminal or a FunctionNode
 			
 		"""
 		# TODO: We can make this limit the depth, if we want. Maybe that's dangerous?
@@ -429,6 +430,8 @@ class Grammar:
 								
 				# how many kids are not equal, and where was the last?
 				mismatch_count, mismatch_index = 0, 0
+
+				print 'args are', x.args
 				
 				if x.args is not None:
 					for i, xa, ya in zip(xrange(len(x.args)), x.args if x.args is not None else [], 

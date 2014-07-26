@@ -114,9 +114,10 @@ class NumberExpression(LOTHypothesis):
 			
 		"""
 		response = self(*datum.input)
-		if response == 'undef' or response == None: 
+		if response == 'undef' or response == None:
 			return log(1.0/10.0) # if undefined, just sample from a base distribution
-		else:   return log( (1.0 - ALPHA)/10.0 + ALPHA * ( response == datum.output ) )
+		else:
+			return log( (1.0 - ALPHA)/10.0 + ALPHA * ( response == datum.output ) )
 		
 	
 	# must wrap these as SimpleExpressionFunctions

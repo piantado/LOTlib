@@ -12,8 +12,6 @@
 import re
 from LOTlib.Miscellaneous import None2Empty
 from copy import copy, deepcopy
-from math import log
-from LOTlib.Miscellaneous import logsumexp
 from random import random
 
 def isFunctionNode(x): 
@@ -87,14 +85,20 @@ class FunctionNode(object):
 	def __copy__(self, shallow=False):
 		"""
 			Copy a function node
-			shallow - if True, this does not copy the children (self.args points to the same as what we return)
+			
+			*shallow* - if True, this does not copy the children (self.to points to the same as what we return)
 		"""
 		if (not shallow) and self.args is not None:
 			newargs = map(copy, self.args)
 		else:
 			newargs = self.args
 		
-		return FunctionNode(self.returntype, self.name, newargs, generation_probability=self.generation_probability, resample_p=self.resample_p, bv_type=self.bv_type, bv_name=self.bv_name, bv_args=deepcopy(self.bv_args), bv_prefix=self.bv_prefix, bv_p=self.bv_p, ruleid=self.ruleid)
+		return FunctionNode(self.returntype, self.name, newargs,
+			generation_probability=self.generation_probability,
+			resample_p=self.resample_p, bv_type=self.bv_type,
+			bv_name=self.bv_name, bv_args=deepcopy(self.bv_args),
+			bv_prefix=self.bv_prefix, bv_p=self.bv_p,
+			ruleid=self.ruleid)
 	
 	def is_nonfunction(self):
 		"""
@@ -144,7 +148,7 @@ class FunctionNode(object):
 
 	# NOTE: Here we do a little fanciness -- with "if" -- we convert it to the "correct" python 
 	# form with short circuiting instead of our fancy ifelse function
-	def pystring(self): 
+	def pystring(self, serialize_bvs=False): 
 		"""
 		Outputs a string that can be evaluated by python
 		"""
@@ -224,26 +228,47 @@ class FunctionNode(object):
 	def __ne__(self, other):
 		return (not self.__eq__(other))
 
-	def __eq__(self, other): 
+	def __eq__(self, other, bv_dict=dict()): 
 		"""
-			Test equality of FunctionNodes. 
+			Tests equality of FunctionNodes up to bound variables.
+
+			NOTE: BV equality has not been tested yet.
 			
-			NOTE That two trees may have identical str(..) but be structured very differently, so this old way is no good:
+			NOTE: That two trees may have identical str(..) but be structured very differently, so this old way is no good:
 					return isFunctionNode(other) and (cmp(self, other) == 0)
-			
-			TODO: MAKE THIS CORRECTLY HANDLE BOUND VARIABLES
 		"""
 		
-		# Some ways to not be equal
+		# If they have different names, they aren't equal
 		if (not isFunctionNode(other)) or (self.name != other.name):
 			return False
-		
+
+		# If both don't have args, they are equal.
 		if self.args is None:
 			return other.args is None
+
+		# If they have a different number of args, they aren't equal
+		if other.args is not None and len(self.args) != len(other.args):
+			return False
 		
+		# If they have a different number of args, they aren't equal
+		if other.args is not None and len(self.args) != len(other.args):
+			return False
+
+		# If the bound variable already exists in the dict, see if 
+		# they're the same
+		if self.name in bv_dict:
+			if bv_dict[self.name] != other.name:
+				return False
+
+		# If it doesn't exist in the dict, add it.
+		if self.islambda() and other.islambda():
+			bv_dict[self.bv_name]=other.bv_name
+		elif self.islambda() != other.islambda():
+			return False
+
 		# so args must be a list
 		for a,b in zip(self.args, other.args):
-			if a != b:
+			if not a.__eq__(b, bv_dict):
 				return False
 		
 		return True
@@ -479,52 +504,6 @@ class FunctionNode(object):
 			
 		# Now check the children, whether or not we are symmetrical
 		return all([x.is_canonical_order(symmetric_ops) for x in self.args if self.args is not None])
-		
-	def proposal_probability_to(self, y):
-		"""
-			Proposal probability from self to y
-		
-			TODO: NOT HEAVILY TESTED/DEBUGGED. PLEASE CHECK
-		"""
-		
-		# We could do this node:
-		pself = -log(len(self))	
-		
-		if( self.returntype != y.returntype):
-			
-			return float("-inf")
-		
-		elif(self.name != y.name):
-			
-			# if names are not equal (but return types are) we must generate from the return type, using the root node
-			return pself + y.log_probability() 
-		
-		else:
-			# we have the same name and returntype, so we may generate children
-			
-			# Compute the arguments and see how mismatched we are
-			mismatches = []
-			if self.args is not None:
-				for a,b in zip(self.args, y.args):
-					if a != b: mismatches.append( [a,b] )
-			
-			# Now act depending on the mismatches
-			if len(mismatches) == 0: # we are identical below
-				
-				# We are the same below here, so we can propose to any subnode, which 
-				# each happens with prob pself
-				return logsumexp( [pself + t.log_probability() for t in self] )
-			
-			elif len(mismatches) == 1:
-				
-				a,b = mismatches[0]
-				
-				# Well if there's one mismatch, it lies below a or b,
-				# so we must propose in a along this subtree
-				m = log(len(a)) + pself # choose uniformly from this subtree, as individual nodes are adjusted later TODO: IM NOT SURE THIS IS RIGHT 
-				return logsumexp([m + a.proposal_probability_to(b), pself + y.log_probability()])
-			
-			else: return pself + y.log_probability() # We have to generate from ourselves
 				
 	def replace_subnodes(self, find, replace):
 		"""
@@ -534,7 +513,7 @@ class FunctionNode(object):
 		"""
 		
 		# now go through and modify
-		for g in filter(lambda x: x==find, self.subnodes() ): #NOTE: must use subnodes since we are modfiying
+		for g in filter(lambda x: x==find, self.subnodes() ): # NOTE: must use subnodes since we are modfiying
 			g.setto(copy(replace))
 	
 	def partial_subtree_root_match(self, y):
