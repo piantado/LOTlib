@@ -1,6 +1,6 @@
 
 from LOTlib.Grammar import Grammar
-from LOTlib.Miscellaneous import evaluate_expression
+from LOTlib.Evaluation.Eval import evaluate_expression
 
 """
 	 A simple demo for how to define FunctionNodes
@@ -52,19 +52,26 @@ grammar.add_rule('EXPR', 'divide_', ['EXPR', 'EXPR'], 1.0)
 # Lambda expressions:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# EXPR -> apply(FUNCTION, EXPR)
+# EXPR -> apply_(FUNCTION, EXPR)
 grammar.add_rule('EXPR', 'apply_', ['FUNCTION', 'EXPR'], 5.0)
 
-# Here, 'lambda' is a special function that allows us to introduce a new bound variable (bv) of a cetain type.
+# Here, 'lambda' is a special function that allows us to introduce a new bound 
+# variable (bv) of a cetain type.
 # The type is specified by bv_args:
 
-grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_name=None, bv_args=None) # Creates a thunk -- no variables, but gets evaled like a lambda (does not add rules)
 
-grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_name='BOOL', bv_args=None) # Creates a terminal of type bool -- e.g. y1
+# Creates a thunk -- no variables, but gets evaled like a lambda (does not add rules)
+grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_type=None, bv_args=None) 
 
-grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_name='BOOL', bv_args=[]) # Creates a thunk lambda variable -- e.g y1()
+# Creates a terminal of type bool -- e.g. y1
+grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_type='BOOL', bv_args=None) 
 
-grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_name='BOOL', bv_args=['EXPR']) # Creates a lambda variable yi always called with an EXPR argument -- e.g., y1(plus(1,1))
+# Creates a thunk lambda variable -- e.g y1()
+grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_type='BOOL', bv_args=[]) 
+
+# Creates a lambda variable yi always called with an EXPR argument -- e.g., y1(plus(1,1))
+grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_type='BOOL', bv_args=['EXPR']) 
+
 
 # Etc. 
 
@@ -94,10 +101,3 @@ for _ in xrange(1000):
 	
 	print t # will call x.__str__ and display as a pythonesque string
 	print map(f, range(0,10))
-
-
-
-
-
-
-
