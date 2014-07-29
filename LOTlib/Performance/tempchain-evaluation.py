@@ -53,7 +53,7 @@ out_aggregate  = ParallelBufferedIO(options.OUT + "-aggregate.txt")
 
 def run_one(iteration, nchains, temperature):
 
-	sampler = MultipleChainMCMC(generate_h0, data, steps=options.SAMPLES, nchains=nchains, likelihood_temperature=temperature)
+	sampler = MultipleChainMCMC(make_h0, data, steps=options.SAMPLES, nchains=nchains, likelihood_temperature=temperature)
 	
 	# Run evaluate on it, printing to the right locations
 	evaluate_sampler(sampler, prefix="\t".join(map(str, [options.MODEL, iteration, nchains, temperature])),  out_hypotheses=out_hypotheses, out_aggregate=out_aggregate)
@@ -63,7 +63,7 @@ def run_one(iteration, nchains, temperature):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # For each process, create the list of parameter
-params = map(list, product( range(options.REPETITONS), [1,2,5,10,50,100,500,1000], [0.1, 0.2, 0.5, 0.9, 1.0, 1.1, 1.25, 1.5, 2.0, 5.0] ))
+params = map(list, product( range(options.REPETITONS), [1,10,100,1000], [0.1, 0.5, 0.9, 1.0, 1.1, 1.5, 2.0, 10.0] ))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Actually run

@@ -4,8 +4,7 @@ library(ggplot2)
 library(stringr)
 library(gridExtra) # needed for "unit"
 
-d <- read.table("output/inference-aggregate.txt")
-# d <- read.table("ei.txt")
+d <- read.table("output-tmp/inference-aggregate.txt")
 names(d)[1:6] <- c("model", "iteration", "method.param", "steps", "time", "Z")
 
 d$method <- gsub("_[A-Z]$", "", d$method.param, perl=TRUE)
@@ -23,10 +22,24 @@ p
 ## Evaluation of temperatures
 ##############################################################
 
-d <- read.table("evaluation-inference-aggregate.txt")
-# d <- read.table("et.txt")
-names(d)[1:6] <- c("iteration", "nchains", "temperature", "steps", "time", "Z")
+d <- read.table("output-tmp/tempchain-aggregate.txt")
+names(d)[1:7] <- c("model", "iteration", "nchains", "temperature", "steps", "time", "Z")
 
-aggregate( Z ~ nchains + temperature, d, max)
+# Pick the median or some time throughout:
+a <- aggregate( Z ~ nchains + temperature, d, median)
+
+# A contour plot -- TODO: Fix the scaling
+p <- ggplot( a, aes(x=log(nchains), y=log(temperature), z=Z)) +
+	stat_contour( aes(color=..level..), binwidth=.5, size=2) 
+p
+
+# A simpler tiled plot
+a$nchains <- as.factor(a$nchains) # make these factors so they plot on a discrete scale
+a$temperature <- as.factor(a$temperature)
+p <- ggplot(a, aes(nchains, temperature)) + 
+	geom_tile(aes(fill = Z), colour = "white") + 
+	scale_fill_gradient(low = "white",high = "steelblue")
+p
+
 
 
