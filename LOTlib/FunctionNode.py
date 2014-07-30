@@ -250,27 +250,23 @@ class FunctionNode(object):
 		if other.args is not None and len(self.args) != len(other.args):
 			return False
 		
-		# If they have a different number of args, they aren't equal
-		if other.args is not None and len(self.args) != len(other.args):
-			return False
-
 		# If the bound variable already exists in the dict, see if 
 		# they're the same
-		if self.name in bv_dict:
-			if bv_dict[self.name] != other.name:
-				return False
+		if self.name in bv_dict and bv_dict[self.name] != other.name:
+			return False
 
 		# If it doesn't exist in the dict, add it.
-		if self.islambda() and other.islambda():
-			bv_dict[self.bv_name]=other.bv_name
-		elif self.islambda() != other.islambda():
-			return False
+		if self.islambda():
+			if other.islambda():
+				bv_dict[self.bv_name]=other.bv_name
+			else: # if the other isn't a lambda, must be false
+				return False
 
 		# so args must be a list
 		for a,b in zip(self.args, other.args):
 			if isFunctionNode(a) and (not isFunctionNode(b) or not a.__eq__(b, bv_dict)):
 				return False
-			elif a != b:
+			elif a != b: # fall back on (string) __eq__
 				return False
 				
 		
