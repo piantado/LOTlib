@@ -7,7 +7,8 @@
 from copy import copy
 from EvaluationException import EvaluationException
 from LOTlib.Miscellaneous import lambda_str
-MAX_RECURSE_DEPTH = 10
+MAX_RECURSE_DEPTH = 25
+MAX_NODES = 50 # how many is the max, in all stages of eval?
 
 def lambda_reduce(fn):
 	# Just a wrapper to copy
@@ -23,7 +24,8 @@ def lambda_reduce_(fn, depth=1):
 	
 	if depth > MAX_RECURSE_DEPTH:		
 		raise EvaluationException("MAX_RECURSE_DEPTH surpassed!")
-	
+	elif fn.count_subnodes() > MAX_NODES:
+		raise EvaluationException("Max number of nodes surpassed!")	
 	elif fn.name == 'apply_':
 		assert len(fn.args)==2
 		

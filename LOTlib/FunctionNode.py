@@ -268,8 +268,11 @@ class FunctionNode(object):
 
 		# so args must be a list
 		for a,b in zip(self.args, other.args):
-			if not a.__eq__(b, bv_dict):
+			if isFunctionNode(a) and (not isFunctionNode(b) or not a.__eq__(b, bv_dict)):
 				return False
+			elif a != b:
+				return False
+				
 		
 		return True
 		

@@ -25,21 +25,30 @@ p
 d <- read.table("output-tmp/tempchain-aggregate.txt")
 names(d)[1:7] <- c("model", "iteration", "nchains", "temperature", "steps", "time", "Z")
 
-# Pick the median or some time throughout:
-a <- aggregate( Z ~ nchains + temperature, d, median)
+
+d$temperature <- as.factor(d$temperature)
+d$nchains <- as.factor(d$nchains)
+p <- ggplot(d, aes(x=steps, y=Z, color=temperature)) + 
+	stat_summary(fun.y=mean, geom="line", size=1) +
+	opts(legend.key.size=unit(3,"lines")) +
+	facet_wrap(model ~ nchains)
+p
+
+
+
+
 
 # A contour plot -- TODO: Fix the scaling
-p <- ggplot( a, aes(x=log(nchains), y=log(temperature), z=Z)) +
-	stat_contour( aes(color=..level..), binwidth=.5, size=2) 
-p
+# a <- aggregate( Z ~ nchains + temperature, d, median)
+# p <- ggplot( a, aes(x=log(nchains), y=log(temperature), z=Z)) +
+# 	stat_contour( aes(color=..level..), binwidth=.5, size=2) 
+# p
 
 # A simpler tiled plot
-a$nchains <- as.factor(a$nchains) # make these factors so they plot on a discrete scale
-a$temperature <- as.factor(a$temperature)
-p <- ggplot(a, aes(nchains, temperature)) + 
-	geom_tile(aes(fill = Z), colour = "white") + 
-	scale_fill_gradient(low = "white",high = "steelblue")
-p
+# p <- ggplot(a, aes(nchains, temperature)) + 
+# 	geom_tile(aes(fill = Z), colour = "white") + 
+# 	scale_fill_gradient(low = "white",high = "steelblue")
+# p
 
 
 
