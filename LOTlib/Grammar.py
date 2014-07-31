@@ -431,7 +431,7 @@ class Grammar:
 				# how many kids are not equal, and where was the last?
 				mismatch_count, mismatch_index = 0, 0
 
-				print 'args are', x.args
+				# print 'args are', x.args
 				
 				if x.args is not None:
 					for i, xa, ya in zip(xrange(len(x.args)), x.args if x.args is not None else [], 
