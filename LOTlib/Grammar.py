@@ -65,9 +65,16 @@ class Grammar:
 		"""
 			Prints all the rules to the console.
 		"""
+		for rule in self:
+				print rule
+	
+	def __iter__(self):
+		"""
+			Define an iterator so we can say "for rule in grammar..."
+		"""
 		for k in self.rules.keys():
 			for r in self.rules[k]:
-				print r
+				yield r
 	
 	def nonterminals(self):
 		"""
@@ -152,17 +159,20 @@ class Grammar:
 			nonterminal or a FunctionNode
 			
 		"""
-		# TODO: We can make this limit the depth, if we want. Maybe that's dangerous?
-		# TODO: Add a check that we don't have any leftover bound variable rules, when d==0
-
+	
 		if x == '*USE_START*':
 			x = self.start
+		else:
+			pass
 		
+		# Dispatch different kinds of generation
 		if isinstance(x,list):
 			# If we get a list, just map along it to generate. We don't count lists as depth--only FunctionNodes
 			return map(lambda xi: self.generate(x=xi, d=d), x)
 		
-		elif x is None: return None
+		elif x is None: 
+			
+			return None
 		
 		elif self.is_nonterminal(x):
 			# if we generate a nonterminal, then sample a GrammarRule, convert it to a FunctionNode
@@ -170,28 +180,22 @@ class Grammar:
 			# And recurse
 			
 			r, gp = weighted_sample(self.rules[x], probs=lambda x: x.p, return_probability=True, log=False)
-			
 			#print "SAMPLED:", gp, r
 			
 			if r.bv_type is not None: # adding a rule
 				added = self.add_bv_rule(r.bv_type, r.bv_args, r.bv_prefix, r.bv_p, d)
 				#print "ADDING", added
-				
+			
+			# expand the "to" part of our rule
+			# We might get a runtime error for going too deep -- we need to be sure we remove those rules,
+			# so we'll catch this error and store it for later (After the rules are removed)
 			raise_after = None
 			try: 
-				# expand the "to" part of our rule
-				# We might get a runtime error for going too deep -- we need to be sure we remove those rules,
-				# so we'll catch this error and store it for later (After the rules are removed)
-				if r is None:
-					args = None
-				else:
-					args = self.generate(r.to, d=d+1)
-					
+				args = self.generate(r.to, d=d+1)
 			except Exception as e: 
 				raise_after = e
 			
-			#print "GENERATED ", args
-			
+
 			if r.bv_type is not None:
 				#print "REMOVING ", added
 				self.remove_rule(added)

@@ -20,7 +20,7 @@ class GrammarRule:
 
 			*resample_p* - the probability of choosing this node in an expansion
 
-			*bv_type* - what bound variable was introduced
+			*bv_type* - return type of the introduced bound variable 
 
 			*bv_args* - what are the args when we use a bv (None is terminals, else a type signature)
 
