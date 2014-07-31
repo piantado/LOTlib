@@ -103,14 +103,14 @@ def run_one(iteration, sampler_type):
 
 # For each process, create the lsit of parameter
 params = [ list(g) for g in product(range(options.REPETITONS), [
-								#'multiple_chains_A', 'multiple_chains_B', 'multiple_chains_C', 
-								#'taboo_A', 'taboo_B', 'taboo_C', 
+								'multiple_chains_A', 'multiple_chains_B', 'multiple_chains_C', 
+								'taboo_A', 'taboo_B', 'taboo_C', 
 								'particle_swarm_s_A', 'particle_swarm_s_B', 'particle_swarm_s_C', 
 								'particle_swarm_t_A', 'particle_swarm_t_B', 'particle_swarm_t_C',
 								'particle_swarm_prior_sample_s_A', 'particle_swarm_prior_sample_s_B', 'particle_swarm_prior_sample_s_C', 
 								'particle_swarm_prior_sample_t_A', 'particle_swarm_prior_sample_t_B', 'particle_swarm_prior_sample_t_C',
 								'mh_sample_A', 'mh_sample_B', 'mh_sample_C', 'mh_sample_D', 'mh_sample_E',
-								 #'parallel_tempering_A', 'parallel_tempering_B', 'parallel_tempering_C',
+								 'parallel_tempering_A', 'parallel_tempering_B', 'parallel_tempering_C',
 								])]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
