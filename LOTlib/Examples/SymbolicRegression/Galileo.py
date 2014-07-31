@@ -27,26 +27,59 @@ STEPS = 10000000
 SKIP = 0
 PRIOR_TEMPERATURE=1.0
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# the running function
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Define the grammar
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def run(*args):
+from LOTlib.Grammar import Grammar
+
+grammar = Grammar()
+grammar.add_rule('START', '', ['EXPR'], 1.0)
+
+grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1.0)
+grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 1.0)
+grammar.add_rule('EXPR', 'divide_', ['EXPR', 'EXPR'], 1.0)
+grammar.add_rule('EXPR', 'subtract_', ['EXPR', 'EXPR'], 1.0)
+
+grammar.add_rule('EXPR', 'exp_', ['EXPR'], 1.0)
+grammar.add_rule('EXPR', 'log_', ['EXPR'], 1.0)
+grammar.add_rule('EXPR', 'pow_', ['EXPR', 'EXPR'], 1.0) # including this gives lots of overflow
+
+grammar.add_rule('EXPR', 'sin_', ['EXPR'], 1.0)
+grammar.add_rule('EXPR', 'cos_', ['EXPR'], 1.0)
+grammar.add_rule('EXPR', 'tan_', ['EXPR'], 1.0)
+
+grammar.add_rule('EXPR', 'x', None, 5.0) # these terminals should have None for their function type; the literals
+
+grammar.add_rule('EXPR', '1.0', None, 5.0)
+
+# # # # # # # # # # # # # # # # # # # # # # # # #
+# Standard exports
+
+make_h0 = lambda:  GaussianLOTHypothesis(grammar)
+
+if __name__ == "__main__":
 	
-	# starting hypothesis -- here this generates at random
-	h0 = GaussianLOTHypothesis(grammar, prior_temperature=PRIOR_TEMPERATURE)
+	# # # # # # # # # # # # # # # # # # # # # # # # # # # #
+	# the running function
 	
-	# We store the top 100 from each run
-	pq = FiniteBestSet(100, max=True, key="posterior_score") 
-	pq.add( mh_sample(h0, data, STEPS, skip=SKIP)  )
+	def run(*args):
 		
-	return pq
-
-finitesample = FiniteBestSet(max=True) # the finite sample of all
-results = map(run, [ [None] ] * CHAINS ) # Run on a single core
-finitesample.merge(results)
+		# starting hypothesis -- here this generates at random
+		h0 = GaussianLOTHypothesis(grammar, prior_temperature=PRIOR_TEMPERATURE)
+		
+		# We store the top 100 from each run
+		pq = FiniteBestSet(100, max=True, key="posterior_score") 
+		pq.add( mh_sample(h0, data, STEPS, skip=SKIP)  )
+			
+		return pq
 	
-## and display
-for r in finitesample.get_all(decreasing=False, sorted=True):
-	print r.posterior_score, r.prior, r.likelihood, qq(str(r))
-	
-	
+	finitesample = FiniteBestSet(max=True) # the finite sample of all
+	results = map(run, [ [None] ] * CHAINS ) # Run on a single core
+	finitesample.merge(results)
+		
+	## and display
+	for r in finitesample.get_all(decreasing=False, sorted=True):
+		print r.posterior_score, r.prior, r.likelihood, qq(str(r))
+		
+		

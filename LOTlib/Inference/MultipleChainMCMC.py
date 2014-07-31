@@ -11,18 +11,22 @@ from LOTlib.Miscellaneous import Infinity
 from MetropolisHastings import MHSampler
 from numpy import mean
 
-class MultipleChainMCMC():
-    def __init__(self, make_h0, data, steps=Infinity, chains=10, **kwargs):
+
+class MultipleChainMCMC(object):
+    
+    def __init__(self, make_h0, data, steps=Infinity, nchains=10, **kwargs):
         
-        self.nchains = chains
+        self.nchains = nchains
         self.chain_idx = -1 # what chain are we on? This get incremented before anything, so it starts with 0
+        self.nsamples = 0
         
-        self.chains = [ MHSampler( make_h0(), data, steps=steps/chains, **kwargs) for _ in xrange(chains) ]
+        self.chains = [ MHSampler( make_h0(), data, steps=steps/nchains, **kwargs) for _ in xrange(nchains) ]
     
     def __iter__(self):
         return self
     
     def next(self):
+        self.nsamples += 1
         self.chain_idx = (self.chain_idx+1)%self.nchains
         return self.chains[self.chain_idx].next()
         

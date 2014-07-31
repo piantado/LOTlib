@@ -12,6 +12,9 @@ Contents:
    :maxdepth: 3 
 
 
+If you are new to this library, please check out tutorial.html.
+
+
 
 Indices and tables
 ==================

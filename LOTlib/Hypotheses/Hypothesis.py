@@ -76,7 +76,7 @@ class Hypothesis(object):
 		
 		self.posterior_score = self.prior + self.likelihood
 		return self.likelihood
-		
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# Methods for accessing likelihoods etc. on a big arrays of data
 		

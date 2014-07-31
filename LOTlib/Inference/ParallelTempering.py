@@ -1,59 +1,63 @@
-"""
-	TODO: RECAST THIS IN THE OO FORMAT OF MetropolisHastings
-"""
 
-import LOTlib
-from LOTlib import lot_iter
-from MetropolisHastings import mh_sample
-
-from copy import copy
 from random import randint, random
 from math import exp
-from random import random
-from copy import copy
+from MHShared import MH_acceptance
+from MultipleChainMCMC import MultipleChainMCMC
 
-#def temperature_ladder(min=1.0,max=1.5,steps=5,log=True)
-
-
-# This staircases, so that each temperature is swapped with the one directly above
-# skipping skips within each level!
-def parallel_tempering_sample(make_h0, data, steps=9999999999, proposer=None, within_steps=10, temperatures=(1.0,1.1,1.2,1.3,1.4), swaps=1, yield_all=False):
+class ParallelTemperingSampler(MultipleChainMCMC):
 	"""
-		If we yield all, we yield everything from every step of every chain
+	Parallel tempering. Here the temperatures *all* refer to likelihood_temperatures
 	"""
 	
-	# a bunch of hypotheses, one for each temperature
-	samples = [make_h0() for _ in xrange(len(temperatures))]
+	def __init__(self, make_h0, data, temperatures=[1.0, 1.1, 1.5], within_steps=10, swaps=1, yield_only_t0=False, **kwargs):
+		
+		self.yield_only_t0 = yield_only_t0 #whether we yield all samples, or only from the lowest temperature
+		self.within_steps = within_steps
+		self.swaps=swaps
+		
+		assert 'nchains' not in kwargs
+		
+		MultipleChainMCMC.__init__(self, make_h0, data, nchains=len(temperatures), **kwargs)
+		
+		# and set the temperatures
+		for i,t in enumerate(temperatures):
+				self.chains[i].likelihood_temperature = t
 	
-	for _ in lot_iter(xrange(steps/(within_steps * len(temperatures)))):
+	def ll_at_temperature(self, i, t):
+		""" The posterior  of chain i at temperature t"""
+		return self.chains[i].current_sample.likelihood / t
+	
+	def next(self):
 		
-		for i in xrange(len(temperatures)):
+		self.nsamples += 1
+		
+		self.chain_idx = (self.chain_idx+1)%self.nchains
+		
+		if self.nsamples % self.within_steps == 0:
 			
-			# update this sample
-			for s in mh_sample(samples[i], data, within_steps, proposer=proposer, skip=0, likelihood_temperature=temperatures[i]):
-				if yield_all: 
-					yield s
-					
-				samples[i] = s # should only be called once, since we skip within step 
-		
-		for _ in xrange(swaps):
-			frm = randint(0, len(temperatures)-2)
-			
-			# get the joint probability -- since temperature is only on the likelihood, everything cancels
-			r = (samples[frm].likelihood) / temperatures[frm+1] + (samples[frm+1].likelihood) / temperatures[frm] - (samples[frm].likelihood) / temperatures[frm] - (samples[frm+1].likelihood) / temperatures[frm+1]
-			
-			if r>0 or random() < exp(r):
-				samples[frm], samples[frm+1] = samples[frm+1], samples[frm]
-		
-		if not yield_all:
-			yield samples[0] # give from the lowest chain
-		
+			for _ in xrange(self.swaps):
+				i = randint(0, self.nchains-2)
+				
+				# the priors cancel, so this represents the posterior
+				cur  = self.ll_at_temperature(i, self.chains[i].likelihood_temperature) + self.ll_at_temperature(i+1, self.chains[i+1].likelihood_temperature)
+				prop = self.ll_at_temperature(i, self.chains[i+1].likelihood_temperature) + self.ll_at_temperature(i+1, self.chains[i].likelihood_temperature)
+				
+				if MH_acceptance(cur, prop, 0.0):
+					self.chains[i].current_sample, self.chains[i+1].current_sample = self.chains[i+1].current_sample, self.chains[i].current_sample 
+	
+		if self.yield_only_t0 and self.chain_idx != 0:
+			return self.next() # keep going until we're on the one we yield 
+			## TODO: FIX THIS SINCE IT WILL BREAK FOR HUGE NUMBERS OF CHAINS
+		else:
+			return self.chains[self.chain_idx].next()
+
+
 if __name__ == "__main__":
 	from LOTlib.Examples.Number.Shared import generate_data, NumberExpression, grammar
 	data = generate_data(300)
 	
 	make_h0 = lambda : NumberExpression(grammar)
 
-	for h in parallel_tempering_sample(make_h0, data, steps=9999999999):
+	for h in ParallelTemperingSampler(make_h0, data, steps=100, yield_only_t0=True):
 		print h.posterior_score, h
 		

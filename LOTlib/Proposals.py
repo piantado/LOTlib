@@ -221,9 +221,14 @@ class MixtureProposal(LOTProposal):
 class InverseInlineProposal(LOTProposal):
 	"""
 		Inverse inlinling for non-functions
+		
+		TODO: HOW TO DEAL WITH ENSURING THE LAMBDA RULES ARE IN THE GRAMMAr, HAVE THE RIGHT PROBS, ETC
+	
+		TODO: NOT QUITE WORKING RIGHT -- 2014 JUL 25 -- BV NAMES ARE WRONG
+		
 	"""
 	
-	def __init__(self, grammar, variable_regex):
+	def __init__(self, grammar):
 		"""
 			This takes a grammar and a regex to match variable names
 		"""
@@ -244,41 +249,43 @@ class InverseInlineProposal(LOTProposal):
 
 		newt = copy(t) 
 		f,b = 0.0, 0.0
-		
-		# we can extract anything of the right type, who does not have any other yi
-		#!
-		#!
-		#!
-		#!
-		#!
-		#!
-		#!
-		## TODO: THIS SHOULD ALLOW VARIABLES NESTED BELOW!! So we should allow bound variables as long as their lambdas
-		# are deeper
-		is_extractable = lambda x: not any([ self.variable_regex.match(y.name) for y in x])
+		success = False #acts to tell us if we found and replaced anything
+			
+		def is_extractable(n):
+			# We must check that this doesn't contain any bound variables of outer lambdas
+			introduced_bvs = set() # the bvs that are introduced below n (and are thus okay)
+			for ni in n: 
+				if ni.ruleid < 0 and ni.name not in introduced_bvs: # If it's a bv 
+					return False
+				elif ni.islambda() and ni.bv_name is not None:
+					introduced_bvs.add(ni.bv_name)
+			return True
+
+		def is_apply(x):
+				return (x.name == 'apply_') and (len(x.args)==2) and x.args[0].islambda() and not x.args[1].islambda()
 	
-		is_apply = lambda x: (x.name == 'apply_') and (len(x.args)==2) and (x.args[0].name is 'lambda') and (x.args[1].name is not 'lambda')
-		
+		# ------------------
 		if random() < 0.5: #INSERT MOVE
 			
 			# sample a node
 			for ni, di, resample_p, Z in self.grammar.sample_node_via_iterate(newt):
 				
-				# Sample a subnode
-				sresample_p = None
-				for s, sdi, sresample_p_, sZ in self.grammar.sample_node_via_iterate(copy(ni), predicate=is_extractable):
-					sresample_p = sresample_p_
+				# Sample a subnode -- NOTE: we must use copy(ni) here since we modify this tree, and so all hell breaks loose otherwise
+				for s, sdi, sresample_p, sZ in self.grammar.sample_node_via_iterate(copy(ni), predicate=is_extractable):
+					success = True
 					
 					below = copy(ni)
-					varname = 'y'+str(di)
+					varname = 'Y'+str(di+1)
 					
 					# replace with the variables
-					below.replace_subnodes(s, FunctionNode(s.returntype, varname, []))
+					# TODO: FIX THE RID HERE -- HOW DO WE TREAT IT?
+					below.replace_subnodes(s, FunctionNode(s.returntype, varname, None, ruleid=-999))
 					
 					# create a new node, the lambda abstraction
-					fn = FunctionNode(self.replacetype, 'apply_', [ \
-						FunctionNode('LAMBDAARG', 'lambda', [ below ], bv_name=varname, bv_type=s.returntype, bv_args=[] ),\
-						FunctionNode('LAMBDATHUNK',  'lambda', [ s  ], bv_name=None, bv_type=None, bv_args=None)\
+					fn = FunctionNode(below.returntype, 'apply_', [ \
+						FunctionNode('LAMBDAARG', 'lambda', [ below ], bv_prefix='Y', bv_name=varname, bv_type=s.returntype, bv_args=[] ),\
+						s
+						#FunctionNode('LAMBDATHUNK',  'lambda', [ s  ], bv_name=None, bv_type=None, bv_args=None)\
 							] )
 					
 					# Now convert into a lambda abstraction
@@ -287,163 +294,50 @@ class InverseInlineProposal(LOTProposal):
 					f += (log(resample_p) - log(Z)) + (log(sresample_p) - log(sZ))  
 			
 			
-			## TODO: NOT WORKING RIGHT, MAY NEED TO SET RULE ID
-			
-			
-			if sresample_p is None: return [copy(t),0.0]
 		
-			#if resample_p is None: return [copy(t), 0.0]
-			#newZ = self.grammar.resample_normalizer(newt, predicate=is_apply)
-			#print resample_p, newZ
-			#b += log(resample_p) - log(newZ) # to go back, we must choose ni from the new tree
 		else: # DELETE MOVE
-			pass
-		
-			#resample_p = None
-			#for ni, di, resample_p, Z in self.grammar.sample_node_via_iterate(newt, predicate=is_apply):
+			
+			resample_p = None
+			for ni, di, resample_p, Z in self.grammar.sample_node_via_iterate(newt, predicate=is_apply):
+				success = True
 				
 				## what does the variable look like? Here a thunk with bv_name
-				#var = FunctionNode( ni.args[0].bv_type , ni.args[0].bv_name, [])
-		       
-				#newni = copy(ni.args[0].args[0]) # may be able to optimize away?
-				##print newni, var, copy(ni.args[1].args[0])
+				var = FunctionNode( ni.args[0].bv_type , ni.args[0].bv_name, None)
+				
+				assert len(ni.args) == 2
+				assert len(ni.args[0].args) == 1
+				
+				newni = ni.args[0].args[0] # may be able to optimize away?
 				
 				## and remove
-				#newni.replace_subnodes(var, copy(ni.args[1].args[0]))
+				newni.replace_subnodes(var, ni.args[1])
 				
 				##print ":", newni
-				#ni.setto(newni) 
-				#f += (log(resample_p) - log(Z))
+				ni.setto(newni) 
+				f += (log(resample_p) - log(Z))
 			
-			#if resample_p is None: return [newt,0.0]
-		
-			## TODO: THE BACKWARD PROB IS NOT RIGHT -- MUST COUNT THE NUMBER OF WAYS OF GOING BACK
-			## COUNTING MULTIPLE PATHS
+			if resample_p is None: return [newt,0.0]
 			
 			#newZ = self.grammar.resample_normalizer(newt, predicate=is_replacetype)
 			##to go back, must choose the 
 			#b += log(resample_p) - log(newZ)
 		
-		newt.fix_bound_variables()
-		newt.reset_function() # make sure we update the function
-		
-		return [newt, f-b]
+	#	newt.fix_bound_variables()
+	#	newt.reset_function() # make sure we update the function
+		if not success: 
+			return [copy(t),0.0]
+		else:
+			return [newt, f-b]
 	
-	
-	
-class InverseInlineThunk(LOTProposal):
-	"""
-		Thunk inlining
+if __name__ == "__main__":
+		from LOTlib.Examples.Number.Shared import generate_data, grammar,  make_h0, NumberExpression
 		
-		TODO: REALLY DOES NOT WORK YET
-	"""
-	
-	def __init__(self, grammar, replacetype='EXPR'):
-		self.__dict__.update(locals())
-		LOTProposal.__init__(self, grammar)
-		
-	
-	def propose_tree(self, t):
-		
-		
-		## Insert/delete must happen at the apply nodes for FunctionGrammarInduction
-		#G.add_rule('EXPR', 'apply_', ['LAMBDAARG', 'LAMBDATHUNK'], 1)
-		#G.add_rule('LAMBDAARG',   'lambda', ['EXPR'], 1., bv_type='EXPR', bv_args=[] )
-		#G.add_rule('LAMBDATHUNK', 'lambda', ['EXPR'], 1., bv_type=None, bv_args=None ) # A thunk
-
-		"""
-			Delete:
-				- find an apply
-				- take the interior of the lambdathunk and sub it in for the lambdaarg everywhere, remove the apply
-			Insert:
-				- Find a node
-				- Find a subnode s
-				- Remove all repetitions of s, create a lambda thunk
-				- and add an apply with the appropriate machinery
+		p = InverseInlineProposal(grammar)
 			
-			TOOD:
-				- how to handle the bv types for the lambdas??
-				- fix forward/backward!
-		"""
-
-		newt = copy(t) 
-		f,b = 0.0, 0.0
-		
-		# Two filtering functions determining when we can do this
-		is_replacetype = lambda x: x.returntype is self.replacetype
-	
-		# we can extract anything of the right type, who does not have any other yi
-		# TODO: REALLY IT CAN'T CONTAIN ANY HIGHER yi
-		is_extractable = lambda x: is_replacetype(x) and all([ not re_variable.match(y.name) for y in x.subnodes()])
-	
-		is_apply = lambda x: (x.name == 'apply_') and (len(x.args)==2) and (x.args[0].name is 'lambda') and (x.args[0].bv_args is not None) and (len(x.args[0].bv_args) == 0) and (x.args[1].name is 'lambda') and (x.args[1].bv_type is None)
-		
-		if random() < 0.5: #INSERT MOVE
+		for _ in xrange(100):	
+			t = grammar.generate()
+			print "\n\n", t
+			for _ in xrange(10):
+				t =  p.propose_tree(t)[0]
+				print "\t", t
 			
-			
-			# sample a node
-			for ni, di, resample_p, Z in self.grammar.sample_node_via_iterate(newt, predicate=is_replacetype):
-				#print "NI=", ni
-				# sample a subnode
-				sresample_p = None
-				for s, sdi, sresample_p, sZ in self.grammar.sample_node_via_iterate(copy(ni), predicate=is_extractable):
-					
-					below = copy(ni)
-					varname = 'y'+str(di)
-					
-					# replace with the variables
-					below.replace_subnodes(s, FunctionNode(s.returntype, varname, []))
-					
-					# create a new node, the lambda abstraction
-					fn = FunctionNode(self.replacetype, 'apply_', [ 
-					    FunctionNode('LAMBDAARG', 'lambda', [ bow ], bv_name=varname, bv_type=s.returntype, bv_args=[] ),
-					    FunctionNode('LAMBDATHUNK',  'lambda', [ s  ], bv_name=None, bv_type=None, bv_args=ne)
-					] )
-					
-					# Now convert into a lambda abstraction
-					ni.setto(fn) 
-					
-					f += (log(resample_p) - log(Z)) + (log(sresample_p) - log(sZ))  
-			
-			
-			## TODO: NOT WORKING RIGHT, MAY NEED TO SET RULE ID
-			
-			
-			if sresample_p is None: return [copy(t),0.0]
-		
-			#if resample_p is None: return [copy(t), 0.0]
-			#newZ = self.grammar.resample_normalizer(newt, predicate=is_apply)
-			#print resample_p, newZ
-			#b += log(resample_p) - log(newZ) # to go back, we must choose ni from the new tree
-		else: # DELETE MOVE
-			pass
-		
-			#resample_p = None
-			#for ni, di, resample_p, Z in self.grammar.sample_node_via_iterate(newt, predicate=is_apply):
-				
-				## what does the variable look like? Here a thunk with bv_name
-				#var = FunctionNode( ni.args[0].bv_type , ni.args[0].bv_name, [])
-		       
-				#newni = copy(ni.args[0].args[0]) # may be able to optimize away?
-				##print newni, var, copy(ni.args[1].args[0])
-				
-				## and remove
-				#newni.replace_subnodes(var, copy(ni.args[1].args[0]))
-				
-				##print ":", newni
-				#ni.setto(newni) 
-				#f += (log(resample_p) - log(Z))
-			
-			#if resample_p is None: return [newt,0.0]
-		
-			## TODO: THE BACKWARD PROB IS NOT RIGHT -- MUST COUNT THE NUMBER OF WAYS OF GOING BACK
-			## COUNTING MULTIPLE PATHS
-			
-			#newZ = self.grammar.resample_normalizer(newt, predicate=is_replacetype)
-			##to go back, must choose the 
-			#b += log(resample_p) - log(newZ)
-		
-		newt.fix_bound_variables()
-		newt.reset_function() # make sure we update the function
-		
-		return [newt, f-b]

@@ -47,7 +47,7 @@ def combinator_reduce(lst, depth=MAX_DEPTH):
 		if isinstance(op, list): 
 			return combinator_reduce( op + args, newdepth )
 		elif op == 'I' and len(args) >= 1: 
-			return combinator_reduce( args, newdepth)
+			return combinator_reduce( args[1:], newdepth)
 		elif op == 'K' and len(args) >= 2: 
 			x,y,rest = args[0], args[1], args[2:]
 			return combinator_reduce( [x] + rest, newdepth)

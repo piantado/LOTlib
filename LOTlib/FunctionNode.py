@@ -46,7 +46,7 @@ class FunctionNode(object):
 			Unnormalized generation probability.
 
 		*resample_p*
-			The probability of choosing this node in an expansion. Takes a number in the range [0.0,1.0]
+			The probability of choosing this node in resampling. Takes any number >0 (all are normalized)
 
 		*bv_name*
 			Name of the Bound Variable e.g. y1, y2, y3...
@@ -111,6 +111,13 @@ class FunctionNode(object):
 			Returns True if the Node contains function arguments, False otherwise.
 		"""
 		return not self.is_nonfunction()
+	
+	def is_leaf(self):
+		"""
+			Returns True if none of the kids are FunctionNodes, meaning that this should be considered a "leaf" 
+			NOTE: A leaf may be a function, but its args are specified in the grammar.
+		"""
+		return (self.args is None) or all([ not isFunctionNode(c) for c in self.args])
 	
 	def as_list(self):
 		"""
@@ -182,7 +189,7 @@ class FunctionNode(object):
 	def fullprint(self, d=0):
 		""" A handy printer for debugging"""
 		tabstr = "  .  " * d
-		print tabstr, self.returntype, self.name, self.bv_type, self.bv_name, self.bv_args, self.bv_prefix, "\t", self.generation_probability # "\t", self.resample_p 
+		print tabstr, self.returntype, self.name, self.bv_type, self.bv_name, self.bv_args, self.bv_prefix, "\t", self.generation_probability, "\t", self.resample_p 
 		if self.args is not None:
 			for a in self.args: 
 				if isFunctionNode(a):
@@ -243,26 +250,25 @@ class FunctionNode(object):
 		if other.args is not None and len(self.args) != len(other.args):
 			return False
 		
-		# If they have a different number of args, they aren't equal
-		if other.args is not None and len(self.args) != len(other.args):
-			return False
-
 		# If the bound variable already exists in the dict, see if 
 		# they're the same
-		if self.name in bv_dict:
-			if bv_dict[self.name] != other.name:
-				return False
+		if self.name in bv_dict and bv_dict[self.name] != other.name:
+			return False
 
 		# If it doesn't exist in the dict, add it.
-		if self.islambda() and other.islambda():
-			bv_dict[self.bv_name]=other.bv_name
-		elif self.islambda() != other.islambda():
-			return False
+		if self.islambda():
+			if other.islambda():
+				bv_dict[self.bv_name]=other.bv_name
+			else: # if the other isn't a lambda, must be false
+				return False
 
 		# so args must be a list
 		for a,b in zip(self.args, other.args):
-			if not a.__eq__(b, bv_dict):
+			if isFunctionNode(a) and (not isFunctionNode(b) or not a.__eq__(b, bv_dict)):
 				return False
+			elif a != b: # fall back on (string) __eq__
+				return False
+				
 		
 		return True
 		
