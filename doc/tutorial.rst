@@ -29,4 +29,7 @@ Installation:
 
 		>>> import LOTlib
 
-Once you've successfully installed LOTlib, it's time to go through some examples to see LOTlib's power. 
+Once you've successfully installed LOTlib, it's time to go through some examples to see LOTlib's power. I suggest starting with a simple demo that shows how to set up a PCFG_ with LOTlib, and how to evaluate it. Please see 
+
+
+.. _PCFG: http://en.wikipedia.org/wiki/Stochastic_context-free_grammar
