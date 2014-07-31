@@ -29,7 +29,9 @@ Installation:
 
 		>>> import LOTlib
 
-Once you've successfully installed LOTlib, it's time to go through some examples to see LOTlib's power. I suggest starting with a simple demo that shows how to set up a PCFG_ with LOTlib, and how to evaluate it. Please see 
+Once you've successfully installed LOTlib, it's time to go through some examples to see LOTlib's power. I suggest starting with a simple demo that shows how to set up a PCFG_ with LOTlib, and how to evaluate it:
+1. In your favorite text editor, open up FunctionNodeDemo.py in the LOTlib/LOTlib/Examples directory.
+2. Go through the in-text comments in FunctionNodeDemo.py. This will guide you through how to initialize a PCFG, how to add rules to the PCFG, and then how to evaulate the PCFG (i.e. how to generate expressions with it). 
 
 
 .. _PCFG: http://en.wikipedia.org/wiki/Stochastic_context-free_grammar
