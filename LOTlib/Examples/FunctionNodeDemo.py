@@ -2,6 +2,7 @@
 from LOTlib.Grammar import Grammar
 from LOTlib.Evaluation.Eval import evaluate_expression
 
+
 """
 	 A simple demo for how to define FunctionNodes
 	 
