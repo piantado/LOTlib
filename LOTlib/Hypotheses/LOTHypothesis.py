@@ -49,6 +49,12 @@ class LOTHypothesis(FunctionHypothesis):
 	
 	def type(self): return self.value.type()
 	
+	def set_proposal_function(self, f):
+		"""
+			Just a setter to create the proposal function
+		"""
+		self.proposal_function = f
+	
 	def __copy__(self):
 		"""
 			Return a copy of myself.

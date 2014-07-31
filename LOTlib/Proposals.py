@@ -200,15 +200,14 @@ class MixtureProposal(LOTProposal):
 	"""
 		A mixture of proposals, like
 		
-		m = MixtureProposal(grammar, [RegenerationProposal(grammar), InsertDeleteProposal(grammar)] )
+		m = MixtureProposal([RegenerationProposal(grammar), InsertDeleteProposal(grammar)] )
 		
 		Probabilities of each can be specified
 	
 	"""
-	def __init__(self, grammar, proposals, probs=None):
+	def __init__(self, proposals, probs=None):
 		#print proposals
 		self.__dict__.update(locals())
-		LOTProposal.__init__(self, grammar)
 		
 		if probs is None:
 			self.probs = numpy.array( [1.] * len(proposals) )

@@ -24,7 +24,6 @@ options, _ = parser.parse_args()
 
 
 if options.MODEL == "Number":
-	# Load the data
 	from LOTlib.Examples.Number.Shared import generate_data, grammar,  make_h0
 	data = synchronize_variable( lambda : generate_data(300)  )
 elif options.MODEL == "Galileo":
@@ -63,7 +62,7 @@ def run_one(iteration, nchains, temperature):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # For each process, create the list of parameter
-params = map(list, product( range(options.REPETITONS), [1,10,100,1000], [0.1, 0.5, 0.9, 1.0, 1.1, 1.5, 2.0, 10.0] ))
+params = map(list, product( range(options.REPETITONS), [1,10,100], [0.1, 0.5, 1.0, 2.0, 10.0] ))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Actually run
