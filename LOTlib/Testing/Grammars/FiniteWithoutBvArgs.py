@@ -17,9 +17,9 @@ g.add_rule("V", "likes", None, 1.0)
 g.add_rule("V", "kills", None, 1.0)
 g.add_rule("V", "eats", None, 1.0)
 
-g.add_rule('AGE', '', ['NUMBER'], 1.0,  bv_type='INT', bv_args=None, bv_prefix='a')
-g.add_rule('INT', '20', None, 1.0)
-g.add_rule('INT', '22', None, 1.0)
+g.add_rule('AGE', '', ['NUMBER'], 1.0,  bv_type='NUMBER', bv_args=None, bv_prefix='a')
+g.add_rule('NUMBER', '20', None, 1.0)
+g.add_rule('NUMBER', '22', None, 1.0)
 
 for i in xrange(100):
 	print(g.generate())
