@@ -127,6 +127,3 @@ out_hypotheses.close()
 out_aggregate.close()
 
 MPI_done()
-
-#import sys
-#sys.exit(0)

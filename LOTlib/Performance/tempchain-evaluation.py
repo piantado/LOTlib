@@ -74,6 +74,9 @@ MPI_map(run_one, params, random_order=False)
 # Clean up
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#out_hypotheses.close()
+out_hypotheses.close()
 out_aggregate.close()
+
+MPI_done()
+
 
