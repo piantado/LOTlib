@@ -85,5 +85,3 @@ if __name__ == "__main__":
 		print h.posterior_score, h.likelihood, h.prior, cleanFunctionNodeString(h)
 		#print map( lambda d: h(*d.input), data)
 		#print "\n"
-	
-		

@@ -8,6 +8,7 @@ import unittest
 
 from LOTlib.Grammar import *
 from LOTlib.Proposals import RegenerationProposal
+from LOTlib import lot_iter
 import math
 from collections import defaultdict
 from scipy.stats import chisquare
@@ -57,8 +58,9 @@ class GrammarTest(unittest.TestCase):
 	def test_lp_regenerate_propose_to(self):
 		# the RegenerationProposal class
 		rp = RegenerationProposal(self.G)
+		numTests = 100
 		# Sample 1000 trees from the grammar, and run a chi-squared test for each of them
-		for i in range(1000):
+		for i in lot_iter(range(numTests)):
 			# keep track of expected and actual counts
 			# expected_counts = defaultdict(int) # a dictionary whose keys are trees and values are the expected number of times we should be proposing to this tree
 			actual_counts = defaultdict(int) # same as expected_counts, but stores the actual number of times we proposed to a given tree
@@ -75,7 +77,7 @@ class GrammarTest(unittest.TestCase):
 			chisquared, p = self.get_pvalue(tree, actual_counts, numTrees)
 			print chisquared, p
 			# if p > 0.01/1000, test passes
-			self.assertTrue(p > 0.01/numTrees, "Trees are not being generated according to the expected log probabilities")
+			self.assertTrue(p > 0.01/numTests, "Trees are not being generated according to the expected log probabilities")
 	
 	# computes a p-value for regeneration, given the expected and actual counts.
 	# First groups trees according to probability, then computes the chi-squared statistic, then gets the p-value
@@ -89,26 +91,30 @@ class GrammarTest(unittest.TestCase):
 		# NOTE: groups trees that are of low probability
 		grouped_count = 0 # a variable for storing the counts for trees of very low probability
 		for newtree in actual_counts.keys():
-			prob = (math.e ** self.G.lp_regenerate_propose_to(tree, newtree))
-			if prob < 1.0/(10*numTrees):
+			prob = math.exp(self.G.lp_regenerate_propose_to(tree, newtree))
+			if prob < 1.0/(1*numTrees):
 				grouped_count += actual_counts[newtree]
 				del actual_counts[newtree]
-				print "deleted tree", newtree
+				# print "deleted tree", newtree
 			else: 
 				prob_sum += prob
 				expected_counts[newtree] = prob * numTrees
 		# the probabilities should sum to less than 1
 		self.assertTrue(prob_sum < 1, "Probabilities don't sum to less than 1! " + str(prob_sum))
 		# add the "rest of the trees"
-		expected_counts[None] = 1 - prob_sum
+		expected_counts[None] = (1 - prob_sum) * numTrees
 		actual_counts[None] = grouped_count
 		# transform the expected and actual counts dictionaries into arrays
 		assert sorted(expected_counts.keys()) == sorted(actual_counts.keys()), "Keys don't match"
+
+		# for t in sorted(expected_counts.keys(), key=lambda x: expected_counts[x]):
+		# 	print expected_counts[t], actual_counts[t], t
+
 		expected_values, actual_values = [], []
 		for newtree in actual_counts.keys():
 			expected_values.append(expected_counts[newtree])
 			actual_values.append(actual_counts[newtree])
-		print expected_counts, actual_counts
+		# print expected_values, actual_values
 		# get the p-value
 		return chisquare(np.array(actual_values), f_exp=np.array(expected_values))
 

@@ -121,12 +121,3 @@ class FunctionHypothesis(Hypothesis):
 		"""
 		self.__dict__.update(state)
 		self.set_value(self.value) # just re-set the value so that we re-compute the function
-
-
-
-
-
-
-
-		
-		

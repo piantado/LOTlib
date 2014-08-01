@@ -114,5 +114,3 @@ def evaluate_expression(e, args=['x'], recurse="L_", addlambda=True):
     except Exception as e:
         print "Error in evaluate_expression:", e
         raise e
-    
-    
