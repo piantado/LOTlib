@@ -5,8 +5,8 @@ Introduction to LOTlib
 Welcome to LOTlib! LOTlib stands for "Language of Thought Library", and can be used for modeling the way people think about the world. To get started, please follow the instructions below for downloading and installing LOTlib.
 
 Installation:
+
 0. Install LOTlib dependencies
-	- numpy
 	- scipy
 	- simpleMPI (optional)
 	- pyparsing (optional)
