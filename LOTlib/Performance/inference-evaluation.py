@@ -54,7 +54,7 @@ from LOTlib.Inference.TemperedTransitions import tempered_transitions_sample
 from LOTlib.Inference.ParallelTempering import ParallelTemperingSampler
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Inference.TabooMCMC import TabooMCMC
-from LOTlib.Inference.ParticleSwarm import ParticleSwarm
+from LOTlib.Inference.ParticleSwarm import ParticleSwarm, ParticleSwarmPriorResample
 from LOTlib.Inference.MultipleChainMCMC import MultipleChainMCMC
 
 # Where we store the output
@@ -71,9 +71,18 @@ def run_one(iteration, sampler_type):
 	elif sampler_type == 'mh_sample_C':             sampler = MHSampler(h0, data, options.SAMPLES,  likelihood_temperature=1.25)
 	elif sampler_type == 'mh_sample_D':             sampler = MHSampler(h0, data, options.SAMPLES,  likelihood_temperature=2.0 )
 	elif sampler_type == 'mh_sample_E':             sampler = MHSampler(h0, data, options.SAMPLES,  likelihood_temperature=5.0 )
-	elif sampler_type == 'particle_swarm_A':        sampler = ParticleSwarm(make_h0, data, steps=options.SAMPLES, within_steps=10)
-	elif sampler_type == 'particle_swarm_B':        sampler = ParticleSwarm(make_h0, data, steps=options.SAMPLES, within_steps=100)
-	elif sampler_type == 'particle_swarm_C':        sampler = ParticleSwarm(make_h0, data, steps=options.SAMPLES, within_steps=200)
+	elif sampler_type == 'particle_swarm_s_A':        sampler = ParticleSwarm(make_h0, data, steps=options.SAMPLES, within_steps=10)
+	elif sampler_type == 'particle_swarm_s_B':        sampler = ParticleSwarm(make_h0, data, steps=options.SAMPLES, within_steps=100)
+	elif sampler_type == 'particle_swarm_s_C':        sampler = ParticleSwarm(make_h0, data, steps=options.SAMPLES, within_steps=200)
+	elif sampler_type == 'particle_swarm_t_A':        sampler = ParticleSwarm(make_h0, data, steps=options.SAMPLES, within_steps=100, temp_sd=0.0001)
+	elif sampler_type == 'particle_swarm_t_B':        sampler = ParticleSwarm(make_h0, data, steps=options.SAMPLES, within_steps=100, temp_sd=0.1)
+	elif sampler_type == 'particle_swarm_t_C':        sampler = ParticleSwarm(make_h0, data, steps=options.SAMPLES, within_steps=100, temp_sd=1.0)
+	elif sampler_type == 'particle_swarm_prior_sample_s_A':        sampler = ParticleSwarmPriorResample(make_h0, data, steps=options.SAMPLES, within_steps=10)
+	elif sampler_type == 'particle_swarm_prior_sample_s_B':        sampler = ParticleSwarmPriorResample(make_h0, data, steps=options.SAMPLES, within_steps=100)
+	elif sampler_type == 'particle_swarm_prior_sample_s_C':        sampler = ParticleSwarmPriorResample(make_h0, data, steps=options.SAMPLES, within_steps=200)
+	elif sampler_type == 'particle_swarm_prior_sample_t_A':        sampler = ParticleSwarmPriorResample(make_h0, data, steps=options.SAMPLES, within_steps=100, temp_sd=0.0001)
+	elif sampler_type == 'particle_swarm_prior_sample_t_B':        sampler = ParticleSwarmPriorResample(make_h0, data, steps=options.SAMPLES, within_steps=100, temp_sd=0.1)
+	elif sampler_type == 'particle_swarm_prior_sample_t_C':        sampler = ParticleSwarmPriorResample(make_h0, data, steps=options.SAMPLES, within_steps=100, temp_sd=1.0)
 	elif sampler_type == 'multiple_chains_A':       sampler = MultipleChainMCMC(make_h0, data, steps=options.SAMPLES, nchains=10)
 	elif sampler_type == 'multiple_chains_B':       sampler = MultipleChainMCMC(make_h0, data, steps=options.SAMPLES, nchains=100)
 	elif sampler_type == 'multiple_chains_C':       sampler = MultipleChainMCMC(make_h0, data, steps=options.SAMPLES, nchains=1000)
@@ -93,12 +102,16 @@ def run_one(iteration, sampler_type):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # For each process, create the lsit of parameter
-params = [ list(g) for g in product(range(options.REPETITONS), ['multiple_chains_A', 'multiple_chains_B', 'multiple_chains_C', 
-												'taboo_A', 'taboo_B', 'taboo_C', 
-												'particle_swarm_A', 'particle_swarm_B', 'particle_swarm_C', 
-												'mh_sample_A', 'mh_sample_B', 'mh_sample_C', 'mh_sample_D', 'mh_sample_E',
-												 'parallel_tempering_A', 'parallel_tempering_B', 'parallel_tempering_C',
-												])]
+params = [ list(g) for g in product(range(options.REPETITONS), [
+								'multiple_chains_A', 'multiple_chains_B', 'multiple_chains_C', 
+								'taboo_A', 'taboo_B', 'taboo_C', 
+								'particle_swarm_s_A', 'particle_swarm_s_B', 'particle_swarm_s_C', 
+								'particle_swarm_t_A', 'particle_swarm_t_B', 'particle_swarm_t_C',
+								'particle_swarm_prior_sample_s_A', 'particle_swarm_prior_sample_s_B', 'particle_swarm_prior_sample_s_C', 
+								'particle_swarm_prior_sample_t_A', 'particle_swarm_prior_sample_t_B', 'particle_swarm_prior_sample_t_C',
+								'mh_sample_A', 'mh_sample_B', 'mh_sample_C', 'mh_sample_D', 'mh_sample_E',
+								 'parallel_tempering_A', 'parallel_tempering_B', 'parallel_tempering_C',
+								])]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Actually run

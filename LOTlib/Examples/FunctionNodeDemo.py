@@ -1,6 +1,6 @@
 
 from LOTlib.Grammar import Grammar
-from LOTlib.Evaluation.Eval import evaluate_expression
+from LOTlib.Evaluation.Eval import evaluate_expression, register_primitive
 
 
 """
@@ -8,10 +8,9 @@ from LOTlib.Evaluation.Eval import evaluate_expression
 	 
 	 All of these primitives are defined in the LOTlib.Primitives package, as well as many others.
 	 In general, the PCFG generates FunctionNode trees via "generate" and then these are printed
-	 via __str__ in a pythonesque way that can be evaled. 
+	 via str(...). 
 
 """
-
 grammar = Grammar()
 
 # Nonterminal START -> Nonterminal EXPR (with no function call)
@@ -23,8 +22,8 @@ grammar.add_rule('EXPR', '1.0', None, 5.0)
 # some other simple terminals
 # these are given much higher probability in order to keep the PCFG well-defined
 grammar.add_rule('EXPR', '0.0', None, 3.0) 
-grammar.add_rule('EXPR', 'pi', None, 3.0) 
-grammar.add_rule('EXPR', 'e', None, 3.0) 
+grammar.add_rule('EXPR', 'TAU', None, 3.0) 
+grammar.add_rule('EXPR', 'E', None, 3.0) 
 
 # To have a string terminal, it must be quoted:
 #grammar.add_rule('EXPR', '\'e\'', None, 3.0) 
@@ -33,13 +32,16 @@ grammar.add_rule('EXPR', 'e', None, 3.0)
 # This gets named as the argument in evaluate_expression below
 grammar.add_rule('EXPR', 'x', None, 10.0) 
 
+ # We can register a new function that will be evaled via evaluate_expression
+def mylambda(): return 141.421
+register_primitive(mylambda)
+
 # A thunk function (lambdaZero is defined in Miscellaneous)
 # We write these with [None] insead of []. The FunctionNode str function knows to print these with parens
-# This notation keeps it simple since on a FunctionNode, the children ("to") are always a list. 
-grammar.add_rule('EXPR', 'lambdaZero', [], 1.0) 
+# This notation keeps it simple since on a FunctionNode, the children ("to") are always a list.
+grammar.add_rule('EXPR', 'mylambda', [], 1.0) 
 #or
-grammar.add_rule('EXPR', 'lambdaZero()', None, 1.0)  # this is supported but not recommended
-
+grammar.add_rule('EXPR', 'mylambda()', None, 1.0)  # this is supported but not recommended
 
 # EXPR -> plus_(EXPR, EXPR)
 grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1.0)
@@ -58,20 +60,23 @@ grammar.add_rule('EXPR', 'apply_', ['FUNCTION', 'EXPR'], 5.0)
 
 # Here, 'lambda' is a special function that allows us to introduce a new bound 
 # variable (bv) of a cetain type.
-# The type is specified by bv_args:
-
-
-# Creates a thunk -- no variables, but gets evaled like a lambda (does not add rules)
-grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_type=None, bv_args=None) 
+# The type is specified by bv_args. Here is how we might use it here:
 
 # Creates a terminal of type bool -- e.g. y1
 grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_type='BOOL', bv_args=None) 
 
+# BUt we can also use more complex situations, where the lambda is a thunk, or the bound variable
+# is itself a function. These are commented out because FUNCTION is only expanded via application to
+# a single EXPR, so the types these require are not supported by the above apply_
+
+# Creates a thunk (lambda of no arguments)
+#grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_type=None, bv_args=None) 
+
 # Creates a thunk lambda variable -- e.g y1()
-grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_type='BOOL', bv_args=[]) 
+#grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_type='BOOL', bv_args=[]) 
 
 # Creates a lambda variable yi always called with an EXPR argument -- e.g., y1(plus(1,1))
-grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_type='BOOL', bv_args=['EXPR']) 
+#grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_type='BOOL', bv_args=['EXPR']) 
 
 
 # Etc. 

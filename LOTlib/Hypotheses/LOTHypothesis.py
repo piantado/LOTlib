@@ -6,7 +6,7 @@
 
 from FunctionHypothesis import FunctionHypothesis
 from copy import copy, deepcopy
-from LOTlib.Proposals import RegenerationProposal
+from LOTlib.Proposals.RegenerationProposal import RegenerationProposal
 from LOTlib.Miscellaneous import *
 from LOTlib.DataAndObjects import FunctionData
 
@@ -48,6 +48,12 @@ class LOTHypothesis(FunctionHypothesis):
 		self.likelihood = 0.0
 	
 	def type(self): return self.value.type()
+	
+	def set_proposal_function(self, f):
+		"""
+			Just a setter to create the proposal function
+		"""
+		self.proposal_function = f
 	
 	def __copy__(self):
 		"""

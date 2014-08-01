@@ -137,14 +137,13 @@ class FunctionNode(object):
 			allow different types of lambdas or something, which is why its nice to
 			have this function)
 		"""
-		ret = (self.name is not None) and (self.name.lower() == 'lambda')
-		
-		# A nice place to keep this--will get checked a lot!
-		if ret:
-			assert len(self.args) == 1, "*** Lambdas must have exactly 1 arg"
-		
-		return ret
-	
+		if self.name is None:
+			return False
+		elif self.name.lower() == 'lambda':
+			assert len(self.args) == 1
+			return True
+		else:
+			return False
 
 	# NOTE: Here we do a little fanciness -- with "if" -- we convert it to the "correct" python 
 	# form with short circuiting instead of our fancy ifelse function
@@ -166,8 +165,9 @@ class FunctionNode(object):
 			assert self.args is not None and len(self.args)==2, "Apply requires exactly 2 arguments"
 			return '('+str(self.args[0])+')('+str(self.args[1])+')'
 		elif self.islambda():
-			# The old version (above) wrapped in parens, but that's probably not necessary?
+			
 			return 'lambda '+ (self.bv_name if self.bv_name is not None else '') +': '+str(self.args[0])
+			
 		else:
 			
 			if self.args is None:

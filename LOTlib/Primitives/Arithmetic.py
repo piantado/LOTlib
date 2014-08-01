@@ -32,7 +32,6 @@ def divide_(x,y):
     
 @LOTlib_primitive
 def subtract_(x,y): return x-y
-
     
 @LOTlib_primitive
 def minus_(x,y): return x-y
