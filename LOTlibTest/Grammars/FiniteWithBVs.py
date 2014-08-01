@@ -14,6 +14,9 @@ g.add_rule("A", 'a', "x", 1.0)
 g.add_rule("B", 'b', "y", 1.0)
 g.add_rule("B", 'b', "z", 1.0)
 
+def log_probability(tree):
+	return 0 # TODO: stub
+
 if __name__ == "__main__":
 	for i in xrange(100):
 		print(g.generate())
