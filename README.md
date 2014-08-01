@@ -32,15 +32,15 @@ The following are useful for many algorithms:
 INSTALLATION
 ------------
 
-Put this library somewhere--mine lives in /home/piantado/Desktop/Libraries/LOTlib/
+Put this library somewhere - e.g. ~/Libraries/LOTlib/
 	
 Set the PYTHONPATH environment variable to point to LOTlib/:
 	
-	export PYTHONPATH=$PYTHONPATH:/home/piantado/Desktop/Libraries/LOTlib
+	$ export PYTHONPATH=$PYTHONPATH:~/Libraries/LOTlib
 	
 You can put this into your .bashrc file to make it loaded automatically when you open a terminal. On ubuntu and most linux, this is:
 	
-	echo 'export PYTHONPATH=$PYTHONPATH:/home/piantado/Desktop/Libraries/LOTlib' >> ~/.bashrc
+	$ echo 'export PYTHONPATH=\$PYTHONPATH:~/Libraries/LOTlib' >> ~/.bashrc
 
 And you should be ready to use the library via:
 	
