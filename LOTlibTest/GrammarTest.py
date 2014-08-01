@@ -7,7 +7,7 @@
 import unittest
 
 from LOTlib.Grammar import *
-from LOTlib.Proposals import RegenerationProposal
+from LOTlib.Proposals.RegenerationProposal import RegenerationProposal
 from LOTlib import lot_iter
 import math
 from collections import defaultdict
@@ -20,6 +20,15 @@ class GrammarTest(unittest.TestCase):
 
 	# initialization that happens before each test is carried out
 	def setUp(self):
+		pass # We will use a different grammar for each test
+		# self.G = Grammar()
+		# self.G.add_rule('START', 'A ', ['START'], 0.1)
+		# self.G.add_rule('START', 'B ', ['START'], 0.3)
+		# self.G.add_rule('START', 'NULL', None, 0.6)
+
+	# tests that the generation and regeneration of trees is consistent with the probabilities
+	# that are output by lp_regenerate_propose_to
+	def test_lp_regenerate_propose_to(self):
 		self.G = Grammar()
 		# NOTE: these probabilities should get normalized automatically
 		self.G.add_rule('START', 'S', ['NP', 'VP'], 0.1)
@@ -48,14 +57,6 @@ class GrammarTest(unittest.TestCase):
 		self.G.add_rule('DET', 'a', None, 0.5)
 		self.G.add_rule('INTERJECTION', 'sh*t', None, 0.6)
 		self.G.add_rule('INTERJECTION', 'fu*k pi', None, 0.6)
-		# self.G = Grammar()
-		# self.G.add_rule('START', 'A ', ['START'], 0.1)
-		# self.G.add_rule('START', 'B ', ['START'], 0.3)
-		# self.G.add_rule('START', 'NULL', None, 0.6)
-
-	# tests that the generation and regeneration of trees is consistent with the probabilities
-	# that are output by lp_regenerate_propose_to
-	def test_lp_regenerate_propose_to(self):
 		# the RegenerationProposal class
 		rp = RegenerationProposal(self.G)
 		numTests = 100
@@ -118,21 +119,60 @@ class GrammarTest(unittest.TestCase):
 		# get the p-value
 		return chisquare(np.array(actual_values), f_exp=np.array(expected_values))
 
-	# tests .log_probability() function
-	# def test_log_probability(self):
-	# 	# construct a different grammar
-	# 	# self.G = Grammar()
-	# 	# self.G.add_rule('START', 'A ', ['START'], 0.1)
-	# 	# self.G.add_rule('START', 'B ', ['START'], 0.3)
-	# 	# self.G.add_rule('START', 'NULL', None, 0.6)
+	# tests .log_probability() function, without bound variables in the grammar
+	# Uses the Grammars/FiniteWithoutBVs.py grammar
+	def test_log_probability_FiniteWithoutBVs(self):
+		# import the grammar
+		from LOTlibTest.Grammars import FiniteWithoutBVs
+		self.G = FiniteWithoutBVs.g
+		# sample from G 100 times
+		for i in range(100):
+			t = self.G.generate('START')
+			# count probability manually
+			prob = FiniteWithoutBVs.log_probability(t)
+			# print t, prob, t.log_probability(), prob - t.log_probability()
+			# check that it's equal to .log_probability()
+			self.assertTrue(math.fabs(prob - t.log_probability()) < 0.00000001)
 
+	# tests .log_probability() function, with bound variables in the grammar
+	# Uses the Grammars/FiniteWithoutBVs.py grammar
+	def test_log_probability_FiniteWithBVs(self):
+		# import the grammar
+		from LOTlibTest.Grammars import FiniteWithBVs
+		self.G = FiniteWithBVs.g
+		# sample from G 100 times
+		for i in range(100):
+			t = self.G.generate('START')
+			# count probability manually
+			prob = FiniteWithBVs.log_probability(t)
+			print t, prob, t.log_probability(), prob - t.log_probability()
+			# check that it's equal to .log_probability()
+			self.assertTrue(math.fabs(prob - t.log_probability()) < 0.00000001)
+
+	# manually checks the log probability of a tree produced from the FiniteWithBVs testing grammar
+	def log_probability_FiniteWithBVs(self, tree):
+		# every tree has an equal probability of being generated
+		return math.log(0.5*0.5*(1.0/3)*0.5*0.5)
+
+	# # tests .log_probability() function, without bound variables in the grammar
+	# # Uses the Grammars/FiniteWithoutBVs.py grammar
+	# def test_log_probability_FiniteWithoutBvArgs(self):
+	# 	# import the grammar
+	# 	from LOTlibTest.Grammars import FiniteWithoutBvArgs
+	# 	self.G = FiniteWithoutBvArgs.g
 	# 	# sample from G 100 times
 	# 	for i in range(100):
 	# 		t = self.G.generate('START')
 	# 		# count probability manually
-	# 		prob = self.countProbability(t)
+	# 		prob = self.log_probability_FiniteWithoutBvArgs(t)
+	# 		print t, prob, t.log_probability(), prob - t.log_probability()
 	# 		# check that it's equal to .log_probability()
-	# 		self.assertTrue(prob - t.log_probability() < 0.00000001)
+	# 		self.assertTrue(math.fabs(prob - t.log_probability()) < 0.00000001)
+
+	# # manually checks the log probability of a tree produced from the FiniteWithoutBvArgs testing grammar
+	# def log_probability_FiniteWithoutBvArgs(self, tree):
+	# 	# every tree has an equal probability of being generated
+	# 	return math.log(0.5*0.5*(1.0/3)*0.5*0.5)
 
 
 	# counts the probability of the grammar manually
@@ -151,7 +191,7 @@ class GrammarTest(unittest.TestCase):
 	# returns a dictionary
 	def count(self, ls):
 		# http://stackoverflow.com/questions/9358983/python-dictionary-and-default-values
-		dictionary = defaultdict(lambda: 0)
+		dictionary = defaultdict(int)
 		# recursively flatten the list
 		flattenedList = self.flatten(ls)
 		# count the elements one-by-one
