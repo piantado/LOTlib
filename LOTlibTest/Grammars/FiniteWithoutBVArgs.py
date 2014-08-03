@@ -22,6 +22,10 @@ g.add_rule('AGE', '', ['INT'], 1.0,  bv_type='NUMBER', bv_args=None, bv_prefix='
 g.add_rule('INT', '20', None, 1.0)
 g.add_rule('INT', '22', None, 1.0)
 
+def log_probability(tree):
+	return 0 # TODO: stub
+
 if __name__ == "__main__":
 	for i in xrange(100):
-		print(g.generate())
+		tree = g.generate()
+		print tree, tree.log_probability()

@@ -11,5 +11,8 @@ header_generator.py
 # Notes
 *.note
 
+# KDE
+*.directory
+
 # Built documentation
 doc/_build
