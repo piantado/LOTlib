@@ -21,42 +21,13 @@ class GrammarTest(unittest.TestCase):
 	# initialization that happens before each test is carried out
 	def setUp(self):
 		pass # We will use a different grammar for each test
-		# self.G = Grammar()
-		# self.G.add_rule('START', 'A ', ['START'], 0.1)
-		# self.G.add_rule('START', 'B ', ['START'], 0.3)
-		# self.G.add_rule('START', 'NULL', None, 0.6)
 
 	# tests that the generation and regeneration of trees is consistent with the probabilities
 	# that are output by lp_regenerate_propose_to
 	def test_lp_regenerate_propose_to(self):
-		self.G = Grammar()
-		# NOTE: these probabilities should get normalized automatically
-		self.G.add_rule('START', 'S', ['NP', 'VP'], 0.1)
-		self.G.add_rule('START', 'S', ['INTERJECTION'], 0.3)
-		self.G.add_rule('NP', 'NV', ['DET', 'N'], 0.6)
-		self.G.add_rule('NP', 'NV', ['DET', 'ADJ', 'N'], 0.4)
-		self.G.add_rule('NP', 'NV', ['PN'], 0.3)
-		self.G.add_rule('VP', 'NV', ['V', 'NP'], 0.5)
-		self.G.add_rule('N', 'ball', None, 0.2)
-		self.G.add_rule('N', 'computer', None, 0.2)
-		self.G.add_rule('N', 'phone', None, 0.2)
-		self.G.add_rule('PN', 'Chomsky', None, 0.3)
-		self.G.add_rule('PN', 'Samay', None, 0.3)
-		self.G.add_rule('PN', 'Steve', None, 0.3)
-		self.G.add_rule('PN', 'Hassler', None, 0.3)
-		self.G.add_rule('V', 'eats', None, 0.25)
-		self.G.add_rule('V', 'kills', None, 0.25)
-		self.G.add_rule('V', 'maims', None, 0.25)
-		self.G.add_rule('V', 'sees', None, 0.25)
-		self.G.add_rule('ADJ', 'peculiar', None, 0.4)
-		self.G.add_rule('ADJ', 'strange', None, 0.4)
-		self.G.add_rule('ADJ', 'red', None, 0.4)
-		self.G.add_rule('ADJ', 'queasy', None, 0.4)
-		self.G.add_rule('ADJ', 'happy', None, 0.4)
-		self.G.add_rule('DET', 'the', None, 0.5)
-		self.G.add_rule('DET', 'a', None, 0.5)
-		self.G.add_rule('INTERJECTION', 'sh*t', None, 0.6)
-		self.G.add_rule('INTERJECTION', 'fu*k pi', None, 0.6)
+		# import the grammar
+		from LOTlibTest.Grammars import lp_regenerate_propose_to_grammar
+		self.G = lp_regenerate_propose_to_grammar.g
 		# the RegenerationProposal class
 		rp = RegenerationProposal(self.G)
 		numTests = 100
