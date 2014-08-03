@@ -3,7 +3,9 @@ from LOTlib.Miscellaneous import unique
 from LOTlib.Grammar import Grammar
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
-G = Grammar()
+from LOTlibTest.Grammars import Test1Grammar
+
+G = Test1Grammar.g
 
 G.add_rule('START', '', ['NT1'], 1.0)
 
