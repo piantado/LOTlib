@@ -36,7 +36,7 @@ grammar.add_rule('INNER-BOOL', 'not_', ['INNER-BOOL'], 1.0)
 
 grammar.add_rule('OBJECT', 'x', None, 1.0)
 grammar.add_rule('OBJECT', 'y', None, 1.0)
-#grammar.add_rule('OBJECT', '', ['BASE-OBJECT'], 1.0) #maybe or maybe not?
+grammar.add_rule('OBJECT', '', ['BASE-OBJECT'], 1.0) # maybe or maybe not?
 
 # BASE-SET is here a set of BASE-OBJECTS (non-args)
 grammar.add_rule('BASE-SET', 'set_add_', ['BASE-OBJECT', 'BASE-SET'], 1.0)
@@ -52,24 +52,24 @@ grammar.add_rule('BASE-OBJECT', qq('n2'), None, 1.0)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 data = [ FunctionData(input=[ "p1", "n1" ], output=True), 
-	 FunctionData(input=[ "p1", "n2" ], output=True), 
-	 FunctionData(input=[ "p1", "p1" ], output=False), 
-	 FunctionData(input=[ "p1", "p2" ], output=False),
-	 
-         FunctionData(input=[ "p2", "n1" ], output=True),
-	 FunctionData(input=[ "p2", "n2" ], output=True),
-	 FunctionData(input=[ "p2", "p1" ], output=False),
-	 FunctionData(input=[ "p2", "p2" ], output=False),
-		 
-	 FunctionData(input=[ "n1", "n1" ], output=False),
-	 FunctionData(input=[ "n1", "n2" ], output=False),
-	 FunctionData(input=[ "n1", "p1" ], output=True),
-	 FunctionData(input=[ "n1", "p2" ], output=True),
-		 
-	 FunctionData(input=[ "n2", "n1" ], output=False),
-	 FunctionData(input=[ "n2", "n2" ], output=False),
-	 FunctionData(input=[ "n2", "p1" ], output=True),
-	 FunctionData(input=[ "n2", "p2" ], output=True) ]
+		 FunctionData(input=[ "p1", "n2" ], output=True), 
+		 FunctionData(input=[ "p1", "p1" ], output=False), 
+		 FunctionData(input=[ "p1", "p2" ], output=False),
+ 
+ 		 FunctionData(input=[ "p2", "n1" ], output=True),
+ 		 FunctionData(input=[ "p2", "n2" ], output=True),
+ 		 FunctionData(input=[ "p2", "p1" ], output=False),
+ 		 FunctionData(input=[ "p2", "p2" ], output=False),
+ 		  
+ 		 FunctionData(input=[ "n1", "n1" ], output=False),
+ 		 FunctionData(input=[ "n1", "n2" ], output=False),
+ 		 FunctionData(input=[ "n1", "p1" ], output=True),
+ 		 FunctionData(input=[ "n1", "p2" ], output=True),
+ 		  
+ 		 FunctionData(input=[ "n2", "n1" ], output=False),
+ 		 FunctionData(input=[ "n2", "n2" ], output=False),
+ 		 FunctionData(input=[ "n2", "p1" ], output=True),
+		 FunctionData(input=[ "n2", "p2" ], output=True)]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Standard exports

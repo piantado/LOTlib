@@ -2,6 +2,7 @@
 	A small finite grammar with bound variables that have bv_args.
 """
 
+
 from LOTlib.Grammar import Grammar
 
 g = Grammar()
