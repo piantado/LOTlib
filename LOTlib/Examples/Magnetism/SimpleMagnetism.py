@@ -81,7 +81,7 @@ if __name__ == "__main__":
 	# Run mcmc
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	
-	from LOTlib.Proposals import *
+	from LOTlib.Proposals.RegenerationProposal import *
 	#mp = MixtureProposal([RegenerationProposal(grammar), InsertDeleteProposal(grammar)] )
 	mp = RegenerationProposal(grammar)
 		
