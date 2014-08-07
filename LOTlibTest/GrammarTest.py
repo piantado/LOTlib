@@ -106,7 +106,7 @@ class GrammarTest(unittest.TestCase):
 			self.assertTrue(math.fabs(prob - t.log_probability()) < 0.00000001)
 
 	# tests .log_probability() function, with bound variables in the grammar
-	# Uses the Grammars/FiniteWithoutBVs.py grammar
+	# Uses the Grammars/FiniteWithBVArgs.py grammar
 	def test_log_probability_FiniteWithBVArgs(self):
 		# import the grammar
 		from LOTlibTest.Grammars import FiniteWithBVArgs
@@ -120,30 +120,20 @@ class GrammarTest(unittest.TestCase):
 			# check that it's equal to .log_probability()
 			self.assertTrue(math.fabs(prob - t.log_probability()) < 0.00000001)
 
-	# manually checks the log probability of a tree produced from the FiniteWithBVArgs testing grammar
-	def log_probability_FiniteWithBVArgs(self, tree):
-		# every tree has an equal probability of being generated
-		return math.log(0.5*0.5*(1.0/3)*0.5*0.5)
-
 	# # tests .log_probability() function, without bound variables in the grammar
-	# # Uses the Grammars/FiniteWithoutBVs.py grammar
-	# def test_log_probability_FiniteWithoutBvArgs(self):
-	# 	# import the grammar
-	# 	from LOTlibTest.Grammars import FiniteWithoutBvArgs
-	# 	self.G = FiniteWithoutBvArgs.g
-	# 	# sample from G 100 times
-	# 	for i in range(100):
-	# 		t = self.G.generate('START')
-	# 		# count probability manually
-	# 		prob = self.log_probability_FiniteWithoutBvArgs(t)
-	# 		print t, prob, t.log_probability(), prob - t.log_probability()
-	# 		# check that it's equal to .log_probability()
-	# 		self.assertTrue(math.fabs(prob - t.log_probability()) < 0.00000001)
-
-	# # manually checks the log probability of a tree produced from the FiniteWithoutBvArgs testing grammar
-	# def log_probability_FiniteWithoutBvArgs(self, tree):
-	# 	# every tree has an equal probability of being generated
-	# 	return math.log(0.5*0.5*(1.0/3)*0.5*0.5)
+	# # Uses the Grammars/FiniteWithoutBVArgs.py grammar
+	def test_log_probability_FiniteWithoutBVArgs(self):
+		# import the grammar
+		from LOTlibTest.Grammars import FiniteWithoutBVArgs
+		self.G = FiniteWithoutBVArgs.g
+		# sample from G 100 times
+		for i in range(100):
+			t = self.G.generate('START')
+			# count probability manually
+			prob = FiniteWithoutBVArgs.log_probability(t)
+			print t, prob, t.log_probability(), prob - t.log_probability()
+			# check that it's equal to .log_probability()
+			self.assertTrue(math.fabs(prob - t.log_probability()) < 0.00000001)
 
 
 	# counts the probability of the grammar manually
