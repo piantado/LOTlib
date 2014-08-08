@@ -203,8 +203,4 @@ def suite():
 
 # main code to run the test
 if __name__ == '__main__':
-	res = unittest.TestResult()
-	generation_suite().run(res)
-	# print res
-	log_probability_suite().run(res)
-	print res.wasSuccessful()
+	unittest.main()
