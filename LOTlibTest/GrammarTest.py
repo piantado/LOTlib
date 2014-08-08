@@ -24,6 +24,7 @@ class GrammarTest(unittest.TestCase):
 
 	# tests that the generation and regeneration of trees is consistent with the probabilities
 	# that are output by lp_regenerate_propose_to
+	# @unittest.skip('Skipping lp_regenerate_propose_to test')
 	def test_lp_regenerate_propose_to(self):
 		# import the grammar
 		from LOTlibTest.Grammars import lp_regenerate_propose_to_grammar
@@ -40,16 +41,18 @@ class GrammarTest(unittest.TestCase):
 			
 			# Regenerate some number of trees at random
 			numTrees = 1000
-			for i in range(numTrees):
+			for j in range(numTrees):
 				newtree = rp.propose_tree(tree)[0]
 				# trees.append(newtree)
 				actual_counts[newtree] += 1
 			# see if the frequency with which each category of trees is generated matches the
 			# expected counts using a chi-squared test
 			chisquared, p = self.get_pvalue(tree, actual_counts, numTrees)
-			print chisquared, p
+			# print chisquared, p
 			# if p > 0.01/1000, test passes
 			self.assertTrue(p > 0.01/numTests, "Trees are not being generated according to the expected log probabilities")
+			if i % 10 == 0 and i != 0: print i, "lp_regenerate_propose_to tests..."
+		print numTests, "lp_regenerate_propose_to tests..."
 	
 	# computes a p-value for regeneration, given the expected and actual counts.
 	# First groups trees according to probability, then computes the chi-squared statistic, then gets the p-value
@@ -92,6 +95,7 @@ class GrammarTest(unittest.TestCase):
 
 	# tests .log_probability() function, without bound variables in the grammar
 	# Uses the Grammars/FiniteWithoutBVs.py grammar
+	# @unittest.skip('Debugging...')
 	def test_log_probability_FiniteWithoutBVs(self):
 		# import the grammar
 		from LOTlibTest.Grammars import FiniteWithoutBVs
@@ -106,7 +110,8 @@ class GrammarTest(unittest.TestCase):
 			self.assertTrue(math.fabs(prob - t.log_probability()) < 0.00000001)
 
 	# tests .log_probability() function, with bound variables in the grammar
-	# Uses the Grammars/FiniteWithoutBVs.py grammar
+	# Uses the Grammars/FiniteWithBVArgs.py grammar
+	# @unittest.skip('Debugging...')
 	def test_log_probability_FiniteWithBVArgs(self):
 		# import the grammar
 		from LOTlibTest.Grammars import FiniteWithBVArgs
@@ -116,34 +121,81 @@ class GrammarTest(unittest.TestCase):
 			t = self.G.generate('START')
 			# count probability manually
 			prob = FiniteWithBVArgs.log_probability(t)
-			print t, prob, t.log_probability(), prob - t.log_probability()
+			# print t, prob, t.log_probability(), prob - t.log_probability()
 			# check that it's equal to .log_probability()
 			self.assertTrue(math.fabs(prob - t.log_probability()) < 0.00000001)
 
-	# manually checks the log probability of a tree produced from the FiniteWithBVArgs testing grammar
-	def log_probability_FiniteWithBVArgs(self, tree):
-		# every tree has an equal probability of being generated
-		return math.log(0.5*0.5*(1.0/3)*0.5*0.5)
+	# tests .log_probability() function, without bound variables in the grammar
+	# Uses the Grammars/FiniteWithoutBVArgs.py grammar
+	def test_log_probability_FiniteWithoutBVArgs(self):
+		# import the grammar
+		from LOTlibTest.Grammars import FiniteWithoutBVArgs
+		self.G = FiniteWithoutBVArgs.g
+		# sample from G 100 times
+		for i in range(100):
+			t = self.G.generate('START')
+			# count probability manually
+			prob = FiniteWithoutBVArgs.log_probability(t)
+			# print t, prob, t.log_probability(), prob - t.log_probability()
+			# check that it's equal to .log_probability()
+			self.assertTrue(math.fabs(prob - t.log_probability()) < 0.00000001)
 
-	# # tests .log_probability() function, without bound variables in the grammar
-	# # Uses the Grammars/FiniteWithoutBVs.py grammar
-	# def test_log_probability_FiniteWithoutBvArgs(self):
-	# 	# import the grammar
-	# 	from LOTlibTest.Grammars import FiniteWithoutBvArgs
-	# 	self.G = FiniteWithoutBvArgs.g
-	# 	# sample from G 100 times
-	# 	for i in range(100):
-	# 		t = self.G.generate('START')
-	# 		# count probability manually
-	# 		prob = self.log_probability_FiniteWithoutBvArgs(t)
-	# 		print t, prob, t.log_probability(), prob - t.log_probability()
-	# 		# check that it's equal to .log_probability()
-	# 		self.assertTrue(math.fabs(prob - t.log_probability()) < 0.00000001)
+	# tests .log_probability() function on trees that were proposed to, and makes sure these probabilities are the same as if we've just generated the tree from scratch
+	# Uses the Grammars/FiniteWithoutBVs.py grammar
+	def test_log_probability_proposals_FiniteWithoutBVs(self):
+		# import the grammar
+		from LOTlibTest.Grammars import FiniteWithoutBVs
+		self.G = FiniteWithoutBVs.g
+		# the RegenerationProposal class
+		rp = RegenerationProposal(self.G)
+		# sample from G 100 times
+		for i in range(100):
+			X = self.G.generate('START')
+			# propose to a new tree
+			Y = rp.propose_tree(X)[0]
+			# count probability manually
+			prob = FiniteWithoutBVs.log_probability(Y)
+			# print X, Y, prob, Y.log_probability(), prob - Y.log_probability()
+			# check that it's equal to .log_probability()
+			self.assertTrue(math.fabs(prob - Y.log_probability()) < 0.00000001)
 
-	# # manually checks the log probability of a tree produced from the FiniteWithoutBvArgs testing grammar
-	# def log_probability_FiniteWithoutBvArgs(self, tree):
-	# 	# every tree has an equal probability of being generated
-	# 	return math.log(0.5*0.5*(1.0/3)*0.5*0.5)
+	# tests .log_probability() function on trees that were proposed to, and makes sure these probabilities are the same as if we've just generated the tree from scratch
+	# Uses the Grammars/FiniteWithBVArgs.py grammar
+	def test_log_probability_proposals_FiniteWithBVArgs(self):
+		# import the grammar
+		from LOTlibTest.Grammars import FiniteWithBVArgs
+		self.G = FiniteWithBVArgs.g
+		# the RegenerationProposal class
+		rp = RegenerationProposal(self.G)
+		# sample from G 100 times
+		for i in range(100):
+			X = self.G.generate('START')
+			# propose to a new tree
+			Y = rp.propose_tree(X)[0]
+			# count probability manually
+			prob = FiniteWithBVArgs.log_probability(Y)
+			# print X, Y, prob, Y.log_probability(), prob - Y.log_probability()
+			# check that it's equal to .log_probability()
+			self.assertTrue(math.fabs(prob - Y.log_probability()) < 0.00000001)
+
+	# tests .log_probability() function on trees that were proposed to, and makes sure these probabilities are the same as if we've just generated the tree from scratch
+	# Uses the Grammars/FiniteWithoutBVArgs.py grammar
+	def test_log_probability_proposals_FiniteWithoutBVArgs(self):
+		# import the grammar
+		from LOTlibTest.Grammars import FiniteWithoutBVArgs
+		self.G = FiniteWithoutBVArgs.g
+		# the RegenerationProposal class
+		rp = RegenerationProposal(self.G)
+		# sample from G 100 times
+		for i in range(100):
+			X = self.G.generate('START')
+			# propose to a new tree
+			Y = rp.propose_tree(X)[0]
+			# count probability manually
+			prob = FiniteWithoutBVArgs.log_probability(Y)
+			# print X, Y, prob, Y.log_probability(), prob - Y.log_probability()
+			# check that it's equal to .log_probability()
+			self.assertTrue(math.fabs(prob - Y.log_probability()) < 0.00000001)
 
 
 	# counts the probability of the grammar manually
@@ -182,9 +234,31 @@ class GrammarTest(unittest.TestCase):
 
 
 
+# A Test Suite composed of all testing functions that test .log_probability
+def log_probability_suite():
+	tests = ['test_log_probability_FiniteWithoutBVArgs',
+			'test_log_probability_FiniteWithBVArgs',
+			'test_log_probability_FiniteWithoutBVs']
+	log_probability_suite = unittest.TestSuite(map(GrammarTest, tests))
+	return log_probability_suite
 
+# A Test Suite composed of all testing functions that test .log_probability under proposals
+def proposal_suite():
+	tests = ['test_log_probability_proposals_FiniteWithoutBVArgs',
+			'test_log_probability_proposals_FiniteWithBVArgs',
+			'test_log_probability_proposals_FiniteWithoutBVs']
+	log_probability_suite = unittest.TestSuite(map(GrammarTest, tests))
+	return log_probability_suite
 
+# A Test Suite composed of all testing functions that test generation
+def generation_suite():
+	tests = ['test_lp_regenerate_propose_to']
+	generation_suite = unittest.TestSuite(map(GrammarTest, tests))
+	return generation_suite
 
+# A Test Suite composed of all tests in this class
+def suite():
+	return unittest.TestLoader().loadTestsFromTestCase(GrammarTest)
 
 
 

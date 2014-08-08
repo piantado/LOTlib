@@ -22,7 +22,9 @@ class SubtreesTest(unittest.TestCase):
 	
 
 
-
+# A Test Suite composed of all tests in this class
+def suite():
+	return unittest.TestLoader().loadTestsFromTestCase(SubtreesTest)
 
 
 

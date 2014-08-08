@@ -67,6 +67,10 @@ class FiniteBestSetTest(unittest.TestCase):
 	# miscellaneous
 
 
+# A Test Suite composed of all tests in this class
+def suite():
+	return unittest.TestLoader().loadTestsFromTestCase(FiniteBestSetTest)
+
 
 
 # main code to run the test

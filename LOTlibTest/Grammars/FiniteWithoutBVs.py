@@ -2,6 +2,7 @@
 	A small finite grammar without bound variables.
 """
 
+
 from LOTlib.Grammar import Grammar
 import math
 
