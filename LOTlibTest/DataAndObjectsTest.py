@@ -23,7 +23,9 @@ class DataAndObjectsTest(unittest.TestCase):
 
 
 
-
+# A Test Suite composed of all tests in this class
+def suite():
+	return unittest.TestLoader().loadTestsFromTestCase(DataAndObjectsTest)
 
 
 if __name__ == '__main__':

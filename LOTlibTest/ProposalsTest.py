@@ -23,7 +23,9 @@ class ProposalsTest(unittest.TestCase):
 
 
 
-
+# A Test Suite composed of all tests in this class
+def suite():
+	return unittest.TestLoader().loadTestsFromTestCase(ProposalsTest)
 
 
 if __name__ == '__main__':
