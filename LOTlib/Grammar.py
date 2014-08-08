@@ -88,7 +88,7 @@ class Grammar:
 			
 			*nt* - The Nonterminal. e.g. S in "S -> NP VP"
 			
-			*name* - The name of this function
+			*name* - The name of this function. NOTE: If you are introducing a bound variable, the name of this function must reflect that it is a lambda node! Currently, the only way to do this is to name it 'lambda'.
 			
 			*to* - What you expand to (usually a FunctionNode).
 			
@@ -102,8 +102,12 @@ class Grammar:
 
 			*rid* - the rule id number -- negative if this introduces a bound variable; otherwise positive
 		"""
+
+		# Assert that if we are adding bound variables, we must expand to a lambda node
+		if bv_type is not None or bv_args is not None:
+			assert (name.lower() == 'lambda'), "When introducing bound variables, the name of the expanded function must be 'lambda'."
 		
-		#Assigns a serialized rule number
+		# Assigns a serialized rule number
 		if rid is None:
 			rid = self.rule_count
 			self.rule_count += 1
