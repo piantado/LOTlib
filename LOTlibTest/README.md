@@ -25,10 +25,12 @@ RUNNING
 -------
 
 To run all tests, execute
+
         $ cd LOTlibTest
         $ python LOTlibTest.py
 
 To run tests for a specific file (e.g. GrammarTest.py), execute
+
         $ cd LOTlibTest
         $ python GrammarTest.py
 
