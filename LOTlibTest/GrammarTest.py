@@ -176,9 +176,23 @@ class GrammarTest(unittest.TestCase):
 
 
 
+# A Test Suite composed of all testing functions that test .log_probability
+def log_probability_suite():
+	tests = ['test_log_probability_FiniteWithoutBVArgs',
+			'test_log_probability_FiniteWithBVArgs',
+			'test_log_probability_FiniteWithoutBVs']
+	log_probability_suite = unittest.TestSuite(map(GrammarTest, tests))
+	return log_probability_suite
 
+# A Test Suite composed of all testing functions that test generation
+def generation_suite():
+	tests = ['test_lp_regenerate_propose_to']
+	generation_suite = unittest.TestSuite(map(GrammarTest, tests))
+	return generation_suite
 
-
+# A Test Suite composed of all tests in this class
+def suite():
+	return unittest.TestLoader().loadTestsFromTestCase(GrammarTest)
 
 
 
@@ -189,4 +203,8 @@ class GrammarTest(unittest.TestCase):
 
 # main code to run the test
 if __name__ == '__main__':
-	unittest.main()
+	res = unittest.TestResult()
+	generation_suite().run(res)
+	# print res
+	log_probability_suite().run(res)
+	print res.wasSuccessful()
