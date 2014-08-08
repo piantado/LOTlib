@@ -18,7 +18,7 @@ g.add_rule("N", "human", None, 1.0)
 g.add_rule("V", "likes", None, 1.0)
 g.add_rule("V", "kills", None, 1.0)
 g.add_rule("V", "eats", None, 1.0)
-g.add_rule('AGE', '', ['INT'], 1.0,  bv_type='INT', bv_args=None, bv_prefix='a') # NOTE: Bound variable probability rules are defaultly 10.0!!!!!!!!!
+g.add_rule('AGE', 'lambda', ['INT'], 1.0,  bv_type='INT', bv_args=None, bv_prefix='a') # NOTE: Bound variable probability rules are defaultly 10.0!!!!!!!!!
 g.add_rule('INT', '20', None, 1.0)
 g.add_rule('INT', '22', None, 1.0)
 
@@ -53,7 +53,7 @@ def log_probability_age(ls):
 	# compute the sum of all unnormalized probabilities for the rules INT --> x
 	sum_prob_int = 12.0
 	# check whether we have a bound variable or not
-	if ls[2][0][0] == 'a2':
+	if ls[2][1][0] == 'a2':
 		prob_int = 10.0/sum_prob_int
 	else: prob_int = 1.0/sum_prob_int
 	return math.log(prob_int)
