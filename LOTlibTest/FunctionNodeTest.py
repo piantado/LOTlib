@@ -33,8 +33,8 @@ class FunctionNodeTest(unittest.TestCase):
 
 			if x.pystring() == y.pystring():
 				counter += 1
-				print(counter)
-				print(x.pystring()+'\n'+y.pystring()+'\n')
+				# print(counter)
+				# print(x.pystring()+'\n'+y.pystring()+'\n')
 
 			self.assertEqual(x.pystring() == y.pystring(), x == y, "Without bvs, the pystrings should be the same")
 
