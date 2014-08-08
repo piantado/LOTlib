@@ -24,7 +24,7 @@ class GrammarTest(unittest.TestCase):
 
 	# tests that the generation and regeneration of trees is consistent with the probabilities
 	# that are output by lp_regenerate_propose_to
-	@unittest.skip('Skipping lp_regenerate_propose_to test')
+	# @unittest.skip('Skipping lp_regenerate_propose_to test')
 	def test_lp_regenerate_propose_to(self):
 		# import the grammar
 		from LOTlibTest.Grammars import lp_regenerate_propose_to_grammar
@@ -41,16 +41,17 @@ class GrammarTest(unittest.TestCase):
 			
 			# Regenerate some number of trees at random
 			numTrees = 1000
-			for i in range(numTrees):
+			for j in range(numTrees):
 				newtree = rp.propose_tree(tree)[0]
 				# trees.append(newtree)
 				actual_counts[newtree] += 1
 			# see if the frequency with which each category of trees is generated matches the
 			# expected counts using a chi-squared test
 			chisquared, p = self.get_pvalue(tree, actual_counts, numTrees)
-			print chisquared, p
+			# print chisquared, p
 			# if p > 0.01/1000, test passes
 			self.assertTrue(p > 0.01/numTests, "Trees are not being generated according to the expected log probabilities")
+			if i % 10 == 0: print i, "lp_regenerate_propose_to tests..."
 	
 	# computes a p-value for regeneration, given the expected and actual counts.
 	# First groups trees according to probability, then computes the chi-squared statistic, then gets the p-value
@@ -93,7 +94,7 @@ class GrammarTest(unittest.TestCase):
 
 	# tests .log_probability() function, without bound variables in the grammar
 	# Uses the Grammars/FiniteWithoutBVs.py grammar
-	@unittest.skip('Debugging...')
+	# @unittest.skip('Debugging...')
 	def test_log_probability_FiniteWithoutBVs(self):
 		# import the grammar
 		from LOTlibTest.Grammars import FiniteWithoutBVs
@@ -109,7 +110,7 @@ class GrammarTest(unittest.TestCase):
 
 	# tests .log_probability() function, with bound variables in the grammar
 	# Uses the Grammars/FiniteWithBVArgs.py grammar
-	@unittest.skip('Debugging...')
+	# @unittest.skip('Debugging...')
 	def test_log_probability_FiniteWithBVArgs(self):
 		# import the grammar
 		from LOTlibTest.Grammars import FiniteWithBVArgs
@@ -119,7 +120,7 @@ class GrammarTest(unittest.TestCase):
 			t = self.G.generate('START')
 			# count probability manually
 			prob = FiniteWithBVArgs.log_probability(t)
-			print t, prob, t.log_probability(), prob - t.log_probability()
+			# print t, prob, t.log_probability(), prob - t.log_probability()
 			# check that it's equal to .log_probability()
 			self.assertTrue(math.fabs(prob - t.log_probability()) < 0.00000001)
 
@@ -134,7 +135,7 @@ class GrammarTest(unittest.TestCase):
 			t = self.G.generate('START')
 			# count probability manually
 			prob = FiniteWithoutBVArgs.log_probability(t)
-			print t, prob, t.log_probability(), prob - t.log_probability()
+			# print t, prob, t.log_probability(), prob - t.log_probability()
 			# check that it's equal to .log_probability()
 			self.assertTrue(math.fabs(prob - t.log_probability()) < 0.00000001)
 
