@@ -24,6 +24,7 @@ class GrammarTest(unittest.TestCase):
 
 	# tests that the generation and regeneration of trees is consistent with the probabilities
 	# that are output by lp_regenerate_propose_to
+	@unittest.skip('Skipping lp_regenerate_propose_to test')
 	def test_lp_regenerate_propose_to(self):
 		# import the grammar
 		from LOTlibTest.Grammars import lp_regenerate_propose_to_grammar
@@ -92,6 +93,7 @@ class GrammarTest(unittest.TestCase):
 
 	# tests .log_probability() function, without bound variables in the grammar
 	# Uses the Grammars/FiniteWithoutBVs.py grammar
+	@unittest.skip('Debugging...')
 	def test_log_probability_FiniteWithoutBVs(self):
 		# import the grammar
 		from LOTlibTest.Grammars import FiniteWithoutBVs
@@ -107,6 +109,7 @@ class GrammarTest(unittest.TestCase):
 
 	# tests .log_probability() function, with bound variables in the grammar
 	# Uses the Grammars/FiniteWithBVArgs.py grammar
+	@unittest.skip('Debugging...')
 	def test_log_probability_FiniteWithBVArgs(self):
 		# import the grammar
 		from LOTlibTest.Grammars import FiniteWithBVArgs
