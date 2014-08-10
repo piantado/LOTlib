@@ -21,7 +21,9 @@ class GrammarRuleTest(unittest.TestCase):
 		pass
 	
 
-
+# A Test Suite composed of all tests in this class
+def suite():
+	return unittest.TestLoader().loadTestsFromTestCase(GrammarRuleTest)
 
 
 

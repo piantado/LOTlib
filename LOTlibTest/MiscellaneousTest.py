@@ -405,7 +405,9 @@ class MiscellaneousTest(unittest.TestCase):
 	# 		return str(fn.name)
 
 	
-
+# A Test Suite composed of all tests in this class
+def suite():
+	return unittest.TestLoader().loadTestsFromTestCase(MiscellaneousTest)
 
 
 
