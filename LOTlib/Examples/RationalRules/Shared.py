@@ -1,14 +1,14 @@
 """
-	Shared functions for all RationalRules examples
+        Shared functions for all RationalRules examples
 """
 
 from LOTlib.Miscellaneous import q
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Set up our grammar. DNF defautly includes the logical connectives
-# in disjunctive normal form, but we need to add predicates to it. 
+# in disjunctive normal form, but we need to add predicates to it.
 
-from LOTlib.DefaultGrammars import DNF 
+from LOTlib.DefaultGrammars import DNF
 grammar = DNF
 
 # Two predicates for checking x's color and shape
@@ -38,10 +38,10 @@ from LOTlib.DataAndObjects import FunctionData, Obj
 # FunctionData takes a list of arguments and a return value. The arguments are objects (which are handled correctly automatically
 # by is_color_ and is_shape_
 data = [ FunctionData( [Obj(shape='square', color='red')], True), \
-	 FunctionData( [Obj(shape='square', color='blue')], False), \
-	 FunctionData( [Obj(shape='triangle', color='blue')], False), \
-	 FunctionData( [Obj(shape='triangle', color='red')], False), \
-	 ]
+         FunctionData( [Obj(shape='square', color='blue')], False), \
+         FunctionData( [Obj(shape='triangle', color='blue')], False), \
+         FunctionData( [Obj(shape='triangle', color='red')], False), \
+         ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Other standard exports

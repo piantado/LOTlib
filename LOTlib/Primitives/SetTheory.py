@@ -22,12 +22,12 @@ def setdifference_(A,B): return A.difference(B)
 
 @LOTlib_primitive
 def select_(A): # choose an element, but don't remove it
-    
+
     try: # quick selecting without copying
         return set([iter(A).next()])
     except StopIteration:
         return set()
-    
+
     #if len(A) > 0:
         #x = A.pop()
         #A.add(x)
@@ -106,4 +106,3 @@ def subset_(A,B):
 @LOTlib_primitive
 def is_in_(x,S):
     return (x in S)
-

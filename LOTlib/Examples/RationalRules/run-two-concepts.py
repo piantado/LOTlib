@@ -1,7 +1,7 @@
 """
-	Rational rules over two concepts at the same time.
-	
-	Another way to do this would be to use a Lexicon and write a custom likelihood method
+        Rational rules over two concepts at the same time.
+
+        Another way to do this would be to use a Lexicon and write a custom likelihood method
 """
 
 from Shared import *
@@ -20,19 +20,19 @@ from LOTlib.DataAndObjects import *
 
 # The argumetns are [concept,object]
 data = [ FunctionData( ['A', Obj(shape='square', color='red')],    True), \
-	 FunctionData( ['A', Obj(shape='square', color='blue')],   False), \
-	 FunctionData( ['A', Obj(shape='triangle', color='blue')], False), \
-	 FunctionData( ['A', Obj(shape='triangle', color='red')],  False), \
-	 
-	 FunctionData( ['B', Obj(shape='square', color='red')],    False), \
-	 FunctionData( ['B', Obj(shape='square', color='blue')],   True), \
-	 FunctionData( ['B', Obj(shape='triangle', color='blue')], True), \
-	 FunctionData( ['B', Obj(shape='triangle', color='red')],  True)
-	] * 10 ## How many data points exactly like these?
+         FunctionData( ['A', Obj(shape='square', color='blue')],   False), \
+         FunctionData( ['A', Obj(shape='triangle', color='blue')], False), \
+         FunctionData( ['A', Obj(shape='triangle', color='red')],  False), \
+
+         FunctionData( ['B', Obj(shape='square', color='red')],    False), \
+         FunctionData( ['B', Obj(shape='square', color='blue')],   True), \
+         FunctionData( ['B', Obj(shape='triangle', color='blue')], True), \
+         FunctionData( ['B', Obj(shape='triangle', color='red')],  True)
+        ] * 10 ## How many data points exactly like these?
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Create an initial hypothesis
-# This is where we set a number of relevant variables -- whether to use RR, alpha, etc. 
+# This is where we set a number of relevant variables -- whether to use RR, alpha, etc.
 
 
 from LOTlib.Hypotheses.RationalRulesLOTHypothesis import RationalRulesLOTHypothesis
@@ -46,8 +46,6 @@ h0 = RationalRulesLOTHypothesis(grammar=G, rrAlpha=1.0, ALPHA=0.9, start='TWO_CO
 from LOTlib.Inference.MetropolisHastings import mh_sample
 
 # Run the vanilla sampler. Without steps, it will run infinitely
-# this prints out posterior (posterior_score), prior, likelihood, 
+# this prints out posterior (posterior_score), prior, likelihood,
 for h in mh_sample(h0, data, 10000, skip=100):
-	print h.posterior_score, h.prior, h.likelihood, q(h)
-	
-	
+    print h.posterior_score, h.prior, h.likelihood, q(h)

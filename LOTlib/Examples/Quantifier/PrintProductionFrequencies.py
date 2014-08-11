@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-	Print the word probability of production according to the model
+        Print the word probability of production according to the model
 """
 
 from Shared import *

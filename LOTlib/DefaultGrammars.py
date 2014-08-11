@@ -1,7 +1,7 @@
 """
-	This folder defines a bunch of "standard" grammars. 
+        This folder defines a bunch of "standard" grammars.
 
-	In each, we do NOT specify the terminals, which typically expand the nonterminal PREDICATE->...
+        In each, we do NOT specify the terminals, which typically expand the nonterminal PREDICATE->...
 
 """
 
@@ -123,8 +123,8 @@ DNF_noTF.add_rule('PRE-PREDICATE', '',     ['PREDICATE'], DEFAULT_FEATURE_WEIGHT
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# A NAND grammar. We get a crazy explosion in rules if 
-# we allowed BOOl->True and BOOL->False, so we simply write these in as 
+# A NAND grammar. We get a crazy explosion in rules if
+# we allowed BOOl->True and BOOL->False, so we simply write these in as
 # separate NAND expansions
 
 

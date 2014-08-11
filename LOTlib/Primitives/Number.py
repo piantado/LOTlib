@@ -18,7 +18,7 @@ prev_hash['ten_'] = 'nine_'
 next_hash['X'] = 'X'
 prev_hash['X'] = 'X'
 
-word_to_number = dict() # map a word like 'four_' to its number, 4    
+word_to_number = dict() # map a word like 'four_' to its number, 4
 for i in range(len(word_list)):
     word_to_number[word_list[i]] = i+1
 word_to_number['ten_'] = 'A' # so everything is one character

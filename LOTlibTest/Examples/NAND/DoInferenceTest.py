@@ -7,19 +7,19 @@ import unittest
 
 from LOTlib.Examples.NAND.DoInference import *
 class DoInferenceTest(unittest.TestCase):
-	
-	# initialization that happens before each test is carried out
-	def setUp(self):
-		pass
-	
-	
-	
-	
-	
-	# function that is executed after each test is carried out
-	def tearDown(self):
-		pass
-	
+
+    # initialization that happens before each test is carried out
+    def setUp(self):
+        pass
+
+
+
+
+
+    # function that is executed after each test is carried out
+    def tearDown(self):
+        pass
+
 
 
 
@@ -27,8 +27,4 @@ class DoInferenceTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-	unittest.main()
-
-
-
-
+    unittest.main()

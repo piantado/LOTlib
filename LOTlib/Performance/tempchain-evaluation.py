@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-	Simple evaluation of number schemes
+        Simple evaluation of number schemes
 """
 
 from LOTlib import lot_iter
@@ -24,18 +24,18 @@ options, _ = parser.parse_args()
 
 
 if options.MODEL == "Number":
-	from LOTlib.Examples.Number.Shared import generate_data, grammar,  make_h0
-	data = synchronize_variable( lambda : generate_data(300)  )
+    from LOTlib.Examples.Number.Shared import generate_data, grammar,  make_h0
+    data = synchronize_variable( lambda : generate_data(300)  )
 elif options.MODEL == "Galileo":
-	from LOTlib.Examples.SymbolicRegression.Galileo import data, grammar, make_h0	
+    from LOTlib.Examples.SymbolicRegression.Galileo import data, grammar, make_h0
 elif options.MODEL == "RationalRules":
-	from LOTlib.Examples.RationalRules.Shared import grammar, data, make_h0
+    from LOTlib.Examples.RationalRules.Shared import grammar, data, make_h0
 elif options.MODEL == "SimpleMagnetism":
-	from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar, data, make_h0
+    from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar, data, make_h0
 elif options.MODEL == "RegularExpression":
-	from LOTlib.Examples.RegularExpression.RegularExpressionInferece import grammar, data, make_h0
+    from LOTlib.Examples.RegularExpression.RegularExpressionInferece import grammar, data, make_h0
 else:
-	assert false, "Unimplemented model: %s" % options.MODEL
+    assert false, "Unimplemented model: %s" % options.MODEL
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # MPI run mh_sample
@@ -52,11 +52,11 @@ out_aggregate  = ParallelBufferedIO(options.OUT + "-aggregate.txt")
 
 def run_one(iteration, nchains, temperature):
 
-	sampler = MultipleChainMCMC(make_h0, data, steps=options.SAMPLES, nchains=nchains, likelihood_temperature=temperature)
-	
-	# Run evaluate on it, printing to the right locations
-	evaluate_sampler(sampler, prefix="\t".join(map(str, [options.MODEL, iteration, nchains, temperature])),  out_hypotheses=out_hypotheses, out_aggregate=out_aggregate)
- 
+    sampler = MultipleChainMCMC(make_h0, data, steps=options.SAMPLES, nchains=nchains, likelihood_temperature=temperature)
+
+    # Run evaluate on it, printing to the right locations
+    evaluate_sampler(sampler, prefix="\t".join(map(str, [options.MODEL, iteration, nchains, temperature])),  out_hypotheses=out_hypotheses, out_aggregate=out_aggregate)
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Create all parameters
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -78,5 +78,3 @@ out_hypotheses.close()
 out_aggregate.close()
 
 MPI_done()
-
-

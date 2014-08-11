@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-	Shared functions for symbolic regression. 
+        Shared functions for symbolic regression.
 """
 import LOTlib
 from LOTlib.Grammar import Grammar
@@ -20,11 +20,3 @@ from random import randint
 
 
 #G.add_rule('CONSTANT', '', ['*gaussian*'], 10.0) ##TODO: HIGHLY EXPERIMENTAL
-
-
-
-
-	
-	
-	
-	

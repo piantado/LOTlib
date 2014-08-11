@@ -2,10 +2,10 @@
 
 """
 
-	 A demo of "syntax" learning using a SimpleGenerativeHypothesis.
-	 
-	 This searches over probabilistic generating functions, running them forward to estimate
-	 the likelihood of the data. Very very simple. 
+         A demo of "syntax" learning using a SimpleGenerativeHypothesis.
+
+         This searches over probabilistic generating functions, running them forward to estimate
+         the likelihood of the data. Very very simple.
 """
 import LOTlib.Miscellaneous
 from LOTlib.Grammar import Grammar
@@ -19,7 +19,7 @@ data = {
         'N V'       : NDATA,
         'D N V'     : NDATA,
         'D N V N'   : NDATA,
-        'D N V D N' : NDATA,         
+        'D N V D N' : NDATA,
 }
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -71,7 +71,5 @@ h0 = SimpleGenerativeHypothesis(grammar )
 
 ## populate the finite sample by running the sampler for this many steps
 for h in mh_sample(h0, data, 100000, skip=100):
-	print h.posterior_score, h.prior, h.likelihood, h
-	print h.llcounts
-	
-        
+    print h.posterior_score, h.prior, h.likelihood, h
+    print h.llcounts

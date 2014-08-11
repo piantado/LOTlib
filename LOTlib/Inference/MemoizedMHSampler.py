@@ -9,10 +9,10 @@ class MemoizedMHSampler(MHSampler):
     """
     def __init__(self, h0,  data, memoize=Infinity, **kwargs):
         MHSampler.__init__(self, h0, data, **kwargs)
-        
+
         # self.mem stores return of compute_posterior
         self.mem = LRUCache(maxsize=memoize)
-        
+
     def compute_posterior(self, h, data):
         if h in self.mem:
             ret = self.mem[h]
@@ -24,12 +24,11 @@ class MemoizedMHSampler(MHSampler):
             return ret
 
 if __name__ == "__main__":
-    
+
     from LOTlib.Examples.Number.Shared import generate_data, NumberExpression, grammar, get_knower_pattern
-    
+
     data = generate_data(100)
-    h0 = NumberExpression(grammar)    
+    h0 = NumberExpression(grammar)
     sampler = MemoizedMHSampler(h0, data, steps=1000)
     for h in sampler:
         pass #print q(get_knower_pattern(h)), h.posterior_score, h.prior, h.likelihood, q(h), sampler.acceptance_count, sampler.acceptance_ratio()
-    
