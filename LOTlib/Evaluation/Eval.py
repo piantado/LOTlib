@@ -1,12 +1,12 @@
 """
-    Routines for evaling 
+    Routines for evaling
 """
 import sys
 
 from LOTlib.Miscellaneous import raise_exception
 from EvaluationException import EvaluationException
 
-# All of these are defaulty in the context for eval. 
+# All of these are defaulty in the context for eval.
 from LOTlib.Primitives.Arithmetic import *
 from LOTlib.Primitives.Combinators import *
 from LOTlib.Primitives.Features import *
@@ -20,26 +20,26 @@ from LOTlib.Primitives.Trees import *
 
 def register_primitive(function, name=None):
     """
-        This allows us to load new functions into the evaluation environment. 
+        This allows us to load new functions into the evaluation environment.
         Defaultly all in LOTlib.Primitives are imported. However, we may want to add our
         own functions, and this makes that possible. As in,
-        
+
         register_primitive(flatten)
-        
-        or 
-        
+
+        or
+
         register_primitive(flatten, name="myflatten")
-        
+
         where flatten is a function that is defined in the calling context and name
         specifies that it takes a different name when evaled in LOTlib
-        
+
         TODO: Add more convenient means for importing more methods
     """
-    
+
     if name is None:
         name = function.__name__
-    
-    sys.modules['__builtin__'].__dict__[name] = function 
+
+    sys.modules['__builtin__'].__dict__[name] = function
 
 
 """
@@ -64,23 +64,23 @@ def Y_bounded(f):
 def Ystar(*l):
     """
     The Y* combinator for mutually recursive functions. Holy shit.
-    
+
     (define (Y* . l)
           ((lambda (u) (u u))
             (lambda (p) (map (lambda (li) (lambda x (apply (apply li (p p)) x))) l))))
-   
-    See: 
+
+    See:
     http://okmij.org/ftp/Computation/fixed-point-combinators.html]
     http://stackoverflow.com/questions/4899113/fixed-point-combinator-for-mutually-recursive-functions
-    
+
     E.g., here is even/odd:
-    
+
     even,odd = Ystar( lambda e,o: lambda x: (x==0) or o(x-1), \
                           lambda e,o: lambda x: (not x==0) and e(x-1) )
-                          
+
         Note that we require a lambda e,o on the outside so that these can have names inside.
     """
-    
+
     return (lambda u: u(u))(lambda p: map(lambda li: lambda x: apply(li, p(p))(x), l))
 
 
@@ -91,24 +91,24 @@ def Ystar(*l):
 
 def evaluate_expression(e, args=['x'], recurse="L_", addlambda=True):
     """
-    This evaluates an expression. If 
+    This evaluates an expression. If
     - e         - the expression itself -- either a str or something that can be made a str
     - addlambda - should we include wrapping lambda arguments in args? lambda x: ...
     - recurse   - if addlambda, this is a special primitive name for recursion
     - args      - if addlambda, a list of all arguments to be added
-    
+
     g = evaluate_expression("x*L(x-1) if x > 1 else 1")
     g(12)
     """
-    
-    if not isinstance(e,str): # TODO: Or assert? 
+
+    if not isinstance(e,str): # TODO: Or assert?
         e = str(e)
-   
+
     try:
         if addlambda:
             f = eval('lambda ' + recurse + ': lambda ' + ','.join(args) + ' :' + e)
             return Y_bounded(f)
-        else: 
+        else:
             f = eval(e)
             return f
     except Exception as e:

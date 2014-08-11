@@ -7,7 +7,7 @@ from Primitives import LOTlib_primitive
 @LOTlib_primitive
 def apply_(f,*args):
     return f(*args)
-    
+
 @LOTlib_primitive
 def cons_(x,y):
     try: return [x,y]

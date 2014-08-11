@@ -1,6 +1,6 @@
 
 """
-	An example of generating quantified logic with lambdas. See FOL.py for inference about first-order logic
+        An example of generating quantified logic with lambdas. See FOL.py for inference about first-order logic
 """
 
 from LOTlib.Grammar import Grammar
@@ -16,7 +16,7 @@ grammar.add_rule('BOOL', 'or_', ['BOOL', 'BOOL'], 1.0)
 grammar.add_rule('BOOL', 'not_', ['BOOL'], 1.0)
 
 grammar.add_rule('BOOL', 'exists_', ['FUNCTION', 'SET'], 0.50)
-grammar.add_rule('BOOL', 'forall_', ['FUNCTION', 'SET'], 0.50) 
+grammar.add_rule('BOOL', 'forall_', ['FUNCTION', 'SET'], 0.50)
 
 grammar.add_rule('SET', 'S', None, 1.0)
 
@@ -26,7 +26,6 @@ grammar.BV_WEIGHT = 2.0 # When we introduce bound variables, they have this (rel
 
 
 for i in xrange(1000):
-	x = grammar.generate('BOOL')
-	
-	print x.log_probability(), x
-	
+    x = grammar.generate('BOOL')
+
+    print x.log_probability(), x

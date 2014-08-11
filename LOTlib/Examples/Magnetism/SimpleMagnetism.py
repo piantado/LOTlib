@@ -1,13 +1,13 @@
 """
-	A very simple case of predicate invention, inspired by 
-	
-	T. D. Ullman, N. D. Goodman and J. B. Tenenbaum (2012), Theory learning as stochastic search in the language of thought. Cognitive Development. 
-	
-	Here, we invent simple predicates whose value is determined by a set membership (BASE-SET), and express logical
-	concepts over those predicates. Data is set up to be like magnetism, with positives (pi) and negatives (ni) that interact
-	with each other but not within groups. 
-	
-	This is simple because there's only two types of things, and you observe all interactions. See ComplexMagnetism.py for a more complex case...
+        A very simple case of predicate invention, inspired by
+
+        T. D. Ullman, N. D. Goodman and J. B. Tenenbaum (2012), Theory learning as stochastic search in the language of thought. Cognitive Development.
+
+        Here, we invent simple predicates whose value is determined by a set membership (BASE-SET), and express logical
+        concepts over those predicates. Data is set up to be like magnetism, with positives (pi) and negatives (ni) that interact
+        with each other but not within groups.
+
+        This is simple because there's only two types of things, and you observe all interactions. See ComplexMagnetism.py for a more complex case...
 """
 
 from LOTlib.Miscellaneous import qq
@@ -46,30 +46,30 @@ grammar.add_rule('BASE-OBJECT', qq('p1'), None, 1.0)
 grammar.add_rule('BASE-OBJECT', qq('p2'), None, 1.0)
 grammar.add_rule('BASE-OBJECT', qq('n1'), None, 1.0)
 grammar.add_rule('BASE-OBJECT', qq('n2'), None, 1.0)
-	
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Set up data -- true output means attraction (p=positive; n=negative)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-data = [ FunctionData(input=[ "p1", "n1" ], output=True), 
-		 FunctionData(input=[ "p1", "n2" ], output=True), 
-		 FunctionData(input=[ "p1", "p1" ], output=False), 
-		 FunctionData(input=[ "p1", "p2" ], output=False),
- 
- 		 FunctionData(input=[ "p2", "n1" ], output=True),
- 		 FunctionData(input=[ "p2", "n2" ], output=True),
- 		 FunctionData(input=[ "p2", "p1" ], output=False),
- 		 FunctionData(input=[ "p2", "p2" ], output=False),
- 		  
- 		 FunctionData(input=[ "n1", "n1" ], output=False),
- 		 FunctionData(input=[ "n1", "n2" ], output=False),
- 		 FunctionData(input=[ "n1", "p1" ], output=True),
- 		 FunctionData(input=[ "n1", "p2" ], output=True),
- 		  
- 		 FunctionData(input=[ "n2", "n1" ], output=False),
- 		 FunctionData(input=[ "n2", "n2" ], output=False),
- 		 FunctionData(input=[ "n2", "p1" ], output=True),
-		 FunctionData(input=[ "n2", "p2" ], output=True)]
+data = [ FunctionData(input=[ "p1", "n1" ], output=True),
+                 FunctionData(input=[ "p1", "n2" ], output=True),
+                 FunctionData(input=[ "p1", "p1" ], output=False),
+                 FunctionData(input=[ "p1", "p2" ], output=False),
+
+                 FunctionData(input=[ "p2", "n1" ], output=True),
+                 FunctionData(input=[ "p2", "n2" ], output=True),
+                 FunctionData(input=[ "p2", "p1" ], output=False),
+                 FunctionData(input=[ "p2", "p2" ], output=False),
+
+                 FunctionData(input=[ "n1", "n1" ], output=False),
+                 FunctionData(input=[ "n1", "n2" ], output=False),
+                 FunctionData(input=[ "n1", "p1" ], output=True),
+                 FunctionData(input=[ "n1", "p2" ], output=True),
+
+                 FunctionData(input=[ "n2", "n1" ], output=False),
+                 FunctionData(input=[ "n2", "n2" ], output=False),
+                 FunctionData(input=[ "n2", "p1" ], output=True),
+                 FunctionData(input=[ "n2", "p2" ], output=True)]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Standard exports
@@ -77,19 +77,19 @@ from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 make_h0 = lambda: LOTHypothesis(grammar, args=['x', 'y'], ALPHA=0.999) # alpha here trades off with the amount of data. Currently assuming no noise, but that's not necessary
 
 if __name__ == "__main__":
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	# Run mcmc
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	
-	from LOTlib.Proposals.RegenerationProposal import *
-	#mp = MixtureProposal([RegenerationProposal(grammar), InsertDeleteProposal(grammar)] )
-	mp = RegenerationProposal(grammar)
-		
-	h0 = LOTHypothesis(grammar, args=['x', 'y'], ALPHA=0.999, proposal_function=mp) # alpha here trades off with the amount of data. Currently assuming no noise, but that's not necessary
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Run mcmc
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	
-	from LOTlib.Inference.MetropolisHastings import mh_sample
-	for h in mh_sample(h0, data, 4000000, skip=100):
-		print h.posterior_score, h.likelihood, h.prior,  cleanFunctionNodeString(h)
-		print map( lambda d: h(*d.input), data)
-		print "\n"
+    from LOTlib.Proposals.RegenerationProposal import *
+    #mp = MixtureProposal([RegenerationProposal(grammar), InsertDeleteProposal(grammar)] )
+    mp = RegenerationProposal(grammar)
+
+    h0 = LOTHypothesis(grammar, args=['x', 'y'], ALPHA=0.999, proposal_function=mp) # alpha here trades off with the amount of data. Currently assuming no noise, but that's not necessary
+
+
+    from LOTlib.Inference.MetropolisHastings import mh_sample
+    for h in mh_sample(h0, data, 4000000, skip=100):
+        print h.posterior_score, h.likelihood, h.prior,  cleanFunctionNodeString(h)
+        print map( lambda d: h(*d.input), data)
+        print "\n"

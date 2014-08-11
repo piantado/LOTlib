@@ -1,5 +1,5 @@
 """
-	A finite English grammar that's used to test functions in FunctionNode
+        A finite English grammar that's used to test functions in FunctionNode
 """
 
 from LOTlib.Grammar import Grammar
@@ -32,8 +32,8 @@ g.add_rule('DET', 'the', None, 0.5)
 g.add_rule('DET', 'a', None, 0.5)
 
 def log_probability(tree):
-	return 0 # TODO: stub
+    return 0 # TODO: stub
 
 if __name__ == "__main__":
-	for i in xrange(100):
-		print(g.generate())
+    for i in xrange(100):
+        print(g.generate())

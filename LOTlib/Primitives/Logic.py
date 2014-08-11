@@ -99,8 +99,8 @@ def exists(F,S):
         if F(s): return True
     return False
 
-@LOTlib_primitive    
-def not_forall_(F,S): return not forall(F,S)    
+@LOTlib_primitive
+def not_forall_(F,S): return not forall(F,S)
 
 @LOTlib_primitive
 def forall_(F,S): return forall(F,S)
@@ -110,7 +110,7 @@ def forall(F,S):
     for s in S:
         if not F(s): return False
     return True
-    
+
 @LOTlib_primitive
 def iota_(F,S):
     """
@@ -122,4 +122,3 @@ def iota_(F,S):
             if match is None: match = s
             else: return None  # We matched more than one
     return match
-        

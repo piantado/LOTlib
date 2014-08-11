@@ -1,5 +1,5 @@
 """
-	A finite English grammar to test the lp_regenerate_propose_to() function
+        A finite English grammar to test the lp_regenerate_propose_to() function
 """
 
 from LOTlib.Grammar import Grammar
@@ -36,8 +36,8 @@ g.add_rule('INTERJECTION', 'fu*k pi', None, 0.6)
 
 
 def log_probability(tree):
-	return 0 # TODO: stub
+    return 0 # TODO: stub
 
 if __name__ == "__main__":
-	for i in xrange(100):
-		print(g.generate())
+    for i in xrange(100):
+        print(g.generate())

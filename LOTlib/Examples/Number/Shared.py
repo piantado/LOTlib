@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-	Shared functions and variables for the number learning model. 
+        Shared functions and variables for the number learning model.
 """
 
 import LOTlib
@@ -55,7 +55,7 @@ grammar.add_rule('SET', 'select_',     ['SET'], 1.0)
 
 grammar.add_rule('SET', 'x',     None, 4.0)
 
-grammar.add_rule('WORD', 'L_',        ['SET'], 1.0) 
+grammar.add_rule('WORD', 'L_',        ['SET'], 1.0)
 
 grammar.add_rule('WORD', 'next_', ['WORD'], 1.0)
 grammar.add_rule('WORD', 'prev_', ['WORD'], 1.0)
@@ -76,55 +76,55 @@ grammar.add_rule('WORD', 'ten_', None, 0.10)
 #Define a class for running MH
 
 class NumberExpression(LOTHypothesis):
-	#__module__ = os.path.splitext(os.path.basename(__file__))[0]  # So that when we pickle this, we know where to read from
- 	
-	def __init__(self, grammar, value=None, f=None, proposal_function=None, **kwargs): 
-		LOTHypothesis.__init__(self,grammar,proposal_function=proposal_function, **kwargs)
-		
-		if value is None: self.set_value(grammar.generate('WORD'), f)
-		else:             self.set_value(value, f)
-		
-	def copy(self):
-		""" Must define this else we return "FunctionHypothesis" as a copy. We need to return a NumberExpression """
-		return NumberExpression(grammar, value=self.value.copy(), prior_temperature=self.prior_temperature)
-		
-	def compute_prior(self): 
-		"""
-			Compute the number model prior
-		"""
-		if self.value.count_nodes() > 20:
-			self.prior = -Infinity
-		else: 
-			if self.value.contains_function("L_"): recursion_penalty = GAMMA
-			else:                                  recursion_penalty = LG_1MGAMMA
-			
-			if USE_RR_PRIOR: # compute the prior with either RR or not.
-				self.prior = (recursion_penalty + grammar.RR_prior(self.value))  / self.prior_temperature
-			else:
-				self.prior = (recursion_penalty + self.value.log_probability())  / self.prior_temperature
-			
-			self.posterior_score = self.prior + self.likelihood
-			
-		return self.prior
-	
-	def compute_single_likelihood(self, datum):
-		"""
-			Computes the likelihood of data.
-			TODO: Make sure this precisely matches the number paper. 
-			
-		"""
-		response = self(*datum.input)
-		if response == 'undef' or response == None:
-			return log(1.0/10.0) # if undefined, just sample from a base distribution
-		else:
-			return log( (1.0 - ALPHA)/10.0 + ALPHA * ( response == datum.output ) )
-		
-	
-	# must wrap these as SimpleExpressionFunctions
-	def enumerative_proposer(self):
-		for k in grammar.enumerate_pointwise(self.value):
-			yield NumberExpression(value=k)
-	
+    #__module__ = os.path.splitext(os.path.basename(__file__))[0]  # So that when we pickle this, we know where to read from
+
+    def __init__(self, grammar, value=None, f=None, proposal_function=None, **kwargs):
+        LOTHypothesis.__init__(self,grammar,proposal_function=proposal_function, **kwargs)
+
+        if value is None: self.set_value(grammar.generate('WORD'), f)
+        else:             self.set_value(value, f)
+
+    def copy(self):
+        """ Must define this else we return "FunctionHypothesis" as a copy. We need to return a NumberExpression """
+        return NumberExpression(grammar, value=self.value.copy(), prior_temperature=self.prior_temperature)
+
+    def compute_prior(self):
+        """
+                Compute the number model prior
+        """
+        if self.value.count_nodes() > 20:
+            self.prior = -Infinity
+        else:
+            if self.value.contains_function("L_"): recursion_penalty = GAMMA
+            else:                                  recursion_penalty = LG_1MGAMMA
+
+            if USE_RR_PRIOR: # compute the prior with either RR or not.
+                self.prior = (recursion_penalty + grammar.RR_prior(self.value))  / self.prior_temperature
+            else:
+                self.prior = (recursion_penalty + self.value.log_probability())  / self.prior_temperature
+
+            self.posterior_score = self.prior + self.likelihood
+
+        return self.prior
+
+    def compute_single_likelihood(self, datum):
+        """
+                Computes the likelihood of data.
+                TODO: Make sure this precisely matches the number paper.
+
+        """
+        response = self(*datum.input)
+        if response == 'undef' or response == None:
+            return log(1.0/10.0) # if undefined, just sample from a base distribution
+        else:
+            return log( (1.0 - ALPHA)/10.0 + ALPHA * ( response == datum.output ) )
+
+
+    # must wrap these as SimpleExpressionFunctions
+    def enumerative_proposer(self):
+        for k in grammar.enumerate_pointwise(self.value):
+            yield NumberExpression(value=k)
+
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
 # The target
@@ -133,51 +133,50 @@ class NumberExpression(LOTHypothesis):
 #target = NumberExpression(value="if_(cardinality1_(x), one_, two_)")
 
 # NOTE: Not necessary, but only for testing -- these are discovered in the real model via search
-#one_knower   = NumberExpression("one_ if cardinality1_(x) else undef") 
-#two_knower   = NumberExpression("one_ if cardinality1_(x) else ( two_ if cardinality2_(x) else undef )") 
-#three_knower = NumberExpression("one_ if cardinality1_(x) else ( two_ if (cardinality2_(x) ) else ( three_ if (cardinality3_(x) else undef) )") 
-#four_knower  = NumberExpression("one_ if cardinality1_(x) else ( two_ if (cardinality2_(x) ) else ( three_ if (cardinality3_(x) else (four_ if (cardinality4_(x) else undef) ) )") 
+#one_knower   = NumberExpression("one_ if cardinality1_(x) else undef")
+#two_knower   = NumberExpression("one_ if cardinality1_(x) else ( two_ if cardinality2_(x) else undef )")
+#three_knower = NumberExpression("one_ if cardinality1_(x) else ( two_ if (cardinality2_(x) ) else ( three_ if (cardinality3_(x) else undef) )")
+#four_knower  = NumberExpression("one_ if cardinality1_(x) else ( two_ if (cardinality2_(x) ) else ( three_ if (cardinality3_(x) else (four_ if (cardinality4_(x) else undef) ) )")
 
 def get_knower_pattern(ne):
-	"""
-		This computes a string describing the behavior of this knower-level
-	"""
-	out = ''
-	resp = [ ne(set(sample_sets_of_objects(n, all_objects))) for n in xrange(1,10)]
-	return ''.join([ str(word_to_number[x]) if (x is not None and x is not 'undef' ) else 'U' for x in resp])
-	
+    """
+            This computes a string describing the behavior of this knower-level
+    """
+    out = ''
+    resp = [ ne(set(sample_sets_of_objects(n, all_objects))) for n in xrange(1,10)]
+    return ''.join([ str(word_to_number[x]) if (x is not None and x is not 'undef' ) else 'U' for x in resp])
+
 
 def generate_data(data_size):
-	"""
-		Sample some data according to the target
-	"""
-	data = []
-	for i in range(data_size):
-		# how many in this set
-		set_size = weighted_sample( range(1,10+1), probs=[7187, 1484, 593, 334, 297, 165, 151, 86, 105, 112] )
-		# get the objects in the current set
-		s = set(sample_sets_of_objects(set_size, all_objects))
-		
-		# sample according to the target
-		if random() < ALPHA: r = WORDS[len(s)-1]
-		else:                r = weighted_sample( WORDS )
-		
-		# and append the sampled utterance
-		data.append(FunctionData( input=[s], output=r) ) # convert to "FunctionData" and store
-	return data
+    """
+            Sample some data according to the target
+    """
+    data = []
+    for i in range(data_size):
+        # how many in this set
+        set_size = weighted_sample( range(1,10+1), probs=[7187, 1484, 593, 334, 297, 165, 151, 86, 105, 112] )
+        # get the objects in the current set
+        s = set(sample_sets_of_objects(set_size, all_objects))
 
-	
+        # sample according to the target
+        if random() < ALPHA: r = WORDS[len(s)-1]
+        else:                r = weighted_sample( WORDS )
+
+        # and append the sampled utterance
+        data.append(FunctionData( input=[s], output=r) ) # convert to "FunctionData" and store
+    return data
+
+
 # # # # # # # # # # # # # # # # # # # # # # # # #
 # All objects -- not very exciting
 
 #here this is really just a dummy -- one type of object, which is replicated in sample_sets_of_objects
-all_objects = make_all_objects(shape=['duck'])  
+all_objects = make_all_objects(shape=['duck'])
 
 # all possible data sets on 10 objects
-all_possible_data = [ ('', set(sample_sets_of_objects(n, all_objects))) for n in xrange(1,10) ] 
+all_possible_data = [ ('', set(sample_sets_of_objects(n, all_objects))) for n in xrange(1,10) ]
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
 # Standard exports
 
 make_h0 = lambda: NumberExpression(grammar)
-

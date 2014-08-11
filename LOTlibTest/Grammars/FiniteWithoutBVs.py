@@ -1,5 +1,5 @@
 """
-	A small finite grammar without bound variables.
+        A small finite grammar without bound variables.
 """
 
 
@@ -20,10 +20,10 @@ g.add_rule("V", "kills", None, 1)
 g.add_rule("V", "eats", None, 1)
 
 def log_probability(tree):
-	# every tree has an equal probability of being generated
-	return math.log(0.5*0.5*(1.0/3)*0.5*0.5)
+    # every tree has an equal probability of being generated
+    return math.log(0.5*0.5*(1.0/3)*0.5*0.5)
 
 
 if __name__ == "__main__":
-	for i in xrange(100):
-		print(g.generate())
+    for i in xrange(100):
+        print(g.generate())

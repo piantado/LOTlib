@@ -1,5 +1,5 @@
 """
-	Just create some combinators and reduce them
+        Just create some combinators and reduce them
 """
 
 from LOTlib.Grammar import Grammar
@@ -20,14 +20,13 @@ from LOTlib.Evaluation.CombinatoryLogic import combinator_reduce
 from LOTlib.Evaluation.EvaluationException import EvaluationException
 
 for _ in range(10000):
-	
-	t = G.generate()
-	
-	lst = t.liststring()
-	
-	print lst, "\t->\t",
-	try:
-		print combinator_reduce(lst)
-	except EvaluationException as e:
-		print "*Probable-NON-HALT*"
-	
+
+    t = G.generate()
+
+    lst = t.liststring()
+
+    print lst, "\t->\t",
+    try:
+        print combinator_reduce(lst)
+    except EvaluationException as e:
+        print "*Probable-NON-HALT*"

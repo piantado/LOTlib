@@ -30,14 +30,14 @@ data.append(  UtteranceData( utterance=str2sen('every woman smiled'), context=Co
 data.append(  UtteranceData( utterance=str2sen('every man laughed'), context=Context(OBJECTS, BASE_FACTS+[("LAUGHED", "JOHN"),("LAUGHED", "BILL")]), possible_utterances=possible_utterances  ))
 data.append(  UtteranceData( utterance=str2sen('every woman laughed'), context=Context(OBJECTS, BASE_FACTS+[("LAUGHED", "MARY"),("LAUGHED", "SUSAN")]), possible_utterances=possible_utterances  ))
 
-# Just treat each possible utterance as 
-for di in data: 
-	possible_utterances.append( di.utterance )
+# Just treat each possible utterance as
+for di in data:
+    possible_utterances.append( di.utterance )
 
 # keep track of all the words
 all_words = set()
-for di in data: 
-	for w in di.utterance: all_words.add(w)
+for di in data:
+    for w in di.utterance: all_words.add(w)
 
 possible_utterances.append( str2sen('mary smiled'))
 all_words.add('mary')

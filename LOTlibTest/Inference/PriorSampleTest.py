@@ -7,19 +7,19 @@ import unittest
 
 from LOTlib.Inference.PriorSample import *
 class PriorSampleTest(unittest.TestCase):
-	
-	# initialization that happens before each test is carried out
-	def setUp(self):
-		pass
-	
-	
-	
-	
-	
-	# function that is executed after each test is carried out
-	def tearDown(self):
-		pass
-	
+
+    # initialization that happens before each test is carried out
+    def setUp(self):
+        pass
+
+
+
+
+
+    # function that is executed after each test is carried out
+    def tearDown(self):
+        pass
+
 
 
 
@@ -27,8 +27,4 @@ class PriorSampleTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-	unittest.main()
-
-
-
-
+    unittest.main()

@@ -23,7 +23,7 @@ data_sd = 0.1 # the SD of the data
 NDATA = 50
 MEMOIZE = 1000 # 0 means don't memoize
 
-## The target function for symbolic regression 
+## The target function for symbolic regression
 target = lambda x: 3.*x + sin(4.3/x)
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -36,4 +36,3 @@ h0.CONSTANT_VALUES = numpy.zeros(NCONSTANTS) ## TODO: Move this to an itializer
 from LOTlib.Inference.MetropolisHastings import mh_sample
 for h in mh_sample(h0, data, STEPS, skip=SKIP, trace=False, debug=False, memoize=MEMOIZE):
     print h.posterior_score, h.likelihood, h.prior, h.CONSTANT_VALUES, qq(h)
-    

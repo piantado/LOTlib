@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-	Use optimal adaptation code to adapt show possible adpatations to the NAND grammar
+        Use optimal adaptation code to adapt show possible adpatations to the NAND grammar
 
 """
 import pickle
@@ -29,14 +29,14 @@ print "# Rescored hypotheses!"
 ## Generate a set of subtrees
 subtrees = set()
 for h in lot_iter(hypotheses):
-	for x in h.value: # for each subtree
-		for i in xrange(N_SUBTREES_PER_NODE):  #take subtree_multiplier random partial subtrees
-			subtrees.add(   x.random_partial_subtree(p=SUBTREE_P)   )
+    for x in h.value: # for each subtree
+        for i in xrange(N_SUBTREES_PER_NODE):  #take subtree_multiplier random partial subtrees
+            subtrees.add(   x.random_partial_subtree(p=SUBTREE_P)   )
 print "# Generated", len(subtrees), "subtrees"
 
 # If you want to see some:
 #for h,p in zip(hypotheses, posteriors[1]):
-	#print p, h
+    #print p, h
 
 from LOTlib.sandbox.OptimalGrammarAdaptation import print_subtree_adaptations
 ## And call from OptimalGrammarAdaptation
