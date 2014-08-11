@@ -39,14 +39,16 @@ class MultipleChainMCMC(object):
             Return the mean acceptance rate of all chains
         """
         return mean([c.acceptance_ratio() for c in self.chains])
-    
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
 if __name__ == "__main__":
+    
     from LOTlib.Examples.Number.Shared import generate_data, NumberExpression, grammar
     data = generate_data(300)
     
     make_h0 = lambda : NumberExpression(grammar)
     
-    sampler = MultipleChainMCMC(make_h0, data)
+    sampler = MultipleChainMCMC(make_h0, data, steps=2000, nchains=100)
     for h in sampler:
         print h.posterior_score, h
         

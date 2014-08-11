@@ -26,7 +26,7 @@ class MHSampler():
 		
 		If a proposer is specific in __init__, it should return a *new copy* of the object
 	"""
-	def __init__(self, current_sample, data, steps=Infinity, proposer=None, skip=0, prior_temperature=1.0, likelihood_temperature=1.0, acceptance_temperature=1.0, trace=False, memoize=0):
+	def __init__(self, current_sample, data, steps=Infinity, proposer=None, skip=0, prior_temperature=1.0, likelihood_temperature=1.0, acceptance_temperature=1.0, trace=False):
 		self.__dict__.update(locals())
 		
 		# was the last proposal accepted
@@ -78,7 +78,7 @@ class MHSampler():
 		pass
 	
 	def next(self):
-		if LOTlib.SIG_INTERRUPTED or self.samples_yielded > self.steps:
+		if LOTlib.SIG_INTERRUPTED or self.samples_yielded >= self.steps:
 			raise StopIteration
 		else:
 			for _ in lot_iter(xrange(self.skip+1)):
@@ -120,11 +120,12 @@ if __name__ == "__main__":
 	
 	from LOTlib.Examples.Number.Shared import generate_data, NumberExpression, grammar, get_knower_pattern
 	
-	data = generate_data(100)
+	data = generate_data(300)
 	h0 = NumberExpression(grammar)	
-	sampler = MHSampler(h0, data, steps=1000)
+	sampler = MHSampler(h0, data, steps=2000)
 	for h in sampler:
-		print q(get_knower_pattern(h)), h.posterior_score, h.prior, h.likelihood, q(h), sampler.acceptance_count, sampler.acceptance_ratio()
+		print h.posterior_score, h
+		#print q(get_knower_pattern(h)), h.posterior_score, h.prior, h.likelihood, q(h), sampler.acceptance_count, sampler.acceptance_ratio()
 	
 
 
