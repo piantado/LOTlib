@@ -13,7 +13,7 @@ from numpy import mean
 
 
 class MultipleChainMCMC(object):
-
+    
     def __init__(self, make_h0, data, steps=Infinity, nchains=10, **kwargs):
 
         self.nchains = nchains

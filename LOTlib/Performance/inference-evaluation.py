@@ -85,7 +85,7 @@ def run_one(iteration, sampler_type):
     elif sampler_type == 'particle_swarm_prior_sample_t_C':        sampler = ParticleSwarmPriorResample(make_h0, data, steps=options.SAMPLES, within_steps=100, temp_sd=1.0)
     elif sampler_type == 'multiple_chains_A':       sampler = MultipleChainMCMC(make_h0, data, steps=options.SAMPLES, nchains=5)
     elif sampler_type == 'multiple_chains_B':       sampler = MultipleChainMCMC(make_h0, data, steps=options.SAMPLES, nchains=10)
-    elif sampler_type == 'multiple_chains_C':       sampler = MultipleChainMCMC(make_h0, data, steps=options.SAMPLES, nchains=100)
+    elif sampler_type == 'multiple_chains_C':       sampler = MultipleChainMCMC(make_h0, data, steps=options.SAMPLES, nchains=50)
     elif sampler_type == 'parallel_tempering_A':    sampler = ParallelTemperingSampler(make_h0, data, steps=options.SAMPLES, within_steps=10, temperatures=[1.0, 1.025, 1.05], swaps=1, yield_only_t0=False)
     elif sampler_type == 'parallel_tempering_B':    sampler = ParallelTemperingSampler(make_h0, data, steps=options.SAMPLES, within_steps=10, temperatures=[1.0, 1.25, 1.5], swaps=1, yield_only_t0=False)
     elif sampler_type == 'parallel_tempering_C':    sampler = ParallelTemperingSampler(make_h0, data, steps=options.SAMPLES, within_steps=10, temperatures=[1.0, 2.0, 5.0], swaps=1, yield_only_t0=False)
@@ -104,13 +104,13 @@ def run_one(iteration, sampler_type):
 # For each process, create the lsit of parameter
 params = [ list(g) for g in product(range(options.REPETITONS), [
                                                                 'multiple_chains_A', 'multiple_chains_B', 'multiple_chains_C',
-                                                                'taboo_A', 'taboo_B', 'taboo_C',
-                                                                'particle_swarm_s_A', 'particle_swarm_s_B', 'particle_swarm_s_C',
-                                                                'particle_swarm_t_A', 'particle_swarm_t_B', 'particle_swarm_t_C',
-                                                                'particle_swarm_prior_sample_s_A', 'particle_swarm_prior_sample_s_B', 'particle_swarm_prior_sample_s_C',
-                                                                'particle_swarm_prior_sample_t_A', 'particle_swarm_prior_sample_t_B', 'particle_swarm_prior_sample_t_C',
-                                                                'mh_sample_A', 'mh_sample_B', 'mh_sample_C', 'mh_sample_D', 'mh_sample_E',
-                                                                 'parallel_tempering_A', 'parallel_tempering_B', 'parallel_tempering_C',
+                                                                # 'taboo_A', 'taboo_B', 'taboo_C',
+                                                               # 'particle_swarm_s_A', 'particle_swarm_s_B', 'particle_swarm_s_C',
+                                                               # 'particle_swarm_t_A', 'particle_swarm_t_B', 'particle_swarm_t_C',
+                                                               # 'particle_swarm_prior_sample_s_A', 'particle_swarm_prior_sample_s_B', 'particle_swarm_prior_sample_s_C',
+                                                               # 'particle_swarm_prior_sample_t_A', 'particle_swarm_prior_sample_t_B', 'particle_swarm_prior_sample_t_C',
+                                                                #'mh_sample_A', 'mh_sample_B', 'mh_sample_C', 'mh_sample_D', 'mh_sample_E',
+                                                               #  'parallel_tempering_A', 'parallel_tempering_B', 'parallel_tempering_C',
                                                                 ])]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -123,7 +123,6 @@ MPI_map(run_one, params, random_order=False)
 # Clean up
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-out_hypotheses.close()
-out_aggregate.close()
-
-MPI_done()
+#out_hypotheses.close()
+#out_aggregate.close()
+#MPI_done()

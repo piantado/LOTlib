@@ -228,15 +228,19 @@ class FunctionNode(object):
     def __ne__(self, other):
         return (not self.__eq__(other))
 
-    def __eq__(self, other, bv_dict=dict()):
+    def __eqq__(self, other):
+         return isFunctionNode(other) and (cmp(self, other) == 0)
+
+    def __eq__(self, other, bv_dict=None):
         """
                 Tests equality of FunctionNodes up to bound variables.
 
                 NOTE: BV equality has not been tested yet.
-
-                NOTE: That two trees may have identical str(..) but be structured very differently, so this old way is no good:
-                                return isFunctionNode(other) and (cmp(self, other) == 0)
+        
         """
+        
+        if bv_dict is None:
+            bv_dict = dict()
 
         # If they have different names, they aren't equal
         if (not isFunctionNode(other)) or (self.name != other.name):
@@ -264,11 +268,11 @@ class FunctionNode(object):
 
         # so args must be a list
         for a,b in zip(self.args, other.args):
-            if isFunctionNode(a) and (not isFunctionNode(b) or not a.__eq__(b, bv_dict)):
+            if isFunctionNode(a):
+                if not (isFunctionNode(b) and a.__eq__(b, bv_dict)):
+                    return False
+            elif a != b: # fall back on default comparison
                 return False
-            elif a != b: # fall back on (string) __eq__
-                return False
-
 
         return True
 

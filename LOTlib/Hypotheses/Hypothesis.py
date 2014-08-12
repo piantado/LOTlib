@@ -90,10 +90,18 @@ class Hypothesis(object):
     def compute_posterior(self, d):
         """
                 Computes the posterior score by computing the prior and likelihood scores
+                
+                Defautly if the prior is -inf, we don't compute the likelihood (and "pretend" it's -Infinity).
+                This saves us from computing likelihoods on hypotheses that we know are bad. 
         """
         LOTlib.Primitives.Primitives.LOCAL_PRIMITIVE_OPS = 0 # Reset this
         p = self.compute_prior()
-        l = self.compute_likelihood(d)
+        
+        if p > -Infinity:        
+            l = self.compute_likelihood(d)
+        else:
+            l = -Infinity # This *could* be 0.0 if we wanted. Not clear what is best. 
+            
         self.posterior_score = p+l
         return [p,l]
 

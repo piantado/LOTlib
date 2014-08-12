@@ -20,6 +20,7 @@ ALPHA = 0.75 # the probability of uttering something true
 GAMMA = -30.0 # the log probability penalty for recursion
 LG_1MGAMMA = log(1.0-exp(GAMMA)) # TODO: Make numerically better
 USE_RR_PRIOR = False # Use the Rational Rules prior? If false, we just use log probability under the PCFG. NOTE: Using it is not supported under pypy
+MAX_NODES = 10 # How many FunctionNodes are allowed in a hypothesis? If we make this, say, 20, things may slow down a lot
 
 WORDS = ['one_', 'two_', 'three_', 'four_', 'five_', 'six_', 'seven_', 'eight_', 'nine_', 'ten_']
 
@@ -92,7 +93,7 @@ class NumberExpression(LOTHypothesis):
         """
                 Compute the number model prior
         """
-        if self.value.count_nodes() > 20:
+        if self.value.count_nodes() > MAX_NODES:
             self.prior = -Infinity
         else:
             if self.value.contains_function("L_"): recursion_penalty = GAMMA
@@ -102,8 +103,8 @@ class NumberExpression(LOTHypothesis):
                 self.prior = (recursion_penalty + grammar.RR_prior(self.value))  / self.prior_temperature
             else:
                 self.prior = (recursion_penalty + self.value.log_probability())  / self.prior_temperature
-
-            self.posterior_score = self.prior + self.likelihood
+        
+        self.posterior_score = self.prior + self.likelihood
 
         return self.prior
 
