@@ -228,7 +228,7 @@ class FunctionNode(object):
     def __ne__(self, other):
         return (not self.__eq__(other))
 
-    def __eqq__(self, other):
+    def __eq__OLD(self, other):
          return isFunctionNode(other) and (cmp(self, other) == 0)
 
     def __eq__(self, other, bv_dict=None):

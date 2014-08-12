@@ -1,10 +1,10 @@
 
 # A script to run all evaluation on a variety of models
 
-MPIEXEC="time mpiexec -n 5" #"mpiexec -n 16"
-SAMPLES=1000 
-PRINT_EVERY=100 #1000
-REPETITIONS=1 #25
+MPIEXEC="time nice -n 19 mpiexec -n 7" #"mpiexec -n 16"
+SAMPLES=10000
+PRINT_EVERY=1000 #1000
+REPETITIONS=10 #25
 
 for m in Number Galileo RationalRules RegularExpression SimpleMagnetism
 do
