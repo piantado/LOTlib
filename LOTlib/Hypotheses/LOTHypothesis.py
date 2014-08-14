@@ -7,7 +7,7 @@
 from FunctionHypothesis import FunctionHypothesis
 from copy import copy, deepcopy
 from LOTlib.Proposals.RegenerationProposal import RegenerationProposal
-from LOTlib.Miscellaneous import *
+from LOTlib.Miscellaneous import Infinity
 from LOTlib.DataAndObjects import FunctionData
 
 class LOTHypothesis(FunctionHypothesis):
