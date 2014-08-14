@@ -211,7 +211,7 @@ class GrammarTest(unittest.TestCase):
         gen = self.G.increment_tree('START', 3)
         # see what trees show up
         for tree in gen:
-            print tree
+            print "TREE IS: ", tree
 
     # counts the probability of the grammar manually
     # NOTE: not modular at this point, if we change our test grammar this function will return something incorrect

@@ -325,7 +325,7 @@ class Grammar:
 
         #print "Call increment_tree ", x     
         if isFunctionNode(x) and depth >= 0 and x.args is not None:
-            print "FN:", x, depth
+            # print "FN:", x, depth
 
             original_x = copy(x)
 
