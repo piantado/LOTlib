@@ -295,10 +295,10 @@ class Grammar:
         """
                 A lazy version of tree enumeration. Here, we generate all trees, starting from a rule or a nonterminal symbol.
 
-                This is constant memory
+                This is constant memory and should produce each tree *once* (However: if a grammar has multiple derivations of the same
+                str(tree), then you will see repeats!)
 
                 *x*: A node in the tree
-
                 *depth*: Depth of the tree
         """
         assert self.bv_count==0, "*** Error: increment_tree not yet implemented for bound variables."
@@ -317,7 +317,7 @@ class Grammar:
             original_x = copy(x)
 
             # go all odometer on the kids below::
-            iters = [self.increment_tree(x=y,depth=depth) if self.is_nonterminal(y) else None for y in x.args]
+            iters = [self.increment_tree(x=y,depth=depth-1) if self.is_nonterminal(y) else None for y in x.args]
             if len(iters) == 0:
                 yield copy(x)
             else:
@@ -348,7 +348,7 @@ class Grammar:
                                     continue_counting = False # done counting here
                                 elif iters[carry_pos] is not None:
                                     # reset the incrementer since we just carried
-                                    iters[carry_pos] = self.increment_tree(x=original_x.args[carry_pos],depth=depth)
+                                    iters[carry_pos] = self.increment_tree(x=original_x.args[carry_pos],depth=depth-1)
                                     x.args[carry_pos] = iters[carry_pos].next() # reset this
                                     # and just continue your loop over i (which processes the carry)
 
@@ -474,10 +474,13 @@ class Grammar:
 if __name__ == "__main__":
     pass
 
-    from LOTlib.Examples.RationalRules.Shared import grammar
+    #from LOTlib.Examples.RationalRules.Shared import grammar
+    from LOTlib.Examples.Number.Shared import grammar
+
     
-    for t in grammar.increment_tree('START'):
+    for t in grammar.increment_tree(depth=4):
         print t
+#        t.fullprint()
 
 
 

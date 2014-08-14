@@ -332,7 +332,7 @@ class FunctionNode(object):
         """
             A FunctionNode is considered a "terminal" if it has no FunctionNodes below
         """
-        return len(filter(isFunctionNode, self.args)) == 0
+        return self.args is None or len(filter(isFunctionNode, self.args)) == 0
 
     def __iter__(self):
         """
