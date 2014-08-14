@@ -189,7 +189,8 @@ class FunctionNode(object):
             return str(self.name)  # simple call
 
         else:
-            return str(self.name)+' '+','.join(map(str, self.args))
+            # Don't use + to concatenate strings.
+            return '{} {}'.format(str(self.name), ','.join(map(str, self.args)))
 
     def fullprint(self, d=0):
         """ A handy printer for debugging"""
@@ -204,7 +205,7 @@ class FunctionNode(object):
 
     def schemestring(self):
         """
-                Print out in scheme format (+ 3 (- 4 5)).
+            Print out in scheme format (+ 3 (- 4 5)).
         """
         if self.args is None:
             return self.name
@@ -213,8 +214,8 @@ class FunctionNode(object):
 
     def liststring(self, cons="cons_"):
         """
-                This "evals" cons_ so that we can conveniently build lists (of lists) without having to eval.
-                Mainly useful for combinatory logic, or "pure" trees
+            This "evals" cons_ so that we can conveniently build lists (of lists) without having to eval.
+            Mainly useful for combinatory logic, or "pure" trees
         """
         if self.args is None:
             return self.name
@@ -238,9 +239,9 @@ class FunctionNode(object):
 
     def __eq__(self, other, bv_dict=None):
         """
-                Tests equality of FunctionNodes up to bound variables.
+            Tests equality of FunctionNodes up to bound variables.
 
-                NOTE: BV equality has not been tested yet.
+            NOTE: BV equality has not been tested yet.
         """
 
         if bv_dict is None:
