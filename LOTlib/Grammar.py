@@ -313,6 +313,7 @@ class Grammar:
 
                 *depth*: Depth of the tree
         """
+        # print 'Performing lazy iteration on node ', x
         assert self.bv_count==0, "*** Error: increment_tree not yet implemented for bound variables."
         
         # wrap no specification for x
@@ -324,7 +325,7 @@ class Grammar:
 
         #print "Call increment_tree ", x     
         if isFunctionNode(x) and depth >= 0 and x.args is not None:
-            #print "FN:", x, depth
+            print "FN:", x, depth
 
             original_x = copy(x)
 
