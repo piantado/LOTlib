@@ -59,6 +59,7 @@ class Grammar:
             # You can be a terminal if you are a function with all non-FunctionNode arguments
             return not any([ isFunctionNode(xi) for xi in None2Empty(x.args)])
         else:
+            print "is_terminal: args are:", None2Empty(x.args)
             return True # non-functionNodes must be terminals
 
     def display_rules(self):
@@ -320,13 +321,14 @@ class Grammar:
 
                 *depth*: Depth of the tree
         """
+        print 'Performing lazy iteration on node ', x
         assert self.bv_count==0, "*** Error: increment_tree not yet implemented for bound variables."
 
         if LOTlib.SIG_INTERRUPTED:
             return # quit if interrupted
 
         if isFunctionNode(x) and depth >= 0 and x.args is not None:
-            #print "FN:", x, depth
+            print "FN:", x, depth
 
             # Short-circuit if we can
 
@@ -385,8 +387,8 @@ class Grammar:
                 if self.is_terminal(k.to):     terminals.append(k)
                 else:                       nonterminals.append(k)
 
-            #print ">>", terminals
-            #print ">>", nonterminals
+            print "terminals are:" ">>", terminals
+            print "nonterminals are:" ">>", nonterminals
 
             Z = logsumexp([ log(r.p) for r in self.rules[x]] ) # normalizer
 

@@ -6,7 +6,7 @@ from LOTlib.Grammar import Grammar
 
 g = Grammar()
 
-g.add_rule('START','S',['NP', 'VP'],1)
+g.add_rule('START','NP',['NP', 'VP'],1)
 g.add_rule('NP','',['the boy'],1)
 g.add_rule('NP','',['the ball'],1)
 g.add_rule('VP','',['ate the dog'],1)
