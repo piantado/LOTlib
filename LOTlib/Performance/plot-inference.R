@@ -17,6 +17,15 @@ p <- ggplot(d, aes(x=steps, y=Z, color=method, linetype=parameter)) +
 
 ggsave("output/inference.pdf", width=16, height=12)
 
+
+
+# Plot the MAP found
+# p <- ggplot(d, aes(x=steps, y=V8, color=method, linetype=parameter)) + 
+# 	stat_summary(fun.y=mean, geom="line", size=2) +
+# 	opts(legend.key.size=unit(3,"lines")) +
+# 	facet_wrap( ~ model, scales="free")
+
+
 # p
 
 # A contour plot -- TODO: Fix the scaling

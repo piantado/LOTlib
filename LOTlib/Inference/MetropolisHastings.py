@@ -73,7 +73,7 @@ class MHSampler():
     def internal_sample(self, h):
         """
                 This is called on each yielded h. It serves no function in MHSampler, but is necessary in others
-                like ProbTaboo
+                like TabooMCMC
         """
         pass
 
