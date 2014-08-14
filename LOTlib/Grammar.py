@@ -322,16 +322,9 @@ class Grammar:
         if LOTlib.SIG_INTERRUPTED:
             return # quit if interrupted
 
-        #print "Call increment_tree ", x
-        
+        #print "Call increment_tree ", x     
         if isFunctionNode(x) and depth >= 0 and x.args is not None:
             #print "FN:", x, depth
-
-            # Short-circuit if we can
-
-
-            # add the rules
-            #addedrules = [ self.add_bv_rule(b,depth) for b in x.bv ]
 
             original_x = copy(x)
 
@@ -370,9 +363,6 @@ class Grammar:
                                     iters[carry_pos] = self.increment_tree(x=original_x.args[carry_pos],depth=depth)
                                     x.args[carry_pos] = iters[carry_pos].next() # reset this
                                     # and just continue your loop over i (which processes the carry)
-
-            #print "REMOVING", addedrule
-            #[ self.remove_rule(r) for r in addedrules ]# remove bv rule
 
         elif self.is_nonterminal(x): # just a single nonterminal
             
