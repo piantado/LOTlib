@@ -321,6 +321,14 @@ def log1mexp(a):
     if a < -log(2.0): return log1p(-exp(a))
     else:             return log(-expm1(a))
 
+def EV(fn, *args):
+    """
+        Estimates (via sampling) the expected value of a function that returns
+        a numerical value. Pass any args to specified function as additional args
+        ex: EV(random.randint, 2, 5)
+    """
+    vals = [fn(*args) for _ in range(100)]
+    return np.average(vals)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Sampling functions
