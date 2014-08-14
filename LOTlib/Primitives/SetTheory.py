@@ -106,3 +106,34 @@ def subset_(A,B):
 @LOTlib_primitive
 def is_in_(x,S):
     return (x in S)
+
+from random import sample as random_sample
+@LOTlib_primitive
+def pick_(S):
+    """
+    sample from a set without replacement
+    """
+    S.remove(elem)
+    return elem
+ 
+from random import choice as random_choice
+@LOTlib_primitive
+def sample_(S):
+    """
+    # sample from a set with replacement
+    """
+    if len(S) == 0:
+        return ''
+    else:
+        return random_choice(list(S))
+ 
+@LOTlib_primitive
+def diff_(S, p):
+    """
+    takes a set and an element of that set and
+    returns the set minus that element
+    """
+    return S.difference(set(p))
+
+
+
