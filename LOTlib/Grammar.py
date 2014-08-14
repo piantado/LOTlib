@@ -48,18 +48,6 @@ class Grammar:
     #       if x is a string       if x is a key
         return isinstance(x, str) and (x in self.rules)
 
-    def is_terminal(self, x):
-        """ Check conditions for something to be a terminal """
-
-        # Nonterminals are not terminals
-        if self.is_nonterminal(x):
-            return False
-
-        if isFunctionNode(x):
-            # You can be a terminal if you are a function with all non-FunctionNode arguments
-            return not any([ isFunctionNode(xi) for xi in None2Empty(x.args)])
-        else:
-            return True # non-functionNodes must be terminals
 
     def display_rules(self):
         """
@@ -488,7 +476,7 @@ if __name__ == "__main__":
 
     from LOTlib.Examples.RationalRules.Shared import grammar
     
-    for t in grammar.increment_tree('START', 5):
+    for t in grammar.increment_tree('START'):
         print t
 
 

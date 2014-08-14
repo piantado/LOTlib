@@ -41,6 +41,17 @@ class MHSampler():
 
         self.reset_counters()
 
+    def set_state(self, x, compute_posterior=True):
+        """
+            Set the current state, computing the posterior if needed
+        """
+        
+        self.current_sample = x
+        
+        if compute_posterior:
+            self.current_sample.compute_posterior(self.data)
+            
+        
     def reset_counters(self):
         """
                 Reset our acceptance and proposal counters

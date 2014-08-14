@@ -328,6 +328,12 @@ class FunctionNode(object):
             for n in filter(isFunctionNode, self.args):
                 yield n
 
+    def is_terminal(self, x):
+        """
+            A FunctionNode is considered a "terminal" if it has no FunctionNodes below
+        """
+        return len(filter(isFunctionNode, self.args)) == 0
+
     def __iter__(self):
         """
                 Iterater for subnodes.
