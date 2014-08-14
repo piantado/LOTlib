@@ -41,7 +41,7 @@ elif options.MODEL == "SimpleMagnetism":
 elif options.MODEL == "RegularExpression":
     from LOTlib.Examples.RegularExpression.RegularExpressionInferece import grammar, data, make_h0
 else:
-    assert false, "Unimplemented model: %s" % options.MODEL
+    raise NotImplementedError(options.MODEL)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run MCMC

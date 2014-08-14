@@ -29,9 +29,9 @@ class TabooMCMC(MHSampler):
 
     def compute_posterior(self, h, data):
         """
-                Wrap the posterior with a penalty for how often we've seen h            . Computes the penalty on the prior
+                Wrap the posterior with a penalty for how often we've seen h. Computes the penalty on the prior
         """
-        mypenalty = self.seen.get(h, 0) * self.penalty
+        mypenalty = self.seen[h] * self.penalty
         np, nl = MHSampler.compute_posterior(self, h, data)
         return np+mypenalty, nl
 

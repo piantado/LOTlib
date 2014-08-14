@@ -302,15 +302,8 @@ class Grammar:
                 foundit=True
                 yield [ni, di, ni.resample_p, Z]
 
-    def increment_tree_NEW(self, x):
-        if LOTlib.SIG_INTERRUPTED:
-            raise StopIteration
-        elif isFunctionNode(x):
-            pass
 
-
-
-    def increment_tree(self, x, depth):
+    def increment_tree(self, x=None, depth=Infinity):
         """
                 A lazy version of tree enumeration. Here, we generate all trees, starting from a rule or a nonterminal symbol.
 
@@ -321,10 +314,16 @@ class Grammar:
                 *depth*: Depth of the tree
         """
         assert self.bv_count==0, "*** Error: increment_tree not yet implemented for bound variables."
-
+        
+        # wrap no specification for x
+        if x is None:
+            x = self.start
+        
         if LOTlib.SIG_INTERRUPTED:
             return # quit if interrupted
 
+        #print "Call increment_tree ", x
+        
         if isFunctionNode(x) and depth >= 0 and x.args is not None:
             #print "FN:", x, depth
 
@@ -337,7 +336,7 @@ class Grammar:
             original_x = copy(x)
 
             # go all odometer on the kids below::
-            iters = [self.increment_tree(y,depth) if self.is_nonterminal(y) else None for y in x.args]
+            iters = [self.increment_tree(x=y,depth=depth) if self.is_nonterminal(y) else None for y in x.args]
             if len(iters) == 0:
                 yield copy(x)
             else:
@@ -368,7 +367,7 @@ class Grammar:
                                     continue_counting = False # done counting here
                                 elif iters[carry_pos] is not None:
                                     # reset the incrementer since we just carried
-                                    iters[carry_pos] = self.increment_tree(original_x.args[carry_pos],depth)
+                                    iters[carry_pos] = self.increment_tree(x=original_x.args[carry_pos],depth=depth)
                                     x.args[carry_pos] = iters[carry_pos].next() # reset this
                                     # and just continue your loop over i (which processes the carry)
 
@@ -376,15 +375,21 @@ class Grammar:
             #[ self.remove_rule(r) for r in addedrules ]# remove bv rule
 
         elif self.is_nonterminal(x): # just a single nonterminal
-
+            
             ## TODO: somewhat inefficient since we do this each time:
             ## Here we change the order of rules to be terminals *first*
             terminals = []
             nonterminals = []
             for k in self.rules[x]:
-                if self.is_terminal(k.to):     terminals.append(k)
-                else:                       nonterminals.append(k)
-
+                if any([self.is_nonterminal(x) for x in None2Empty(k.to)]):     
+                    nonterminals.append(k)
+                else:                       
+                    terminals.append(k)
+            
+            # sort by probability, so high probability trees *tend* to come first
+            terminals    = sorted(terminals,    key=lambda r:r.p, reverse=True)
+            nonterminals = sorted(nonterminals, key=lambda r:r.p, reverse=True)
+            
             #print ">>", terminals
             #print ">>", nonterminals
 
@@ -400,7 +405,7 @@ class Grammar:
                 # and expand each nonterminals
                 for r in nonterminals:
                     n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), generation_probability=(log(r.p) - Z), bv_type=r.bv_type, bv_args=r.bv_args, ruleid=r.rid )
-                    for q in self.increment_tree(n, depth-1): yield q
+                    for q in self.increment_tree(x=n, depth=depth-1): yield q
         else:
             raise StopIteration
 
@@ -490,6 +495,14 @@ class Grammar:
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 if __name__ == "__main__":
     pass
+
+    from LOTlib.Examples.RationalRules.Shared import grammar
+    
+    for t in grammar.increment_tree('START', 5):
+        print t
+
+
+
 """
         #AB_GRAMMAR = PCFG()
         #AB_GRAMMAR.add_rule('START', '', ['EXPR'], 1.0)

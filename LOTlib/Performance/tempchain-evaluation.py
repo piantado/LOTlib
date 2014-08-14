@@ -35,7 +35,7 @@ elif options.MODEL == "SimpleMagnetism":
 elif options.MODEL == "RegularExpression":
     from LOTlib.Examples.RegularExpression.RegularExpressionInferece import grammar, data, make_h0
 else:
-    assert false, "Unimplemented model: %s" % options.MODEL
+    raise NotImplementedError(options.MODEL)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # MPI run mh_sample
@@ -70,11 +70,3 @@ params = map(list, product( range(options.REPETITONS), [1,10,100], [0.1, 0.5, 1.
 
 MPI_map(run_one, params, random_order=False)
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Clean up
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-out_hypotheses.close()
-out_aggregate.close()
-
-MPI_done()
