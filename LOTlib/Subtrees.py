@@ -4,7 +4,9 @@
 
 """
 from LOTlib.Miscellaneous import UniquifyFunction
+from LOTlib.FunctionNode import isFunctionNode
 from LOTlib import lot_iter
+from copy import copy
 
 def generate_trees(grammar, start='START', N=1000):
     """
@@ -65,6 +67,30 @@ def count_identical_nonterminals(t,x):
 
 def count_subtree_matches(t, x):
     return sum(map(lambda tt: tt.partial_subtree_root_match(t), x))
+
+
+
+def trim_leaves(t):
+    # A version that doesn't modify t
+    return trim_leaves_(copy(t))
+
+def trim_leaves_(t):
+    """
+        Take a tree t and replace terminal nodes (leaves) with their returntypes.
+        
+        next_(next_(((nine_ if True else four_) if equal_(ten_, ten_) else one_)))
+        to:
+        next_(next_(((WORD if BOOL else WORD) if equal_(WORD, WORD) else WORD)))        
+        
+        NOTE: This modifies t!
+    """
+    if t.is_terminal():
+        return t.returntype
+    
+    if isFunctionNode(t) and t.args is not None:
+        t.args = [ x.returntype if x.is_terminal() else trim_leaves_(x) for x in t.args]
+    return t
+                
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 if __name__ == '__main__':

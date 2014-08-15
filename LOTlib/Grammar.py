@@ -482,7 +482,7 @@ if __name__ == "__main__":
     SimpleBoolean.add_rule('START', '', ['BOOL'], 1.0)
     
     SimpleBoolean.add_rule('BOOL', 'and_', ['BOOL', 'BOOL'], 1.0)
-    #SimpleBoolean.add_rule('BOOL', 'not_', ['BOOL'], 1.0)
+    SimpleBoolean.add_rule('BOOL', 'not_', ['BOOL'], 1.0)
     
     SimpleBoolean.add_rule('BOOL', '', ['PREDICATE'], 5)
      

@@ -27,6 +27,9 @@ class MHSampler():
             If a proposer is specific in __init__, it should return a *new copy* of the object
     """
     def __init__(self, current_sample, data, steps=Infinity, proposer=None, skip=0, prior_temperature=1.0, likelihood_temperature=1.0, acceptance_temperature=1.0, trace=False):
+        """
+            *current_sample* -- if None, we don't compute it's posterior (via set_state); otherwise we do. 
+        """
         self.__dict__.update(locals())
 
         # was the last proposal accepted
@@ -38,6 +41,8 @@ class MHSampler():
 
         # how many samples have I yielded? This doesn't count skipped samples
         self.samples_yielded = 0
+        
+        self.set_state(current_sample, compute_posterior = (current_sample is not None))
 
         self.reset_counters()
 

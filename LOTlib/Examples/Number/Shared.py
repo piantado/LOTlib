@@ -180,4 +180,5 @@ all_possible_data = [ ('', set(sample_sets_of_objects(n, all_objects))) for n in
 # # # # # # # # # # # # # # # # # # # # # # # # #
 # Standard exports
 
-make_h0 = lambda: NumberExpression(grammar)
+def make_h0(value=None):
+    return NumberExpression(grammar,value=value)
