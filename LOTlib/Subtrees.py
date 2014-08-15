@@ -84,11 +84,13 @@ def trim_leaves_(t):
         
         NOTE: This modifies t!
     """
-    if t.is_terminal():
+    if not isFunctionNode(t):
+        return t
+    elif t.is_terminal():
         return t.returntype
     
     if isFunctionNode(t) and t.args is not None:
-        t.args = [ x.returntype if x.is_terminal() else trim_leaves_(x) for x in t.args]
+        t.args = [ x.returntype if (isFunctionNode(x) and x.is_terminal()) else trim_leaves_(x) for x in t.args]
     return t
                 
 

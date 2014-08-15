@@ -102,6 +102,7 @@ def run_one(iteration, sampler_type):
     elif sampler_type == 'taboo_A':                 sampler = TabooMCMC( h0, data, steps=options.SAMPLES, skip=0, penalty=.10)
     elif sampler_type == 'taboo_B':                 sampler = TabooMCMC( h0, data, steps=options.SAMPLES, skip=0, penalty=1.0)
     elif sampler_type == 'taboo_C':                 sampler = TabooMCMC( h0, data, steps=options.SAMPLES, skip=0, penalty=10.0)
+    elif sampler_type == 'partitionMCMC_d1':        sampler = PartitionMCMC(grammar, make_h0, data, 1, steps=options.SAMPLES)
     elif sampler_type == 'partitionMCMC_d2':        sampler = PartitionMCMC(grammar, make_h0, data, 2, steps=options.SAMPLES)
     elif sampler_type == 'partitionMCMC_d3':        sampler = PartitionMCMC(grammar, make_h0, data, 3, steps=options.SAMPLES)
     elif sampler_type == 'partitionMCMC_d4':        sampler = PartitionMCMC(grammar, make_h0, data, 4, steps=options.SAMPLES)
@@ -124,7 +125,7 @@ params = [ list(g) for g in product(range(options.REPETITONS), [
                                                                 #'particle_swarm_prior_sample_t_A', 'particle_swarm_prior_sample_t_B', 'particle_swarm_prior_sample_t_C',
                                                                 #'mh_sample_A', 'mh_sample_B', 'mh_sample_C', 'mh_sample_D', 'mh_sample_E',
                                                                 #'parallel_tempering_A', 'parallel_tempering_B', 'parallel_tempering_C',
-                                                                'partitionMCMC_d2','partitionMCMC_d3'
+                                                                'partitionMCMC_d1', #'partitionMCMC_d2'
                                                                 ])]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -133,10 +134,3 @@ params = [ list(g) for g in product(range(options.REPETITONS), [
 
 MPI_map(run_one, params, random_order=False)
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Clean up
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-#out_hypotheses.close()
-#out_aggregate.close()
-#MPI_done()

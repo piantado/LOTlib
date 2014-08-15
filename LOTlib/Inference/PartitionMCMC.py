@@ -32,7 +32,7 @@ class PartitionMCMC(MultipleChainMCMC):
                 seen_collapsed.add(ct)
                 partitions.append(t)
         
-        print "# Using partitions:", partitions
+        #print "# Using partitions:", partitions
         
         # Take each partition (h0) and set it to have zero resample_p exact at the leaf
         for p in partitions:
@@ -47,7 +47,6 @@ class PartitionMCMC(MultipleChainMCMC):
         
         # And set each to the partition
         for c,p in zip(self.chains, partitions):
-            print ">>", p
             c.set_state(make_h0(value=p))
             
 
