@@ -23,9 +23,21 @@ options, _ = parser.parse_args()
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-if options.MODEL == "Number":
+if options.MODEL == "Number100":
+    # Load the data
+    from LOTlib.Examples.Number.Shared import generate_data, grammar,  make_h0
+    data = synchronize_variable( lambda : generate_data(100)  )
+
+elif options.MODEL == "Number300":
+    # Load the data
     from LOTlib.Examples.Number.Shared import generate_data, grammar,  make_h0
     data = synchronize_variable( lambda : generate_data(300)  )
+    
+elif options.MODEL == "Number1000":
+    # Load the data
+    from LOTlib.Examples.Number.Shared import generate_data, grammar,  make_h0
+    data = synchronize_variable( lambda : generate_data(1000)  )
+    
 elif options.MODEL == "Galileo":
     from LOTlib.Examples.SymbolicRegression.Galileo import data, grammar, make_h0
 elif options.MODEL == "RationalRules":

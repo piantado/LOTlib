@@ -210,7 +210,7 @@ class FunctionNode(object):
         if self.args is None:
             return self.name
         else:
-            return '('+self.name + ' ' + ' '.join(map(lambda x: x.schemestring(), None2Empty(self.args)))+')'
+            return '('+self.name + ' ' + ' '.join(map(lambda x: x.schemestring() if isFunctionNode(x) else str(x), None2Empty(self.args)))+')'
 
     def liststring(self, cons="cons_"):
         """
@@ -332,6 +332,12 @@ class FunctionNode(object):
             # TODO: In python 3, use yeild from
             for n in filter(isFunctionNode, self.args):
                 yield n
+
+    def is_terminal(self):
+        """
+            A FunctionNode is considered a "terminal" if it has no FunctionNodes below
+        """
+        return self.args is None or len(filter(isFunctionNode, self.args)) == 0
 
     def __iter__(self):
         """
