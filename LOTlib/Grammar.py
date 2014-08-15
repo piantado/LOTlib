@@ -316,7 +316,7 @@ class Grammar:
             original_x = copy(x)
 
             # go all odometer on the kids below::
-            iters = [self.increment_tree(x=y,depth=depth) if self.is_nonterminal(y) else None for y in x.args]
+            iters = [self.increment_tree(x=y,depth=depth-1) if self.is_nonterminal(y) else None for y in x.args]
             if len(iters) == 0:
                 yield copy(x)
             else:
@@ -346,7 +346,7 @@ class Grammar:
                                     continue_counting = False # done counting here
                                 elif iters[carry_pos] is not None:
                                     # reset the incrementer since we just carried
-                                    iters[carry_pos] = self.increment_tree(x=original_x.args[carry_pos],depth=depth)
+                                    iters[carry_pos] = self.increment_tree(x=original_x.args[carry_pos],depth=depth-1)
                                     x.args[carry_pos] = iters[carry_pos].next() # reset this
                                     # and just continue your loop over i (which processes the carry)
 
@@ -486,7 +486,7 @@ if __name__ == "__main__":
     
     SimpleBoolean.add_rule('BOOL', '', ['PREDICATE'], 5)
      
-    for t in SimpleBoolean.increment_tree(x='BOOL', depth=3):
+    for t in SimpleBoolean.increment_tree(x='BOOL', depth=6):
         print t
 
 
