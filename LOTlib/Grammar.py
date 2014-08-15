@@ -310,23 +310,21 @@ class Grammar:
         if LOTlib.SIG_INTERRUPTED:
             return # quit if interrupted
 
-        #print "Call increment_tree ", x     
         if isFunctionNode(x) and depth >= 0 and x.args is not None:
-            #print "FN:", x, depth
+            # print "FN:",  x.schemestring()
 
             original_x = copy(x)
 
             # go all odometer on the kids below::
-            iters = [self.increment_tree(x=y,depth=depth-1) if self.is_nonterminal(y) else None for y in x.args]
+            iters = [self.increment_tree(x=y,depth=depth) if self.is_nonterminal(y) else None for y in x.args]
             if len(iters) == 0:
                 yield copy(x)
             else:
-
-                # First, initialize the arguments
+                #print "HERE", iters
                 for i in xrange(len(iters)):
                     if iters[i] is not None:
                         x.args[i] = iters[i].next()
-
+                
                 # the index of the last terminal symbol (may not be len(iters)-1),
                 last_terminal_idx = max( [i if iters[i] is not None else -1 for i in xrange(len(iters))] )
 
@@ -348,18 +346,18 @@ class Grammar:
                                     continue_counting = False # done counting here
                                 elif iters[carry_pos] is not None:
                                     # reset the incrementer since we just carried
-                                    iters[carry_pos] = self.increment_tree(x=original_x.args[carry_pos],depth=depth-1)
+                                    iters[carry_pos] = self.increment_tree(x=original_x.args[carry_pos],depth=depth)
                                     x.args[carry_pos] = iters[carry_pos].next() # reset this
                                     # and just continue your loop over i (which processes the carry)
 
-        elif self.is_nonterminal(x): # just a single nonterminal
-            
+        elif self.is_nonterminal(x) and depth >= 0: # just a single nonterminal
+          
             ## TODO: somewhat inefficient since we do this each time:
             ## Here we change the order of rules to be terminals *first*
             terminals = []
             nonterminals = []
             for k in self.rules[x]:
-                if any([self.is_nonterminal(x) for x in None2Empty(k.to)]):     
+                if any([self.is_nonterminal(a) for a in None2Empty(k.to)]):      #AAH this used to be called "x" and that ruined the scope of the outer "x"
                     nonterminals.append(k)
                 else:                       
                     terminals.append(k)
@@ -368,22 +366,23 @@ class Grammar:
             terminals    = sorted(terminals,    key=lambda r:r.p, reverse=True)
             nonterminals = sorted(nonterminals, key=lambda r:r.p, reverse=True)
             
-            #print ">>", terminals
-            #print ">>", nonterminals
+            #print "T:\t", terminals
+            #print "NT:\t", nonterminals
 
             Z = logsumexp([ log(r.p) for r in self.rules[x]] ) # normalizer
-
-            if depth >= 0:
-                # yield each of the rules that lead to terminals
-                for r in terminals:
-                    n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), generation_probability=(log(r.p) - Z), bv_type=r.bv_type, bv_args=r.bv_args, ruleid=r.rid )
-                    yield n
-
+            
+            # yield each of the rules that lead to terminals -- always do this since depth>=0 (above)
+            for r in terminals:
+                n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), generation_probability=(log(r.p) - Z), bv_type=r.bv_type, bv_args=r.bv_args, ruleid=r.rid )
+                yield n
+                    
             if depth > 0:
                 # and expand each nonterminals
                 for r in nonterminals:
                     n = FunctionNode(returntype=r.nt, name=r.name, args=deepcopy(r.to), generation_probability=(log(r.p) - Z), bv_type=r.bv_type, bv_args=r.bv_args, ruleid=r.rid )
-                    for q in self.increment_tree(x=n, depth=depth-1): yield q
+                    for q in self.increment_tree(x=n, depth=depth-1):
+                        yield q
+                    
         else:
             raise StopIteration
 
@@ -475,12 +474,20 @@ if __name__ == "__main__":
     pass
 
     #from LOTlib.Examples.RationalRules.Shared import grammar
-    from LOTlib.Examples.Number.Shared import grammar
-
+    #from LOTlib.Examples.Number.Shared import grammar
+    #from LOTlib.DefaultGrammars import SimpleBoolean as grammar
+    SimpleBoolean= Grammar()
+    SimpleBoolean.add_rule('START', 'False', None, 1)
+    SimpleBoolean.add_rule('START', 'True', None, 1)
+    SimpleBoolean.add_rule('START', '', ['BOOL'], 1.0)
     
-    for t in grammar.increment_tree(depth=4):
+    SimpleBoolean.add_rule('BOOL', 'and_', ['BOOL', 'BOOL'], 1.0)
+    #SimpleBoolean.add_rule('BOOL', 'not_', ['BOOL'], 1.0)
+    
+    SimpleBoolean.add_rule('BOOL', '', ['PREDICATE'], 5)
+     
+    for t in SimpleBoolean.increment_tree(x='BOOL', depth=3):
         print t
-#        t.fullprint()
 
 
 
