@@ -74,7 +74,9 @@ data = [ FunctionData(input=[ "p1", "n1" ], output=True),
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Standard exports
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-make_h0 = lambda: LOTHypothesis(grammar, args=['x', 'y'], ALPHA=0.999) # alpha here trades off with the amount of data. Currently assuming no noise, but that's not necessary
+
+def make_ho(value=None):
+    return LOTHypothesis(grammar, value=value, args=['x', 'y'], ALPHA=0.999) # alpha here trades off with the amount of data. Currently assuming no noise, but that's not necessary
 
 if __name__ == "__main__":
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

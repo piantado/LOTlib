@@ -69,7 +69,8 @@ data = [ FunctionData(input=['aaaa'], output=True),\
          FunctionData(input=['aaca'], output=True),\
          FunctionData(input=['a'],    output=True) ]
 
-make_h0 = lambda:  RegexHypothesis(grammar, ALPHA=0.999)
+def make_h0(value=None):
+    return RegexHypothesis(grammar, value=value, ALPHA=0.999)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if __name__ == "__main__":

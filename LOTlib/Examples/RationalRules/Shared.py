@@ -48,4 +48,5 @@ data = [ FunctionData( [Obj(shape='square', color='red')], True), \
 
 from LOTlib.Hypotheses.RationalRulesLOTHypothesis import RationalRulesLOTHypothesis
 
-make_h0 = lambda: RationalRulesLOTHypothesis(grammar=DNF, rrAlpha=1.0)
+def make_h0(value=None):
+    return RationalRulesLOTHypothesis(grammar=DNF, value=value, rrAlpha=1.0)

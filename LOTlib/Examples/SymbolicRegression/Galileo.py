@@ -56,7 +56,8 @@ grammar.add_rule('EXPR', '1.0', None, 5.0)
 # # # # # # # # # # # # # # # # # # # # # # # # #
 # Standard exports
 
-make_h0 = lambda:  GaussianLOTHypothesis(grammar)
+def make_h0(value=None):
+    return  GaussianLOTHypothesis(grammar, value=value)
 
 if __name__ == "__main__":
 

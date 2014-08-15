@@ -2,7 +2,7 @@
 """
         A simple symbolic regression demo
 """
-
+from LOTlib.Hypotheses.GaussianLOTHypothesis import GaussianLOTHypothesis
 from Shared import *
 from math import sin
 
