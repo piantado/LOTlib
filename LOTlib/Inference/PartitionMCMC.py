@@ -7,11 +7,9 @@
     partition proposes a change to each other partition. 
 
 """
-from LOTlib.Examples.Number.Shared import grammar, generate_data, NumberExpression, get_knower_pattern
 from LOTlib.Miscellaneous import Infinity
 from copy import copy
 
-data = generate_data(300)
 
 from MultipleChainMCMC import MultipleChainMCMC
 
@@ -34,7 +32,7 @@ class PartitionMCMC(MultipleChainMCMC):
                 seen_collapsed.add(ct)
                 partitions.append(t)
         
-        #print "# Using partitions:", partitions
+        print "# Using partitions:", partitions
         
         # Take each partition (h0) and set it to have zero resample_p exact at the leaf
         for p in partitions:
@@ -49,15 +47,17 @@ class PartitionMCMC(MultipleChainMCMC):
         
         # And set each to the partition
         for c,p in zip(self.chains, partitions):
+            print ">>", p
             c.set_state(make_h0(value=p))
             
 
 
 if __name__ == "__main__":
     
-    from LOTlib.Examples.Number.Shared import grammar, make_h0, generate_data
+    #from LOTlib.Examples.Number.Shared import grammar, make_h0, generate_data
+    from LOTlib.Examples.RationalRules.Shared import grammar, data, make_h0
     
-    for h in PartitionMCMC(grammar, make_h0, generate_data(300), 2, skip=0):
+    for h in PartitionMCMC(grammar, make_h0, data, 3, skip=0):
         print h.posterior_score, h
     
  
