@@ -168,7 +168,7 @@ class FunctionNode(object):
             return str(self.name)
         elif self.name == "if_": # this gets translated
             assert len(self.args) == 3, "if_ requires 3 arguments!"
-            return '( %s if %s else %s )' % tuple(map(str, self.args))
+            return '( %s if %s else %s )' % (str(self.args[1]), str(self.args[0]), str(self.args[2])) # fix order for if statement
         elif self.name == '':
             assert len(self.args) == 1, "Null names must have exactly 1 argument"
             return str(self.args[0])
@@ -177,8 +177,7 @@ class FunctionNode(object):
             #print ">>>>", self.args
             return '( %s )( %s )' % tuple(map(str, self.args))
         elif self.islambda():
-            assert self.added_rule is not None
-            return 'lambda %s: %s' % (self.added_rule.name if self.added_rule.name is not None else '', str(self.args[0]) )
+            return 'lambda %s: %s' % (self.added_rule.name if self.added_rule is not None else '', str(self.args[0]) )
         elif self.isapplylambda():
             if self.added_rule.to is None:
                 assert len(self.args) == 2
