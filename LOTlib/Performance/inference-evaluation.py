@@ -23,7 +23,7 @@ options, _ = parser.parse_args()
 # Define the test model
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-if options.MODEL == "Number100":
+if options.MODEL == "Number300":
     # Load the data
     from LOTlib.Examples.Number.Shared import generate_data, grammar,  make_h0
     data = synchronize_variable( lambda : generate_data(100)  )
@@ -99,9 +99,11 @@ def run_one(iteration, sampler_type):
     elif sampler_type == 'parallel_tempering_A':    sampler = ParallelTemperingSampler(make_h0, data, steps=options.SAMPLES, within_steps=10, temperatures=[1.0, 1.025, 1.05], swaps=1, yield_only_t0=False)
     elif sampler_type == 'parallel_tempering_B':    sampler = ParallelTemperingSampler(make_h0, data, steps=options.SAMPLES, within_steps=10, temperatures=[1.0, 1.25, 1.5], swaps=1, yield_only_t0=False)
     elif sampler_type == 'parallel_tempering_C':    sampler = ParallelTemperingSampler(make_h0, data, steps=options.SAMPLES, within_steps=10, temperatures=[1.0, 2.0, 5.0], swaps=1, yield_only_t0=False)
-    elif sampler_type == 'taboo_A':                 sampler = TabooMCMC( h0, data, steps=options.SAMPLES, skip=0, penalty=.10)
-    elif sampler_type == 'taboo_B':                 sampler = TabooMCMC( h0, data, steps=options.SAMPLES, skip=0, penalty=1.0)
-    elif sampler_type == 'taboo_C':                 sampler = TabooMCMC( h0, data, steps=options.SAMPLES, skip=0, penalty=10.0)
+    elif sampler_type == 'taboo_A':                 sampler = TabooMCMC( h0, data, steps=options.SAMPLES, skip=0, penalty= 0.001)
+    elif sampler_type == 'taboo_B':                 sampler = TabooMCMC( h0, data, steps=options.SAMPLES, skip=0, penalty= 0.010)
+    elif sampler_type == 'taboo_C':                 sampler = TabooMCMC( h0, data, steps=options.SAMPLES, skip=0, penalty= 0.100)
+    elif sampler_type == 'taboo_D':                 sampler = TabooMCMC( h0, data, steps=options.SAMPLES, skip=0, penalty= 1.000)
+    elif sampler_type == 'taboo_E':                 sampler = TabooMCMC( h0, data, steps=options.SAMPLES, skip=0, penalty=10.000)
     elif sampler_type == 'partitionMCMC_d1':        sampler = PartitionMCMC(grammar, make_h0, data, 1, steps=options.SAMPLES)
     elif sampler_type == 'partitionMCMC_d2':        sampler = PartitionMCMC(grammar, make_h0, data, 2, steps=options.SAMPLES)
     elif sampler_type == 'partitionMCMC_d3':        sampler = PartitionMCMC(grammar, make_h0, data, 3, steps=options.SAMPLES)
@@ -117,15 +119,15 @@ def run_one(iteration, sampler_type):
 
 # For each process, create the lsit of parameter
 params = [ list(g) for g in product(range(options.REPETITONS), [
-                                                                #'multiple_chains_A', 'multiple_chains_B', 'multiple_chains_C',
-                                                                #'taboo_A', 'taboo_B', 'taboo_C',
-                                                                #'particle_swarm_s_A', 'particle_swarm_s_B', 'particle_swarm_s_C',
-                                                                #'particle_swarm_t_A', 'particle_swarm_t_B', 'particle_swarm_t_C',
-                                                                #'particle_swarm_prior_sample_s_A', 'particle_swarm_prior_sample_s_B', 'particle_swarm_prior_sample_s_C',
-                                                                #'particle_swarm_prior_sample_t_A', 'particle_swarm_prior_sample_t_B', 'particle_swarm_prior_sample_t_C',
-                                                                #'mh_sample_A', 'mh_sample_B', 'mh_sample_C', 'mh_sample_D', 'mh_sample_E',
-                                                                #'parallel_tempering_A', 'parallel_tempering_B', 'parallel_tempering_C',
-                                                                'partitionMCMC_d1', #'partitionMCMC_d2'
+                                                                'multiple_chains_A', 'multiple_chains_B', 'multiple_chains_C',
+                                                                'taboo_A', 'taboo_B', 'taboo_C', 'taboo_D',
+                                                                'particle_swarm_s_A', 'particle_swarm_s_B', 'particle_swarm_s_C',
+                                                                'particle_swarm_t_A', 'particle_swarm_t_B', 'particle_swarm_t_C',
+                                                                'particle_swarm_prior_sample_s_A', 'particle_swarm_prior_sample_s_B', 'particle_swarm_prior_sample_s_C',
+                                                                'particle_swarm_prior_sample_t_A', 'particle_swarm_prior_sample_t_B', 'particle_swarm_prior_sample_t_C',
+                                                                'mh_sample_A', 'mh_sample_B', 'mh_sample_C', 'mh_sample_D', 'mh_sample_E',
+                                                                'parallel_tempering_A', 'parallel_tempering_B', 'parallel_tempering_C',
+                                                                'partitionMCMC_d1', 'partitionMCMC_d2'
                                                                 ])]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
