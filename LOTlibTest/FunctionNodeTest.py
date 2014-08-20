@@ -20,7 +20,7 @@ class FunctionNodeTest(unittest.TestCase):
     # tests the .pystring() method
     def test_str(self):
         t = self.G.generate('START')
-        string = t.pystring()
+        string = pystring(t)
         # test whether the object is a string
         self.assertEqual(type(string), str)
         self.assertEqual(type(t.__str__()), str)
@@ -31,12 +31,12 @@ class FunctionNodeTest(unittest.TestCase):
             x = self.G.generate()
             y = self.G.generate()
 
-            if x.pystring() == y.pystring():
+            if pystring(x) == pystring(y):
                 counter += 1
                 # print(counter)
-                # print(x.pystring()+'\n'+y.pystring()+'\n')
+                #print( pystring(x)+'\n'+ pystring(y)+'\n')
 
-            self.assertEqual(x.pystring() == y.pystring(), x == y, "Without bvs, the pystrings should be the same")
+            self.assertEqual( pystring(x) == pystring(y), x == y, "Without bvs, the pystrings should be the same")
 
 
     # function that is executed after each test is carried out

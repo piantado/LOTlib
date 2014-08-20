@@ -14,6 +14,12 @@ from LOTlib.Miscellaneous import None2Empty
 from copy import copy, deepcopy
 from random import random
 
+"""
+==============================================================================================================================================
+== Helper functions 
+==============================================================================================================================================
+"""
+
 def isFunctionNode(x):
     # just because this is nicer, and allows us to map, etc.
     """
@@ -30,6 +36,58 @@ def cleanFunctionNodeString(x):
     s = re.sub("_", '', s) # remove underscores
     return s
 
+
+
+def pystring(x, d=0, bv_names=None):
+    """
+    Outputs a string that can be evaluated by python. This gives bound variables names based on their depth
+    
+    *bv_names* - a dictionary from the uuids to nicer names
+    """
+    
+    if isinstance(x, str): 
+        return bv_names.get(x,x)
+    elif isFunctionNode(x):
+        
+        if bv_names is None:
+            bv_names = dict()    
+        
+        if x.args is None:
+            return bv_names.get(str(x.name), str(x.name))
+        elif x.name == "if_": # this gets translated
+            assert len(x.args) == 3, "if_ requires 3 arguments!"
+            return '( %s if %s else %s )' % tuple(map(lambda a: pystring(a,d=d+1,bv_names=bv_names), x.args))
+        elif x.name == '':
+            assert len(x.args) == 1, "Null names must have exactly 1 argument"
+            return pystring(x.args[0], d=d, bv_names=bv_names)
+        elif x.isapply():
+            assert x.args is not None and len(x.args)==2, "Apply requires exactly 2 arguments"
+            #print ">>>>", self.args
+            return '( %s )( %s )' % tuple(map(lambda x: pystring(x, d=d, bv_names=bv_names), x.args))
+        elif x.islambda():
+            # On a lambda, we must add the introduced bv, and then remove it again afterwards
+            
+            bvn = ''
+            if x.added_rule is not None:
+                bvn = x.added_rule.bv_prefix+str(d)
+                bv_names[x.added_rule.name] = bvn
+            
+            ret = 'lambda %s: %s' % ( bvn, pystring(x.args[0], d=d+1, bv_names=bv_names) )
+            
+            if x.added_rule is not None:
+                del bv_names[x.added_rule.name]
+                
+            return ret  
+        else:
+        
+            return bv_names.get(x.name, x.name)+'('+', '.join(map(lambda a: pystring(a, d=d+1, bv_names=bv_names), x.args))+')'
+
+
+"""
+==============================================================================================================================================
+== FunctionNode main class
+==============================================================================================================================================
+"""
 
 class FunctionNode(object):
     """
@@ -108,7 +166,7 @@ class FunctionNode(object):
         """
                 Returns a list representation of the FunctionNode with function/self.name as the first element.
 
-                NOTE: This does not handle BV yet
+                NOTE: 
         """
         x = [self.name] if self.name != '' else []
         if self.args is not None:
@@ -154,41 +212,6 @@ class FunctionNode(object):
         else:
             return False
     
-    # NOTE: Here we do a little fanciness -- with "if" -- we convert it to the "correct" python
-    # form with short circuiting instead of our fancy ifelse function
-    def pystring(self, serialize_bvs=False):
-        """
-        Outputs a string that can be evaluated by python
-        """
-        
-        assert not any([a is self for a in None2Empty(self.args) ])
-        
-        #print ">>", self.name
-        if self.is_nonfunction(): # a terminal
-            return str(self.name)
-        elif self.name == "if_": # this gets translated
-            assert len(self.args) == 3, "if_ requires 3 arguments!"
-            return '( %s if %s else %s )' % (str(self.args[1]), str(self.args[0]), str(self.args[2])) # fix order for if statement
-        elif self.name == '':
-            assert len(self.args) == 1, "Null names must have exactly 1 argument"
-            return str(self.args[0])
-        elif self.isapply():
-            assert self.args is not None and len(self.args)==2, "Apply requires exactly 2 arguments"
-            #print ">>>>", self.args
-            return '( %s )( %s )' % tuple(map(str, self.args))
-        elif self.islambda():
-            return 'lambda %s: %s' % (self.added_rule.name if self.added_rule is not None else '', str(self.args[0]) )
-        elif self.isapplylambda():
-            if self.added_rule.to is None:
-                assert len(self.args) == 2
-                return '(lambda %s: %s)(%s)' % (self.added_rule.name, self.args[0], self.args[1])
-            else:
-                # The lambda has args --- NOTE THESE ARE SET IN GRAMMAR WHEN NEEDED
-                return '(lambda %s: %s)(lambda %s: %s)' % (self.added_rule.name, self.args[0], ','.join([aa.name for aa in self.a_args]), self.args[1])
-                #return '(lambda %s: %s)(lambda %s: %s)' % (self.added_rule.name, self.args[0], ','.join('a'+i for i in xrange(len(self.added_rule.bv_args))), self.args[1])
-        else:
-            return str(self.name)+'('+', '.join(map(str,self.args))+')'
-
     def quickstring(self):
         """
                 A (maybe??) faster string function used for hashing -- doesn't handle any details and is meant
@@ -203,7 +226,7 @@ class FunctionNode(object):
     def fullprint(self, d=0):
         """ A handy printer for debugging"""
         tabstr = "  .  " * d
-        print tabstr, self.returntype, self.name, self.bv_type, self.bv_name, self.bv_args, self.bv_prefix, "\t", self.generation_probability, "\t", self.resample_p
+        print tabstr, self.returntype, self.name, "\t", self.generation_probability, "\t", self.resample_p, self.added_rule
         if self.args is not None:
             for a in self.args:
                 if isFunctionNode(a):
@@ -234,66 +257,18 @@ class FunctionNode(object):
 
     # NOTE: in the future we may want to change this to do fancy things
     def __str__(self):
-        return self.pystring()
+        return pystring(self)
 
     def __repr__(self):
-        return self.pystring()
+        return pystring(self)
 
     def __ne__(self, other):
         return (not self.__eq__(other))
-
-    def __eq__OLD(self, other):
-         return isFunctionNode(other) and (cmp(self, other) == 0)
-
-    def __eq__(self, other, bv_dict=None):
-        """
-                Tests equality of FunctionNodes up to bound variables.
-
-                NOTE: BV equality has not been tested yet.
-                
-                
-                ## TODO: STILL NEED TO ADD SUPPORT FOR BV_ARGS
-        
-        """
-        
-        if bv_dict is None:
-            bv_dict = dict()
-
-        # If they have different names, they aren't equal
-        if (not isFunctionNode(other)) or (self.name != other.name):
-            return False
-
-        # If both don't have args, they are equal.
-        if self.args is None:
-            return other.args is None
-
-        # If they have a different number of args, they aren't equal
-        if other.args is not None and len(self.args) != len(other.args):
-            return False
-
-        # If the bound variable already exists in the dict, see if
-        # they're the same
-        if self.name in bv_dict and bv_dict[self.name] != other.name:
-            return False
-
-        # If it doesn't exist in the dict, add it.
-        ## TODO: STILL NEED TO ADD SUPPORT FOR BV_ARGS
-        if self.added_rule is not None:
-            if other.added_rule is not None:
-                bv_dict[self.added_rule.name]=other.added_rule.name
-            else: # if the other isn't a lambda, must be false
-                return False
-
-        # so args must be a list
-        for a,b in zip(self.args, other.args):
-            if isFunctionNode(a):
-                if not (isFunctionNode(b) and a.__eq__(b, bv_dict)):
-                    return False
-            elif a != b: # fall back on default comparison
-                return False
-
-        return True
-
+    
+    def __eq__(self, other):
+        return pystring(self) == pystring(other)
+    
+    
     ## TODO: overwrite these with something faster
     # hash trees. This just converts to string -- maybe too slow?
     def __hash__(self):

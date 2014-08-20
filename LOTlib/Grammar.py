@@ -15,46 +15,10 @@ from LOTlib.Miscellaneous import *
 from LOTlib.FunctionNode import isFunctionNode
 from LOTlib.GrammarRule import GrammarRule, BVGrammarRule
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
+from LOTlib.BVRuleContextManager import BVRuleContextManager
 
-    
-class BVRuleContextManager(object):
-    
-    def __init__(self, grammar, depth, *rules):
-        """
-            This manages rules that we add and subtract in the context of grammar generation. This is a class that is somewhat
-            inbetween Grammar and GrammarRule. It manages creating, adding, and subtracting the bound variable rule via "with" clause in Grammar.
-            
-            NOTE: The "rule" heres is the added rule, not the "bound variable" one (that adds the rule)
-            NOTE: If rule is None, then nothing happens
-            
-            This actually could go in FunctionNode, *except* that it needs to know the grammar, which FunctionNodes do not
-        """
-        self.__dict__.update(locals())
-                
-    def __str__(self):
-        return "<Managing context for %s>"%str(self.rule)
-    
-    def __enter__(self):
-        """
-            Here, we construct the bound variable rule if any and then remove it later
-        """
-        
-        for r in self.rules:
-            if r is not None:
-                assert isinstance(r, GrammarRule)
-                self.grammar.rules[r.nt].append(r)
-    
-    def __exit__(self, t, value, traceback):
-        for r in self.rules:
-            if r is not None:
-                self.grammar.rules[r.nt].remove(r)
-        
-        return False #re-raise exceptions
-        
-    
-    
-    
-    
+
+
 class Grammar:
     """
             A PCFG-ish class that can handle special types of rules:
@@ -144,14 +108,21 @@ class Grammar:
         # actually add it
         self.rules[nt].append(newrule)     
         return newrule
-
-
+    
+    def is_terminal_rule(self, r):
+        """
+            Check if a rule is "terminal" meaning that it doesn't contain any nonterminals in its expansion
+        """ 
+        return not any([self.is_nonterminal(a) for a in None2Empty(r.to)])  
+    
+    
+        
     ############################################################
     ## Generation
     ############################################################
 
 
-    def generate(self, x=None, d=0):
+    def generate(self, x=None):
         """
                 Generate from the PCFG -- default is to start from x - either a
                 nonterminal or a FunctionNode
@@ -164,11 +135,9 @@ class Grammar:
             x = self.start
 
         # Dispatch different kinds of generation
-        if x is None:
-            return None
-        elif isinstance(x,list):            
+        if isinstance(x,list):            
             # If we get a list, just map along it to generate. We don't count lists as depth--only FunctionNodes
-            return map(lambda xi: self.generate(x=xi, d=d), x)
+            return map(lambda xi: self.generate(x=xi), x)
         elif self.is_nonterminal(x):
             
             # sample a grammar rule
@@ -176,7 +145,7 @@ class Grammar:
             #print "SAMPLED:", gp, r, type(r)
             
             # Make a stub for this functionNode 
-            fn = r.make_FunctionNodeStub(self, d, gp) ## NOT SURE WHY BU TCOPY IS NECESSARY HERE
+            fn = r.make_FunctionNodeStub(self, gp) ## NOT SURE WHY BU TCOPY IS NECESSARY HERE
             
             # How we expend below depends on whether or not its an applylambda
             """
@@ -213,9 +182,9 @@ class Grammar:
             """
                 
             # Define a new context that is the grammar with the rule added. Then, when we exit, it's still right 
-            with BVRuleContextManager(self, d, fn.added_rule): # not sure why I can't use with/as:
-                if fn.args is not None:  ## TODO: Not sure why it breaks if I remove this if?
-                    fn.args = self.generate(fn.args, d=d+1)  # and generate below *in* this context (e.g. with the new rules added)
+            with BVRuleContextManager(self, fn.added_rule): # not sure why I can't use with/as:
+                if fn.args is not None:  # Can't recurse on None or else we genreate from self.start
+                    fn.args = self.generate(fn.args)  # and generate below *in* this context (e.g. with the new rules added)
 
             return fn
 
@@ -241,13 +210,13 @@ class Grammar:
         """
         
         if isFunctionNode(t):
-            #print "iterate subnode: ", t.name, t.bv_type, t
+          #  print "iterate subnode: ", t, t.added_rule
             
             if predicate(t):
                 yield (t,d) if yield_depth else t
             
             #Define a new context that is the grammar with the rule added. Then, when we exit, it's still right 
-            with BVRuleContextManager(self, d, t.added_rule):                    
+            with BVRuleContextManager(self, t.added_rule):                    
                    
                 if t.args is not None:
                     for g in self.iterate_subnodes(t.args, d=d+1, do_bv=do_bv, yield_depth=yield_depth, predicate=predicate): # pass up anything from below
@@ -306,8 +275,7 @@ class Grammar:
                 *x*: A node in the tree
                 *depth*: Depth of the tree
                 
-                
-                TODO: 
+                TODO: MAYBE BV CONTEXT MANAGER SHOULD GO SOMEWHER ELSE?
                 
         """
         # wrap no specification for x
@@ -367,7 +335,7 @@ class Grammar:
             terminals = []
             nonterminals = []
             for k in self.rules[x]:
-                if any([self.is_nonterminal(a) for a in None2Empty(k.to)]):      #AAH this used to be called "x" and that ruined the scope of the outer "x"
+                if not self.is_terminal_rule(k):      #AAH this used to be called "x" and that ruined the scope of the outer "x"
                     nonterminals.append(k)
                 else:                       
                     terminals.append(k)
@@ -448,34 +416,6 @@ class Grammar:
 
         return RP
 
-    ## ------------------------------------------------------------------------------------------------------------------------------
-    ## Here are some versions of old functions which can be added eventually -- they are for doing "pointwise" changes to hypotheses
-    ## ------------------------------------------------------------------------------------------------------------------------------
-
-    ## yeild all pointwise changes to this function. this changes each function, trying all with the same type signature
-    ## and then yeilds the trees
-    #def enumerate_pointwise(self, t):
-        #"""
-            #Returns a generator of all the ways you can change a function (keeping the types the same) for t. Each gneeration is a copy
-        #"""
-        #for x in make_p_unique(self.enumerate_pointwise_nonunique(t)):
-            #yield x
-
-    ## this enumerates using rules, but it may over-count, creating more than one instance. So we have to wrap it in
-    ## a filter above
-    #def enumerate_pointwise_nonunique(self, t):
-        #for ti in t:
-            #titype = ti.get_type_signature() # for now, keep terminals as they are
-            #weightsum = logsumexp([ x.lp for x in self.rules[ti.returntype]])
-            #old_name, old_lp = [ti.name, ti.lp] # save these to restore
-            #possible_rules = filter(lambda ri: (ri.get_type_signature() == titype), self.rules[ti.returntype])
-            #if len(possible_rules) > 1:  # let's not yeild ourselves in all the ways we can
-                #for r in possible_rules: # for each rule of the same type
-                    ## add this rule, copying over
-                    #ti.name = r.name
-                    #ti.lp = r.lp - weightsum # this is the lp -- the rule was unnormalized
-                    #yield t.copy() # now the pointers are updated so we can yield this
-            #ti.name, lp = [old_name, old_lp]
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 if __name__ == "__main__":

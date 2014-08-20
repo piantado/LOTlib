@@ -11,7 +11,7 @@ from Hypothesis import Hypothesis
 from LOTlib.Evaluation.Eval import evaluate_expression
 from LOTlib.Evaluation.EvaluationException import EvaluationException
 from LOTlib.Miscellaneous import lambdaNone
-from LOTlib.DataAndObjects import FunctionData,UtteranceData
+from LOTlib.DataAndObjects import FunctionData, UtteranceData
 from copy import copy
 
 class FunctionHypothesis(Hypothesis):

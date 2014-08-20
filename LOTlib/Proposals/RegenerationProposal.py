@@ -11,6 +11,7 @@ class RegenerationProposal(LOTProposal):
     def propose_tree(self, t, separate_fb=False, predicate=lambdaTrue):
         """
                 If separate_fb=True -- return [newt, f, b], instead of [newt,f-b]
+                NOTE: This used to copy but no longer!
         """
         newt = copy(t)
 
@@ -20,7 +21,7 @@ class RegenerationProposal(LOTProposal):
 
             # re-generate my type from the grammar, and change this functionode
             if self.grammar.is_nonterminal(n.returntype):
-                n.setto(self.grammar.generate(n.returntype, d=di))
+                n.setto(self.grammar.generate(n.returntype))
             else: pass # do nothing if we aren't returnable from the grammar
 
             tZ = Z

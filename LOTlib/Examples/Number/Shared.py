@@ -121,11 +121,6 @@ class NumberExpression(LOTHypothesis):
             return log( (1.0 - ALPHA)/10.0 + ALPHA * ( response == datum.output ) )
 
 
-    # must wrap these as SimpleExpressionFunctions
-    def enumerative_proposer(self):
-        for k in grammar.enumerate_pointwise(self.value):
-            yield NumberExpression(value=k)
-
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
 # The target

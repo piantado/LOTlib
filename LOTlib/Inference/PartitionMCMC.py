@@ -18,7 +18,7 @@ from LOTlib.Miscellaneous import None2Empty
 
 class PartitionMCMC(MultipleChainMCMC):
 
-    def __init__(self, grammar, make_h0, data, depth, increment_from=None, steps=Infinity, grammar_optimize=True, **kwargs):
+    def __init__(self, grammar, make_h0, data, max_depth, increment_from=None, steps=Infinity, grammar_optimize=True, **kwargs):
         """
             Initializer.
             
@@ -44,8 +44,7 @@ class PartitionMCMC(MultipleChainMCMC):
                     elif not found_terminal:
                         found_terminal = True
                         newrules.append(r)
-                grammar.rules[nt] = newrules
-        
+                grammar.rules[nt] = newrules        
         
         # first figure out how many trees we have
         # We generate a lot and then replace terminal nodes with their types, because the terminal nodes will
@@ -53,7 +52,7 @@ class PartitionMCMC(MultipleChainMCMC):
         # trees that differ only on terminals
         partitions = [] # the "Starting" trees for a partition -- includes an arbitrary terminal
         seen_collapsed = set() # what have we seen the collapsed forms of?
-        for t in grammar.increment_tree(x=increment_from, depth=depth):
+        for t in grammar.increment_tree(x=increment_from, max_depth=max_depth):
             ct = trim_leaves(t)
             
             if ct not in seen_collapsed:
@@ -82,13 +81,15 @@ class PartitionMCMC(MultipleChainMCMC):
 
 if __name__ == "__main__":
     
-    from LOTlib.Examples.Number.Shared import grammar, make_h0, generate_data
-    data = generate_data(300)
+    #from LOTlib.Examples.Number.Shared import grammar, make_h0, generate_data
+    #data = generate_data(300)
     
+    from LOTlib.Examples.RegularExpression.Shared import grammar, make_h0, data
+        
     #from LOTlib.Examples.RationalRules.Shared import grammar, data, make_h0
     
     #PartitionMCMC(grammar, make_h0, data, 2, skip=0)
-    for h in PartitionMCMC(grammar, make_h0, data, 0, skip=0):
+    for h in PartitionMCMC(grammar, make_h0, data, 5, skip=0):
         print h.posterior_score, h
     
  

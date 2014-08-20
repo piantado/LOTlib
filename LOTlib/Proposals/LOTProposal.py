@@ -12,7 +12,7 @@ class LOTProposal(object):
         # A wrapper that calls propose_tree (defined in subclasses) on our tree value
         # so this manages making LOTHypotheses (or the relevant subclass), and proposal subclasses
         # can just manage trees
-        p = copy(h)
+        p = copy(h) ## TODO: This copies twice
         ret = self.propose_tree(h.value, **kwargs) # don't unpack, since we may return [newt,fb] or [newt,f,b]
         p.set_value(ret[0])
         ret[0] = p

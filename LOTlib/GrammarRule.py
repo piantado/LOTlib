@@ -7,10 +7,9 @@
 from FunctionNode import FunctionNode
 from copy import copy
 
-from uuid import uuid4
 
 class GrammarRule(object):
-    def __init__(self, nt, name, to, p=1.0, resample_p=1.0):
+    def __init__(self, nt, name, to, p=1.0, resample_p=1.0, bv_prefix=None):
         """
                 *nt* - the nonterminal
 
@@ -19,6 +18,8 @@ class GrammarRule(object):
                 *to* - what you expand to (usually a FunctionNode).
 
                 *p* - unnormalized probability of expansion
+                
+                *bv_previx* may be needed for GrammarRules introduced *by* BVGrammarRules, so that when we display them we can map to bv_prefix+depth
 
                 Examples:
                 A rule where "expansion" is a nonempty list is a real expansion:
@@ -52,12 +53,14 @@ class GrammarRule(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def make_FunctionNodeStub(self, grammar, depth, gp):
+    def make_FunctionNodeStub(self, grammar, gp):
         # NOTE: It is VERY important to copy to, or else we end up wtih garbage
         return FunctionNode(returntype=self.nt, name=self.name, args=copy(self.to), generation_probability=gp, added_rule=None)
 
 
 
+
+from uuid import uuid4
 
 class BVGrammarRule(GrammarRule):
     """
@@ -92,11 +95,8 @@ class BVGrammarRule(GrammarRule):
     
     def __repr__(self):
         return str(self.nt) + " -> " + self.name + (str(self.to) if self.to is not None else '') + " w/ p=" +str(self.p)+ ", resample_p=" + str(self.resample_p) + "BV:"+ str(self.bv_type)+";"+str(self.bv_args)+";"+self.bv_prefix+""
-
-    def get_full_bv_name(self, depth):
-        return self.bv_prefix+str(depth)
     
-    def make_bv_rule(self, depth, grammar):
+    def make_bv_rule(self, grammar):
         """
             Construct the rule that I introduce at a given depth. 
            
@@ -107,9 +107,9 @@ class BVGrammarRule(GrammarRule):
         if bvp is None:
             bvp = grammar.BV_P
 
-        return GrammarRule(self.bv_type, self.get_full_bv_name(depth), self.bv_args, p=bvp, resample_p=grammar.BV_RESAMPLE_P)
+        return GrammarRule(self.bv_type, uuid4().hex, self.bv_args, p=bvp, resample_p=grammar.BV_RESAMPLE_P, bv_prefix=self.bv_prefix)
    
-    def make_FunctionNodeStub(self, grammar, depth, gp):
+    def make_FunctionNodeStub(self, grammar, gp):
         """
             Return a FunctionNode with none of the arguments realized. That's a "stub"
             
@@ -119,7 +119,7 @@ class BVGrammarRule(GrammarRule):
         
         # The None's in the next line need to get set elsewhere, since they will depend on the depth and other rules
         # NOTE: It is VERY important to copy to, or else we end up wtih garbage
-        return  FunctionNode(returntype=self.nt, name=self.name, args=copy(self.to), generation_probability=gp, added_rule=self.make_bv_rule(depth, grammar) )
+        return  FunctionNode(returntype=self.nt, name=self.name, args=copy(self.to), generation_probability=gp, added_rule=self.make_bv_rule(grammar) )
 
 
 
