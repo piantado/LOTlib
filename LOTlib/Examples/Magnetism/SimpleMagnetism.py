@@ -24,10 +24,19 @@ grammar.add_rule('Pabstraction',  'apply_', ['lambdaUsePredicate', 'lambdaDefine
 grammar.add_rule('lambdaUsePredicate', 'lambda', ['INNER-BOOL'],    5.0, bv_type='INNER-BOOL', bv_args=['OBJECT'], bv_prefix='F')
 grammar.add_rule('lambdaUsePredicate', 'lambda', ['Pabstraction'], 1.0,  bv_type='INNER-BOOL', bv_args=['OBJECT'], bv_prefix='F')
 
+
 # Define a predicate that will just check if something is in a BASE-SET
 grammar.add_rule('lambdaDefinePredicate', 'lambda', ['lambdaDefinePredicateINNER'], 1.0,  bv_type='OBJECT', bv_args=None, bv_prefix='z')
 # the function on objects, that allows them to be put into classes (analogous to a logical model here)
 grammar.add_rule('lambdaDefinePredicateINNER', 'is_in_', ['OBJECT', 'BASE-SET'], 1.0)
+
+# Here's how things will look with applylambda:
+#grammar.add_rule('START', 'applylambda', ['INNER-BOOL'], 10.0,  bv_type='INNER-BOOL', bv_args=['OBJECT'], bv_prefix='F')
+#grammar.add_rule('START', 'applylambda', ['START'],      1.0,   bv_type='INNER-BOOL', bv_args=['OBJECT'], bv_prefix='F')
+
+
+grammar.add_rule('INNER-BOOL', 'is_in_', ['OBJECT', 'BASE-SET'], 10.0)
+
 
 # After we've defined F, these are used to construct the concept
 grammar.add_rule('INNER-BOOL', 'and_', ['INNER-BOOL', 'INNER-BOOL'], 1.0)
@@ -74,7 +83,9 @@ data = [ FunctionData(input=[ "p1", "n1" ], output=True),
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Standard exports
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-make_h0 = lambda: LOTHypothesis(grammar, args=['x', 'y'], ALPHA=0.999) # alpha here trades off with the amount of data. Currently assuming no noise, but that's not necessary
+
+def make_ho(value=None):
+    return LOTHypothesis(grammar, value=value, args=['x', 'y'], ALPHA=0.999) # alpha here trades off with the amount of data. Currently assuming no noise, but that's not necessary
 
 if __name__ == "__main__":
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

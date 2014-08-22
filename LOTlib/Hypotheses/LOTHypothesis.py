@@ -9,6 +9,7 @@ from copy import copy, deepcopy
 from LOTlib.Proposals.RegenerationProposal import RegenerationProposal
 from LOTlib.Miscellaneous import Infinity
 from LOTlib.DataAndObjects import FunctionData
+from math import log
 
 class LOTHypothesis(FunctionHypothesis):
     """
@@ -108,10 +109,10 @@ class LOTHypothesis(FunctionHypothesis):
         return log( self.ALPHA*(self(*datum.input)==datum.output) + (1.0-self.ALPHA)/2.0 )
 
     # must wrap these as SimpleExpressionFunctions
-    def enumerative_proposer(self):
-        """
-                Returns a generator, where the elements in the generator are instances of LOTHypothesis
-                 that can be gotten to from the current LOTHypothesis.
-        """
-        for k in grammar.enumerate_pointwise(self.value):
-            yield LOTHypothesis(self.grammar, value=k)
+    # def enumerative_proposer(self):
+    #     """
+    #             Returns a generator, where the elements in the generator are instances of LOTHypothesis
+    #              that can be gotten to from the current LOTHypothesis.
+    #     """
+    #     for k in grammar.enumerate_pointwise(self.value):
+    #         yield LOTHypothesis(self.grammar, value=k)

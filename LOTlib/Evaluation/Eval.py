@@ -16,6 +16,7 @@ from LOTlib.Primitives.Number import *
 from LOTlib.Primitives.Semantics import *
 from LOTlib.Primitives.SetTheory import *
 from LOTlib.Primitives.Trees import *
+from LOTlib.Primitives.Stochastics import *
 
 
 def register_primitive(function, name=None):

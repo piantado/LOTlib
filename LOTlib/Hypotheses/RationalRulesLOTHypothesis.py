@@ -50,13 +50,13 @@ class RationalRulesLOTHypothesis(LOTHypothesis):
             Implement a Rational Rules (Goodman et al 2008)-style grammar over Boolean expressions.
 
     """
-    def __init__(self, grammar, rrAlpha=1.0, *args, **kwargs):
+    def __init__(self, grammar, value=None, rrAlpha=1.0, *args, **kwargs):
         """
                 Everything is passed to LOTHypothesis
         """
         self.rrAlpha = rrAlpha
 
-        LOTHypothesis.__init__(self, grammar, *args, **kwargs)
+        LOTHypothesis.__init__(self, grammar, value=value, *args, **kwargs)
 
 
     def __copy__(self):

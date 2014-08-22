@@ -14,6 +14,11 @@ from LOTlib.Miscellaneous import None2Empty
 from copy import copy, deepcopy
 from random import random
 
+"""
+==============================================================================================================================================
+== Helper functions 
+==============================================================================================================================================
+"""
 
 def isFunctionNode(x):
     # just because this is nicer, and allows us to map, etc.
@@ -32,6 +37,58 @@ def cleanFunctionNodeString(x):
     return s
 
 
+
+def pystring(x, d=0, bv_names=None):
+    """
+    Outputs a string that can be evaluated by python. This gives bound variables names based on their depth
+    
+    *bv_names* - a dictionary from the uuids to nicer names
+    """
+    
+    if isinstance(x, str): 
+        return bv_names.get(x,x)
+    elif isFunctionNode(x):
+        
+        if bv_names is None:
+            bv_names = dict()    
+        
+        if x.args is None:
+            return bv_names.get(str(x.name), str(x.name))
+        elif x.name == "if_": # this gets translated
+            assert len(x.args) == 3, "if_ requires 3 arguments!"
+            return '( %s if %s else %s )' % tuple(map(lambda a: pystring(a,d=d+1,bv_names=bv_names), x.args))
+        elif x.name == '':
+            assert len(x.args) == 1, "Null names must have exactly 1 argument"
+            return pystring(x.args[0], d=d, bv_names=bv_names)
+        elif x.isapply():
+            assert x.args is not None and len(x.args)==2, "Apply requires exactly 2 arguments"
+            #print ">>>>", self.args
+            return '( %s )( %s )' % tuple(map(lambda x: pystring(x, d=d, bv_names=bv_names), x.args))
+        elif x.islambda():
+            # On a lambda, we must add the introduced bv, and then remove it again afterwards
+            
+            bvn = ''
+            if x.added_rule is not None:
+                bvn = x.added_rule.bv_prefix+str(d)
+                bv_names[x.added_rule.name] = bvn
+            
+            ret = 'lambda %s: %s' % ( bvn, pystring(x.args[0], d=d+1, bv_names=bv_names) )
+            
+            if x.added_rule is not None:
+                del bv_names[x.added_rule.name]
+                
+            return ret  
+        else:
+        
+            return bv_names.get(x.name, x.name)+'('+', '.join(map(lambda a: pystring(a, d=d+1, bv_names=bv_names), x.args))+')'
+
+
+"""
+==============================================================================================================================================
+== FunctionNode main class
+==============================================================================================================================================
+"""
+
 class FunctionNode(object):
     """
             *returntype*
@@ -49,21 +106,6 @@ class FunctionNode(object):
             *resample_p*
                     The probability of choosing this node in resampling. Takes any number >0 (all are normalized)
 
-            *bv_name*
-                    Name of the Bound Variable e.g. y1, y2, y3...
-
-            *bv_type*
-                    Bound variable type
-
-            *bv_args*
-                    Arguments of the Bound Variable. "None" implies this is a terminal, otherwise a type signature.
-
-            *bv_prefix*
-                    Bound variable Prefix e.g. the 'y' in y1, y2, y3...
-
-            *bv_p*
-                    Unnormalized probability of the rule expanding to the bound variable.
-
             *ruleid*
                     The rule ID number
 
@@ -72,11 +114,13 @@ class FunctionNode(object):
             bv - stores the actual *rule* that was added (so that we can re-add it when we loop through the tree)
     """
 
-    def __init__(self, returntype, name, args, generation_probability=0.0,
-                 resample_p=1.0, bv_name=None, bv_type=None, bv_args=None,
-                 bv_prefix=None, bv_p=None, ruleid=None):
+
+    def __init__(self, returntype, name, args, generation_probability=0.0, resample_p=1.0, ruleid=None, added_rule=None, a_args=None):
         self.__dict__.update(locals())
 
+        if self.name.lower() == 'applylambda':
+            raise NotImplementedError # Let's not support any applylambda for now
+    
     def setto(self, q):
         """
                 Makes all the parts the same as q, not copies.
@@ -85,7 +129,9 @@ class FunctionNode(object):
 
     def __copy__(self, shallow=False):
         """
-                Copy a function node
+                Copy a function node. 
+                
+                NOTE: The rule is NOT deeply copied (regardless of shallow)
 
                 *shallow* - if True, this does not copy the children (self.to points to the same as what we return)
         """
@@ -95,11 +141,8 @@ class FunctionNode(object):
             newargs = self.args
 
         return FunctionNode(self.returntype, self.name, newargs,
-                            generation_probability=self.generation_probability,
-                            resample_p=self.resample_p, bv_type=self.bv_type,
-                            bv_name=self.bv_name, bv_args=deepcopy(self.bv_args),
-                            bv_prefix=self.bv_prefix, bv_p=self.bv_p,
-                            ruleid=self.ruleid)
+                generation_probability=self.generation_probability,
+                resample_p=self.resample_p, ruleid=self.ruleid, added_rule=self.added_rule, a_args=self.a_args)
 
     def is_nonfunction(self):
         """
@@ -124,7 +167,7 @@ class FunctionNode(object):
         """
                 Returns a list representation of the FunctionNode with function/self.name as the first element.
 
-                NOTE: This does not handle BV yet
+                NOTE: 
         """
         x = [self.name] if self.name != '' else []
         if self.args is not None:
@@ -145,40 +188,31 @@ class FunctionNode(object):
             return True
         else:
             return False
-
-    def pystring(self, serialize_bvs=False):
+        
+    def isapply(self):
         """
-        Outputs a string that can be evaluated by python
+            Are you an apply node?
         """
-        # NOTE: Here we do a little fanciness -- with "if" -- we convert it to the "correct" python
-        # form with short circuiting instead of our fancy ifelse function
-
-        #print ">>", self.name
-        if self.is_nonfunction():  # A terminal
-            return str(self.name)
-
-        elif self.name == "if_":  # This gets translated
-            assert len(self.args) == 3, "if_ requires 3 arguments!"
-            return '(' + str(self.args[1]) + ' if ' + str(self.args[0]) + ' else ' + str(self.args[2]) + ')'
-            #return '(' + str(self.args[1]) + ') if (' + str(self.args[0]) + ') else (' + str(self.args[2]) + ')'
-
-        elif self.name == '':
-            assert len(self.args) == 1, "Null names must have exactly 1 argument"
-            return str(self.args[0])
-
-        elif self.name is not None and self.name.lower() == 'apply_':
-            assert self.args is not None and len(self.args) == 2, "Apply requires exactly 2 arguments"
-            return '('+str(self.args[0])+')('+str(self.args[1])+')'
-
-        elif self.islambda():
-            return 'lambda ' + (self.bv_name if self.bv_name is not None else '') + ': '+str(self.args[0])
-
+        if self.name is None:
+            return False
+        elif self.name.lower() == 'apply_' or self.name.lower() == 'apply':
+            assert len(self.args) == 2
+            return True
         else:
-            if self.args is None:
-                return str(self.name) + '()'  # simple call
-            else:
-                return str(self.name) + '(' + ', '.join(map(str, self.args))+')'
-
+            return False
+        
+    def isapplylambda(self):
+        """ 
+            Are you an apply-lambda?
+            This introduces a bound variable
+        """
+        if self.name is None:
+            return False
+        elif self.name.lower() == 'applylambda':
+            return True
+        else:
+            return False
+    
     def quickstring(self):
         """
             A (maybe??) faster string function used for hashing -- doesn't handle any details and is meant
@@ -195,7 +229,7 @@ class FunctionNode(object):
     def fullprint(self, d=0):
         """ A handy printer for debugging"""
         tabstr = "  .  " * d
-        print tabstr, self.returntype, self.name, self.bv_type, self.bv_name, self.bv_args, self.bv_prefix, "\t", self.generation_probability, "\t", self.resample_p
+        print tabstr, self.returntype, self.name, "\t", self.generation_probability, "\t", self.resample_p, self.added_rule
         if self.args is not None:
             for a in self.args:
                 if isFunctionNode(a):
@@ -210,7 +244,7 @@ class FunctionNode(object):
         if self.args is None:
             return self.name
         else:
-            return '('+self.name + ' ' + ' '.join(map(lambda x: x.schemestring(), None2Empty(self.args)))+')'
+            return '('+self.name + ' ' + ' '.join(map(lambda x: x.schemestring() if isFunctionNode(x) else str(x), None2Empty(self.args)))+')'
 
     def liststring(self, cons="cons_"):
         """
@@ -226,61 +260,19 @@ class FunctionNode(object):
 
     # NOTE: in the future we may want to change this to do fancy things
     def __str__(self):
-        return self.pystring()
+        return pystring(self)
 
     def __repr__(self):
-        return self.pystring()
+        return pystring(self)
 
     def __ne__(self, other):
         return (not self.__eq__(other))
 
-    def __eq__OLD(self, other):
-        return isFunctionNode(other) and (cmp(self, other) == 0)
-
-    def __eq__(self, other, bv_dict=None):
-        """
-            Tests equality of FunctionNodes up to bound variables.
-
-            NOTE: BV equality has not been tested yet.
-        """
-
-        if bv_dict is None:
-            bv_dict = dict()
-
-        # If they have different names, they aren't equal
-        if (not isFunctionNode(other)) or (self.name != other.name):
-            return False
-
-        # If both don't have args, they are equal.
-        if self.args is None:
-            return other.args is None
-
-        # If they have a different number of args, they aren't equal
-        if other.args is not None and len(self.args) != len(other.args):
-            return False
-
-        # If the bound variable already exists in the dict, see if
-        # they're the same
-        if self.name in bv_dict and bv_dict[self.name] != other.name:
-            return False
-
-        # If it doesn't exist in the dict, add it.
-        if self.islambda():
-            if other.islambda():
-                bv_dict[self.bv_name] = other.bv_name
-            else:  # if the other isn't a lambda, must be false
-                return False
-
-        # so args must be a list
-        for a, b in zip(self.args, other.args):
-            if isFunctionNode(a):
-                if not (isFunctionNode(b) and a.__eq__(b, bv_dict)):
-                    return False
-            elif a != b:  # fall back on default comparison
-                return False
-
-        return True
-
+    
+    def __eq__(self, other):
+        return pystring(self) == pystring(other)
+    
+    
     ## TODO: overwrite these with something faster
     # hash trees. This just converts to string -- maybe too slow?
     def __hash__(self):
@@ -332,6 +324,12 @@ class FunctionNode(object):
             # TODO: In python 3, use yeild from
             for n in filter(isFunctionNode, self.args):
                 yield n
+
+    def is_terminal(self):
+        """
+            A FunctionNode is considered a "terminal" if it has no FunctionNodes below
+        """
+        return self.args is None or len(filter(isFunctionNode, self.args)) == 0
 
     def __iter__(self):
         """
@@ -390,7 +388,7 @@ class FunctionNode(object):
             rename = dict()
 
         if self.name is not None:
-            if self.islambda() and (self.bv_type is not None):
+            if (self.islambda() and (self.bv_type is not None)) or self.isapplylambda():
                 assert self.args is not None
 
                 newname = self.bv_prefix+str(d)
@@ -461,10 +459,10 @@ class FunctionNode(object):
         else:
             # figure out what kind of lambda
             t = []
-            if self.bv_args is not None:
-                t = tuple([self.bv_type, ] + copy(self.bv_args))
+            if self.added_rule is not None and self.added_rule.to is not None:
+                t = tuple( [self.added_rule.nt,] + copy(self.self.added_rule.to) )
             else:
-                t = self.bv_type
+                t = self.added_rule.nt
 
             return (self.args[0].type(), t)
 

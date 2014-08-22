@@ -19,7 +19,8 @@ class MultipleChainMCMC(object):
         self.nchains = nchains
         self.chain_idx = -1 # what chain are we on? This get incremented before anything, so it starts with 0
         self.nsamples = 0
-
+        assert nchains>0, "Must have > 0 chains specified (you sent %s)"%nchains
+        
         self.chains = [ MHSampler( make_h0(), data, steps=steps/nchains, **kwargs) for _ in xrange(nchains) ]
 
     def __iter__(self):

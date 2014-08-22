@@ -121,11 +121,6 @@ class NumberExpression(LOTHypothesis):
             return log( (1.0 - ALPHA)/10.0 + ALPHA * ( response == datum.output ) )
 
 
-    # must wrap these as SimpleExpressionFunctions
-    def enumerative_proposer(self):
-        for k in grammar.enumerate_pointwise(self.value):
-            yield NumberExpression(value=k)
-
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
 # The target
@@ -180,4 +175,5 @@ all_possible_data = [ ('', set(sample_sets_of_objects(n, all_objects))) for n in
 # # # # # # # # # # # # # # # # # # # # # # # # #
 # Standard exports
 
-make_h0 = lambda: NumberExpression(grammar)
+def make_h0(value=None):
+    return NumberExpression(grammar,value=value)

@@ -137,7 +137,11 @@ class GrammarTest(unittest.TestCase):
             t = self.G.generate('START')
             # count probability manually
             prob = FiniteWithoutBVArgs.log_probability(t)
-            # print t, prob, t.log_probability(), prob - t.log_probability()
+            
+            # Debugging
+            #print t, prob, t.log_probability(), prob - t.log_probability()
+            #t.fullprint()
+            
             # check that it's equal to .log_probability()
             self.assertTrue(math.fabs(prob - t.log_probability()) < 0.00000001)
 

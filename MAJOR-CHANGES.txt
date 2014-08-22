@@ -1,3 +1,17 @@
+Aug 19 2014:
+	- FunctionNode bound variables are now stored with uuids *internally* rather than a string plus the depth. We use the string+Depth view when casting a FunctionNode to a string.
+	- pystring was moved out of FunctionNode to make it a little more elegant
+	- FunctionNode.__eq__ the fancy version is now not as necessary (since all bv_names are unique, and that's handled by pystring), so that has been removed. We still could check uniqueness wrt bv_prefix. 
+
+Aug 16 2014:
+	- Refactoring of GrammarRule and creation of a BVRuleContextManager to allow easier management of added bound variables. Changes in grammar to use "with" instead of adding and subtracting rules
+	- Change to FunctionNode for nicer printing via %s
+	- Refactoring of FunctionNode to store the *rule* added, rather than the bv_name, bv_type, etc. Now use FunctionNode.added_rule to get hte bv characteristsics
+	- Removed Grammar.add_bv_rule and Grammar.remove_rule
+	- Added BV to increment_tree with fancy new "with" statements
+	- GrammarRule now will return a FunctionNode "stub" that hasn't expanded the args yet. This is used in generation. 
+	- Some early edits for applylambda. Not clear if that will be feasible to add. 
+
 July 31 2014
 	- Refactored Proposals to have separate classes. 
 July 20 2014

@@ -25,13 +25,12 @@ h0 = NumberExpression(grammar)
 # store hypotheses we've found
 allhyp = FiniteBestSet(max=True,N=1000)
 
-import LOTlib.Inference
-import LOTlib.Inference.TemperedTransitions
+from  LOTlib.Inference.MetropolisHastings import MHSampler
 
 # A bunch of different MCMC algorithms to try. mh_sample is from the Rational Rules paper and generally works very well.
 #for h in  LOTlib.Inference.TemperedTransitions.tempered_transitions_sample(initial_hyp, data, 500000, skip=0, temperatures=[1.0, 1.25, 1.5]):
 #for h in  LOTlib.Inference.ParallelTempering.parallel_tempering_sample(initial_hyp, data, STEPS, within_steps=10, yield_all=True, temperatures=[1.0,1.05, 1.1]):
-for h in LOTlib.Inference.MetropolisHastings.mh_sample(h0, data, STEPS, skip=SKIP):
+for h in MHSampler(h0, data, STEPS, skip=SKIP):
     if TRACE:
         print q(get_knower_pattern(h)), h.compute_prior(), h.compute_likelihood(data), q(h)
 

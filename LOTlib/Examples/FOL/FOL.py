@@ -30,6 +30,9 @@ grammar.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'red\''],   5.00) # --> is_c
 grammar.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'blue\''],  5.00)
 grammar.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'green\''], 5.00)
 
+
+#grammar.add_rule('BOOL', 'applylambda', ['BOOL'], 1.0, bv_type='OBJECT')
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Just generate from this grammar
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,9 +64,10 @@ h0 = LOTHypothesis(grammar, args=['S'])
 #from LOTlib.Proposals import *
 #h0 = LOTHypothesis(grammar, proposal_function=MixtureProposal(grammar, [RegenerationProposal(grammar), InsertDeleteProposal(grammar)] ) )
 
-
-# MCMC!
-for h in mh_sample(h0, data, 4000): # run sampler
-#for h in unique(mh_sample(h0, data, 4000)): # get unique samples
-        # hypotheses' .prior, .likelihood, and .posterior_score are set in mh_sample
-    print h.likelihood, h.prior, h.posterior_score, h
+if __name__ == "__main__":
+        
+    # MCMC!
+    for h in mh_sample(h0, data, 4000): # run sampler
+    #for h in unique(mh_sample(h0, data, 4000)): # get unique samples
+            # hypotheses' .prior, .likelihood, and .posterior_score are set in mh_sample
+        print h.likelihood, h.prior, h.posterior_score, h

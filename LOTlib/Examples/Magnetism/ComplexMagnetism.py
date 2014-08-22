@@ -73,7 +73,7 @@ for a,b in itertools.product(objects, objects):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if __name__ == "__main__":
 
-    from LOTlib.Proposals import *
+    from LOTlib.Proposals.RegenerationProposal import RegenerationProposal
     #mp = MixtureProposal([RegenerationProposal(grammar), InsertDeleteProposal(grammar)] )
     mp = RegenerationProposal(grammar)
 
