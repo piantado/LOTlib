@@ -330,7 +330,7 @@ class Grammar:
 
         if isFunctionNode(x):
             # NOTE: WE don't need to handle BV here since they are handled below when we use the rule
-
+            
             original_x = copy(x)
             
             # go all odometer on the kids below::
