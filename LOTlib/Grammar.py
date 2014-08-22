@@ -263,9 +263,56 @@ class Grammar:
             if sm >= r and not foundit: # our node
                 foundit=True
                 yield [ni, di, ni.resample_p, Z]
-
+        
+        
+    def depth_to_terminal(self, x, openset=None, current_d=None):
+        """
+            Return a dictionary that maps both this grammar's rules and its nonterminals to a number, giving how quickly we
+            can go from that nonterminal or rule to a terminal. 
+            
+            *openset* -- stores the set of things we're currently trying to compute for. We must skip rules that contain anything we've seen, since 
+            they have to be defined still, and so we want to avoid a loop. 
+        """
+        
+        if current_d is None: 
+            current_d = dict()
+            
+        if openset is None:
+            openset = set()
+            
+        openset.add(x)
+        
+        if isinstance(x, GrammarRule):
+            if x.to is None or len(x.to) == 0:
+                current_d[x] = 0 # we are a terminal
+            else:
+                current_d[x] = 1+max([ (self.depth_to_terminal(a, openset=openset, current_d=current_d) if a not in openset else 0) for a in x.to])
+        elif isinstance(x, str):
+            if x not in self.rules:
+                current_d[x] = 0 # a terminal
+            else:
+                current_d[x] = min([(self.depth_to_terminal(r, openset=openset, current_d=current_d) if r not in openset else Infinity) for r in self.rules[x] ])
+        else:
+            assert False, "Shouldn't get here!"
+        
+        openset.remove(x)
+        
+        return current_d[x]
+        
 
     def increment_tree(self, x=None, depth=0, max_depth=Infinity):
+        """
+            A wrapper to increment_tree to pre-compute some info on depths and handle corner cases
+        """
+        if x is None:
+            x = self.start
+        
+        # Now really call increment_tree, using depthdict to sort
+        for y in LOTlib.lot_iter(self.increment_tree_(x, depth=depth, max_depth=max_depth, depthdict=dict())):
+            yield y
+            
+    
+    def increment_tree_(self, x=None, depth=0, max_depth=Infinity, depthdict=None):
         """
                 A lazy version of tree enumeration. Here, we generate all trees, starting from a rule or a nonterminal symbol and going up to max_depth
 
@@ -274,16 +321,9 @@ class Grammar:
 
                 *x*: A node in the tree
                 *depth*: Depth of the tree
-                
-                TODO: MAYBE BV CONTEXT MANAGER SHOULD GO SOMEWHER ELSE?
-                
+                *depthdict* : memoizes depth_to_terminal so that we can order rules in order to make enumeration small->large
         """
         # wrap no specification for x
-        if x is None:
-            x = self.start
-        
-        if LOTlib.SIG_INTERRUPTED:
-            return # quit if interrupted
         
         if depth >= max_depth:
             raise StopIteration
@@ -294,7 +334,7 @@ class Grammar:
             original_x = copy(x)
             
             # go all odometer on the kids below::
-            iters = [self.increment_tree(x=y,depth=depth,max_depth=max_depth) if self.is_nonterminal(y) else None for y in x.args]
+            iters = [self.increment_tree_(x=y,depth=depth,max_depth=max_depth, depthdict=depthdict) if self.is_nonterminal(y) else None for y in x.args]
             if len(iters) == 0:
                 yield copy(x)
             else:
@@ -307,26 +347,28 @@ class Grammar:
                 last_terminal_idx = max( [i if iters[i] is not None else -1 for i in xrange(len(iters))] )
 
                 ## Now loop through the args, counting them up
-                continue_counting = True
-                while continue_counting: # while we continue incrementing
-
+                while True:
+                    
                     yield copy(x) # yield the initial tree, and then each successive tree
 
                     # and then process each carry:
                     for carry_pos in xrange(len(iters)): # index into which tree we are incrementing
                         if iters[carry_pos] is not None: # we are not a terminal symbol (mixed in)
-
-                            try:
-                                x.args[carry_pos] = iters[carry_pos].next()
-                                break # if we increment successfully, no carry, so break out of i loop
-                            except StopIteration: # if so, then "carry"
-                                if carry_pos == last_terminal_idx:
-                                    continue_counting = False # done counting here
-                                elif iters[carry_pos] is not None:
-                                    # reset the incrementer since we just carried
-                                    iters[carry_pos] = self.increment_tree(x=original_x.args[carry_pos],depth=depth,max_depth=max_depth)
-                                    x.args[carry_pos] = iters[carry_pos].next() # reset this
-                                    # and just continue your loop over i (which processes the carry)
+                            
+                            ## NOTE: This *MUST* go here in order to prevent adding a rule and then not removing it when you carry (thus introducing a bv of a1 into a2)
+                            with BVRuleContextManager(self, x.added_rule):
+    
+                                try:
+                                    x.args[carry_pos] = iters[carry_pos].next()
+                                    break # if we increment successfully, no carry, so break out of i loop
+                                except StopIteration: # if so, then "carry"
+                                    if carry_pos == last_terminal_idx:
+                                        raise StopIteration
+                                    elif iters[carry_pos] is not None:
+                                        # reset the incrementer since we just carried
+                                        iters[carry_pos] = self.increment_tree_(x=original_x.args[carry_pos],depth=depth,max_depth=max_depth, depthdict=depthdict)
+                                        x.args[carry_pos] = iters[carry_pos].next() # reset this
+                                        # and just continue your loop over i (which processes the carry)
 
         elif self.is_nonterminal(x): # just a single nonterminal
           
@@ -341,24 +383,31 @@ class Grammar:
                     terminals.append(k)
             
             # sort by probability, so high probability trees *tend* to come first
-            terminals    = sorted(terminals,    key=lambda r:r.p, reverse=True)
-            nonterminals = sorted(nonterminals, key=lambda r:r.p, reverse=True)
+            #terminals    = sorted(terminals,    key=lambda r: self.depth_to_terminal(r, current_d=depthdict) )
+            #nonterminals = sorted(nonterminals, key=lambda r: self.depth_to_terminal(r, current_d=depthdict) )
+            terminals    = sorted(terminals,    key=lambda r: 1 )
+            nonterminals = sorted(nonterminals, key=lambda r: 1 )
             Z = logsumexp([ log(r.p) for r in self.rules[x]] ) # normalizer
+            
+            #print terminals
+            #print nonterminals
+            #print "---------------------------------------"
             
             # yield each of the rules that lead to terminals -- always do this since depth>=0 (above)
             for r in terminals:
-                fn = r.make_FunctionNodeStub(self, depth, (log(r.p) - Z))
+                fn = r.make_FunctionNodeStub(self, (log(r.p) - Z))
                 # Do not need to set added_rule since they can't exist here
                 yield fn
                 
             if depth < max_depth: # if we can go deeper
                 # and expand each nonterminals
                 for r in nonterminals:
-                    fn = r.make_FunctionNodeStub(self, depth, (log(r.p) - Z))
+                    fn = r.make_FunctionNodeStub(self, (log(r.p) - Z))
+                    #print ">>>>", r
                     
-                    with BVRuleContextManager(self, depth, fn.added_rule):
-                        for q in self.increment_tree(x=fn, depth=depth+1,max_depth=max_depth):
-                            yield q
+                    
+                    for q in self.increment_tree_(x=fn, depth=depth+1,max_depth=max_depth, depthdict=depthdict):
+                        yield q
             else:
                 yield x
 
@@ -424,11 +473,17 @@ if __name__ == "__main__":
     from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar
     #from LOTlib.Examples.Number.Shared import grammar
     
-    #for t in grammar.increment_tree(max_depth=6):
-    #    print t
+    #for t in grammar.increment_tree(max_depth=7):
+    #    print t.depth(), t
+        #t.fullprint()
+        #print "\n\n"
+     
+    #for r in grammar.rules.keys():
+    #    print ">>", grammar.depth_to_terminal(r), r
         
-    for _ in xrange(1000):
-        print grammar.generate()
+    #for _ in xrange(1000):
+    #    t = grammar.generate()
+    #    print t.depth(), t
 
 """
     #from LOTlib.Examples.RationalRules.Shared import grammar

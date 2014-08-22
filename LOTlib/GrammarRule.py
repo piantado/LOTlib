@@ -6,7 +6,7 @@
 
 from FunctionNode import FunctionNode
 from copy import copy
-
+from LOTlib.Miscellaneous import None2Empty
 
 class GrammarRule(object):
     def __init__(self, nt, name, to, p=1.0, resample_p=1.0, bv_prefix=None):
@@ -36,7 +36,10 @@ class GrammarRule(object):
         p = float(p)  # make sure these are floats
         
         self.__dict__.update(locals())
-
+        
+        for a in None2Empty(to):
+            assert isinstance(a,str)
+        
         if name == '':
             assert (to is None) or (len(to) == 1), "*** GrammarRules with empty names must have only 1 argument"
 
