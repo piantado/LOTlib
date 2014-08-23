@@ -115,8 +115,9 @@ class FunctionNode(object):
     """
 
 
-    def __init__(self, returntype, name, args, generation_probability=0.0, resample_p=1.0, ruleid=None, added_rule=None, a_args=None):
+    def __init__(self, returntype, name, args, generation_probability=0.0, resample_p=1.0, ruleid=None, a_args=None):
         self.__dict__.update(locals())
+        self.added_rule = None
 
         if self.name.lower() == 'applylambda':
             raise NotImplementedError # Let's not support any applylambda for now
@@ -142,7 +143,7 @@ class FunctionNode(object):
 
         return FunctionNode(self.returntype, self.name, newargs,
                 generation_probability=self.generation_probability,
-                resample_p=self.resample_p, ruleid=self.ruleid, added_rule=self.added_rule, a_args=self.a_args)
+                resample_p=self.resample_p, ruleid=self.ruleid, a_args=self.a_args)
 
     def is_nonfunction(self):
         """
@@ -163,15 +164,77 @@ class FunctionNode(object):
         """
         return (self.args is None) or all([not isFunctionNode(c) for c in self.args])
 
-    def as_list(self):
+    def is_bv(self):
+        """
+                Returns True if this FunctionNode stores a bound variable
+        """
+        return False
+
+    # def as_list(self, depth=0):
+    #     """
+    #             Returns a list representation of the FunctionNode with function/self.name as the first element.
+
+    #             *depth* An optional argument that keeps track of how far down the tree we are
+
+    #             TODO: do what pystring does
+    #     """
+    #     if self.name == '':
+    #         x = []
+    #     else:
+    #         x = [self.bv_prefix+str(depth)] if self.is_bv() else [self.name]
+    #     # x = [self.name] if self.name != '' else []
+    #     if self.args is not None:
+    #         x.extend([a.as_list(depth=depth+1) if isFunctionNode(a) else a for a in self.args])
+    #     return x
+
+    def as_list(self, d=0, bv_names=None):
         """
                 Returns a list representation of the FunctionNode with function/self.name as the first element.
 
-                NOTE: 
+                *d* An optional argument that keeps track of how far down the tree we are
+
+                *bv_names* A dictionary keeping track of the names of bound variables (keys = UUIDs, values = names)
+
+                TODO: do what pystring does
         """
-        x = [self.name] if self.name != '' else []
+        
+        # initialize the bv_names variable if it's not defined
+        if bv_names is None:
+            bv_names = dict()    
+
+        # print "calling as_list on " + self.name + " and with names = " + str(bv_names)
+
+        # the tree should be represented as the empty set if the function node has no name
+        if self.name == '':
+            x = []
+
+        # when we encounter a lambda node, we should add an item to the bv_names dictionary
+        elif self.islambda():
+            
+            bvn = ''
+            if self.added_rule is not None:
+                bvn = self.added_rule.bv_prefix+str(d)
+                bv_names[self.added_rule.name] = bvn
+            
+            # ret = 'lambda %s: %s' % ( bvn, pystring(x.args[0], d=d+1, bv_names=bv_names) )
+        
+        # add the bv name to the list if we are at a BV node
+        if self.is_bv():
+            x = [bv_names[self.name]]
+        # otherwise, add the function node's name to the list
+        else:
+            x = [self.name]
+        # and we're now ready to loop over the function node's arguments
         if self.args is not None:
-            x.extend([a.as_list() if isFunctionNode(a) else a for a in self.args])
+            x.extend([a.as_list(d=d+1, bv_names=bv_names) if isFunctionNode(a) else a for a in self.args])
+
+        # afterwards, we should remove the BV name from the bv_names dictionary
+        # TODO: do we really need this?
+        if self.islambda() and self.added_rule is not None:
+            # del bv_names[self.added_rule.name]
+            pass
+
+
         return x
 
     def islambda(self):
@@ -611,3 +674,17 @@ class FunctionNode(object):
         ret.args = newargs
 
         return ret
+
+class BVAddFunctionNode(FunctionNode):
+    def __init__(self, returntype, name, args, generation_probability=0.0, resample_p=1.0, ruleid=None, a_args=None, added_rule=None):
+        FunctionNode.__init__(self, returntype, name, args, generation_probability, resample_p, ruleid, a_args)
+        self.added_rule = added_rule
+
+class BVUseFunctionNode(FunctionNode):
+    def __init__(self, returntype, name, args, generation_probability=0.0, resample_p=1.0, ruleid=None, a_args=None, bv_prefix=None):
+        FunctionNode.__init__(self, returntype, name, args, generation_probability, resample_p, ruleid, a_args)
+        self.bv_prefix = bv_prefix
+
+    # overwrite the is_bv method
+    def is_bv(self):
+        return True
