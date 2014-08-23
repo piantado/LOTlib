@@ -167,7 +167,7 @@ class GrammarTest(unittest.TestCase):
 
     # tests .log_probability() function on trees that were proposed to, and makes sure these probabilities are the same as if we've just generated the tree from scratch
     # Uses the Grammars/FiniteWithBVArgs.py grammar
-    @unittest.skip('Debugging...')
+    # @unittest.skip('Debugging...')
     def test_log_probability_proposals_FiniteWithBVArgs(self):
         # import the grammar
         from LOTlibTest.Grammars import FiniteWithBVArgs
@@ -187,7 +187,7 @@ class GrammarTest(unittest.TestCase):
 
     # tests .log_probability() function on trees that were proposed to, and makes sure these probabilities are the same as if we've just generated the tree from scratch
     # Uses the Grammars/FiniteWithoutBVArgs.py grammar
-    @unittest.skip('Debugging...')
+    # @unittest.skip('Debugging...')
     def test_log_probability_proposals_FiniteWithoutBVArgs(self):
         # import the grammar
         from LOTlibTest.Grammars import FiniteWithoutBVArgs
@@ -206,7 +206,7 @@ class GrammarTest(unittest.TestCase):
             self.assertTrue(math.fabs(prob - Y.log_probability()) < 0.00000001)
 
     # tests lazy enumeration of trees via the increment_tree function, with a simple grammar (without bound variables)
-    # @unittest.skip('Debugging...')
+    @unittest.skip('Debugging...')
     def test_increment_tree(self):
         # import the grammar
         from LOTlibTest.Grammars import IncrementTreeGrammar
