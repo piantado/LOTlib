@@ -170,72 +170,72 @@ class FunctionNode(object):
         """
         return False
 
-    # def as_list(self, depth=0):
-    #     """
-    #             Returns a list representation of the FunctionNode with function/self.name as the first element.
-
-    #             *depth* An optional argument that keeps track of how far down the tree we are
-
-    #             TODO: do what pystring does
-    #     """
-    #     if self.name == '':
-    #         x = []
-    #     else:
-    #         x = [self.bv_prefix+str(depth)] if self.is_bv() else [self.name]
-    #     # x = [self.name] if self.name != '' else []
-    #     if self.args is not None:
-    #         x.extend([a.as_list(depth=depth+1) if isFunctionNode(a) else a for a in self.args])
-    #     return x
-
-    def as_list(self, d=0, bv_names=None):
+    def as_list(self, depth=0):
         """
                 Returns a list representation of the FunctionNode with function/self.name as the first element.
 
-                *d* An optional argument that keeps track of how far down the tree we are
-
-                *bv_names* A dictionary keeping track of the names of bound variables (keys = UUIDs, values = names)
+                *depth* An optional argument that keeps track of how far down the tree we are
 
                 TODO: do what pystring does
         """
-        
-        # initialize the bv_names variable if it's not defined
-        if bv_names is None:
-            bv_names = dict()    
-
-        # print "calling as_list on " + self.name + " and with names = " + str(bv_names)
-
-        # the tree should be represented as the empty set if the function node has no name
-        if self.name == '':
-            x = []
-
-        # when we encounter a lambda node, we should add an item to the bv_names dictionary
-        elif self.islambda():
-            
-            bvn = ''
-            if self.added_rule is not None:
-                bvn = self.added_rule.bv_prefix+str(d)
-                bv_names[self.added_rule.name] = bvn
-            
-            # ret = 'lambda %s: %s' % ( bvn, pystring(x.args[0], d=d+1, bv_names=bv_names) )
-        
-        # add the bv name to the list if we are at a BV node
-        if self.is_bv():
-            x = [bv_names[self.name]]
-        # otherwise, add the function node's name to the list
-        else:
-            x = [self.name]
-        # and we're now ready to loop over the function node's arguments
+        # if self.name == '':
+        #     x = []
+        # else:
+        #     x = [self.bv_prefix+str(depth)] if self.is_bv() else [self.name]
+        x = [self.name] if self.name != '' else []
         if self.args is not None:
-            x.extend([a.as_list(d=d+1, bv_names=bv_names) if isFunctionNode(a) else a for a in self.args])
-
-        # afterwards, we should remove the BV name from the bv_names dictionary
-        # TODO: do we really need this?
-        if self.islambda() and self.added_rule is not None:
-            # del bv_names[self.added_rule.name]
-            pass
-
-
+            x.extend([a.as_list(depth=depth+1) if isFunctionNode(a) else a for a in self.args])
         return x
+
+    # def as_list(self, d=0, bv_names=None):
+    #     """
+    #             Returns a list representation of the FunctionNode with function/self.name as the first element.
+
+    #             *d* An optional argument that keeps track of how far down the tree we are
+
+    #             *bv_names* A dictionary keeping track of the names of bound variables (keys = UUIDs, values = names)
+
+    #             TODO: do what pystring does
+    #     """
+        
+    #     # initialize the bv_names variable if it's not defined
+    #     if bv_names is None:
+    #         bv_names = dict()    
+
+    #     # print "calling as_list on " + self.name + " and with names = " + str(bv_names)
+
+    #     # the tree should be represented as the empty set if the function node has no name
+    #     if self.name == '':
+    #         x = []
+
+    #     # when we encounter a lambda node, we should add an item to the bv_names dictionary
+    #     elif self.islambda():
+            
+    #         bvn = ''
+    #         if self.added_rule is not None:
+    #             bvn = self.added_rule.bv_prefix+str(d)
+    #             bv_names[self.added_rule.name] = bvn
+            
+    #         # ret = 'lambda %s: %s' % ( bvn, pystring(x.args[0], d=d+1, bv_names=bv_names) )
+        
+    #     # add the bv name to the list if we are at a BV node
+    #     if self.is_bv():
+    #         x = [bv_names[self.name]]
+    #     # otherwise, add the function node's name to the list
+    #     else:
+    #         x = [self.name]
+    #     # and we're now ready to loop over the function node's arguments
+    #     if self.args is not None:
+    #         x.extend([a.as_list(d=d+1, bv_names=bv_names) if isFunctionNode(a) else a for a in self.args])
+
+    #     # afterwards, we should remove the BV name from the bv_names dictionary
+    #     # TODO: do we really need this?
+    #     if self.islambda() and self.added_rule is not None:
+    #         # del bv_names[self.added_rule.name]
+    #         pass
+
+
+    #     return x
 
     def islambda(self):
         """
