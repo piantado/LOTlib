@@ -1,4 +1,3 @@
-
 """
         This class is a wrapper for representing "rules" in the grammar.
 """
@@ -9,30 +8,31 @@ from copy import copy
 from LOTlib.Miscellaneous import None2Empty
 
 class GrammarRule(object):
+    """
+            *nt* - the nonterminal
+            
+            *name* - the name of this function
+            
+            *to* - what you expand to (usually a FunctionNode).
+            
+            *p* - unnormalized probability of expansion
+            
+            *bv_prefix* may be needed for GrammarRules introduced *by* BVGrammarRules, so that when we display them we can map to bv_prefix+depth
+
+            Examples:
+            A rule where "expansion" is a nonempty list is a real expansion:
+                    GrammarRule( "EXPR", "plus", ["EXPR", "EXPR"], ...) -> plus(EXPR,EXPR)
+            A rule where "expansion" is [] is a thunk
+                    GrammarRule( "EXPR", "plus", [], ...) -> plus()
+            A rule where "expansion" is [] is a real terminal (non-thunk)
+                    GrammarRule( "EXPR", "five", None, ...) -> five
+            A rule where "name" is '' expands without parens:
+                    GrammarRule( "EXPR", '', "SUBEXPR", ...) -> EXPR->SUBEXPR
+
+            NOTE: The rule id (rid) is very important -- it's what we use expansion determine equality
+    """
     def __init__(self, nt, name, to, p=1.0, resample_p=1.0, bv_prefix=None):
-        """
-                *nt* - the nonterminal
 
-                *name* - the name of this function
-
-                *to* - what you expand to (usually a FunctionNode).
-
-                *p* - unnormalized probability of expansion
-                
-                *bv_prefix* may be needed for GrammarRules introduced *by* BVGrammarRules, so that when we display them we can map to bv_prefix+depth
-
-                Examples:
-                A rule where "expansion" is a nonempty list is a real expansion:
-                        GrammarRule( "EXPR", "plus", ["EXPR", "EXPR"], ...) -> plus(EXPR,EXPR)
-                A rule where "expansion" is [] is a thunk
-                        GrammarRule( "EXPR", "plus", [], ...) -> plus()
-                A rule where "expansion" is [] is a real terminal (non-thunk)
-                        GrammarRule( "EXPR", "five", None, ...) -> five
-                A rule where "name" is '' expands without parens:
-                        GrammarRule( "EXPR", '', "SUBEXPR", ...) -> EXPR->SUBEXPR
-
-                NOTE: The rule id (rid) is very important -- it's what we use expansion determine equality
-        """
         p = float(p)  # make sure these are floats
         
         self.__dict__.update(locals())
