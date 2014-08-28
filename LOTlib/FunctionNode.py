@@ -125,6 +125,7 @@ class FunctionNode(object):
                 Makes all the parts the same as q, not copies.
         """
         self.__dict__.update(q.__dict__)
+        self.__class__ = q.__class__ # to update in case q is a different subtype of FunctionNode
 
     def __copy__(self, shallow=False):
         """

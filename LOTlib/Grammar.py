@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-TODO: Allow PCFG to take another tree of FunctionNodes in generation. It then recurses and only genreates the leaves
-TODO: When we generate, we MUST have a START->EXPR expansion, otherwise the top level doesn't get searched
-"""
-
 try:                import numpy as np
 except ImportError: import numpypy as np
 
@@ -133,6 +128,7 @@ class Grammar:
         # Decide what to start from based on the default if start is not specified
         if x is None:
             x = self.start
+            assert self.start in self.rules, "The default start symbol %s is not a defined nonterminal"%self.start
 
         # Dispatch different kinds of generation
         if isinstance(x,list):            
@@ -146,40 +142,6 @@ class Grammar:
             
             # Make a stub for this functionNode 
             fn = r.make_FunctionNodeStub(self, gp) ## NOT SURE WHY BU TCOPY IS NECESSARY HERE
-            
-            # How we expend below depends on whether or not its an applylambda
-            """
-            if fn.isapplylambda():
-                # isapplylambda is special in that the first arg is generated in the context created by adding the rule, but the second is not
-                # Note that we may have 1 or 2 args: 1 if it's the first generation, and 2 if its a resample
-                
-                # Make the length right -- when generating fn.args has one, otherwise it will have 2 (in resampling)
-                if len(fn.args) == 1:
-                        fn.args.append(fn.added_rule.nt)
-                assert len(fn.args) == 2
-                                    
-                # Define a new context that is the grammar with the rule added. Then, when we exit, it's still right 
-                with BVRuleContextManager(self, d, fn.added_rule):                    
-                    # the BV is defined for the first arg, but not the second
-                    fn.args[0] = self.generate(fn.args[0] if isinstance(fn.args[0],str) else fn.args[0].returntype, d+1)
-                
-                # generate the argument that gets passed to the first argument
-                # The complication here is that the args may themselves be functions
-                if r.bv_args is None: # if the args are not functions
-                    a = self.generate(fn.added_rule.nt, d+1)
-                else: # if they are functions, we must introduce rules on *that* side
-                    
-                    # give each a an argument!
-                    fn.a_args = [  GrammarRule(a_t, 'a'+str(d), None, p=self.BV_P, resample_p=self.BV_RESAMPLE_P) for a_t in r.bv_args]
-                    with BVRuleContextManager(self, d, *fn.a_args):                    
-                        # the BV is defined for the first arg, but not the second
-                        fn.args[1] = self.generate(fn.args[1] if isinstance(fn.args[1],str) else fn.args[1].returntype, d+1)
-                
-                return fn
-            else: # Else we are normal, either a lambda or not (in either case, the args have added_rule (which may be none) in the context
-            
-            INDENT THE NEXT BLOCK IF YOU UNCOMMENT THIS:
-            """
                 
             # Define a new context that is the grammar with the rule added. Then, when we exit, it's still right 
             with BVRuleContextManager(self, fn.added_rule): # not sure why I can't use with/as:
@@ -210,7 +172,7 @@ class Grammar:
         """
         
         if isFunctionNode(t):
-          #  print "iterate subnode: ", t, t.added_rule
+            #  print "iterate subnode: ", t, t.added_rule
             
             if predicate(t):
                 yield (t,d) if yield_depth else t
@@ -270,7 +232,7 @@ class Grammar:
             Return a dictionary that maps both this grammar's rules and its nonterminals to a number, giving how quickly we
             can go from that nonterminal or rule to a terminal. 
             
-            *openset* -- stores the set of things we're currently trying to compute for. We must skip rules that contain anything we've seen, since 
+            *openset* -- stores the set of things we're currently trying to compute for. We must skip rules that contain anything in there, since 
             they have to be defined still, and so we want to avoid a loop. 
         """
         
@@ -317,8 +279,10 @@ class Grammar:
                 A lazy version of tree enumeration. Here, we generate all trees, starting from a rule or a nonterminal symbol and going up to max_depth
 
                 This is constant memory and should produce each tree *once* (However: if a grammar has multiple derivations of the same
-                str(tree), then you will see repeats!)
-
+                str(tree), then you will see repeats!). 
+                
+                TODO: CHANGE THIS TO ENUMERATE SHALLOW->DEEP
+                
                 *x*: A node in the tree
                 *depth*: Depth of the tree
                 *depthdict* : memoizes depth_to_terminal so that we can order rules in order to make enumeration small->large
@@ -357,7 +321,7 @@ class Grammar:
                             
                             ## NOTE: This *MUST* go here in order to prevent adding a rule and then not removing it when you carry (thus introducing a bv of a1 into a2)
                             with BVRuleContextManager(self, x.added_rule):
-    
+                                
                                 try:
                                     x.args[carry_pos] = iters[carry_pos].next()
                                     break # if we increment successfully, no carry, so break out of i loop
@@ -383,10 +347,8 @@ class Grammar:
                     terminals.append(k)
             
             # sort by probability, so high probability trees *tend* to come first
-            #terminals    = sorted(terminals,    key=lambda r: self.depth_to_terminal(r, current_d=depthdict) )
-            #nonterminals = sorted(nonterminals, key=lambda r: self.depth_to_terminal(r, current_d=depthdict) )
-            terminals    = sorted(terminals,    key=lambda r: 1 )
-            nonterminals = sorted(nonterminals, key=lambda r: 1 )
+            terminals    = sorted(terminals,    key=lambda r: self.depth_to_terminal(r, current_d=depthdict) )
+            nonterminals = sorted(nonterminals, key=lambda r: self.depth_to_terminal(r, current_d=depthdict) )
             Z = logsumexp([ log(r.p) for r in self.rules[x]] ) # normalizer
             
             #print terminals
@@ -400,11 +362,8 @@ class Grammar:
                 yield fn
                 
             if depth < max_depth: # if we can go deeper
-                # and expand each nonterminals
-                for r in nonterminals:
+                for r in nonterminals:#expand each nonterminals
                     fn = r.make_FunctionNodeStub(self, (log(r.p) - Z))
-                    #print ">>>>", r
-                    
                     
                     for q in self.increment_tree_(x=fn, depth=depth+1,max_depth=max_depth, depthdict=depthdict):
                         yield q
@@ -470,11 +429,11 @@ class Grammar:
 if __name__ == "__main__":
     pass
     #from LOTlib.Examples.FOL.FOL import grammar
-    from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar
-    #from LOTlib.Examples.Number.Shared import grammar
+    #from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar
+    from LOTlib.Examples.Number.Shared import grammar
     
-    #for t in grammar.increment_tree(max_depth=7):
-    #    print t.depth(), t
+    for t in grammar.increment_tree(max_depth=9):
+        print t.depth(), t
         #t.fullprint()
         #print "\n\n"
      
