@@ -179,9 +179,10 @@ class GrammarTest(unittest.TestCase):
             X = self.G.generate('START')
             # propose to a new tree
             Y = rp.propose_tree(X)[0]
+            # Y.fullprint()
             # count probability manually
             prob = FiniteWithBVArgs.log_probability(Y)
-            print "iteration", i, X, Y, prob, Y.log_probability(), prob - Y.log_probability()
+            # print "iteration", i, X, Y, prob, Y.log_probability(), prob - Y.log_probability()
             # check that it's equal to .log_probability()
             self.assertTrue(math.fabs(prob - Y.log_probability()) < 0.00000001)
 

@@ -210,17 +210,18 @@ class FunctionNode(object):
 
         # when we encounter a lambda node, we should add an item to the bv_names dictionary
         elif self.islambda():
-            print "We are a lambda node...", self.name
+            # print "We are a lambda node...", self.name
             
             bvn = ''
             if self.added_rule is not None:
                 bvn = self.added_rule.bv_prefix+str(d)
                 bv_names[self.added_rule.name] = bvn
-                print "adding rule...", bvn, " and type is ", type(self)
+                # print "adding rule...", bvn, " and type is ", type(self)
             else:
-                bvn = 'z'+str(d)
-                bv_names[self.name] = bvn
-                print "NOT ADDING RULE...", type(self)
+                # bvn = 'z'+str(d)
+                # bv_names[self.name] = bvn
+                # print "NOT ADDING RULE...", type(self)
+                pass
             
             # ret = 'lambda %s: %s' % ( bvn, pystring(x.args[0], d=d+1, bv_names=bv_names) )
         
@@ -240,8 +241,8 @@ class FunctionNode(object):
             del bv_names[self.added_rule.name]
             # pass
 
-        print "as_list on function node", self.name, " at depth ", d, " with pystring", pystring(self)
-        print "\tand dictionary ", bv_names, " returns: ", x
+        # print "as_list on function node", self.name, " at depth ", d, " with pystring", pystring(self)
+        # print "\tand dictionary ", bv_names, " returns: ", x
         return x
 
     def islambda(self):
