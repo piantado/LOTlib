@@ -76,6 +76,14 @@ LOTlib.Primitives.SetTheory module
     :undoc-members:
     :show-inheritance:
 
+LOTlib.Primitives.Stochastics module
+------------------------------------
+
+.. automodule:: LOTlib.Primitives.Stochastics
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 LOTlib.Primitives.Trees module
 ------------------------------
 

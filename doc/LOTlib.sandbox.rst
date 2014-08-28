@@ -12,6 +12,14 @@ LOTlib.sandbox.OptimalGrammarAdaptation module
     :undoc-members:
     :show-inheritance:
 
+LOTlib.sandbox.RealValueGrammar module
+--------------------------------------
+
+.. automodule:: LOTlib.sandbox.RealValueGrammar
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

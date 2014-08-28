@@ -7,12 +7,13 @@ There are several sampling methods provided, including tree-regeneration metropo
 
 Currently, the best way to use this library is to read and modify the examples. On-going development is focused on providing testing, documentation, and evaluation suites. LOTlib will make a transition to Python 3.x in the near future
 
+TEST TEST
+
 .. toctree::
    :maxdepth: 2
    :numbered:
-   
+
    intro
-   tutorial
 
 Setup
 -----
