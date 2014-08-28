@@ -1,7 +1,6 @@
 from Shared import *
 from Utilities import *
 
-from LOTlib.Testing.check_counts import check_counts
 
 #distribution of context sizes
 #for i in xrange(1000):
