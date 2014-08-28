@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# *- coding: utf-8 -*-
 try:                import numpy as np
 except ImportError: import numpypy as np
 
@@ -430,18 +430,30 @@ if __name__ == "__main__":
     pass
     #from LOTlib.Examples.FOL.FOL import grammar
     #from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar
-    from LOTlib.Examples.Number.Shared import grammar
+    #from LOTlib.Examples.Number.Shared import grammar
+    from LOTlibTest.Grammars.FiniteWithBVArgs import g as grammar
     
-    for t in grammar.increment_tree(max_depth=9):
-        print t.depth(), t
+    #for t in grammar.increment_tree(max_depth=9):
+    #    print t.depth(), t
         #t.fullprint()
         #print "\n\n"
      
     #for r in grammar.rules.keys():
     #    print ">>", grammar.depth_to_terminal(r), r
+    """
+    for _ in xrange(1000):
+        t = grammar.generate()
+        print type(t), t
         
-    #for _ in xrange(1000):
-    #    t = grammar.generate()
+        from LOTlib.Proposals.RegenerationProposal import RegenerationProposal
+        rp = RegenerationProposal(grammar)
+        x = rp.propose_tree(t)[0]
+        print type(x), x
+        
+        print "\n\n"
+    """
+    
+     
     #    print t.depth(), t
 
 """

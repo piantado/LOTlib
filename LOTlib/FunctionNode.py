@@ -127,7 +127,7 @@ class FunctionNode(object):
                 Makes all the parts the same as q, not copies.
         """
         self.__dict__.update(q.__dict__)
-        self.__class__ = q.__class__ # to update in case q is a different subtype of FunctionNode
+        self.__class__ = q.__class__ # to update in case q is a different subtype of FunctionNode. NOTE: Setting __class__ is not a recommended thing to do.
 
     def __copy__(self, shallow=False):
         """
@@ -143,9 +143,9 @@ class FunctionNode(object):
             newargs = self.args
 
         return FunctionNode(self.returntype, self.name, newargs,
-                generation_probability=self.generation_probability,
-                resample_p=self.resample_p, ruleid=self.ruleid, a_args=self.a_args)
-
+                          generation_probability=self.generation_probability,
+                          resample_p=self.resample_p, ruleid=self.ruleid, a_args=self.a_args)
+        
     def is_nonfunction(self):
         """
                 Returns True if the Node contains no function arguments, False otherwise.
@@ -689,6 +689,24 @@ class BVAddFunctionNode(FunctionNode):
         FunctionNode.__init__(self, returntype, name, args, generation_probability, resample_p, ruleid, a_args)
         self.added_rule = added_rule
 
+
+    def __copy__(self, shallow=False):
+        """
+                Copy a function node. 
+                
+                NOTE: The rule is NOT deeply copied (regardless of shallow)
+
+                *shallow* - if True, this does not copy the children (self.to points to the same as what we return)
+        """
+        if (not shallow) and self.args is not None:
+            newargs = map(copy, self.args)
+        else:
+            newargs = self.args
+
+        return BVAddFunctionNode(self.returntype, self.name, newargs,
+                          generation_probability=self.generation_probability,
+                          resample_p=self.resample_p, ruleid=self.ruleid, a_args=self.a_args, added_rule=self.added_rule)
+
     # we are a lambda node
     def islambda(self):
         return True
@@ -697,6 +715,24 @@ class BVUseFunctionNode(FunctionNode):
     def __init__(self, returntype, name, args, generation_probability=0.0, resample_p=1.0, ruleid=None, a_args=None, bv_prefix=None):
         FunctionNode.__init__(self, returntype, name, args, generation_probability, resample_p, ruleid, a_args)
         self.bv_prefix = bv_prefix
+
+    def __copy__(self, shallow=False):
+        """
+                Copy a function node. 
+                
+                NOTE: The rule is NOT deeply copied (regardless of shallow)
+
+                *shallow* - if True, this does not copy the children (self.to points to the same as what we return)
+        """
+        if (not shallow) and self.args is not None:
+            newargs = map(copy, self.args)
+        else:
+            newargs = self.args
+
+        return BVUseFunctionNode(self.returntype, self.name, newargs,
+                          generation_probability=self.generation_probability,
+                          resample_p=self.resample_p, ruleid=self.ruleid, a_args=self.a_args, bv_prefix=self.bv_prefix)
+
 
     # overwrite the is_bv method
     def is_bv(self):

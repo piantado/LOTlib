@@ -21,7 +21,9 @@ class RegenerationProposal(LOTProposal):
 
             # re-generate my type from the grammar, and change this functionode
             if self.grammar.is_nonterminal(n.returntype):
-                n.setto(self.grammar.generate(n.returntype))
+                new = self.grammar.generate(n.returntype)
+                n.setto(new)
+                
             else: pass # do nothing if we aren't returnable from the grammar
 
             tZ = Z

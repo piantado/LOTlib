@@ -179,7 +179,6 @@ class GrammarTest(unittest.TestCase):
             X = self.G.generate('START')
             # propose to a new tree
             Y = rp.propose_tree(X)[0]
-            # Y.fullprint()
             # count probability manually
             prob = FiniteWithBVArgs.log_probability(Y)
             # print "iteration", i, X, Y, prob, Y.log_probability(), prob - Y.log_probability()
