@@ -24,7 +24,7 @@ class GrammarTest(unittest.TestCase):
 
     # tests that the generation and regeneration of trees is consistent with the probabilities
     # that are output by lp_regenerate_propose_to
-    @unittest.skip('Skipping lp_regenerate_propose_to test')
+    # @unittest.skip('Skipping lp_regenerate_propose_to test')
     def test_lp_regenerate_propose_to(self):
         # import the grammar
         from LOTlibTest.Grammars import lp_regenerate_propose_to_grammar
@@ -181,7 +181,7 @@ class GrammarTest(unittest.TestCase):
             Y = rp.propose_tree(X)[0]
             # count probability manually
             prob = FiniteWithBVArgs.log_probability(Y)
-            print "iteration", i, X, Y, prob, Y.log_probability(), prob - Y.log_probability()
+            # print "iteration", i, X, Y, prob, Y.log_probability(), prob - Y.log_probability()
             # check that it's equal to .log_probability()
             self.assertTrue(math.fabs(prob - Y.log_probability()) < 0.00000001)
 

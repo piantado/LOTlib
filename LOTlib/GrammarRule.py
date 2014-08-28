@@ -6,6 +6,8 @@
 from FunctionNode import FunctionNode, BVAddFunctionNode, BVUseFunctionNode
 from copy import copy
 from LOTlib.Miscellaneous import None2Empty
+from uuid import uuid4
+
 
 class GrammarRule(object):
     """
@@ -62,8 +64,6 @@ class GrammarRule(object):
 
 
 
-
-from uuid import uuid4
 
 class BVAddGrammarRule(GrammarRule):
     """
