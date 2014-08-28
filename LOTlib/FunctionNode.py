@@ -32,8 +32,8 @@ def cleanFunctionNodeString(x):
     """
             Makes FunctionNode strings easier to read
     """
-    s = re.sub("lambda", u"\u03BB", str(x)) # make lambdas the single char
-    s = re.sub("_", '', s) # remove underscores
+    s = re.sub("lambda", u"\u03BB", str(x))  # make lambdas the single char
+    s = re.sub("_", '', s)  # remove underscores
     return s
 
 
@@ -114,8 +114,10 @@ class FunctionNode(object):
             bv - stores the actual *rule* that was added (so that we can re-add it when we loop through the tree)
     """
 
-    def __init__(self, returntype, name, args, generation_probability=0.0, resample_p=1.0, ruleid=None, added_rule=None, a_args=None):
+
+    def __init__(self, returntype, name, args, generation_probability=0.0, resample_p=1.0, ruleid=None, a_args=None):
         self.__dict__.update(locals())
+        self.added_rule = None
 
         if self.name.lower() == 'applylambda':
             raise NotImplementedError # Let's not support any applylambda for now
@@ -141,7 +143,7 @@ class FunctionNode(object):
 
         return FunctionNode(self.returntype, self.name, newargs,
                 generation_probability=self.generation_probability,
-                resample_p=self.resample_p, ruleid=self.ruleid, added_rule=self.added_rule, a_args=self.a_args)
+                resample_p=self.resample_p, ruleid=self.ruleid, a_args=self.a_args)
 
     def is_nonfunction(self):
         """
@@ -160,17 +162,87 @@ class FunctionNode(object):
                 Returns True if none of the kids are FunctionNodes, meaning that this should be considered a "leaf"
                 NOTE: A leaf may be a function, but its args are specified in the grammar.
         """
-        return (self.args is None) or all([ not isFunctionNode(c) for c in self.args])
+        return (self.args is None) or all([not isFunctionNode(c) for c in self.args])
 
-    def as_list(self):
+    def is_bv(self):
+        """
+                Returns True if this FunctionNode stores a bound variable
+        """
+        return False
+
+    # def as_list(self, depth=0):
+    #     """
+    #             Returns a list representation of the FunctionNode with function/self.name as the first element.
+
+    #             *depth* An optional argument that keeps track of how far down the tree we are
+
+    #             TODO: do what pystring does
+    #     """
+    #     # if self.name == '':
+    #     #     x = []
+    #     # else:
+    #     #     x = [self.bv_prefix+str(depth)] if self.is_bv() else [self.name]
+    #     x = [self.name] if self.name != '' else []
+    #     if self.args is not None:
+    #         x.extend([a.as_list(depth=depth+1) if isFunctionNode(a) else a for a in self.args])
+    #     return x
+
+    def as_list(self, d=0, bv_names=None):
         """
                 Returns a list representation of the FunctionNode with function/self.name as the first element.
 
-                NOTE: 
+                *d* An optional argument that keeps track of how far down the tree we are
+
+                *bv_names* A dictionary keeping track of the names of bound variables (keys = UUIDs, values = names)
+
+                TODO: do what pystring does
         """
-        x = [self.name] if self.name != '' else []
+        
+        # initialize the bv_names variable if it's not defined
+        if bv_names is None:
+            bv_names = dict()    
+
+        # print "calling as_list on " + self.name + " and with names = " + str(bv_names)
+
+        # the tree should be represented as the empty set if the function node has no name
+        if self.name == '':
+            x = []
+
+        # when we encounter a lambda node, we should add an item to the bv_names dictionary
+        elif self.islambda():
+            # print "We are a lambda node...", self.name
+            
+            bvn = ''
+            if self.added_rule is not None:
+                bvn = self.added_rule.bv_prefix+str(d)
+                bv_names[self.added_rule.name] = bvn
+                # print "adding rule...", bvn, " and type is ", type(self)
+            else:
+                # bvn = 'z'+str(d)
+                # bv_names[self.name] = bvn
+                # print "NOT ADDING RULE...", type(self)
+                pass
+            
+            # ret = 'lambda %s: %s' % ( bvn, pystring(x.args[0], d=d+1, bv_names=bv_names) )
+        
+        # add the bv name to the list if we are at a BV node
+        if self.is_bv():
+            x = [bv_names[self.name]]
+        # otherwise, add the function node's name to the list
+        else:
+            x = [self.name]
+        # and we're now ready to loop over the function node's arguments
         if self.args is not None:
-            x.extend( [a.as_list() if isFunctionNode(a) else a for a in self.args] )
+            x.extend([a.as_list(d=d+1, bv_names=bv_names) if isFunctionNode(a) else a for a in self.args])
+
+        # afterwards, we should remove the BV name from the bv_names dictionary
+        # TODO: do we really need this?
+        if self.islambda() and self.added_rule is not None:
+            del bv_names[self.added_rule.name]
+            # pass
+
+        # print "as_list on function node", self.name, " at depth ", d, " with pystring", pystring(self)
+        # print "\tand dictionary ", bv_names, " returns: ", x
         return x
 
     def islambda(self):
@@ -214,14 +286,16 @@ class FunctionNode(object):
     
     def quickstring(self):
         """
-                A (maybe??) faster string function used for hashing -- doesn't handle any details and is meant
-                to just be quick
+            A (maybe??) faster string function used for hashing -- doesn't handle any details and is meant
+            to just be quick
         """
+
         if self.args is None:
-            return str(self.name) # simple call
+            return str(self.name)  # simple call
+
         else:
-            # Using + on strings is very slow, this needs changing.
-            return str(self.name)+' '+','.join(map(str,self.args))
+            # Don't use + to concatenate strings.
+            return '{} {}'.format(str(self.name), ','.join(map(str, self.args)))
 
     def fullprint(self, d=0):
         """ A handy printer for debugging"""
@@ -236,7 +310,7 @@ class FunctionNode(object):
 
     def schemestring(self):
         """
-                Print out in scheme format (+ 3 (- 4 5)).
+            Print out in scheme format (+ 3 (- 4 5)).
         """
         if self.args is None:
             return self.name
@@ -245,8 +319,8 @@ class FunctionNode(object):
 
     def liststring(self, cons="cons_"):
         """
-                This "evals" cons_ so that we can conveniently build lists (of lists) without having to eval.
-                Mainly useful for combinatory logic, or "pure" trees
+            This "evals" cons_ so that we can conveniently build lists (of lists) without having to eval.
+            Mainly useful for combinatory logic, or "pure" trees
         """
         if self.args is None:
             return self.name
@@ -264,6 +338,7 @@ class FunctionNode(object):
 
     def __ne__(self, other):
         return (not self.__eq__(other))
+
     
     def __eq__(self, other):
         return pystring(self) == pystring(other)
@@ -296,10 +371,10 @@ class FunctionNode(object):
         """
                 Compute the log probability of a tree
         """
-        lp = self.generation_probability # the probability of my rule
+        lp = self.generation_probability  # the probability of my rule
 
         if self.args is not None:
-            lp += sum([x.log_probability() for x in self.argFunctionNodes() ])
+            lp += sum([x.log_probability() for x in self.argFunctionNodes()])
         return lp
 
     def subnodes(self):
@@ -344,19 +419,19 @@ class FunctionNode(object):
         """
                 Iterates subnodes, yielding node and depth
         """
-        yield (self,0)
+        yield (self, 0)
 
         if self.args is not None:
             for a in self.argFunctionNodes():
-                for ssn,dd in a.iterdepth():
-                    yield (ssn,dd+1)
+                for ssn, dd in a.iterdepth():
+                    yield (ssn, dd+1)
 
     def all_leaves(self):
         """
                 Returns a generator for all leaves of the subtree rooted at the instantiated FunctionNode.
         """
         if self.args is not None:
-            for i in range(len(self.args)): # loop through kids
+            for i in range(len(self.args)):  # loop through kids
                 if isFunctionNode(self.args[i]):
                     for ssn in self.args[i].all_leaves():
                         yield ssn
@@ -433,8 +508,8 @@ class FunctionNode(object):
         """
                 Returns the depth of the tree (how many embeddings below)
         """
-        depths = [ a.depth() for a in self.argFunctionNodes() ]
-        depths.append(-1) # for no function nodes (+1=0)
+        depths = [a.depth() for a in self.argFunctionNodes()]
+        depths.append(-1)  # for no function nodes (+1=0)
         return max(depths)+1
 
     # get a description of the input and output types
@@ -447,7 +522,7 @@ class FunctionNode(object):
                 is a (SET (BOOL BOOL)), where in types, (A B) is something that takes an A and returns a B
         """
 
-        if self.name == '': # If we don't have a function call (as in START), just use the type of what's below
+        if self.name == '':  # If we don't have a function call (as in START), just use the type of what's below
             assert len(self.args) == 1, "**** Nameless calls must have exactly 1 arg"
             return self.args[0].type()
         if (not self.islambda()):
@@ -475,7 +550,7 @@ class FunctionNode(object):
         """
                 A function node is replicating (by definition) if one of its children is of the same type
         """
-        return any([ x.returntype == self.returntype for x in self.argFunctionNodes() ])
+        return any([x.returntype == self.returntype for x in self.argFunctionNodes()])
 
     def is_canonical_order(self, symmetric_ops):
         """
@@ -515,7 +590,7 @@ class FunctionNode(object):
         """
 
         # now go through and modify
-        for g in filter(lambda x: x==find, self.subnodes() ): # NOTE: must use subnodes since we are modfiying
+        for g in filter(lambda x: x == find, self.subnodes()):  # NOTE: must use subnodes since we are modfiying
             g.setto(copy(replace))
 
     def partial_subtree_root_match(self, y):
@@ -526,25 +601,34 @@ class FunctionNode(object):
                 are not expanded
         """
         if isFunctionNode(y):
-            if y.returntype != self.returntype: return False
-            if y.name != self.name: return False
+            if y.returntype != self.returntype:
+                return False
 
-            if y.args is None: return self.args is None
-            if len(y.args) != len(self.args): return False
+            if y.name != self.name:
+                return False
+
+            if y.args is None:
+                return self.args is None
+
+            if len(y.args) != len(self.args):
+                return False
 
             for a, b in zip(self.args, y.args):
                 if isFunctionNode(a):
-                    if not a.partial_subtree_root_match(b): return False
+                    if not a.partial_subtree_root_match(b):
+                        return False
                 else:
-                    if isFunctionNode(b): return False # cannot work!
+                    if isFunctionNode(b):
+                        return False  # cannot work!
 
                     # neither is a function node
-                    if a != b: return False
+                    if a != b:
+                        return False
 
             return True
         else:
             # else y is a string and we match if y is our returntype
-            assert isinstance(y,str)
+            assert isinstance(y, str)
             return y == self.returntype
 
     def partial_subtree_match(self, y):
@@ -552,7 +636,8 @@ class FunctionNode(object):
                 Does *y* match a subtree anywhere?
         """
         for x in self:
-            if x.partial_subtree_root_match(y): return True
+            if x.partial_subtree_root_match(y):
+                return True
 
         return False
 
@@ -580,17 +665,38 @@ class FunctionNode(object):
                 NOTE: Partial here means that we include nonterminals with probability p
         """
 
-        if self.args is None: return copy(self)
+        if self.args is None:
+            return copy(self)
 
         newargs = []
         for a in self.args:
             if isFunctionNode(a):
-                if random() < p: newargs.append( a.returntype )
-                else:            newargs.append( a.random_partial_subtree(p=p) )
+                if random() < p:
+                    newargs.append(a.returntype)
+                else:
+                    newargs.append(a.random_partial_subtree(p=p))
             else:
-                newargs.append(a) # string or something else
+                newargs.append(a)  # string or something else
 
-        ret = self.__copy__(shallow=True) # don't copy kids
+        ret = self.__copy__(shallow=True)  # don't copy kids
         ret.args = newargs
 
         return ret
+
+class BVAddFunctionNode(FunctionNode):
+    def __init__(self, returntype, name, args, generation_probability=0.0, resample_p=1.0, ruleid=None, a_args=None, added_rule=None):
+        FunctionNode.__init__(self, returntype, name, args, generation_probability, resample_p, ruleid, a_args)
+        self.added_rule = added_rule
+
+    # we are a lambda node
+    def islambda(self):
+        return True
+
+class BVUseFunctionNode(FunctionNode):
+    def __init__(self, returntype, name, args, generation_probability=0.0, resample_p=1.0, ruleid=None, a_args=None, bv_prefix=None):
+        FunctionNode.__init__(self, returntype, name, args, generation_probability, resample_p, ruleid, a_args)
+        self.bv_prefix = bv_prefix
+
+    # overwrite the is_bv method
+    def is_bv(self):
+        return True

@@ -1,38 +1,38 @@
-
 """
         This class is a wrapper for representing "rules" in the grammar.
 """
 # TODO: One day we will change "nt" to returntype to match with the FunctionNodes
 
-from FunctionNode import FunctionNode
+from FunctionNode import FunctionNode, BVAddFunctionNode, BVUseFunctionNode
 from copy import copy
 from LOTlib.Miscellaneous import None2Empty
 
 class GrammarRule(object):
+    """
+            *nt* - the nonterminal
+            
+            *name* - the name of this function
+            
+            *to* - what you expand to (usually a FunctionNode).
+            
+            *p* - unnormalized probability of expansion
+            
+            *bv_prefix* may be needed for GrammarRules introduced *by* BVGrammarRules, so that when we display them we can map to bv_prefix+depth
+
+            Examples:
+            A rule where "expansion" is a nonempty list is a real expansion:
+                    GrammarRule( "EXPR", "plus", ["EXPR", "EXPR"], ...) -> plus(EXPR,EXPR)
+            A rule where "expansion" is [] is a thunk
+                    GrammarRule( "EXPR", "plus", [], ...) -> plus()
+            A rule where "expansion" is [] is a real terminal (non-thunk)
+                    GrammarRule( "EXPR", "five", None, ...) -> five
+            A rule where "name" is '' expands without parens:
+                    GrammarRule( "EXPR", '', "SUBEXPR", ...) -> EXPR->SUBEXPR
+
+            NOTE: The rule id (rid) is very important -- it's what we use expansion determine equality
+    """
     def __init__(self, nt, name, to, p=1.0, resample_p=1.0, bv_prefix=None):
-        """
-                *nt* - the nonterminal
 
-                *name* - the name of this function
-
-                *to* - what you expand to (usually a FunctionNode).
-
-                *p* - unnormalized probability of expansion
-                
-                *bv_previx* may be needed for GrammarRules introduced *by* BVGrammarRules, so that when we display them we can map to bv_prefix+depth
-
-                Examples:
-                A rule where "expansion" is a nonempty list is a real expansion:
-                        GrammarRule( "EXPR", "plus", ["EXPR", "EXPR"], ...) -> plus(EXPR,EXPR)
-                A rule where "expansion" is [] is a thunk
-                        GrammarRule( "EXPR", "plus", [], ...) -> plus()
-                A rule where "expansion" is [] is a real terminal (non-thunk)
-                        GrammarRule( "EXPR", "five", None, ...) -> five
-                A rule where "name" is '' expands without parens:
-                        GrammarRule( "EXPR", '', "SUBEXPR", ...) -> EXPR->SUBEXPR
-
-                NOTE: The rule id (rid) is very important -- it's what we use expansion determine equality
-        """
         p = float(p)  # make sure these are floats
         
         self.__dict__.update(locals())
@@ -58,14 +58,14 @@ class GrammarRule(object):
 
     def make_FunctionNodeStub(self, grammar, gp):
         # NOTE: It is VERY important to copy to, or else we end up wtih garbage
-        return FunctionNode(returntype=self.nt, name=self.name, args=copy(self.to), generation_probability=gp, added_rule=None)
+        return FunctionNode(returntype=self.nt, name=self.name, args=copy(self.to), generation_probability=gp)
 
 
 
 
 from uuid import uuid4
 
-class BVGrammarRule(GrammarRule):
+class BVAddGrammarRule(GrammarRule):
     """
         A kind of GrammarRule that supports introducing BVs. This gives a little type checking so that we don't call this with the wrong rules
         
@@ -110,7 +110,7 @@ class BVGrammarRule(GrammarRule):
         if bvp is None:
             bvp = grammar.BV_P
 
-        return GrammarRule(self.bv_type, uuid4().hex, self.bv_args, p=bvp, resample_p=grammar.BV_RESAMPLE_P, bv_prefix=self.bv_prefix)
+        return BVUseGrammarRule(self.bv_type, self.bv_args, p=bvp, resample_p=grammar.BV_RESAMPLE_P, bv_prefix=self.bv_prefix)
    
     def make_FunctionNodeStub(self, grammar, gp):
         """
@@ -122,12 +122,13 @@ class BVGrammarRule(GrammarRule):
         
         # The None's in the next line need to get set elsewhere, since they will depend on the depth and other rules
         # NOTE: It is VERY important to copy to, or else we end up wtih garbage
-        return  FunctionNode(returntype=self.nt, name=self.name, args=copy(self.to), generation_probability=gp, added_rule=self.make_bv_rule(grammar) )
+        return BVAddFunctionNode(returntype=self.nt, name=self.name, args=copy(self.to), generation_probability=gp, added_rule=self.make_bv_rule(grammar) )
+
+class BVUseGrammarRule(GrammarRule):
+    def __init__(self, nt, to, p=1.0, resample_p=1.0, bv_prefix=None):
+        GrammarRule.__init__(self, nt, uuid4().hex, to, p, resample_p, bv_prefix)
 
 
-
-
-        
-    
-    
-        
+    def make_FunctionNodeStub(self, grammar, gp):
+        # NOTE: It is VERY important to copy to, or else we end up wtih garbage
+        return BVUseFunctionNode(returntype=self.nt, name=self.name, args=copy(self.to), generation_probability=gp)

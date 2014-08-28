@@ -13,7 +13,7 @@ from collections import defaultdict
 import LOTlib
 from LOTlib.Miscellaneous import *
 from LOTlib.FunctionNode import isFunctionNode
-from LOTlib.GrammarRule import GrammarRule, BVGrammarRule
+from LOTlib.GrammarRule import GrammarRule, BVAddGrammarRule, BVUseGrammarRule
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
 from LOTlib.BVRuleContextManager import BVRuleContextManager
 
@@ -100,13 +100,13 @@ class Grammar:
             # Check the name
             assert (name.lower() == 'lambda' or name.lower() == 'applylambda'), "When introducing bound variables, the name of the expanded function must be 'lambda'."
             
-            newrule = BVGrammarRule(nt,name,to, p=p, resample_p=resample_p, bv_type=bv_type, bv_args=bv_args, bv_prefix=bv_prefix, bv_p=bv_p)
+            newrule = BVAddGrammarRule(nt,name,to, p=p, resample_p=resample_p, bv_type=bv_type, bv_args=bv_args, bv_prefix=bv_prefix, bv_p=bv_p)
             
         else:
             newrule = GrammarRule(nt,name,to, p=p, resample_p=resample_p)
             
         # actually add it
-        self.rules[nt].append(newrule)     
+        self.rules[nt].append(newrule)
         return newrule
     
     def is_terminal_rule(self, r):
@@ -330,7 +330,7 @@ class Grammar:
 
         if isFunctionNode(x):
             # NOTE: WE don't need to handle BV here since they are handled below when we use the rule
-
+            
             original_x = copy(x)
             
             # go all odometer on the kids below::
