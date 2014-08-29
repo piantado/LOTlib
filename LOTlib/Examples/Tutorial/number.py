@@ -1,14 +1,14 @@
-import LOTlib
+
 from LOTlib.Grammar import Grammar
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+from LOTlib.Evaluation.Eval import *
 
 grammar = Grammar()
 
 grammar.add_rule('START', '', ['EXPR'], 1)
 grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 1)
 grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1)
-grammar.add_rule('EXPR', 'modulo_', ['EXPR', 'EXPR'], 1)
-grammar.add_rule('EXPR', 'exp_', ['EXPR', 'EXPR'], 1)
+grammar.add_rule('EXPR', 'pow_', ['EXPR', 'EXPR'], 1)
 grammar.add_rule('EXPR', '', ['NUM'], 10)
 grammar.add_rule('NUM', 'one_', None, 0.10)
 grammar.add_rule('NUM', 'two_', None, 0.10)
@@ -20,16 +20,17 @@ grammar.add_rule('NUM', 'seven_', None, 0.10)
 grammar.add_rule('NUM', 'eight_', None, 0.10)
 grammar.add_rule('NUM', 'nine_', None, 0.10)
 grammar.add_rule('NUM', 'ten_', None, 0.10)
-grammar.add_rule('NUM', 'n_', None, 4)
-
-for i in range(100):
-    print(grammar.generate())
+grammar.add_rule('NUM', 'n', None, 4)
 
 
 class NumberExpression(LOTHypothesis):
 
-    def __init__(self, grammar, value=None, f=None, proposal_function=None, **kwargs):
+	
+
+
+    def __init__(self, grammar, domain=100, value=None, f=None, proposal_function=None, **kwargs):
         LOTHypothesis.__init__(self, grammar, proposal_function=proposal_function, **kwargs)
+        self.domain = domain
 
         if value is None:
             self.set_value(grammar.generate('EXPR'), f)
@@ -40,34 +41,42 @@ class NumberExpression(LOTHypothesis):
         """ Must define this else we return "FunctionHypothesis" as a copy. We need to return a NumberExpression """
         return NumberExpression(grammar, value=self.value.copy(), prior_temperature=self.prior_temperature)
 
-    def compute_prior(self):
-        """
-                Compute the number model prior
-        """
-        if self.value.count_nodes() > MAX_NODES:
-            self.prior = -Infinity
-        else:
-            if self.value.contains_function("L_"): recursion_penalty = GAMMA
-            else:                                  recursion_penalty = LG_1MGAMMA
+    def compute_likelihood(self, data):
+        """ Computes the likelihood of data. """
+        n = len(data)
 
-            if USE_RR_PRIOR: # compute the prior with either RR or not.
-                self.prior = (recursion_penalty + grammar.RR_prior(self.value))  / self.prior_temperature
-            else:
-                self.prior = (recursion_penalty + self.value.log_probability())  / self.prior_temperature
-        
-        self.posterior_score = self.prior + self.likelihood
+        for n in range(1,self.domain+1):
+        	t = grammar.generate()
+        	f = evaluate_expression(t, args=['n'])
+        	subset = map(f, range(1,self.domain+1))
+        	subset = [item for item in subset if item<=self.domain]
 
-        return self.prior
+        s = len(subset)
+        return (1/s)**n
 
-    def compute_single_likelihood(self, datum):
-        """
-                Computes the likelihood of data.
-                TODO: Make sure this precisely matches the number paper.
 
-        """
-        response = self(*datum.input)
-        if response == 'undef' or response == None:
-            return log(1.0/10.0) # if undefined, just sample from a base distribution
-        else:
-            return log( (1.0 - ALPHA)/10.0 + ALPHA * ( response == datum.output ) )
+
+
+num_iters = 100
+data = [2, 8, 16]
+
+
+likelihoods = {}
+
+for i in xrange(num_iters):
+	t = NumberExpression(grammar)
+	likelihoods[t] = t.compute_likelihood(data)
+
+for t in likelihoods.keys():
+	# use prior, likelihood to calculate posterior for hypothesis t 
+	prior = t.compute_prior()
+	likelihood = t.compute_likelihood(data)
+	posterior = prior * likelihood
+
+	# normalize
+	normalize_param = sum(likelihoods.items() - likelihood)
+	posterior = posterior / normalize_param
+
+
+
 
