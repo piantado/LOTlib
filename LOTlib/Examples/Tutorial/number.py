@@ -2,13 +2,16 @@
 from LOTlib.Grammar import Grammar
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Evaluation.Eval import *
+from LOTlib.Primitives.Number import *
+from LOTlib.Miscellaneous import Infinity
+from math import log
 
 grammar = Grammar()
 
 grammar.add_rule('START', '', ['EXPR'], 1)
 grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 1)
 grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1)
-grammar.add_rule('EXPR', 'pow_', ['EXPR', 'EXPR'], 1)
+grammar.add_rule('EXPR', 'pow_', ['EXPR', 'EXPR'], 0.5)
 grammar.add_rule('EXPR', '', ['NUM'], 10)
 grammar.add_rule('NUM', 'one_', None, 0.10)
 grammar.add_rule('NUM', 'two_', None, 0.10)
@@ -45,14 +48,17 @@ class NumberExpression(LOTHypothesis):
         """ Computes the likelihood of data. """
         n = len(data)
 
-        for n in range(1,self.domain+1):
-        	t = grammar.generate()
-        	f = evaluate_expression(t, args=['n'])
-        	subset = map(f, range(1,self.domain+1))
-        	subset = [item for item in subset if item<=self.domain]
+        
+    	t = grammar.generate()
+    	print(t)
+    	f = evaluate_expression(t, args=['n'])
+    	subset = map(f, range(1,self.domain+1))
+    	subset = [item for item in subset if item<=self.domain]
 
         s = len(subset)
-        return (1/s)**n
+        if s==0:
+        	return -Infinity
+        return log((1./s)**n)
 
 
 
@@ -76,7 +82,3 @@ for t in likelihoods.keys():
 	# normalize
 	normalize_param = sum(likelihoods.items() - likelihood)
 	posterior = posterior / normalize_param
-
-
-
-
