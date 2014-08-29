@@ -1,9 +1,11 @@
 
 from LOTlib.Grammar import Grammar
-from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+from LOTlib.Hypotheses.LOTHypothesis import *
 from LOTlib.Evaluation.Eval import *
 from LOTlib.Primitives.Number import *
-from LOTlib.Miscellaneous import Infinity
+from LOTlib.Primitives.Arithmetic import *
+from LOTlib.Miscellaneous import *
+from LOTlib.Primitives.Number import *
 from math import log
 
 grammar = Grammar()
