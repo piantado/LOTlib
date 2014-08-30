@@ -28,14 +28,6 @@ LOTlib.Examples.Number.EvaluateTop module
     :undoc-members:
     :show-inheritance:
 
-LOTlib.Examples.Number.NakedDemo module
----------------------------------------
-
-.. automodule:: LOTlib.Examples.Number.NakedDemo
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 LOTlib.Examples.Number.Search module
 ------------------------------------
 
@@ -48,22 +40,6 @@ LOTlib.Examples.Number.Shared module
 ------------------------------------
 
 .. automodule:: LOTlib.Examples.Number.Shared
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-LOTlib.Examples.Number.evaluate-inference module
-------------------------------------------------
-
-.. automodule:: LOTlib.Examples.Number.evaluate-inference
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-LOTlib.Examples.Number.evaluate-temperatures module
----------------------------------------------------
-
-.. automodule:: LOTlib.Examples.Number.evaluate-temperatures
     :members:
     :undoc-members:
     :show-inheritance:

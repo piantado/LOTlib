@@ -12,11 +12,19 @@ Subpackages
     LOTlib.Inference
     LOTlib.Performance
     LOTlib.Primitives
-    LOTlib.Testing
+    LOTlib.Proposals
     LOTlib.sandbox
 
 Submodules
 ----------
+
+LOTlib.BVRuleContextManager module
+----------------------------------
+
+.. automodule:: LOTlib.BVRuleContextManager
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 LOTlib.DataAndObjects module
 ----------------------------
@@ -78,14 +86,6 @@ LOTlib.Parsing module
 ---------------------
 
 .. automodule:: LOTlib.Parsing
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-LOTlib.Proposals module
------------------------
-
-.. automodule:: LOTlib.Proposals
     :members:
     :undoc-members:
     :show-inheritance:

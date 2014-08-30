@@ -84,6 +84,14 @@ LOTlib.Examples.Quantifier.Utilities module
     :undoc-members:
     :show-inheritance:
 
+LOTlib.Examples.Quantifier.check_counts module
+----------------------------------------------
+
+.. automodule:: LOTlib.Examples.Quantifier.check_counts
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

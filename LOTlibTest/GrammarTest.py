@@ -24,7 +24,7 @@ class GrammarTest(unittest.TestCase):
 
     # tests that the generation and regeneration of trees is consistent with the probabilities
     # that are output by lp_regenerate_propose_to
-    @unittest.skip('Skipping lp_regenerate_propose_to test')
+    # @unittest.skip('Skipping lp_regenerate_propose_to test')
     def test_lp_regenerate_propose_to(self):
         # import the grammar
         from LOTlibTest.Grammars import lp_regenerate_propose_to_grammar

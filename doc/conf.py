@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # LOTlib documentation build configuration file, created by
-# sphinx-quickstart on Thu May 29 13:38:38 2014.
+# sphinx-quickstart on Thu Aug 28 12:50:23 2014.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -18,7 +18,7 @@ import os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../LOTlib'))
+#sys.path.insert(0, os.path.abspath('.'))
 
 # -- General configuration ------------------------------------------------
 
@@ -30,8 +30,7 @@ sys.path.insert(0, os.path.abspath('../LOTlib'))
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.coverage',
-    'sphinx.ext.ifconfig',
+    'sphinx.ext.pngmath',
     'sphinx.ext.viewcode',
 ]
 
@@ -49,14 +48,14 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'LOTlib'
-copyright = u'2014, Steve Piantadosi'
+copyright = u'2014, Steven Piantadosi'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = '0.2.0'
+version = '0.2'
 # The full version, including alpha/beta/rc tags.
 release = '0.2.0'
 
@@ -141,7 +140,7 @@ html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-html_last_updated_fmt = '%b %d, %Y'
+#html_last_updated_fmt = '%b %d, %Y'
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
@@ -202,7 +201,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'LOTlib.tex', u'LOTlib Documentation',
-   u'Steve Piantadosi', 'manual'),
+   u'Steven Piantadosi', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -232,7 +231,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'lotlib', u'LOTlib Documentation',
-     [u'Steve Piantadosi'], 1)
+     [u'Steven Piantadosi'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -245,8 +244,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    ('index', 'LOTlib', u'LOTlib Documentation',
-   u'Steve Piantadosi', 'LOTlib', 'One line description of project.',
+  ('index', 'LOTlib', u'LOTlib Documentation',
+   u'Steven Piantadosi', 'LOTlib', 'One line description of project.',
    'Miscellaneous'),
 ]
 
