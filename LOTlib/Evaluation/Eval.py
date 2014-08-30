@@ -7,16 +7,16 @@ from LOTlib.Miscellaneous import raise_exception
 from EvaluationException import EvaluationException
 
 # All of these are defaulty in the context for eval.
-from LOTlib.Primitives.Arithmetic import *
-from LOTlib.Primitives.Combinators import *
-from LOTlib.Primitives.Features import *
-from LOTlib.Primitives.Functional import *
-from LOTlib.Primitives.Logic import *
-from LOTlib.Primitives.Number import *
-from LOTlib.Primitives.Semantics import *
-from LOTlib.Primitives.SetTheory import *
-from LOTlib.Primitives.Trees import *
-from LOTlib.Primitives.Stochastics import *
+from Primitives.Arithmetic import *
+from Primitives.Combinators import *
+from Primitives.Features import *
+from Primitives.Functional import *
+from Primitives.Logic import *
+from Primitives.Number import *
+from Primitives.Semantics import *
+from Primitives.SetTheory import *
+from Primitives.Trees import *
+from Primitives.Stochastics import *
 
 
 def register_primitive(function, name=None):

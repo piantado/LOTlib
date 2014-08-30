@@ -49,7 +49,7 @@ elif options.MODEL == "SimpleMagnetism":
     from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar, data, make_h0
 
 elif options.MODEL == "RegularExpression":
-    from LOTlib.Examples.RegularExpression.RegularExpressionInferece import grammar, data, make_h0
+    from LOTlib.Examples.RegularExpression.Shared import grammar, data, make_h0
 else:
     raise NotImplementedError(options.MODEL)
 

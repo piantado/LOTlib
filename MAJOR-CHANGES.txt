@@ -1,3 +1,17 @@
+Aug 29 2014:
+	- Removed isapply, islambda, isbv, etc. The lambdas and bvs can be checked by checking the type of the FunctionNode or GrammarRule
+	- changed BVRuleContextManager to take a functionNode as its first argument, not a rule. It defautly looks at the .added_rule attribute of the FunctionNode
+	- Added parent references to FunctionNodes. This simplified some code in resampling proposals (and allowed them to use BVContextManager)
+	- Move subnode sampling from grammar to FunctionNode
+	- These changes got rid of the need to do crazy "for ... in" notation for sampling nodes. Now it works via BVContextManger as in RegenerationProposal
+	- InsertDeleteProposal is now defaultly NOT a mixture of insertdelete and RegenerationProposal
+	- FunctionNdoes now store a pointer to the rule that made them. This is required to allow them to recompute their probabilities under a grammar
+	- Cleaned up some code in Grammar	
+	- Primitives moved to inside Evaluation
+	- Proposals moved inside Inference
+	- Move tests into Testing, and removed some extras
+	- fixed problem in "if_" print order
+	- Updated number Shared code
 Aug 22 2014:
 	- Fixed bug in enumeration with new bound variable setup; make bound variables increment in depth order 
 Aug 19 2014:

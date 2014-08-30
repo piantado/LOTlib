@@ -58,9 +58,9 @@ class GrammarRule(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def make_FunctionNodeStub(self, grammar, gp):
+    def make_FunctionNodeStub(self, grammar, gp, parent):
         # NOTE: It is VERY important to copy to, or else we end up wtih garbage
-        return FunctionNode(returntype=self.nt, name=self.name, args=copy(self.to), generation_probability=gp)
+        return FunctionNode(parent, returntype=self.nt, name=self.name, args=copy(self.to), generation_probability=gp, rule=self)
 
 
 
@@ -112,7 +112,7 @@ class BVAddGrammarRule(GrammarRule):
 
         return BVUseGrammarRule(self.bv_type, self.bv_args, p=bvp, resample_p=grammar.BV_RESAMPLE_P, bv_prefix=self.bv_prefix)
    
-    def make_FunctionNodeStub(self, grammar, gp):
+    def make_FunctionNodeStub(self, grammar, gp, parent):
         """
             Return a FunctionNode with none of the arguments realized. That's a "stub"
             
@@ -122,13 +122,13 @@ class BVAddGrammarRule(GrammarRule):
         
         # The None's in the next line need to get set elsewhere, since they will depend on the depth and other rules
         # NOTE: It is VERY important to copy to, or else we end up wtih garbage
-        return BVAddFunctionNode(returntype=self.nt, name=self.name, args=copy(self.to), generation_probability=gp, added_rule=self.make_bv_rule(grammar) )
+        return BVAddFunctionNode(parent, returntype=self.nt, name=self.name, args=copy(self.to), generation_probability=gp, added_rule=self.make_bv_rule(grammar), rule=self)
 
 class BVUseGrammarRule(GrammarRule):
     def __init__(self, nt, to, p=1.0, resample_p=1.0, bv_prefix=None):
         GrammarRule.__init__(self, nt, uuid4().hex, to, p, resample_p, bv_prefix)
 
 
-    def make_FunctionNodeStub(self, grammar, gp):
+    def make_FunctionNodeStub(self, grammar, gp, parent):
         # NOTE: It is VERY important to copy to, or else we end up wtih garbage
-        return BVUseFunctionNode(returntype=self.nt, name=self.name, args=copy(self.to), generation_probability=gp)
+        return BVUseFunctionNode(parent, returntype=self.nt, name=self.name, args=copy(self.to), generation_probability=gp, rule=self)

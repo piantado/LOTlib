@@ -3,18 +3,11 @@
         Shared functions and variables for the number learning model.
 """
 
-import LOTlib
-from LOTlib import lot_iter
 from LOTlib.Grammar import Grammar
-import LOTlib.Inference.ParallelTempering
-from LOTlib.Inference.MetropolisHastings import mh_sample
-from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Miscellaneous import *
-from LOTlib.DataAndObjects import *
+from LOTlib.DataAndObjects import FunctionData, sample_sets_of_objects, make_all_objects
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-from LOTlib.Primitives.Number import word_to_number
-from random import randint
-from LOTlib.Primitives.Number import *
+from LOTlib.Evaluation.Primitives.Number import word_to_number
 
 ALPHA = 0.75 # the probability of uttering something true
 GAMMA = -30.0 # the log probability penalty for recursion
@@ -62,48 +55,40 @@ grammar.add_rule('WORD', 'next_', ['WORD'], 1.0)
 grammar.add_rule('WORD', 'prev_', ['WORD'], 1.0)
 
 #grammar.add_rule('WORD', 'undef', None, 1.0)
-grammar.add_rule('WORD', 'one_', None, 0.10)
-grammar.add_rule('WORD', 'two_', None, 0.10)
-grammar.add_rule('WORD', 'three_', None, 0.10)
-grammar.add_rule('WORD', 'four_', None, 0.10)
-grammar.add_rule('WORD', 'five_', None, 0.10)
-grammar.add_rule('WORD', 'six_', None, 0.10)
-grammar.add_rule('WORD', 'seven_', None, 0.10)
-grammar.add_rule('WORD', 'eight_', None, 0.10)
-grammar.add_rule('WORD', 'nine_', None, 0.10)
-grammar.add_rule('WORD', 'ten_', None, 0.10)
+# These are quoted (q) since they are strings when evaled
+grammar.add_rule('WORD', q('one'), None, 0.10)
+grammar.add_rule('WORD', q('two'), None, 0.10)
+grammar.add_rule('WORD', q('three'), None, 0.10)
+grammar.add_rule('WORD', q('four_'), None, 0.10)
+grammar.add_rule('WORD', q('five_'), None, 0.10)
+grammar.add_rule('WORD', q('six_'), None, 0.10)
+grammar.add_rule('WORD', q('seven_'), None, 0.10)
+grammar.add_rule('WORD', q('eight_'), None, 0.10)
+grammar.add_rule('WORD', q('nine_'), None, 0.10)
+grammar.add_rule('WORD', q('ten_'), None, 0.10)
 
 ##########################################################
 #Define a class for running MH
 
 class NumberExpression(LOTHypothesis):
-    #__module__ = os.path.splitext(os.path.basename(__file__))[0]  # So that when we pickle this, we know where to read from
-
+    
     def __init__(self, grammar, value=None, f=None, proposal_function=None, **kwargs):
-        LOTHypothesis.__init__(self,grammar,proposal_function=proposal_function, **kwargs)
-
-        if value is None: self.set_value(grammar.generate('WORD'), f)
-        else:             self.set_value(value, f)
-
-    def copy(self):
-        """ Must define this else we return "FunctionHypothesis" as a copy. We need to return a NumberExpression """
-        return NumberExpression(grammar, value=self.value.copy(), prior_temperature=self.prior_temperature)
+        LOTHypothesis.__init__(self, grammar, value=value, proposal_function=proposal_function, **kwargs)
 
     def compute_prior(self):
         """
-                Compute the number model prior
+                Compute the number model prior: log_probability() with a penalty on whether or not recursion is used
         """
+        recursion_penalty = 0
         if self.value.count_nodes() > MAX_NODES:
             self.prior = -Infinity
         else:
-            if self.value.contains_function("L_"): recursion_penalty = GAMMA
-            else:                                  recursion_penalty = LG_1MGAMMA
-
-            if USE_RR_PRIOR: # compute the prior with either RR or not.
-                self.prior = (recursion_penalty + grammar.RR_prior(self.value))  / self.prior_temperature
+            if self.value.contains_function("L_"): 
+                recursion_penalty = GAMMA
             else:
-                self.prior = (recursion_penalty + self.value.log_probability())  / self.prior_temperature
-        
+                recursion_penalty = LG_1MGAMMA
+
+        self.prior = (recursion_penalty + self.value.log_probability())  / self.prior_temperature
         self.posterior_score = self.prior + self.likelihood
 
         return self.prior
@@ -127,7 +112,6 @@ class NumberExpression(LOTHypothesis):
 
 #target = NumberExpression("one_ if cardinality1_(x) else next_(L_(setdifference_(x, select_(x))))") # we need to translate "if" ourselves
 #target = NumberExpression(value="if_(cardinality1_(x), one_, two_)")
-
 # NOTE: Not necessary, but only for testing -- these are discovered in the real model via search
 #one_knower   = NumberExpression("one_ if cardinality1_(x) else undef")
 #two_knower   = NumberExpression("one_ if cardinality1_(x) else ( two_ if cardinality2_(x) else undef )")
@@ -176,4 +160,11 @@ all_possible_data = [ ('', set(sample_sets_of_objects(n, all_objects))) for n in
 # Standard exports
 
 def make_h0(value=None):
-    return NumberExpression(grammar,value=value)
+    return NumberExpression(grammar, value=value)
+
+
+if __name__ == "__main__":
+    
+    for _ in xrange(1000):
+        h = NumberExpression()
+        print get_knower_pattern(h), h

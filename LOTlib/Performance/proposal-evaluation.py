@@ -15,7 +15,7 @@ parser.add_option("--out", dest="OUT", type="string", help="Output prefix", defa
 parser.add_option("--samples", dest="SAMPLES", type="int", default=100000, help="Number of samples to run")
 parser.add_option("--chains", dest="CHAINS", type="int", default=10, help="Number of chains to run in parallel")
 parser.add_option("--repetitions", dest="REPETITONS", type="int", default=100, help="Number of repetitions to run")
-parser.add_option("--model", dest="MODEL", type="str", default="Number", help="Which model to run on (Number, Galileo, RationalRules, SimpleMagnetism)")
+parser.add_option("--model", dest="MODEL", type="str", default="Number100", help="Which model to run on (Number, Galileo, RationalRules, SimpleMagnetism)")
 parser.add_option("--print-every", dest="PRINTEVERY", type="int", default=1000, help="Evaluation prints every this many")
 options, _ = parser.parse_args()
 
@@ -45,7 +45,7 @@ elif options.MODEL == "RationalRules":
 elif options.MODEL == "SimpleMagnetism":
 	from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar, data, make_h0
 elif options.MODEL == "RegularExpression":
-	from LOTlib.Examples.RegularExpression.RegularExpressionInferece import grammar, data, make_h0
+	from LOTlib.Examples.RegularExpression.Shared import grammar, data, make_h0
 else:
 	assert false, "Unimplemented model: %s" % options.MODEL
 
@@ -57,9 +57,9 @@ else:
 from SimpleMPI.ParallelBufferedIO          import ParallelBufferedIO
 from LOTlib.Performance.Evaluation         import evaluate_sampler
 from LOTlib.Inference.MultipleChainMCMC    import MultipleChainMCMC
-from LOTlib.Proposals.MixtureProposal      import MixtureProposal
-from LOTlib.Proposals.RegenerationProposal import RegenerationProposal
-from LOTlib.Proposals.InsertDeleteProposal import InsertDeleteProposal
+from LOTlib.Inference.Proposals.MixtureProposal      import MixtureProposal
+from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
+from LOTlib.Inference.Proposals.InsertDeleteProposal import InsertDeleteProposal
 
 # Where we store the output
 out_hypotheses = open(os.devnull,'w') #ParallelBufferedIO(options.OUT + "-hypotheses.txt")

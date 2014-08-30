@@ -6,10 +6,10 @@
 """
 
 from Shared import *
-
+from LOTlib.FiniteBestSet import FiniteBestSet
 
 LARGE_DATA_SIZE = 10000 # this is what we compute the average LL on
-DATA_SIZE = 300
+DATA_SIZE = 100
 TRACE = True
 STEPS = 1000000
 SKIP = 1
@@ -32,7 +32,7 @@ from  LOTlib.Inference.MetropolisHastings import MHSampler
 #for h in  LOTlib.Inference.ParallelTempering.parallel_tempering_sample(initial_hyp, data, STEPS, within_steps=10, yield_all=True, temperatures=[1.0,1.05, 1.1]):
 for h in MHSampler(h0, data, STEPS, skip=SKIP):
     if TRACE:
-        print q(get_knower_pattern(h)), h.compute_prior(), h.compute_likelihood(data), q(h)
+        print q(get_knower_pattern(h)), h.compute_prior(), h.compute_likelihood(data), qq(h)
 
     # add h to our priority queue, with priority of its log probability, h.posterior_score
     allhyp.push(h, h.posterior_score)

@@ -2,10 +2,10 @@ from GrammarRule import GrammarRule
 
 class BVRuleContextManager(object):
     
-    def __init__(self, grammar, *rules):
+    def __init__(self, grammar, fn, recurse_up=False):
         """
             This manages rules that we add and subtract in the context of grammar generation. This is a class that is somewhat
-            inbetween Grammar and GrammarRule. It manages creating, adding, and subtracting the bound variable rule via "with" clause in Grammar.
+            in between Grammar and GrammarRule. It manages creating, adding, and subtracting the bound variable rule via "with" clause in Grammar.
             
             NOTE: The "rule" here is the added rule, not the "bound variable" one (that adds the rule)
             NOTE: If rule is None, then nothing happens
@@ -13,26 +13,36 @@ class BVRuleContextManager(object):
             This actually could go in FunctionNode, *except* that it needs to know the grammar, which FunctionNodes do not
         """
         self.__dict__.update(locals())
+        self.added_rules = []
                 
     def __str__(self):
-        return "<Managing context for %s>"%str(self.rule)
+        return "<Managing context for %s>"%str(self.fn)
     
     
     def __enter__(self):
-        """
-            Here, we construct the bound variable rule if any and then remove it later
-        """
-        #print "# The rules:\t", self.rules
+        if self.fn is None: # skip these
+            return
         
-        for r in self.rules:
-            if r is not None:
-                assert isinstance(r, GrammarRule), r
+        assert len(self.added_rules) == 0 # Should not call __enter__ twice
+        
+        for x in self.fn.up_to_root() if self.recurse_up else [self.fn]:
+            if x.added_rule is not None:
+                #print "# Adding rule ", x.added_rule
+                r = x.added_rule
+                self.added_rules.append(r)
                 self.grammar.rules[r.nt].append(r)
-    
+                        
     def __exit__(self, t, value, traceback):
-        for r in self.rules:
-            if r is not None:
-                self.grammar.rules[r.nt].remove(r)
+        
+        if self.fn is None: # skip these
+            return
+        
+        for r in self.added_rules:
+            #print "# Removing rule", r
+            self.grammar.rules[r.nt].remove(r)
+            
+        # reset these
+        self.added_rules = []
         
         return False #re-raise exceptions
         

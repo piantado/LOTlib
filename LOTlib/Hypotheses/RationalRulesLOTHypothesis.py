@@ -4,7 +4,7 @@ import numpy
 
 from LOTHypothesis import LOTHypothesis
 from LOTlib.Miscellaneous import Infinity, beta
-
+from LOTlib.FunctionNode import FunctionNode
 from collections import defaultdict
 
 def get_rule_counts(grammar, t):
@@ -18,12 +18,15 @@ def get_rule_counts(grammar, t):
     counts = defaultdict(int) # a count for each hash type
 
     for x in t:
-        if x.ruleid >= 0: counts[x.ruleid] += 1
+        if type(x) != FunctionNode:
+            raise NotImplementedError("Rational rules not implemented for bound variables")
+        
+        counts[x.rule] += 1
 
     # and convert into a list of vectors (with the right zero counts)
     out = []
     for nt in grammar.rules.keys():
-        v = numpy.array([ counts.get(r.rid,0) for r in grammar.rules[nt] ])
+        v = numpy.array([ counts.get(r,0) for r in grammar.rules[nt] ])
         out.append(v)
     return out
 

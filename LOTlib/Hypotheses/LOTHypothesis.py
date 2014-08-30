@@ -6,7 +6,7 @@
 
 from FunctionHypothesis import FunctionHypothesis
 from copy import copy, deepcopy
-from LOTlib.Proposals.RegenerationProposal import RegenerationProposal
+from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
 from LOTlib.Miscellaneous import Infinity
 from LOTlib.DataAndObjects import FunctionData
 from math import log
@@ -16,7 +16,7 @@ class LOTHypothesis(FunctionHypothesis):
             A FunctionHypothesis built from a grammar.
     """
 
-    def __init__(self, grammar, value=None, f=None, start='START', ALPHA=0.9, maxnodes=25, args=['x'], proposal_function=None, **kwargs):
+    def __init__(self, grammar, value=None, f=None, start=None, ALPHA=0.9, maxnodes=25, args=['x'], proposal_function=None, **kwargs):
         """
                 *grammar* - The grammar for the hypothesis (specified in Grammar.py)
 
@@ -35,9 +35,13 @@ class LOTHypothesis(FunctionHypothesis):
                 *proposal_function* - function that tells the program how to transition from one tree to another
                 (by default, it uses the RegenerationProposal function)
         """
-
+        
         # save all of our keywords (though we don't need v)
         self.__dict__.update(locals())
+
+        # If this is not specified, defaultly use grammar
+        if start is None: self.start = grammar.start
+
         if value is None: value = grammar.generate(self.start)
 
         FunctionHypothesis.__init__(self, value=value, f=f, args=args, **kwargs)
@@ -107,12 +111,3 @@ class LOTHypothesis(FunctionHypothesis):
         assert isinstance(datum, FunctionData)
 
         return log( self.ALPHA*(self(*datum.input)==datum.output) + (1.0-self.ALPHA)/2.0 )
-
-    # must wrap these as SimpleExpressionFunctions
-    # def enumerative_proposer(self):
-    #     """
-    #             Returns a generator, where the elements in the generator are instances of LOTHypothesis
-    #              that can be gotten to from the current LOTHypothesis.
-    #     """
-    #     for k in grammar.enumerate_pointwise(self.value):
-    #         yield LOTHypothesis(self.grammar, value=k)

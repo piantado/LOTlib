@@ -8,7 +8,7 @@ import importlib # http://stackoverflow.com/questions/8718885/import-module-from
 def test_module(module):
     res = unittest.TestResult()
     # import the package package
-    f = importlib.import_module("LOTlibTest." + module)
+    f = importlib.import_module(module)
     # NOTE: the testing file MUST have a method named suite(), otherwise we'll skip this test
     # TODO: find a more robust way of testing whether a given module has a suite() method
     if 'suite' not in dir(f):
@@ -29,7 +29,7 @@ def test_module(module):
 # executes all tests within the LOTlibTest package
 def test_all():
     # a list of test modules we should execute
-    tests = ['DataAndObjectsTest','FunctionNodeTest','GrammarTest','SubtreesTest','FiniteBestSetTest','GrammarRuleTest','MiscellaneousTest','ProposalsTest'
+    tests = ['FunctionNodeTest','GrammarTest','SubtreesTest','FiniteBestSetTest','MiscellaneousTest','ProposalsTest'
             # ,'ParsingTest' # we need the pyparsing module to do this test
     ]
     # a list of test results, wrapped in unittest.TestResult objects

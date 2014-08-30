@@ -32,15 +32,3 @@ def next_(w): return next_hash[w]
 @LOTlib_primitive
 def prev_(w): return prev_hash[w]
 
-# and define these
-one_ = 'one_'
-two_ = 'two_'
-three_ = 'three_'
-four_ = 'four_'
-five_ = 'five_'
-six_ = 'six_'
-seven_ = 'seven_'
-eight_ = 'eight_'
-nine_ = 'nine_'
-ten_ = 'ten_'
-undef = 'undef'

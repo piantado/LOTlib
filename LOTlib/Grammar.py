@@ -12,8 +12,6 @@ from LOTlib.GrammarRule import GrammarRule, BVAddGrammarRule, BVUseGrammarRule
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
 from LOTlib.BVRuleContextManager import BVRuleContextManager
 
-
-
 class Grammar:
     """
             A PCFG-ish class that can handle special types of rules:
@@ -91,11 +89,9 @@ class Grammar:
         self.rule_count += 1
         
         if bv_type is not None:
+            assert name.lower() == 'lambda', "When introducing bound variables, the name of the expanded function must be 'lambda'."
             
-            # Check the name
-            assert (name.lower() == 'lambda' or name.lower() == 'applylambda'), "When introducing bound variables, the name of the expanded function must be 'lambda'."
-            
-            newrule = BVAddGrammarRule(nt,name,to, p=p, resample_p=resample_p, bv_type=bv_type, bv_args=bv_args, bv_prefix=bv_prefix, bv_p=bv_p)
+            newrule = BVAddGrammarRule(nt, name,to, p=p, resample_p=resample_p, bv_type=bv_type, bv_args=bv_args, bv_prefix=bv_prefix, bv_p=bv_p)
             
         else:
             newrule = GrammarRule(nt,name,to, p=p, resample_p=resample_p)
@@ -117,10 +113,11 @@ class Grammar:
     ############################################################
 
 
-    def generate(self, x=None):
+    def generate(self, x=None, return_p=False):
         """
-                Generate from the PCFG -- default is to start from x - either a
-                nonterminal or a FunctionNode
+                Generate from the PCFG -- default is to start from x - either a nonterminal or a FunctionNode
+                *x* - what we start from -- can be None and then we use Grammar.start
+                *return_p* -- should we return a list including the log probability of the rule?
 
         """
         #print "# Calling grammar.generate", d, type(x), x
@@ -138,15 +135,18 @@ class Grammar:
             
             # sample a grammar rule
             r, gp = weighted_sample(self.rules[x], probs=lambda x: x.p, return_probability=True, log=False)
-            #print "SAMPLED:", gp, r, type(r)
             
             # Make a stub for this functionNode 
-            fn = r.make_FunctionNodeStub(self, gp) ## NOT SURE WHY BU TCOPY IS NECESSARY HERE
+            fn = r.make_FunctionNodeStub(self, gp, None) 
                 
             # Define a new context that is the grammar with the rule added. Then, when we exit, it's still right 
-            with BVRuleContextManager(self, fn.added_rule): # not sure why I can't use with/as:
+            with BVRuleContextManager(self, fn, recurse_up=False): # not sure why I can't use with/as:
                 if fn.args is not None:  # Can't recurse on None or else we genreate from self.start
                     fn.args = self.generate(fn.args)  # and generate below *in* this context (e.g. with the new rules added)
+                
+                # and set the parents
+                for a in fn.argFunctionNodes():
+                    a.parent = fn
 
             return fn
 
@@ -171,60 +171,24 @@ class Grammar:
                 TODO: Make this more elegant -- use BVCM
         """
         
-        if isFunctionNode(t):
-            #  print "iterate subnode: ", t, t.added_rule
+        if predicate(t):
+            yield (t,d) if yield_depth else t
             
-            if predicate(t):
-                yield (t,d) if yield_depth else t
-            
-            #Define a new context that is the grammar with the rule added. Then, when we exit, it's still right 
-            with BVRuleContextManager(self, t.added_rule):                    
-                   
-                if t.args is not None:
-                    for g in self.iterate_subnodes(t.args, d=d+1, do_bv=do_bv, yield_depth=yield_depth, predicate=predicate): # pass up anything from below
-                        yield g
-
-        elif isinstance(t, list):
-            for a in t:
-                for g in self.iterate_subnodes(a, d=d, do_bv=do_bv, yield_depth=yield_depth, predicate=predicate):
+        #Define a new context that is the grammar with the rule added. Then, when we exit, it's still right 
+        with BVRuleContextManager(self, t, recurse_up=False):                    
+            for a in t.argFunctionNodes():
+                for g in self.iterate_subnodes(a, d=d+1, do_bv=do_bv, yield_depth=yield_depth, predicate=predicate): # pass up anything from below
                     yield g
 
-    def resample_normalizer(self, t, predicate=lambdaTrue):
+    
+    def recompute_generation_probabilities(self, fn):
         """
-                Returns the sum of all of the non-normalized probabilities.
+            Re-compute all the generation_probabilities
         """
-        Z = 0.0
-        for ti in self.iterate_subnodes(t, do_bv=True, predicate=predicate):
-            Z += ti.resample_p
-        return Z
-
-
-    def sample_node_via_iterate(self, t, predicate=lambdaTrue, do_bv=True):
-        """
-                This will yield a random node in the middle of its iteration, allowing us to expand bound variables properly
-                (e.g. when the node is yielded, the state of the grammar is correct)
-                It also yields the probability and the depth
-
-                So use this via
-
-                for ni, di, resample_p, resample_Z, in sample_node_via_iterate():
-                        ... do something
-
-                and it should only execute once, despite the "for"
-                The "for" is nice so that it will yield back and clean up the bv
-
-        """
-
-        Z = self.resample_normalizer(t, predicate=predicate) # the total probability
-        r = random() * Z # now select a random number (giving a random node)
-        sm = 0.0
-        foundit = False
-
-        for ni, di in self.iterate_subnodes(t, predicate=predicate, do_bv=do_bv, yield_depth=True):
-            sm += ni.resample_p
-            if sm >= r and not foundit: # our node
-                foundit=True
-                yield [ni, di, ni.resample_p, Z]
+        assert fn.rule is not None 
+        for t in self.iterate_subnodes(fn, do_bv=True):
+            t.generation_probability = log(t.rule.p) - log(sum([x.p for x in self.rules[t.returntype]]))
+        
         
         
     def depth_to_terminal(self, x, openset=None, current_d=None):
@@ -320,7 +284,7 @@ class Grammar:
                         if iters[carry_pos] is not None: # we are not a terminal symbol (mixed in)
                             
                             ## NOTE: This *MUST* go here in order to prevent adding a rule and then not removing it when you carry (thus introducing a bv of a1 into a2)
-                            with BVRuleContextManager(self, x.added_rule):
+                            with BVRuleContextManager(self, x):
                                 
                                 try:
                                     x.args[carry_pos] = iters[carry_pos].next()
@@ -357,15 +321,20 @@ class Grammar:
             
             # yield each of the rules that lead to terminals -- always do this since depth>=0 (above)
             for r in terminals:
-                fn = r.make_FunctionNodeStub(self, (log(r.p) - Z))
+                fn = r.make_FunctionNodeStub(self, (log(r.p) - Z), None) # this "None" gets set above                
+                
                 # Do not need to set added_rule since they can't exist here
                 yield fn
                 
             if depth < max_depth: # if we can go deeper
                 for r in nonterminals:#expand each nonterminals
-                    fn = r.make_FunctionNodeStub(self, (log(r.p) - Z))
+                    fn = r.make_FunctionNodeStub(self, (log(r.p) - Z), None)
                     
                     for q in self.increment_tree_(x=fn, depth=depth+1,max_depth=max_depth, depthdict=depthdict):
+                        
+                        for a in q.argFunctionNodes():
+                            a.parent = q
+                        
                         yield q
             else:
                 yield x
@@ -394,8 +363,8 @@ class Grammar:
         if (isinstance(x,str) and isinstance(y,str) and x==y) or (x.returntype == y.returntype):
 
             # compute the normalizer
-            if xZ is None: xZ = self.resample_normalizer(x)
-            if yZ is None: yZ = self.resample_normalizer(y)
+            if xZ is None: xZ = x.sample_node_normalizer()
+            if yZ is None: yZ = y.sample_node_normalizer()
 
             # Well we could select x's root to go to Y
             RP = logplusexp(RP, log(x.resample_p) - log(xZ) + y.log_probability() )
@@ -433,13 +402,16 @@ if __name__ == "__main__":
     #from LOTlib.Examples.Number.Shared import grammar
     from LOTlibTest.Grammars.FiniteWithBVArgs import g as grammar
     
-    #for t in grammar.increment_tree(max_depth=9):
-    #    print t.depth(), t
+    for t in grammar.increment_tree(max_depth=9):
+        print t.depth(), t
         #t.fullprint()
         #print "\n\n"
      
     #for r in grammar.rules.keys():
     #    print ">>", grammar.depth_to_terminal(r), r
+    #for _ in xrange(1000):
+    #    print grammar.generate()
+        
     """
     for _ in xrange(1000):
         t = grammar.generate()

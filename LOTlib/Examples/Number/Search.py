@@ -17,12 +17,12 @@ from Shared import *
 from optparse import OptionParser
 
 parser = OptionParser()
-parser.add_option("--out", dest="OUT_PATH", type="string",                  help="Output file (a pickle of FiniteBestSet)", default="/home/piantado/Desktop/mit/Libraries/LOTlib/LOTlib/Examples/Number/mpi-run.pkl")
+parser.add_option("--out", dest="OUT_PATH", type="string",                  help="Output file (a pickle of FiniteBestSet)", default="/home/piantado/Desktop/Science/Libraries/LOTlib/LOTlib/Examples/Number/mpi-run.pkl")
 
 parser.add_option("--steps", dest="STEPS", type="int", default=200000,       help="Number of samples to run")
 parser.add_option("--top", dest="TOP_COUNT", type="int", default=1000,       help="Top number of hypotheses to store")
 parser.add_option("--chains", dest="CHAINS", type="int", default=1,          help="Number of chains to run (new data set for each chain)")
-parser.add_option("--large", dest="LARGE_DATA_SIZE", type="int", default=-1, help="If > 0, recomputes the likelihood on a sample of data this size")
+parser.add_option("--large", dest="LARGE_DATA_SIZE", type="int", default=1000, help="If > 0, recomputes the likelihood on a sample of data this size")
 
 parser.add_option("--data", dest="DATA", type="int",default=-1,       help="Amount of data")
 parser.add_option("--dmin", dest="DATA_MIN", type="int",default=20,   help="Min data to run")

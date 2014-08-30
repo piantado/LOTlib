@@ -6,7 +6,7 @@ follows the standards in https://docs.python.org/2/library/unittest.html
 import unittest
 from LOTlib.FunctionNode import *
 from LOTlib.Grammar import *
-from LOTlibTest.Grammars import FunctionNodeGrammar
+from Grammars import FunctionNodeGrammar
 from LOTlib import lot_iter
 
 
