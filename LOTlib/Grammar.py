@@ -136,7 +136,7 @@ class Grammar:
             r, gp = weighted_sample(self.rules[x], probs=lambda x: x.p, return_probability=True, log=False)
 
             # Make a stub for this functionNode 
-            fn = r.make_FunctionNodeStub(self, gp) ## NOT SURE WHY BU TCOPY IS NECESSARY HERE
+            fn = r.make_FunctionNodeStub(self, gp, None) 
 
             # Define a new context that is the grammar with the rule added. Then, when we exit, it's still right 
             with BVRuleContextManager(self, fn, recurse_up=False): # not sure why I can't use with/as:
