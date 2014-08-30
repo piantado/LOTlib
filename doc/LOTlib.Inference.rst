@@ -4,10 +4,10 @@ LOTlib.Inference package
 Submodules
 ----------
 
-LOTlib.Inference.IncreaseTemperatureMH module
----------------------------------------------
+LOTlib.Inference.EnumerationInference module
+--------------------------------------------
 
-.. automodule:: LOTlib.Inference.IncreaseTemperatureMH
+.. automodule:: LOTlib.Inference.EnumerationInference
     :members:
     :undoc-members:
     :show-inheritance:
@@ -20,10 +20,26 @@ LOTlib.Inference.MHShared module
     :undoc-members:
     :show-inheritance:
 
+LOTlib.Inference.MemoizedMHSampler module
+-----------------------------------------
+
+.. automodule:: LOTlib.Inference.MemoizedMHSampler
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 LOTlib.Inference.MetropolisHastings module
 ------------------------------------------
 
 .. automodule:: LOTlib.Inference.MetropolisHastings
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+LOTlib.Inference.MultipleChainMCMC module
+-----------------------------------------
+
+.. automodule:: LOTlib.Inference.MultipleChainMCMC
     :members:
     :undoc-members:
     :show-inheritance:
@@ -36,6 +52,14 @@ LOTlib.Inference.ParallelTempering module
     :undoc-members:
     :show-inheritance:
 
+LOTlib.Inference.PartitionMCMC module
+-------------------------------------
+
+.. automodule:: LOTlib.Inference.PartitionMCMC
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 LOTlib.Inference.PriorSample module
 -----------------------------------
 
@@ -44,18 +68,18 @@ LOTlib.Inference.PriorSample module
     :undoc-members:
     :show-inheritance:
 
-LOTlib.Inference.ProbTaboo module
----------------------------------
-
-.. automodule:: LOTlib.Inference.ProbTaboo
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 LOTlib.Inference.StochasticOptimization module
 ----------------------------------------------
 
 .. automodule:: LOTlib.Inference.StochasticOptimization
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+LOTlib.Inference.TabooMCMC module
+---------------------------------
+
+.. automodule:: LOTlib.Inference.TabooMCMC
     :members:
     :undoc-members:
     :show-inheritance:

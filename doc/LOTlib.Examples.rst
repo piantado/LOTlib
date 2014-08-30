@@ -14,7 +14,7 @@ Subpackages
     LOTlib.Examples.Number
     LOTlib.Examples.Quantifier
     LOTlib.Examples.RationalRules
-    LOTlib.Examples.RegularExpressionLearner
+    LOTlib.Examples.RegularExpression
     LOTlib.Examples.SchemeProgramInduction
     LOTlib.Examples.SimpleGenerativeHypothesis
     LOTlib.Examples.SimpleMCMC

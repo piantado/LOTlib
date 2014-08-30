@@ -60,10 +60,26 @@ LOTlib.Hypotheses.SimpleGenerativeHypothesis module
     :undoc-members:
     :show-inheritance:
 
+LOTlib.Hypotheses.SimpleLexicon module
+--------------------------------------
+
+.. automodule:: LOTlib.Hypotheses.SimpleLexicon
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 LOTlib.Hypotheses.VectorHypothesis module
 -----------------------------------------
 
 .. automodule:: LOTlib.Hypotheses.VectorHypothesis
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+LOTlib.Hypotheses.WeightedLexicon module
+----------------------------------------
+
+.. automodule:: LOTlib.Hypotheses.WeightedLexicon
     :members:
     :undoc-members:
     :show-inheritance:

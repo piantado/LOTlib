@@ -118,10 +118,9 @@ class Grammar:
                 Generate from the PCFG -- default is to start from x - either a nonterminal or a FunctionNode
                 *x* - what we start from -- can be None and then we use Grammar.start
                 *return_p* -- should we return a list including the log probability of the rule?
-
         """
         #print "# Calling grammar.generate", d, type(x), x
-        
+
         # Decide what to start from based on the default if start is not specified
         if x is None:
             x = self.start
@@ -132,13 +131,13 @@ class Grammar:
             # If we get a list, just map along it to generate. We don't count lists as depth--only FunctionNodes
             return map(lambda xi: self.generate(x=xi), x)
         elif self.is_nonterminal(x):
-            
+
             # sample a grammar rule
             r, gp = weighted_sample(self.rules[x], probs=lambda x: x.p, return_probability=True, log=False)
-            
+
             # Make a stub for this functionNode 
-            fn = r.make_FunctionNodeStub(self, gp, None) 
-                
+            fn = r.make_FunctionNodeStub(self, gp) ## NOT SURE WHY BU TCOPY IS NECESSARY HERE
+
             # Define a new context that is the grammar with the rule added. Then, when we exit, it's still right 
             with BVRuleContextManager(self, fn, recurse_up=False): # not sure why I can't use with/as:
                 if fn.args is not None:  # Can't recurse on None or else we genreate from self.start
@@ -167,7 +166,6 @@ class Grammar:
 
                 NOTE: if you DON'T iterate all the way through, you end up acculmulating bv rules
                 so NEVER stop this iteration in the middle!
-                
                 TODO: Make this more elegant -- use BVCM
         """
         
@@ -178,6 +176,7 @@ class Grammar:
         with BVRuleContextManager(self, t, recurse_up=False):                    
             for a in t.argFunctionNodes():
                 for g in self.iterate_subnodes(a, d=d+1, do_bv=do_bv, yield_depth=yield_depth, predicate=predicate): # pass up anything from below
+
                     yield g
 
     
@@ -194,10 +193,10 @@ class Grammar:
     def depth_to_terminal(self, x, openset=None, current_d=None):
         """
             Return a dictionary that maps both this grammar's rules and its nonterminals to a number, giving how quickly we
-            can go from that nonterminal or rule to a terminal. 
-            
-            *openset* -- stores the set of things we're currently trying to compute for. We must skip rules that contain anything in there, since 
-            they have to be defined still, and so we want to avoid a loop. 
+            can go from that nonterminal or rule to a terminal.
+
+            *openset* -- stores the set of things we're currently trying to compute for. We must skip rules that contain anything in there, since
+            they have to be defined still, and so we want to avoid a loop.
         """
         
         if current_d is None: 
@@ -399,8 +398,7 @@ if __name__ == "__main__":
     pass
     #from LOTlib.Examples.FOL.FOL import grammar
     #from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar
-    #from LOTlib.Examples.Number.Shared import grammar
-    from LOTlibTest.Grammars.FiniteWithBVArgs import g as grammar
+    from LOTlib.Examples.Number.Shared import grammar
     
     for t in grammar.increment_tree(max_depth=9):
         print t.depth(), t

@@ -12,6 +12,14 @@ LOTlib.Examples.FOL.FOL module
     :undoc-members:
     :show-inheritance:
 
+LOTlib.Examples.FOL.FOL_lambda module
+-------------------------------------
+
+.. automodule:: LOTlib.Examples.FOL.FOL_lambda
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 LOTlib.Examples.FOL.GenerateQuantifiers module
 ----------------------------------------------
 
