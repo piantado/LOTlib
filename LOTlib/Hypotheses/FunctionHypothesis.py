@@ -41,9 +41,9 @@ class FunctionHypothesis(Hypothesis):
         """
                 Make this callable just like a function (as in: myFunction(data)). Yay python!
         """
-        assert not any([isinstance(x, FunctionData) for x in vals]), "*** Probably you mean to pass FunctionData.input instead of FunctionData?"
-        assert callable(self.fvalue)
-        #print "# CALL", str(self), vals
+        # The below assertions are useful but VERY slow
+        #assert not any([isinstance(x, FunctionData) for x in vals]), "*** Probably you mean to pass FunctionData.input instead of FunctionData?"
+        #assert callable(self.fvalue)
 
         try:
             return self.fvalue(*vals)
