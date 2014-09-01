@@ -25,7 +25,7 @@ class BVRuleContextManager(object):
         
         assert len(self.added_rules) == 0 # Should not call __enter__ twice
         
-        for x in self.fn.up_to_root() if self.recurse_up else [self.fn]:
+        for x in self.fn.up_to(to=None) if self.recurse_up else [self.fn]:
             if x.added_rule is not None:
                 #print "# Adding rule ", x.added_rule
                 r = x.added_rule

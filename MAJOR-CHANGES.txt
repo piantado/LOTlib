@@ -1,3 +1,9 @@
+Aug 31 2014:
+        - Fixed setto to update parents correctly
+        - Changed "replace_subnodes" to use a predicate rather than equality, since equality is a bit of a hazard with new bound variables
+        - Fixed FunctionNode copy to correctly manage parents
+        - fixed lambda thunk print error
+        - update InverseInline proposal, but not thoroughly checked
 Aug 29 2014:
 	- Removed isapply, islambda, isbv, etc. The lambdas and bvs can be checked by checking the type of the FunctionNode or GrammarRule
 	- changed BVRuleContextManager to take a functionNode as its first argument, not a rule. It defautly looks at the .added_rule attribute of the FunctionNode

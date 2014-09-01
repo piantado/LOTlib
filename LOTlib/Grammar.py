@@ -176,7 +176,6 @@ class Grammar:
         with BVRuleContextManager(self, t, recurse_up=False):                    
             for a in t.argFunctionNodes():
                 for g in self.iterate_subnodes(a, d=d+1, do_bv=do_bv, yield_depth=yield_depth, predicate=predicate): # pass up anything from below
-
                     yield g
 
     

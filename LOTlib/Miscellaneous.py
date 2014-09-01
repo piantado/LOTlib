@@ -42,12 +42,12 @@ def eighth(x):  return x[7]
 
 def dropfirst(g):
     """
-            Return all but the first element
+        Yield all but the first in a generator
     """
     keep = False
     for x in g:
         if keep: yield x
-        keep = True
+        keep = True        
 
 def None2Empty(x):
     # Treat Nones as empty

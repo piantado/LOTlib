@@ -56,9 +56,9 @@ grammar.add_rule('WORD', 'prev_', ['WORD'], 1.0)
 
 #grammar.add_rule('WORD', 'undef', None, 1.0)
 # These are quoted (q) since they are strings when evaled
-grammar.add_rule('WORD', q('one'), None, 0.10)
-grammar.add_rule('WORD', q('two'), None, 0.10)
-grammar.add_rule('WORD', q('three'), None, 0.10)
+grammar.add_rule('WORD', q('one_'), None, 0.10)
+grammar.add_rule('WORD', q('two_'), None, 0.10)
+grammar.add_rule('WORD', q('three_'), None, 0.10)
 grammar.add_rule('WORD', q('four_'), None, 0.10)
 grammar.add_rule('WORD', q('five_'), None, 0.10)
 grammar.add_rule('WORD', q('six_'), None, 0.10)
@@ -159,8 +159,8 @@ all_possible_data = [ ('', set(sample_sets_of_objects(n, all_objects))) for n in
 # # # # # # # # # # # # # # # # # # # # # # # # #
 # Standard exports
 
-def make_h0(value=None):
-    return NumberExpression(grammar, value=value)
+def make_h0(**kwargs):
+    return NumberExpression(grammar, **kwargs)
 
 
 if __name__ == "__main__":

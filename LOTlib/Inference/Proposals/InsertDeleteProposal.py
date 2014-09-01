@@ -144,9 +144,10 @@ class InsertDeleteProposal(LOTProposal):
     
 if __name__ == "__main__":
     
-    from LOTlib.Examples.Number.Shared import grammar, make_h0, generate_data
-    data = generate_data(300)
-    #from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar, make_h0, data
+    #from LOTlib.Examples.Number.Shared import grammar, make_h0, generate_data
+    #data = generate_data(300)
+    
+    from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar, make_h0, data
     
     
     

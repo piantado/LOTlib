@@ -9,7 +9,10 @@ To install on my system, I had to build mpich2, mpi4py and set up ubunut with th
 To run on MPI:
 $time mpiexec -hostfile /home/piantado/Desktop/mit/Libraries/LOTlib/hosts.mpich2 -n 36 python Search.py --steps=10000 --top=50 --chains=25 --large=1000 --dmin=0 --dmax=300 --dstep=10 --mpi --out=/home/mpiu/tmp.pkl
 """
-
+import LOTlib
+from LOTlib import lot_iter
+from LOTlib.FiniteBestSet import FiniteBestSet
+from LOTlib.Inference.MetropolisHastings import MHSampler
 from SimpleMPI.MPI_map import MPI_map, is_master_process
 from Shared import *
 
@@ -30,7 +33,6 @@ parser.add_option("--dmax", dest="DATA_MAX", type="int", default=500, help="Max 
 parser.add_option("--dstep", dest="DATA_STEP", type="int", default=20,help="Step size for varying data")
 
 # standard options
-parser.add_option("--dl", dest="DEBUG_LEVEL", type="int", default=10,                  help="Debug level -- higher will print more, 0 prints minimum")
 parser.add_option("-q", "--quiet", action="store_true", dest="QUIET", default=False,   help="Don't print status messages to stdout")
 
 (options, args) = parser.parse_args()
@@ -39,10 +41,6 @@ if options.DATA == -1:
     options.DATA_AMOUNTS = range(options.DATA_MIN,options.DATA_MAX,options.DATA_STEP)
 else:
     options.DATA_AMOUNTS = [ options.DATA ]
-
-# manage how much we print
-if options.QUIET: options.DEBUG_LEVEL = 0
-LOTlib.Miscellaneous.DEBUG_LEVEL = options.DEBUG_LEVEL
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # the main sampling function to run
@@ -55,10 +53,11 @@ def run(data_size):
     data = generate_data(data_size)
 
     # starting hypothesis -- here this generates at random
-    h0 = NumberExpression(grammar)
+    h0 = make_h0()
 
     hyps = FiniteBestSet(max=True, N=options.TOP_COUNT, key="posterior_score")
-    hyps.add( mh_sample(h0, data, options.STEPS, trace=False) )
+    
+    hyps.add( lot_iter(MHSampler(h0, data, options.STEPS, trace=False) ))
 
     return hyps
 
@@ -89,6 +88,6 @@ if options.LARGE_DATA_SIZE > 0 and is_master_process():
     [h.compute_posterior(huge_data) for h in H]
 
     # show the *average* ll for each hypothesis
-    for h in H:
+    for h in lot_iter(H):
         if h.prior > float("-inf"):
             print h.prior, h.likelihood/float(options.LARGE_DATA_SIZE), q(get_knower_pattern(h)),  q(h) # a quoted x

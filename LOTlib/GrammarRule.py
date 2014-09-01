@@ -95,7 +95,8 @@ class BVAddGrammarRule(GrammarRule):
         
         # If we use this, we should have BV
         assert bv_type is not None, "Did you mean to use a GrammarRule instead of a BVGrammarRule?"
-    
+        assert isinstance(bv_type, str), "bv_type must be a string! Make sure it's not a tuple or list."
+        
     def __repr__(self):
         return str(self.nt) + " -> " + self.name + (str(self.to) if self.to is not None else '') + " w/ p=" +str(self.p)+ ", resample_p=" + str(self.resample_p) + "BV:"+ str(self.bv_type)+";"+str(self.bv_args)+";"+self.bv_prefix+""
     
@@ -126,7 +127,7 @@ class BVAddGrammarRule(GrammarRule):
 
 class BVUseGrammarRule(GrammarRule):
     def __init__(self, nt, to, p=1.0, resample_p=1.0, bv_prefix=None):
-        GrammarRule.__init__(self, nt, uuid4().hex, to, p, resample_p, bv_prefix)
+        GrammarRule.__init__(self, nt, 'bv__'+uuid4().hex, to, p, resample_p, bv_prefix)
 
 
     def make_FunctionNodeStub(self, grammar, gp, parent):

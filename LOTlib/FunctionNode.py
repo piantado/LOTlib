@@ -64,11 +64,11 @@ def pystring(x, d=0, bv_names=None):
             assert x.args is not None and len(x.args)==2, "Apply requires exactly 2 arguments"
             #print ">>>>", self.args
             return '( %s )( %s )' % tuple(map(lambda x: pystring(x, d=d, bv_names=bv_names), x.args))
-        elif isinstance(x, BVAddFunctionNode):
+        elif x.name == 'lambda':
             # On a lambda, we must add the introduced bv, and then remove it again afterwards
             
             bvn = ''
-            if x.added_rule is not None:
+            if isinstance(x, BVAddFunctionNode) and x.added_rule is not None:
                 bvn = x.added_rule.bv_prefix+str(d)
                 bv_names[x.added_rule.name] = bvn
             
@@ -131,10 +131,20 @@ class FunctionNode(object):
     
     def setto(self, q):
         """
-                Makes all the parts the same as q, not copies.
+                Makes all the parts the same as q, not copies. 
+                Note that this sets the parent of q to my current parent! 
         """
-        self.__dict__.update(q.__dict__)
+        
+        old_parent = self.parent # preserve my parent
+        
+        self.__dict__ = q.__dict__
         self.__class__ = q.__class__ # to update in case q is a different subtype of FunctionNode. NOTE: Setting __class__ is not a recommended thing to do.
+        
+        # and we must fix the kid refs. Everything else should be right.
+        for a in self.argFunctionNodes():
+            a.parent = self
+        
+        self.parent = old_parent
 
     def __copy__(self, shallow=False):
         """
@@ -144,14 +154,21 @@ class FunctionNode(object):
 
                 *shallow* - if True, this does not copy the children (self.to points to the same as what we return)
         """
-        if (not shallow) and self.args is not None:
-            newargs = map(copy, self.args)
-        else:
-            newargs = self.args
-
-        return FunctionNode(self.parent, self.returntype, self.name, newargs,
+        
+        fn = FunctionNode(self.parent, self.returntype, self.name, None,
                           generation_probability=self.generation_probability,
-                          resample_p=self.resample_p, rule=self.rule, a_args=self.a_args)
+                          resample_p=self.resample_p, rule=self.rule)
+        
+        if (not shallow) and self.args is not None:
+            fn.args = map(copy, self.args)
+        else:
+            fn.args = self.args
+
+        # and update 
+        for a in fn.argFunctionNodes():
+            a.parent = fn 
+
+        return fn 
         
     def is_nonfunction(self):
         """
@@ -174,6 +191,34 @@ class FunctionNode(object):
 
     def is_root(self):
         return self.parent is None
+    
+    def check_parent_refs(self):
+        """
+            Recurse through the tree and ensure that the parent refs are good
+        """
+        for t in self.argFunctionNodes():
+            if (t.parent is not self) or (t.check_parent_refs() is not True):
+                print "Bad parent reference at %s"%t.name
+                print "If it prints, the full string is %s, a subnode of %s, whose parent is %s" % (t, self, t.parent)
+                return False
+            
+        return True
+    
+    def check_generation_probabilities(self, grammar):
+        """
+            Check this node's generation probabilities. NOTE: The can only be called on root -- no bvs allowed unless they are introduced, 
+            or else grammar.recompute_generation_probabilities will not work right
+        """
+        # and check the generation probabilities -- that these are set correctly
+        gps  = [t.generation_probability for t in self]
+        grammar.recompute_generation_probabilities(self) # re-check these
+        gps2 = [t.generation_probability for t in self]
+        for a,b,n in zip(gps, gps2, self.subnodes()):
+            if abs(a-b) > 0.0001:
+                print "# Wrong generation probabilities %s %s for %s" % (a, b, n)
+                return False
+            
+        return True
 
     def as_list(self, d=0, bv_names=None):
         """
@@ -256,6 +301,11 @@ class FunctionNode(object):
 
     
     def __eq__(self, other):
+        """
+            Check if two FunctionNodes are equal. This is actually a little subtle due to bound variables. In (lambda (x) x) and (lambda (y) y) will be equal (since they map
+            to identical strings via pystring), even though the nodes below x and y will not themselves be equal. This is because pystring(x) and pystring(y) will not know 
+            where these came from and will just cmopare the uuids. But pystring on the lambda keeps track of where bound variables were introduced. 
+        """
         return pystring(self) == pystring(other)
     
     
@@ -321,10 +371,9 @@ class FunctionNode(object):
         """
         yield self
 
-        if self.args is not None:
-            for a in self.argFunctionNodes():
-                for ssn in a:
-                    yield ssn
+        for a in self.argFunctionNodes():
+            for ssn in a:
+                yield ssn
 
     def iterdepth(self):
         """
@@ -371,16 +420,15 @@ class FunctionNode(object):
                 return True
         return False
 
-    def up_to_root(self):
+            
+    def up_to(self, to=None):
         """
-            Yield all nodes going up to the root (whose parent is None), including myself
+            Yield all nodes going up to "to". If "to" is None, we go until the root (default)
         """
         ptr = self
-        while ptr is not None:
+        while (ptr is not to) and (ptr is not None):
             yield ptr
             ptr = ptr.parent
-            
-            
 
     def count_nodes(self):
         """
@@ -479,16 +527,16 @@ class FunctionNode(object):
         # Now check the children, whether or not we are symmetrical
         return all([x.is_canonical_order(symmetric_ops) for x in self.args if self.args is not None])
 
-    def replace_subnodes(self, find, replace):
+    def replace_subnodes(self, predicate, replace):
         """
-                *find*s subnodes and *replace*s it.
-                NOTE: NOT THE FASTEST!
-                NOTE: Defaultly only makes copies of replace
+              Set all nodes satifying predicate to a copy of replace. 
+              NOTE: we must fix probabilities after this since they may not be right--we can copy into a place
+              where a lambda is defined. 
         """
 
         # now go through and modify
-        for g in filter(lambda x: x == find, self.subnodes()):  # NOTE: must use subnodes since we are modfiying
-            g.setto(copy(replace))
+        for n in filter(predicate, self.subnodes()):  # NOTE: must use subnodes since we are modfiying
+            n.setto(copy(replace))
 
     def partial_subtree_root_match(self, y):
         """
@@ -594,14 +642,19 @@ class BVAddFunctionNode(FunctionNode):
 
                 *shallow* - if True, this does not copy the children (self.to points to the same as what we return)
         """
-        if (not shallow) and self.args is not None:
-            newargs = map(copy, self.args)
-        else:
-            newargs = self.args
-
-        return BVAddFunctionNode(self.parent, self.returntype, self.name, newargs,
+        fn = BVAddFunctionNode(self.parent, self.returntype, self.name, None,
                           generation_probability=self.generation_probability,
                           resample_p=self.resample_p, rule=self.rule, a_args=self.a_args, added_rule=self.added_rule)
+        
+        if (not shallow) and self.args is not None:
+            fn.args = map(copy, self.args)
+        else:
+            fn.args = self.args
+
+        for a in fn.argFunctionNodes():
+            a.parent = fn
+
+        return fn
 
     
     def as_list(self, d=0, bv_names=None):
@@ -641,7 +694,6 @@ class BVUseFunctionNode(FunctionNode):
         FunctionNode.__init__(self, parent, returntype, name, args, generation_probability, resample_p, rule, a_args)
         self.bv_prefix = bv_prefix
 
-
     def as_list(self, d=0, bv_names=None):
         """
                 Returns a list representation of the FunctionNode with function/self.name as the first element.
@@ -670,13 +722,18 @@ class BVUseFunctionNode(FunctionNode):
 
                 *shallow* - if True, this does not copy the children (self.to points to the same as what we return)
         """
-        if (not shallow) and self.args is not None:
-            newargs = map(copy, self.args)
-        else:
-            newargs = self.args
-
-        return BVUseFunctionNode(self.parent, self.returntype, self.name, newargs,
+        fn = BVUseFunctionNode(self.parent, self.returntype, self.name, None,
                           generation_probability=self.generation_probability,
                           resample_p=self.resample_p, rule=self.rule, a_args=self.a_args, bv_prefix=self.bv_prefix)
+        
+        if (not shallow) and self.args is not None:
+            fn.args = map(copy, self.args)
+        else:
+            fn.args = self.args
+
+        for a in fn.argFunctionNodes():
+            a.parent = fn
+
+        return fn
 
 

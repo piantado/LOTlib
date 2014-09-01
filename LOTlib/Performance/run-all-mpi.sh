@@ -7,9 +7,9 @@
 # REPETITIONS=50 #25
 
 MPIEXEC="time nice -n 19 mpiexec -n 6" #"mpiexec -n 16"
-SAMPLES=10000
+SAMPLES=5000
 PRINT_EVERY=500 #1000
-REPETITIONS=20 #25
+REPETITIONS=10 #25
 
 for m in Number100 SimpleMagnetism Galileo Number300 Number1000 RationalRules RegularExpression
 do
