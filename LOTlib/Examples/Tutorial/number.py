@@ -5,7 +5,6 @@ from LOTlib.Hypotheses.LOTHypothesis import *
 from LOTlib.Evaluation.Eval import *
 from LOTlib.Miscellaneous import logsumexp, exp
 from math import log
-import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -53,8 +52,8 @@ grammar.add_rule('EXPR', 'pow_', ['EXPR', 'EXPR'], 1)
 
 # Converted to digits so python can evaluate them
 grammar.add_rule('EXPR', 'n', None, 10)
-for i in xrange(1, 10):
-    grammar.add_rule('EXPR', str(i), None, 4 - (3*i / 10))
+for i in range(1, 10):
+    grammar.add_rule('EXPR', str(i), None, (10-i)/2)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~ 3 : Generate hypotheses for data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -103,7 +102,12 @@ for q in range(domain):
     for h in hypotheses:
         posterior = h.posterior_score - Z
         likelihood = h.compute_likelihood([q+1])
-        predictive_dist[q] += exp(posterior + likelihood)
+        subset = [map stuff to stuff]
+        predictive_dist[q] += exp(posterior) * (q in subset)
+        # predictive_dist[q] += exp(posterior + likelihood)
+        # if (likelihood / posterior) > 10:
+        #     print '\nh: '+str(h)+'\nq: '+str(q)+'\npost: '+str(posterior)+'\nlike: '+str(
+        #         likelihood)+'\n~~~~~~~~~~'
 
 fig, ax = plt.subplots()
 rects = plt.bar(range(1,domain+1), predictive_dist)
@@ -122,3 +126,4 @@ plt.show()
 # it would be good to keep track of # of times you visit each state (hypothesis) during MH,
 # so that we can compare that to using the posterior scores; after a lot of iterations we should
 # see them converge
+
