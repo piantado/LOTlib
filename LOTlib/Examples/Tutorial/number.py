@@ -45,20 +45,20 @@ class NumberGameExpression(LOTHypothesis):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 grammar = Grammar()
 grammar.add_rule('START', '', ['EXPR'], 1)
-grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 1)
+# grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 1)
 grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1)
-grammar.add_rule('EXPR', 'minus_', ['EXPR', 'EXPR'], 1)
+# grammar.add_rule('EXPR', 'minus_', ['EXPR', 'EXPR'], 1)
 grammar.add_rule('EXPR', 'pow_', ['EXPR', 'EXPR'], 1)
 
 # Converted to digits so python can evaluate them
 grammar.add_rule('EXPR', 'n', None, 10)
-for i in range(1, 10):
+for i in range(1, 3):
     grammar.add_rule('EXPR', str(i), None, (10-i)/2)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~ 3 : Generate hypotheses for data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Edit these parameters
-num_iters = 5000
+num_iters = 50000
 data = [3, 9, 17]
 domain = 100
 noise = 0.9
@@ -73,8 +73,9 @@ for h in MHSampler(h0, data, steps=num_iters):
     hypotheses.add(h)
 '''
 
+print '\nGenerating ',num_iters,' hypotheses...\n'
 hypotheses = set()
-for _ in lot_iter(xrange(num_iters)):       # You can ctrl+C to exit this loop
+for _ in xrange(num_iters):       # You can ctrl+C to exit this loop
     t = NumberGameExpression(grammar, domain=domain, noise=noise)
     t.compute_posterior(data)               # Get prior, likelihood, posterior
     hypotheses.add(t)
@@ -85,29 +86,45 @@ Z = logsumexp([h.posterior_score for h in hypotheses])
 
 
 #~~~~~~~~~~~~ printing prior, likelihood, & normalized posterior score ~~~~~~~~~~~~~~~~~#
-for h in sorted(hypotheses, key=lambda x: x.posterior_score):
-    print h.prior, h.likelihood, exp(h.posterior_score - Z), h
+best_hypotheses = sorted(hypotheses, key=lambda x: x.posterior_score)
+best_hypotheses.reverse()
+print '======================================='
+for i in reversed(range(10)):
+    h = best_hypotheses[i]
+    print (i+1),':\t','Hypothesis:\t',h
+    print '\tPosterior:\t%.5f' % exp(h.posterior_score - Z)
+    # print '\t\tPrior:\t\t%.3f' % h.prior
+    # print '\t\tLikehd:\t\t%.3f' % h.likelihood
+    print '======================================='
 
-print str(num_iters) + ' number of iterations'
-print str(len(hypotheses)) + ' hypotheses in total'
+print '\n'
+print str(num_iters) + ' total hypotheses generated'
+print str(len(hypotheses)) + ' unique hypotheses'
 
 
 #~~~~~~~~~ graph p(y in C | d) as a function of y in domain (see figs 3,4,9) ~~~~~~~~~~~#
-# - NOTE: this does not calculate p(y in C | d);  change to describe what it does calc. #
 predictive_dist = [0.]*domain
 
-# Calculate chance of sampling for each item in domain
+'''
+# METHOD 1 : calculate ???
 for q in range(domain):
     # Sum p(q|h) * p(h|D) for all hypotheses h
     for h in hypotheses:
         posterior = h.posterior_score - Z
         likelihood = h.compute_likelihood([q+1])
-        subset = [map stuff to stuff]
+        predictive_dist[q] += exp(posterior + likelihood)
+'''
+
+# METHOD 2 : calculate chance of sampling for each item in domain
+for h in hypotheses:
+    subset = map(h, map(float, range(1, domain + 1)))
+    subset = [item for item in subset if item <= domain]
+    for q in range(domain):
+        posterior = h.posterior_score - Z
         predictive_dist[q] += exp(posterior) * (q in subset)
-        # predictive_dist[q] += exp(posterior + likelihood)
-        # if (likelihood / posterior) > 10:
-        #     print '\nh: '+str(h)+'\nq: '+str(q)+'\npost: '+str(posterior)+'\nlike: '+str(
-        #         likelihood)+'\n~~~~~~~~~~'
+
+
+
 
 fig, ax = plt.subplots()
 rects = plt.bar(range(1,domain+1), predictive_dist)
