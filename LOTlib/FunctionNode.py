@@ -485,7 +485,7 @@ class FunctionNode(object):
         if self.name == '':  # If we don't have a function call (as in START), just use the type of what's below
             assert len(self.args) == 1, "**** Nameless calls must have exactly 1 arg"
             return self.args[0].type()
-        if (not self.islambda()):
+        if not (isinstance(self, BVAddFunctionNode) and self.added_rule is not None):
             return self.returntype
         else:
             # figure out what kind of lambda

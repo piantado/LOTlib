@@ -1,5 +1,4 @@
 import re
-from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
 # What are the objects we may use?
 OBJECTS              = ['JOHN', 'MARY', 'SUSAN', 'BILL']
@@ -9,7 +8,7 @@ SEMANTIC_2PREDICATES = ['SAW', 'LOVED']
 class Context:
     """
             A context stores a list of objects and list of N-ary relations, represented as tuples,
-            as in relations = [  (happy, john), (loved, mary, john) ], with ( *args, function)
+            as in relations = [  (happy, john), (loved, mary, john) ], with (function, *args)
     """
     def __init__(self, objects, relations):
         self.__dict__.update(locals())

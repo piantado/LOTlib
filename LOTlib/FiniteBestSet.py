@@ -107,11 +107,6 @@ class FiniteBestSet(object):
         else:
             return [ c.x for c in self.Q]
 
-    ##NOTE: NOW DEFUNCT: USE .get_all
-    #def get_sorted(self, decreasing=False):
-        # """ Return all elements in sorted order. Returns a *copy*  via 'sorted' """
-        #return [ c.x for c in sorted(self.Q, reverse = not decreasing)]
-
     def merge(self, y):
         """
                 Copy over everything from y. Here, y may be a list of things to merge (e.g. other FiniteBestSets)
@@ -119,9 +114,11 @@ class FiniteBestSet(object):
         """
         if isinstance(y, list) or isinstance(y, tuple) or isinstance(y, set):
             for yi in y: self.merge(yi)
-        else:
+        elif isinstance(y, FiniteBestSet):
             for yi in y.Q:
                 self.add(yi.x, yi.priority*y.max_multiplier) # mult y by y.max_multiplier to convert it back to the original scale
+        else:
+            raise NotImplementedError
 
 if __name__ == "__main__":
 

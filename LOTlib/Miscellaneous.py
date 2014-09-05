@@ -17,7 +17,6 @@ import collections
 
 import re
 import types # for checking if something is a function: isinstance(f, types.FunctionType)
-import re # should this be imported twice???
 
 ## Some useful constants
 Infinity = float("inf")
@@ -30,7 +29,6 @@ TAU = 6.28318530718 # fuck pi
 T=True
 F=False
 
-# does not check whether array has fewer elements than needed
 def first(x): return x[0]
 def second(x): return x[1]
 def third(x):  return x[2]
@@ -58,13 +56,16 @@ def make_mutable(x):
     # TODO: update with other types
     if isinstance(x, frozenset): return set(x)
     elif isinstance(x, tuple): return list(x)
-    else: return x
+    else: 
+        raise NotImplementedError
 
 def make_immutable(x):
     # TODO: update with other types
     if isinstance(x, set ): return frozenset(x)
     elif isinstance(x, list): return tuple(x)
-    else: return x
+    else:
+        raise NotImplementedError
+
 
 def unlist_singleton(x):
     """
@@ -173,13 +174,13 @@ def unique(gen):
             s.add(gi)
 
 def UniquifyFunction(gen):
-    """
-            A decorator to make a function only return unique values
-    """
-    def f(*args, **kwargs):
-        for x in unique(gen(*args, **kwargs)):
-            yield x
-    return f
+        """
+        A decorator to make a function only return unique values
+        """
+        def f(*args, **kwargs):
+                for x in unique(gen(*args, **kwargs)):
+                        yield x
+        return f
 
 def flatten(expr):
     """
@@ -317,7 +318,9 @@ def log1mexp(a):
             Computes log(1-exp(a)) according to Machler, "Accurately computing ..."
             Note: a should be a large negative value!
     """
-    if a > 0: print >>sys.stderr, "# Warning, log1mexp with a=", a, " > 0"
+    if a > 0:
+        print >>sys.stderr, "# Warning, log1mexp with a=", a, " > 0"
+    
     if a < -log(2.0): return log1p(-exp(a))
     else:             return log(-expm1(a))
 

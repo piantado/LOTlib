@@ -7,15 +7,11 @@
 		
 
 """
-
-from random import sample
-from copy import deepcopy, copy
+from copy import copy
 from inspect import isroutine
 
-from LOTlib.DataAndObjects import UtteranceData
 from LOTlib.Miscellaneous import *
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
-from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
 class SimpleLexicon(Hypothesis):
 	"""
@@ -57,7 +53,7 @@ class SimpleLexicon(Hypothesis):
 		"""
 			This defaultly puts a \0 at the end so that we can sort -z if we want (e.g. if we print out a posterior first) 
 		"""
-		return '\n'.join([ str(w)+':\t'+str(v) for w,v in sorted(self.value.iteritems())]) + '\0\n'
+		return '\n'.join([ str(w)+':\t'+str(v) for w,v in sorted(self.value.iteritems())]) + '\0'
 	def __hash__(self): return hash(str(self))
 	def __eq__(self, other):   return (str(self)==str(other)) # simple but there are probably better ways
 	
@@ -111,12 +107,3 @@ class SimpleLexicon(Hypothesis):
 	def compute_single_likelihood(self, di):
 		raise NotImplementedError
 
-	#def enumerative_proposer(self):
-		
-		#for w in self.all_words():
-			#for k in self.grammar.enumerate_pointwise(self.value[w]):
-				#new = copy(self)
-				#new.set_word(w, k)
-				#yield new
-	
-	
