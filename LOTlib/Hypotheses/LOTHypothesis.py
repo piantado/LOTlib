@@ -7,7 +7,7 @@
 from FunctionHypothesis import FunctionHypothesis
 from copy import copy, deepcopy
 from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
-from LOTlib.Miscellaneous import Infinity
+from LOTlib.Miscellaneous import Infinity, lambdaNone
 from LOTlib.DataAndObjects import FunctionData
 from math import log
 
@@ -59,6 +59,17 @@ class LOTHypothesis(FunctionHypothesis):
                 Just a setter to create the proposal function
         """
         self.proposal_function = f
+
+    def set_value(self, value, f=None):
+        """
+            Sets the value via FunctionHypothesis, unless there are too many nodes.
+            This is just a wrapper, and ensures that "value" is always set, and f is not
+            evaled if it has too many nodes
+        """
+        if self.value.count_nodes() > self.maxnodes:
+            f = lambdaNone
+
+        FunctionHypothesis.set_value(self, value, f=f)
 
     def __copy__(self):
         """
