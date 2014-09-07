@@ -66,7 +66,7 @@ class LOTHypothesis(FunctionHypothesis):
             This is just a wrapper, and ensures that "value" is always set, and f is not
             evaled if it has too many nodes
         """
-        if self.value.count_nodes() > self.maxnodes:
+        if self.value is not None and self.value.count_nodes() > self.maxnodes:
             f = lambdaNone
 
         FunctionHypothesis.set_value(self, value, f=f)
