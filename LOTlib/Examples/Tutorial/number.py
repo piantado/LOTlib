@@ -38,7 +38,7 @@ class NumberGameExpression(LOTHypothesis):
         self.posterior_score = self.prior + self.likelihood
         return self.likelihood
 
-
+"""
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 2 : Create grammar ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # - Rules in our grammar map between sets of integers in our domain                     #
 # - E.g. "3n+1" maps to { 1, 4, 7, 10, ... }                                            #
@@ -144,3 +144,4 @@ plt.show()
 # so that we can compare that to using the posterior scores; after a lot of iterations we should
 # see them converge
 
+"""
