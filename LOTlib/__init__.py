@@ -17,7 +17,13 @@ SIG_INTERRUPTED = False
 def signal_handler(signal, frame):
     global SIG_INTERRUPTED
     SIG_INTERRUPTED = True
+
+# Handle interrupt CTRL-C
 signal.signal(signal.SIGINT, signal_handler)
+
+# handle signal 24, CPU time exceeded (via slurm or other cluster managers)
+signal.signal(24, signal_handler)
+
 
 
 def lot_iter(g, multi_break=False):
