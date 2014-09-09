@@ -3,11 +3,11 @@
 """
 This runs the number model on the laptop or an MPI cluster.
 This is the primary implementation intended for replication of Piantadosi, Tenebaum & Goodman
-To install on my system, I had to build mpich2, mpi4py and set up ubunut with the following:
+To install on my system, I had to build mpich2, mpi4py and set up ubuntu with the following:
         https://help.ubuntu.com/community/MpichCluster
 
 To run on MPI:
-$time mpiexec -hostfile /home/piantado/Desktop/mit/Libraries/LOTlib/hosts.mpich2 -n 36 python Search.py --steps=10000 --top=50 --chains=25 --large=1000 --dmin=0 --dmax=300 --dstep=10 --mpi --out=/home/mpiu/tmp.pkl
+$time mpiexec -hostfile /home/piantado/Libraries/LOTlib/hosts.mpich2 -n 36 python Search.py --steps=10000 --top=50 --chains=25 --large=1000 --dmin=0 --dmax=300 --dstep=10 --mpi --out=/home/mpiu/tmp.pkl
 """
 import LOTlib
 from LOTlib import lot_iter

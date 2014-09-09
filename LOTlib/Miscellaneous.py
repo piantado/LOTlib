@@ -236,7 +236,7 @@ except ImportError:
     # Die if we try to use this in numpypy
     def gammaln(*args, **kwargs): assert False
 
-## This is just a wrapper to avoid logsumexp([-inf, -inf, -inf...]) warnings
+
 try:
     from scipy.misc import logsumexp as logsumexp_base
 except ImportError:
@@ -251,6 +251,7 @@ except ImportError:
 def logsumexp(v):
     """
             logsumexp - our own version wraps the version defined about (logsumexp_base)
+            to avoid logsumexp([-inf, -inf, -inf...]) warnings
     """
     if len(v) == 0:
         return -Infinity

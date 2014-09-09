@@ -9,6 +9,7 @@ from copy import copy, deepcopy
 from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
 from LOTlib.Miscellaneous import Infinity, lambdaNone
 from LOTlib.DataAndObjects import FunctionData
+from LOTlib.Evaluation.Eval import evaluate_expression
 from math import log
 
 class LOTHypothesis(FunctionHypothesis):
@@ -60,16 +61,19 @@ class LOTHypothesis(FunctionHypothesis):
         """
         self.proposal_function = f
 
-    def set_value(self, value, f=None):
+    def value2function(self, value):
         """
-            Sets the value via FunctionHypothesis, unless there are too many nodes.
-            This is just a wrapper, and ensures that "value" is always set, and f is not
-            evaled if it has too many nodes
+            Called in set_value to compile into a function.
         """
-        if self.value is not None and self.value.count_nodes() > self.maxnodes:
-            f = lambdaNone
-
-        FunctionHypothesis.set_value(self, value, f=f)
+        if self.value.count_nodes() > self.maxnodes:
+            return lambdaNone
+        else:
+            try:
+                return evaluate_expression(value, args=self.args)
+            except Exception as e:
+                print "# Warning: failed to execute evaluate_expression on " + str(value)
+                print "# ", e
+                return lambdaNone
 
     def __copy__(self):
         """

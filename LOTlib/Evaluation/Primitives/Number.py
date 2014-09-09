@@ -32,3 +32,9 @@ def next_(w): return next_hash[w]
 @LOTlib_primitive
 def prev_(w): return prev_hash[w]
 
+@LOTlib_primitive
+def ifU_(C,X):
+    if C:
+        return X
+    else:
+        return 'undef'

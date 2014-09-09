@@ -161,7 +161,7 @@ class InverseInlineProposal(LOTProposal):
             b = (log(newn.resample_p) - log(new_nZ)) + argvalp + (-log(len(ir)))
         
         ## and fix the generation probabilites, because otherwiset hey are ruined by all the mangling above
-        grammar.recompute_generation_probabilities(newt)
+        self.grammar.recompute_generation_probabilities(newt)
         assert newt.check_parent_refs() # Can comment out -- here for debugging
         
         

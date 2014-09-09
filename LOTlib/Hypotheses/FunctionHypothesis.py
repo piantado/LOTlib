@@ -11,7 +11,6 @@ from Hypothesis import Hypothesis
 from LOTlib.Evaluation.Eval import evaluate_expression
 from LOTlib.Evaluation.EvaluationException import EvaluationException
 from LOTlib.Miscellaneous import lambdaNone
-from LOTlib.DataAndObjects import FunctionData, UtteranceData
 from copy import copy
 
 class FunctionHypothesis(Hypothesis):
@@ -75,15 +74,17 @@ class FunctionHypothesis(Hypothesis):
     def set_value(self, value, f=None):
         """
                 Sets the value for the hypothesis.
-                Another option: send f, and not write (this is for some speed considerations) but you better be sure f is correct
-                since an error will not be caught!
+                Another option: send f if speed is necessary
         """
 
         Hypothesis.set_value(self,value)
 
-        if f is not None:     self.fvalue = f
-        elif value is None:   self.fvalue = None
-        else:                 self.fvalue = self.value2function(value)
+        if f is not None:
+            self.fvalue = f
+        elif value is None:
+            self.fvalue = None
+        else:
+            self.fvalue = self.value2function(value)
 
     def force_function(self, f):
         self.value = "<FORCED_FUNCTION>"

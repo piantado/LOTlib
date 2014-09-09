@@ -58,11 +58,6 @@ def if_(C,X,Y):
     else: return Y
 
 @LOTlib_primitive
-def ifU_(C,X):
-    if C: return X
-    else: return 'undef'
-
-@LOTlib_primitive
 def gt_(x,y): return x>y
 
 @LOTlib_primitive

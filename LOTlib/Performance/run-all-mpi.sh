@@ -15,14 +15,14 @@ for m in Galileo Number100 SimpleMagnetism Number300 Number1000 RationalRules Re
 do
 	echo Running $m inference
 	$MPIEXEC python inference-evaluation.py --model=$m --samples=$SAMPLES --print-every=$PRINT_EVERY --repetitions=$REPETITIONS
-	R --no-save < plot-inference.R  
+	R --no-save < plot-inference.R  &
 	
 	echo Running $m tempchain
 	$MPIEXEC python tempchain-evaluation.py --model=$m --samples=$SAMPLES --print-every=$PRINT_EVERY --repetitions=$REPETITIONS
-	R --no-save < plot-tempchain.R  
+	R --no-save < plot-tempchain.R  &
 # 
 	echo Running $m proposal
 	# Don't run this on magnetism, since insert/delete doesn't work
 	$MPIEXEC python proposal-evaluation.py --model=$m --samples=$SAMPLES --print-every=$PRINT_EVERY --repetitions=$REPETITIONS
-	R --no-save < plot-proposal.R  
+	R --no-save < plot-proposal.R  &
 done

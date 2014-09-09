@@ -12,7 +12,7 @@ LARGE_DATA_SIZE = 1000
 huge_data = generate_data(LARGE_DATA_SIZE)
 print "# Generated data!"
 
-allfs = pickle.load(open("runs/2014Feb10_small.pkl")) # for now, use data from the run on February 10
+allfs = pickle.load(open("mpi-run.pkl")) # for now, use data from the run on February 10
 print "# Loaded!"
 
 # save this with a huge data set -- eval with average ll
