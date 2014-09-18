@@ -225,6 +225,46 @@ def weave(*iterables):
             try: yield it.next()
             except StopIteration: del iterables[i]
 
+
+
+
+def lazyproduct(iterators, restart_ith):
+        """
+            Compute a product of the iterators, without holding all of their values in memory.
+            This requires a function restart_ith that returns a new (refreshed or restarted) version of the
+            i'th iterator so we can start it anew
+
+            for g in lazyproduct( [xrange(10), xrange(10)], lambda i: xrange(10)):
+            	print g
+
+        """
+
+        iterators = map(iter, iterators)
+
+        # initialize all iterators
+        state = [it.next() for it in iterators]
+
+        yield state
+
+        while True:
+
+            for idx in xrange(len(iterators)):
+                try:
+                    state[idx] = iterators[idx].next()
+                    break # break the idx loop (which would process "carries")
+                except StopIteration:
+
+                    if idx == len(iterators)-1:
+                        raise StopIteration # actually exit
+                    else:
+                        # restart the current one and increment the next
+                        # by NOT breaking here
+                        iterators[idx] = iter(restart_ith(idx))
+                        state[idx] = iterators[idx].next() # reset this state (the next idx is increment on the next loop)
+
+                        # and no break so we iterate the next
+            yield state
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Math functions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
