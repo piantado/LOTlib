@@ -1,6 +1,7 @@
 from numpy import median
 from numpy.random import normal, randint
 from MultipleChainMCMC import MultipleChainMCMC
+from LOTlib import lot_iter
 from LOTlib.Miscellaneous import logsumexp, q, Infinity, logplusexp
 from copy import copy
 
@@ -21,11 +22,12 @@ class ParticleSwarm(MultipleChainMCMC):
 
         self.within_steps = within_steps
 
+        self.kwargs = kwargs
         self.seen = set()
         self.chainZ = [-Infinity for _ in xrange(self.nchains)]
         self.nsamples = 0  # How many samples have we drawn?
 
-    def resample(self):
+    def refresh(self):
         """
         This gets called when we have run within_steps to refresh some of the chains. It get overwritten in the inherited classes
 
@@ -49,12 +51,11 @@ class ParticleSwarm(MultipleChainMCMC):
         idx = self.chain_idx
         if nxt not in self.seen:
             self.chainZ[idx] = logplusexp(self.chainZ[idx], nxt.posterior_score)
-        else:
             self.seen.add(nxt)
 
             # # Process the situation where we need to re-organize
         if self.nsamples % (self.within_steps * self.nchains) == 0 and self.nsamples > 0:
-            self.resample()
+            self.refresh()
 
         self.nsamples += 1
 
@@ -66,7 +67,7 @@ class ParticleSwarmPriorResample(ParticleSwarm):
     Like ParticleSwarm, but resamples from the prior
     """
 
-    def resample(self):
+    def refresh(self):
         """
             Resample by resampling those below the median from the prior.
 
@@ -76,22 +77,19 @@ class ParticleSwarmPriorResample(ParticleSwarm):
 
         for i in range(self.nchains):
             if self.chainZ[i] < m:
-                self.chains[i] = self.make_h0()
+                self.chains[i] = self.make_h0(**self.kwargs)
             self.chainZ[i] = -Infinity  # reset this
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~			
 if __name__ == "__main__":
-    from LOTlib.Examples.Number.Shared import generate_data, NumberExpression, grammar
+    from LOTlib.Examples.Number.Shared import generate_data, grammar, make_h0
 
     data = generate_data(300)
 
-    make_h0 = lambda: NumberExpression(grammar)
     ps = ParticleSwarm(make_h0, data)
-    for h in ps:
+    for h in lot_iter(ps):
         print h.posterior_score, h
 
         if len(ps.seen) > 0:
             print "#", sorted(ps.seen, key=lambda x: x.posterior_score, reverse=True)[0]
-		
- 
