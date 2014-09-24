@@ -10,20 +10,19 @@ def apply_(f,*args):
 
 @LOTlib_primitive
 def cons_(x,y):
-    try: return [x,y]
-    except: return None
+    return [x,y]
 
 @LOTlib_primitive
 def cdr_(x):
     try:    return x[1:]
-    except: return []
+    except IndexError: return []
 
 rest_  = cdr_
 
 @LOTlib_primitive
 def car_(x):
     try:    return x[0]
-    except: return []
+    except IndexError: return []
 
 first_ = car_
 
