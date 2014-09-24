@@ -69,7 +69,7 @@ class LOTHypothesis(FunctionHypothesis):
             return lambdaNone
         else:
             try:
-                return evaluate_expression(value, args=self.args)
+                return evaluate_expression(str(self))
             except Exception as e:
                 print "# Warning: failed to execute evaluate_expression on " + str(value)
                 print "# ", e
