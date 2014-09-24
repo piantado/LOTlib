@@ -34,7 +34,40 @@ def cleanFunctionNodeString(x):
     s = re.sub("_", '', s)  # remove underscores
     return s
 
+"""
+==============================================================================================================================================
+== String casting functions
+==============================================================================================================================================
+"""
 
+def schemestring(x, d=0, bv_names=None):
+    """
+    Outputs a scheme string in (lambda (x) (+ x 3)) format.
+
+    *bv_names* - a dictionary from the uuids to nicer names
+    """
+
+    if isinstance(x, str):
+        return x
+    elif isFunctionNode(x):
+
+        if bv_names is None:
+            bv_names = dict()
+
+        name = x.name
+        if isinstance(x, BVUseFunctionNode):
+            name = bv_names.get(x.name, x.name)
+
+        if x.args is None:
+            return name
+        else:
+            if x.args is None:
+                return name
+            elif isinstance(x, BVAddFunctionNode):
+                assert name is 'lambda'
+                return "(%s (%s) %s)" % (name, x.added_rule.name, map(lambda a: schemestring(a,d+1,bv_names=bv_names), x.args))
+            else:
+                return "(%s %s)" % (name, map(lambda a: schemestring(a,d+1,bv_names=bv_names), x.args))
 
 def pystring(x, d=0, bv_names=None):
     """
@@ -267,15 +300,6 @@ class FunctionNode(object):
                     a.fullprint(d+1)
                 else:
                     print tabstr, a
-
-    def schemestring(self):
-        """
-            Print out in scheme format (+ 3 (- 4 5)).
-        """
-        if self.args is None:
-            return self.name
-        else:
-            return '('+self.name + ' ' + ' '.join(map(lambda x: x.schemestring() if isFunctionNode(x) else str(x), None2Empty(self.args)))+')'
 
     def liststring(self, cons="cons_"):
         """
@@ -525,7 +549,7 @@ class FunctionNode(object):
                         return False
 
         # Now check the children, whether or not we are symmetrical
-        return all([x.is_canonical_order(symmetric_ops) for x in self.args if self.args is not None])
+        return all([x.is_canonical_order(symmetric_ops) for x in self.argFunctionNodes() ])
 
     def replace_subnodes(self, predicate, replace):
         """
