@@ -32,6 +32,12 @@ class FunctionHypothesis(Hypothesis):
         Hypothesis.__init__(self, value, **kwargs) # this initializes prior and likleihood variables, so keep it here!
         self.set_value(value,f)
 
+    def __str__(self):
+        """
+        Strings of FunctionHypotheses wrap in an implicit lambda and args
+        """
+        return 'lambda %s: %s' % (','.join(self.args), str(self.value))
+
     def __copy__(self):
         """ Create a copy, only deeply of f value """
         return FunctionHypothesis(value=copy(self.value), f=self.fvalue, args=self.args)
@@ -60,9 +66,9 @@ class FunctionHypothesis(Hypothesis):
 
         # Risky here to catch all exceptions, but we'll do it and warn on failure
         try:
-            return evaluate_expression(value, args=self.args)
+            return evaluate_expression(str(self))
         except Exception as e:
-            print "# Warning: failed to execute evaluate_expression on " + str(value)
+            print "# Warning: failed to execute evaluate_expression on " + str(value), self.args
             print "# ", e
             return lambdaNone
 
@@ -87,8 +93,13 @@ class FunctionHypothesis(Hypothesis):
             self.fvalue = self.value2function(value)
 
     def force_function(self, f):
+        """
+        Sets the function to f, ignoring value.
+        :param f: - a python function (object)
+        :return:
+        """
         self.value = "<FORCED_FUNCTION>"
-        self.fvalue=f
+        self.fvalue = f
 
     def compute_single_likelihood(self, datum):
         """
