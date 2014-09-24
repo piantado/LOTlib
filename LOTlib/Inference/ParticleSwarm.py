@@ -70,8 +70,6 @@ class ParticleSwarmPriorResample(ParticleSwarm):
     def refresh(self):
         """
             Resample by resampling those below the median from the prior.
-
-            NOTE: What do we do about the temperature?
         """
         m = median(self.chainZ)
 

@@ -156,6 +156,16 @@ def display_option_summary(obj):
 # Genuine Miscellany
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+def infrange():
+    """
+    yields 0, 1, 2, 3, ...
+    """
+    i = 0
+    while True:
+        yield i
+        i += 1
+
+
 # a wrapper so we can call this in the below weirdo composition
 def raise_exception(e): raise e
 
@@ -241,14 +251,14 @@ def lazyproduct(iterators, restart_ith):
 
         iterators = map(iter, iterators)
 
-        # initialize all iterators
+        # initialize the state
         state = [it.next() for it in iterators]
 
         yield state
 
         while True:
 
-            for idx in xrange(len(iterators)):
+            for idx in xrange(len(iterators)): # the "carry" loop
                 try:
                     state[idx] = iterators[idx].next()
                     break # break the idx loop (which would process "carries")

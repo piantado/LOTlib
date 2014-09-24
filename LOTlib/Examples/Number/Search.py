@@ -49,6 +49,8 @@ def run(data_size):
     """
             This runs on the DATA_RANGE amounts of data and returns *all* hypothese in the top options.TOP_COUNT
     """
+    if LOTlib.SIG_INTERRUPTED: return [] # Put this here else we waste time making data for everything that isn't run
+
     # initialize the data
     data = generate_data(data_size)
 

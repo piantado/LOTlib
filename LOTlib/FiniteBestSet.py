@@ -30,7 +30,7 @@ class QueueItem(object):
 
 class FiniteBestSet(object):
     """
-            This class stores the top N (possibly infite) hypotheses it observes, keeping only unique ones.
+            This class stores the top N (possibly infinite) hypotheses it observes, keeping only unique ones.
             It works by storing a priority queue (in the opposite order), and popping off the worst as we need to add more
     """
 
@@ -53,7 +53,6 @@ class FiniteBestSet(object):
         for r in self.Q:
             if r.x == y: return True
         return False
-        #return (x in self.Q)
 
     def __iter__(self):
         for x in self.get_all(): yield x

@@ -143,7 +143,8 @@ class InsertDeleteProposal(LOTProposal):
         return [newt, f-b]
     
 if __name__ == "__main__":
-    
+
+    from LOTlib import lot_iter
     #from LOTlib.Examples.Number.Shared import grammar, make_h0, generate_data
     #data = generate_data(300)
     
@@ -157,7 +158,7 @@ if __name__ == "__main__":
      
     #data = generate_data(100)
     h = make_h0(proposal_function=idp) 
-    for h in MHSampler(h, data, 100000):
+    for h in lot_iter(MHSampler(h, data, 100000)):
         print h.posterior_score, h
         
     """

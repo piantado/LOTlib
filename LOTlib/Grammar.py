@@ -4,12 +4,9 @@ except ImportError: import numpypy as np
 
 from copy import copy
 from collections import defaultdict
-import itertools
 
-import LOTlib
 from LOTlib import lot_iter
 from LOTlib.Miscellaneous import *
-from LOTlib.FunctionNode import isFunctionNode
 from LOTlib.GrammarRule import GrammarRule, BVAddGrammarRule, BVUseGrammarRule
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
 from LOTlib.BVRuleContextManager import BVRuleContextManager
@@ -89,7 +86,7 @@ class Grammar:
 
         """
         self.rule_count += 1
-        
+        assert name is not None, "To use null names, use an empty string ('') as the name."
         if bv_type is not None:
             assert name.lower() == 'lambda', "When introducing bound variables, the name of the expanded function must be 'lambda'."
             
@@ -189,67 +186,76 @@ class Grammar:
         for t in self.iterate_subnodes(fn, do_bv=True):
             t.generation_probability = log(t.rule.p) - log(sum([x.p for x in self.rules[t.returntype]]))
 
-    def enumerate(self, d=Infinity, nt=None):
+    def enumerate(self, d=Infinity, nt=None, leaves=True):
         """
         Enumerate all trees up to depth n
         :param d: - how deep to go? (defaults to Infinity)
         :param nt: - the nonterminal type
+        :param leaves: - do we put terminals in the leaves or leave nonterminal types? This is useful in PartitionMCMC
         :return:
         """
-        i = 0
-        while i < d:
-            for t in self.enumerate_at_depth(i, nt=nt):
+        for i in infrange():
+            for t in self.enumerate_at_depth(i, nt=nt, leaves=leaves):
                 yield t
-            i += 1
 
-    def enumerate_at_depth(self, d, nt=None):
+    def enumerate_at_depth(self, d, nt=None, leaves=True):
         """
         Generate trees at depth d, no deeper or shallower
-        :param d: - the depth you want to generate at
+        :param d: - the depth of trees you want to generate
         :param nt: - the type of the nonterminal you want to return (None reverts to self.start)
+        :param leaves: - do we put terminals in the leaves or leave nonterminal types? This is useful in PartitionMCMC. This returns trees of depth d-1!
         :return: -- yields the
         """
-
         if nt is None:
             nt = self.start
-        elif not self.is_nonterminal(nt):
+
+        # handle garbage that may be passed in here
+        if not self.is_nonterminal(nt):
             yield nt
             raise StopIteration
 
-
+        # TODO: THIS MIGHT HAVE TO GO INSIDE THE LOOP?
         Z = log(sum([r.p for r in self.rules[nt]]))
+
         if d == 0:
-            # Just yield the terminals
-            for r in filter(lambda ri: self.is_terminal_rule(ri), self.rules[nt]):
-                yield r.make_FunctionNodeStub(self, (log(r.p) - Z), None)
-        elif d > 0:
-            for r in self.rules[nt]: # filter(lambda ri: not self.is_terminal_rule(ri), self.rules[nt]):
+            if leaves:
+                for r in self.rules[nt]:  # note: can NOT use filter here, or else it doesn't include added rules
+                    if self.is_terminal_rule(r):
+                        yield r.make_FunctionNodeStub(self, (log(r.p) - Z), None)
+            else:
+                # if not leaves, we just put the nonterminal type in the leaves
+                yield nt
+        else:
+            for r in self.rules[nt]:  # Note: can NOT use filter here, or else it doesn't include added rules. No sorting either!
+                if self.is_terminal_rule(r): # no good since it won't be deep enough
+                    continue
+
                 fn = r.make_FunctionNodeStub(self, (log(r.p) - Z), None)
 
-                if fn.args is None:
-                     yield fn
-                else:
+                argtypes = copy(fn.args)  # list of the nonterminal types
 
-                    argtypes = copy(fn.args) # vector of the nonterminal types
+                # the depths of each kid
+                for cd in lazyproduct([ xrange(d) for _ in range(len(argtypes))], lambda i: xrange(d)):
+                    if max(cd) < d-1:  # one must be equal to d-1; TODO: can be made more efficient via permutations. Also can skip terminals in args
+                        continue
+                    assert max(cd) == d-1
 
-                    myiter = lazyproduct([self.enumerate_at_depth(d-1, nt=a) for a in fn.args],\
-                                         lambda i: self.enumerate_at_depth(d-1, nt=argtypes[i]))
+                    myiter = lazyproduct([self.enumerate_at_depth(di, nt=a, leaves=leaves) for di, a in zip(cd, argtypes)],\
+                                         lambda i: self.enumerate_at_depth(cd[i], nt=argtypes[i], leaves=leaves))
+                    try:
+                        while True:
+                            # BVRuleContextManager here makes us remove the rule BEFORE yielding, or else this will be incorrect
+                            # Wasteful but necessary.
+                            with BVRuleContextManager(self, fn, recurse_up=False):
+                                fn.args = myiter.next()
 
-                    while True:
-                        # We need to put the BVRuleContextManager like this because we can't leave the rules in the
-                        # grammar when we yield. Wasteful, but necessary
-                        with BVRuleContextManager(self, fn):
-                            fn.args = myiter.next()
+                                for a in fn.argFunctionNodes(): # update parents
+                                    a.parent = fn
 
-                            for a in fn.args:# update parents
-                                a.parent = fn
+                            yield copy(fn)
 
-                        yield copy(fn)
-        else:
-            # nothing, since this is a dead end -- cannot generate a terminal in time
-            pass
-
-        raise StopIteration
+                    except StopIteration:  # catch this here so we continue in this loop over rules
+                        pass
 
     def depth_to_terminal(self, x, openset=None, current_d=None):
         """
@@ -344,21 +350,29 @@ class Grammar:
 if __name__ == "__main__":
     pass
     #from LOTlib.Examples.FOL.FOL import grammar
-    from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar
+    #from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar
     #from LOTlib.Examples.Number.Shared import grammar
+   # from LOTlib.Examples.RegularExpression.Shared import grammar
+    from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar, data, make_h0
 
-    seen = set()
-    for t in lot_iter(grammar.enumerate()):
+    """
+    grammar = Grammar()
+    grammar.add_rule('START', 'lambda', ['A'],  1.0, bv_type='B')
+    grammar.add_rule('A', 'af', ['A', 'B'], 1.0)
+    grammar.add_rule('A', '', ['a'], 1.0)
+    #grammar.add_rule('A', 'x', ['B'], 1.0)
+    grammar.add_rule('B', '', ['b'], 1.0)
+    grammar.add_rule('B', 'bf', ['A', 'B'], 1.0)
+    """
 
-        if t in seen:
-            assert False
-
-        seen.add(t)
-
+    for t in lot_iter(grammar.enumerate_at_depth(6, leaves=True)):
         print t.depth(), t
-        #t.fullprint()
-        #print "\n\n"
-     
+
+    #for t in lot_iter(grammar.enumerate(leaves=False)):
+    #    print t.depth(), t
+    #    #assert t not in seen
+
+
     #for r in grammar.rules.keys():
     #    print ">>", grammar.depth_to_terminal(r), r
     #for _ in xrange(1000):

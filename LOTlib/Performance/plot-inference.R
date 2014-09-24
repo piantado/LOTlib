@@ -4,8 +4,8 @@ library(ggplot2)
 library(stringr)
 library(gridExtra) # needed for "unit"
 
-d <- read.table("output/inference-aggregate.txt")
-#d <- read.table("output/ia.txt")
+# d <- read.table("output/inference-aggregate.txt")
+d <- read.table("output/ia.txt")
 
 names(d)[1:6] <- c("model", "iteration", "method.param", "steps", "time", "Z")
 

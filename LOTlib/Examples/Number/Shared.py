@@ -122,8 +122,8 @@ def get_knower_pattern(ne):
             This computes a string describing the behavior of this knower-level
     """
     out = ''
-    resp = [ ne(set(sample_sets_of_objects(n, all_objects))) for n in xrange(1,10)]
-    return ''.join([ str(word_to_number[x]) if (x is not None and x is not 'undef' ) else 'U' for x in resp])
+    resp = [ ne(set(sample_sets_of_objects(n, all_objects))) for n in xrange(1, 10)]
+    return ''.join([str(word_to_number[x]) if (x is not None and x is not 'undef') else 'U' for x in resp])
 
 
 def generate_data(data_size):
@@ -142,7 +142,7 @@ def generate_data(data_size):
         else:                r = weighted_sample( WORDS )
 
         # and append the sampled utterance
-        data.append(FunctionData( input=[s], output=r) ) # convert to "FunctionData" and store
+        data.append(FunctionData(input=[s], output=r))  # convert to "FunctionData" and store
     return data
 
 

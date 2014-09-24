@@ -90,28 +90,18 @@ def Ystar(*l):
     Evaluation of expressions
 """
 
-def evaluate_expression(e, args=['x'], recurse="L_", addlambda=True):
+def evaluate_expression(e, recurse="L_"):
     """
-    This evaluates an expression. If
-    - e         - the expression itself -- either a str or something that can be made a str
-    - addlambda - should we include wrapping lambda arguments in args? lambda x: ...
-    - recurse   - if addlambda, this is a special primitive name for recursion
-    - args      - if addlambda, a list of all arguments to be added
-
-    g = evaluate_expression("x*L(x-1) if x > 1 else 1")
-    g(12)
+    evaluate the expression, adding a Y combinator for recursion
+    :param e: - a string that can be evaled as python
+    :param recurse: -- what internal symbol should recursion be?
     """
 
-    if not isinstance(e,str): # TODO: Or assert?
-        e = str(e)
+    assert isinstance(e,str)
 
     try:
-        if addlambda:
-            f = eval('lambda ' + recurse + ': lambda ' + ','.join(args) + ' :' + e)
-            return Y_bounded(f)
-        else:
-            f = eval(e)
-            return f
+        f = eval('lambda %s: %s'%(recurse, e))
+        return Y_bounded(f)
     except Exception as ex:
-        print "Error in evaluate_expression:", e
+        print "*** Error in evaluate_expression:", e
         raise ex

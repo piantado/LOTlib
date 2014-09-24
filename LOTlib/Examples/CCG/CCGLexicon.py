@@ -60,9 +60,9 @@ class CCGLexicon(WeightedLexicon):
         u = udi.utterance
 
         # compute the weights
-        all_weights  = sum(map( lambda u: self.weightfunction(u, udi.context), udi.possible_utterances ))
-        true_weights = sum(map( lambda u: self.weightfunction(u, udi.context), trues))
-        met_weights  = sum(map( lambda u: self.weightfunction(u, udi.context), falses)) + true_weights
+        all_weights  = sum(map(lambda u: self.weightfunction(u, udi.context), udi.possible_utterances ))
+        true_weights = sum(map(lambda u: self.weightfunction(u, udi.context), trues))
+        met_weights  = sum(map(lambda u: self.weightfunction(u, udi.context), falses)) + true_weights
 
         # Unlike WeightedLexicon, this doesn't play nicely with the case where we are generating and
         # sometimes trues or mets are empty

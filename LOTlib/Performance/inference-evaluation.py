@@ -61,6 +61,7 @@ else:
 from SimpleMPI.ParallelBufferedIO import ParallelBufferedIO
 from LOTlib.Performance.Evaluation import evaluate_sampler
 from LOTlib.Inference.TemperedTransitions import tempered_transitions_sample
+from LOTlib.Inference.EnumerationInference import EnumerationInference
 from LOTlib.Inference.ParallelTempering import ParallelTemperingSampler
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Inference.TabooMCMC import TabooMCMC
@@ -81,18 +82,12 @@ def run_one(iteration, sampler_type):
     elif sampler_type == 'mh_sample_C':             sampler = MHSampler(h0, data, options.SAMPLES,  likelihood_temperature=1.25)
     elif sampler_type == 'mh_sample_D':             sampler = MHSampler(h0, data, options.SAMPLES,  likelihood_temperature=2.0 )
     elif sampler_type == 'mh_sample_E':             sampler = MHSampler(h0, data, options.SAMPLES,  likelihood_temperature=5.0 )
-    elif sampler_type == 'particle_swarm_s_A':        sampler = ParticleSwarm(make_h0, data, steps=options.SAMPLES, within_steps=10)
-    elif sampler_type == 'particle_swarm_s_B':        sampler = ParticleSwarm(make_h0, data, steps=options.SAMPLES, within_steps=100)
-    elif sampler_type == 'particle_swarm_s_C':        sampler = ParticleSwarm(make_h0, data, steps=options.SAMPLES, within_steps=200)
-    elif sampler_type == 'particle_swarm_t_A':        sampler = ParticleSwarm(make_h0, data, steps=options.SAMPLES, within_steps=100, temp_sd=0.0001)
-    elif sampler_type == 'particle_swarm_t_B':        sampler = ParticleSwarm(make_h0, data, steps=options.SAMPLES, within_steps=100, temp_sd=0.1)
-    elif sampler_type == 'particle_swarm_t_C':        sampler = ParticleSwarm(make_h0, data, steps=options.SAMPLES, within_steps=100, temp_sd=1.0)
-    elif sampler_type == 'particle_swarm_prior_sample_s_A':        sampler = ParticleSwarmPriorResample(make_h0, data, steps=options.SAMPLES, within_steps=10)
-    elif sampler_type == 'particle_swarm_prior_sample_s_B':        sampler = ParticleSwarmPriorResample(make_h0, data, steps=options.SAMPLES, within_steps=100)
-    elif sampler_type == 'particle_swarm_prior_sample_s_C':        sampler = ParticleSwarmPriorResample(make_h0, data, steps=options.SAMPLES, within_steps=200)
-    elif sampler_type == 'particle_swarm_prior_sample_t_A':        sampler = ParticleSwarmPriorResample(make_h0, data, steps=options.SAMPLES, within_steps=100, temp_sd=0.0001)
-    elif sampler_type == 'particle_swarm_prior_sample_t_B':        sampler = ParticleSwarmPriorResample(make_h0, data, steps=options.SAMPLES, within_steps=100, temp_sd=0.1)
-    elif sampler_type == 'particle_swarm_prior_sample_t_C':        sampler = ParticleSwarmPriorResample(make_h0, data, steps=options.SAMPLES, within_steps=100, temp_sd=1.0)
+    elif sampler_type == 'particle_swarm_A':        sampler = ParticleSwarm(make_h0, data, steps=options.SAMPLES, within_steps=10)
+    elif sampler_type == 'particle_swarm_B':        sampler = ParticleSwarm(make_h0, data, steps=options.SAMPLES, within_steps=100)
+    elif sampler_type == 'particle_swarm_C':        sampler = ParticleSwarm(make_h0, data, steps=options.SAMPLES, within_steps=200)
+    elif sampler_type == 'particle_swarm_prior_sample_A':        sampler = ParticleSwarmPriorResample(make_h0, data, steps=options.SAMPLES, within_steps=10)
+    elif sampler_type == 'particle_swarm_prior_sample_B':        sampler = ParticleSwarmPriorResample(make_h0, data, steps=options.SAMPLES, within_steps=100)
+    elif sampler_type == 'particle_swarm_prior_sample_C':        sampler = ParticleSwarmPriorResample(make_h0, data, steps=options.SAMPLES, within_steps=200)
     elif sampler_type == 'multiple_chains_A':       sampler = MultipleChainMCMC(make_h0, data, steps=options.SAMPLES, nchains=5)
     elif sampler_type == 'multiple_chains_B':       sampler = MultipleChainMCMC(make_h0, data, steps=options.SAMPLES, nchains=10)
     elif sampler_type == 'multiple_chains_C':       sampler = MultipleChainMCMC(make_h0, data, steps=options.SAMPLES, nchains=100)
@@ -104,10 +99,10 @@ def run_one(iteration, sampler_type):
     elif sampler_type == 'taboo_C':                 sampler = TabooMCMC( h0, data, steps=options.SAMPLES, skip=0, penalty= 0.100)
     elif sampler_type == 'taboo_D':                 sampler = TabooMCMC( h0, data, steps=options.SAMPLES, skip=0, penalty= 1.000)
     elif sampler_type == 'taboo_E':                 sampler = TabooMCMC( h0, data, steps=options.SAMPLES, skip=0, penalty=10.000)
-    elif sampler_type == 'partitionMCMC_d1':        sampler = PartitionMCMC(grammar, make_h0, data, 1, steps=options.SAMPLES)
-    elif sampler_type == 'partitionMCMC_d2':        sampler = PartitionMCMC(grammar, make_h0, data, 2, steps=options.SAMPLES)
-    elif sampler_type == 'partitionMCMC_d3':        sampler = PartitionMCMC(grammar, make_h0, data, 3, steps=options.SAMPLES)
-    elif sampler_type == 'partitionMCMC_d4':        sampler = PartitionMCMC(grammar, make_h0, data, 4, steps=options.SAMPLES)
+    elif sampler_type == 'partitionMCMC_A':        sampler = PartitionMCMC(grammar, make_h0, data, 100, steps=options.SAMPLES)
+    elif sampler_type == 'partitionMCMC_B':        sampler = PartitionMCMC(grammar, make_h0, data, 1000, steps=options.SAMPLES)
+    elif sampler_type == 'partitionMCMC_C':        sampler = PartitionMCMC(grammar, make_h0, data, 10000, steps=options.SAMPLES)
+    elif sampler_type == 'enumeration_A':            sampler = EnumerationInference(grammar, make_h0, data, steps=options.SAMPLES)
     else: assert False, "Bad sampler type: %s" % sampler_type
 
     # Run evaluate on it, printing to the right locations
@@ -121,13 +116,12 @@ def run_one(iteration, sampler_type):
 params = [ list(g) for g in product(range(options.REPETITONS), [
                                                                 'multiple_chains_A', 'multiple_chains_B', 'multiple_chains_C',
                                                                 'taboo_A', 'taboo_B', 'taboo_C', 'taboo_D',
-                                                                'particle_swarm_s_A', 'particle_swarm_s_B', 'particle_swarm_s_C',
-                                                                'particle_swarm_t_A', 'particle_swarm_t_B', 'particle_swarm_t_C',
-                                                                'particle_swarm_prior_sample_s_A', 'particle_swarm_prior_sample_s_B', 'particle_swarm_prior_sample_s_C',
-                                                                'particle_swarm_prior_sample_t_A', 'particle_swarm_prior_sample_t_B', 'particle_swarm_prior_sample_t_C',
+                                                                'particle_swarm_A', 'particle_swarm_B', 'particle_swarm_C',
+                                                                'particle_swarm_prior_sample_A', 'particle_swarm_prior_sample_B', 'particle_swarm_prior_sample_C',
                                                                 'mh_sample_A', 'mh_sample_B', 'mh_sample_C', 'mh_sample_D', 'mh_sample_E',
                                                                 'parallel_tempering_A', 'parallel_tempering_B', 'parallel_tempering_C',
-                                                                'partitionMCMC_d1', 'partitionMCMC_d2'
+                                                                'partitionMCMC_A', 'partitionMCMC_B', 'partitionMCMC_C',
+                                                                'enumeration_A'
                                                                 ])]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
