@@ -5,6 +5,10 @@ from Primitives import LOTlib_primitive
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 @LOTlib_primitive
+def map_(f,A):
+    return [f(a) for a in A]
+
+@LOTlib_primitive
 def apply_(f,*args):
     return f(*args)
 

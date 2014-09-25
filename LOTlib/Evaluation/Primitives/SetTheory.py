@@ -115,5 +115,8 @@ def diff_(S, p):
     """
     return S.difference(set(p))
 
+@LOTlib_primitive
+def range_(x,y):
+    return range(x,y+1)
 
 

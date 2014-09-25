@@ -38,6 +38,35 @@ class NumberGameExpression(LOTHypothesis):
         self.posterior_score = self.prior + self.likelihood
         return self.likelihood
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~ 1b : Wrapper class for hypothesis ~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+class NumberGameExpression2(LOTHypothesis):
+
+    def __init__(self, grammar, noise=0.9, args=[], **kwargs):
+        LOTHypothesis.__init__(self, grammar, args=args, **kwargs)
+        self.noise = noise
+
+    def compute_likelihood(self, data):
+        """
+            Likelihood of specified data being produced by this hypothesis. If datum item
+            not in set, it still has 'noise' likelihood of being generated.
+        """
+        h = self.__call__()     # Get hypothesis set
+        alpha = self.noise
+        noise = (1-alpha) / (max(h)-min(h))
+        self.likelihood = 0
+        for d in data:
+            if d in h:
+                self.likelihood += log(alpha/len(h) + noise)
+            else:
+                self.likelihood += log(noise)
+
+        # This is required in all compute_likelihoods
+        self.posterior_score = self.prior + self.likelihood
+        return self.likelihood
+
+
 """
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 2 : Create grammar ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # - Rules in our grammar map between sets of integers in our domain                     #
