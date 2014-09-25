@@ -1,3 +1,6 @@
+Sep 24 2014:
+        - Major revision to Grammar.enumeration (no longer called increment_tree)
+        - Changed string output to include the "implicit" lambda on LOTHypotheses
 Aug 31 2014:
         - Fixed setto to update parents correctly
         - Changed "replace_subnodes" to use a predicate rather than equality, since equality is a bit of a hazard with new bound variables
