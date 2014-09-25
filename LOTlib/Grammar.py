@@ -232,27 +232,32 @@ class Grammar:
 
                 fn = r.make_FunctionNodeStub(self, (log(r.p) - Z), None)
 
-                argtypes = copy(fn.args)  # list of the nonterminal types
+                # the possible depths for the i'th child
+                # here we just ensure that nonterminals vary up to d, and otherwise
+                child_i_depths = lambda i: xrange(d) if self.is_nonterminal(fn.args[i]) else [0]
 
                 # the depths of each kid
-                for cd in lazyproduct([ xrange(d) for _ in range(len(argtypes))], lambda i: xrange(d)):
+                for cd in  lazyproduct(map(child_i_depths, xrange(len(fn.args))), child_i_depths):
                     if max(cd) < d-1:  # one must be equal to d-1; TODO: can be made more efficient via permutations. Also can skip terminals in args
                         continue
                     assert max(cd) == d-1
 
-                    myiter = lazyproduct([self.enumerate_at_depth(di, nt=a, leaves=leaves) for di, a in zip(cd, argtypes)],\
-                                         lambda i: self.enumerate_at_depth(cd[i], nt=argtypes[i], leaves=leaves))
+                    myiter = lazyproduct([self.enumerate_at_depth(di, nt=a, leaves=leaves) for di, a in zip(cd, fn.args)],\
+                                         lambda i: self.enumerate_at_depth(cd[i], nt=fn.args[i], leaves=leaves))
                     try:
                         while True:
+
+                            yieldfn = copy(fn) # make a copy so we don't modify anything
+
                             # BVRuleContextManager here makes us remove the rule BEFORE yielding, or else this will be incorrect
                             # Wasteful but necessary.
                             with BVRuleContextManager(self, fn, recurse_up=False):
-                                fn.args = myiter.next()
+                                yieldfn.args = myiter.next()
 
-                                for a in fn.argFunctionNodes(): # update parents
-                                    a.parent = fn
+                                for a in yieldfn.argFunctionNodes(): # update parents
+                                    a.parent = yieldfn
 
-                            yield copy(fn)
+                            yield yieldfn
 
                     except StopIteration:  # catch this here so we continue in this loop over rules
                         pass
@@ -365,8 +370,12 @@ if __name__ == "__main__":
     grammar.add_rule('B', 'bf', ['A', 'B'], 1.0)
     """
 
-    for t in lot_iter(grammar.enumerate_at_depth(6, leaves=True)):
+    #for t in lot_iter(grammar.enumerate_at_depth(6, leaves=
+    seen = set()
+    for t in lot_iter(grammar.enumerate()):
         print t.depth(), t
+        assert t not in seen
+        seen.add(t)
 
     #for t in lot_iter(grammar.enumerate(leaves=False)):
     #    print t.depth(), t
