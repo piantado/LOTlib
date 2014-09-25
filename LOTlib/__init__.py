@@ -13,10 +13,15 @@ LOTlib_VERSION = "0.2.0"
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import signal
+import sys
+
 SIG_INTERRUPTED = False
 def signal_handler(signal, frame):
     global SIG_INTERRUPTED
     SIG_INTERRUPTED = True
+    print >>sys.stderr, "# Signal %s caught."%signal
+
+# Handle interrupt CTRL-C
 signal.signal(signal.SIGINT, signal_handler)
 
 

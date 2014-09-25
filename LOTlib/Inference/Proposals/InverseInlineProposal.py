@@ -161,7 +161,7 @@ class InverseInlineProposal(LOTProposal):
             b = (log(newn.resample_p) - log(new_nZ)) + argvalp + (-log(len(ir)))
         
         ## and fix the generation probabilites, because otherwiset hey are ruined by all the mangling above
-        grammar.recompute_generation_probabilities(newt)
+        self.grammar.recompute_generation_probabilities(newt)
         assert newt.check_parent_refs() # Can comment out -- here for debugging
         
         
@@ -170,6 +170,7 @@ class InverseInlineProposal(LOTProposal):
             
     
 if __name__ == "__main__":
+        from LOTlib import lot_iter
         #from LOTlib.Examples.Magnetism.SimpleMagnetism import data, grammar,  make_h0  DOES NOT WORK FOR BV ARGS
         from LOTlib.Examples.Number.Shared import grammar, make_h0, generate_data, get_knower_pattern
         
@@ -199,7 +200,7 @@ if __name__ == "__main__":
                 
         h = make_h0(proposal_function=MixtureProposal([InverseInlineProposal(grammar), RegenerationProposal(grammar)] ))
         data = generate_data(100)
-        for h in MHSampler(h, data):
+        for h in lot_iter(MHSampler(h, data)):
             print h.posterior_score, h.prior, h.likelihood, get_knower_pattern(h), h
         
             

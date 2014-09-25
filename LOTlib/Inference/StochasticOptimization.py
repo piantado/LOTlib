@@ -11,7 +11,6 @@ from random import random
 from math import log, exp, isnan
 
 import LOTlib
-from LOTlib import lot_iter
 from LOTlib.Miscellaneous import *
 from LOTlib.FiniteBestSet import FiniteBestSet
 from MetropolisHastings import mh_sample
@@ -32,9 +31,9 @@ def datawise_optimize(current_sample, data, steps=1000000, inner_steps=10, data_
     # How many data points? Used for setting the temperature below
     NDATA = len(data)
 
-    for mhi in lot_iter(xrange(steps/inner_steps)):
+    for mhi in xrange(steps/inner_steps):
 
-        for di in lot_iter(data):
+        for di in data:
 
             for h in mh_sample(current_sample, [di], steps=inner_steps, ll_temperature=ll_temperature/(NDATA*data_weight), **kwargs):
                 current_sample = h

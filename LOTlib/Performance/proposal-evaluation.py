@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-	Simple evaluation of proposal schemes
+	Simple evaluation of proposal schemes. Test various mixtures of them. 
 """
 
 from LOTlib import lot_iter
@@ -9,6 +9,7 @@ from itertools import product
 
 from SimpleMPI.MPI_map import MPI_map, synchronize_variable
 from optparse import OptionParser
+from LOTlib.Miscellaneous import q
 
 parser = OptionParser()
 parser.add_option("--out", dest="OUT", type="string", help="Output prefix", default="output/proposal")
@@ -60,20 +61,15 @@ from LOTlib.Inference.MultipleChainMCMC    import MultipleChainMCMC
 from LOTlib.Inference.Proposals.MixtureProposal      import MixtureProposal
 from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
 from LOTlib.Inference.Proposals.InsertDeleteProposal import InsertDeleteProposal
+from LOTlib.Inference.Proposals.InverseInlineProposal import InverseInlineProposal
 
 # Where we store the output
 out_hypotheses = open(os.devnull,'w') #ParallelBufferedIO(options.OUT + "-hypotheses.txt")
 out_aggregate  = ParallelBufferedIO(options.OUT + "-aggregate.txt")
 
-def run_one(iteration, proposal_type, proposal_param=None):
+def run_one(iteration, probs=None):
 
-	m = None
-	if proposal_type == 'InsertDeleteMixture':
-		m = MixtureProposal([RegenerationProposal(grammar), InsertDeleteProposal(grammar)], probs=[proposal_param, 1.-proposal_param])
-	elif proposal_type == 'RegenerationProposal':
-		m = RegenerationProposal(grammar)
-	else:
-		raise NotImplementedError(proposal_type)
+	m = MixtureProposal([RegenerationProposal(grammar), InsertDeleteProposal(grammar), InverseInlineProposal(grammar)], probs=probs )
 		
 	# define a wrapper to set this proposal
 	def wrapped_make_h0():
@@ -84,14 +80,27 @@ def run_one(iteration, proposal_type, proposal_param=None):
 	sampler = MultipleChainMCMC(wrapped_make_h0, data, steps=options.SAMPLES, nchains=options.CHAINS)
 	
 	# Run evaluate on it, printing to the right locations
-	evaluate_sampler(sampler, prefix="\t".join(map(str, [options.MODEL, iteration, proposal_type, proposal_param])),  out_hypotheses=out_hypotheses, out_aggregate=out_aggregate)
+	evaluate_sampler(sampler, prefix="\t".join(map(str, [options.MODEL, iteration, q(str(probs)) ])),  out_hypotheses=out_hypotheses, out_aggregate=out_aggregate)
  
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Create all parameters
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # For each process, create the list of parameter
-params = map(list, product( range(options.REPETITONS), ['InsertDeleteMixture'], [0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99] ))
+params = map(list, product( range(options.REPETITONS), [ (1., 1., 1.), 
+                                                         (2., 1., 1.),
+                                                         (1., 2., 1.),
+                                                         (1., 1., 2.),
+                                                         (2., 2., 1.),
+                                                         (1., 2., 2.),
+                                                         (2., 1., 2.),
+                                                         (10., 1., 1.),
+                                                         (1., 10., 1.),
+                                                         (1., 1., 10.),
+                                                         (10., 10., 1.),
+                                                         (1., 10., 10.),
+                                                         (10., 1., 10.)
+                                                         ]))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Actually run

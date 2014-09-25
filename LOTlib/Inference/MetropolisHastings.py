@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import LOTlib
-from LOTlib import lot_iter
 from LOTlib.Miscellaneous import q, qq, Infinity
 from MHShared import MH_acceptance
 
@@ -94,10 +93,10 @@ class MHSampler():
         pass
 
     def next(self):
-        if LOTlib.SIG_INTERRUPTED or self.samples_yielded >= self.steps:
+        if self.samples_yielded >= self.steps:
             raise StopIteration
         else:
-            for _ in lot_iter(xrange(self.skip+1)):
+            for _ in xrange(self.skip+1):
 
                 self.proposal, fb = self.proposer(self.current_sample)
 

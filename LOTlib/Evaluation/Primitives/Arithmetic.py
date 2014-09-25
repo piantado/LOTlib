@@ -105,5 +105,30 @@ def pow2_(x):
 
 @LOTlib_primitive
 def mod_(x,y):
-    if y==0.0: return float("nan")
-    return (x% y)
+    if y==0.0 or math.isnan(x) or math.isnan(y):
+        return float("nan")
+    return x % y
+
+@LOTlib_primitive
+def gt_(x, y):
+    return (x>y)
+
+@LOTlib_primitive
+def geq_(x, y):
+    return (x>=y)
+
+
+@LOTlib_primitive
+def lt_(x, y):
+    return (x<y)
+
+@LOTlib_primitive
+def leq_(x, y):
+    return (x<=y)
+
+@LOTlib_primitive
+def eequals_(x, y, epsilon=0.0001):
+    """
+    Equals up to some epsilon
+    """
+    return abs(x-y) < epsilon

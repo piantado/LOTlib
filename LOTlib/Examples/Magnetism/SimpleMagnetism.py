@@ -87,12 +87,12 @@ from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 def make_h0(**kwargs):
     return LOTHypothesis(grammar, args=['x', 'y'], ALPHA=0.999, **kwargs) # alpha here trades off with the amount of data. Currently assuming no noise, but that's not necessary
 
-if __name__ == "__main__":
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Run mcmc
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    from LOTlib.Proposals.RegenerationProposal import *
+if __name__ == "__main__":
+
+    from LOTlib import lot_iter
+
+    from LOTlib.Inference.Proposals.RegenerationProposal import *
     #mp = MixtureProposal([RegenerationProposal(grammar), InsertDeleteProposal(grammar)] )
     mp = RegenerationProposal(grammar)
 
@@ -100,7 +100,6 @@ if __name__ == "__main__":
 
 
     from LOTlib.Inference.MetropolisHastings import mh_sample
-    for h in mh_sample(h0, data, 4000000, skip=100):
+    for h in lot_iter(mh_sample(h0, data, 4000000, skip=100)):
         print h.posterior_score, h.likelihood, h.prior,  cleanFunctionNodeString(h)
         print map( lambda d: h(*d.input), data)
-        print "\n"

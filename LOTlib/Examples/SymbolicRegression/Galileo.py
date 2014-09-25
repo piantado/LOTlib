@@ -22,10 +22,6 @@ data = [
          FunctionData(input=[0.], output=0., ll_sd=data_sd) # added 0,0 since it makes physical sense.
         ]
 
-CHAINS = 10
-STEPS = 10000000
-SKIP = 0
-PRIOR_TEMPERATURE=1.0
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Define the grammar
@@ -56,10 +52,14 @@ grammar.add_rule('EXPR', '1.0', None, 5.0)
 # # # # # # # # # # # # # # # # # # # # # # # # #
 # Standard exports
 
-def make_h0(value=None):
-    return  GaussianLOTHypothesis(grammar, value=value)
+def make_h0(**kwargs):
+    return  GaussianLOTHypothesis(grammar, **kwargs)
 
 if __name__ == "__main__":
+
+    CHAINS = 10
+    STEPS = 10000000
+    SKIP = 0
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     # the running function
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     def run(*args):
 
         # starting hypothesis -- here this generates at random
-        h0 = GaussianLOTHypothesis(grammar, prior_temperature=PRIOR_TEMPERATURE)
+        h0 = GaussianLOTHypothesis(grammar)
 
         # We store the top 100 from each run
         pq = FiniteBestSet(100, max=True, key="posterior_score")

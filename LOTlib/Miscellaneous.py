@@ -17,7 +17,6 @@ import collections
 
 import re
 import types # for checking if something is a function: isinstance(f, types.FunctionType)
-import re # should this be imported twice???
 
 ## Some useful constants
 Infinity = float("inf")
@@ -30,7 +29,6 @@ TAU = 6.28318530718 # fuck pi
 T=True
 F=False
 
-# does not check whether array has fewer elements than needed
 def first(x): return x[0]
 def second(x): return x[1]
 def third(x):  return x[2]
@@ -58,13 +56,16 @@ def make_mutable(x):
     # TODO: update with other types
     if isinstance(x, frozenset): return set(x)
     elif isinstance(x, tuple): return list(x)
-    else: return x
+    else: 
+        raise NotImplementedError
 
 def make_immutable(x):
     # TODO: update with other types
     if isinstance(x, set ): return frozenset(x)
     elif isinstance(x, list): return tuple(x)
-    else: return x
+    else:
+        raise NotImplementedError
+
 
 def unlist_singleton(x):
     """
@@ -155,6 +156,16 @@ def display_option_summary(obj):
 # Genuine Miscellany
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+def infrange():
+    """
+    yields 0, 1, 2, 3, ...
+    """
+    i = 0
+    while True:
+        yield i
+        i += 1
+
+
 # a wrapper so we can call this in the below weirdo composition
 def raise_exception(e): raise e
 
@@ -173,13 +184,13 @@ def unique(gen):
             s.add(gi)
 
 def UniquifyFunction(gen):
-    """
-            A decorator to make a function only return unique values
-    """
-    def f(*args, **kwargs):
-        for x in unique(gen(*args, **kwargs)):
-            yield x
-    return f
+        """
+        A decorator to make a function only return unique values
+        """
+        def f(*args, **kwargs):
+                for x in unique(gen(*args, **kwargs)):
+                        yield x
+        return f
 
 def flatten(expr):
     """
@@ -224,6 +235,46 @@ def weave(*iterables):
             try: yield it.next()
             except StopIteration: del iterables[i]
 
+
+
+
+def lazyproduct(iterators, restart_ith):
+        """
+            Compute a product of the iterators, without holding all of their values in memory.
+            This requires a function restart_ith that returns a new (refreshed or restarted) version of the
+            i'th iterator so we can start it anew
+
+            for g in lazyproduct( [xrange(10), xrange(10)], lambda i: xrange(10)):
+            	print g
+
+        """
+
+        iterators = map(iter, iterators)
+
+        # initialize the state
+        state = [it.next() for it in iterators]
+
+        yield state
+
+        while True:
+
+            for idx in xrange(len(iterators)): # the "carry" loop
+                try:
+                    state[idx] = iterators[idx].next()
+                    break # break the idx loop (which would process "carries")
+                except StopIteration:
+
+                    if idx == len(iterators)-1:
+                        raise StopIteration # actually exit
+                    else:
+                        # restart the current one and increment the next
+                        # by NOT breaking here
+                        iterators[idx] = iter(restart_ith(idx))
+                        state[idx] = iterators[idx].next() # reset this state (the next idx is increment on the next loop)
+
+                        # and no break so we iterate the next
+            yield state
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Math functions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -235,7 +286,7 @@ except ImportError:
     # Die if we try to use this in numpypy
     def gammaln(*args, **kwargs): assert False
 
-## This is just a wrapper to avoid logsumexp([-inf, -inf, -inf...]) warnings
+
 try:
     from scipy.misc import logsumexp as logsumexp_base
 except ImportError:
@@ -250,6 +301,7 @@ except ImportError:
 def logsumexp(v):
     """
             logsumexp - our own version wraps the version defined about (logsumexp_base)
+            to avoid logsumexp([-inf, -inf, -inf...]) warnings
     """
     if len(v) == 0:
         return -Infinity
@@ -317,7 +369,9 @@ def log1mexp(a):
             Computes log(1-exp(a)) according to Machler, "Accurately computing ..."
             Note: a should be a large negative value!
     """
-    if a > 0: print >>sys.stderr, "# Warning, log1mexp with a=", a, " > 0"
+    if a > 0:
+        print >>sys.stderr, "# Warning, log1mexp with a=", a, " > 0"
+    
     if a < -log(2.0): return log1p(-exp(a))
     else:             return log(-expm1(a))
 

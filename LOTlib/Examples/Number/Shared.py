@@ -11,9 +11,8 @@ from LOTlib.Evaluation.Primitives.Number import word_to_number
 
 ALPHA = 0.75 # the probability of uttering something true
 GAMMA = -30.0 # the log probability penalty for recursion
-LG_1MGAMMA = log(1.0-exp(GAMMA)) # TODO: Make numerically better
-USE_RR_PRIOR = False # Use the Rational Rules prior? If false, we just use log probability under the PCFG. NOTE: Using it is not supported under pypy
-MAX_NODES = 10 # How many FunctionNodes are allowed in a hypothesis? If we make this, say, 20, things may slow down a lot
+LG_1MGAMMA = log1mexp(GAMMA)
+MAX_NODES = 50 # How many FunctionNodes are allowed in a hypothesis? If we make this, say, 20, things may slow down a lot
 
 WORDS = ['one_', 'two_', 'three_', 'four_', 'five_', 'six_', 'seven_', 'eight_', 'nine_', 'ten_']
 
@@ -123,8 +122,8 @@ def get_knower_pattern(ne):
             This computes a string describing the behavior of this knower-level
     """
     out = ''
-    resp = [ ne(set(sample_sets_of_objects(n, all_objects))) for n in xrange(1,10)]
-    return ''.join([ str(word_to_number[x]) if (x is not None and x is not 'undef' ) else 'U' for x in resp])
+    resp = [ ne(set(sample_sets_of_objects(n, all_objects))) for n in xrange(1, 10)]
+    return ''.join([str(word_to_number[x]) if (x is not None and x is not 'undef') else 'U' for x in resp])
 
 
 def generate_data(data_size):
@@ -143,7 +142,7 @@ def generate_data(data_size):
         else:                r = weighted_sample( WORDS )
 
         # and append the sampled utterance
-        data.append(FunctionData( input=[s], output=r) ) # convert to "FunctionData" and store
+        data.append(FunctionData(input=[s], output=r))  # convert to "FunctionData" and store
     return data
 
 

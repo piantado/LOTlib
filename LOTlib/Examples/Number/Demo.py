@@ -6,10 +6,11 @@
 """
 
 from Shared import *
+from LOTlib import lot_iter
 from LOTlib.FiniteBestSet import FiniteBestSet
 
 LARGE_DATA_SIZE = 10000 # this is what we compute the average LL on
-DATA_SIZE = 100
+DATA_SIZE = 300
 TRACE = True
 STEPS = 1000000
 SKIP = 1
@@ -19,8 +20,12 @@ SKIP = 1
 
 data = generate_data(DATA_SIZE)
 
+
 # A starting hypothesis (later ones are created by .propose, called in LOTlib.MetropolisHastings
 h0 = NumberExpression(grammar)
+
+#from LOTlib.Inference.Proposals.InsertDeleteProposal import InsertDeleteProposal
+#h0 = NumberExpression(grammar, proposal_function=InsertDeleteProposal(grammar))
 
 # store hypotheses we've found
 allhyp = FiniteBestSet(max=True,N=1000)
@@ -30,9 +35,9 @@ from  LOTlib.Inference.MetropolisHastings import MHSampler
 # A bunch of different MCMC algorithms to try. mh_sample is from the Rational Rules paper and generally works very well.
 #for h in  LOTlib.Inference.TemperedTransitions.tempered_transitions_sample(initial_hyp, data, 500000, skip=0, temperatures=[1.0, 1.25, 1.5]):
 #for h in  LOTlib.Inference.ParallelTempering.parallel_tempering_sample(initial_hyp, data, STEPS, within_steps=10, yield_all=True, temperatures=[1.0,1.05, 1.1]):
-for h in MHSampler(h0, data, STEPS, skip=SKIP):
+for h in lot_iter(MHSampler(h0, data, STEPS, skip=SKIP)):
     if TRACE:
-        print q(get_knower_pattern(h)), h.compute_prior(), h.compute_likelihood(data), qq(h)
+        print q(get_knower_pattern(h)), h.posterior_score, h.compute_prior(), h.compute_likelihood(data), qq(h)
 
     # add h to our priority queue, with priority of its log probability, h.posterior_score
     allhyp.push(h, h.posterior_score)

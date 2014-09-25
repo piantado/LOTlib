@@ -7,10 +7,22 @@ library(gridExtra) # needed for "unit"
 ##############################################################
 
 d <- read.table("output/proposal-aggregate.txt")
-names(d)[1:7] <- c("model", "iteration", "proposal.type", "parameter", "steps", "time", "Z")
+#d <- read.table("output/pi.txt")
+names(d)[1:6] <- c("model", "iteration", "parameter", "steps", "time", "Z")
+
+# recode to two factors: strength 2/10/1 and code 
+d$strength <- ifelse(grepl("2", d$parameter), "2", 
+                               ifelse(grepl("10", d$parameter), "10", "1"))
+
+d$code <- gsub("(10.0|2.0)", "L", d$parameter)
+d$code <- gsub("1.0", "S", d$code)
+d$code <- gsub("[^SL]", "", d$code)
+
+
 
 d$parameter <- as.factor(d$parameter)
-p <- ggplot(d, aes(x=steps, y=Z, color=parameter)) + 
+d$code <- as.factor(d$code)
+p <- ggplot(d, aes(x=steps, y=Z, color=code, linetype=strength)) + 
 	stat_summary(fun.y=mean, geom="line", size=1) +
 	opts(legend.key.size=unit(3,"lines")) +
 	facet_wrap( ~ model, scales="free_y") # free_y makes our y axes free

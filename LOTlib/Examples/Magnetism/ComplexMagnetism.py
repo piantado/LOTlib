@@ -50,10 +50,6 @@ objects = [ t+str(i) for t,i in itertools.product('pnx', range(3)) ]
 for o in objects:
     grammar.add_rule('BASE-OBJECT', qq(o), None, 1.0)
 
-#from LOTlib.Subtrees import *
-#for t in generate_trees(grammar):
-    #print t
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Set up data -- true output means attraction (p=positive; n=negative)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,8 +68,9 @@ for a,b in itertools.product(objects, objects):
 # Run mcmc
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if __name__ == "__main__":
+    from LOTlib import lot_iter
 
-    from LOTlib.Proposals.RegenerationProposal import RegenerationProposal
+    from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
     #mp = MixtureProposal([RegenerationProposal(grammar), InsertDeleteProposal(grammar)] )
     mp = RegenerationProposal(grammar)
 
@@ -81,7 +78,7 @@ if __name__ == "__main__":
     h0 = LOTHypothesis(grammar, args=['x', 'y'], ALPHA=0.999, proposal_function=mp) # alpha here trades off with the amount of data. Currently assuming no noise, but that's not necessary
 
     from LOTlib.Inference.MetropolisHastings import mh_sample
-    for h in mh_sample(h0, data, 4000000, skip=100):
+    for h in lot_iter(mh_sample(h0, data, skip=100)):
         print h.posterior_score, h.likelihood, h.prior, cleanFunctionNodeString(h)
         #print map( lambda d: h(*d.input), data)
         #print "\n"

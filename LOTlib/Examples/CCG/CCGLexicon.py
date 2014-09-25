@@ -1,6 +1,5 @@
 from LOTlib.Hypotheses.WeightedLexicon import WeightedLexicon
 from LOTlib.DataAndObjects import UtteranceData
-from LOTlib.Miscellaneous import flip
 from copy import copy
 
 from math import log
@@ -19,7 +18,7 @@ class CCGLexicon(WeightedLexicon):
         """
         assert not isinstance(sentence, UtteranceData), "can_parse takes a sentence, not utterance data. Maybe you forgot .utterance?"
 
-        def inner_parse(s, t, m):
+        def inner_parse(s, t, m): # Sentence, type, meaning
             assert len(s)==len(t)==len(m)
 
             if len(s) == 1:
@@ -48,22 +47,6 @@ class CCGLexicon(WeightedLexicon):
         return inner_parse(sentence, \
                            map(lambda x: self.value[x].type(), sentence),\
                            map(lambda x: self.value[x], sentence))
-    #def propose(self):
-        #"""
-            #A proposal function that proposes to many things simultaneously, flipping a coin.
-            #This is used because single proposals go very slowly!
-        #"""
-
-        #new = copy(self)
-
-        #fb = 0.0
-        #for w in self.value:
-            #p,fb_ = self.value[w].propose()
-            #fb += fb_
-
-            #new.set_word(w, p)
-
-        #return new, fb
 
     def compute_single_likelihood(self, udi):
         """
@@ -77,11 +60,11 @@ class CCGLexicon(WeightedLexicon):
         u = udi.utterance
 
         # compute the weights
-        all_weights  = sum(map( lambda u: self.weightfunction(u, udi.context), udi.possible_utterances ))
-        true_weights = sum(map( lambda u: self.weightfunction(u, udi.context), trues))
-        met_weights  = sum(map( lambda u: self.weightfunction(u, udi.context), falses)) + true_weights
+        all_weights  = sum(map(lambda u: self.weightfunction(u, udi.context), udi.possible_utterances ))
+        true_weights = sum(map(lambda u: self.weightfunction(u, udi.context), trues))
+        met_weights  = sum(map(lambda u: self.weightfunction(u, udi.context), falses)) + true_weights
 
-        # Unliked WeightedLexicon, this doesn't play nicely with the case where we are generating and
+        # Unlike WeightedLexicon, this doesn't play nicely with the case where we are generating and
         # sometimes trues or mets are empty
         w = self.weightfunction(u, udi.context) # the current word weight
         if   (u in trues):  p = self.palpha * (self.alpha * w / true_weights + (1.0 - self.alpha) * w / met_weights) + (1.0 - self.palpha) * w / all_weights # choose from the trues

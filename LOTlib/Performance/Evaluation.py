@@ -51,7 +51,7 @@ def evaluate_sampler(my_sampler, print_every=1000, out_hypotheses=sys.stdout, ou
             ll   =  sorted([x.likelihood for x in visited_at.keys()], reverse=True)
             Z = logsumexp(post) # just compute total probability mass found -- the main measure
 
-            out_aggregate.write('\t'.join(map(str, [prefix, n, time()-startt, r5(Z), len(post)]+mydisplay(post)+mydisplay(ll))) + '\n')
+            out_aggregate.write('\t'.join(map(str, [prefix, n, time()-startt, r5(Z), len(post)]+mydisplay(post))) + '\n')
 
     # Now once we're done, output the hypothesis stats
     for k,v in visited_at.items():
