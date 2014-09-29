@@ -5,6 +5,11 @@ from Primitives import LOTlib_primitive
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 @LOTlib_primitive
+def lambda_(f,args):
+    f.args = args
+    return f
+
+@LOTlib_primitive
 def map_(f,A):
     return [f(a) for a in A]
 
