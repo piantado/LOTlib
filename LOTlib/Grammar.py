@@ -112,11 +112,10 @@ class Grammar:
     ############################################################
 
 
-    def generate(self, x=None, return_p=False):
+    def generate(self, x=None):
         """
                 Generate from the PCFG -- default is to start from x - either a nonterminal or a FunctionNode
                 *x* - what we start from -- can be None and then we use Grammar.start
-                *return_p* -- should we return a list including the log probability of the rule?
         """
         #print "# Calling grammar.generate", d, type(x), x
 
@@ -257,7 +256,7 @@ class Grammar:
                                 for a in yieldfn.argFunctionNodes(): # update parents
                                     a.parent = yieldfn
 
-                            yield yieldfn
+                            yield copy(yieldfn)
 
                     except StopIteration:  # catch this here so we continue in this loop over rules
                         pass

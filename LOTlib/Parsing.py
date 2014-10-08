@@ -8,7 +8,7 @@
 
 
 from pyparsing import Suppress, alphanums, Group, Forward, ZeroOrMore, Word
-from LOTlib.FunctionNode import FunctionNode
+from LOTlib.FunctionNode import FunctionNode, BVAddFunctionNode
 from LOTlib.Miscellaneous import unlist_singleton
 
 #####################################################################
@@ -43,15 +43,23 @@ def list2FunctionNode(l, style="atis"):
     """
 
     if isinstance(l, list):
+
+        fn = None
         if len(l) == 0: return None
         elif style is 'atis':
             rec = lambda x: list2FunctionNode(x, style=style) # a wrapper to my recursive self
             if l[0] == 'lambda':
-                return FunctionNode('FUNCTION', 'lambda', [rec(l[3])], generation_probability=0.0, bv_type=l[1], bv_args=None ) # TOOD: HMM WHAT IS THE BV?
+                fn = BVAddFunctionNode(None, 'FUNCTION', 'lambda', [rec(l[3])], generation_probability=0.0, bv_type=l[1], bv_args=None ) # TOOD: HMM WHAT IS THE BV?
             else:
-                return FunctionNode(l[0], l[0], map(rec, l[1:]), generation_probability=0.0)
+                fn = FunctionNode(None, l[0], l[0], map(rec, l[1:]), generation_probability=0.0)
         elif style is 'scheme':
             raise NotImplementedError
+
+        # set the parents
+        for a in fn.argFunctionNodes():
+            a.parent=fn
+
+        return fn
 
     else: # for non-list
         return l

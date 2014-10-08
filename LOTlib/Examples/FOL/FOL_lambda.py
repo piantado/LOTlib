@@ -13,11 +13,11 @@ grammar = Grammar()
 grammar.add_rule('START', '', ['BOOL'], 1.0)
 
 # Very simple -- one allowed quantifier
-#grammar.add_rule('QUANT', 'exists_', ['FUNCTION', 'SET'], 1.00)
-#grammar.add_rule('QUANT', 'forall_', ['FUNCTION', 'SET'], 1.00) 
+grammar.add_rule('QUANT', 'exists_', ['FUNCTION', 'SET'], 1.00)
+grammar.add_rule('QUANT', 'forall_', ['FUNCTION', 'SET'], 1.00) 
 
 # The thing we are a function of
-#grammar.add_rule('SET', 'S', None, 1.0)
+grammar.add_rule('SET', 'S', None, 1.0)
 grammar.add_rule('OBJECT', 'x', None, 1.0)
 
 # And allow us to create a new kind of function
