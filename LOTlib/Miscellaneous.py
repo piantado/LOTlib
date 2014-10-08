@@ -165,6 +165,13 @@ def infrange():
         yield i
         i += 1
 
+def takeN(g, n):
+    for i, v in enumerate(g):
+        if i >= n:
+            break
+        yield v
+
+
 
 # a wrapper so we can call this in the below weirdo composition
 def raise_exception(e): raise e

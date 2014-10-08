@@ -72,7 +72,7 @@ class Hypothesis(object):
 
         Versions using decayed likelihood can be found in Hypothesis.DecayedLikelihoodHypothesis
         """
-        self.likelihood = sum(map( self.compute_single_likelihood, data))/self.likelihood_temperature
+        self.likelihood = sum(map(self.compute_single_likelihood, data))/self.likelihood_temperature
 
         self.posterior_score = self.prior + self.likelihood
         return self.likelihood
