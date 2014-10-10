@@ -21,13 +21,13 @@ class NumberSetHypothesis(LOTHypothesis):
         h = self.__call__()     # Get hypothesis set
         alpha = self.alpha
         noise = (1-alpha) / len(h)
-        self.likelihood = 0
+        likelihood = 0
         for datum in data:
             if datum in h:
-                self.likelihood += log(alpha/len(h) + noise)
+                likelihood += log(alpha/len(h) + noise)
             else:
-                self.likelihood += log(noise)
+                likelihood += log(noise)
 
-        # This is required in all compute_likelihoods
-        self.posterior_score = self.prior + self.likelihood
-        return self.likelihood
+        self.likelihood = likelihood
+        self.posterior_score = self.prior + likelihood      # required in all compute_likelihoods
+        return likelihood

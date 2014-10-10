@@ -1,6 +1,6 @@
 __author__ = 'eric'
-from Shared import *
-import NumberSetHypothesis
+from Parameters import *
+from NumberSetHypothesis import *
 from pylab import *
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -8,11 +8,11 @@ from pylab import *
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Input data
 # data = [1,1,1,3,3,3,3,3,5,5,7,7,9,9,11,11,11,15,15,17,17,17,17,19,19,19]  # for 2n - 1
-data = [3, 9, 17]       # for 2^n + 1
+DATA = [3, 9, 17]       # for 2^n + 1
 # Number of hypotheses to generate
-num_iters = 50000
+NUM_ITERS = 50000
 # Noise parameter
-alpha = 0.9
+ALPHA = 0.9
 
 
 
@@ -20,25 +20,20 @@ alpha = 0.9
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Randomly generate samples ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-# Initialize an empty set to store our hypotheses
-hypotheses = set()
+def genHypotheses(grammar, data, num_iters=10000, alpha=0.9):
+    hypotheses = set()
+    for i in lot_iter(xrange(num_iters)):
+        if i % 2000 == 0: print '\r\nGenerating %i hypotheses...\n' % i
+        t = NumberSetHypothesis(grammar, alpha=alpha)
+        t.compute_posterior(data)       # Get prior, likelihood, posterior
+        hypotheses.add(t)
 
-# Iterate for the specified number of times
-for _ in lot_iter(xrange(num_iters)):
-    if _ % 2000 == 0:
-        print '\r\nGenerating %i hypotheses...\n' % _                # Printing statement #
-
-    # Generate a hypothesis & add it to our set
-    t = NumberSetHypothesis(grammar, alpha=alpha)
-    t.compute_posterior(data)                        # Get prior, likelihood, posterior #
-    hypotheses.add(t)
-
-# Estimate normalizing constant Z
-Z = logsumexp([h.posterior_score for h in hypotheses])
+    return hypotheses
 
 
-
-
+hypotheses = genHypotheses(grammar, NUM_ITERS, ALPHA, DATA)
+Z = logsumexp([h.posterior_score for h in hypotheses])      # Estimate normalizing constant Z
+### Will this be accurate??? h is recorded in a *set* not a list...
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Printing top 10 hypotheses ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -46,18 +41,13 @@ Z = logsumexp([h.posterior_score for h in hypotheses])
 best_hypotheses = sorted(hypotheses, key=lambda x: x.posterior_score)
 best_hypotheses.reverse()
 
-print '\nGenerated %i hypotheses in total' % num_iters
+print '\nGenerated %i hypotheses in total' % NUM_ITERS
 print str(len(hypotheses)) + ' unique hypotheses\n'
 print '================================================================'
-
 for i in range(10):
-    h = best_hypotheses[i]
-    # C_h is the set of items this hypothesis maps to; e.g. 2^n => {2,4,8,16,...}
-    C_h = map(h, map(float, range(1, domain + 1)))
-    C_h = [item for item in C_h if item <= domain]
-
-    # Create figure
-    figure(num=None, figsize=(8, 1.5), dpi=80, facecolor='w', edgecolor='k')
-    hist(C_h, bins=domain, range=(1,domain))
-    title('Hypothesis: '+str(h)+'   \nPosterior: %.5f' % exp(h.posterior_score - Z)
-          +'\nPrior: %.3f' % h.prior + '\nLikehd: %.3f' % h.likelihood)
+    h = best_hypotheses[i].__call__()
+    print (i+1),' ~\t','Hypothesis:\t',str(h)
+    print '\tPosterior:\t%.5f' % exp(h.posterior_score - Z)
+    print '\t\tPrior:\t\t%.3f' % h.prior
+    print '\t\tLikehd:\t\t%.3f' % h.likelihood
+    print '================================================================\n'
