@@ -1,11 +1,18 @@
 
 This file contains code for learning a system of quantifiers. There are two basic approaches:
 	
-	- In Gibbs, we enumerate a "small" space of single word meanings and do gibbs over their assignments into a lexicon. The enumeration is done by EnumerateTrees.py, writing the file all_trees.pkl (a UniquePriorityQueue, although it could have been a list). The Search_UnoptimizedGibbs is a simpler implementation, but super slow. Search_VectorizedGibbs is super fast but more confusing. Both output a list of hypotheses which should be re-evaluated by Evaluate_MPI. TODO: This whole pipeline has not been extensively tested, and is still in development. 
+	- In Gibbs, we enumerate a "small" space of single word meanings and do gibbs over their assignments into a
+	lexicon. The enumeration is done by EnumerateTrees.py, writing the file all_trees.pkl (a UniquePriorityQueue,
+	although it could have been a list). The Search_UnoptimizedGibbs is a simpler implementation, but super slow.
+	Search_VectorizedGibbs is super fast but more confusing. Both output a list of hypotheses which should be
+	re-evaluated by Evaluate_MPI. TODO: This whole pipeline has not been extensively tested, and is still in
+	development.
 	
-	- In MCMC we do the tree-regeneration MCMC over all word simultaneously. This tends to work less well and is very slow, but easy to understand.  
+	- In MCMC we do the tree-regeneration MCMC over all word simultaneously. This tends to work less well and is very
+	 slow, but easy to understand.
 
-NOTE: For MPI, we must go through the right directory that is mounted on each computer (e.g. /home/piantado/Desktop/mit instead of /home/piantado/mit/)
+NOTE: For MPI, we must go through the right directory that is mounted on each computer (e.g.
+/home/piantado/Desktop/mit instead of /home/piantado/mit/)
 
 TODO:
 	This is not finished yet ...

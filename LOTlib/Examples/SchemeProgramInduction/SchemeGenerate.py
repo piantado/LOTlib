@@ -1,10 +1,11 @@
 
 """
-        This generates random scheme code with cons, cdr, and car, and evaluates it on some simple list structures.
-        No inference here--just random sampling from a grammar.
+    This generates random scheme code with cons, cdr, and car, and evaluates it on some simple list structures.
+    No inference here -- just random sampling from a grammar.
 """
 
-from Shared import *
+from LOTlib.Hypotheses import LOTHypothesis
+from Grammar import grammar
 
 example_input = [   [], [[]], [ [], [] ], [[[]]]  ]
 

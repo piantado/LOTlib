@@ -1,5 +1,5 @@
 from LOTlib.DataAndObjects import UtteranceData
-from Shared import Context, str2sen, OBJECTS
+from Global import Context, str2sen, OBJECTS
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Set up the data

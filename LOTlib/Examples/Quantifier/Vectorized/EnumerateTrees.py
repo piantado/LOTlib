@@ -5,7 +5,7 @@
 """
 import sys
 
-from Shared import *
+from Global import *
 
 OUT = "data/all_trees_2012May2.pkl"
 DEPTH = 3

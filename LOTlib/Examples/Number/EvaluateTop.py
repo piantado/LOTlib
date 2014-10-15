@@ -4,7 +4,7 @@
 """
 
 import pickle
-from Shared import *
+from Global import *
 
 LARGE_DATA_SIZE = 1000
 

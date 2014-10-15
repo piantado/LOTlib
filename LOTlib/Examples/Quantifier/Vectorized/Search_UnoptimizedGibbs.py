@@ -10,7 +10,7 @@
 """
 import sys
 sys.path.append("..")
-from Shared import *
+from Global import *
 
 IN_PATH = "data/all_trees_2012May2.pkl"
 STEPS = 10000

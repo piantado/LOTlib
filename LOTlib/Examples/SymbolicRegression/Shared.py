@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-        Shared functions for symbolic regression.
+    Shared functions for symbolic regression.
 """
 import LOTlib
 from LOTlib.Grammar import Grammar
-from LOTlib.BasicPrimitives import *
 from LOTlib.Inference.MetropolisHastings import mh_sample
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Miscellaneous import *

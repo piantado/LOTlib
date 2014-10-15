@@ -18,7 +18,7 @@ from copy import copy
 import numpy as np
 from LOTlib.MetropolisHastings import MHStats
 
-from Shared import *
+from Global import *
 
 ########################################################################
 # Parse the input and command lines

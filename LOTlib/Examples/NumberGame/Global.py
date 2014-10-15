@@ -4,12 +4,11 @@ __author__ = 'eric'
 import Data
 import Inference
 import Specification
-import Grammar
+from Grammar import *
 
 
 # grammar parameters
 
-grammar = Grammar.grammar1()
 
 # Global parameters for inference
 ALPHA = 0.9

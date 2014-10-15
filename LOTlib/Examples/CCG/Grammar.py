@@ -1,7 +1,7 @@
 
 from LOTlib.Grammar import Grammar
 from LOTlib.Miscellaneous import qq
-from Shared import OBJECTS, SEMANTIC_1PREDICATES, SEMANTIC_2PREDICATES
+from Global import OBJECTS, SEMANTIC_1PREDICATES, SEMANTIC_2PREDICATES
 
 
 grammar = Grammar()

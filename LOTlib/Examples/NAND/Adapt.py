@@ -5,7 +5,7 @@
 
 """
 import pickle
-from Shared import *
+from Global import *
 from LOTlib.Subtrees import *
 
 NDATA = 100

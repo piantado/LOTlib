@@ -5,7 +5,7 @@
 
 """
 
-from Shared import *
+from Global import *
 
 from LOTlib.sandbox.OptimalGrammarAdaptation import print_subtree_adaptations
 

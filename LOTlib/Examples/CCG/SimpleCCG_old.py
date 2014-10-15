@@ -13,7 +13,7 @@ import re
 from LOTlib import lot_iter
 from LOTlib.Miscellaneous import qq
 from LOTlib.FiniteBestSet import FiniteBestSet
-from CCGLexicon import CCGLexicon
+from Specification import CCGLexicon
 from Grammar import make_hypothesis
 
 

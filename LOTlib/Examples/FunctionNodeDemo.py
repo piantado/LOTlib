@@ -4,12 +4,11 @@ from LOTlib.Evaluation.Eval import evaluate_expression, register_primitive
 
 
 """
-         A simple demo for how to define FunctionNodes
+     A simple demo for how to define FunctionNodes
 
-         All of these primitives are defined in the LOTlib.Primitives package, as well as many others.
-         In general, the PCFG generates FunctionNode trees via "generate" and then these are printed
-         via str(...).
-
+     All of these primitives are defined in the LOTlib.Primitives package, as well as many others.
+     In general, the PCFG generates FunctionNode trees via "generate" and then these are printed
+     via str(...).
 """
 grammar = Grammar()
 

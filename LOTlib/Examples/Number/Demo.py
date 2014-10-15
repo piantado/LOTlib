@@ -5,7 +5,7 @@
         Note: CTRL-C breaks out of the MCMC loop, and the processes at the bottom with average likelihood for each hypothesis.
 """
 
-from Shared import *
+from Global import *
 from LOTlib import lot_iter
 from LOTlib.FiniteBestSet import FiniteBestSet
 

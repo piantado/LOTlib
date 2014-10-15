@@ -1,8 +1,7 @@
 
 """
-
-        Just playing around with vector-valued hypotheses. This is a simple sampler for a posterior shaped like
-        the exp(-RosenbrockFunction)
+    Just playing around with vector-valued hypotheses. This is a simple sampler for a posterior shaped like
+    the exp(-RosenbrockFunction)
 """
 
 from LOTlib.Hypotheses.VectorHypothesis import VectorHypothesis
