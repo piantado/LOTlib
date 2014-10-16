@@ -1,4 +1,5 @@
 from LOTlib.Grammar import Grammar
+from LOTlib.Miscellaneous import q
 from Global import SHAPES, COLORS
 
 # ------------------------------------------------------------------
