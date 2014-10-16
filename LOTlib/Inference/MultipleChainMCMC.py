@@ -44,7 +44,7 @@ class MultipleChainMCMC(object):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if __name__ == "__main__":
 
-    from LOTlib.Examples.Number.Shared import generate_data, NumberExpression, grammar
+    from LOTlib.Examples.Number.Global import generate_data, NumberExpression, grammar
     data = generate_data(300)
 
     make_h0 = lambda : NumberExpression(grammar)

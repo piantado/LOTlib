@@ -5,7 +5,7 @@ follows the standards in https://docs.python.org/2/library/unittest.html
 
 import unittest
 
-from LOTlib.Examples.CCG.CCGLexicon import *
+from LOTlib.Examples.CCG.Specification import *
 class CCGLexiconTest(unittest.TestCase):
 
     # initialization that happens before each test is carried out

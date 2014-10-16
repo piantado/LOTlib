@@ -7,9 +7,10 @@ from collections import defaultdict
 
 from LOTlib import lot_iter
 from LOTlib.Miscellaneous import *
-from LOTlib.GrammarRule import GrammarRule, BVAddGrammarRule, BVUseGrammarRule
+from LOTlib.GrammarRule import GrammarRule, BVAddGrammarRule
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
 from LOTlib.BVRuleContextManager import BVRuleContextManager
+
 
 class Grammar:
     """
@@ -357,7 +358,7 @@ if __name__ == "__main__":
     #from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar
     #from LOTlib.Examples.Number.Shared import grammar
    # from LOTlib.Examples.RegularExpression.Shared import grammar
-    from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar, data, make_h0
+    from LOTlib.Examples.Magnetism.Simple.Global import grammar
 
     """
     grammar = Grammar()

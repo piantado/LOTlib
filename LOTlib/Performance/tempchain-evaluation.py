@@ -3,12 +3,12 @@
         Simple evaluation of number schemes
 """
 
-from LOTlib import lot_iter
 import os
 from itertools import product
+from optparse import OptionParser
 
 from SimpleMPI.MPI_map import MPI_map, synchronize_variable
-from optparse import OptionParser
+
 
 parser = OptionParser()
 parser.add_option("--out", dest="OUT", type="string", help="Output prefix", default="output/tempchain")
@@ -25,27 +25,21 @@ options, _ = parser.parse_args()
 
 if options.MODEL == "Number100":
     # Load the data
-    from LOTlib.Examples.Number.Shared import generate_data, grammar,  make_h0
     data = synchronize_variable( lambda : generate_data(100)  )
 
 elif options.MODEL == "Number300":
     # Load the data
-    from LOTlib.Examples.Number.Shared import generate_data, grammar,  make_h0
     data = synchronize_variable( lambda : generate_data(300)  )
     
 elif options.MODEL == "Number1000":
     # Load the data
-    from LOTlib.Examples.Number.Shared import generate_data, grammar,  make_h0
+    from LOTlib.Examples.Number.Global import generate_data, make_h0
     data = synchronize_variable( lambda : generate_data(1000)  )
     
-elif options.MODEL == "Galileo":
-    from LOTlib.Examples.SymbolicRegression.Galileo import data, grammar, make_h0
-elif options.MODEL == "RationalRules":
-    from LOTlib.Examples.RationalRules.Shared import grammar, data, make_h0
-elif options.MODEL == "SimpleMagnetism":
-    from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar, data, make_h0
-elif options.MODEL == "RegularExpression":
-    from LOTlib.Examples.RegularExpression.RegularExpressionInferece import grammar, data, make_h0
+elif options.MODEL == "Galileo": \
+elif options.MODEL == "RationalRules": \
+elif options.MODEL == "SimpleMagnetism": \
+elif options.MODEL == "RegularExpression": \
 else:
     raise NotImplementedError(options.MODEL)
 

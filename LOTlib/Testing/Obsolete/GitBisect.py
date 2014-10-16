@@ -8,7 +8,7 @@ def handler(signum, frame):
     return 0
 
 def function_to_test():
-    from LOTlib.Examples.NAND import DoInference
+    from LOTlib.Examples.NAND import Inference
 
 signal.signal(signal.SIGALRM, handler)
 signal.alarm(5) # abort the function to test after 5 seconds

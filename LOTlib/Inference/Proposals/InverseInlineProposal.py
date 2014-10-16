@@ -172,7 +172,7 @@ class InverseInlineProposal(LOTProposal):
 if __name__ == "__main__":
         from LOTlib import lot_iter
         #from LOTlib.Examples.Magnetism.SimpleMagnetism import data, grammar,  make_h0  DOES NOT WORK FOR BV ARGS
-        from LOTlib.Examples.Number.Shared import grammar, make_h0, generate_data, get_knower_pattern
+        from LOTlib.Examples.Number.Global import grammar, make_h0, generate_data, get_knower_pattern
         
         grammar.add_rule('LAMBDA_WORD', 'lambda', ['WORD'], 1.0, bv_type='WORD')
         grammar.add_rule('WORD', 'apply_', ['LAMBDA_WORD', 'WORD'], 1.0)

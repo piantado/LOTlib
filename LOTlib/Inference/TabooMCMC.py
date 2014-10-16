@@ -38,7 +38,7 @@ class TabooMCMC(MHSampler):
 
 if __name__ == "__main__":
 
-    from LOTlib.Examples.Number.Shared import generate_data, NumberExpression, grammar, get_knower_pattern
+    from LOTlib.Examples.Number.Global import generate_data, NumberExpression, grammar, get_knower_pattern
     from LOTlib.Miscellaneous import q
 
     data = generate_data(500)

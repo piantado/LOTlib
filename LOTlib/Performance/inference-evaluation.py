@@ -3,11 +3,8 @@
         Simple evaluation of number schemes -- read LOTlib.Performance.Evaluation to see what the output is
 """
 
-from LOTlib import lot_iter
-
 import os
 from itertools import product
-from SimpleMPI.MPI_map import MPI_map, synchronize_variable, MPI_done
 
 from optparse import OptionParser
 
@@ -25,17 +22,17 @@ options, _ = parser.parse_args()
 
 if options.MODEL == "Number300":
     # Load the data
-    from LOTlib.Examples.Number.Shared import generate_data, grammar,  make_h0
+    from LOTlib.Examples.Number.Global import generate_data, grammar,  make_h0
     data = synchronize_variable( lambda : generate_data(100)  )
 
 elif options.MODEL == "Number300":
     # Load the data
-    from LOTlib.Examples.Number.Shared import generate_data, grammar,  make_h0
+    from LOTlib.Examples.Number.Global import generate_data, grammar,  make_h0
     data = synchronize_variable( lambda : generate_data(300)  )
     
 elif options.MODEL == "Number1000":
     # Load the data
-    from LOTlib.Examples.Number.Shared import generate_data, grammar,  make_h0
+    from LOTlib.Examples.Number.Global import generate_data, grammar,  make_h0
     data = synchronize_variable( lambda : generate_data(1000)  )
 
 elif options.MODEL == "Galileo":
@@ -43,13 +40,13 @@ elif options.MODEL == "Galileo":
 
 elif options.MODEL == "RationalRules":
 
-    from LOTlib.Examples.RationalRules.Shared import grammar, data, make_h0
+    from LOTlib.Examples.RationalRules.Global import grammar, data, make_h0
 
 elif options.MODEL == "SimpleMagnetism":
-    from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar, data, make_h0
+    from LOTlib.Examples.Magnetism.Simple.Global import grammar, data, make_h0
 
 elif options.MODEL == "RegularExpression":
-    from LOTlib.Examples.RegularExpression.Shared import grammar, data, make_h0
+    from LOTlib.Examples.RegularExpression.Global import grammar, data, make_h0
 else:
     raise NotImplementedError(options.MODEL)
 
@@ -60,7 +57,6 @@ else:
 # These get defined for each process
 from SimpleMPI.ParallelBufferedIO import ParallelBufferedIO
 from LOTlib.Performance.Evaluation import evaluate_sampler
-from LOTlib.Inference.TemperedTransitions import tempered_transitions_sample
 from LOTlib.Inference.EnumerationInference import EnumerationInference
 from LOTlib.Inference.ParallelTempering import ParallelTemperingSampler
 from LOTlib.Inference.MetropolisHastings import MHSampler

@@ -81,7 +81,7 @@ class ParticleSwarmPriorResample(ParticleSwarm):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~			
 if __name__ == "__main__":
-    from LOTlib.Examples.Number.Shared import generate_data, grammar, make_h0
+    from LOTlib.Examples.Number.Global import generate_data, grammar, make_h0
 
     data = generate_data(300)
 

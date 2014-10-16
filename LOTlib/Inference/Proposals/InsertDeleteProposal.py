@@ -1,15 +1,12 @@
-
-from LOTlib.Miscellaneous import weighted_sample, lambdaTrue, sample1
-from LOTlib.FunctionNode import *
-from copy import copy
 from math import log
-from random import random, randint, sample
-import numpy
+from random import random
 
+from LOTlib.Miscellaneous import sample1
+from LOTlib.FunctionNode import *
 from LOTProposal import LOTProposal
-
 from LOTlib.GrammarRule import *
 from LOTlib.BVRuleContextManager import BVRuleContextManager
+
 
 def is_replicating_GrammarRule(r):
     """
@@ -148,7 +145,7 @@ if __name__ == "__main__":
     #from LOTlib.Examples.Number.Shared import grammar, make_h0, generate_data
     #data = generate_data(300)
     
-    from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar, make_h0, data
+    from LOTlib.Examples.Magnetism.Simple.Global import grammar, make_h0, data
     
     
     

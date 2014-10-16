@@ -5,7 +5,7 @@ follows the standards in https://docs.python.org/2/library/unittest.html
 
 import unittest
 
-from LOTlib.Examples.FOL.FOL import *
+
 class FOLTest(unittest.TestCase):
 
     # initialization that happens before each test is carried out

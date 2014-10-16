@@ -29,7 +29,7 @@ if __name__ == "__main__":
     #data = generate_data(100)
     #from LOTlib.Examples.RegularExpression.Shared import grammar, make_h0, data
 
-    from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar, data, make_h0
+    from LOTlib.Examples.Magnetism.Simple.Global import grammar, data, make_h0
 
     #from LOTlib.Examples.RationalRules.Shared import grammar, data, make_h0
 

@@ -24,7 +24,7 @@ def prior_sample(h0, data, N):
 
 if __name__ == "__main__":
 
-    from LOTlib.Examples.Number.Shared import *
+    from LOTlib.Examples.Number.Global import *
 
     data = generate_data(500)
     h0 = NumberExpression(grammar)

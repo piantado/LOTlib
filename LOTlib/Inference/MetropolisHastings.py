@@ -136,7 +136,7 @@ class mh_sample(MHSampler):
 
 if __name__ == "__main__":
 
-    from LOTlib.Examples.Number.Shared import generate_data, NumberExpression, grammar, get_knower_pattern
+    from LOTlib.Examples.Number.Global import generate_data, NumberExpression, grammar, get_knower_pattern
 
     data = generate_data(300)
     h0 = NumberExpression(grammar)

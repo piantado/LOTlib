@@ -5,7 +5,7 @@ follows the standards in https://docs.python.org/2/library/unittest.html
 
 import unittest
 
-from LOTlib.Examples.NAND.DoInference import *
+from LOTlib.Examples.NAND.Inference import *
 class DoInferenceTest(unittest.TestCase):
 
     # initialization that happens before each test is carried out
