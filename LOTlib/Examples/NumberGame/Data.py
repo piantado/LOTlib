@@ -1,6 +1,7 @@
 __author__ = 'eric'
 
 from collections import defaultdict
+from math import factorial
 from LOTlib.Miscellaneous import logplusexp, Infinity
 from Inference import normalizingConstant
 
@@ -38,11 +39,13 @@ def likelihoodGivenGrammar(grammar, input_data, output_data):
 def likelihoodOfHumanDataGivenGrammar(grammar, input_data, output_data):
     model_likelihoods = likelihoodGivenGrammar(grammar, input_data, output_data)
 
-    human_likelihoods = {}
+    p_gen_human_data = {}
     for o in output_data.keys():
-        likelihood = output_data[o][0] / (output_data[o][0]+output_data[o][1])       # number of 'yes' responses / number of 'no'
-        human_likelihoods[o] = likelihood
+        p = model_likelihoods[o]
+        k = output_data[o][0]       # num. yes responses
+        n = k + output_data[o][1]   # num. trials
+        bc = factorial(n) / (factorial(k) * factorial(n-k))   # binomial coefficient
+        p_gen_human_data[o] = bc * pow(p, k) * pow(1-p, n-k)
 
-    # TODO: calculate similarity between model_likelihoods & human_likelihoods
-    return 0
+    return p_gen_human_data
 
