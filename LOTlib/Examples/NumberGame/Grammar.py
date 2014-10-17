@@ -4,7 +4,7 @@ from LOTlib.Grammar import Grammar
 
 # Default parameters for integer primitives
 TERMINAL_PRIOR = .25
-INTEGERS       = [1., 2., 3., 4., 5., 6., 7., 8., 9., 10.]
+INTEGERS       = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 INTEGERS_DIST  = [1., 1., 1., .8, 1., .8, 1., .6, 1., .8]   # len same as INT_PRIMITIVES
 
 
@@ -18,7 +18,7 @@ grammar.add_rule('SET', 'setdifference_', ['SET', 'SET'], 1)
 grammar.add_rule('SET', 'intersection_', ['SET', 'SET'], 1)
 
 # Range of numbers, e.g. [1,100] (numbers 1 through 100)
-grammar.add_rule('SET', 'range_', ['EXPR', 'EXPR'], 5)
+grammar.add_rule('SET', 'range_', ['EXPR', 'EXPR'], 10)
 # Mapping expressions over sets of numbers
 grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1, bv_type='EXPR')
 grammar.add_rule('SET', 'map_', ['FUNC', 'SET'], 1)

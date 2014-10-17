@@ -1,8 +1,8 @@
 __author__ = 'eric'
 
 from collections import defaultdict
-from math import factorial
-from LOTlib.Miscellaneous import logplusexp, Infinity
+from math import factorial, log
+from LOTlib.Miscellaneous import logplusexp, Infinity, log1mexp
 from Inference import normalizingConstant
 
 # maps output number (e.g. 8) to a number of yes/no's (e.g. [10/2] )
@@ -45,7 +45,8 @@ def likelihoodOfHumanDataGivenGrammar(grammar, input_data, output_data):
         k = output_data[o][0]       # num. yes responses
         n = k + output_data[o][1]   # num. trials
         bc = factorial(n) / (factorial(k) * factorial(n-k))   # binomial coefficient
-        p_gen_human_data[o] = bc * pow(p, k) * pow(1-p, n-k)
+        p_gen_human_data[o] = log(bc) + (k*p) + (n-k)*log1mexp(p)       # log version
+        # p_gen_human_data[o] = bc * pow(p, k) * pow(1-p, n-k)          # linear version
 
     return p_gen_human_data
 

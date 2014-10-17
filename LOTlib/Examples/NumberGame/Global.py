@@ -18,4 +18,5 @@ DATA = []
 
 hypotheses = Inference.randomSample(grammar, DATA, num_iters=NUM_ITERS, alpha=ALPHA)
 
+Inference.printBestHypotheses(hypotheses)
 
