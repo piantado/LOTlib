@@ -1,5 +1,3 @@
-__author__ = 'eric'
-
 from math import log
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Evaluation.Eval import *
@@ -21,7 +19,7 @@ class NumberSetHypothesis(LOTHypothesis):
         """
         h = self.__call__()     # Get hypothesis set
         alpha = self.alpha
-        noise = (1-alpha) / len(h)
+        noise = (1-alpha)/len(h) if len(h) > 0 else (1-alpha)
         likelihood = 0
         for datum in data:
             if datum in h:

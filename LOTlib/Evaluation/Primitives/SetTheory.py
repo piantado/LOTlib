@@ -116,7 +116,10 @@ def diff_(S, p):
     return S.difference(set(p))
 
 @LOTlib_primitive
-def range_(x,y):
-    return range(x,y+1)
+def range_(x, y):
+    if x > y:
+        return set(range(y, x+1))
+    else:
+        return set(range(x, y+1))
 
 
