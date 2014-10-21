@@ -3,7 +3,7 @@ __author__ = 'eric'
 from collections import defaultdict
 from math import factorial, log
 from LOTlib.Miscellaneous import logplusexp, Infinity, log1mexp
-from Inference import normalizingConstant
+from Model.Inference import normalizingConstant
 
 # maps output number (e.g. 8) to a number of yes/no's (e.g. [10/2] )
 human_in_data = [2, 4, 6]

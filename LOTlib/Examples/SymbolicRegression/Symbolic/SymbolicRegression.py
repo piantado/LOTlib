@@ -2,13 +2,13 @@
 """
         A simple symbolic regression demo
 """
-from math import sin
 from LOTlib.Hypotheses.GaussianLOTHypothesis import GaussianLOTHypothesis
 from LOTlib.Inference.MetropolisHastings import mh_sample
 from LOTlib.FiniteBestSet import FiniteBestSet
-from LOTlib.DataAndObjects import *
+from LOTlib.DataAndObjects import qq
 from LOTlib.Examples.SymbolicRegression.Grammar import grammar
 from Data import generate_data
+
 
 CHAINS = 4
 STEPS = 50000
