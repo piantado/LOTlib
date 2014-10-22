@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 
 """
-This runs the number model on the laptop or an MPI cluster.
+This out the number model on the laptop or an MPI cluster.
 This is the primary implementation intended for replication of Piantadosi, Tenebaum & Goodman
 To install on my system, I had to build mpich2, mpi4py and set up ubuntu with the following:
         https://help.ubuntu.com/community/MpichCluster
 
 To run on MPI:
-$time mpiexec -hostfile /home/piantado/Libraries/LOTlib/hosts.mpich2 -n 36 python Inference.py --steps=10000 --top=50 --chains=25 --large=1000 --dmin=0 --dmax=300 --dstep=10 --mpi --out=/home/mpiu/tmp.pkl
+$time mpiexec -hostfile /home/piantado/Libraries/LOTlib/hosts.mpich2 -n 36 python Run.py --steps=10000 --top=50 --chains=25 --large=1000 --dmin=0 --dmax=300 --dstep=10 --mpi --out=/home/mpiu/tmp.pkl
 """
 import LOTlib
 from LOTlib import lot_iter
+from LOTlib.Examples.Number.Model import Inference
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from SimpleMPI.MPI_map import MPI_map, is_master_process
-import Global
 
 ## Parse command line options:
 from optparse import OptionParser
@@ -47,15 +47,15 @@ else:
 
 def run(data_size):
     """
-            This runs on the DATA_RANGE amounts of data and returns *all* hypothese in the top options.TOP_COUNT
+            This out on the DATA_RANGE amounts of data and returns *all* hypothese in the top options.TOP_COUNT
     """
     if LOTlib.SIG_INTERRUPTED: return [] # Put this here else we waste time making data for everything that isn't run
 
     # initialize the data
-    data = Global.generate_data(data_size)
+    data = Inference.generate_data(data_size)
 
     # starting hypothesis -- here this generates at random
-    h0 = Global.make_h0()
+    h0 = Inference.make_h0()
 
     hyps = FiniteBestSet(max=True, N=options.TOP_COUNT, key="posterior_score")
     
@@ -67,7 +67,7 @@ def run(data_size):
 # Main running
 
 if is_master_process():
-    Global.display_option_summary(options)
+    Inference.display_option_summary(options)
 
 # choose the appropriate map function
 allret = MPI_map(run, map(lambda x: [x], options.DATA_AMOUNTS * options.CHAINS))
@@ -84,7 +84,7 @@ with open(options.OUT_PATH, 'w') as f:
 if options.LARGE_DATA_SIZE > 0 and is_master_process():
 
     #now evaluate on different amounts of data too:
-    huge_data = Global.generate_data(options.LARGE_DATA_SIZE)
+    huge_data = Inference.generate_data(options.LARGE_DATA_SIZE)
 
     H = allfs.get_all()
     [h.compute_posterior(huge_data) for h in H]
@@ -92,4 +92,4 @@ if options.LARGE_DATA_SIZE > 0 and is_master_process():
     # show the *average* ll for each hypothesis
     for h in lot_iter(H):
         if h.prior > float("-inf"):
-            print h.prior, h.likelihood/float(options.LARGE_DATA_SIZE), Global.q(Global.get_knower_pattern(h)),  Global.q(h) # a quoted x
+            print h.prior, h.likelihood/float(options.LARGE_DATA_SIZE), Inference.q(Inference.get_knower_pattern(h)),  Inference.q(h) # a quoted x

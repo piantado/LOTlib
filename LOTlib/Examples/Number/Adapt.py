@@ -5,7 +5,7 @@
 
 """
 
-from Global import *
+from Inference import *
 
 from LOTlib.sandbox.OptimalGrammarAdaptation import print_subtree_adaptations
 
@@ -14,7 +14,7 @@ datas = map(generate_data, xrange(0, 400, 10))
 print "# Generated data!"
 
 #hypotheses = set([ NumberExpression(G) for i in xrange(10)])
-hypotheses = pickle.load(open("runs/2014Feb10_small.pkl", 'r')).get_all()
+hypotheses = pickle.load(open("out/2014Feb10_small.pkl", 'r')).get_all()
 print "# Loaded hypotheses"
 
 # Clean out ones with 0 probability, or else KL computation in print_subtree_adaptations goes to hell

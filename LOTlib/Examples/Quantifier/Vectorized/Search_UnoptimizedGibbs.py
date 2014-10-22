@@ -10,7 +10,7 @@
 """
 import sys
 sys.path.append("..")
-from Global import *
+from Inference import *
 
 IN_PATH = "data/all_trees_2012May2.pkl"
 STEPS = 10000

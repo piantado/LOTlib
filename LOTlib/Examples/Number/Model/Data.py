@@ -1,7 +1,7 @@
 from LOTlib.Miscellaneous import random, weighted_sample
 from LOTlib.DataAndObjects import FunctionData, sample_sets_of_objects, make_all_objects
 from LOTlib.Evaluation.Primitives.Number import word_to_number
-from Global import ALPHA, WORDS
+from LOTlib.Examples.Number.Model.Inference import ALPHA, WORDS
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
 # The target

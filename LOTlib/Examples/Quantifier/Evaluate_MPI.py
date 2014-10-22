@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-        This runs after we search, taking the top hypotheses that were found and evaluating them on a bunch of new data
+        This out after we search, taking the top hypotheses that were found and evaluating them on a bunch of new data
 
         This outputs one set of lines for each word, for each amount of data. So when CHAINS=10,
 

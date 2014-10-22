@@ -19,7 +19,7 @@ grammar.add_rule('SET', 'intersection_', ['SET', 'SET'], 1)
 grammar.add_rule('SET', 'range_', ['EXPR', 'EXPR'], 10)
 # Mapping expressions over sets of numbers
 grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1, bv_type='EXPR')
-grammar.add_rule('SET', 'map_', ['FUNC', 'SET'], 1)
+grammar.add_rule('SET', 'mapset_', ['FUNC', 'SET'], 1)
 
 # Expressions
 grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], .1)

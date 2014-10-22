@@ -1,6 +1,6 @@
 from LOTlib.Hypotheses import LOTHypothesis
 from LOTlib.Miscellaneous import log, Infinity
-from Global import ALPHA, GAMMA, LG_1MGAMMA, MAX_NODES
+from Inference import ALPHA, GAMMA, LG_1MGAMMA, MAX_NODES
 
 ##########################################################
 # Define a class for running MH

@@ -1,14 +1,16 @@
 from math import factorial, log
 from collections import defaultdict
-import Hypothesis
+
+import numpy as np
+import matplotlib.pyplot as plt
 from LOTlib.Examples.NumberGame.Model import Grammar
 from LOTlib.Miscellaneous import logsumexp, exp, logplusexp, Infinity, log1mexp
 from LOTlib.Inference.MetropolisHastings import MHSampler
+import Hypothesis
 
-from LOTlib.Inference.PriorSample import prior_sample
 
-
-def mhSample(grammar, data, num_iters=10000, alpha=0.9):
+# Generate new hypotheses by sampling w/ metro hastings
+def mhSample(data, num_iters=10000, alpha=0.9):
     hypotheses = set()
     h0 = make_h0(alpha=alpha)
     for h in MHSampler(h0, data, steps=num_iters):
@@ -56,7 +58,7 @@ def randomSample(grammar, data, num_iters=10000, alpha=0.9):
 
 
 #######################################################################################################################
-# Inference with human data                                                                                           #
+# Inference grammar rule probabilities with human data                                                                #
 #######################################################################################################################
 '''
 # maps output number (e.g. 8) to a number of yes/no's (e.g. [10/2] )
@@ -104,3 +106,30 @@ def probabilityOfHumanData(grammar, input_data, output_data):
 
     return p_gen_human_data
 
+
+# return the distribution of probability of human data given dist. of probabilities for this rule
+def probHDataGivenRule(grammar, rule_nt, rule_name, input_data, output_data,
+                                probs=np.arange(0, 2, 0.2)):
+    nt_rules = grammar.rules[rule_nt]
+    name_rules = filter(lambda r: (r.name == rule_name), nt_rules)   # there should only be 1 item in this list
+
+    rule = name_rules[0]
+    dist = []
+    orig_p = rule.p
+    for p in probs:
+        rule.p = p
+        dist.append(probabilityOfHumanData(grammar, input_data, output_data))
+
+    rule.p = orig_p
+    return dist
+
+
+# visualize results from probHDataGivenRule
+def visualizeRuleProbs(probs, dist, rule_name='RULE_'):
+    fig, ax = plt.subplots()
+    rects = plt.bar(probs, dist)
+
+    plt.xlabel('Grammar Rule Probability')
+    plt.ylabel('Pr. of human data')
+    plt.title('Prob. of human data given prob. for rule: '+rule_name)
+    plt.show()

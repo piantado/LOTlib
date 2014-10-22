@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-        This basically runs a new version and makes a much smaller hypothesis space, one for each word, which we can then run again on
+        This basically out a new version and makes a much smaller hypothesis space, one for each word, which we can then run again on
 
         Let's add options for many different kinds of proposals:
                 - Distance metric based
@@ -18,7 +18,7 @@ from copy import copy
 import numpy as np
 from LOTlib.MetropolisHastings import MHStats
 
-from Global import *
+from LOTlib.Examples.Number.Model.Inference import *
 
 ########################################################################
 # Parse the input and command lines

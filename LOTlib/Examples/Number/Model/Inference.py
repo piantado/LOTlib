@@ -3,11 +3,9 @@
         Shared functions and variables for the number learning model.
 """
 
-from LOTlib.Miscellaneous import *
-from Data import *
-from Grammar import *
-from Inference import *
-from Specification import *
+from LOTlib.Miscellaneous import log1mexp
+from Grammar import grammar
+from Hypothesis import NumberExpression
 
 ALPHA = 0.75 # the probability of uttering something true
 GAMMA = -30.0 # the log probability penalty for recursion
@@ -23,8 +21,8 @@ def make_h0(**kwargs):
     return NumberExpression(grammar, **kwargs)
 
 
-if __name__ == "__main__":
-    
-    for _ in xrange(1000):
-        h = NumberExpression()
-        print get_knower_pattern(h), h
+# if __name__ == "__main__":
+#
+#     for _ in xrange(1000):
+#         h = NumberExpression()
+#         print get_knower_pattern(h), h
