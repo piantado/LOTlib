@@ -66,6 +66,17 @@ def pow_(x,y):
     except: return float("nan")
 
 @LOTlib_primitive
+def powf_(x,y):
+    try: return pow(float(x),float(y))
+    except: return float("nan")
+
+@LOTlib_primitive
+def ipowf_(x,y):
+    try: return int(pow(float(x),float(y)))
+    except: return float("nan")
+
+
+@LOTlib_primitive
 def abspow_(x,y):
     """ Absolute power. sign(x)*abs(x)**y """
     #print x,y

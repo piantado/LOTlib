@@ -3,16 +3,20 @@ from collections import defaultdict
 
 import numpy as np
 import matplotlib.pyplot as plt
-from LOTlib.Examples.NumberGame.Model import Grammar
+from LOTlib.Examples.NumberGame.Model import Grammar as G
 from LOTlib.Miscellaneous import logsumexp, exp, logplusexp, Infinity, log1mexp
 from LOTlib.Inference.MetropolisHastings import MHSampler
+from LOTlib.Inference.PriorSample import prior_sample
 import Hypothesis
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~ Generate hypotheses                                                         ~~~~~#
+
 # Generate new hypotheses by sampling w/ metro hastings
-def mhSample(data, num_iters=10000, alpha=0.9):
+def mhSample(data, grammar=G.grammar, num_iters=10000, alpha=0.9):
     hypotheses = set()
-    h0 = make_h0(alpha=alpha)
+    h0 = make_h0(grammar, alpha=alpha)
     for h in MHSampler(h0, data, steps=num_iters):
         #print h        # with this you can see how hill climbing moves towards maxima
         hypotheses.add(h)
@@ -41,8 +45,8 @@ def printBestHypotheses(hypotheses, n=10):
         print '================================================================\n'
 
 
-def make_h0(**kwargs):
-    return Hypothesis.NumberSetHypothesis(Grammar.grammar, **kwargs)
+def make_h0(grammar=G.grammar, **kwargs):
+    return Hypothesis.NumberSetHypothesis(grammar, **kwargs)
 
 
 def randomSample(grammar, data, num_iters=10000, alpha=0.9):
@@ -57,43 +61,29 @@ def randomSample(grammar, data, num_iters=10000, alpha=0.9):
     return hypotheses
 
 
-#######################################################################################################################
-# Inference grammar rule probabilities with human data                                                                #
-#######################################################################################################################
-'''
-# maps output number (e.g. 8) to a number of yes/no's (e.g. [10/2] )
-human_in_data = [2, 4, 6]
-human_out_data = {
-    8: (10, 2),
-    12: (5, 7),
-    14: (8, 4)
-}
-'''
-
-
-# TODO: make this generate some hypotheses
-def generateHypotheses(grammar, input_data):
-    return set()
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~ Infer grammar rule probabilities with human data                            ~~~~~#
 
 # return likelihood of generating data given a grammar, summed over all hypotheses generated
 # ==> returns a dictionary with each output key returning the summed likelihood of that single data point
-def likelihoodGivenGrammar(grammar, input_data, output_data):
-    hypotheses = generateHypotheses(grammar, input_data)
+def likelihoodGivenGrammar(grammar, input_data, output_data, num_iters=10000, alpha=0.9):
+    hypotheses = mhSample(input_data, grammar=grammar, num_iters=num_iters, alpha=alpha)
     Z = normalizingConstant(hypotheses)
 
     likelihoods = defaultdict(lambda: -Infinity)
     for h in hypotheses:
         w = h.posterior_score - Z
-        for o in output_data.keys():
-            weighted_likelihood = h.compute_likelihood(o) + w
+        for o in output_data.keys():                # TODO: is this loop updating posterior_score each time?
+            old_likelihood = h.likelihood
+            weighted_likelihood = h.compute_likelihood([o]) + w
+            h.likelihood = old_likelihood
             likelihoods[0] = logplusexp(likelihoods[o], weighted_likelihood)
     return likelihoods
 
 
 # for fixed grammar and model parameters (e.g. for a fixed model you could import) compute the match to human data
-def probabilityOfHumanData(grammar, input_data, output_data):
-    model_likelihoods = likelihoodGivenGrammar(grammar, input_data, output_data)
+def probabilityOfHumanData(grammar, input_data, output_data, num_iters=10000, alpha=0.9):
+    model_likelihoods = likelihoodGivenGrammar(grammar, input_data, output_data, num_iters, alpha)
 
     p_gen_human_data = {}
     for o in output_data.keys():
@@ -108,17 +98,16 @@ def probabilityOfHumanData(grammar, input_data, output_data):
 
 
 # return the distribution of probability of human data given dist. of probabilities for this rule
-def probHDataGivenRule(grammar, rule_nt, rule_name, input_data, output_data,
-                                probs=np.arange(0, 2, 0.2)):
+def probHDataGivenRuleProbs(grammar, rule_nt, rule_name, input_data, output_data,
+                            probs=np.arange(0, 2, 0.2), num_iters=10000, alpha=0.9):
     nt_rules = grammar.rules[rule_nt]
     name_rules = filter(lambda r: (r.name == rule_name), nt_rules)   # there should only be 1 item in this list
-
     rule = name_rules[0]
     dist = []
     orig_p = rule.p
     for p in probs:
         rule.p = p
-        dist.append(probabilityOfHumanData(grammar, input_data, output_data))
+        dist.append(probabilityOfHumanData(grammar, input_data, output_data, num_iters, alpha))
 
     rule.p = orig_p
     return dist

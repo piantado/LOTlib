@@ -39,3 +39,7 @@ first_ = car_
 @LOTlib_primitive
 def filter_(f,x):
     return filter(f,x)
+
+@LOTlib_primitive
+def mapset_(f,A):
+    return {f(a) for a in A}

@@ -3,6 +3,7 @@
 """
 
 import LOTlib
+from LOTlib.Evaluation import Primitives
 from LOTlib.Miscellaneous import *
 
 class Hypothesis(object):
@@ -94,7 +95,7 @@ class Hypothesis(object):
                 Defautly if the prior is -inf, we don't compute the likelihood (and "pretend" it's -Infinity).
                 This saves us from computing likelihoods on hypotheses that we know are bad. 
         """
-        LOTlib.Evaluation.Primitives.Primitives.LOCAL_PRIMITIVE_OPS = 0 # Reset this
+        Primitives.LOCAL_PRIMITIVE_OPS = 0 # Reset this
         p = self.compute_prior()
         
         if p > -Infinity:        
