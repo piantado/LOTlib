@@ -1,7 +1,7 @@
 from LOTlib.Miscellaneous import random, weighted_sample
 from LOTlib.DataAndObjects import FunctionData, sample_sets_of_objects, make_all_objects
 from LOTlib.Evaluation.Primitives.Number import word_to_number
-from LOTlib.Examples.Number.Model.Inference import ALPHA, WORDS
+from LOTlib.Examples.Number.Model.Hypothesis import ALPHA
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
 # The target
@@ -14,18 +14,11 @@ from LOTlib.Examples.Number.Model.Inference import ALPHA, WORDS
 #three_knower = NumberExpression("one_ if cardinality1_(x) else ( two_ if (cardinality2_(x) ) else ( three_ if (cardinality3_(x) else undef) )")
 #four_knower  = NumberExpression("one_ if cardinality1_(x) else ( two_ if (cardinality2_(x) ) else ( three_ if (cardinality3_(x) else (four_ if (cardinality4_(x) else undef) ) )")
 
-def get_knower_pattern(ne):
-    """
-            This computes a string describing the behavior of this knower-level
-    """
-    out = ''
-    resp = [ ne(set(sample_sets_of_objects(n, all_objects))) for n in xrange(1, 10)]
-    return ''.join([str(word_to_number[x]) if (x is not None and x is not 'undef') else 'U' for x in resp])
-
+WORDS = ['one_', 'two_', 'three_', 'four_', 'five_', 'six_', 'seven_', 'eight_', 'nine_', 'ten_']
 
 def generate_data(data_size):
     """
-            Sample some data according to the target
+    Sample some data according to the target
     """
     data = []
     for i in range(data_size):
@@ -41,6 +34,13 @@ def generate_data(data_size):
         # and append the sampled utterance
         data.append(FunctionData(input=[s], output=r))  # convert to "FunctionData" and store
     return data
+
+
+# compute a string describing the behavior of this knower-level
+def get_knower_pattern(ne):
+    out = ''
+    resp = [ ne(set(sample_sets_of_objects(n, all_objects))) for n in xrange(1, 10)]
+    return ''.join([str(word_to_number[x]) if (x is not None and x is not 'undef') else 'U' for x in resp])
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
