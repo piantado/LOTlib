@@ -31,5 +31,5 @@ grammar.add_rule('EXPR', 'pow_', ['EXPR', 'EXPR'], .1)
 
 # Terminals
 for i in range(0, len(INTEGERS)):
-    grammar.add_rule('EXPR', INTEGERS[i], None, TERMINAL_PRIOR * INTEGERS_DIST[i])
+    grammar.add_rule('EXPR', str(INTEGERS[i]), None, TERMINAL_PRIOR * INTEGERS_DIST[i])
 

@@ -158,8 +158,10 @@ class FunctionNode(object):
     def __init__(self, parent, returntype, name, args, generation_probability=0.0, resample_p=1.0, rule=None, a_args=None):
         self.__dict__.update(locals())
         self.added_rule = None
-
-        if self.name.lower() == 'applylambda':
+        
+        assert self.name is None or isinstance(self.name, str)
+        
+        if self.name is not None and self.name.lower() == 'applylambda':
             raise NotImplementedError # Let's not support any applylambda for now
     
     def setto(self, q):

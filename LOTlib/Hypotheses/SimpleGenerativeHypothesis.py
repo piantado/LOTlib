@@ -28,8 +28,6 @@ class SimpleGenerativeHypothesis(LOTHypothesis):
 
         LOTHypothesis.__init__(self, grammar,  **kwargs) # this is simple-generative since args=[] (a thunk)
 
-    def compute_single_likelihood(self, datum):
-        assert False, "Should not call this!"
 
     def compute_single_likelihood(self, datum):
         """

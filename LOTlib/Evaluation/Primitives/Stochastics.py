@@ -11,8 +11,8 @@ def flip_(p=0.5):
     return flip(p)
 
 @LOTlib_primitive
-def binomial_(n,p):
-	if isinstance(n,int) and n > 0:
-		return numpy.random.binomial(n,p)
-	else:
-		return float("nan")
+def binomial_(n, p):
+    if isinstance(n, int) and n > 0 and 0. <= p <= 1:
+        return numpy.random.binomial(n, p)
+    else:
+        return float("nan")

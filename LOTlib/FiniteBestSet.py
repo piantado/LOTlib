@@ -34,19 +34,26 @@ class FiniteBestSet(object):
             It works by storing a priority queue (in the opposite order), and popping off the worst as we need to add more
     """
 
-    def __init__(self, N=Infinity, max=True, key='posterior_score'):
+    def __init__(self, generator=None, N=Infinity, max=True, key='posterior_score'):
         """
                 N - the number of hypotheses to store
                 max - True/False -- do we keep the ones closes to +inf (or -inf)
                 key - if a string (attribute) or function, we used this to access a hypothesis' priority score
         """
 
-        self.__dict__.update(locals())
+        self.N = N
+        self.max = max
+        self.key = key
 
         self.max_multiplier = (1 if self.max else -1) # invert sign
 
         self.Q = [] # we use heapq to
         self.unique_set = set()
+
+        # if we can, add from here
+        if generator is not None:
+            for g in generator:
+                self.add(g)
 
 
     def __contains__(self, y):

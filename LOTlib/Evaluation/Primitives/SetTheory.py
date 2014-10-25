@@ -65,7 +65,7 @@ def equal_word_(A,B): return (A == B)
 def empty_(A): return (len(A)==0)
 
 @LOTlib_primitive
-def nonempty_(A): return not empty_(A)
+def nonempty_(A): return (len(A) > 0)
 
 @LOTlib_primitive
 def cardinality1_(A): return (len(A)==1)

@@ -90,7 +90,7 @@ class InsertDeleteProposal(LOTProposal):
             ni.setto(fn)
                         
             # what is the prob mass of the new stuff?
-            new_lp_below =  sum([fn.args[i].log_probability() if i!=replace_i else 0. for i in xrange(len(fn.args))])
+            new_lp_below =  sum([fn.args[i].log_probability() if (i!=replace_i and isFunctionNode(fn.args[i])) else 0. for i in xrange(len(fn.args))])
             # What is the new normalizer?
             newZ = newt.sample_node_normalizer(is_not_BVAddFunctionNode)
             assert newZ > 0
@@ -120,7 +120,7 @@ class InsertDeleteProposal(LOTProposal):
             before_same_children = sum([x==ni.args[samplei] for x in ni.args ]) # how many are the same after?
 
             # the lp of everything we'd have to create going backwards
-            old_lp_below = sum([ni.args[i].log_probability() if i!=samplei else 0. for i in xrange(len(ni.args))])
+            old_lp_below = sum([ni.args[i].log_probability() if (i!=samplei and isFunctionNode(ni.args[i])) else 0. for i in xrange(len(ni.args))])
 
             # and replace it
             ni.args[samplei].parent = ni.parent # update this first ;; TODO: IS THIS NECSESARY?
@@ -144,11 +144,11 @@ if __name__ == "__main__":
     from LOTlib import lot_iter
     #from LOTlib.Examples.Number.Shared import grammar, make_h0, generate_data
     #data = generate_data(300)
-    
+
+    ## NOTE: TO NORMALLY USE THIS, YOU MUST MIX WITH REGENERATION PROPOSAL -- ELSE NOT ERGODIC
+
     from LOTlib.Examples.Magnetism.Simple.Global import grammar, make_h0, data
-    
-    
-    
+
     from LOTlib.Inference.MetropolisHastings import MHSampler
     
     idp = InsertDeleteProposal(grammar)
