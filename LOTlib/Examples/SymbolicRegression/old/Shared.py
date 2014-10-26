@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    Shared functions for symbolic regression.
+Shared functions for symbolic regression.
 """
 import LOTlib
 from LOTlib.Grammar import Grammar

@@ -14,25 +14,19 @@ import Hypothesis
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 def normalizing_constant(hypotheses):
-    """Estimate normalizing constant Z."""
+    """Estimate normalizing constant Z.
+
+    Calculated as logsumexp(posterior scores for all hypotheses).
+    """
     return logsumexp([h.posterior_score for h in hypotheses])
 
 
 def make_h0(grammar=G.grammar, **kwargs):
-    """Default make initial hypothesis method."""
+    """Default make initial hypothesis method.
+
+    Return type: NumberGame.Hypothesis.NumberSetHypothesis
+    """
     return Hypothesis.NumberSetHypothesis(grammar, **kwargs)
-
-
-def random_sample(grammar, data, n=10000, alpha=0.9):
-    """Randomly sample `n` hypotheses from the grammar."""
-    hypotheses = set()
-    for i in xrange(n):
-        t = Hypothesis.NumberSetHypothesis(grammar, alpha=alpha)
-        print '%'*70 + '\n'
-        print str(t) + '\n'         # Show the last hypothesis we tried
-        t.compute_posterior(data)   # Compute prior, likelihood, posterior
-        hypotheses.add(t)
-    return hypotheses
 
 
 def mh_sample(data, grammar=G.grammar, num_iters=10000, alpha=0.9):
@@ -45,13 +39,33 @@ def mh_sample(data, grammar=G.grammar, num_iters=10000, alpha=0.9):
     return hypotheses
 
 
+def random_sample(grammar, input_data, n=10000, alpha=0.9):
+    """Randomly sample `n` hypotheses from the grammar using prior_sample generator."""
+    hypotheses = set()
+    h0 = make_h0(grammar, alpha=alpha)
+    for h in prior_sample(h0, input_data, n):
+        hypotheses.add(h)
+    return hypotheses
+
+
+def random_sample_old(grammar, input_data, n=10000, alpha=0.9):
+    """Randomly sample `n` hypotheses from the grammar -- old version."""
+    hypotheses = set()
+    for i in xrange(n):
+        t = Hypothesis.NumberSetHypothesis(grammar, alpha=alpha)
+        print '%'*70 + '\n'
+        print str(t) + '\n'                 # Show the last hypothesis we tried
+        t.compute_posterior(input_data)     # Compute prior, likelihood, posterior
+        hypotheses.add(t)
+    return hypotheses
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~ Infer grammar rule probabilities with human data
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 def prob_data_rule(grammar, rule, data, p, num_iters=10000, alpha=0.9):
-    """Return the probabilities of set of data given p for a given rule"""
-
+    """Return the probabilities of set of data given p for a given rule."""
     orig_p = rule.p
     rule.p = p
     p_human = 0
@@ -157,7 +171,7 @@ def get_rule(rule_name, rule_nt=None, grammar=G.grammar):
 
 
 def visualize_probs(probs, dist, rule_name='RULE_'):
-    """Visualize results from probHDataGivenRule."""
+    """Visualize results from probs_data_rule."""
     fig, ax = plt.subplots()
     rects = plt.bar(probs, dist)
 

@@ -2,10 +2,12 @@
         Move out some functions from Shared -- things that aren't part of the core model specification
 """
 from collections import defaultdict
+
 from LOTlib.Miscellaneous import *
 
+
 def show_baseline_distribution(testing_set, N=1000):
-    from Shared import generate_data, target
+    from LOTlib.Examples.Quantifier.Model.Shared import generate_data, target
 
     d = generate_data(N)
 

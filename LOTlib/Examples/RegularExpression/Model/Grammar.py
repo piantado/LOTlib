@@ -1,7 +1,10 @@
+"""
+Define a grammar.
+
+"""
 from LOTlib.Grammar import Grammar
 
-##########################################################
-# Define a grammar
+
 grammar = Grammar()
 
 grammar.add_rule('START', '', ['EXPR'], 1.0)

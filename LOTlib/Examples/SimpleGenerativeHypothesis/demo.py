@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
 """
+ A demo of "syntax" learning using a SimpleGenerativeHypothesis.
 
-         A demo of "syntax" learning using a SimpleGenerativeHypothesis.
+ This searches over probabilistic generating functions, running them forward to estimate
+ the likelihood of the data. Very very simple.
 
-         This searches over probabilistic generating functions, running them forward to estimate
-         the likelihood of the data. Very very simple.
 """
 from LOTlib.Inference.MetropolisHastings import mh_sample
 from LOTlib.Hypotheses.SimpleGenerativeHypothesis import SimpleGenerativeHypothesis
-from Data import data
-from Grammar import grammar
+from Model.Data import data
+from Model.Grammar import grammar
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #

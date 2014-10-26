@@ -1,6 +1,6 @@
-from Hypothesis import Hypothesis
 from copy import copy, deepcopy
 import numpy
+from Hypothesis import Hypothesis
 
 
 class VectorHypothesis(Hypothesis):

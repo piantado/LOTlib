@@ -1,4 +1,4 @@
-from Shared import *
+from LOTlib.Examples.Quantifier.Model.Shared import *
 from Utilities import *
 
 

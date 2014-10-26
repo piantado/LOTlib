@@ -1,7 +1,10 @@
+
+"""
+Define some data.
+
+"""
 from LOTlib.DataAndObjects import FunctionData
 
-##########################################################
-# Define some data
 
 data = [
     FunctionData(input=['aaaa'], output=True),

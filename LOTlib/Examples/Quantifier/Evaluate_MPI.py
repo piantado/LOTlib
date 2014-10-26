@@ -16,14 +16,15 @@
 
 """
 
-from Shared import *
-from Utilities import *
-from SimpleMPI.MPI_map import MPI_map, is_master_process, get_rank
-from LOTlib.Miscellaneous import logsumexp
 from collections import defaultdict
-import numpy as np
 from optparse import OptionParser
-from SimpleMPI.MPI_map import MPI_map,is_master_process
+
+import numpy as np
+
+from LOTlib.Examples.Quantifier.Model.Shared import *
+from Utilities import *
+from LOTlib.Miscellaneous import logsumexp
+
 
 DATA_RANGE = range(0, 2050, 100) # Don't need an option for this right now
 parser = OptionParser()

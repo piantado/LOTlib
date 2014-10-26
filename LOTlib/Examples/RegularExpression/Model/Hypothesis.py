@@ -3,15 +3,15 @@ from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 import re
 
 
-##########################################################
-# Hypothesis
 class RegexHypothesis(LOTHypothesis):
-    """
-            Define a special hypothesis for regular expressions. This requires overwritting value2function
-            to use our custom interpretation model on trees -- not just simple eval.
+    """Define a special hypothesis for regular expressions.
 
-            Note that this doesn't require any basic_primitives -- the grammar node names are used by
-            to_regex to
+    This requires overwritting value2function to use our custom interpretation model on trees -- not just
+    simple eval.
+
+    Note:
+        This doesn't require any basic_primitives -- the grammar node names are used by to_regex too
+
     """
     def value2function(self, v):
         regex = to_regex(v)
@@ -22,11 +22,10 @@ class RegexHypothesis(LOTHypothesis):
         return to_regex(self.value)
 
 
-##########################################################
-# Map a tree to a regular expression
 def to_regex(fn):
-    """
-            Custom mapping from a function node to a regular expression string (like, e.g. "(ab)*(c|d)" )
+    """Map a tree to a regular expression.
+
+    Custom mapping from a function node to a regular expression string (like, e.g. "(ab)*(c|d)" )
     """
     assert isFunctionNode(fn)
 
