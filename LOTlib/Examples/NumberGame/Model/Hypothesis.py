@@ -4,7 +4,7 @@ from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Hypotheses.VectorHypothesis import VectorHypothesis
 from LOTlib.Miscellaneous import logplusexp
 # from LOTlib.Evaluation.Eval import *
-import Inference as I, Grammar as G
+import Utilities as I, Grammar as G
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#

@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-"""
-        Shared functions for the quantifier learning model.
-"""
+
+
+
 
 from LOTlib import lot_iter
 
-from LOTlib.Grammar import Grammar
+
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Inference.MetropolisHastings import mh_sample
 from LOTlib.Miscellaneous import *
@@ -19,16 +18,7 @@ from copy import copy
 from GriceanWeightedLexicon import *
 from Utilities import *
 
-############################################################
-# Store a context
-
-class MyContext(object):
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
-
-    def __str__(self):
-        return str(self.__dict__)
-
+import Hypothesis as H
 
 ############################################################
 # Making data, sets, and objects
@@ -44,7 +34,7 @@ def sample_context():
     # get the objects in the current set
     si = sample_sets_of_objects(set_size, all_objects)
 
-    return MyContext( A=set([o for o in si if o.shape=='man']),\
+    return H.MyContext( A=set([o for o in si if o.shape=='man']),\
                       B=set([o for o in si if o.job=='pirate']),\
                       S=set(si))
 
@@ -63,61 +53,6 @@ def generate_data(data_size):
         data.append( UtteranceData(utterance=word, context=context, possible_utterances=all_words) )
 
     return data
-
-
-############################################################
-# Set up the grammar
-grammar = Grammar()
-
-"""
-        Note: This was updated on Dec 3 2012, after the language submission. We now include AND/OR/NOT, and S, and removed nonempty
-"""
-grammar.add_rule('START', 'presup_', ['BOOL', 'BOOL'], 1.0)
-
-grammar.add_rule('START', 'presup_', ['True', 'BOOL'], 1.0)
-grammar.add_rule('START', 'presup_', ['False', 'BOOL'], 1.0)
-
-grammar.add_rule('START', 'presup_', ['False', 'False'], 1.0)
-grammar.add_rule('START', 'presup_', ['True', 'True'], 1.0)
-
-grammar.add_rule('BOOL', 'not_', ['BOOL'], 1.0)
-grammar.add_rule('BOOL', 'and_', ['BOOL', 'BOOL'], 1.0)
-grammar.add_rule('BOOL', 'or_', ['BOOL', 'BOOL'], 1.0)
-#grammar.add_rule('BOOL', 'nonempty_', ['SET'], 1.0) # don't need this if we do logical operations
-
-grammar.add_rule('BOOL', 'empty_', ['SET'], 1.0)
-grammar.add_rule('BOOL', 'subset_', ['SET', 'SET'], 1.0)
-grammar.add_rule('BOOL', 'exhaustive_', ['SET', 'context.S'], 1.0)
-grammar.add_rule('BOOL', 'cardinality1_', ['SET'], 1.0) # if cardinalities are included, don't include these!
-grammar.add_rule('BOOL', 'cardinality2_', ['SET'], 1.0)
-grammar.add_rule('BOOL', 'cardinality3_', ['SET'], 1.0)
-
-grammar.add_rule('SET', 'union_', ['SET', 'SET'], 1.0)
-grammar.add_rule('SET', 'intersection_', ['SET', 'SET'], 1.0)
-grammar.add_rule('SET', 'setdifference_', ['SET', 'SET'], 1.0)
-
-# These will just be attributes of the current context
-grammar.add_rule('SET', 'context.A', None, 10.0)
-grammar.add_rule('SET', 'context.B', None, 10.0)
-grammar.add_rule('SET', 'context.S', None, 10.0) ## Must include this or else we can't get complement
-
-# Cardinality operations
-grammar.add_rule('BOOL', 'cardinalityeq_', ['SET', 'SET'], 1.0)
-grammar.add_rule('BOOL', 'cardinalitygt_', ['SET', 'SET'], 1.0)
-#grammar.add_rule('BOOL', 'cardinalityeq_', ['SET', 'CARD'], 1.0)
-#grammar.add_rule('BOOL', 'cardinalitygt_', ['SET', 'CARD'], 1.0)
-#grammar.add_rule('BOOL', 'cardinalitygt_', ['CARD', 'SET'], 1.0)
-###grammar.add_rule('CARD', 'cardinality_', ['SET'], 1.0)
-
-##grammar.add_rule('CARD',  '0', None, 1.0)
-#grammar.add_rule('CARD',  '1', None, 1.0)
-#grammar.add_rule('CARD',  '2', None, 1.0)
-#grammar.add_rule('CARD',  '3', None, 1.0)
-#grammar.add_rule('CARD',  '4', None, 1.0)
-#grammar.add_rule('CARD',  '5', None, 1.0)
-#grammar.add_rule('CARD',  '6', None, 1.0)
-#grammar.add_rule('CARD',  '7', None, 1.0)
-#grammar.add_rule('CARD',  '8', None, 1.0)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -143,18 +78,6 @@ for adb in xrange(APD_N):
 
 TESTING_SET = [MyContext(A=x[0], B=x[1], S=x[2]) for x in all_possible_context_sets] # [ sample_context_set() for x in xrange(TESTING_SET_SIZE)  ]
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## Functions for gricean
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-def make_my_hypothesis():
-    return LOTHypothesis(grammar, args=['context'])
-
-from cachetools import lru_cache
-
-@lru_cache
-def my_weight_function(h):
-    return gricean_weight(h, TESTING_SET)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Define the target
@@ -184,3 +107,6 @@ target = GriceanQuantifierLexicon(make_my_hypothesis, my_weight_function)
 
 for w, f in target_functions.items():
     target.set_word(w, LOTHypothesis(grammar, value='SET_IN_TARGET', f=f))
+
+
+

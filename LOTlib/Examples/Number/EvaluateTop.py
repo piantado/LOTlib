@@ -4,7 +4,7 @@
 """
 
 import pickle
-from Inference import *
+from Utilities import *
 
 LARGE_DATA_SIZE = 1000
 

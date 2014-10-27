@@ -21,7 +21,7 @@ from optparse import OptionParser
 
 import numpy as np
 
-from LOTlib.Examples.Quantifier.Model.Shared import *
+from LOTlib.Examples.Quantifier.Model import *
 from Utilities import *
 from LOTlib.Miscellaneous import logsumexp
 

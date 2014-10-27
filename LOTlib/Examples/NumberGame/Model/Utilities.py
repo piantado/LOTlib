@@ -65,7 +65,7 @@ def random_sample_old(grammar, input_data, n=10000, alpha=0.9):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 def prob_data_rule(grammar, rule, data, p, num_iters=10000, alpha=0.9):
-    """Return the probabilities of set of data given p for a given rule."""
+    """Return the probabilities of set of data given a single p value for a rule."""
     orig_p = rule.p
     rule.p = p
     p_human = 0
@@ -102,10 +102,12 @@ def probs_data_rule(grammar, rule, data, probs=np.arange(0, 2, 0.2), num_iters=1
         p_human = 0
         for d in data:
             # get probability of producing this data pair, add to total
-            p_human_d = prob_data(grammar, d[0], d[1], num_iters, alpha)
-            p_human = logplusexp(p_human, p_human_d)
+            p_d = prob_data(grammar, d[0], d[1], num_iters, alpha)
+            p_human = logplusexp(p_human, p_d)
+            print '%'*50
+            print p_human
         dist.append(p_human)
-
+        print '!'*70
     rule.p = orig_p
     return dist
 
@@ -123,15 +125,18 @@ def prob_data(grammar, input_data, output_data, num_iters=10000, alpha=0.9):
 
     """
     model_likelihoods = likelihood_data(grammar, input_data, output_data, num_iters, alpha)
-    p_gen_human_data = {}
+    p_output = 0
+
     for o in output_data.keys():
         p = model_likelihoods[o]
         k = output_data[o][0]       # num. yes responses
         n = k + output_data[o][1]   # num. trials
         bc = factorial(n) / (factorial(k) * factorial(n-k))             # binomial coefficient
-        p_gen_human_data[o] = log(bc) + (k*p) + (n-k)*log1mexp(p)       # log version
+        p_o = log(bc) + (k*p) + (n-k)*log1mexp(p)                       # log version
+        p_output = logplusexp(p_output, p_o)
         # p_gen_human_data[o] = bc * pow(p, k) * pow(1-p, n-k)          # linear version
-    return p_gen_human_data
+
+    return p_output
 
 
 def likelihood_data(grammar, input_data, output_data, num_iters=10000, alpha=0.9):
@@ -150,6 +155,7 @@ def likelihood_data(grammar, input_data, output_data, num_iters=10000, alpha=0.9
     hypotheses = mh_sample(input_data, grammar=grammar, num_iters=num_iters, alpha=alpha)
     Z = normalizing_constant(hypotheses)
     likelihoods = defaultdict(lambda: -Infinity)
+
     for h in hypotheses:
         w = h.posterior_score - Z
         for o in output_data.keys():                # TODO: is this loop updating posterior_score each time?
@@ -157,6 +163,7 @@ def likelihood_data(grammar, input_data, output_data, num_iters=10000, alpha=0.9
             weighted_likelihood = h.compute_likelihood([o]) + w
             h.likelihood = old_likelihood
             likelihoods[0] = logplusexp(likelihoods[o], weighted_likelihood)
+
     return likelihoods
 
 
@@ -167,7 +174,7 @@ def get_rule(rule_name, rule_nt=None, grammar=G.grammar):
     else:
         rules = grammar.rules[rule_nt]
     rules = filter(lambda r: (r.name == rule_name), rules)   # there should only be 1 item in this list
-    rule = rules[0]
+    return rules[0]
 
 
 def visualize_probs(probs, dist, rule_name='RULE_'):

@@ -2,7 +2,7 @@
 """
         Demo MCMC through lexica. Generally does not work well (too slow) so use the vectorized Gibbs version.
 """
-from LOTlib.Examples.Quantifier.Model.Shared import *
+from LOTlib.Examples.Quantifier.Model.Inference import *
 
 show_baseline_distribution(TESTING_SET)
 print "\n\n"

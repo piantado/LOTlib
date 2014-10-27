@@ -7,7 +7,7 @@ from LOTlib.Miscellaneous import *
 
 
 def show_baseline_distribution(testing_set, N=1000):
-    from LOTlib.Examples.Quantifier.Model.Shared import generate_data, target
+    from LOTlib.Examples.Quantifier.Model.Inference import generate_data, target
 
     d = generate_data(N)
 

@@ -5,7 +5,7 @@
 """
 import sys
 
-from Inference import *
+from Utilities import *
 
 OUT = "data/all_trees_2012May2.pkl"
 DEPTH = 3
