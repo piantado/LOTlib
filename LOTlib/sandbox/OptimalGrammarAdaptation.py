@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-        An experimental adaptive method, that runs a bunch of standard mcmc in order to find tree parts that tend to be used in
+        An experimental adaptive method, that out a bunch of standard mcmc in order to find tree parts that tend to be used in
         good grammars.
 
         TODO: FIX MULTIPLE COUNTS ON PARTIAL MATCHES MATCHING THEMSELVES. Here we restrict to one match per tree, which is stupid.

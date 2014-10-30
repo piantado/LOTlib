@@ -5,7 +5,7 @@ follows the standards in https://docs.python.org/2/library/unittest.html
 
 import unittest
 
-from LOTlib.Examples.RationalRules.Inference-memory-decay import *
+from LOTlib.Examples.RationalRules.Run-memory-decay import *
 class runmemorydecayTest(unittest.TestCase):
 
     # initialization that happens before each test is carried out

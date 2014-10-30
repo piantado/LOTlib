@@ -3,7 +3,7 @@
 #import psyco
 #psyco.full()
 
-from Global import *
+from Utilities import *
 from LOTlib.EnumerativeSearch import *
 
 show_baseline_distribution()

@@ -1,1 +1,1 @@
-__author__ = 'eric'
+from Model import *

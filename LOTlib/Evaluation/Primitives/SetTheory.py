@@ -1,4 +1,6 @@
 from Primitives import LOTlib_primitive
+from LOTlib.Miscellaneous import Infinity
+from math import isnan, isinf
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Set-theoretic primitives
@@ -116,7 +118,10 @@ def diff_(S, p):
     return S.difference(set(p))
 
 @LOTlib_primitive
-def range_(x,y):
-    return range(x,y+1)
+def range_set_(x, y, bound=Infinity):
+    if y<x or y-x > bound or isnan(x) or isnan(y) or isinf(x) or isinf(y):
+        return set() # Or None?
+    else:
+        return set(range(x, y+1))
 
 

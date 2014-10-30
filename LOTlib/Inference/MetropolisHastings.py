@@ -3,31 +3,35 @@ import LOTlib
 from LOTlib.Miscellaneous import q, qq, Infinity
 from MHShared import MH_acceptance
 
+
 class MHSampler():
-    """
-            A class to implement MH sampling. You can create a sampler object::
+    """A class to implement MH sampling.
 
-                    from LOTlib.Examples.Number.Shared import generate_data, NumberExpression, grammar
-                    data = generate_data(500)
-                    h0 = NumberExpression(grammar)
-                    sampler = MHSampler(h0, data, 10000)
-                    for h in sampler:
-                            print sampler.acceptance_ratio(), h
+    You can create a sampler object::
+        from LOTlib.Examples.Number.Shared import generate_data, NumberExpression, grammar
+        data = generate_data(500)
+        h0 = NumberExpression(grammar)
+        sampler = MHSampler(h0, data, 10000)
+        for h in sampler:
+            print sampler.acceptance_ratio(), h
 
-            Or implicitly::
-                    from LOTlib.Examples.Number.Shared import generate_data, NumberExpression, grammar
-                    data = generate_data(500)
-                    h0 = NumberExpression(grammar)
-                    for h in  MHSampler(h0, data, 10000):
-                            print h
+    Or implicitly::
+        from LOTlib.Examples.Number.Shared import generate_data, NumberExpression, grammar
+        data = generate_data(500)
+        h0 = NumberExpression(grammar)
+        for h in  MHSampler(h0, data, 10000):
+            print h
 
-            A wrapper below called mh_sample is provided to maintain backward compatibility. But mh_sample will be removed in the future.
+    Note:
+        A wrapper below called mh_sample is provided to maintain backward compatibility. But mh_sample
+        will be removed in the future.
 
-            If a proposer is specific in __init__, it should return a *new copy* of the object
+    Returns:
+        If a proposer is specific in __init__, it should return a *new copy* of the object
     """
     def __init__(self, current_sample, data, steps=Infinity, proposer=None, skip=0, prior_temperature=1.0, likelihood_temperature=1.0, acceptance_temperature=1.0, trace=False):
         """
-            *current_sample* -- if None, we don't compute it's posterior (via set_state); otherwise we do. 
+        *current_sample* -- if None, we don't compute it's posterior (via set_state); otherwise we do.
         """
         self.__dict__.update(locals())
 
@@ -47,25 +51,25 @@ class MHSampler():
 
     def set_state(self, x, compute_posterior=True):
         """
-            Set the current state, computing the posterior if needed
+        Set the current state, computing the posterior if needed
         """
         
         self.current_sample = x
         
         if compute_posterior:
             self.current_sample.compute_posterior(self.data)
-            
-        
+
+
     def reset_counters(self):
         """
-                Reset our acceptance and proposal counters
+        Reset our acceptance and proposal counters
         """
         self.acceptance_count = 0
         self.proposal_count = 0
 
     def acceptance_ratio(self):
         """
-                Returns the proportion of proposals that have been accepted
+        Returns the proportion of proposals that have been accepted
         """
         return float(self.acceptance_count) / float(self.proposal_count)
 
@@ -129,7 +133,7 @@ class MHSampler():
 
 class mh_sample(MHSampler):
     """
-            Just temporarily, this will prevent code from breaking, from the switch to MHSampler
+    Just temporarily, this will prevent code from breaking, from the switch to MHSampler
     """
     pass
 

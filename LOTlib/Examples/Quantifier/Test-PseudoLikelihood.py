@@ -7,7 +7,7 @@
         That the truth values of X are not enough to determine meaning if the subset problem is there....
 """
 
-from Shared import *
+from LOTlib.Examples.Quantifier.Model.Inference import *
 
 ALPHA = 0.9
 SAMPLES = 100000

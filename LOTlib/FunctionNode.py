@@ -34,6 +34,48 @@ def cleanFunctionNodeString(x):
     s = re.sub("_", '', s)  # remove underscores
     return s
 
+
+
+def DOTstring(x, d=0, bv_names=None):
+    """
+    Outputs a string in (lambda (x) (+ x 3)) format.
+
+    """
+
+    if d == 0:
+        return 'digraph g {'+DOTstring(x,d=1)+'\n}'
+
+    if isinstance(x, str):
+        return x
+    elif isFunctionNode(x):
+
+        if bv_names is None:
+            bv_names = dict()
+
+        name = x.name
+        if isinstance(x, BVUseFunctionNode):
+            name = bv_names.get(x.name, x.name)
+
+        if x.args is None:
+            s = name+';\n'
+            return name
+        else:
+            if x.args is None:
+                return name
+            elif isinstance(x, BVAddFunctionNode):
+                assert name is 'lambda'
+                s = name + ';\n\t'
+                s = s+added_rule.name+';\n\t'
+                s = s+map(lambda a: DOTstring(a,d+1,bv_names=bv_names), x.args)+';\n\t'
+                return s
+                # return "(%s (%s) %s)" % (name, x.added_rule.name, map(lambda a: DOTstring(a,d+1,bv_names=bv_names), x.args))
+            else:
+                s = name + ';\n\t'
+                s = s+map(lambda a: DOTstring(a,d+1,bv_names=bv_names), x.args)+';\n\t'
+                return s
+                # return "(%s %s)" % (name, map(lambda a: DOTstring(a,d+1,bv_names=bv_names), x.args))
+
+
 """
 ==============================================================================================================================================
 == String casting functions

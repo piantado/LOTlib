@@ -1,5 +1,5 @@
 from Primitives import LOTlib_primitive
-from LOTlib.Miscellaneous import flip
+from LOTlib.Miscellaneous import flip, Infinity
 import numpy
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -12,7 +12,7 @@ def flip_(p=0.5):
 
 @LOTlib_primitive
 def binomial_(n, p):
-    if isinstance(n, int) and n > 0 and 0. <= p <= 1:
-        return numpy.random.binomial(n, p)
+    if 0 < n < Infinity and 0. <= p <= 1 and (isinstance(n, int) or n.is_integer()):
+        return numpy.random.binomial(int(n), p)
     else:
         return float("nan")

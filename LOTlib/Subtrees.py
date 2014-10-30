@@ -98,7 +98,7 @@ def trim_leaves_(t):
 if __name__ == '__main__':
 
 
-    from LOTlib.Examples.Number.Global import *
+    from LOTlib.Examples.Number.Model.Inference import *
 
     #for t in generate_unique_trees(grammar, start='WORD'): print t
 

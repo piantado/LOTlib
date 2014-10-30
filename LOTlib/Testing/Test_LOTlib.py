@@ -4,7 +4,7 @@
 import unittest
 import importlib # http://stackoverflow.com/questions/8718885/import-module-from-string-variable
 
-# runs all tests in a testing file
+# out all tests in a testing file
 def test_module(module):
     res = unittest.TestResult()
     # import the package package

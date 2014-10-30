@@ -1,7 +1,5 @@
 """
-
-    Data generation for symbolic regression
-
+Data generation for symbolic regression
 """
 
 from random import random
@@ -9,9 +7,9 @@ from numpy.random import normal
 
 from LOTlib.DataAndObjects import FunctionData
 
-# Make up some learning data for the symbolic regression
-def generate_data(target, data_size, sd):
 
+def generate_data(target, data_size, sd):
+    """Make up some learning data for the symbolic regression."""
     # initialize the data
     data = []
     for i in range(data_size):
