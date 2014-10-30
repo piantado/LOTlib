@@ -14,7 +14,7 @@ LOTlib_VERSION = "0.2.0"
 
 import signal
 import sys
-from Utilities.MetropolisHastings import MHSampler, mh_sample
+from Inference.MetropolisHastings import MHSampler, mh_sample
 from DataAndObjects import FunctionData, UtteranceData, make_all_objects
 
 SIG_INTERRUPTED = False
