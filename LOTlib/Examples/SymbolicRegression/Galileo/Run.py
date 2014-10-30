@@ -5,7 +5,7 @@ from LOTlib.Inference.MetropolisHastings import mh_sample
 from LOTlib.Miscellaneous import qq
 from Data import data
 from Grammar import grammar
-from Inference import make_h0
+from Utilities import make_h0
 
 """
 This uses Galileo's data on a falling ball.

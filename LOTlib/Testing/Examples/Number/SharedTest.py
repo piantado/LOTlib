@@ -5,7 +5,7 @@ follows the standards in https://docs.python.org/2/library/unittest.html
 
 import unittest
 
-from LOTlib.Examples.Number.Model.Inference import *
+from LOTlib.Examples.Number.Model.Utilities import *
 class SharedTest(unittest.TestCase):
 
     # initialization that happens before each test is carried out

@@ -4,7 +4,7 @@
 """
 
 import pickle
-from Utilities import *
+from ..Model import *
 
 LARGE_DATA_SIZE = 1000
 

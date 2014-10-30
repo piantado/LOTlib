@@ -1,5 +1,6 @@
 import re
-from Specification import *
+from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+from Grammar import grammar
 
 # What are the objects we may use?
 OBJECTS              = ['JOHN', 'MARY', 'SUSAN', 'BILL']
@@ -26,3 +27,8 @@ def can_compose(a,b):
 
         if afrom == b: return ato
         else:          return None
+
+
+# How we make a hypothesis inside the lexicon
+def make_hypothesis():
+    return LOTHypothesis(grammar, args=['C'])

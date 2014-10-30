@@ -8,13 +8,14 @@ To install on my system, I had to build mpich2, mpi4py and set up ubuntu with th
 
 To run on MPI:
 $time mpiexec -hostfile /home/piantado/Libraries/LOTlib/hosts.mpich2 -n 36 python Run.py --steps=10000 --top=50 --chains=25 --large=1000 --dmin=0 --dmax=300 --dstep=10 --mpi --out=/home/mpiu/tmp.pkl
+
 """
 import LOTlib
 from LOTlib import lot_iter
-from LOTlib.Examples.Number.Model import Inference
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from SimpleMPI.MPI_map import MPI_map, is_master_process
+from ..Model import *
 
 ## Parse command line options:
 from optparse import OptionParser
@@ -52,10 +53,10 @@ def run(data_size):
     if LOTlib.SIG_INTERRUPTED: return [] # Put this here else we waste time making data for everything that isn't run
 
     # initialize the data
-    data = Inference.generate_data(data_size)
+    data = generate_data(data_size)
 
     # starting hypothesis -- here this generates at random
-    h0 = Inference.make_h0()
+    h0 = Utilities.make_h0()
 
     hyps = FiniteBestSet(max=True, N=options.TOP_COUNT, key="posterior_score")
     
@@ -67,7 +68,7 @@ def run(data_size):
 # Main running
 
 if is_master_process():
-    Inference.display_option_summary(options)
+    display_option_summary(options)
 
 # choose the appropriate map function
 allret = MPI_map(run, map(lambda x: [x], options.DATA_AMOUNTS * options.CHAINS))
@@ -84,7 +85,7 @@ with open(options.OUT_PATH, 'w') as f:
 if options.LARGE_DATA_SIZE > 0 and is_master_process():
 
     #now evaluate on different amounts of data too:
-    huge_data = Inference.generate_data(options.LARGE_DATA_SIZE)
+    huge_data = generate_data(options.LARGE_DATA_SIZE)
 
     H = allfs.get_all()
     [h.compute_posterior(huge_data) for h in H]
@@ -92,4 +93,4 @@ if options.LARGE_DATA_SIZE > 0 and is_master_process():
     # show the *average* ll for each hypothesis
     for h in lot_iter(H):
         if h.prior > float("-inf"):
-            print h.prior, h.likelihood/float(options.LARGE_DATA_SIZE), Inference.q(Inference.get_knower_pattern(h)),  Inference.q(h) # a quoted x
+            print h.prior, h.likelihood/float(options.LARGE_DATA_SIZE), Utilities.q(Utilities.get_knower_pattern(h)),  Utilities.q(h) # a quoted x

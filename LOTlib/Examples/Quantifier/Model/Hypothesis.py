@@ -1,4 +1,29 @@
 
+from LOTlib.Hypotheses.WeightedLexicon import WeightedLexicon
+from copy import copy
+from Utilities import make_my_hypothesis    # TODO: on line 18, maybe this is what make_hypothesis should be?
+
+
+class GriceanQuantifierLexicon(WeightedLexicon):
+    """A simple class that always fixes our generating function to LOTHypothesis.
+
+        A weighted lexicon that evaluates the probability of a word depending on how likely it is to be used
+        in a random (average) testing set.
+
+    """
+    def __init__(self, make_hypothesis, my_weight_function, alpha=0.9, palpha=0.9):
+        WeightedLexicon.__init__(self, make_hypothesis, alpha=alpha, palpha=palpha)
+        self.my_weight_function = my_weight_function
+
+    def __copy__(self):
+        new = type(self)(self.make_hypothesis, self.my_weight_function, alpha=self.alpha, palpha=self.palpha)
+        for w in self.value.keys():
+            new.value[w] = copy(self.value[w])
+        return new
+
+    def weightfunction(self, u, context):
+        return self.my_weight_function(self.value[u])
+
 
 class MyContext(object):
     """Store a context."""

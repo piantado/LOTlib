@@ -1,8 +1,8 @@
 
 """
-        An example of generating quantified logic with lambdas. See FOL.py for inference about first-order logic
-"""
+An example of generating quantified logic with lambdas. See FOL.py for inference about first-order logic.
 
+"""
 from LOTlib.Grammar import Grammar
 
 # Create a  grammar:

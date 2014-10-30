@@ -2,10 +2,11 @@
 
 """
 Use optimal adaptation code to adapt show possible adpatations to the Number grammar.
+
 """
 
 import pickle
-import Model.Inference as I
+from ..Model import *
 from LOTlib.sandbox.OptimalGrammarAdaptation import print_subtree_adaptations
 
 ## Set up how much data we want
@@ -28,8 +29,8 @@ print "# Rescored hypotheses!"
 subtrees = set()
 for h in I.lot_iter(hypotheses):
     for x in h.value: # for each subtree
-        for i in xrange(I.N_SUBTREES_PER_NODE):  #take subtree_multiplier random partial subtrees
-            subtrees.add(   x.random_partial_subtree(p=I.SUBTREE_P)   )
+        for i in xrange(Utilities.N_SUBTREES_PER_NODE):  #take subtree_multiplier random partial subtrees
+            subtrees.add(   x.random_partial_subtree(p=Utilities.SUBTREE_P)   )
 print "# Generated", len(subtrees), "subtrees"
 
 ## And call from OptimalGrammarAdaptation

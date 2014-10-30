@@ -1,4 +1,4 @@
 
-from Data import data
+from Data import data, NDATA
 from Grammar import grammar
 import Data, Grammar

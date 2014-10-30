@@ -358,7 +358,7 @@ if __name__ == "__main__":
     #from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar
     #from LOTlib.Examples.Number.Shared import grammar
    # from LOTlib.Examples.RegularExpression.Shared import grammar
-    from LOTlib.Examples.Magnetism.Simple.Global import grammar
+    from LOTlib.Examples.Magnetism.Simple.Run import grammar
 
     """
     grammar = Grammar()

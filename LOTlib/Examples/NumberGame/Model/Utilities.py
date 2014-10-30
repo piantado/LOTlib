@@ -2,11 +2,10 @@ from math import factorial, log
 from collections import defaultdict
 import numpy as np
 import matplotlib.pyplot as plt
-from LOTlib.Examples.NumberGame.Model import Grammar as G
 from LOTlib.Miscellaneous import logsumexp, logplusexp, Infinity, log1mexp
 from LOTlib.Inference.MetropolisHastings import MHSampler
-from LOTlib.Inference.PriorSample import prior_sample       # keep this
-import Hypothesis
+from LOTlib.Inference.PriorSample import prior_sample
+import Grammar as G, Hypothesis
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -143,9 +142,6 @@ def likelihood_data(grammar, input_data, output_data, num_iters=10000, alpha=0.9
     """Generate a set of hypotheses, and use these to estimate likelihood of generating the human data.
 
     This is taken as a weighted sum over all hypotheses.
-
-    Args:
-        see docstring for prob_gen_data
 
     Returns:
         dict: Each output key returns the summed likelihood of that single data point. Keys are the same as

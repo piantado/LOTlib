@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-        Try a pseudolikelihood -- score just present/absent for each word, ignoring the size principle.
-        This does terribly.. you really need a full size principle likelihood.
+Try a pseudolikelihood -- score just present/absent for each word, ignoring the size principle.
+This does terribly.. you really need a full size principle likelihood.
 
-        We could probably prove that any likelihood function that does not consider alternatives will not arrive at the correct set of meanings. Any function only of the truth value, which does not include others, will fail...
-        That the truth values of X are not enough to determine meaning if the subset problem is there....
+We could probably prove that any likelihood function that does not consider alternatives will not arrive at the correct set of meanings. Any function only of the truth value, which does not include others, will fail...
+That the truth values of X are not enough to determine meaning if the subset problem is there....
+
 """
-
-from LOTlib.Examples.Quantifier.Model.Inference import *
+import LOTlib
+from LOTlib.FiniteBestSet import FiniteBestSet
+from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+from ..Model import *
 
 ALPHA = 0.9
 SAMPLES = 100000

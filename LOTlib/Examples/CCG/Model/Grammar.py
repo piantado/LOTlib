@@ -1,8 +1,7 @@
 
 from LOTlib.Grammar import Grammar
 from LOTlib.Miscellaneous import qq
-from Global import OBJECTS, SEMANTIC_1PREDICATES, SEMANTIC_2PREDICATES
-
+from Utilities import OBJECTS, SEMANTIC_1PREDICATES, SEMANTIC_2PREDICATES
 
 grammar = Grammar()
 
@@ -31,9 +30,3 @@ grammar.add_rule('BOOL', 'not_', ['BOOL'], 1.0)
 grammar.add_rule('FUNCTION', 'lambda', ['START'], 1.0, bv_type='OBJECT')
 grammar.add_rule('FUNCTION', 'lambda', ['START'], 1.0, bv_type='BOOL', bv_args=['OBJECT'])
 grammar.add_rule('FUNCTION', 'lambda', ['START'], 1.0, bv_type='BOOL', bv_args=['OBJECT', 'OBJECT'])
-
-from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-
-# How we make a hypothesis inside the lexicon
-def make_hypothesis():
-    return LOTHypothesis(grammar, args=['C'])

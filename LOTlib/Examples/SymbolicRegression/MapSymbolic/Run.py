@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """
 Symbolic regression that fits parameters using a MAP estimate of the continuous parameters.
-We put a simple bayesian prior on these constants, and use it to compute MAPs
-"""
 
+We put a simple bayesian prior on these constants, and use it to compute MAPs.
+
+"""
 import numpy
 from math import sin
-
 from LOTlib.Miscellaneous import qq
-from LOTlib.Examples.SymbolicRegression.Grammar import grammar, NCONSTANTS
+from ..Grammar import grammar, NCONSTANTS
 from Hypothesis import MAPSymbolicRegressionHypothesis
 from Data import generate_data
 

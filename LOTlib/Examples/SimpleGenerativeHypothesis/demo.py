@@ -10,8 +10,7 @@
 from LOTlib import lot_iter
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Hypotheses.SimpleGenerativeHypothesis import SimpleGenerativeHypothesis
-from Model.Data import data
-from Model.Grammar import grammar
+from Model import *
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #

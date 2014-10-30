@@ -44,7 +44,7 @@ def datawise_optimize(current_sample, data, steps=1000000, inner_steps=10, data_
 
 if __name__ == "__main__":
 
-    from LOTlib.Examples.Number.Model.Inference import *
+    from LOTlib.Examples.Number.Model.Utilities import *
     from copy import copy
 
     data = generate_data(200)
