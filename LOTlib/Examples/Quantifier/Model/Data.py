@@ -1,63 +1,30 @@
+"""
+Attributes defined here:
+    - all_objects
+    - TESTING_SET_SIZE
+    - TESTING_SET
+    - target_functions
+    - target
+    - sample_context
+    - generate_data
 
-
-
-
-from LOTlib import lot_iter
-
-
-from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-from LOTlib.Inference.MetropolisHastings import mh_sample
-from LOTlib.Miscellaneous import *
-from LOTlib.DataAndObjects import *
-from LOTlib.FunctionNode import FunctionNode
-from LOTlib.FiniteBestSet import FiniteBestSet
-
+"""
 from random import randint
-from copy import copy
+from LOTlib import lot_iter
+from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+from LOTlib.DataAndObjects import *
+from LOTlib.Evaluation.Primitives.SetTheory import *
+from LOTlib.Primitives.Semantics import *
+from Utilities import make_my_hypothesis, my_weight_function
+import Hypothesis as H, Grammar as G
 
-from GriceanWeightedLexicon import *
-from Utilities import *
-
-import Hypothesis as H
-
-############################################################
-# Making data, sets, and objects
 
 # quantifiers involving cardinality
 all_objects = make_all_objects(shape=['man', 'woman', 'child'], job=['pirate', 'chef', 'fireman'])
 
-def sample_context():
-
-    set_size = randint(1,8) # the i'th data point
-    #set_size =  weighted_sample( range(1,10+1), probs=[7187, 1484, 593, 334, 297, 165, 151, 86, 105, 112] ) # for the number-style probabilities
-
-    # get the objects in the current set
-    si = sample_sets_of_objects(set_size, all_objects)
-
-    return H.MyContext( A=set([o for o in si if o.shape=='man']),\
-                      B=set([o for o in si if o.job=='pirate']),\
-                      S=set(si))
-
-def generate_data(data_size):
-
-    all_words = target.all_words()
-
-    data = []
-    for i in lot_iter(xrange(data_size)):
-
-        # a context is a set of men, pirates, and everything. functions are applied to this to get truth values
-        context = sample_context()
-
-        word = target.sample_utterance(all_words, context)
-
-        data.append( UtteranceData(utterance=word, context=context, possible_utterances=all_words) )
-
-    return data
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## Define a test set -- for doign Gricean things
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~ Define a test set -- for doing Gricean things ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 TESTING_SET_SIZE = 1000
 
 # create a small list of all plausible context sets.
@@ -75,38 +42,81 @@ for adb in xrange(APD_N):
 
                 all_possible_context_sets.append( [adb_.union(anb_), bda_.union(anb_), s_])
 
+# [sample_context_set() for x in xrange(TESTING_SET_SIZE)]
+TESTING_SET = [H.MyContext(A=x[0], B=x[1], S=x[2]) for x in all_possible_context_sets]
 
-TESTING_SET = [MyContext(A=x[0], B=x[1], S=x[2]) for x in all_possible_context_sets] # [ sample_context_set() for x in xrange(TESTING_SET_SIZE)  ]
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~ Define target ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## Define the target
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Write this out as a dictionary so that we can load it into a GriceanSimpleLexicon easier
+target_functions = {
+    'every': lambda context: presup_(
+        nonempty_(context.A), subset_(context.A, context.B)),
+    'some': lambda context: presup_(
+        nonempty_(context.A), nonempty_(intersection_(context.A, context.B))),
+    'a': lambda context: presup_(
+        True, nonempty_(intersection_(context.A, context.B))),
+    'the': lambda context: presup_(
+        cardinality1_(context.A), subset_(context.A, context.B)),
+    'no': lambda context: presup_(
+        nonempty_(context.A), empty_(intersection_(context.A, context.B))),
+    'both': lambda context: presup_(
+        cardinality2_(context.A), subset_(context.A, context.B)),
+    'neither': lambda context: presup_(
+        cardinality2_(context.A), empty_(intersection_(context.A, context.B))),
 
-from LOTlib.Primitives.Semantics import *
-## Write this out as a dictionary so that we can load it into a GriceanSimpleLexicon easier
-target_functions = { 'every' : lambda context: presup_(nonempty_(context.A), subset_(context.A,context.B)),\
-                     'some'  : lambda context: presup_(nonempty_(context.A), nonempty_(intersection_(context.A,context.B))),\
-                     'a': lambda context: presup_(True, nonempty_(intersection_(context.A,context.B))),\
-                     'the': lambda context: presup_(cardinality1_(context.A), subset_(context.A,context.B)),\
-                     'no': lambda context: presup_(nonempty_(context.A), empty_(intersection_(context.A,context.B))),\
-                     'both': lambda context: presup_(cardinality2_(context.A), subset_(context.A,context.B)),\
-                     'neither':lambda context: presup_(cardinality2_(context.A), empty_(intersection_(context.A,context.B))),\
-                     #'either': lambda context: presup_(cardinality2_(context.A), cardinality1_(intersection_(context.A,context.B))),\
-                     #'one':lambda context: presup_(True, cardinality1_(intersection_(context.A,context.B))),\
-                     #'two':lambda context: presup_(True, cardinality2_(intersection_(context.A,context.B))),\
-                     #'three':lambda context: presup_(True, cardinality3_(intersection_(context.A,context.B))),\
-                     #'most':lambda context: presup_(nonempty_(context.A), cardinalitygt_(intersection_(context.A,context.B), setdifference_(context.A,context.B)))
+    # 'either': lambda context: presup_(
+    #     cardinality2_(context.A), cardinality1_(intersection_(context.A, context.B))),
+    # 'one': lambda context: presup_(
+    #     True, cardinality1_(intersection_(context.A, context.B))),
+    # 'two': lambda context: presup_(
+    #     True, cardinality2_(intersection_(context.A, context.B))),
+    # 'three': lambda context: presup_(
+    #     True, cardinality3_(intersection_(context.A, context.B))),
+    # 'most': lambda context: presup_(
+    #     nonempty_(context.A), cardinalitygt_(intersection_(context.A, context.B),
+    #                                                  setdifference_(context.A, context.B))),
+    #
+    # 'few': lambda context: presup_(
+    #     True, cardinalitygt_(3, intersection_(context.A, context.B))),
+    # 'many': lambda context: presup_(
+    #     True, cardinalitygt_(intersection_(context.A, context.B), 3)),
+    # 'half': lambda context: presup_(
+    #     nonempty_(context.A), cardinalityeq_(intersection_(context.A, context.B),
+    #                                          setdifference_(context.A, context.B)))
+}
 
-                     #'few':lambda context: presup_(True, cardinalitygt_(3, intersection_(context.A,context.B))),
-                     #'many':lambda context: presup_(True, cardinalitygt_(intersection_(context.A,context.B), 3)),
-                     #'half':lambda context: presup_(nonempty_(context.A), cardinalityeq_(intersection_(context.A,context.B), setdifference_(context.A,context.B)))
-                     }
-
-target = GriceanQuantifierLexicon(make_my_hypothesis, my_weight_function)
+target = H.GriceanQuantifierLexicon(make_my_hypothesis, my_weight_function)
 
 for w, f in target_functions.items():
-    target.set_word(w, LOTHypothesis(grammar, value='SET_IN_TARGET', f=f))
+    target.set_word(w, LOTHypothesis(G.grammar, value='SET_IN_TARGET', f=f))
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~ Generate data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+def sample_context():
+    set_size = randint(1,8)                             # the i'th data point
+#    set_size =  weighted_sample( range(1,10+1),        # for the number-style probabilities
+#                                 probs=[7187, 1484, 593, 334, 297, 165, 151, 86, 105, 112] )
+    si = sample_sets_of_objects(set_size, all_objects)  # get the objects in the current set
+    return H.MyContext(A=set([o for o in si if o.shape == 'man']),
+                       B=set([o for o in si if o.job == 'pirate']),
+                       S=set(si))
+
+
+def generate_data(data_size):
+    all_words = target.all_words()
+    data = []
+
+    for i in lot_iter(xrange(data_size)):
+        # a context is a set of men, pirates, and everything. functions are applied to this to get truth values
+        context = sample_context()
+        word = target.sample_utterance(all_words, context)
+        data.append( UtteranceData(utterance=word, context=context, possible_utterances=all_words) )
+
+    return data
 

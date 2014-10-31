@@ -1,12 +1,17 @@
+"""
+TODOS:
+    - likelihood_data: see comment
+
+"""
+
 from math import factorial, log
 from collections import defaultdict
 import numpy as np
 import matplotlib.pyplot as plt
-from LOTlib.Examples.NumberGame.Model import Grammar as G
 from LOTlib.Miscellaneous import logsumexp, logplusexp, Infinity, log1mexp
 from LOTlib.Inference.MetropolisHastings import MHSampler
-from LOTlib.Inference.PriorSample import prior_sample       # keep this
-import Hypothesis
+from LOTlib.Inference.PriorSample import prior_sample
+import Grammar as G, Hypothesis
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -99,15 +104,16 @@ def probs_data_rule(grammar, rule, data, probs=np.arange(0, 2, 0.2), num_iters=1
     orig_p = rule.p
     for p in probs:
         rule.p = p
-        p_human = 0
+        p_human = -Infinity
         for d in data:
             # get probability of producing this data pair, add to total
             p_d = prob_data(grammar, d[0], d[1], num_iters, alpha)
             p_human = logplusexp(p_human, p_d)
-            print '%'*50
-            print p_human
+            # print '%'*50 + ' data point'
+            # print p_d
+            # print p_human
         dist.append(p_human)
-        print '!'*70
+        # print '!'*70 + ' p = ' + str(p)
     rule.p = orig_p
     return dist
 
@@ -117,7 +123,7 @@ def prob_data(grammar, input_data, output_data, num_iters=10000, alpha=0.9):
 
     Args:
         grammar (LOTlib.Grammar): The grammar.
-        input_data (list): List of numbers, the likelihood of the model is initially computed with these.
+        input_data (list): List of integers, the likelihood of the model is initially computed with these.
         output_data (list): List of tuples corresponding to (# yes, # no) responses in human data.
 
     Returns:
@@ -125,7 +131,7 @@ def prob_data(grammar, input_data, output_data, num_iters=10000, alpha=0.9):
 
     """
     model_likelihoods = likelihood_data(grammar, input_data, output_data, num_iters, alpha)
-    p_output = 0
+    p_output = -Infinity
 
     for o in output_data.keys():
         p = model_likelihoods[o]
@@ -145,7 +151,8 @@ def likelihood_data(grammar, input_data, output_data, num_iters=10000, alpha=0.9
     This is taken as a weighted sum over all hypotheses.
 
     Args:
-        see docstring for prob_gen_data
+        input_data(list): List of input integers.
+        output_data(dict):
 
     Returns:
         dict: Each output key returns the summed likelihood of that single data point. Keys are the same as
@@ -158,11 +165,12 @@ def likelihood_data(grammar, input_data, output_data, num_iters=10000, alpha=0.9
 
     for h in hypotheses:
         w = h.posterior_score - Z
-        for o in output_data.keys():                # TODO: is this loop updating posterior_score each time?
+        for o in output_data.keys():
             old_likelihood = h.likelihood
+            # TODO: is h.compute_likelihood updating posterior_score each loop?
             weighted_likelihood = h.compute_likelihood([o]) + w
             h.likelihood = old_likelihood
-            likelihoods[0] = logplusexp(likelihoods[o], weighted_likelihood)
+            likelihoods[o] = logplusexp(likelihoods[o], weighted_likelihood)
 
     return likelihoods
 

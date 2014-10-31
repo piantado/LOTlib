@@ -77,7 +77,7 @@ class PartitionMCMC(MultipleChainMCMC):
 
 if __name__ == "__main__":
     
-    from LOTlib.Examples.Number.Model.Inference import grammar, make_h0, generate_data
+    from LOTlib.Examples.Number.Model.Utilities import grammar, make_h0, generate_data
     data = generate_data(300)
     
     #from LOTlib.Examples.RegularExpression.Shared import grammar, make_h0, data

@@ -1,29 +1,24 @@
 # -*- coding: utf-8 -*-
 
 """
-        This out after we search, taking the top hypotheses that were found and evaluating them on a bunch of new data
+This out after we search, taking the top hypotheses that were found and evaluating them on a bunch of new data
 
-        This outputs one set of lines for each word, for each amount of data. So when CHAINS=10,
+This outputs one set of lines for each word, for each amount of data. So when CHAINS=10,
 
-        MPI run:
-        $ mpiexec --hostfile ../../hosts.mpich2 -n 25 python Evaluate_MPI.py --dl=0 --chains=10
+MPI run:
+$ mpiexec --hostfile ../../hosts.mpich2 -n 25 python Evaluate_MPI.py --dl=0 --chains=10
 
-        TODO: Make sure this is what you want-- when your random data leads you to a hypothesis, this computes how
-              often that hypothesis agrees on NEW (or average) data -- how right the hypothesis is.
+TODO: Make sure this is what you want-- when your random data leads you to a hypothesis, this computes how
+      often that hypothesis agrees on NEW (or average) data -- how right the hypothesis is.
 
 
-        TODO: ADD OUTPUT OF THE TOP HYPOTHESES AT EAHC POINT IN TIME.
+TODO: ADD OUTPUT OF THE TOP HYPOTHESES AT EAHC POINT IN TIME.
 
 """
-
 from collections import defaultdict
 from optparse import OptionParser
-
-import numpy as np
-
-from LOTlib.Examples.Quantifier.Model import *
-from Utilities import *
 from LOTlib.Miscellaneous import logsumexp
+from ..Model import *
 
 
 DATA_RANGE = range(0, 2050, 100) # Don't need an option for this right now

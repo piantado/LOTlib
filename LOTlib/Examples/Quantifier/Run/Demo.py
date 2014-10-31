@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-        Demo MCMC through lexica. Generally does not work well (too slow) so use the vectorized Gibbs version.
+Demo MCMC through lexica. Generally does not work well (too slow) so use the vectorized Gibbs version.
+
 """
-from LOTlib.Examples.Quantifier.Model.Inference import *
+import re
+from LOTlib import mh_sample
+from ..Model import *
+
 
 show_baseline_distribution(TESTING_SET)
 print "\n\n"

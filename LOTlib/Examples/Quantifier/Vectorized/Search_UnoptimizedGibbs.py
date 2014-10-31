@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 
 """
-        A gibbs sampler version, but this does not cache all of the hypothesis responses. So it slower, but less memory.
-        This uses LOTlib.MetropolisHastings gibbs sampler, which calls enumerative proposer to sample.
-        Mainly for experimentation.
+A gibbs sampler version, but this does not cache all of the hypothesis responses. So it's slower,
+but uses less memory.
 
-        Here, we wrap a GriceanSimpleLexicon with an enumerative sampler for each word meaning
+This uses LOTlib.MetropolisHastings gibbs sampler, which calls enumerative proposer to sample.
+
+Note: Mainly for experimentation.
+
+Here, we wrap a GriceanSimpleLexicon with an enumerative sampler for each word meaning
 
 """
-import sys
-sys.path.append("..")
-from Utilities import *
+import pickle
+from ..Model import *
 
 IN_PATH = "data/all_trees_2012May2.pkl"
 STEPS = 10000
@@ -21,10 +23,12 @@ inh = open(IN_PATH)
 fs = pickle.load(inh)
 my_finite_trees = fs.get_all()
 
-## A kind of SimpleLexicon which can do word-wise gibbs sampling
+
 class GibbsyGriceanSimpleLexicon(GriceanSimpleLexicon):
-    """
-            Just overwrite enumerative_proposer to take a word, and sub in all meanings from our finite list
+    """A kind of SimpleLexicon which can do word-wise gibbs sampling.
+
+    Overwrite enumerative_proposer to take a word, and sub in all meanings from our finite list.
+
     """
     def enumerative_proposer(self, wd):
         for k in my_finite_trees:
@@ -32,9 +36,7 @@ class GibbsyGriceanSimpleLexicon(GriceanSimpleLexicon):
             new.set_word(wd, k)
             yield new
     def copy(self):
-        """
-                Overwritten to work correctly for this type!
-        """
+        """Overwritten to work correctly for this type!"""
         new = GibbsyGriceanSimpleLexicon(self.grammar, self.args, alpha=self.alpha, palpha=self.palpha)
         for w in self.lex.keys(): new.lex[w] = self.lex[w].copy()
         return new

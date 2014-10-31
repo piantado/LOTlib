@@ -1,7 +1,7 @@
 """
-        Just create some combinators and reduce them
-"""
+Just create some combinators and reduce them.
 
+"""
 from LOTlib.Grammar import Grammar
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 

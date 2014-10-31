@@ -6,7 +6,7 @@ Another way to do this would be to use a Lexicon and write a custom likelihood m
 
 from LOTlib.Hypotheses.RationalRulesLOTHypothesis import RationalRulesLOTHypothesis
 from LOTlib.Inference.MetropolisHastings import mh_sample
-from LOTlib.Examples.RationalRules.Model.Inference import grammar
+from LOTlib.Examples.RationalRules.Model.Utilities import grammar
 from Data import data
 
 

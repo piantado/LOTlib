@@ -40,10 +40,10 @@ elif options.MODEL == "Galileo":
 
 elif options.MODEL == "RationalRules":
 
-    from LOTlib.Examples.RationalRules.Model.Inference import grammar, data, make_h0
+    from LOTlib.Examples.RationalRules.Model.Utilities import grammar, data, make_h0
 
 elif options.MODEL == "SimpleMagnetism":
-    from LOTlib.Examples.Magnetism.Simple.Global import grammar, data, make_h0
+    from LOTlib.Examples.Magnetism.Simple.Run import grammar, data, make_h0
 
 elif options.MODEL == "RegularExpression":
     from LOTlib.Examples.RegularExpression.Model.Inference import grammar, data, make_h0

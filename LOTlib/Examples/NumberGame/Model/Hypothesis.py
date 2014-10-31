@@ -1,3 +1,4 @@
+
 from math import log
 import numpy
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis

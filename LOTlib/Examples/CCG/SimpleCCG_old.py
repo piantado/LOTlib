@@ -8,17 +8,14 @@
 
 """
 
-import re
-
 from LOTlib import lot_iter
-from LOTlib.Miscellaneous import qq
 from LOTlib.FiniteBestSet import FiniteBestSet
-from Specification import CCGLexicon
-from Grammar import make_hypothesis
+from LOTlib.Examples.CCG.Model.Hypothesis import CCGLexicon
+from LOTlib.Examples.CCG.Model.Grammar import make_hypothesis
 
 
 
-from Data import all_words, data
+from LOTlib.Examples.CCG.Model.Data import all_words, data
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 SAMPLES = 100000

@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 
 """
-        All out rational-rules style gibbs on lexicons.
-        For MPI or local.
-        This is much slower than the vectorized versions.
+All out rational-rules style gibbs on lexicons.
+For MPI or local.
+This is much slower than the vectorized versions.
 
-        MPI run:
-        $ mpiexec --hostfile ../../hosts.mpich2 -n 15 python Search_MCMC.py
+MPI run:
+$ mpiexec --hostfile ../../hosts.mpich2 -n 15 python Search_MCMC.py
+
 """
-
-from LOTlib.Examples.Quantifier.Model.Inference import *
 from SimpleMPI.MPI_map import MPI_map
+from LOTlib import mh_sample
+from LOTlib.FiniteBestSet import FiniteBestSet
+from ..Model import *
 
 CHAINS = 3  #how many times do we run?
 DATA_AMOUNTS = range(0,300, 100) #range(0,1500,100)

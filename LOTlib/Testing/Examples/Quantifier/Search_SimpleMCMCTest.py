@@ -5,7 +5,7 @@ follows the standards in https://docs.python.org/2/library/unittest.html
 
 import unittest
 
-from LOTlib.Examples.Quantifier.Search_SimpleMCMC import *
+
 class Search_SimpleMCMCTest(unittest.TestCase):
 
     # initialization that happens before each test is carried out

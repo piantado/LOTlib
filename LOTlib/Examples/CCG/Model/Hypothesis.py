@@ -1,14 +1,16 @@
 from copy import copy
 from math import log
+
 from LOTlib.Hypotheses.WeightedLexicon import WeightedLexicon
 from LOTlib.DataAndObjects import UtteranceData
-from Global import can_compose
+from LOTlib.Examples.CCG.Model.Utilities import can_compose
 
 
 class Context:
     """
-            A context stores a list of objects and list of N-ary relations, represented as tuples,
-            as in relations = [  (happy, john), (loved, mary, john) ], with (function, *args)
+    A context stores a list of objects and list of N-ary relations, represented as tuples,
+    as in relations = [  (happy, john), (loved, mary, john) ], with (function, *args)
+
     """
     def __init__(self, objects, relations):
         self.__dict__.update(locals())
@@ -18,14 +20,13 @@ class Context:
 
 
 class CCGLexicon(WeightedLexicon):
-    """
-            A version for doing CCG, which parses in the likelihood
-    """
+    """A version for doing CCG, which parses in the likelihood."""
 
     def can_parse(self, sentence):
         """
-                A very quick and dirty backtracking parsing algorithm that uses the types
-                to see if we can parse, returning a sentence string, a type, and a function computing the truth value
+        A very quick and dirty backtracking parsing algorithm that uses the types to see if we can parse,
+        returning a sentence string, a type, and a function computing the truth value.
+
         """
         assert not isinstance(sentence, UtteranceData), "can_parse takes a sentence, not utterance data. Maybe you forgot .utterance?"
 
@@ -61,8 +62,9 @@ class CCGLexicon(WeightedLexicon):
 
     def compute_single_likelihood(self, udi):
         """
-                TODO: WE CAN USE LIKELIHOOD FROM WEIGHTEDLEXICON, BUT THAT BEHAVES WEIRDLY WHEN THE
-                POSSIBLE UTTERANCES ARE SMALL
+        TODO: WE CAN USE LIKELIHOOD FROM WEIGHTEDLEXICON, BUT THAT BEHAVES WEIRDLY WHEN THE
+        POSSIBLE UTTERANCES ARE SMALL
+
         """
         assert isinstance(udi, UtteranceData)
 
@@ -86,9 +88,7 @@ class CCGLexicon(WeightedLexicon):
 
 
     def __call__(self, utterance, context):
-        """
-                Evaluate this lexicon on a possible utterance
-        """
+        """Evaluate this lexicon on a possible utterance."""
         ret = self.can_parse(utterance)
         if ret:
             assert len(ret) == 3

@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-        This basically out a new version and makes a much smaller hypothesis space, one for each word, which we can then run again on
+This basically out a new version and makes a much smaller hypothesis space, one for each word, which we can then run again on
 
-        Let's add options for many different kinds of proposals:
-                - Distance metric based
-                - Flat uniform
-                - Sample from the prior
-                - Build a large, sparse, connected graph of each guys' nearest neighbors
-                - What if you hash the semantics, and "propose" by altering it a little and re-querying the hash?
-
+Let's add options for many different kinds of proposals:
+    - Distance metric based
+    - Flat uniform
+    - Sample from the prior
+    - Build a large, sparse, connected graph of each guys' nearest neighbors
+    - What if you hash the semantics, and "propose" by altering it a little and re-querying the hash?
 
 """
 import sys
@@ -18,7 +17,7 @@ from copy import copy
 import numpy as np
 from LOTlib.MetropolisHastings import MHStats
 
-from LOTlib.Examples.Number.Model.Inference import *
+from ..Model import *
 
 ########################################################################
 # Parse the input and command lines
@@ -85,7 +84,7 @@ def run(data_size):
     prior = prior - logsumexp(prior)
 
     ## the likelihood weights for each hypothesis
-    weights = np.array([ my_gricean_weight(h) for h in my_finite_trees ])
+    weights = np.array([ my_weight_function(h) for h in my_finite_trees ])
 
     # response[h,di] gives the response of the h'th tree to data di
     response = np.array( [ mapto012(t.get_function_responses(data)) for t in my_finite_trees] )

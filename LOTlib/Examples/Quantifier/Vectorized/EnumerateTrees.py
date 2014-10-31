@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
-        Enumerate all possible trees (as FunctionHypotheses), saving them to a file (for later gibbs as in Search_UnoptimizedGibbs and Search_VectorizedGibbs)
+Enumerate all possible trees (as FunctionHypotheses), saving them to a file (for later gibbs as in Search_UnoptimizedGibbs and Search_VectorizedGibbs)
+
 """
 import sys
 

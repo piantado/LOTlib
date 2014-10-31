@@ -1,16 +1,16 @@
 """
 A simple rational rules demo.
 
+This script scatters our imports around to show where each part comes from.
+
+Paper:
     A rational analysis of rule-based concept learning. N. D. Goodman, J. B. Tenenbaum, J. Feldman, and T. L.
     Griffiths (2008). Cognitive Science. 32:1, 108-154. http://www.mit.edu/~ndg/papers/RRfinal3.pdf
 
-This script scatters our imports around to show where each part comes from
 """
-
-from Model import *
 from LOTlib.Hypotheses.RationalRulesLOTHypothesis import RationalRulesLOTHypothesis
 from LOTlib.Inference.MetropolisHastings import mh_sample
-
+from Model import *
 
 def run_mh():
     """Run the MH; Run the vanilla sampler.

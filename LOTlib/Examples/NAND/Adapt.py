@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 """
-        Use optimal adaptation code to adapt show possible adpatations to the NAND grammar
+Use optimal adaptation code to adapt show possible adpatations to the NAND grammar
 
 """
 import pickle
-from Global import *
+from LOTlib.Miscellaneous import Infinity
 from LOTlib.Subtrees import *
+from Model import *
+
 
 NDATA = 100
 N_SUBTREES_PER_NODE = 50

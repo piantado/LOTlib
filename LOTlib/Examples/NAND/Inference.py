@@ -1,21 +1,19 @@
 """
-        Play around with learning multiple concepts from a single primitive like NAND.
-        Useful for learning new chunks of concepts, a la Dechter, Malmaud, Adams & Tenenbaum (2013)
+Play around with learning multiple concepts from a single primitive like NAND.
+Useful for learning new chunks of concepts, a la Dechter, Malmaud, Adams & Tenenbaum (2013)
 
-        This runs inference on each concept in TARGET_CONCEPTS (defined in Shared) and saves the top
-        100 hypotheses from each concept into all_hypotheses, which is written to pickle file OUTFILE
+This runs inference on each concept in TARGET_CONCEPTS (defined in Shared) and saves the top
+100 hypotheses from each concept into all_hypotheses, which is written to pickle file OUTFILE
 
-        You can then run Adapt.py, which reads OUTFILE and calls OptimalGrammarAdaptation.print_subtree_adaptations
-        to show the best subtrees to define for minimizing KL between the prior and posterior
+You can then run Adapt.py, which reads OUTFILE and calls OptimalGrammarAdaptation.print_subtree_adaptations
+to show the best subtrees to define for minimizing KL between the prior and posterior
 
 """
-
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Inference.MetropolisHastings import mh_sample
-from Data import generate_data
-from Global import TARGET_CONCEPTS
-from Grammar import grammar
+from Model import *
+
 
 NDATA = 50 # How many total data points?
 NSTEPS = 10000

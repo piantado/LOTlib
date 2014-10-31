@@ -80,10 +80,12 @@ class Obj:
 
 
 def make_all_objects(**f):
-    """
-            This takes a list of lists and crosses them into all objects
-            e.g. make_all_objects( size=[1,2,3], color=['red', 'green', 'blue'] ) will return a list of 9 (3x3) objects,
-            each of which will have a different pair of size and color attributes
+    """This takes a list of lists and crosses them into all objects.
+
+    Example:
+        >>> make_all_objects(size=[1,2,3], color=['red', 'green', 'blue'])
+        ### Returns a list of 9 (3x3) objects, each with a different pair of size and color attributes.
+
     """
 
     keys = f.keys()

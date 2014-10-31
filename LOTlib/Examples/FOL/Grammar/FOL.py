@@ -1,9 +1,9 @@
 
 """
-        An example of inference over first-order logical expressions.
-        Here, we take sets of objects and generate quantified descriptions
-"""
+An example of inference over first-order logical expressions.
+Here, we take sets of objects and generate quantified descriptions
 
+"""
 from LOTlib.Miscellaneous import unique
 from LOTlib.Grammar import Grammar
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis

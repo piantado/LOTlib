@@ -147,7 +147,7 @@ if __name__ == "__main__":
 
     ## NOTE: TO NORMALLY USE THIS, YOU MUST MIX WITH REGENERATION PROPOSAL -- ELSE NOT ERGODIC
 
-    from LOTlib.Examples.Magnetism.Simple.Global import grammar, make_h0, data
+    from LOTlib.Examples.Magnetism.Simple.Run import grammar, make_h0, data
 
     from LOTlib.Inference.MetropolisHastings import MHSampler
     

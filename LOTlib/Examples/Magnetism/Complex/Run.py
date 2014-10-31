@@ -1,16 +1,16 @@
 """
-        A very simple case of predicate invention, inspired by
+A very simple case of predicate invention, inspired by
 
-        T. D. Ullman, N. D. Goodman and J. B. Tenenbaum (2012), Theory learning as stochastic search in the language of thought. Cognitive Development.
+T. D. Ullman, N. D. Goodman and J. B. Tenenbaum (2012), Theory learning as stochastic search in the
+    language of thought. Cognitive Development.
 
-        Here, we invent simple predicates whose value is determined by a set membership (BASE-SET), and express logical
-        concepts over those predicates. Data is set up to be like magnetism, with positives (pi) and negatives (ni) that interact
-        with each other but not within groups
+Here, we invent simple predicates whose value is determined by a set membership (BASE-SET), and express
+logical concepts over those predicates. Data is set up to be like magnetism, with positives (pi) and
+negatives (ni) that interact with each other but not within groups/
 
-        TODO: Let's add another class--the non-magnetic ones!
+TODO: Let's add another class--the non-magnetic ones!
 
 """
-
 from LOTlib.FunctionNode import cleanFunctionNodeString
 from Data import *
 from Grammar import *
@@ -18,9 +18,8 @@ from Grammar import *
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run mcmc
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if __name__ == "__main__":
+def run():
     from LOTlib import lot_iter
-
     from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
     #mp = MixtureProposal([RegenerationProposal(grammar), InsertDeleteProposal(grammar)] )
     mp = RegenerationProposal(grammar)
@@ -33,3 +32,6 @@ if __name__ == "__main__":
         print h.posterior_score, h.likelihood, h.prior, cleanFunctionNodeString(h)
         #print map( lambda d: h(*d.input), data)
         #print "\n"
+
+if __name__ == "__main__":
+    run()

@@ -1,6 +1,6 @@
 
 from LOTlib.Miscellaneous import q
-from LOTlib.Examples.RationalRules.Model.Inference import grammar
+from LOTlib.Examples.RationalRules.Model.Utilities import grammar
 from LOTlib.Examples.RationalRules.TwoConcepts.Data import *
 from Hypothesis import *
 

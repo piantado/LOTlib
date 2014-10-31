@@ -1,7 +1,9 @@
 
 """
-	An example of inference over first-order logical expressions.
-	Here, we take sets of objects and generate quantified descriptions
+An example of inference over first-order logical expressions.
+
+Here, we take sets of objects and generate quantified descriptions
+
 """
 import LOTlib
 from LOTlib import lot_iter

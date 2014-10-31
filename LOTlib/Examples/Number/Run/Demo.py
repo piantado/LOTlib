@@ -3,9 +3,9 @@
         A quick demo of the number model.
 
         Note: CTRL-C breaks out of the MCMC loop, and the processes at the bottom with average likelihood for each hypothesis.
-"""
 
-from Utilities import *
+"""
+from ..Model import *
 from LOTlib import lot_iter
 from LOTlib.FiniteBestSet import FiniteBestSet
 
