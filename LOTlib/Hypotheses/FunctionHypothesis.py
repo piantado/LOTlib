@@ -108,15 +108,6 @@ class FunctionHypothesis(Hypothesis):
         """
         raise NotImplementedError
 
-    def compute_likelihood(self, data):
-        """
-                Computes the likelihood. Pretty self-explanatory :)
-        """
-        self.likelihood = sum(map( self.compute_single_likelihood, data)) / self.likelihood_temperature
-
-        self.posterior_score = self.prior + self.likelihood
-        return self.likelihood
-
 
     # ~~~~~~~~~
     # Make this thing pickleable

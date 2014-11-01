@@ -53,6 +53,8 @@ class Hypothesis(object):
     def compute_prior(self):
         """ computes the prior and stores it in self.prior
                 Note: This method must be implemented when writing subclasses of Hypothesis
+
+            This *should* take into account prior_temperature
         """
         raise NotImplementedError
 
@@ -62,18 +64,20 @@ class Hypothesis(object):
                 Compute the likelihood of a single data point datum, under this hypothesis.
 
                 Note: This method must be implemented when writing subclasses of Hypothesis
+
+                It should NOT take into account likelihood_temperature, as this is done in compute_likelihood
         """
         raise NotImplementedError
 
 
     # And the main likelihood function just maps compute_single_likelihood over the data
-    def compute_likelihood(self, data):
+    def compute_likelihood(self, data, **kwargs):
         """
         Compute the likelihood of the iterable of data. This is typically NOT subclassed, as compute_single_likelihood is what subclasses should implement.
 
         Versions using decayed likelihood can be found in Hypothesis.DecayedLikelihoodHypothesis
         """
-        self.likelihood = sum(map(self.compute_single_likelihood, data))/self.likelihood_temperature
+        self.likelihood = sum([self.compute_single_likelihood(datum, **kwargs) for datum in data]) / self.likelihood_temperature
 
         self.posterior_score = self.prior + self.likelihood
         return self.likelihood

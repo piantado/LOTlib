@@ -29,16 +29,29 @@ class SimpleGenerativeHypothesis(LOTHypothesis):
         LOTHypothesis.__init__(self, grammar,  **kwargs) # this is simple-generative since args=[] (a thunk)
 
 
-    def compute_single_likelihood(self, datum):
+    def make_ll_counts(self,*input):
+        """
+            Run this model forward nsamples times, returning a dictionary of how often each outcome occurred
+        """
+        llcounts = defaultdict(int)
+        for i in xrange(self.nsamples):
+            llcounts[self(*input)] += 1
+
+        self.llcounts = llcounts # we also store this for easy access in the future
+
+        return llcounts
+
+
+    def compute_single_likelihood(self, datum, llcounts=None):
         """
                 sm smoothing counts are added to existing bins of counts (just to prevent badness)
+                This can take an optiona llcounts in order to allow us to cache this externally
         """
         #print self
         assert isinstance(datum.output, dict), "Data supplied to SimpleGenerativeHypothesis must be a dict (function outputs to counts)"
 
-        self.llcounts = defaultdict(int)
-        for i in xrange(self.nsamples):
-            self.llcounts[ self(*datum.input) ] += 1
+        if llcounts is None: # compute if not passed in
+            llcounts = self.make_ll_counts(*datum.input)
 
-        return sum([ datum.output[k] * (nicelog(self.llcounts[k] + self.sm)-nicelog(self.nsamples + self.sm*len(datum.output.keys())) ) for k in datum.output.keys() ]) / self.likelihood_temperature
+        return sum([ datum.output[k] * (nicelog(llcounts[k] + self.sm)-nicelog(self.nsamples + self.sm*len(datum.output.keys())) ) for k in datum.output.keys() ])
 
