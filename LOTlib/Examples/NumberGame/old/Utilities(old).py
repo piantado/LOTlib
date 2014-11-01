@@ -1,3 +1,8 @@
+"""
+TODOS:
+    - likelihood_data: see comment
+
+"""
 
 from math import factorial, log
 from collections import defaultdict
@@ -8,15 +13,6 @@ from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Inference.PriorSample import prior_sample
 import Grammar as G, Hypothesis
 
-
-def get_rule(grammar, rule_name, rule_nt=None):
-        """Get the GrammarRule associated with this rule name."""
-        if rule_nt is None:
-            rules = [rule for sublist in grammar.rules.values() for rule in sublist]
-        else:
-            rules = grammar.rules[rule_nt]
-        rules = filter(lambda r: (r.name == rule_name), rules)   # there should only be 1 item in this list
-        return rules[0]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~ Generate number set hypotheses
@@ -30,9 +26,6 @@ def normalizing_constant(hypotheses):
 def make_h0(grammar=G.grammar, **kwargs):
     """Make initial NumberSetHypothesis."""
     return Hypothesis.NumberSetHypothesis(grammar, **kwargs)
-
-def mh_sample(data):
-        return lambda grammar: set(MHSampler(make_h0(grammar), data, steps=10000))
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -80,6 +73,62 @@ def probs_data_rule(grammar, rule, data, probs=np.arange(0, 2, 0.2), num_iters=1
     rule.p = orig_p
     return dist
 
+
+def prob_data(grammar, input_data, output_data, num_iters=10000, alpha=0.9):
+    """Compute the probability of generating human data given our grammar & input data.
+
+    Args:
+        grammar (LOTlib.Grammar): The grammar.
+        input_data (list): List of integers, the likelihood of the model is initially computed with these.
+        output_data (list): List of tuples corresponding to (# yes, # no) responses in human data.
+
+    Returns:
+         float: Estimated probability of generating human data.
+
+    """
+    model_likelihoods = likelihood_data(grammar, input_data, output_data, num_iters, alpha)
+    p_output = -Infinity
+
+    for o in output_data.keys():
+        p = model_likelihoods[o]
+        k = output_data[o][0]       # num. yes responses
+        n = k + output_data[o][1]   # num. trials
+        bc = factorial(n) / (factorial(k) * factorial(n-k))             # binomial coefficient
+        p_o = log(bc) + (k*p) + (n-k)*log1mexp(p)                       # log version
+        p_output = logplusexp(p_output, p_o)
+        # p_gen_human_data[o] = bc * pow(p, k) * pow(1-p, n-k)          # linear version
+
+    return p_output
+
+
+def likelihood_data(grammar, input_data, output_data, num_iters=10000, alpha=0.9):
+    """Generate a set of hypotheses, and use these to estimate likelihood of generating the human data.
+
+    This is taken as a weighted sum over all hypotheses.
+
+    Args:
+        input_data(list): List of input integers.
+        output_data(dict):
+
+    Returns:
+        dict: Each output key returns the summed likelihood of that single data point. Keys are the same as
+        those of argument `output_data`.
+
+    """
+    hypotheses = mh_sample(input_data, grammar=grammar, num_iters=num_iters, alpha=alpha)
+    Z = normalizing_constant(hypotheses)
+    likelihoods = defaultdict(lambda: -Infinity)
+
+    for h in hypotheses:
+        w = h.posterior_score - Z
+        for o in output_data.keys():
+            old_likelihood = h.likelihood
+            # TODO: is h.compute_likelihood updating posterior_score each loop?
+            weighted_likelihood = h.compute_likelihood([o]) + w
+            h.likelihood = old_likelihood
+            likelihoods[o] = logplusexp(likelihoods[o], weighted_likelihood)
+
+    return likelihoods
 
 
 def get_rule(rule_name, rule_nt=None, grammar=G.grammar):

@@ -43,23 +43,23 @@ def register_primitive(function, name=None):
     sys.modules['__builtin__'].__dict__[name] = function
 
 
-"""
-The Y combinator
-#example:
-#fac = lambda f: lambda n: (1 if n<2 else n*(f(n-1)))
-#Y(fac)(10)
-"""
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~ The Y combinator
+# example:
+# fac = lambda f: lambda n: (1 if n<2 else n*(f(n-1)))
+# Y(fac)(10)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Y = lambda f: (lambda x: x(x))(lambda y: f(lambda *args: y(y)(*args)) )
-
-
 MAX_RECURSION = 25
+
+
 def Y_bounded(f):
     """
     A fancy fixed point iterator that only goes MAX_RECURSION deep, else throwing a a RecusionDepthException
     """
-    return (lambda x, n: x(x, n))(lambda y, n: f(lambda *args: y(y, n+1)(*args)) if n < MAX_RECURSION else raise_exception(EvaluationException()), 0)
-
-
+    return (lambda x, n: x(x, n))(lambda y, n: f(lambda *args: y(y, n+1)(*args))
+                                  if n < MAX_RECURSION else raise_exception(EvaluationException()), 0)
 
 
 def Ystar(*l):
@@ -86,17 +86,17 @@ def Ystar(*l):
 
 
 
-"""
-    Evaluation of expressions
-"""
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~ Evaluation of expressions
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def evaluate_expression(e, recurse="L_"):
-    """
-    evaluate the expression, adding a Y combinator for recursion
+    """Evaluate the expression, adding a Y combinator for recursion.
+
     :param e: - a string that can be evaled as python
     :param recurse: -- what internal symbol should recursion be?
-    """
 
+    """
     assert isinstance(e,str)
 
     try:

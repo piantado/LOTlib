@@ -1,15 +1,16 @@
 """
-        Routines for combinatory logic evaluation.
+Routines for combinatory logic evaluation.
 
-        This provides an explicit evaluator for a sequence of combinators like ['I' 'S' ['K' 'S' 'S']]
-        which maps to a new lists. This is slower than implementing them directly as functions,
-        but lets us see what they reduce to.
+This provides an explicit evaluator for a sequence of combinators like ['I' 'S' ['K' 'S' 'S']]
+which maps to a new lists. This is slower than implementing them directly as functions,
+but lets us see what they reduce to.
 
-        Relevant functions in Miscellaneous are:
-                - LOTlib.Miscellaneous.unlist_singleton  (removes extraneous lists)
-                - LOTlib.Miscellaneous.list2sexpstr      (converts a list of lists into an S-expression string)
+Relevant functions in Miscellaneous are:
+        - LOTlib.Miscellaneous.unlist_singleton  (removes extraneous lists)
+        - LOTlib.Miscellaneous.list2sexpstr      (converts a list of lists into an S-expression string)
 
-        Much much faster scheme code is available from Steve.
+Much much faster scheme code is available from Steve.
+
 """
 
 from LOTlib.Miscellaneous import unlist_singleton
@@ -26,14 +27,15 @@ class CombinatorEvaluationDepthException(CombinatorEvaluationException): pass
 
 class CombinatorEvaluationLengthException(CombinatorEvaluationException): pass
 
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # evaluate combinators
 
 def combinator_reduce(lst, depth=MAX_DEPTH):
-    """
-            Reduce combinatory logic list of lists.
+    """Reduce combinatory logic list of lists.
 
-            TODO: Incorporate other reduction strategies / evaluation orders.
+    TODO: Incorporate other reduction strategies / evaluation orders.
+
     """
 
     if not isinstance(lst, list): return lst
