@@ -16,6 +16,7 @@ import signal
 import sys
 from Inference.MetropolisHastings import MHSampler, mh_sample
 from DataAndObjects import FunctionData, UtteranceData, make_all_objects
+from Miscellaneous import *     # lots of imports here!
 
 SIG_INTERRUPTED = False
 def signal_handler(signal, frame):

@@ -1,7 +1,6 @@
 
 from Data import *          # 'import *' is ok because Data has no imports
 from Grammar import grammar
-from Hypothesis import NumberSetHypothesis, GrammarProbHypothesis
-from Utilities import normalizing_constant, make_h0, random_sample, mh_sample, prob_data_rule, \
-    probs_data_rule, prob_data, likelihood_data, get_rule, visualize_probs
+from Hypothesis import NumberGameHypothesis
+from Utilities import normalizing_constant, make_h0, get_rule, visualize_probs, dist_over_rule
 import Data, Grammar, Hypothesis, Utilities

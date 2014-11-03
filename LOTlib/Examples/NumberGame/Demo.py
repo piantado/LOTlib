@@ -1,5 +1,7 @@
 
 import numpy as np
+from LOTlib.Hypotheses.GrammarProbHypothesis import GrammarProbHypothesis
+from LOTlib.Inference.MetropolisHastings import MHSampler
 from Model import *
 
 # Global parameters for inference
@@ -20,20 +22,17 @@ hypotheses = I.randomSample(G.grammar, initial_data, num_iters=num_iters, alpha=
 '''
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#~~~~~ just one rule . . .                                                         ~~~~~#
+#~~~~~ inference with grammar rule probabilities
 
-rule = get_rule('union_', rule_nt='SET', grammar=grammar)
+
+hypotheses = set(MHSampler(make_h0(), in_data1, steps=10000))
+grammar_h = GrammarProbHypothesis(grammar, hypotheses)
+
 probs = [0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8]
-dist = probs_data_rule(grammar, rule, data, probs, num_iters, alpha)
+dist = grammar_h.dist_over_rule(grammar, 'union_', data, probs)
 print dist
-visualize_probs(probs, dist, rule.name)
+
+visualize_probs(probs, dist, 'union_')
 
 
-'''
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#~~~~~ all rules! (and which probabilities?)                                       ~~~~~#
 
-use_this_class = H.GrammarProbHypothesis(G.grammar, alpha, domain=domain)
-cool_data = use_this_class.compute_likelihood(data, num_iters, alpha)
-
-'''
