@@ -67,7 +67,7 @@ class GrammarProbHypothesis(VectorHypothesis):
         self.posterior_score = self.prior + self.likelihood
         return likelihood
 
-    def prob_output_datum(self, output_datum):
+    def prob_output_datum(self, output_int, output_datum):
         """Compute the probability of generating human data given our grammar & input data.
 
         Args:
@@ -77,7 +77,7 @@ class GrammarProbHypothesis(VectorHypothesis):
              float: Estimated probability of generating human data.
 
         """
-        p = self.compute_likelihood(output_datum)
+        p = self.compute_likelihood(output_int)
         k = output_datum[0]         # num. yes responses
         n = k + output_datum[1]     # num. trials
         bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient  # TODO is this right?
@@ -86,7 +86,11 @@ class GrammarProbHypothesis(VectorHypothesis):
         # bc = factorial(n) / (factorial(k) * factorial(n-k))
 
     def prob_output_data(self, output_data):
-        return logsumexp([self.prob_output_datum(d) for d in output_data])
+        """
+        Input is a dict with keys ~ output ints, e.g. '8' or '16', and values are # yes & no responses.
+
+        """
+        return logsumexp([self.prob_output_datum(d.key(), d.item()) for d in output_data])
 
     def dist_over_rule(self, data, rule_name, probs=np.arange(0, 2, .2)):
         r_index = self.get_rule_index(rule_name)
