@@ -57,15 +57,33 @@ class GrammarProbHypothesis(VectorHypothesis):
         likelihood = -Infinity
 
         for h in hypotheses:
+            h.compute_posterior(in_data)
             w = h.posterior_score - Z
-            old_likelihood = h.likelihood
-            # TODO: is h.compute_likelihood updating posterior_score each loop?
-            weighted_likelihood = h.compute_likelihood([data]) + w
-            h.likelihood = old_likelihood
-            likelihood = logplusexp(likelihood, weighted_likelihood)
 
+            for o in output_data:
+                # calculate p (output_data==Yes | h)
+                old_likelihood = h.likelihood
+                # TODO: is h.compute_likelihood updating posterior_score each loop?
+                weighted_likelihood = h.compute_likelihood([o]) + w
+                h.likelihood = old_likelihood
+
+                # calculate p (output_data == human_data)
+                p = weighted_likelihood
+                k = o[0]         # num. yes responses
+                n = k + o[1]     # num. trials
+                bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient  # TODO is this right?
+                human_likelihood = bc + (k*p) + (n-k)*log1mexp(p)       # likelihood that we got same # yes/no as human
+
+                likelihood = logplusexp(likelihood, human_likelihood)
+
+
+        self.likelihood = likelihood
         self.posterior_score = self.prior + self.likelihood
-        return likelihood
+
+            # p_data = bc * pow(p, k) * pow(1-p, n-k)               # linear version
+            # bc = factorial(n) / (factorial(k) * factorial(n-k))
+
+
 
     def prob_output_datum(self, output_int, output_datum):
         """Compute the probability of generating human data given our grammar & input data.
@@ -77,13 +95,7 @@ class GrammarProbHypothesis(VectorHypothesis):
              float: Estimated probability of generating human data.
 
         """
-        p = self.compute_likelihood(output_int)
-        k = output_datum[0]         # num. yes responses
-        n = k + output_datum[1]     # num. trials
-        bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient  # TODO is this right?
-        return bc + (k*p) + (n-k)*log1mexp(p)                   # log version
-        # p_data = bc * pow(p, k) * pow(1-p, n-k)               # linear version
-        # bc = factorial(n) / (factorial(k) * factorial(n-k))
+
 
     def prob_output_data(self, output_data):
         """
