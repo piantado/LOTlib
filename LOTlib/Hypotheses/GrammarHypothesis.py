@@ -26,11 +26,11 @@ class GrammarProbHypothesis(VectorHypothesis):
     """
     def __init__(self, grammar, hypotheses, **kwargs):
         self.rules = [rule for sublist in grammar.rules.values() for rule in sublist]
+        self.grammar = grammar
+        self.hypotheses = hypotheses
         p_vector = [rule.p for rule in self.rules]
         n = len(p_vector)
         VectorHypothesis.__init__(self, value=p_vector, n=n, proposal=np.eye(n))
-        self.hypotheses = hypotheses
-        self.grammar = grammar
         self.prior = self.compute_prior()
 
     def compute_prior(self):
@@ -45,11 +45,11 @@ class GrammarProbHypothesis(VectorHypothesis):
 
         Args:
             input_data(list): List of input integers.
-            output_data(dict):
+            output_data(dict): Keys are output integers, values are (#yes, #no) tuples.
 
         Returns:
-            dict: Each output key returns the summed likelihood of that single data point. Keys are the
-            same as those of argument `output_data`.
+            float: Likelihood for each output summed over all outputs, summed over all hypotheses &
+            weighted for each hypothesis by posterior score p(h|d).
 
         """
         hypotheses = self.hypotheses
@@ -57,31 +57,28 @@ class GrammarProbHypothesis(VectorHypothesis):
         likelihood = -Infinity
 
         for h in hypotheses:
-            h.compute_posterior(in_data)
+            h.compute_posterior(data.input)
             w = h.posterior_score - Z
+            h_copy = h.__copy__()
 
-            for o in output_data:
-                # calculate p (output_data==Yes | h)
-                old_likelihood = h.likelihood
+            for o in data.output:
+                # calculate Pr (output_data==Yes | h)
                 # TODO: is h.compute_likelihood updating posterior_score each loop?
-                weighted_likelihood = h.compute_likelihood([o]) + w
-                h.likelihood = old_likelihood
+                p = h.compute_likelihood([o]) + w
 
-                # calculate p (output_data == human_data)
-                p = weighted_likelihood
+                # calculate Pr (data of this hypothesis == human data)
                 k = o[0]         # num. yes responses
                 n = k + o[1]     # num. trials
                 bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient  # TODO is this right?
-                human_likelihood = bc + (k*p) + (n-k)*log1mexp(p)       # likelihood that we got same # yes/no as human
-
+                human_likelihood = bc + (k*p) + (n-k)*log1mexp(p)       # likelihood that we get human output
+                # p_data = bc * pow(p, k) * pow(1-p, n-k)               # linear version
+                # bc = factorial(n) / (factorial(k) * factorial(n-k))
                 likelihood = logplusexp(likelihood, human_likelihood)
 
 
+            h = h_copy
         self.likelihood = likelihood
         self.posterior_score = self.prior + self.likelihood
-
-            # p_data = bc * pow(p, k) * pow(1-p, n-k)               # linear version
-            # bc = factorial(n) / (factorial(k) * factorial(n-k))
 
 
 
@@ -95,7 +92,6 @@ class GrammarProbHypothesis(VectorHypothesis):
              float: Estimated probability of generating human data.
 
         """
-
 
     def prob_output_data(self, output_data):
         """
