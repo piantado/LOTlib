@@ -35,11 +35,11 @@ class NumberGameHypothesis(LOTHypothesis):
             likelihood = log(noise)
         return likelihood
 
-    def compute_likelihood(self, data):
+    def compute_likelihood(self, data, **kwargs):
         """Sum likelihoods over all data points, divide by likelihood_temperature."""
-        likelihoods = map(self.compute_single_likelihood, data)
+        likelihoods = [self.compute_single_likelihood(datum) for datum in data]
         self.likelihood = logsumexp(likelihoods) / self.likelihood_temperature
-        self.posterior_score = self.prior + self.likelihood
+        self.posterior_score = self.likelihood + self.prior
         return self.likelihood
 
 

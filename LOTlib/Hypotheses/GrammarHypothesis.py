@@ -3,13 +3,14 @@
 With this class, we can propose hypotheses as a vector of grammar rule probabilities.
 
 """
+import copy
 import numpy as np
 from LOTlib.Hypotheses.VectorHypothesis import VectorHypothesis
 from LOTlib.Miscellaneous import logplusexp, logsumexp, log1mexp, gammaln, Infinity
 
 
-class GrammarProbHypothesis(VectorHypothesis):
-    """Hypothesis for grammar so we can represent rule prob. assignments as a vector.
+class GrammarHypothesis(VectorHypothesis):
+    """Hypothesis for grammar, we can represent grammar rule probability assignments as a vector.
 
     Inherits from VectorHypothesis, though I haven't figured out yet whe this really means...
 
@@ -19,11 +20,8 @@ class GrammarProbHypothesis(VectorHypothesis):
         rules (list): List of all rules in the grammar.
         value (list): Vector of numbers corresponding to the items in `rules`.
 
-        TODO:
-            - should this have a 'proposal' arg? (for VectorHypothesis)
-            - compute_prior - is this right? what about shape/scale parameters?
-
     """
+    # TODO should this have a 'proposal' arg? (for VectorHypothesis)
     def __init__(self, grammar, hypotheses, **kwargs):
         self.rules = [rule for sublist in grammar.rules.values() for rule in sublist]
         self.grammar = grammar
@@ -36,79 +34,70 @@ class GrammarProbHypothesis(VectorHypothesis):
     def compute_prior(self):
         # TODO what should shape & scale values here be?
         shape = 1.0
-        return np.random.gamma(shape, scale=1.0, size=self.n)
+        rule_priors = np.random.gamma(shape, scale=1.0, size=self.n)
+        return logsumexp(rule_priors)
 
-    def compute_likelihood(self, data):
+    def compute_likelihood(self, data, **kwargs):
         """Use hypotheses to estimate likelihood of generating the data.
 
         This is taken as a weighted sum over all hypotheses.
 
         Args:
-            input_data(list): List of input integers.
-            output_data(dict): Keys are output integers, values are (#yes, #no) tuples.
+            data(list): List of FunctionData objects.
 
         Returns:
-            float: Likelihood for each output summed over all outputs, summed over all hypotheses &
-            weighted for each hypothesis by posterior score p(h|d).
+            float: Likelihood summed over all outputs, summed over all hypotheses & weighted for each
+            hypothesis by posterior score p(h|d).
 
         """
         hypotheses = self.hypotheses
         Z = logsumexp([h.posterior_score for h in hypotheses])
         likelihood = -Infinity
 
-        for h in hypotheses:
-            h.compute_posterior(data.input)
-            w = h.posterior_score - Z
-            h_copy = h.__copy__()
+        for d in data:
+            for h in hypotheses:
+                h.compute_posterior(d.input)
+                w = h.posterior_score - Z
+                h_copy = copy.copy(h)
 
-            for o in data.output:
-                # calculate Pr (output_data==Yes | h)
-                # TODO: is h.compute_likelihood updating posterior_score each loop?
-                p = h.compute_likelihood([o]) + w
+                for key in d.output.keys():
+                    # calculate Pr (output_data==Yes | h)
+                    # TODO: is h.compute_likelihood updating posterior_score each loop?
+                    p = h.compute_likelihood([key]) + w
 
-                # calculate Pr (data of this hypothesis == human data)
-                k = o[0]         # num. yes responses
-                n = k + o[1]     # num. trials
-                bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient  # TODO is this right?
-                human_likelihood = bc + (k*p) + (n-k)*log1mexp(p)       # likelihood that we get human output
-                # p_data = bc * pow(p, k) * pow(1-p, n-k)               # linear version
-                # bc = factorial(n) / (factorial(k) * factorial(n-k))
-                likelihood = logplusexp(likelihood, human_likelihood)
+                    # calculate Pr (data of this hypothesis == human data)
+                    k = d.output[key][0]         # num. yes responses
+                    n = k + d.output[key][1]     # num. trials
+                    bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient  # TODO is this right?
+                    human_likelihood = bc + (k*p) + (n-k)*log1mexp(p)       # likelihood that we get human output
+                    # p_data = bc * pow(p, k) * pow(1-p, n-k)               ## linear version
+                    # bc = factorial(n) / (factorial(k) * factorial(n-k))
+                    likelihood = logplusexp(likelihood, human_likelihood)
 
-
-            h = h_copy
+                h = h_copy
         self.likelihood = likelihood
         self.posterior_score = self.prior + self.likelihood
 
-
-
-    def prob_output_datum(self, output_int, output_datum):
-        """Compute the probability of generating human data given our grammar & input data.
+    def rule_distribution(self, data, rule_name, probs=np.arange(0, 2, .2)):
+        """Compute posterior values for this grammar, varying specified rule over a set of probabilites.
 
         Args:
-            output_data (tuple): (# yes, # no) responses in [human] evaluation data.
+            data(list): List of FunctionData objects.
+            rule_name(string): Name of the rule we're varying probabilities over.  E.g. 'union_'
+            probs(list): List of float probability values.  E.g. [0,.2,.4, ..., 2.]
 
         Returns:
-             float: Estimated probability of generating human data.
+            list: List of posterior scores, where each item corresponds to an item in `probs` argument.
 
         """
-
-    def prob_output_data(self, output_data):
-        """
-        Input is a dict with keys ~ output ints, e.g. '8' or '16', and values are # yes & no responses.
-
-        """
-        return logsumexp([self.prob_output_datum(d.key(), d.item()) for d in output_data])
-
-    def dist_over_rule(self, data, rule_name, probs=np.arange(0, 2, .2)):
         r_index = self.get_rule_index(rule_name)
         dist = []
-        old_value = self.value.copy()
+        old_value = copy.copy(self.value)
         for p in probs:
-            value = self.value.copy()
+            value = copy.copy(self.value)
             value[r_index] = p
             self.set_value(value)
-            dist.append(self.prob_output_data(data))
+            dist.append(self.compute_likelihood(data))
 
         self.set_value(old_value)
         return dist
@@ -122,7 +111,7 @@ class GrammarProbHypothesis(VectorHypothesis):
         for i in range(1, len(value)):
             self.rules[i].p = value[i]
         for h in self.hypotheses:
-            h.log_probability()   # TODO figure out how to do this
+            h.compute_prior()   # TODO figure out how to do this
 
     def get_rule(self, rule_index):
         """Get the GrammarRule at this index."""
