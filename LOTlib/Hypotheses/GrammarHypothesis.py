@@ -5,6 +5,7 @@ With this class, we can propose hypotheses as a vector of grammar rule probabili
 """
 import copy
 import numpy as np
+from scipy.stats import gamma
 from LOTlib.Hypotheses.VectorHypothesis import VectorHypothesis
 from LOTlib.Miscellaneous import logplusexp, logsumexp, log1mexp, gammaln, Infinity
 
@@ -21,21 +22,26 @@ class GrammarHypothesis(VectorHypothesis):
         value (list): Vector of numbers corresponding to the items in `rules`.
 
     """
-    # TODO should this have a 'proposal' arg? (for VectorHypothesis)
-    def __init__(self, grammar, hypotheses, **kwargs):
+    def __init__(self, grammar, hypotheses, prior_shape=2., prior_scale=1., **kwargs):
         self.rules = [rule for sublist in grammar.rules.values() for rule in sublist]
         self.grammar = grammar
         self.hypotheses = hypotheses
         p_vector = [rule.p for rule in self.rules]
         n = len(p_vector)
-        VectorHypothesis.__init__(self, value=p_vector, n=n, proposal=np.eye(n))
+        VectorHypothesis.__init__(self, value=p_vector, n=n)
+        self.prior_shape = prior_shape
+        self.prior_scale = prior_scale
         self.prior = self.compute_prior()
 
     def compute_prior(self):
-        # TODO what should shape & scale values here be?
-        shape = 1.0
-        rule_priors = np.random.gamma(shape, scale=1.0, size=self.n)
-        return logsumexp(rule_priors)
+        shape = self.prior_shape
+        scale = self.prior_scale
+        rule_priors = [gamma.pdf(r, shape, scale=scale) for r in self.value]
+
+        prior = logsumexp(rule_priors)  # TODO is this logsumexp?
+        self.prior = prior
+        self.posterior_score = self.prior + self.likelihood
+        return prior
 
     def compute_likelihood(self, data, **kwargs):
         """Use hypotheses to estimate likelihood of generating the data.
@@ -51,56 +57,33 @@ class GrammarHypothesis(VectorHypothesis):
 
         """
         hypotheses = self.hypotheses
-        Z = logsumexp([h.posterior_score for h in hypotheses])
         likelihood = -Infinity
 
         for d in data:
+            for h in hypotheses: h.compute_posterior(d.input)
+            Z = logsumexp([h.posterior_score for h in hypotheses])
+
             for h in hypotheses:
-                h.compute_posterior(d.input)
                 w = h.posterior_score - Z
-                h_copy = copy.copy(h)
 
                 for key in d.output.keys():
                     # calculate Pr (output_data==Yes | h)
-                    # TODO: is h.compute_likelihood updating posterior_score each loop?
-                    p = h.compute_likelihood([key]) + w
+                    p = h.compute_likelihood([key])
 
                     # calculate Pr (data of this hypothesis == human data)
                     k = d.output[key][0]         # num. yes responses
                     n = k + d.output[key][1]     # num. trials
-                    bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient  # TODO is this right?
-                    human_likelihood = bc + (k*p) + (n-k)*log1mexp(p)       # likelihood that we get human output
-                    # p_data = bc * pow(p, k) * pow(1-p, n-k)               ## linear version
-                    # bc = factorial(n) / (factorial(k) * factorial(n-k))
-                    likelihood = logplusexp(likelihood, human_likelihood)
+                    bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
+                    likelihood_human_data = bc + (k*p) + (n-k)*log1mexp(p)  # likelihood that we get human output
+                    likelihood = logplusexp(likelihood, likelihood_human_data + w)
 
-                h = h_copy
         self.likelihood = likelihood
         self.posterior_score = self.prior + self.likelihood
 
-    def rule_distribution(self, data, rule_name, probs=np.arange(0, 2, .2)):
-        """Compute posterior values for this grammar, varying specified rule over a set of probabilites.
-
-        Args:
-            data(list): List of FunctionData objects.
-            rule_name(string): Name of the rule we're varying probabilities over.  E.g. 'union_'
-            probs(list): List of float probability values.  E.g. [0,.2,.4, ..., 2.]
-
-        Returns:
-            list: List of posterior scores, where each item corresponds to an item in `probs` argument.
-
-        """
-        r_index = self.get_rule_index(rule_name)
-        dist = []
-        old_value = copy.copy(self.value)
-        for p in probs:
-            value = copy.copy(self.value)
-            value[r_index] = p
-            self.set_value(value)
-            dist.append(self.compute_likelihood(data))
-
-        self.set_value(old_value)
-        return dist
+    def rule_distribution(self, data, rule_name, vals=np.arange(0, 2, .2)):
+        """Compute posterior values for this grammar, varying specified rule over a set of values."""
+        rule_index = self.get_rule_index(rule_name)
+        self.marginal_distribution(data, rule_index, vals=vals)
 
     def set_value(self, value):
         """Set value and grammar rules for this hypothesis."""
@@ -111,17 +94,27 @@ class GrammarHypothesis(VectorHypothesis):
         for i in range(1, len(value)):
             self.rules[i].p = value[i]
         for h in self.hypotheses:
-            h.compute_prior()   # TODO figure out how to do this
+            h.compute_prior()
 
-    def get_rule(self, rule_index):
+    def get_rule(self, rule_name):
+        """Get the GrammarRule associated with this rule name."""
+        rule_index = self.get_rule_index(rule_name)
+        return self.get_rule_by_index(rule_index)
+
+    def get_rules(self, rule_name):
+        """Get all GrammarRules associated with this rule name."""
+        return [r for r in self.rules if r.name == rule_name]
+
+    def get_rule_by_index(self, rule_index):
         """Get the GrammarRule at this index."""
         return self.rules[rule_index]
 
     def get_rule_index(self, rule_name):
-        """Get rules index associated with this rule name."""
+        """Get index of the GrammarRule associated with this rule name."""
         # there should only be 1 item in this list
         rules = [i for i, r in enumerate(self.rules) if r.name == rule_name]
-        return rules[0]
-
-
+        if len(rules) == 1:
+            return rules[0]
+        else:
+            return None
 

@@ -19,9 +19,9 @@ h0 = make_h0(grammar=grammar, alpha=alpha)
 hypotheses = set(prior_sample(h0, data, N=num_iters))
 grammar_h = GrammarHypothesis(grammar, hypotheses)
 
-probs = np.arange(0, 2, .2)
-rule_dist = grammar_h.rule_distribution(data, 'union_', probs=probs)
+vals = np.arange(0, 2, .2)
+rule_dist = grammar_h.m_distribution(data, 'union_', vals=vals)
 print rule_dist
 
-visualize_probs(probs, rule_dist, 'union_')
+visualize_probs(vals, rule_dist, 'union_')
 

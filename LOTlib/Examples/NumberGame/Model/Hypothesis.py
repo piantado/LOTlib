@@ -27,9 +27,13 @@ class NumberGameHypothesis(LOTHypothesis):
 
         """
         h = self.__call__()     # set of numbers corresponding to this hypothesis
+        if h is None:
+            print '%'*50
+            print str(self)
+            print '\n'
         alpha = self.alpha
         noise = (1-alpha) / self.domain
-        if datum in h:
+        if h is None or datum in h:
             likelihood = log(alpha/len(h) + noise)
         else:
             likelihood = log(noise)
