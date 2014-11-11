@@ -36,3 +36,5 @@ def run_mh():
 
 
 
+if __name__ == "__main__":
+    run_mh()

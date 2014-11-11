@@ -21,14 +21,14 @@ class MultipleChainMCMC(object):
         self.nsamples = 0
         assert nchains>0, "Must have > 0 chains specified (you sent %s)"%nchains
         
-        self.chains = [ MHSampler( make_h0(), data, steps=steps/nchains, **kwargs) for _ in xrange(nchains) ]
+        self.chains = [MHSampler( make_h0(), data, steps=steps/nchains, **kwargs) for _ in xrange(nchains)]
 
     def __iter__(self):
         return self
 
     def next(self):
         self.nsamples += 1
-        self.chain_idx = (self.chain_idx+1)%self.nchains
+        self.chain_idx = (self.chain_idx+1) % self.nchains
         return self.chains[self.chain_idx].next()
 
     def reset_counters(self):
@@ -44,7 +44,7 @@ class MultipleChainMCMC(object):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if __name__ == "__main__":
 
-    from LOTlib.Examples.Number.Global import generate_data, NumberExpression, grammar
+    from LOTlib.Examples.Number import generate_data, NumberExpression, grammar
     data = generate_data(300)
 
     make_h0 = lambda : NumberExpression(grammar)

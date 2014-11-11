@@ -77,9 +77,6 @@ grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_type='BOOL', bv_args=N
 # Creates a lambda variable yi always called with an EXPR argument -- e.g., y1(plus(1,1))
 #grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_type='BOOL', bv_args=['EXPR'])
 
-
-# Etc.
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Conditional:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -89,7 +86,8 @@ grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0,  bv_type='BOOL', bv_args=N
 grammar.add_rule('EXPR', 'if_', ['COND', 'EXPR', 'EXPR'], 1.0)
 grammar.add_rule('COND', 'gt_', ['EXPR', 'EXPR'], 1.0)
 grammar.add_rule('COND', 'eq_', ['EXPR', 'EXPR'], 1.0)
-# Note that because if_ prints specially, it is correctly handled (via short circuit evaluation)
+
+# Note that because if_ prints specially in FunctionNode, it is correctly handled (via short circuit evaluation)
 # so that we don't eval both branches unnecessarily
 
 
@@ -97,12 +95,16 @@ for _ in xrange(1000):
 
     t = grammar.generate() # Default is to generate from 'START'; else use 'START=t' to generate from type t
 
-    # Now x is a FunctionNode
+    # We can make this into a function by adding a lambda and a variable name, corresponding to
+    # the argument "x" that we built into the grammar. This step is defaultly done by a a LOTHypothesis (see below)
 
-    # We can compile it via LOTlib.Miscellaneous.evaluate_expression
-    # This says that t is a *function* with arguments 'x' (allowed via the grammar above)
-    # The alternative way to do this would be to put a lambda at the top of each tree
-    f = evaluate_expression(t, args=['x'])
+    f = evaluate_expression('lambda x:%s'%t)
 
     print t # will call x.__str__ and display as a pythonesque string
     print map(f, range(0,10))
+
+    # Alternatively, we can just make a LOTHypothesis, which is typically the only place in LOTlib we use trees
+    from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+    h = LOTHypothesis(grammar, value=t, args=['x'])
+    print map(h, range(0,10))
+

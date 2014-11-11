@@ -118,7 +118,7 @@ def worker_process(outfile=None):
         # test for a function to evaluate
         if comm.Iprobe(source=MASTER_PROCESS, tag=RUN_TAG):
             f, i, a = comm.recv(source=MASTER_PROCESS, tag=RUN_TAG) # get our next job
-            #dprintn(100, rank, " received ", i, a)
+            #print "#", rank, " received ", i, a
             r = f(*a)
 
             if outfile is not None:
@@ -249,12 +249,14 @@ def MPI_map(f, args, random_order=True, outfile=None, mpi_done=False, yieldfrom=
 
             #print size, arglen, completed_count, range(1,min(size,arglen+1),1)
             for i in range(1,min(size,arglen+1),1): # run at most the number of arguments in parallel
+                #print "#", i, running[i], size, arglen
 
                 if (not running[i]) and (started_count < arglen):
                     #print "# Main sending ", args[ind[started_count]], " to ", i
-                    comm.send( [f, ind[started_count],  listifnot(args[ind[started_count]]) ], dest=i, tag=RUN_TAG)
+                    comm.send([f, ind[started_count],  listifnot(args[ind[started_count]])], dest=i, tag=RUN_TAG)
                     started_count += 1
                     running[i] = True
+
                 if comm.Iprobe(source=i, tag=RUN_TAG): # test for a message
                     completed_count += 1 # we've gotten back one more
                     if progress_bar: draw_progress(float(completed_count)/float(arglen))

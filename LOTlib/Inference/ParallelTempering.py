@@ -9,18 +9,18 @@ class ParallelTemperingSampler(MultipleChainMCMC):
     Parallel tempering. Here the temperatures *all* refer to likelihood_temperatures
     """
 
-    def __init__(self, make_h0, data, temperatures=[1.0, 1.1, 1.5], within_steps=10, swaps=1, yield_only_t0=False, **kwargs):
+    def __init__(self, make_h0, data, temperatures=[1.0, 1.1, 1.5], within_steps=50, swaps=1, yield_only_t0=False, **kwargs):
 
         self.yield_only_t0 = yield_only_t0 #whether we yield all samples, or only from the lowest temperature
         self.within_steps = within_steps
-        self.swaps=swaps
+        self.swaps = swaps
 
         assert 'nchains' not in kwargs
 
         MultipleChainMCMC.__init__(self, make_h0, data, nchains=len(temperatures), **kwargs)
 
         # and set the temperatures
-        for i,t in enumerate(temperatures):
+        for i, t in enumerate(temperatures):
             self.chains[i].likelihood_temperature = t
 
     def ll_at_temperature(self, i, t):
@@ -31,7 +31,7 @@ class ParallelTemperingSampler(MultipleChainMCMC):
 
         self.nsamples += 1
 
-        self.chain_idx = (self.chain_idx+1)%self.nchains
+        self.chain_idx = (self.chain_idx+1) % self.nchains
 
         if self.nsamples % self.within_steps == 0:
 
@@ -39,11 +39,11 @@ class ParallelTemperingSampler(MultipleChainMCMC):
                 i = randint(0, self.nchains-2)
 
                 # the priors cancel, so this represents the posterior
-                cur  = self.ll_at_temperature(i, self.chains[i].likelihood_temperature) + self.ll_at_temperature(i+1, self.chains[i+1].likelihood_temperature)
+                cur  = self.ll_at_temperature(i, self.chains[i].likelihood_temperature) + self.ll_at_temperature(i+1,   self.chains[i+1].likelihood_temperature)
                 prop = self.ll_at_temperature(i, self.chains[i+1].likelihood_temperature) + self.ll_at_temperature(i+1, self.chains[i].likelihood_temperature)
 
                 if MH_acceptance(cur, prop, 0.0):
-                    self.chains[i].current_sample, self.chains[i+1].current_sample = self.chains[i+1].current_sample, self.chains[i].current_sample
+                    self.chains[i].current_sample, self.chains[i+1].current_sample = self.chains[i+1].current_sample,   self.chains[i].current_sample
 
         if self.yield_only_t0 and self.chain_idx != 0:
             return self.next() # keep going until we're on the one we yield
