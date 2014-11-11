@@ -7,11 +7,11 @@
 # REPETITIONS=50 #25
 
 MPIEXEC="time nice -n 19 mpiexec -n 16" #"mpiexec -n 16"
-SAMPLES=500000
-PRINT_EVERY=1000 #1000
-REPETITIONS=100 #25
+SAMPLES=20000
+PRINT_EVERY=500 
+REPETITIONS=100 
 
-for m in Galileo Number100 SimpleMagnetism Number300 RationalRules RegularExpression Number1000
+for m in Galileo SimpleMagnetism RationalRules RegularExpression Number100 Number300 Number1000
 do
 	echo Running $m inference
 	$MPIEXEC python inference-evaluation.py --model=$m --samples=$SAMPLES --print-every=$PRINT_EVERY --repetitions=$REPETITIONS

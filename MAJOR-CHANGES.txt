@@ -1,3 +1,5 @@
+Oct 31 2014:
+        - Integration of SimpleMPI with LOTlib (now LOTlib.MPI). SimpleMPI will no longer be updated. 
 Sep 24 2014:
         - Major revision to Grammar.enumeration (no longer called increment_tree)
         - Changed string output to include the "implicit" lambda on LOTHypotheses
