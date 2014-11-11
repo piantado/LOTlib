@@ -35,12 +35,11 @@ grammar.add_rule('EXPR', 'x', None, 10.0)
 def mylambda(): return 141.421
 register_primitive(mylambda)
 
-# A thunk function (lambdaZero is defined in Miscellaneous)
-# We write these with [None] insead of []. The FunctionNode str function knows to print these with parens
-# This notation keeps it simple since on a FunctionNode, the children ("to") are always a list.
+# A thunk function
 grammar.add_rule('EXPR', 'mylambda', [], 1.0)
 #or
 grammar.add_rule('EXPR', 'mylambda()', None, 1.0)  # this is supported but not recommended
+#grammar.add_rule('EXPR', 'mylambda', None, 1.0)  # this would have made mylambda as a non-function constant
 
 # EXPR -> plus_(EXPR, EXPR)
 grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1.0)
@@ -58,7 +57,7 @@ grammar.add_rule('EXPR', 'divide_', ['EXPR', 'EXPR'], 1.0)
 grammar.add_rule('EXPR', 'apply_', ['FUNCTION', 'EXPR'], 5.0)
 
 # Here, 'lambda' is a special function that allows us to introduce a new bound
-# variable (bv) of a cetain type.
+# variable (bv) of a certain type.
 # The type is specified by bv_args. Here is how we might use it here:
 
 # Creates a terminal of type bool -- e.g. y1
