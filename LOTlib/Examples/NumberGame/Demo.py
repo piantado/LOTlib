@@ -17,5 +17,5 @@ h0 = make_h0(grammar=grammar, alpha=alpha)
 prior_sampler = prior_sample(h0, [7,7,7,7,7,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9], num_iters)
 hypotheses = FiniteBestSet(generator=prior_sampler, N=N, key="posterior_score")
 for h in hypotheses:
-print str(h), h.posterior_score
+    print str(h), h.posterior_score
 

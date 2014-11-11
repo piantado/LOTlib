@@ -20,7 +20,7 @@ hypotheses = set(prior_sample(h0, data, N=num_iters))
 grammar_h = GrammarHypothesis(grammar, hypotheses)
 
 vals = np.arange(0, 2, .2)
-rule_dist = grammar_h.m_distribution(data, 'union_', vals=vals)
+rule_dist = grammar_h.rule_distribution(data, 'range_set_', vals=vals)
 print rule_dist
 
 visualize_probs(vals, rule_dist, 'union_')
