@@ -1,11 +1,18 @@
+"""
+Find N best number game hypotheses.
 
-import numpy as np
+"""
+from LOTlib.FiniteBestSet import FiniteBestSet
+from LOTlib.Inference.MetropolisHastings import MHSampler
+from LOTlib.Inference.PriorSample import prior_sample
 from Model import *
 
 # Global parameters for inference
 domain = 100
 alpha = 0.9
-num_iters = 100
+num_iters = 10000
+N = 10
+h0 = make_h0(grammar=grammar, alpha=alpha)
 
 
 

@@ -1,22 +1,10 @@
 
-from math import factorial, log
-from collections import defaultdict
 import numpy as np
 import matplotlib.pyplot as plt
-from LOTlib.Miscellaneous import logsumexp, logplusexp, Infinity, log1mexp
-from LOTlib.Inference.MetropolisHastings import MHSampler
-from LOTlib.Inference.PriorSample import prior_sample
+from LOTlib import MHSampler
+from LOTlib.Miscellaneous import logsumexp, logplusexp
 import Grammar as G, Hypothesis
 
-
-def get_rule(grammar, rule_name, rule_nt=None):
-        """Get the GrammarRule associated with this rule name."""
-        if rule_nt is None:
-            rules = [rule for sublist in grammar.rules.values() for rule in sublist]
-        else:
-            rules = grammar.rules[rule_nt]
-        rules = filter(lambda r: (r.name == rule_name), rules)   # there should only be 1 item in this list
-        return rules[0]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~ Generate number set hypotheses
@@ -28,68 +16,18 @@ def normalizing_constant(hypotheses):
 
 
 def make_h0(grammar=G.grammar, **kwargs):
-    """Make initial NumberSetHypothesis."""
-    return Hypothesis.NumberSetHypothesis(grammar, **kwargs)
-
-def mh_sample(data):
-        return lambda grammar: set(MHSampler(make_h0(grammar), data, steps=10000))
+    """Make initial NumberGameHypothesis."""
+    return Hypothesis.NumberGameHypothesis(grammar, **kwargs)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~ Infer grammar rule probabilities with human data
-# TODO: use Grammar class instead, things will be muuuch simpler
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-def prob_data_rule(grammar, rule, data, p, num_iters=10000, alpha=0.9):
-    """Return the probabilities of set of data given a single p value for a rule."""
-    orig_p = rule.p
-    rule.p = p
-    p_human = 0
-    for d in data:
-        # get probability of producing this data pair, add to total
-        p_human_d = prob_data(grammar, d[0], d[1], num_iters, alpha)
-        p_human = logplusexp(p_human, p_human_d)
-    rule.p = orig_p
-    return p_human
+# h0 = make_h0(grammar, alpha=alpha)
+# trees = set(MHSampler(h0, data, steps=num_iters))
+# h = Hypothesis.GrammarProbHypothesis(grammar, trees)
 
-
-def probs_data_rule(grammar, rule, data, probs=np.arange(0, 2, 0.2), num_iters=10000, alpha=0.9):
-    """Return the probabilities of set of data given distribution of probabilities for a given rule
-
-    Args:
-        grammar (LOTlib.Grammar): The grammar.
-        rule (LOTlib.GrammarRule): Specify a specific rule of which to vary the probability. Use get_rule
-            to get the GrammarRule for a name, e.g. 'union_'.
-
-    Returns:
-        list: Probability of human data for each value in `probs`.
-
-    Example:
-        >> data = [([2, 8, 16], {4: (10, 2), 6: (4, 8), 12: (7, 5)}),      # (data set 1)
-        ..         ([3, 9, 13], {6: (11, 1), 5: (3, 9), 12: (8, 4)})]      # (data set 2)
-        >> probHDataGivenRuleProbs(G.grammar, 'SET', 'union_', data, probs=[0.,1.,2.,3.,4.])
-        [-0.923, -2.48, -5.12, -0.44, -6.36]
-
-    """
-    dist = []
-    orig_p = rule.p
-    for p in probs:
-        rule.p = p
-        p_human = logplusexp([prob_data(grammar, d[0], d[1], num_iters, alpha) for d in data])
-        dist.append(p_human)
-    rule.p = orig_p
-    return dist
-
-
-
-def get_rule(rule_name, rule_nt=None, grammar=G.grammar):
-    """Return the GrammarRule associated with this rule name."""
-    if rule_nt is None:
-        rules = [rule for sublist in grammar.rules.values() for rule in sublist]
-    else:
-        rules = grammar.rules[rule_nt]
-    rules = filter(lambda r: (r.name == rule_name), rules)   # there should only be 1 item in this list
-    return rules[0]
 
 
 def visualize_probs(probs, dist, rule_name='RULE_'):
@@ -102,6 +40,16 @@ def visualize_probs(probs, dist, rule_name='RULE_'):
     plt.title('Prob. of human data given prob. for rule: '+rule_name)
     plt.show()
 
+
+
+
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~ scrap
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 # # Print top 10 hypotheses
 # def printBestHypotheses(hypotheses, n=10):
@@ -119,38 +67,11 @@ def visualize_probs(probs, dist, rule_name='RULE_'):
 #         print '\t\tLikehd:\t\t%.3f' % h.likelihood
 #         print '================================================================\n'
 
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#~~~ TODO: change Demo code so it doesn't need these
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-'''
-def mh_sample(data, grammar=G.grammar, num_iters=10000, alpha=0.9):
-    """Generate new hypotheses by sampling w/ metro hastings."""
-    hypotheses = set()
-    h0 = make_h0(grammar, alpha=alpha)
-    for h in MHSampler(h0, data, steps=num_iters):
-        #print h        # with this you can see how hill climbing moves towards maxima
-        hypotheses.add(h)
-    return hypotheses
-
-
-def random_sample(grammar, input_data, n=10000, alpha=0.9):
-    """Randomly sample `n` hypotheses from the grammar using prior_sample generator."""
-    hypotheses = set()
-    h0 = make_h0(grammar, alpha=alpha)
-    for h in prior_sample(h0, input_data, n):
-        hypotheses.add(h)
-    return hypotheses
-
-
-def random_sample_old(grammar, input_data, n=10000, alpha=0.9):
-    """Randomly sample `n` hypotheses from the grammar -- old version."""
-    hypotheses = set()
-    for i in xrange(n):
-        t = Hypothesis.NumberSetHypothesis(grammar, alpha=alpha)
-        print '%'*70 + '\n'
-        print str(t) + '\n'                 # Show the last hypothesis we tried
-        t.compute_posterior(input_data)     # Compute prior, likelihood, posterior
-        hypotheses.add(t)
-    return hypotheses
-'''
+def get_rule(grammar, rule_name, rule_nt=None):
+        """Get the GrammarRule associated with this rule name."""
+        if rule_nt is None:
+            rules = [rule for sublist in grammar.rules.values() for rule in sublist]
+        else:
+            rules = grammar.rules[rule_nt]
+        rules = filter(lambda r: (r.name == rule_name), rules)   # there should only be 1 item in this list
+        return rules[0]
