@@ -23,5 +23,5 @@ vals = np.arange(0, 2, .2)
 rule_dist = grammar_h.rule_distribution(data, 'range_set_', vals=vals)
 print rule_dist
 
-visualize_probs(vals, rule_dist, 'union_')
+# visualize_probs(vals, rule_dist, 'union_')
 
