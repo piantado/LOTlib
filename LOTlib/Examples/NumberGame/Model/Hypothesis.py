@@ -28,12 +28,12 @@ class NumberGameHypothesis(LOTHypothesis):
         """
         h = self.__call__()     # set of numbers corresponding to this hypothesis
         if h is None:
-            print '%'*50
-            print str(self)
+            print '%'*150
+            print self
             print '\n'
         alpha = self.alpha
         noise = (1-alpha) / self.domain
-        if h is None or datum in h:
+        if datum in h:
             likelihood = log(alpha/len(h) + noise)
         else:
             likelihood = log(noise)
@@ -42,7 +42,7 @@ class NumberGameHypothesis(LOTHypothesis):
     def compute_likelihood(self, data, **kwargs):
         """Sum likelihoods over all data points, divide by likelihood_temperature."""
         likelihoods = [self.compute_single_likelihood(datum) for datum in data]
-        self.likelihood = logsumexp(likelihoods) / self.likelihood_temperature
+        self.likelihood = sum(likelihoods) / self.likelihood_temperature
         self.posterior_score = self.likelihood + self.prior
         return self.likelihood
 

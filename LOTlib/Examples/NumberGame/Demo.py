@@ -1,5 +1,6 @@
 """
 Find N best number game hypotheses.
+
 """
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Inference.MetropolisHastings import MHSampler

@@ -7,7 +7,7 @@ import copy
 import numpy as np
 from scipy.stats import gamma
 from LOTlib.Hypotheses.VectorHypothesis import VectorHypothesis
-from LOTlib.Miscellaneous import logplusexp, logsumexp, log1mexp, gammaln, Infinity
+from LOTlib.Miscellaneous import logplusexp, logsumexp, log1mexp, gammaln, Infinity, log
 
 
 class GrammarHypothesis(VectorHypothesis):
@@ -38,7 +38,7 @@ class GrammarHypothesis(VectorHypothesis):
         scale = self.prior_scale
         rule_priors = [gamma.pdf(r, shape, scale=scale) for r in self.value]
 
-        prior = logsumexp(rule_priors)  # TODO is this logsumexp?
+        prior = sum([log(r) for r in rule_priors])      # TODO is this right?
         self.prior = prior
         self.posterior_score = self.prior + self.likelihood
         return prior
@@ -79,16 +79,17 @@ class GrammarHypothesis(VectorHypothesis):
 
         self.likelihood = likelihood
         self.posterior_score = self.prior + self.likelihood
+        return likelihood
 
     def rule_distribution(self, data, rule_name, vals=np.arange(0, 2, .2)):
         """Compute posterior values for this grammar, varying specified rule over a set of values."""
         rule_index = self.get_rule_index(rule_name)
-        self.marginal_distribution(data, rule_index, vals=vals)
+        return self.marginal_distribution(data, rule_index, vals=vals)
 
     def set_value(self, value):
         """Set value and grammar rules for this hypothesis."""
         if not (len(value) == len(self.rules)):
-            print "INVALID VALUE VECTOR"
+            print '%'*80+"INVALID VALUE VECTOR\n"+'%'*80
             return
         self.value = value
         for i in range(1, len(value)):
