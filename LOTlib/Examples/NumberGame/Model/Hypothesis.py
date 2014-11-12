@@ -34,7 +34,8 @@ class NumberGameHypothesis(LOTHypothesis):
             print '\n'
         alpha = self.alpha
         noise = (1-alpha) / self.domain
-        if h is not None and datum in h:    # TODO: why is h NoneType sometimes with GrammarDemo??
+        # if h is not None and datum in h:    # TODO: why is h NoneType sometimes with GrammarDemo??
+        if datum in h:
             likelihood = log(alpha/len(h) + noise)
         else:
             likelihood = log(noise)
