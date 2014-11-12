@@ -1,9 +1,9 @@
 from LOTlib.Grammar import Grammar
 
 # Default parameters for integer primitives
-TERMINAL_PRIOR = .25
+TERMINAL_PRIOR = 5.
 INTEGERS       = [1,   2,  3,  4,  5,  6,  7,  8,  9, 10]
-INTEGERS_DIST  = [1., 1., 1., .8, 1., .8, 1., .6, 1., .8]   # len same as INT_PRIMITIVES
+INTEGERS_DIST  = [1., 1., 1., 1., 1., 1., 1., 1., 1., 1.]   # len same as INT_PRIMITIVES
 
 
 # Setting up our LOT hypothesis grammar
@@ -11,9 +11,9 @@ grammar = Grammar()
 
 # Sets
 grammar.add_rule('START', '', ['SET'], 1.)
-# grammar.add_rule('SET', 'union_', ['SET', 'SET'], 1.)
-# grammar.add_rule('SET', 'setdifference_', ['SET', 'SET'], 1.)
-# grammar.add_rule('SET', 'intersection_', ['SET', 'SET'], 1.)
+grammar.add_rule('SET', 'union_', ['SET', 'SET'], 1.)
+grammar.add_rule('SET', 'setdifference_', ['SET', 'SET'], 1.)
+grammar.add_rule('SET', 'intersection_', ['SET', 'SET'], 1.)
 
 # Range of numbers, e.g. [1,100] (numbers 1 through 100)
 grammar.add_rule('SET', 'range_set_', ['EXPR', 'EXPR', 'bound=100'], 10.)
@@ -28,9 +28,7 @@ grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='EXPR')
 grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], .1)
 grammar.add_rule('EXPR', 'minus_', ['EXPR', 'EXPR'], .1)
 grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], .1)
-
-## This rule makes it so somewhere we get a None that should be an empty set {}
-# grammar.add_rule('EXPR', 'ipowf_', ['EXPR', 'EXPR'], .1)
+grammar.add_rule('EXPR', 'ipowf_', ['EXPR', 'EXPR'], .1)
 
 # Terminals
 for i in range(0, len(INTEGERS)):

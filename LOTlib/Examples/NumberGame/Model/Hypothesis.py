@@ -29,11 +29,12 @@ class NumberGameHypothesis(LOTHypothesis):
         h = self.__call__()     # set of numbers corresponding to this hypothesis
         if h is None:
             print '%'*150
+            print datum
             print self
             print '\n'
         alpha = self.alpha
         noise = (1-alpha) / self.domain
-        if datum in h:
+        if h is not None and datum in h:    # TODO: why is h NoneType sometimes with GrammarDemo??
             likelihood = log(alpha/len(h) + noise)
         else:
             likelihood = log(noise)
