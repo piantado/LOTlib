@@ -5,7 +5,7 @@ Demo MCMC through lexica. Generally does not work well (too slow) so use the vec
 """
 import re
 from LOTlib import mh_sample
-from ..Model import *
+from LOTlib.Examples.Quantifier.Model import *
 
 
 show_baseline_distribution(TESTING_SET)

@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 A simple symbolic regression demo
+
 """
 from LOTlib.Hypotheses.GaussianLOTHypothesis import GaussianLOTHypothesis
 from LOTlib.Inference.MetropolisHastings import mh_sample
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.DataAndObjects import qq
-from ..Grammar import grammar
+from LOTlib.Examples.SymbolicRegression.Grammar import grammar
 from Data import generate_data
 
 

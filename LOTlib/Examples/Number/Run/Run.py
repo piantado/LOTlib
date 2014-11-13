@@ -14,8 +14,9 @@ import LOTlib
 from LOTlib import lot_iter
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Inference.MetropolisHastings import MHSampler
+from LOTlib.Miscellaneous import q
 from LOTlib.MPI.MPI_map import MPI_map, is_master_process
-from ..Model import *
+from LOTlib.Examples.Number.Model import *
 
 ## Parse command line options:
 from optparse import OptionParser
@@ -93,4 +94,4 @@ if options.LARGE_DATA_SIZE > 0 and is_master_process():
     # show the *average* ll for each hypothesis
     for h in lot_iter(H):
         if h.prior > float("-inf"):
-            print h.prior, h.likelihood/float(options.LARGE_DATA_SIZE), Utilities.q(Utilities.get_knower_pattern(h)),  Utilities.q(h) # a quoted x
+            print h.prior, h.likelihood/float(options.LARGE_DATA_SIZE), q(Utilities.get_knower_pattern(h)),  q(h) # a quoted x

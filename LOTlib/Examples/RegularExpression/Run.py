@@ -10,6 +10,5 @@ from LOTlib.Miscellaneous import qq
 from Model import *
 
 
-def run():
-    for h in lot_iter(MHSampler(make_h0(), data, steps=10000)):
-        print h.posterior_score, h.prior, h.likelihood, qq(h)
+for h in lot_iter(MHSampler(make_h0(), data, steps=10000)):
+    print h.posterior_score, h.prior, h.likelihood, qq(h)

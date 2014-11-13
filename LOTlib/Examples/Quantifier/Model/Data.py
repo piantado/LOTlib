@@ -14,7 +14,7 @@ from LOTlib import lot_iter
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.DataAndObjects import *
 from LOTlib.Evaluation.Primitives.SetTheory import *
-from LOTlib.Primitives.Semantics import *
+from LOTlib.Evaluation.Primitives.Semantics import *
 from Utilities import make_my_hypothesis, my_weight_function
 import Hypothesis as H, Grammar as G
 

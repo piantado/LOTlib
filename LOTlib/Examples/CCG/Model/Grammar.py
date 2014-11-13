@@ -1,7 +1,13 @@
 
 from LOTlib.Grammar import Grammar
 from LOTlib.Miscellaneous import qq
-from Utilities import OBJECTS, SEMANTIC_1PREDICATES, SEMANTIC_2PREDICATES
+
+# What are the objects we may use?
+OBJECTS              = ['JOHN', 'MARY', 'SUSAN', 'BILL']
+SEMANTIC_1PREDICATES = ['SMILED', 'LAUGHED', 'MAN', 'WOMAN']
+SEMANTIC_2PREDICATES = ['SAW', 'LOVED']
+
+
 
 grammar = Grammar()
 

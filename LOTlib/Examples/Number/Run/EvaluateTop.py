@@ -4,7 +4,8 @@
 """
 
 import pickle
-from ..Model import *
+from LOTlib.Miscellaneous import q
+from LOTlib.Examples.Number.Model import *
 
 LARGE_DATA_SIZE = 1000
 

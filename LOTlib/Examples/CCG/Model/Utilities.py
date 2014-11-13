@@ -2,11 +2,6 @@ import re
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from Grammar import grammar
 
-# What are the objects we may use?
-OBJECTS              = ['JOHN', 'MARY', 'SUSAN', 'BILL']
-SEMANTIC_1PREDICATES = ['SMILED', 'LAUGHED', 'MAN', 'WOMAN']
-SEMANTIC_2PREDICATES = ['SAW', 'LOVED']
-
 def str2sen(s):
     # Chop up a string by spaces to make a "Sentence"
     return re.split(r'\s', s)

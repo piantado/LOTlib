@@ -18,7 +18,7 @@ TODO: ADD OUTPUT OF THE TOP HYPOTHESES AT EAHC POINT IN TIME.
 from collections import defaultdict
 from optparse import OptionParser
 from LOTlib.Miscellaneous import logsumexp
-from ..Model import *
+from LOTlib.Examples.Quantifier.Model import *
 
 
 DATA_RANGE = range(0, 2050, 100) # Don't need an option for this right now

@@ -1,7 +1,7 @@
 """
 Data generation for symbolic regression
-"""
 
+"""
 from random import random
 from numpy.random import normal
 

@@ -12,7 +12,7 @@ $ mpiexec --hostfile ../../hosts.mpich2 -n 15 python Search_MCMC.py
 from SimpleMPI.MPI_map import MPI_map
 from LOTlib import mh_sample
 from LOTlib.FiniteBestSet import FiniteBestSet
-from ..Model import *
+from LOTlib.Examples.Quantifier.Model import *
 
 CHAINS = 3  #how many times do we run?
 DATA_AMOUNTS = range(0,300, 100) #range(0,1500,100)

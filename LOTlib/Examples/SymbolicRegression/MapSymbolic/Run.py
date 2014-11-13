@@ -8,7 +8,7 @@ We put a simple bayesian prior on these constants, and use it to compute MAPs.
 import numpy
 from math import sin
 from LOTlib.Miscellaneous import qq
-from ..Grammar import grammar, NCONSTANTS
+from LOTlib.Examples.SymbolicRegression.Grammar import grammar, NCONSTANTS
 from Hypothesis import MAPSymbolicRegressionHypothesis
 from Data import generate_data
 
@@ -32,3 +32,5 @@ def run():
     from LOTlib.Inference.MetropolisHastings import mh_sample
     for h in mh_sample(h0, data, STEPS, skip=SKIP, trace=False, debug=False, memoize=MEMOIZE):
         print h.posterior_score, h.likelihood, h.prior, h.CONSTANT_VALUES, qq(h)
+
+run()

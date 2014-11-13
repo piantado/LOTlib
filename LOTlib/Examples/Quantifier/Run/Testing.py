@@ -2,7 +2,7 @@
 from collections import defaultdict
 from LOTlib.DataAndObjects import UtteranceData
 from LOTlib.Miscellaneous import exp
-from ..Model import *
+from LOTlib.Examples.Quantifier.Model import *
 
 #distribution of context sizes
 #for i in xrange(1000):

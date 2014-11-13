@@ -12,6 +12,7 @@ from LOTlib.Hypotheses.RationalRulesLOTHypothesis import RationalRulesLOTHypothe
 from LOTlib.Inference.MetropolisHastings import mh_sample
 from Model import *
 
+
 def run_mh():
     """Run the MH; Run the vanilla sampler.
 
@@ -29,11 +30,8 @@ def run_mh():
     # is defined in LOTlib.Hypotheses and wraps LOTHypothesis with the rational rules prior
     h0 = RationalRulesLOTHypothesis(grammar=DNF, rrAlpha=1.0)
 
-
-
     for h in mh_sample(h0, data, 10000, skip=100):
         print h.posterior_score, h.prior, h.value.log_probability(), h.likelihood, q(h)
-
 
 
 if __name__ == "__main__":

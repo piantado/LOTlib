@@ -1,4 +1,4 @@
-from LOTlib.Hypotheses import LOTHypothesis
+from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Miscellaneous import log, Infinity, log1mexp
 
 ##########################################################

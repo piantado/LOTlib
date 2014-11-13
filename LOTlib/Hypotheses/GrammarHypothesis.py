@@ -38,7 +38,7 @@ class GrammarHypothesis(VectorHypothesis):
         scale = self.prior_scale
         rule_priors = [gamma.logpdf(r, shape, scale=scale) for r in self.value]
 
-        prior = sum([log(r) for r in rule_priors])      # TODO is this right?
+        prior = sum([r for r in rule_priors])      # TODO is this right?
         self.prior = prior
         self.posterior_score = self.prior + self.likelihood
         return prior

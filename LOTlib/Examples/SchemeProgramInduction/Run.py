@@ -51,3 +51,5 @@ def scheme_generate():
             print x.log_probability(), x
             for ei in example_input:
                 print "\t", ei, " -> ", f(ei)
+
+run()

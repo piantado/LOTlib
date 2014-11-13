@@ -1,16 +1,15 @@
 """
-    This currently will learn mutually recursive definitions, things like even/odd. It makes a version
-    of a SimpleLexicon that allows word definitinos to call other word definitions.
+This currently will learn mutually recursive definitions, things like even/odd. It makes a version
+of a SimpleLexicon that allows word definitinos to call other word definitions.
 
-    In the future, we should see how we could invent predicates from nothing in order to explain data (via Ystar)
+In the future, we should see how we could invent predicates from nothing in order to explain data (via Ystar)
+
 """
-
 from LOTlib import lot_iter
-from Model import *
-
 from LOTlib.DataAndObjects import FunctionData
 from LOTlib.FunctionNode import cleanFunctionNodeString
 from LOTlib.Inference.MetropolisHastings import MHSampler
+from Model import *
 
 data = []
 for x in xrange(1, 10):

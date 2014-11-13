@@ -1,6 +1,7 @@
 from LOTlib.DataAndObjects import UtteranceData
 from Hypothesis import Context
-from Utilities import str2sen, OBJECTS
+from Grammar import OBJECTS
+from Utilities import str2sen
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Set up the data

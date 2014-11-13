@@ -6,8 +6,9 @@ from math import log
 class SchemeFunction(LOTHypothesis):
 
     # Prior, proposals, __init__ are all inherited from LOTHypothesis
-    def __init__(self, ALPHA=0.9):
-        self.ALPHA=ALPHA
+    def __init__(self, grammar, ALPHA=0.9, **kwargs):
+        LOTHypothesis.__init__(self, grammar, **kwargs)
+        self.ALPHA = ALPHA
 
     def compute_single_likelihood(self, datum):
         """

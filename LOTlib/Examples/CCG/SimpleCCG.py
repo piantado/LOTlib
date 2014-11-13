@@ -1,19 +1,16 @@
 """
-        A simple case of CCG-ish learning for a toy domain
+A simple case of CCG-ish learning for a toy domain
 
-        This just uses brute force parsing.
+This just uses brute force parsing.
 
 
-        TODO: Learn that MAN is JOHN or BILL
+TODO: Learn that MAN is JOHN or BILL
 
 """
-
-from LOTlib.Examples.CCG.Model.Hypothesis import CCGLexicon
-from LOTlib.Examples.CCG.Model.Grammar import make_hypothesis
 from LOTlib.Inference.MetropolisHastings import MHSampler
+from Model import *
 
 
-from LOTlib.Examples.CCG.Model.Data import all_words, data
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 SAMPLES = 100000

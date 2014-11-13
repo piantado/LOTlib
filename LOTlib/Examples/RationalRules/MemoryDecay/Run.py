@@ -1,7 +1,6 @@
 
 from LOTlib.Miscellaneous import q
-from LOTlib.Examples.RationalRules.Model.Utilities import grammar
-from LOTlib.Examples.RationalRules.TwoConcepts.Data import *
+from LOTlib.Examples.RationalRules.Model import *
 from Hypothesis import *
 
 def run():
@@ -32,3 +31,5 @@ def run():
 
     #-12.2035235691 -9.93962659915 -2.26389696996 'and_(is_shape_(x, 'triangle'), is_color_(x, 'blue'))'
     #-10.7313040795 -9.93962659915 -0.791677480378 'and_(is_shape_(x, 'triangle'), is_color_(x, 'red'))'
+
+run()

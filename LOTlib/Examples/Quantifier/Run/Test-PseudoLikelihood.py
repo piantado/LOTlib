@@ -7,10 +7,10 @@ We could probably prove that any likelihood function that does not consider alte
 That the truth values of X are not enough to determine meaning if the subset problem is there....
 
 """
-import LOTlib
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-from ..Model import *
+from LOTlib.Inference.MetropolisHastings import mh_sample
+from LOTlib.Examples.Quantifier.Model import *
 
 ALPHA = 0.9
 SAMPLES = 100000
@@ -28,9 +28,9 @@ for di in data:
 
 FBS = FiniteBestSet(max=True, N=100)
 
-H = LOTHypothesis(G, args=['A', 'B', 'S'], ALPHA=ALPHA)
+H = LOTHypothesis(grammar, args=['A', 'B', 'S'], ALPHA=ALPHA)
 # Now just run the sampler with a LOTHypothesis
-for s in LOTlib.MetropolisHastings.mh_sample(H, data, SAMPLES, skip=10):
+for s in mh_sample(H, data, SAMPLES, skip=10):
     #print s.lp, "\t", s.prior, "\t", s.likelihood, "\n", s, "\n\n"
     FBS.push(s, s.lp)
 

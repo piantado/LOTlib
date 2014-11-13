@@ -5,9 +5,11 @@
         Note: CTRL-C breaks out of the MCMC loop, and the processes at the bottom with average likelihood for each hypothesis.
 
 """
-from ..Model import *
 from LOTlib import lot_iter
 from LOTlib.FiniteBestSet import FiniteBestSet
+from LOTlib.Inference.MetropolisHastings import MHSampler
+from LOTlib.Miscellaneous import q, qq
+from LOTlib.Examples.Number.Model import *
 
 LARGE_DATA_SIZE = 10000 # this is what we compute the average LL on
 DATA_SIZE = 300
@@ -30,7 +32,6 @@ h0 = NumberExpression(grammar)
 # store hypotheses we've found
 allhyp = FiniteBestSet(max=True,N=1000)
 
-from  LOTlib.Inference.MetropolisHastings import MHSampler
 
 # A bunch of different MCMC algorithms to try. mh_sample is from the Rational Rules paper and generally works very well.
 #for h in  LOTlib.Inference.TemperedTransitions.tempered_transitions_sample(initial_hyp, data, 500000, skip=0, temperatures=[1.0, 1.25, 1.5]):
@@ -55,3 +56,5 @@ for h in lot_iter(MHSampler(h0, data, STEPS, skip=SKIP)):
 # show the *average* ll for each hypothesis, at this data size
 #for h in H:
     #print h.prior, h.likelihood/float(LARGE_DATA_SIZE), q(get_knower_pattern(h)),  q(h) # a quoted x
+
+

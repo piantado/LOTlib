@@ -1,7 +1,7 @@
 
 from LOTlib.Hypotheses.WeightedLexicon import WeightedLexicon
 from copy import copy
-from Utilities import make_my_hypothesis    # TODO: on line 18, maybe this is what make_hypothesis should be?
+from Utilities import make_my_hypothesis
 
 
 class GriceanQuantifierLexicon(WeightedLexicon):
@@ -16,7 +16,7 @@ class GriceanQuantifierLexicon(WeightedLexicon):
         self.my_weight_function = my_weight_function
 
     def __copy__(self):
-        new = type(self)(self.make_hypothesis, self.my_weight_function, alpha=self.alpha, palpha=self.palpha)
+        new = type(self)(make_my_hypothesis(), self.my_weight_function, alpha=self.alpha, palpha=self.palpha)
         for w in self.value.keys():
             new.value[w] = copy(self.value[w])
         return new
