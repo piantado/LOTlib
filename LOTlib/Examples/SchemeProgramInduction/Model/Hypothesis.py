@@ -16,7 +16,6 @@ class SchemeFunction(LOTHypothesis):
             since when we are wrong, it should generate the observed data with some probability that's not going
             to be 1-ALPHA
         """
-
         if str(self(datum.input)) == str(datum.output):
             return log(self.ALPHA)
         else:

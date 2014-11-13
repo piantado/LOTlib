@@ -12,6 +12,9 @@ def presup_(a,b):
         else: return "undefF"
 
 @LOTlib_primitive
+def is_undef_(x):
+    return is_undef(x)
+
 def is_undef(x):
     if isinstance(x,list):
         return map(is_undef, x)

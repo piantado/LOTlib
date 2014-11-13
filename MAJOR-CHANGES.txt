@@ -1,3 +1,10 @@
+Nov 13 2014:
+        - fixes to inverse-inline proposal
+        - value2function(value) now is compile_function(), and assumes that the value has been set
+        - Updates to organization of Examples
+        - More examples brought up to date
+        - FunctionHypothesis.__call__ now does no error handling--exceptions must be handled by subclasses
+        - Fixed NameErrors to be useful!
 Oct 31 2014:
         - Integration of SimpleMPI with LOTlib (now LOTlib.MPI). SimpleMPI will no longer be updated. 
 Sep 24 2014:

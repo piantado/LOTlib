@@ -39,3 +39,6 @@ def multirun():
 
     for r in finitesample.get_all():
         print r.posterior_score, r.prior, r.likelihood, qq(str(r))
+
+if __name__ == "__main__":
+    run()

@@ -103,5 +103,5 @@ def evaluate_expression(e, recurse="L_"):
         f = eval('lambda %s: %s'%(recurse, e))
         return Y_bounded(f)
     except Exception as ex:
-        print "*** Error in evaluate_expression:", e
+        print "*** Error in evaluate_expression:", ex
         raise ex

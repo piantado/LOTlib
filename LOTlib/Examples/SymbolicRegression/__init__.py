@@ -1,3 +1,3 @@
 
-import Galileo, MapSymbolic, Symbolic
+import Galileo, MAPSymbolic, Symbolic
 import Grammar

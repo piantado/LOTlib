@@ -34,5 +34,5 @@ for s in mh_sample(H, data, SAMPLES, skip=10):
     #print s.lp, "\t", s.prior, "\t", s.likelihood, "\n", s, "\n\n"
     FBS.push(s, s.lp)
 
-for k in reversed(FBS.get_sorted()):
+for k in reversed(FBS.get_all(sorted=True)):
     print k.lp, k.prior, k.likelihood, k

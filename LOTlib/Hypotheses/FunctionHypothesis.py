@@ -50,27 +50,16 @@ class FunctionHypothesis(Hypothesis):
         #assert not any([isinstance(x, FunctionData) for x in vals]), "*** Probably you mean to pass FunctionData.input instead of FunctionData?"
         #assert callable(self.fvalue)
 
-        try:
-            return self.fvalue(*vals)
-        except EvaluationException:
-            return None
-        except TypeError:
-            print "TypeError in function call: "+str(self)+"  ;  "+str(vals)
-            raise TypeError
-        except NameError:
-            print "NameError in function call: " + str(self)
-            raise NameError
+        return self.fvalue(*vals)
 
-    def value2function(self, value):
-        """ How we convert a value into a function. Default is LOTlib.Miscellaneous.evaluate_expression """
 
-        # Risky here to catch all exceptions, but we'll do it and warn on failure
-        try:
-            return evaluate_expression(str(self))
-        except Exception as e:
-            print "# Warning: failed to execute evaluate_expression on " + str(value), self.args
-            print "# ", e
-            return lambdaNone
+    def compile_function(self):
+        """
+        Takes my value and returns what function I compute. Internally cached by set_value
+
+        NOTE: This must be overwritten by subclasses to something useful--see LOTHypothesis
+        """
+        raise NotImplementedError
 
     def reset_function(self):
         """ re-construct the function from the value -- useful after pickling """
@@ -90,7 +79,7 @@ class FunctionHypothesis(Hypothesis):
         elif value is None:
             self.fvalue = None
         else:
-            self.fvalue = self.value2function(value)
+            self.fvalue = self.compile_function() # now that the value is set
 
     def force_function(self, f):
         """

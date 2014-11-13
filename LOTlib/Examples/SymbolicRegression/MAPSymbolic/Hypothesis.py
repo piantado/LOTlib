@@ -21,12 +21,11 @@ class MAPSymbolicRegressionHypothesis(GaussianLOTHypothesis):
     likelihood to optimize
     """
 
-    def value2function(self, value):
+    def compile_function(self):
         """
         Overwrite this from FunctionHypothesis. Here, we add args for the constants so we can use them
         """
-        #print ">>", self.args, CONSTANT_NAMES
-        return evaluate_expression(value, args=self.args+CONSTANT_NAMES)
+        return evaluate_expression(str(self))
 
     def __call__(self, *vals):
         """

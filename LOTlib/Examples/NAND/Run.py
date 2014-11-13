@@ -9,9 +9,11 @@ You can then run Adapt.py, which reads OUTFILE and calls OptimalGrammarAdaptatio
 to show the best subtrees to define for minimizing KL between the prior and posterior
 
 """
+import pickle
+from LOTlib import lot_iter
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.FiniteBestSet import FiniteBestSet
-from LOTlib.Inference.MetropolisHastings import mh_sample
+from LOTlib.Inference.MetropolisHastings import MHSampler
 from Model import *
 
 
@@ -34,8 +36,8 @@ for i, f in enumerate(TARGET_CONCEPTS):
 
     # Now run some MCMC
     fs = FiniteBestSet(N=BEST_N, key="posterior_score")
-    fs.add(mh_sample(h0, data, steps=NSTEPS, trace=False))
+    fs.add(lot_iter(MHSampler(h0, data, steps=NSTEPS, trace=False)))
 
     all_hypotheses.merge(fs)
 
-pickle_save(all_hypotheses, OUTFILE)
+pickle.dump(all_hypotheses, open(OUTFILE, 'w'))

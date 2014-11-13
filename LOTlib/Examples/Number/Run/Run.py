@@ -14,7 +14,7 @@ import LOTlib
 from LOTlib import lot_iter
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Inference.MetropolisHastings import MHSampler
-from LOTlib.Miscellaneous import q
+from LOTlib.Miscellaneous import q, display_option_summary
 from LOTlib.MPI.MPI_map import MPI_map, is_master_process
 from LOTlib.Examples.Number.Model import *
 

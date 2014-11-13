@@ -8,8 +8,9 @@ Note: it does not work very well for complex functions since it is hard to sampl
     much of a gradient to climb on cons, cdr, car
 
 """
+from LOTlib import lot_iter
 from LOTlib.Hypotheses import LOTHypothesis
-from LOTlib.Inference.MetropolisHastings import mh_sample
+from LOTlib.Inference.MetropolisHastings import MHSampler
 from Model import *
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -21,7 +22,7 @@ ALPHA = 0.9
 def run():
     """ Standard run function."""
     h0 = SchemeFunction(grammar, ALPHA=ALPHA)
-    for x in mh_sample(h0, data, STEPS):
+    for x in lot_iter(MHSampler(h0, data, STEPS)):
 
         print x.posterior_score, x
         for di in data:

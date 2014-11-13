@@ -1,5 +1,4 @@
 from Primitives import LOTlib_primitive
-from LOTlib.Evaluation.Eval import Ystar
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Lambda calculus & Scheme

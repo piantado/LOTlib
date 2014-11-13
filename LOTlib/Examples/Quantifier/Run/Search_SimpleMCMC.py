@@ -9,7 +9,7 @@ MPI run:
 $ mpiexec --hostfile ../../hosts.mpich2 -n 15 python Search_MCMC.py
 
 """
-from SimpleMPI.MPI_map import MPI_map
+from LOTlib.MPI.MPI_map import MPI_map
 from LOTlib import mh_sample
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Examples.Quantifier.Model import *
@@ -62,6 +62,5 @@ for r in allret:
     print "# Merging ", len(r)
     outhyp.merge(r)
 
-from LOTlib.Serialization import *
-serialize2file(outhyp, OUT_PATH)
-#outhyp.save(OUT_PATH)
+import pickle
+pickle.dump(outhyp, open(OUT_PATH, 'w'))

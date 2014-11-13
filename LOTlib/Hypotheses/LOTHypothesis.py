@@ -7,10 +7,11 @@
 from FunctionHypothesis import FunctionHypothesis
 from copy import copy, deepcopy
 from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
-from LOTlib.Miscellaneous import Infinity, lambdaNone
+from LOTlib.Miscellaneous import Infinity, lambdaNone, raise_exception
 from LOTlib.DataAndObjects import FunctionData
 from LOTlib.Evaluation.Eval import evaluate_expression
 from math import log
+from LOTlib.Evaluation.EvaluationException import TooBigException, EvaluationException
 
 class LOTHypothesis(FunctionHypothesis):
     """
@@ -53,6 +54,18 @@ class LOTHypothesis(FunctionHypothesis):
 
         self.likelihood = 0.0
 
+    def __call_(self, *args):
+        try:
+            return FunctionHypothesis.__call__(self, *args)
+        except EvaluationException: # We defaultly handle these as None
+            return None
+        except TypeError as e:
+            print "TypeError in function call: ", e, str(self), "  ;  "+str(vals)
+            raise TypeError
+        except NameError as e:
+            print "NameError in function call: ", e, str(self)
+            raise NameError
+
     def type(self):
         return self.value.type()
 
@@ -62,19 +75,19 @@ class LOTHypothesis(FunctionHypothesis):
         """
         self.proposal_function = f
 
-    def value2function(self, value):
+    def compile_function(self):
         """
             Called in set_value to compile into a function.
         """
         if self.value.count_nodes() > self.maxnodes:
-            return lambdaNone
+            return (lambda: raise_exception(TooBigException) )
         else:
             try:
                 return evaluate_expression(str(self))
             except Exception as e:
-                print "# Warning: failed to execute evaluate_expression on " + str(value)
+                print "# Warning: failed to execute evaluate_expression on " + str(self)
                 print "# ", e
-                return lambdaNone
+                return (lambda: raise_exception(EvaluationException) )
 
     def __copy__(self):
         """

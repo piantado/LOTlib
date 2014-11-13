@@ -4,3 +4,6 @@
 
 class EvaluationException(Exception):
     pass
+
+class TooBigException(EvaluationException):
+    pass
