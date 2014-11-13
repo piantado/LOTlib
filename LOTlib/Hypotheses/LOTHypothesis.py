@@ -54,7 +54,7 @@ class LOTHypothesis(FunctionHypothesis):
 
         self.likelihood = 0.0
 
-    def __call_(self, *args):
+    def __call__(self, *args):
         try:
             return FunctionHypothesis.__call__(self, *args)
         except EvaluationException: # We defaultly handle these as None
@@ -80,14 +80,14 @@ class LOTHypothesis(FunctionHypothesis):
             Called in set_value to compile into a function.
         """
         if self.value.count_nodes() > self.maxnodes:
-            return (lambda: raise_exception(TooBigException) )
+            return (lambda *args: raise_exception(TooBigException) )
         else:
             try:
                 return evaluate_expression(str(self))
             except Exception as e:
                 print "# Warning: failed to execute evaluate_expression on " + str(self)
                 print "# ", e
-                return (lambda: raise_exception(EvaluationException) )
+                return (lambda *args: raise_exception(EvaluationException) )
 
     def __copy__(self):
         """
