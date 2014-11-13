@@ -65,7 +65,7 @@ def DOTstring(x, d=0, bv_names=None):
             elif isinstance(x, BVAddFunctionNode):
                 assert name is 'lambda'
                 s = name + ';\n\t'
-                s = s+added_rule.name+';\n\t'
+                s = s+x.added_rule.name+';\n\t'
                 s = s+map(lambda a: DOTstring(a,d+1,bv_names=bv_names), x.args)+';\n\t'
                 return s
                 # return "(%s (%s) %s)" % (name, x.added_rule.name, map(lambda a: DOTstring(a,d+1,bv_names=bv_names), x.args))
@@ -139,6 +139,10 @@ def pystring(x, d=0, bv_names=None):
             assert x.args is not None and len(x.args)==2, "Apply requires exactly 2 arguments"
             #print ">>>>", self.args
             return '( %s )( %s )' % tuple(map(lambda x: pystring(x, d=d, bv_names=bv_names), x.args))
+        elif x.name == "or_sc_": # short-circuit or
+            return "(%s)" % ' or '.join(map(lambda x: pystring(x, d=d, bv_names=bv_names), x.args))
+        elif x.name == "and_sc_": # short-circuit and
+            return "(%s)" % ' and '.join(map(lambda x: pystring(x, d=d, bv_names=bv_names), x.args))
         elif x.name == 'lambda':
             # On a lambda, we must add the introduced bv, and then remove it again afterwards
             

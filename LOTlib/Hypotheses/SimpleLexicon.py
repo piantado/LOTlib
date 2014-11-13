@@ -57,6 +57,12 @@ class SimpleLexicon(Hypothesis):
     def __hash__(self): return hash(str(self))
     def __eq__(self, other):   return (str(self)==str(other)) # simple but there are probably better ways
 
+    def __call__(self, word, *args):
+        """
+        Just a wrapper so we can call like SimpleLexicon('hi', 4)
+        """
+        return self.value[word](*args)
+
     # this sets the word and automatically compute its function
     def set_word(self, w, v=None):
         """
@@ -91,7 +97,7 @@ class SimpleLexicon(Hypothesis):
         new = copy(self)
 
         w = weighted_sample(self.value.keys()) # the word to change
-        p,fb = self.value[w].propose()
+        p, fb = self.value[w].propose()
 
         new.set_word(w, p)
 

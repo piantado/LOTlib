@@ -1,4 +1,5 @@
 from Primitives import LOTlib_primitive
+from LOTlib.Evaluation.Eval import Ystar
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Lambda calculus & Scheme
@@ -43,3 +44,7 @@ def filter_(f,x):
 @LOTlib_primitive
 def mapset_(f,A):
     return {f(a) for a in A}
+
+@LOTlib_primitive
+def Ystar_(*args):
+    return Ystar(*args)

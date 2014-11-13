@@ -53,7 +53,8 @@ class LOTHypothesis(FunctionHypothesis):
 
         self.likelihood = 0.0
 
-    def type(self): return self.value.type()
+    def type(self):
+        return self.value.type()
 
     def set_proposal_function(self, f):
         """

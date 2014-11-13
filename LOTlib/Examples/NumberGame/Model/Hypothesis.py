@@ -26,19 +26,15 @@ class NumberGameHypothesis(LOTHypothesis):
         If datum item not in set, it still has (1 - alpha) likelihood of being generated.
 
         """
-        h = self.__call__()     # set of numbers corresponding to this hypothesis
-        if h is None:
-            print '%'*150
-            print datum
-            print self
-            print '\n'
-        alpha = self.alpha
-        noise = (1-alpha) / self.domain
-        # if h is not None and datum in h:    # TODO: why is h NoneType sometimes with GrammarDemo??
-        if datum in h:
-            likelihood = log(alpha/len(h) + noise)
+        s = self()     # set of numbers corresponding to this hypothesis
+                       # NOTE: This may be None if the hypothesis has too many nodess
+
+        errorp = (1.-self.alpha) / self.domain
+
+        if s is not None and datum in s:
+            likelihood = log(self.alpha/len(s) + errorp)
         else:
-            likelihood = log(noise)
+            likelihood = log(errorp)
         return likelihood
 
     def compute_likelihood(self, data, **kwargs):
