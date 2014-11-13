@@ -36,7 +36,7 @@ class GrammarHypothesis(VectorHypothesis):
     def compute_prior(self):
         shape = self.prior_shape
         scale = self.prior_scale
-        rule_priors = [gamma.pdf(r, shape, scale=scale) for r in self.value]
+        rule_priors = [gamma.logpdf(r, shape, scale=scale) for r in self.value]
 
         prior = sum([log(r) for r in rule_priors])      # TODO is this right?
         self.prior = prior
@@ -84,7 +84,7 @@ class GrammarHypothesis(VectorHypothesis):
     def rule_distribution(self, data, rule_name, vals=np.arange(0, 2, .2)):
         """Compute posterior values for this grammar, varying specified rule over a set of values."""
         rule_index = self.get_rule_index(rule_name)
-        return self.marginal_distribution(data, rule_index, vals=vals)
+        return self.conditional_distribution(data, rule_index, vals=vals)
 
     def set_value(self, value):
         """Set value and grammar rules for this hypothesis."""
@@ -112,10 +112,6 @@ class GrammarHypothesis(VectorHypothesis):
 
     def get_rule_index(self, rule_name):
         """Get index of the GrammarRule associated with this rule name."""
-        # there should only be 1 item in this list
         rules = [i for i, r in enumerate(self.rules) if r.name == rule_name]
-        if len(rules) == 1:
-            return rules[0]
-        else:
-            return None
-
+        assert (len(rules) == 1), 'ERROR: More than 1 rule associated with this rule name!'
+        return rules[0]

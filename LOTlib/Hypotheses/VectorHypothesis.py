@@ -25,7 +25,7 @@ class VectorHypothesis(Hypothesis):
         #TODO why is there a `, 0.0` at the end of this return statement?
         ### return VectorHypothesis(value=newv, n=self.n, proposal=self.proposal), 0.0  # symmetric proposals
 
-    def marginal_distribution(self, data, value_index, vals=numpy.arange(0, 2, .2)):
+    def conditional_distribution(self, data, value_index, vals=numpy.arange(0, 2, .2)):
         """Compute posterior values for this grammar, varying specified value over a specified set.
 
         Args:
@@ -43,7 +43,7 @@ class VectorHypothesis(Hypothesis):
             value = copy.copy(self.value)
             value[value_index] = p
             self.set_value(value)
-            dist.append(self.compute_likelihood(data))
+            dist.append(self.compute_posterior(data))
 
         self.set_value(old_value)
         return dist
