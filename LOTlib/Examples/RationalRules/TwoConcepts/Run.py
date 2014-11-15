@@ -30,4 +30,5 @@ def run_mh():
     for h in mh_sample(h0, data, 10000, skip=100):
         print h.posterior_score, h.prior, h.likelihood, q(h)
 
-run_mh()
+if __name__ == "__main__":
+    run_mh()
