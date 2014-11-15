@@ -10,13 +10,46 @@ Attributes defined here:
 
 """
 from random import randint
+from cachetools import lru_cache
 from LOTlib import lot_iter
-from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.DataAndObjects import *
 from LOTlib.Evaluation.Primitives.SetTheory import *
 from LOTlib.Evaluation.Primitives.Semantics import *
-from Utilities import make_my_hypothesis, my_weight_function
+from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+from LOTlib.Miscellaneous import ifelse
 import Hypothesis as H, Grammar as G
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~ These should be in Utilities, except then we'd have circular imports ~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+def make_my_hypothesis():
+    return LOTHypothesis(G.grammar, args=['context'])
+
+@lru_cache
+def my_weight_function(h):
+    return gricean_weight(h, TESTING_SET)
+
+
+def gricean_weight(h, testing_set, nu=1.0):
+    """Takes a hypothesis and its function and returns the weight under a gricean setup.
+
+    Production probability is proportional to:  exp( 1.0 / (nu + proportionoftimeitistrue) )
+
+    Notes:
+        The max weight is 1/nu, and this should not be huge compared to 1/alpha
+        We (should) boundedly memoize this
+
+    """
+
+    pct = float(sum(map(lambda s: ifelse(h(s), 1.0, 0.0), testing_set) )) / len(testing_set)
+    # pul out the context sets and apply f
+    #pct = float(sum(map(lambda s: ifelse(f(*s) is True, 1.0, 0.0), testing_set) )) / len(testing_set)
+    # pul out the context sets and apply f
+    #pct = float(sum(map(lambda s: ifelse(collapse_undef(f(*s)), 1.0, 0.0), testing_set) )) / len(testing_set)
+
+    return 1.0 / (nu + pct)
 
 
 # quantifiers involving cardinality

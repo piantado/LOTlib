@@ -22,7 +22,7 @@ from LOTlib.Examples.Number.Model import *
 from optparse import OptionParser
 
 parser = OptionParser()
-parser.add_option("--out", dest="OUT_PATH", type="string",                  help="Output file (a pickle of FiniteBestSet)", default="/home/piantado/Desktop/Science/Libraries/LOTlib/LOTlib/Examples/Number/mpi-run.pkl")
+parser.add_option("--out", dest="OUT_PATH", type="string",                  help="Output file (a pickle of FiniteBestSet)", default="mpi-run.pkl")
 
 parser.add_option("--steps", dest="STEPS", type="int", default=200000,       help="Number of samples to run")
 parser.add_option("--top", dest="TOP_COUNT", type="int", default=1000,       help="Top number of hypotheses to store")

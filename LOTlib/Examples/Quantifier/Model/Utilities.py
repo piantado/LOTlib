@@ -3,45 +3,19 @@ Move out some functions from Shared -- things that aren't part of the core model
 
 """
 from collections import defaultdict
-from cachetools import lru_cache
+
 from scipy.stats import chisquare
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Miscellaneous import *
 from LOTlib.Evaluation.Eval import evaluate_expression
 import Grammar as G
-from Data import TESTING_SET, target, generate_data
+from Data import target, generate_data, my_weight_function, gricean_weight, make_my_hypothesis
 from LOTlib.Evaluation.Primitives.Semantics import is_undef
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~ Functions for doing Gricean things ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-def make_my_hypothesis():
-    return LOTHypothesis(G.grammar, args=['context'])
-
-
-@lru_cache
-def my_weight_function(h):
-    return gricean_weight(h, TESTING_SET)
-
-
-def gricean_weight(h, testing_set, nu=1.0):
-    """Takes a hypothesis and its function and returns the weight under a gricean setup.
-
-    Production probability is proportional to:  exp( 1.0 / (nu + proportionoftimeitistrue) )
-
-    Notes:
-        The max weight is 1/nu, and this should not be huge compared to 1/alpha
-        We (should) boundedly memoize this
-
-    """
-
-    pct = float(sum(map(lambda s: ifelse(h(s), 1.0, 0.0), testing_set) )) / len(testing_set)
-    #pct = float(sum(map(lambda s: ifelse(f(*s) is True, 1.0, 0.0), testing_set) )) / len(testing_set) # pul out the context sets and apply f
-    #pct = pct = float(sum(map(lambda s: ifelse(collapse_undef(f(*s)), 1.0, 0.0), testing_set) )) / len(testing_set) # pul out the context sets and apply f
-
-    return 1.0 / (nu + pct)
-
 
 def show_baseline_distribution(testing_set, N=1000):
     frq = defaultdict(int)

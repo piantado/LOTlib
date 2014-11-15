@@ -1,8 +1,11 @@
-
-from LOTlib.Hypotheses.WeightedLexicon import WeightedLexicon
 from copy import copy
-from Utilities import make_my_hypothesis
+from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+from LOTlib.Hypotheses.WeightedLexicon import WeightedLexicon
+import Grammar as G
 
+
+def make_my_hypothesis():
+    return LOTHypothesis(G.grammar, args=['context'])
 
 class GriceanQuantifierLexicon(WeightedLexicon):
     """A simple class that always fixes our generating function to LOTHypothesis.
