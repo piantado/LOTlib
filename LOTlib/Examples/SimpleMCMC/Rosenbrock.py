@@ -38,6 +38,7 @@ class RosenbrockSampler(VectorHypothesis):
         newv = numpy.random.multivariate_normal(self.value, self.proposal)
         return RosenbrockSampler(value=newv), 0.0 # from symmetric proposals
 
+
 if __name__ == "__main__":
 
     N = 1

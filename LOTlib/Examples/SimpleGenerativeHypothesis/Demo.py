@@ -12,11 +12,12 @@ from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Hypotheses.SimpleGenerativeHypothesis import SimpleGenerativeHypothesis
 from Model import *
 
+if __name__ == "__main__":
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # #
-h0 = SimpleGenerativeHypothesis(grammar, args=[''] )
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+    h0 = SimpleGenerativeHypothesis(grammar, args=[''] )
 
-## populate the finite sample by running the sampler for this many steps
-for h in lot_iter(MHSampler(h0, data, 100000, skip=100)):
-    print h.posterior_score, h.prior, h.likelihood, h
-    print h.llcounts
+    ## populate the finite sample by running the sampler for this many steps
+    for h in lot_iter(MHSampler(h0, data, 100000, skip=100)):
+        print h.posterior_score, h.prior, h.likelihood, h
+        print h.llcounts

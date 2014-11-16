@@ -17,7 +17,6 @@ from Model import *
 SAMPLES = 100000
 
 def run(llt=1.0):
-
     h0 = CCGLexicon(make_hypothesis, words=all_words, alpha=0.9, palpha=0.9, likelihood_temperature=llt)
 
     fbs = FiniteBestSet(N=10)
@@ -27,77 +26,78 @@ def run(llt=1.0):
 
     return fbs
 
+if __name__ == "__main__":
 
-## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-### MPI map
-## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ### MPI map
+    ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-try:
-    from SimpleMPI.MPI_map import MPI_map, is_master_process
-except ImportError:
-    MPI_map = map
-    is_master_process = lambda: True
-    
-allret = MPI_map(run, map(lambda x: [x], [0.01, 0.1, 1.0] * 100 ))
+    try:
+        from SimpleMPI.MPI_map import MPI_map, is_master_process
+    except ImportError:
+        MPI_map = map
+        is_master_process = lambda: True
 
-if is_master_process():
+    allret = MPI_map(run, map(lambda x: [x], [0.01, 0.1, 1.0] * 100 ))
 
-    allfbs = FiniteBestSet(max=True)
-    allfbs.merge(allret)
+    if is_master_process():
 
-    H = allfbs.get_all()
+        allfbs = FiniteBestSet(max=True)
+        allfbs.merge(allret)
 
-    for h in H:
-        h.likelihood_temperature = 0.01 # on what set of data we want?
-        h.compute_posterior(data)
+        H = allfbs.get_all()
 
-    # show the *average* ll for each hypothesis
-    for h in sorted(H, key=lambda h: h.posterior_score):
-        print h.posterior_score, h.prior, h.likelihood, h.likelihood_temperature
-        print h
+        for h in H:
+            h.likelihood_temperature = 0.01 # on what set of data we want?
+            h.compute_posterior(data)
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## Play around with some different inference schemes
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # show the *average* ll for each hypothesis
+        for h in sorted(H, key=lambda h: h.posterior_score):
+            print h.posterior_score, h.prior, h.likelihood, h.likelihood_temperature
+            print h
 
-#h0 = CCGLexicon(make_hypothesis, words=all_words, alpha=0.9, palpha=0.9, likelihood_temperature=0.01)
-#for i, h in lot_iter(enumerate(mh_sample(h0, data, 400000000, skip=0, debug=False))):
-    #print h.posterior_score, h.prior, h.likelihood, qq(re.sub(r"\n", ";", str(h)))
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ## Play around with some different inference schemes
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#from LOTlib.Inference.IncreaseTemperatureMH import increase_temperature_mh_sample
+    #h0 = CCGLexicon(make_hypothesis, words=all_words, alpha=0.9, palpha=0.9, likelihood_temperature=0.01)
+    #for i, h in lot_iter(enumerate(mh_sample(h0, data, 400000000, skip=0, debug=False))):
+        #print h.posterior_score, h.prior, h.likelihood, qq(re.sub(r"\n", ";", str(h)))
 
-#h0 = CCGLexicon(make_hypothesis, words=all_words, alpha=0.9, palpha=0.9, likelihood_temperature=0.01)
-#for i, h in lot_iter(enumerate(increase_temperature_mh_sample(h0, data, 400000000, skip=0, increase_amount=1.50))):
-#    print h.posterior_score, h.prior, h.likelihood, qq(re.sub(r"\n", ";", str(h)))
+    #from LOTlib.Inference.IncreaseTemperatureMH import increase_temperature_mh_sample
+
+    #h0 = CCGLexicon(make_hypothesis, words=all_words, alpha=0.9, palpha=0.9, likelihood_temperature=0.01)
+    #for i, h in lot_iter(enumerate(increase_temperature_mh_sample(h0, data, 400000000, skip=0, increase_amount=1.50))):
+    #    print h.posterior_score, h.prior, h.likelihood, qq(re.sub(r"\n", ";", str(h)))
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## Run on a single computer, printing out
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#fbs = FiniteBestSet(N=100)
-#h0 = CCGLexicon(make_hypothesis, words=all_words, alpha=0.9, palpha=0.9, likelihood_temperature=0.051)
-#for i, h in lot_iter(enumerate(mh_sample(h0, data, 400000000, skip=0, debug=False))):
-    #fbs.add(h, h.posterior_score)
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ## Run on a single computer, printing out
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #fbs = FiniteBestSet(N=100)
+    #h0 = CCGLexicon(make_hypothesis, words=all_words, alpha=0.9, palpha=0.9, likelihood_temperature=0.051)
+    #for i, h in lot_iter(enumerate(mh_sample(h0, data, 400000000, skip=0, debug=False))):
+        #fbs.add(h, h.posterior_score)
 
-    #if i%100==0:
+        #if i%100==0:
+            #print h.posterior_score, h.prior, h.likelihood #, re.sub(r"\n", ";", str(h))
+            #print h
+
+    #for h in fbs.get_all(sorted=True):
         #print h.posterior_score, h.prior, h.likelihood #, re.sub(r"\n", ";", str(h))
         #print h
 
-#for h in fbs.get_all(sorted=True):
-    #print h.posterior_score, h.prior, h.likelihood #, re.sub(r"\n", ";", str(h))
-    #print h
 
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ## Just generate and parse
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## Just generate and parse
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #for _ in xrange(1000):
 
-#for _ in xrange(1000):
-
-    #cp = h.can_parse(data[3].utterance)
-    #if cp:
-        #s, t, f = cp
-        #print L
-        #print s, t, f
-        #print f(data[3].context)
-        #print "\n\n"
+        #cp = h.can_parse(data[3].utterance)
+        #if cp:
+            #s, t, f = cp
+            #print L
+            #print s, t, f
+            #print f(data[3].context)
+            #print "\n\n"

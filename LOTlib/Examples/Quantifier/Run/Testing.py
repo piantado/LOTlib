@@ -18,14 +18,16 @@ from LOTlib.Examples.Quantifier.Model import *
 
 N_SAMPLES = 10000
 
-context = sample_context()
+if __name__ == "__main__":
 
-cnt = defaultdict(int)
-for _ in xrange(N_SAMPLES):
-    u = target.sample_utterance( context=context, possible_utterances=target.all_words())
-    cnt[u] += 1
+    context = sample_context()
 
-#for w,c in cnt.items():
-    #print w, float(c)/float(N_SAMPLES), exp(target.compute_single_likelihood( UtteranceData(utterance=w, possible_utterances=target.all_words(), context=context)))
+    cnt = defaultdict(int)
+    for _ in xrange(N_SAMPLES):
+        u = target.sample_utterance( context=context, possible_utterances=target.all_words())
+        cnt[u] += 1
 
-print check_counts( cnt, lambda w: exp(target.compute_single_likelihood( UtteranceData(utterance=w, possible_utterances=target.all_words(), context=context))))
+    #for w,c in cnt.items():
+        #print w, float(c)/float(N_SAMPLES), exp(target.compute_single_likelihood( UtteranceData(utterance=w, possible_utterances=target.all_words(), context=context)))
+
+    print check_counts( cnt, lambda w: exp(target.compute_single_likelihood( UtteranceData(utterance=w, possible_utterances=target.all_words(), context=context))))

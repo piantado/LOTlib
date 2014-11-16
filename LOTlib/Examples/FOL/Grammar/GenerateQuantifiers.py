@@ -25,7 +25,9 @@ grammar.add_rule('FUNCTION', 'lambda', ['BOOL'], 1.0, bv_type='BOOL', bv_args=No
 grammar.BV_WEIGHT = 2.0 # When we introduce bound variables, they have this (relative) probability
 
 
-for i in xrange(1000):
-    x = grammar.generate('BOOL')
+if __name__ == "__main__":
 
-    print x.log_probability(), x
+    for i in xrange(1000):
+        x = grammar.generate('BOOL')
+
+        print x.log_probability(), x

@@ -34,4 +34,6 @@ def run():
     for h in lot_iter(MHSampler(h0, data, STEPS, skip=SKIP, trace=False)):
         print h.posterior_score, h.likelihood, h.prior, h.CONSTANT_VALUES, qq(h)
 
-run()
+
+if __name__ == "__main__":
+    run()

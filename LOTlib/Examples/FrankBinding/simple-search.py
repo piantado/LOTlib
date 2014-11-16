@@ -16,16 +16,18 @@ parser.add_option("--data", dest="DATA", type="float", default=10.0, help="How m
 # standard options
 (options, args) = parser.parse_args()
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Simplified search/mcmc
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if __name__ == "__main__":
 
-# set up an initial hypothesis
-initial_hyp = Shared.BindingTheoryLexicon(Shared.make_hypothesis, likelihood_temperature=1./options.DATA)
-initial_hyp.set_word("he/him")
-initial_hyp.set_word("himself")
-initial_hyp.set_word("<UNCHANGED>")
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Simplified search/mcmc
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-for h in Shared.lot_iter(mh_sample(initial_hyp, Shared.data, steps=1000)):
-    print h.posterior_score, h.prior, h.likelihood, "\n", h, "\n"
+    # set up an initial hypothesis
+    initial_hyp = Shared.BindingTheoryLexicon(Shared.make_hypothesis, likelihood_temperature=1./options.DATA)
+    initial_hyp.set_word("he/him")
+    initial_hyp.set_word("himself")
+    initial_hyp.set_word("<UNCHANGED>")
+
+    for h in Shared.lot_iter(mh_sample(initial_hyp, Shared.data, steps=1000)):
+        print h.posterior_score, h.prior, h.likelihood, "\n", h, "\n"
 

@@ -9,6 +9,6 @@ from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Miscellaneous import qq
 from Model import *
 
-
-for h in lot_iter(MHSampler(make_h0(), data, steps=10000)):
-    print h.posterior_score, h.prior, h.likelihood, qq(h)
+if __name__ == "__main__":
+    for h in lot_iter(MHSampler(make_h0(), data, steps=10000)):
+        print h.posterior_score, h.prior, h.likelihood, qq(h)

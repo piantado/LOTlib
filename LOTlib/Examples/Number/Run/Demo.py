@@ -17,44 +17,44 @@ TRACE = True
 STEPS = 1000000
 SKIP = 1
 
-# # # # # # # # # # # # # # # # # # # # # # # # #
-# Generate some data
+if __name__ == "__main__":
 
-data = generate_data(DATA_SIZE)
+    # # # # # # # # # # # # # # # # # # # # # # # # #
+    # Generate some data
 
-
-# A starting hypothesis (later ones are created by .propose, called in LOTlib.MetropolisHastings
-h0 = NumberExpression(grammar)
-
-#from LOTlib.Inference.Proposals.InsertDeleteProposal import InsertDeleteProposal
-#h0 = NumberExpression(grammar, proposal_function=InsertDeleteProposal(grammar))
-
-# store hypotheses we've found
-allhyp = FiniteBestSet(max=True,N=1000)
+    data = generate_data(DATA_SIZE)
 
 
-# A bunch of different MCMC algorithms to try. mh_sample is from the Rational Rules paper and generally works very well.
-#for h in  LOTlib.Inference.TemperedTransitions.tempered_transitions_sample(initial_hyp, data, 500000, skip=0, temperatures=[1.0, 1.25, 1.5]):
-#for h in  LOTlib.Inference.ParallelTempering.parallel_tempering_sample(initial_hyp, data, STEPS, within_steps=10, yield_all=True, temperatures=[1.0,1.05, 1.1]):
-for h in lot_iter(MHSampler(h0, data, STEPS, skip=SKIP)):
-    if TRACE:
-        print q(get_knower_pattern(h)), h.posterior_score, h.compute_prior(), h.compute_likelihood(data), qq(h)
+    # A starting hypothesis (later ones are created by .propose, called in LOTlib.MetropolisHastings
+    h0 = NumberExpression(grammar)
 
-    # add h to our priority queue, with priority of its log probability, h.posterior_score
-    allhyp.push(h, h.posterior_score)
+    #from LOTlib.Inference.Proposals.InsertDeleteProposal import InsertDeleteProposal
+    #h0 = NumberExpression(grammar, proposal_function=InsertDeleteProposal(grammar))
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-## now re-evaluate everything we found on new data
-#huge_data = generate_data(LARGE_DATA_SIZE)
-
-#save this with a huge data set -- eval with average ll
-#H = allhyp.get_sorted()
-
-# compute the posterior for each hypothesis
-#[ h.compute_posterior(huge_data) for h in H]
-
-# show the *average* ll for each hypothesis, at this data size
-#for h in H:
-    #print h.prior, h.likelihood/float(LARGE_DATA_SIZE), q(get_knower_pattern(h)),  q(h) # a quoted x
+    # store hypotheses we've found
+    allhyp = FiniteBestSet(max=True,N=1000)
 
 
+    # A bunch of different MCMC algorithms to try. mh_sample is from the Rational Rules paper and generally works very well.
+    #for h in  LOTlib.Inference.TemperedTransitions.tempered_transitions_sample(initial_hyp, data, 500000, skip=0, temperatures=[1.0, 1.25, 1.5]):
+    #for h in  LOTlib.Inference.ParallelTempering.parallel_tempering_sample(initial_hyp, data, STEPS, within_steps=10, yield_all=True, temperatures=[1.0,1.05, 1.1]):
+    for h in lot_iter(MHSampler(h0, data, STEPS, skip=SKIP)):
+        if TRACE:
+            print q(get_knower_pattern(h)), h.posterior_score, h.compute_prior(), h.compute_likelihood(data), qq(h)
+
+        # add h to our priority queue, with priority of its log probability, h.posterior_score
+        allhyp.push(h, h.posterior_score)
+
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+    ## now re-evaluate everything we found on new data
+    #huge_data = generate_data(LARGE_DATA_SIZE)
+
+    #save this with a huge data set -- eval with average ll
+    #H = allhyp.get_sorted()
+
+    # compute the posterior for each hypothesis
+    #[ h.compute_posterior(huge_data) for h in H]
+
+    # show the *average* ll for each hypothesis, at this data size
+    #for h in H:
+        #print h.prior, h.likelihood/float(LARGE_DATA_SIZE), q(get_knower_pattern(h)),  q(h) # a quoted x

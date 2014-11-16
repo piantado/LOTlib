@@ -89,21 +89,22 @@ grammar.add_rule('COND', 'eq_', ['EXPR', 'EXPR'], 1.0)
 # Note that because if_ prints specially in FunctionNode, it is correctly handled (via short circuit evaluation)
 # so that we don't eval both branches unnecessarily
 
+if __name__ == "__main__":
 
-for _ in xrange(1000):
+    for _ in xrange(1000):
 
-    t = grammar.generate() # Default is to generate from 'START'; else use 'START=t' to generate from type t
+        t = grammar.generate() # Default is to generate from 'START'; else use 'START=t' to generate from type t
 
-    # We can make this into a function by adding a lambda and a variable name, corresponding to
-    # the argument "x" that we built into the grammar. This step is defaultly done by a a LOTHypothesis (see below)
+        # We can make this into a function by adding a lambda and a variable name, corresponding to
+        # the argument "x" that we built into the grammar. This step is defaultly done by a a LOTHypothesis (see below)
 
-    f = evaluate_expression('lambda x:%s'%t)
+        f = evaluate_expression('lambda x:%s'%t)
 
-    print t # will call x.__str__ and display as a pythonesque string
-    print map(f, range(0,10))
+        print t # will call x.__str__ and display as a pythonesque string
+        print map(f, range(0,10))
 
-    # Alternatively, we can just make a LOTHypothesis, which is typically the only place in LOTlib we use trees
-    from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-    h = LOTHypothesis(grammar, value=t, args=['x'])
-    print map(h, range(0,10))
+        # Alternatively, we can just make a LOTHypothesis, which is typically the only place in LOTlib we use trees
+        from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+        h = LOTHypothesis(grammar, value=t, args=['x'])
+        print map(h, range(0,10))
 

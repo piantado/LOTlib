@@ -4,8 +4,14 @@ from LOTlib.DataAndObjects import FunctionData
 
 # here just doubling x :-> cons(x,x)
 data = [
-    FunctionData( input=[ [] ],   output=[[],[]] ),
-    FunctionData( input=[ [[]] ], output=[[[]], [[]]] ),
+    FunctionData(
+        input=[[]],
+        output=[[], []]
+    ),
+    FunctionData(
+        input=[[[]]],
+        output=[[[]], [[]]]
+    ),
 ]
 
  # A little more interesting. Squaring: N parens go to N^2

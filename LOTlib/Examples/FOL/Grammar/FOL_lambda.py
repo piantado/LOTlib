@@ -33,54 +33,56 @@ grammar.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'red\''], 5.00) # --> is_col
 grammar.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'blue\''], 5.00) 
 grammar.add_rule('BOOL', 'is_color_',  ['OBJECT', '\'green\''], 5.00) 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Just generate from this grammar
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-from LOTlib.Proposals import *
 
-#iip = InverseInlineThunk(grammar, replacetype='BOOL')
+if __name__ == "__main__":
 
-#for j in lot_iter(xrange(1000)):
-	#print "-----------------------------------\n\n"
-	
-	#t = grammar.generate()
-	#for i in lot_iter(xrange(10)):
-		#print "\t", t
-		##t = iip.propose_tree(t)
-		
-		
-for i in xrange(10000):
-	print grammar.generate()
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Just generate from this grammar
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    from LOTlib.Proposals import *
 
-# Or we can make them as hypotheses (functions of S):
-#for i in xrange(100):
-	#print LOTHypothesis(grammar, args=['S'])
-	
+    #iip = InverseInlineThunk(grammar, replacetype='BOOL')
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Or real inference:
-## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #for j in lot_iter(xrange(1000)):
+        #print "-----------------------------------\n\n"
 
-#from LOTlib.DataAndObjects import FunctionData, Obj # for nicely managing data
-#from LOTlib.Inference.MetropolisHastings import mh_sample # for running MCMC
+        #t = grammar.generate()
+        #for i in lot_iter(xrange(10)):
+            #print "\t", t
+            ##t = iip.propose_tree(t)
 
 
-## Make up some data -- here just one set containing {red, red, green} colors
-#data = [ FunctionData(args=[ {Obj(color='red'), Obj(color='red'), Obj(color='green')} ], \
-	              #output=True) ]
+    for i in xrange(10000):
+        print grammar.generate()
 
-## Create an initial hypothesis
-#h0 = LOTHypothesis(grammar, args=['S'])
-
-## OR if we want to specify and use insert/delete proposals
-##from LOTlib.Proposals import *
-##h0 = LOTHypothesis(grammar, proposal_function=MixtureProposal(grammar, [RegenerationProposal(grammar), InsertDeleteProposal(grammar)] ) )
+    # Or we can make them as hypotheses (functions of S):
+    #for i in xrange(100):
+        #print LOTHypothesis(grammar, args=['S'])
 
 
-## MCMC!
-#for h in mh_sample(h0, data, 4000): # run sampler
-##for h in unique(mh_sample(h0, data, 4000)): # get unique samples
-	## hypotheses' .prior, .likelihood, and .lp are set in mh_sample
-	#print h.likelihood, h.prior, h.lp, h
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Or real inference:
+    ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	
+    #from LOTlib.DataAndObjects import FunctionData, Obj # for nicely managing data
+    #from LOTlib.Inference.MetropolisHastings import mh_sample # for running MCMC
+
+
+    ## Make up some data -- here just one set containing {red, red, green} colors
+    #data = [ FunctionData(args=[ {Obj(color='red'), Obj(color='red'), Obj(color='green')} ], \
+                      #output=True) ]
+
+    ## Create an initial hypothesis
+    #h0 = LOTHypothesis(grammar, args=['S'])
+
+    ## OR if we want to specify and use insert/delete proposals
+    ##from LOTlib.Proposals import *
+    ##h0 = LOTHypothesis(grammar, proposal_function=MixtureProposal(grammar, [RegenerationProposal(grammar), InsertDeleteProposal(grammar)] ) )
+
+
+    ## MCMC!
+    #for h in mh_sample(h0, data, 4000): # run sampler
+    ##for h in unique(mh_sample(h0, data, 4000)): # get unique samples
+        ## hypotheses' .prior, .likelihood, and .lp are set in mh_sample
+        #print h.likelihood, h.prior, h.lp, h
+

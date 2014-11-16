@@ -17,6 +17,8 @@ TODO: ADD OUTPUT OF THE TOP HYPOTHESES AT EAHC POINT IN TIME.
 """
 from collections import defaultdict
 from optparse import OptionParser
+import numpy as np
+from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Miscellaneous import logsumexp
 from LOTlib.Examples.Quantifier.Model import *
 
@@ -131,7 +133,10 @@ if True: #not is_master_process(): # only load if you aren't zero (else we must 
 
     print "#", get_rank(), ": Done caching"
 
-# run with null args, this many times
-allret = MPI_map(run, [ [x] for x in DATA_RANGE ] * options.CHAINS ) # pass an array of lists of arguments
 
-print "Complete."
+if __name__ == "__main__":
+
+    # run with null args, this many times
+    allret = MPI_map(run, [ [x] for x in DATA_RANGE ] * options.CHAINS ) # pass an array of lists of arguments
+
+    print "Complete."

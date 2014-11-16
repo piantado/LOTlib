@@ -16,23 +16,25 @@ ALPHA = 0.9
 SAMPLES = 100000
 DATA_SIZE = 1000
 
-## sample the target data
-data = generate_data(DATA_SIZE)
+if __name__ == "__main__":
 
-W = 'every'
+    ## sample the target data
+    data = generate_data(DATA_SIZE)
 
-# Now to use it as a LOTHypothesis, we need data to have an "output" field which is true/false for whether its the target word. This is then used by LOTHypothesis.compute_likelihood to see if we match or not with whether a word was said (ignoring the other words -- that's why its a pseudolikelihood)
-for di in data:
-    di.output = (di.word == W)
-    #print (di.word == W)
+    W = 'every'
 
-FBS = FiniteBestSet(max=True, N=100)
+    # Now to use it as a LOTHypothesis, we need data to have an "output" field which is true/false for whether its the target word. This is then used by LOTHypothesis.compute_likelihood to see if we match or not with whether a word was said (ignoring the other words -- that's why its a pseudolikelihood)
+    for di in data:
+        di.output = (di.word == W)
+        #print (di.word == W)
 
-H = LOTHypothesis(grammar, args=['A', 'B', 'S'], ALPHA=ALPHA)
-# Now just run the sampler with a LOTHypothesis
-for s in mh_sample(H, data, SAMPLES, skip=10):
-    #print s.lp, "\t", s.prior, "\t", s.likelihood, "\n", s, "\n\n"
-    FBS.push(s, s.lp)
+    FBS = FiniteBestSet(max=True, N=100)
 
-for k in reversed(FBS.get_all(sorted=True)):
-    print k.lp, k.prior, k.likelihood, k
+    H = LOTHypothesis(grammar, args=['A', 'B', 'S'], ALPHA=ALPHA)
+    # Now just run the sampler with a LOTHypothesis
+    for s in mh_sample(H, data, SAMPLES, skip=10):
+        #print s.lp, "\t", s.prior, "\t", s.likelihood, "\n", s, "\n\n"
+        FBS.push(s, s.lp)
+
+    for k in reversed(FBS.get_all(sorted=True)):
+        print k.lp, k.prior, k.likelihood, k

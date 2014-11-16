@@ -50,17 +50,19 @@ def run(data_size):
 
     return hypset
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# MPI interface
+if __name__ == "__main__":
 
-# Map. SimpleMPI will use a normal MAP if we are not running in MPI
-allret = MPI_map(run, map(lambda x: [x], DATA_AMOUNTS * CHAINS)) # this many chains
+    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+    # MPI interface
 
-## combine into a single hypothesis set and save
-outhyp = FiniteBestSet(max=True)
-for r in allret:
-    print "# Merging ", len(r)
-    outhyp.merge(r)
+    # Map. SimpleMPI will use a normal MAP if we are not running in MPI
+    allret = MPI_map(run, map(lambda x: [x], DATA_AMOUNTS * CHAINS)) # this many chains
 
-import pickle
-pickle.dump(outhyp, open(OUT_PATH, 'w'))
+    ## combine into a single hypothesis set and save
+    outhyp = FiniteBestSet(max=True)
+    for r in allret:
+        print "# Merging ", len(r)
+        outhyp.merge(r)
+
+    import pickle
+    pickle.dump(outhyp, open(OUT_PATH, 'w'))

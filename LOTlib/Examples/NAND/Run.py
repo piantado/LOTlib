@@ -25,19 +25,20 @@ OUTFILE = "hypotheses.pkl"
 # Where we keep track of all hypotheses (across concepts)
 all_hypotheses = FiniteBestSet()
 
-# Now loop over each target concept and get a set of hypotheses
-for i, f in enumerate(TARGET_CONCEPTS):
+if __name__ == "__main__":
+    # Now loop over each target concept and get a set of hypotheses
+    for i, f in enumerate(TARGET_CONCEPTS):
 
-    # Set up the hypothesis
-    h0 = LOTHypothesis(grammar, start='START', args=['x'])
+        # Set up the hypothesis
+        h0 = LOTHypothesis(grammar, start='START', args=['x'])
 
-    # Set up some data
-    data = generate_data(NDATA, f)
+        # Set up some data
+        data = generate_data(NDATA, f)
 
-    # Now run some MCMC
-    fs = FiniteBestSet(N=BEST_N, key="posterior_score")
-    fs.add(lot_iter(MHSampler(h0, data, steps=NSTEPS, trace=False)))
+        # Now run some MCMC
+        fs = FiniteBestSet(N=BEST_N, key="posterior_score")
+        fs.add(lot_iter(MHSampler(h0, data, steps=NSTEPS, trace=False)))
 
-    all_hypotheses.merge(fs)
+        all_hypotheses.merge(fs)
 
-pickle.dump(all_hypotheses, open(OUTFILE, 'w'))
+    pickle.dump(all_hypotheses, open(OUTFILE, 'w'))

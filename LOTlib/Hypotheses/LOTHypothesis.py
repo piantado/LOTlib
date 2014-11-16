@@ -1,8 +1,3 @@
-"""
-        A FunctionHypothesis built from a grammar.
-"""
-
-
 
 from FunctionHypothesis import FunctionHypothesis
 from copy import copy, deepcopy
@@ -13,38 +8,38 @@ from LOTlib.Evaluation.Eval import evaluate_expression
 from math import log
 from LOTlib.Evaluation.EvaluationException import TooBigException, EvaluationException
 
+
 class LOTHypothesis(FunctionHypothesis):
+    """A FunctionHypothesis built from a grammar.
+
+    Args:
+        grammar (LOTLib.Grammar): The grammar for the hypothesis.
+        value: The value for the hypothesis.
+        f: If specified, we don't recompile the whole function.
+        start: The start symbol for the grammar.
+        ALPHA (float): Parameter for compute_single_likelihood that.
+        maxnodes (int): The maximum amount of nodes that the grammar can have
+        args (list): The arguments to the function.
+        proposal_function: Function that tells the program how to transition from one tree to another
+            (by default, it uses the RegenerationProposal function)
+
     """
-            A FunctionHypothesis built from a grammar.
-    """
 
-    def __init__(self, grammar, value=None, f=None, start=None, ALPHA=0.9, maxnodes=25, args=['x'], proposal_function=None, **kwargs):
-        """
-                *grammar* - The grammar for the hypothesis (specified in Grammar.py)
+    def __init__(self, grammar, value=None, f=None, start=None, ALPHA=0.9, maxnodes=25, args=['x'],
+                 proposal_function=None, **kwargs):
+        self.grammar = grammar
+        self.f = f
+        self.ALPHA = ALPHA
+        self.maxnodes = maxnodes
 
-                *value* - the value for the hypothesis
-
-                *f* - if specified, we don't recompile the whole function
-
-                *start* - The start symbol for the grammar
-
-                *ALPHA* - parameter for compute_single_likelihood that
-
-                *maxnodes* - the maximum amount of nodes that the grammar can have
-
-                *args* - The arguments to the function
-
-                *proposal_function* - function that tells the program how to transition from one tree to another
-                (by default, it uses the RegenerationProposal function)
-        """
-        
         # save all of our keywords (though we don't need v)
         self.__dict__.update(locals())
 
         # If this is not specified, defaultly use grammar
-        if start is None: self.start = grammar.start
-
-        if value is None: value = grammar.generate(self.start)
+        if start is None:
+            self.start = grammar.start
+        if value is None:
+            value = grammar.generate(self.start)
 
         FunctionHypothesis.__init__(self, value=value, f=f, args=args, **kwargs)
         # Save a proposal function
@@ -60,7 +55,7 @@ class LOTHypothesis(FunctionHypothesis):
         except EvaluationException: # We defaultly handle these as None
             return None
         except TypeError as e:
-            print "TypeError in function call: ", e, str(self), "  ;  "+str(vals)
+            print "TypeError in function call: ", e, str(self), "  ;  ", type(self)
             raise TypeError
         except NameError as e:
             print "NameError in function call: ", e, str(self)
@@ -70,15 +65,11 @@ class LOTHypothesis(FunctionHypothesis):
         return self.value.type()
 
     def set_proposal_function(self, f):
-        """
-                Just a setter to create the proposal function
-        """
+        """Just a setter to create the proposal function."""
         self.proposal_function = f
 
     def compile_function(self):
-        """
-            Called in set_value to compile into a function.
-        """
+        """Called in set_value to compile into a function."""
         if self.value.count_nodes() > self.maxnodes:
             return (lambda *args: raise_exception(TooBigException) )
         else:
@@ -90,11 +81,7 @@ class LOTHypothesis(FunctionHypothesis):
                 return (lambda *args: raise_exception(EvaluationException) )
 
     def __copy__(self):
-        """
-                Return a copy of myself.
-                This makes a deepcopy of everything except grammar (which is the, presumably, static grammar)
-        """
-
+        """Make a deepcopy of everything except grammar (which is the, presumably, static grammar)."""
         # Since this is inherited, call the constructor on everything, copying what should be copied
         thecopy = type(self)(self.grammar, value=copy(self.value), f=self.f, proposal_function=self.proposal_function)
 
@@ -105,20 +92,17 @@ class LOTHypothesis(FunctionHypothesis):
 
         return thecopy
 
-
     def propose(self, **kwargs):
         """
-                Computes a very similar derivation from the current derivation, using the proposal function we specified
-                as an option when we created an instance of LOTHypothesis
+        Computes a very similar derivation from the current derivation, using the proposal function we specified
+        as an option when we created an instance of LOTHypothesis
         """
         ret = self.proposal_function(self, **kwargs)
         ret[0].posterior_score = "<must compute posterior!>" # Catch use of proposal.posterior_score, without posteriors!
         return ret
 
     def compute_prior(self):
-        """
-                Compute the log of the prior probability
-        """
+        """Compute the log of the prior probability."""
         if self.value.count_subnodes() > self.maxnodes:
             self.prior = -Infinity
         else:
@@ -131,12 +115,12 @@ class LOTHypothesis(FunctionHypothesis):
 
     #def compute_likelihood(self, data): # called in FunctionHypothesis.compute_likelihood
     def compute_single_likelihood(self, datum):
-        """
-                Computes the likelihood of the data
+        """Computes the likelihood of the data
 
-                The data here is from LOTlib.Data and is of the type FunctionData
-                This assumes binary function data -- maybe it should be a BernoulliLOTHypothesis
+        The data here is from LOTlib.Data and is of the type FunctionData
+        This assumes binary function data -- maybe it should be a BernoulliLOTHypothesis
+
         """
         assert isinstance(datum, FunctionData)
-
-        return log( self.ALPHA*(self(*datum.input)==datum.output) + (1.0-self.ALPHA)/2.0 )
+        return log(self.ALPHA * (self(*datum.input) == datum.output)
+                   + (1.0-self.ALPHA) / 2.0)

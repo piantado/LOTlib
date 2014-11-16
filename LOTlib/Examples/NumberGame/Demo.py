@@ -16,17 +16,19 @@ h0 = make_h0(grammar=grammar, alpha=alpha)
 demo_data = [1,1,1,1,1,1,2,2,2,2,2,2,2,7,7,7,7,7,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-prior_sampler = prior_sample(h0, demo_data, num_iters)
-mh_sampler = MHSampler(h0, demo_data, num_iters)
+if __name__ == "__main__":
 
-hypos = [h for h in prior_sampler]
-for h in hypos:
-    h.compute_posterior([8])
+    prior_sampler = prior_sample(h0, demo_data, num_iters)
+    mh_sampler = MHSampler(h0, demo_data, num_iters)
 
-hypos = sorted(set(hypos), key=lambda x: x.posterior_score)
-for h in hypos[-10:]:
-    print str(h), h.posterior_score, h.likelihood, h.prior
-# hypotheses = FiniteBestSet(generator=prior_sampler, N=N, key="posterior_score")
-# for h in hypotheses:
-#     print str(h), h.posterior_score
+    hypos = [h for h in prior_sampler]
+    for h in hypos:
+        h.compute_posterior([8])
+
+    hypos = sorted(set(hypos), key=lambda x: x.posterior_score)
+    for h in hypos[-10:]:
+        print str(h), h.posterior_score, h.likelihood, h.prior
+    # hypotheses = FiniteBestSet(generator=prior_sampler, N=N, key="posterior_score")
+    # for h in hypotheses:
+    #     print str(h), h.posterior_score
 

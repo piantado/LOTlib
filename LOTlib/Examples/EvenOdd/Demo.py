@@ -11,15 +11,17 @@ from LOTlib.FunctionNode import cleanFunctionNodeString
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from Model import *
 
-data = []
-for x in xrange(1, 10):
-    data.append(FunctionData(input=['even', x], output=(x % 2 == 0)))
-    data.append(FunctionData(input=['odd',  x], output=(x % 2 == 1)))
-# print data
+if __name__ == "__main__":
 
-for h in lot_iter(MHSampler(make_h0(), data, skip=100)):
-    print cleanFunctionNodeString(h)
-    print h.posterior_score, h.prior, h.likelihood
+    data = []
+    for x in xrange(1, 10):
+        data.append(FunctionData(input=['even', x], output=(x % 2 == 0)))
+        data.append(FunctionData(input=['odd',  x], output=(x % 2 == 1)))
+    # print data
+
+    for h in lot_iter(MHSampler(make_h0(), data, skip=100)):
+        print cleanFunctionNodeString(h)
+        print h.posterior_score, h.prior, h.likelihood
 
 
 
