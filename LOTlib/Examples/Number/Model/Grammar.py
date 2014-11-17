@@ -33,7 +33,7 @@ grammar.add_rule('SET', 'select_',     ['SET'], 1.0)
 
 grammar.add_rule('SET', 'x',     None, 4.0)
 
-grammar.add_rule('WORD', 'L_',        ['SET'], 1.0)
+grammar.add_rule('WORD', 'recurse_',        ['SET'], 1.0)
 
 grammar.add_rule('WORD', 'next_', ['WORD'], 1.0)
 grammar.add_rule('WORD', 'prev_', ['WORD'], 1.0)

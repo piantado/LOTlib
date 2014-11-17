@@ -1,4 +1,4 @@
-from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis
 from LOTlib.Miscellaneous import log, Infinity, log1mexp
 
 ##########################################################
@@ -9,10 +9,10 @@ GAMMA = -30.0 # the log probability penalty for recursion
 LG_1MGAMMA = log1mexp(GAMMA)
 MAX_NODES = 50 # How many FunctionNodes are allowed in a hypothesis? If we make this 20, things may slow
 
-class NumberExpression(LOTHypothesis):
+class NumberExpression(RecursiveLOTHypothesis):
     
-    def __init__(self, grammar, value=None, f=None, proposal_function=None, **kwargs):
-        LOTHypothesis.__init__(self, grammar, value=value, proposal_function=proposal_function, **kwargs)
+    def __init__(self, grammar, value=None, f=None, proposal_function=None, args=['x'], **kwargs):
+        RecursiveLOTHypothesis.__init__(self, grammar, value=value, proposal_function=proposal_function, args=['x'], **kwargs)
 
     def compute_prior(self):
         """Compute the number model prior.
@@ -23,7 +23,7 @@ class NumberExpression(LOTHypothesis):
         if self.value.count_nodes() > MAX_NODES:
             self.prior = -Infinity
         else:
-            if self.value.contains_function("L_"): 
+            if self.value.contains_function(self.recurse):
                 recursion_penalty = GAMMA
             else:
                 recursion_penalty = LG_1MGAMMA

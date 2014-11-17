@@ -4,8 +4,9 @@ Rational rules over two concepts at the same time.
 Another way to do this would be to use a Lexicon and write a custom likelihood method
 
 """
+from LOTlib.Examples.RationalRules.Model import *
 from LOTlib.Hypotheses.RationalRulesLOTHypothesis import RationalRulesLOTHypothesis
-from LOTlib.Inference.MetropolisHastings import mh_sample
+from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Examples.RationalRules.Model import grammar, q
 from Data import data
 
@@ -27,7 +28,7 @@ def run_mh():
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Run the vanilla sampler. Without steps, it will run infinitely
     # this prints out posterior (posterior_score), prior, likelihood,
-    for h in mh_sample(h0, data, 10000, skip=100):
+    for h in lot_iter(MHSampler(h0, data, 10000, skip=100)):
         print h.posterior_score, h.prior, h.likelihood, q(h)
 
 if __name__ == "__main__":

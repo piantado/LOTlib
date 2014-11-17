@@ -7,3 +7,6 @@ class EvaluationException(Exception):
 
 class TooBigException(EvaluationException):
     pass
+
+class RecursionDepthException(EvaluationException):
+    pass

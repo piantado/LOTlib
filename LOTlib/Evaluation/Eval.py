@@ -44,7 +44,7 @@ def register_primitive(function, name=None):
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~~~ The Y combinator
+#~~~ The Y combinator and a bounded version
 # example:
 # fac = lambda f: lambda n: (1 if n<2 else n*(f(n-1)))
 # Y(fac)(10)
@@ -90,18 +90,13 @@ def Ystar(*l):
 #~~~ Evaluation of expressions
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def evaluate_expression(e, recurse="L_"):
-    """Evaluate the expression, adding a Y combinator for recursion.
-
-    :param e: - a string that can be evaled as python
-    :param recurse: -- what internal symbol should recursion be?
-
+def evaluate_expression(e):
+    """
+    Evaluate the expression, wrapping in an error in case it can't be evaled
     """
     assert isinstance(e,str)
-
     try:
-        f = eval('lambda %s: %s'%(recurse, e))
-        return Y_bounded(f)
+        return eval(e)
     except Exception as ex:
         print "*** Error in evaluate_expression:", ex
         raise ex

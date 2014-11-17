@@ -63,7 +63,7 @@ class DecayedLikelihoodHypothesis(Hypothesis):
 
     def compute_likelihood(self, data):
         """
-                This is overwritten, writes to stored_likelihood, and thenc alls get_culmulative_likelihoods
+                This is overwritten, writes to stored_likelihood, and then calls get_culmulative_likelihoods
         """
         self.stored_likelihood = map( self.compute_single_likelihood, data)
         culm_lls = self.get_culmulative_likelihoods()

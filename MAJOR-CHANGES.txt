@@ -1,3 +1,6 @@
+Nov 17 2014:
+        - Recursion defaultly removed from LOTHypothesis. Now, recursive calls must use RecursiveLOTHypothesis. (This saves all LOTHypotheses from having to wrap in a Y combinator)
+        - Added Annealing and Schedule classes
 Nov 13 2014:
         - fixes to inverse-inline proposal
         - value2function(value) now is compile_function(), and assumes that the value has been set
