@@ -9,7 +9,11 @@ import re
 from copy import copy, deepcopy
 from math import log
 from random import random
-import graphviz
+try:
+    import graphviz
+except ImportError:
+    pass
+
 from LOTlib.Miscellaneous import None2Empty, lambdaTrue, Infinity
 
 """
