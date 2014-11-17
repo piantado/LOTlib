@@ -18,7 +18,6 @@ from Primitives.SetTheory import *
 from Primitives.Trees import *
 from Primitives.Stochastics import *
 
-
 def register_primitive(function, name=None):
     """
         This allows us to load new functions into the evaluation environment.
@@ -37,7 +36,7 @@ def register_primitive(function, name=None):
         TODO: Add more convenient means for importing more methods
     """
 
-    if name is None:
+    if name is None: # if we don't specify a name
         name = function.__name__
 
     sys.modules['__builtin__'].__dict__[name] = function
@@ -50,7 +49,7 @@ def evaluate_expression(e):
     """
     Evaluate the expression, wrapping in an error in case it can't be evaled
     """
-    assert isinstance(e,str)
+    assert isinstance(e, str)
     try:
         return eval(e)
     except Exception as ex:

@@ -28,6 +28,7 @@ class NumberGameHypothesis(LOTHypothesis):
         """
         s = self()     # set of numbers corresponding to this hypothesis
                        # NOTE: This may be None if the hypothesis has too many nodes
+        s = [item for item in s if item <= self.domain]
         error_p = (1.-self.alpha) / self.domain
 
         if s is not None and datum in s:

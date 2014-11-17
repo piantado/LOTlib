@@ -34,5 +34,5 @@ h0 = LOTHypothesis(grammar, args=['S'])
 
 if __name__ == "__main__":
         
-    for h in lot_iter(MHSampler(h0, data, 4000)): # run sampler
+    for h in lot_iter(MHSampler(h0, data, steps=4000)): # run sampler
         print h.likelihood, h.prior, h.posterior_score, h
