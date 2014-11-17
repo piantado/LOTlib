@@ -8,8 +8,4 @@ You can run Search.py (on MPI if preferred) and this outputs a file of top hypot
 
 Then execute EvaluateTop.py > o.txt and this scores the top hypotheses on data, computing average likelihoods etc. 
 Then o.txt can be plotted used plot-learning-curves.R
-
-
-TODO:
-	- 2012 Jan 4 - This has not been tested for exact agreement with the published paper (for the prior and likelihood). This should be fixed soon!
 	
