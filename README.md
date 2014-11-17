@@ -22,6 +22,7 @@ The following are frequently used, but not required:
 - mpi4py (if using MPI; I recommend running with mpich3)
 - pyparsing (for parsing)
 - cachetools (for memoization)
+- graphviz (for DOT images of trees)
 
 INSTALLATION
 ------------
