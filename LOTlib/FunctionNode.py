@@ -7,10 +7,11 @@
 """
 
 import re
-from LOTlib.Miscellaneous import None2Empty, lambdaTrue, Infinity
 from copy import copy, deepcopy
-from random import random
 from math import log
+from random import random
+import graphviz
+from LOTlib.Miscellaneous import None2Empty, lambdaTrue, Infinity
 
 """
 ==============================================================================================================================================
@@ -36,7 +37,7 @@ def cleanFunctionNodeString(x):
 
 
 
-def DOTstring(x, d=0, bv_names=None):
+def DOTstring_old(x, d=0, bv_names=dict()):
     """
     Outputs a string in (lambda (x) (+ x 3)) format.
 
@@ -48,9 +49,6 @@ def DOTstring(x, d=0, bv_names=None):
     if isinstance(x, str):
         return x
     elif isFunctionNode(x):
-
-        if bv_names is None:
-            bv_names = dict()
 
         name = x.name
         if isinstance(x, BVUseFunctionNode):
@@ -66,12 +64,12 @@ def DOTstring(x, d=0, bv_names=None):
                 assert name is 'lambda'
                 s = name + ';\n\t'
                 s = s+x.added_rule.name+';\n\t'
-                s = s+map(lambda a: DOTstring(a,d+1,bv_names=bv_names), x.args)+';\n\t'
+                s = s+map(lambda a: DOTstring(a, d+1, bv_names=bv_names), x.args) + ';\n\t'
                 return s
                 # return "(%s (%s) %s)" % (name, x.added_rule.name, map(lambda a: DOTstring(a,d+1,bv_names=bv_names), x.args))
             else:
                 s = name + ';\n\t'
-                s = s+map(lambda a: DOTstring(a,d+1,bv_names=bv_names), x.args)+';\n\t'
+                s = s+map(lambda a: DOTstring(a, d+1, bv_names=bv_names), x.args) + ';\n\t'
                 return s
                 # return "(%s %s)" % (name, map(lambda a: DOTstring(a,d+1,bv_names=bv_names), x.args))
 
@@ -178,29 +176,29 @@ def pystring(x, d=0, bv_names=None):
 
 class FunctionNode(object):
     """
-            *returntype*
-                    The return type of the FunctionNode
+    Args:
+    *returntype*
+            The return type of the FunctionNode
 
-            *name*
-                    The name of the function
+    *name*
+            The name of the function
 
-            *args*
-                    Arguments of the function
+    *args*
+            Arguments of the function
 
-            *generation_probability*
-                    Unnormalized generation probability.
+    *generation_probability*
+            Unnormalized generation probability.
 
-            *resample_p*
-                    The probability of choosing this node in resampling. Takes any number >0 (all are normalized)
+    *resample_p*
+            The probability of choosing this node in resampling. Takes any number >0 (all are normalized)
 
-            *rule* - The rule that was used in generating the FunctionNode
+    *rule* - The rule that was used in generating the FunctionNode
 
-            NOTE: If a node has [ None ] as args, it is treated as a thunk
+    NOTE: If a node has [ None ] as args, it is treated as a thunk
 
-            bv - stores the actual *rule* that was added (so that we can re-add it when we loop through the tree)
+    bv - stores the actual *rule* that was added (so that we can re-add it when we loop through the tree)
+
     """
-
-
     def __init__(self, parent, returntype, name, args, generation_probability=0.0, resample_p=1.0, rule=None, a_args=None):
         self.__dict__.update(locals())
         self.added_rule = None
@@ -302,16 +300,16 @@ class FunctionNode(object):
         return True
 
     def as_list(self, d=0, bv_names=None):
+        """Returns a list representation of the FunctionNode with function/self.name as the first element.
+
+        This function is subclassed so by BVAdd and BVUse so that those handle other cases
+
+        Args:
+            d: An optional argument that keeps track of how far down the tree we are
+            bv_names: A dictionary keeping track of the names of bound variables (keys = UUIDs,
+                values = names)
+
         """
-                Returns a list representation of the FunctionNode with function/self.name as the first element.
-
-                *d* An optional argument that keeps track of how far down the tree we are
-
-                *bv_names* A dictionary keeping track of the names of bound variables (keys = UUIDs, values = names)
-
-                This function is subclassed so by BVAdd and BVUse so that those handle other cases
-        """
-        
         # the tree should be represented as the empty set if the function node has no name
         if self.name == '':
             x = []
@@ -360,6 +358,38 @@ class FunctionNode(object):
             return map(lambda x: x.liststring(), self.args)
         else:
             assert False, "FunctionNode must only use cons to call liststring!"
+
+    def make_dot(self, ls=None, n='0', parent_n=None):
+        print '*'*80
+        print 'ls = ', ls
+        print 'n = ', n
+        print 'parent_n = ', parent_n
+        print '*'*80
+        # Initialize
+        if not hasattr(self, 'dot'):
+            self.dot = graphviz.Digraph(comment='The DOT Graph')
+        if ls is None:
+            ls = self.as_list()[0]
+        this_n = n
+        d = self.dot
+
+        # Draw the graph
+        if not isinstance(ls, list):
+            d.node(this_n, label=str(ls), shape='square')
+            if not (parent_n is None):
+                d.edge(parent_n, this_n, style='dotted')
+                # do something fun!
+        elif len(ls) >= 1:
+            d.node(this_n, label=str(ls[0]), shape='plaintext')
+            if not (parent_n is None):
+                d.edge(parent_n, this_n, style='solid')
+        if len(ls) > 1:
+            for i in range(0, len(ls)):
+                # Recursive call
+                self.make_dot(ls[i], n=this_n+str(i), parent_n=this_n)
+
+    def to_dot(self):
+        return self.dot.source
 
     # NOTE: in the future we may want to change this to do fancy things
     def __str__(self):
