@@ -20,7 +20,7 @@ if __name__ == "__main__":
     hypotheses = set(prior_sample(h0, data, N=num_iters))
     grammar_h = GrammarHypothesis(grammar, hypotheses)
 
-    vals = np.arange(0.2, 2, .2) ## NOTE: Cannot start at 0!
+    vals = np.arange(0.2, 2, .2)    # NOTE: Cannot start at 0! (why??)
     rule_dist = grammar_h.rule_distribution(data, 'range_set_', vals=vals)
     print rule_dist
 

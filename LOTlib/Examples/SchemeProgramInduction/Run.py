@@ -14,10 +14,9 @@ from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from Model import *
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#=============================================================================================================
 
-# STEPS = 1000000
-STEPS = 1000
+STEPS = 1000000
 ALPHA = 0.9
 
 #
@@ -31,7 +30,7 @@ ALPHA = 0.9
 #             print "\t", di.input, "->", x(*di.input), " ; should be ", di.output
 
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#=============================================================================================================
 
 example_input = [
     [],
@@ -43,12 +42,14 @@ example_input = [
 
 def scheme_generate():
     """ This generates random scheme code with cons, cdr, and car, and evaluates it on some simple list
-    structures. No inference here -- just random sampling from a grammar.
+    structures.
+
+    No inference here -- just random sampling from a grammar.
 
     """
     ## Generate some and print out unique ones
     seen = set()
-    for i in xrange(10000):
+    for i in lot_iter(xrange(10000)):
         x = grammar.generate('START')
 
         if x not in seen:
@@ -62,4 +63,4 @@ def scheme_generate():
                 print "\t", ei, " -> ", f(ei)
 
 if __name__ == "__main__":
-    # run()
+    scheme_generate()
