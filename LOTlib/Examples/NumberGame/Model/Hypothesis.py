@@ -27,21 +27,20 @@ class NumberGameHypothesis(LOTHypothesis):
 
         """
         s = self()     # set of numbers corresponding to this hypothesis
-                       # NOTE: This may be None if the hypothesis has too many nodess
-
-        errorp = (1.-self.alpha) / self.domain
+                       # NOTE: This may be None if the hypothesis has too many nodes
+        error_p = (1.-self.alpha) / self.domain
 
         if s is not None and datum in s:
-            likelihood = log(self.alpha/len(s) + errorp)
+            likelihood = log(self.alpha/len(s) + error_p)
         else:
-            likelihood = log(errorp)
+            likelihood = log(error_p)
         return likelihood
 
     def compute_likelihood(self, data, **kwargs):
         """Sum likelihoods over all data points, divide by likelihood_temperature."""
-        likelihoods = [self.compute_single_likelihood(datum) for datum in data]
+        likelihoods = map(self.compute_single_likelihood, data)
         self.likelihood = sum(likelihoods) / self.likelihood_temperature
-        self.posterior_score = self.likelihood + self.prior
+        self.update_posterior()
         return self.likelihood
 
 

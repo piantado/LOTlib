@@ -3,11 +3,10 @@
 With this class, we can propose hypotheses as a vector of grammar rule probabilities.
 
 """
-import copy
 import numpy as np
 from scipy.stats import gamma
 from LOTlib.Hypotheses.VectorHypothesis import VectorHypothesis
-from LOTlib.Miscellaneous import logplusexp, logsumexp, log1mexp, gammaln, Infinity, log
+from LOTlib.Miscellaneous import logplusexp, logsumexp, log1mexp, gammaln, Infinity
 
 
 class GrammarHypothesis(VectorHypothesis):
@@ -40,7 +39,7 @@ class GrammarHypothesis(VectorHypothesis):
 
         prior = sum([r for r in rule_priors])      # TODO is this right?
         self.prior = prior
-        self.posterior_score = self.prior + self.likelihood
+        self.update_posterior()
         return prior
 
     def compute_likelihood(self, data, **kwargs):
@@ -56,6 +55,8 @@ class GrammarHypothesis(VectorHypothesis):
             hypothesis by posterior score p(h|d).
 
         """
+        # TODO: likelihood we get human input, this should not be calculated this way...
+        # TODO: ...For example, (11 yes, 1 no) is equally as close to (12y, 0n) as (1y, 11n)
         hypotheses = self.hypotheses
         likelihood = -Infinity
 
@@ -74,11 +75,11 @@ class GrammarHypothesis(VectorHypothesis):
                     k = d.output[key][0]         # num. yes responses
                     n = k + d.output[key][1]     # num. trials
                     bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
-                    likelihood_human_data = bc + (k*p) + (n-k)*log1mexp(p)  # likelihood that we get human output
+                    likelihood_human_data = bc + (k*p) + (n-k)*log1mexp(p)  # likelihood we got human output
                     likelihood = logplusexp(likelihood, likelihood_human_data + w)
 
         self.likelihood = likelihood
-        self.posterior_score = self.prior + self.likelihood
+        self.update_posterior()
         return likelihood
 
     def rule_distribution(self, data, rule_name, vals=np.arange(0, 2, .2)):
@@ -88,12 +89,12 @@ class GrammarHypothesis(VectorHypothesis):
 
     def set_value(self, value):
         """Set value and grammar rules for this hypothesis."""
-        if not (len(value) == len(self.rules)):
-            print '%'*80+"INVALID VALUE VECTOR\n"+'%'*80
-            return
+        assert len(value) == len(self.rules), "ERROR: Invalid value vector!!!"
         self.value = value
+        # Set probability for each rule corresponding to value index
         for i in range(1, len(value)):
             self.rules[i].p = value[i]
+        # Recompute prior for each hypothesis, given new grammar probs
         for h in self.hypotheses:
             h.compute_prior()
 
@@ -112,6 +113,6 @@ class GrammarHypothesis(VectorHypothesis):
 
     def get_rule_index(self, rule_name):
         """Get index of the GrammarRule associated with this rule name."""
-        rules = [i for i, r in enumerate(self.rules) if r.name == rule_name]
-        assert (len(rules) == 1), 'ERROR: More than 1 rule associated with this rule name!'
-        return rules[0]
+        rule_indexes = [i for i, r in enumerate(self.rules) if r.name == rule_name]
+        assert (len(rule_indexes) == 1), "ERROR: More than 1 rule associated with this rule name!!!"
+        return rule_indexes[0]
