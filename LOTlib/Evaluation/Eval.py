@@ -42,50 +42,6 @@ def register_primitive(function, name=None):
 
     sys.modules['__builtin__'].__dict__[name] = function
 
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~~~ The Y combinator and a bounded version
-# example:
-# fac = lambda f: lambda n: (1 if n<2 else n*(f(n-1)))
-# Y(fac)(10)
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Y = lambda f: (lambda x: x(x))(lambda y: f(lambda *args: y(y)(*args)) )
-MAX_RECURSION = 25
-
-
-def Y_bounded(f):
-    """
-    A fancy fixed point iterator that only goes MAX_RECURSION deep, else throwing a a RecusionDepthException
-    """
-    return (lambda x, n: x(x, n))(lambda y, n: f(lambda *args: y(y, n+1)(*args))
-                                  if n < MAX_RECURSION else raise_exception(EvaluationException()), 0)
-
-
-def Ystar(*l):
-    """
-    The Y* combinator for mutually recursive functions. Holy shit.
-
-    (define (Y* . l)
-          ((lambda (u) (u u))
-            (lambda (p) (map (lambda (li) (lambda x (apply (apply li (p p)) x))) l))))
-
-    See:
-    http://okmij.org/ftp/Computation/fixed-point-combinators.html]
-    http://stackoverflow.com/questions/4899113/fixed-point-combinator-for-mutually-recursive-functions
-
-    E.g., here is even/odd:
-
-    even,odd = Ystar( lambda e,o: lambda x: (x==0) or o(x-1), \
-                          lambda e,o: lambda x: (not x==0) and e(x-1) )
-
-        Note that we require a lambda e,o on the outside so that these can have names inside.
-    """
-
-    return (lambda u: u(u))(lambda p: map(lambda li: lambda x: apply(li, p(p))(x), l))
-
-
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~ Evaluation of expressions
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

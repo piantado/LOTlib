@@ -4,7 +4,7 @@ grammar = Grammar()
 
 grammar.add_rule('START', '', ['QUANT'], 1.0)
 
-# Very simple -- one allowed quantifier
+# Very simple -- one allowed and required quantifier
 grammar.add_rule('QUANT', 'exists_', ['FUNCTION', 'SET'], 1.00)
 grammar.add_rule('QUANT', 'forall_', ['FUNCTION', 'SET'], 1.00)
 
@@ -13,6 +13,8 @@ grammar.add_rule('SET', 'S', None, 1.0)
 
 # And allow us to create a new kind of function
 grammar.add_rule('FUNCTION', 'lambda', ['BOOL'], 1.0, bv_type='OBJECT')
+
+# Logical connectives
 grammar.add_rule('BOOL', 'and_', ['BOOL', 'BOOL'], 1.0)
 grammar.add_rule('BOOL', 'or_', ['BOOL', 'BOOL'], 1.0)
 grammar.add_rule('BOOL', 'not_', ['BOOL'], 1.0)

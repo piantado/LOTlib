@@ -1,6 +1,6 @@
 """
 This currently will learn mutually recursive definitions, things like even/odd. It makes a version
-of a SimpleLexicon that allows word definitinos to call other word definitions.
+of a SimpleLexicon that allows word definitions to call other word definitions.
 
 In the future, we should see how we could invent predicates from nothing in order to explain data (via Ystar)
 
