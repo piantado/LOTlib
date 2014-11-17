@@ -28,7 +28,7 @@ class NumberExpression(LOTHypothesis):
             else:
                 recursion_penalty = LG_1MGAMMA
 
-        self.prior = (recursion_penalty + self.value.log_probability()) / self.prior_temperature
+            self.prior = (recursion_penalty + self.value.log_probability()) / self.prior_temperature
         self.posterior_score = self.prior + self.likelihood
 
         return self.prior
