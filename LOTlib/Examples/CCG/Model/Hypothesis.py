@@ -4,19 +4,8 @@ from math import log
 from LOTlib.Hypotheses.WeightedLexicon import WeightedLexicon
 from LOTlib.DataAndObjects import UtteranceData
 from LOTlib.Examples.CCG.Model.Utilities import can_compose
+from LOTlib.DataAndObjects import Context
 
-
-class Context:
-    """
-    A context stores a list of objects and list of N-ary relations, represented as tuples,
-    as in relations = [  (happy, john), (loved, mary, john) ], with (function, *args)
-
-    """
-    def __init__(self, objects, relations):
-        self.__dict__.update(locals())
-
-    def relation_(self, *args):
-        return tuple(args) in self.relations
 
 
 class CCGLexicon(WeightedLexicon):
