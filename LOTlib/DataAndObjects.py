@@ -113,3 +113,19 @@ def sample_sets_of_objects(N, objs):
     """
     s = weighted_sample(objs, N=N, returnlist=True) # the set of objects
     return map(deepcopy, s) # the set must NOT be just the pointers sampled, since then set() operations will collapse them!
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class Context:
+    """
+    A context stores a list of objects and list of N-ary relations, represented as tuples,
+    as in relations = [  (happy, john), (loved, mary, john) ], with (function, *args)
+
+    Then in a grammar, you can have a terminal like context.relation_('parent', 'barak', 'sasha')
+
+    """
+    def __init__(self, objects, relations):
+        self.__dict__.update(locals())
+
+    def relation_(self, *args):
+        return tuple(args) in self.relations
