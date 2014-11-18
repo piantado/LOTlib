@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LOTlib.Examples.Magnetism.SimpleMagnetism &mdash; LOTlib 0.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="LOTlib 0.2.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="LOTlib" href="../../../LOTlib.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for LOTlib.Examples.Magnetism.SimpleMagnetism</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A very simple case of predicate invention, inspired by</span>
+
+<span class="sd">        T. D. Ullman, N. D. Goodman and J. B. Tenenbaum (2012), Theory learning as stochastic search in the language of thought. Cognitive Development.</span>
+
+<span class="sd">        Here, we invent simple predicates whose value is determined by a set membership (BASE-SET), and express logical</span>
+<span class="sd">        concepts over those predicates. Data is set up to be like magnetism, with positives (pi) and negatives (ni) that interact</span>
+<span class="sd">        with each other but not within groups.</span>
+
+<span class="sd">        This is simple because there&#39;s only two types of things, and you observe all interactions. See ComplexMagnetism.py for a more complex case...</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="n">qq</span>
+<span class="kn">from</span> <span class="nn">LOTlib.Grammar</span> <span class="kn">import</span> <span class="n">Grammar</span>
+<span class="kn">from</span> <span class="nn">LOTlib.DataAndObjects</span> <span class="kn">import</span> <span class="n">FunctionData</span>
+<span class="kn">from</span> <span class="nn">LOTlib.FunctionNode</span> <span class="kn">import</span> <span class="n">cleanFunctionNodeString</span>
+
+<span class="n">grammar</span> <span class="o">=</span> <span class="n">Grammar</span><span class="p">()</span>
+
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;START&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;Pabstraction&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span> <span class="c"># a predicate abstraction</span>
+
+<span class="c"># lambdaUsePredicate is where you can use the predicate defined in lambdaDefinePredicate</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;Pabstraction&#39;</span><span class="p">,</span>  <span class="s">&#39;apply_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;lambdaUsePredicate&#39;</span><span class="p">,</span> <span class="s">&#39;lambdaDefinePredicate&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">,</span> <span class="p">)</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;lambdaUsePredicate&#39;</span><span class="p">,</span> <span class="s">&#39;lambda&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;INNER-BOOL&#39;</span><span class="p">],</span>    <span class="mf">5.0</span><span class="p">,</span> <span class="n">bv_type</span><span class="o">=</span><span class="s">&#39;INNER-BOOL&#39;</span><span class="p">,</span> <span class="n">bv_args</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;OBJECT&#39;</span><span class="p">],</span> <span class="n">bv_prefix</span><span class="o">=</span><span class="s">&#39;F&#39;</span><span class="p">)</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;lambdaUsePredicate&#39;</span><span class="p">,</span> <span class="s">&#39;lambda&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;Pabstraction&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">,</span>  <span class="n">bv_type</span><span class="o">=</span><span class="s">&#39;INNER-BOOL&#39;</span><span class="p">,</span> <span class="n">bv_args</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;OBJECT&#39;</span><span class="p">],</span> <span class="n">bv_prefix</span><span class="o">=</span><span class="s">&#39;F&#39;</span><span class="p">)</span>
+
+
+<span class="c"># Define a predicate that will just check if something is in a BASE-SET</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;lambdaDefinePredicate&#39;</span><span class="p">,</span> <span class="s">&#39;lambda&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;lambdaDefinePredicateINNER&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">,</span>  <span class="n">bv_type</span><span class="o">=</span><span class="s">&#39;OBJECT&#39;</span><span class="p">,</span> <span class="n">bv_args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bv_prefix</span><span class="o">=</span><span class="s">&#39;z&#39;</span><span class="p">)</span>
+<span class="c"># the function on objects, that allows them to be put into classes (analogous to a logical model here)</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;lambdaDefinePredicateINNER&#39;</span><span class="p">,</span> <span class="s">&#39;is_in_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;OBJECT&#39;</span><span class="p">,</span> <span class="s">&#39;BASE-SET&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
+
+<span class="c"># Here&#39;s how things will look with applylambda:</span>
+<span class="c">#grammar.add_rule(&#39;START&#39;, &#39;applylambda&#39;, [&#39;INNER-BOOL&#39;], 10.0,  bv_type=&#39;INNER-BOOL&#39;, bv_args=[&#39;OBJECT&#39;], bv_prefix=&#39;F&#39;)</span>
+<span class="c">#grammar.add_rule(&#39;START&#39;, &#39;applylambda&#39;, [&#39;START&#39;],      1.0,   bv_type=&#39;INNER-BOOL&#39;, bv_args=[&#39;OBJECT&#39;], bv_prefix=&#39;F&#39;)</span>
+
+
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;INNER-BOOL&#39;</span><span class="p">,</span> <span class="s">&#39;is_in_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;OBJECT&#39;</span><span class="p">,</span> <span class="s">&#39;BASE-SET&#39;</span><span class="p">],</span> <span class="mf">10.0</span><span class="p">)</span>
+
+
+<span class="c"># After we&#39;ve defined F, these are used to construct the concept</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;INNER-BOOL&#39;</span><span class="p">,</span> <span class="s">&#39;and_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;INNER-BOOL&#39;</span><span class="p">,</span> <span class="s">&#39;INNER-BOOL&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;INNER-BOOL&#39;</span><span class="p">,</span> <span class="s">&#39;or_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;INNER-BOOL&#39;</span><span class="p">,</span> <span class="s">&#39;INNER-BOOL&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;INNER-BOOL&#39;</span><span class="p">,</span> <span class="s">&#39;not_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;INNER-BOOL&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
+
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;OBJECT&#39;</span><span class="p">,</span> <span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;OBJECT&#39;</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;OBJECT&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;BASE-OBJECT&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span> <span class="c"># maybe or maybe not?</span>
+
+<span class="c"># BASE-SET is here a set of BASE-OBJECTS (non-args)</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;BASE-SET&#39;</span><span class="p">,</span> <span class="s">&#39;set_add_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;BASE-OBJECT&#39;</span><span class="p">,</span> <span class="s">&#39;BASE-SET&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;BASE-SET&#39;</span><span class="p">,</span> <span class="s">&#39;set_&#39;</span><span class="p">,</span> <span class="p">[],</span> <span class="mf">1.0</span><span class="p">)</span>
+
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;BASE-OBJECT&#39;</span><span class="p">,</span> <span class="n">qq</span><span class="p">(</span><span class="s">&#39;p1&#39;</span><span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;BASE-OBJECT&#39;</span><span class="p">,</span> <span class="n">qq</span><span class="p">(</span><span class="s">&#39;p2&#39;</span><span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;BASE-OBJECT&#39;</span><span class="p">,</span> <span class="n">qq</span><span class="p">(</span><span class="s">&#39;n1&#39;</span><span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;BASE-OBJECT&#39;</span><span class="p">,</span> <span class="n">qq</span><span class="p">(</span><span class="s">&#39;n2&#39;</span><span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+<span class="c"># ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="c"># Set up data -- true output means attraction (p=positive; n=negative)</span>
+<span class="c"># ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="p">[</span> <span class="n">FunctionData</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="p">[</span> <span class="s">&quot;p1&quot;</span><span class="p">,</span> <span class="s">&quot;n1&quot;</span> <span class="p">],</span> <span class="n">output</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                 <span class="n">FunctionData</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="p">[</span> <span class="s">&quot;p1&quot;</span><span class="p">,</span> <span class="s">&quot;n2&quot;</span> <span class="p">],</span> <span class="n">output</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                 <span class="n">FunctionData</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="p">[</span> <span class="s">&quot;p1&quot;</span><span class="p">,</span> <span class="s">&quot;p1&quot;</span> <span class="p">],</span> <span class="n">output</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+                 <span class="n">FunctionData</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="p">[</span> <span class="s">&quot;p1&quot;</span><span class="p">,</span> <span class="s">&quot;p2&quot;</span> <span class="p">],</span> <span class="n">output</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+
+                 <span class="n">FunctionData</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="p">[</span> <span class="s">&quot;p2&quot;</span><span class="p">,</span> <span class="s">&quot;n1&quot;</span> <span class="p">],</span> <span class="n">output</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                 <span class="n">FunctionData</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="p">[</span> <span class="s">&quot;p2&quot;</span><span class="p">,</span> <span class="s">&quot;n2&quot;</span> <span class="p">],</span> <span class="n">output</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                 <span class="n">FunctionData</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="p">[</span> <span class="s">&quot;p2&quot;</span><span class="p">,</span> <span class="s">&quot;p1&quot;</span> <span class="p">],</span> <span class="n">output</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+                 <span class="n">FunctionData</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="p">[</span> <span class="s">&quot;p2&quot;</span><span class="p">,</span> <span class="s">&quot;p2&quot;</span> <span class="p">],</span> <span class="n">output</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+
+                 <span class="n">FunctionData</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="p">[</span> <span class="s">&quot;n1&quot;</span><span class="p">,</span> <span class="s">&quot;n1&quot;</span> <span class="p">],</span> <span class="n">output</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+                 <span class="n">FunctionData</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="p">[</span> <span class="s">&quot;n1&quot;</span><span class="p">,</span> <span class="s">&quot;n2&quot;</span> <span class="p">],</span> <span class="n">output</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+                 <span class="n">FunctionData</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="p">[</span> <span class="s">&quot;n1&quot;</span><span class="p">,</span> <span class="s">&quot;p1&quot;</span> <span class="p">],</span> <span class="n">output</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                 <span class="n">FunctionData</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="p">[</span> <span class="s">&quot;n1&quot;</span><span class="p">,</span> <span class="s">&quot;p2&quot;</span> <span class="p">],</span> <span class="n">output</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+
+                 <span class="n">FunctionData</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="p">[</span> <span class="s">&quot;n2&quot;</span><span class="p">,</span> <span class="s">&quot;n1&quot;</span> <span class="p">],</span> <span class="n">output</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+                 <span class="n">FunctionData</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="p">[</span> <span class="s">&quot;n2&quot;</span><span class="p">,</span> <span class="s">&quot;n2&quot;</span> <span class="p">],</span> <span class="n">output</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+                 <span class="n">FunctionData</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="p">[</span> <span class="s">&quot;n2&quot;</span><span class="p">,</span> <span class="s">&quot;p1&quot;</span> <span class="p">],</span> <span class="n">output</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                 <span class="n">FunctionData</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="p">[</span> <span class="s">&quot;n2&quot;</span><span class="p">,</span> <span class="s">&quot;p2&quot;</span> <span class="p">],</span> <span class="n">output</span><span class="o">=</span><span class="bp">True</span><span class="p">)]</span>
+
+<span class="c"># ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="c"># Standard exports</span>
+<span class="kn">from</span> <span class="nn">LOTlib.Hypotheses.LOTHypothesis</span> <span class="kn">import</span> <span class="n">LOTHypothesis</span>
+
+<div class="viewcode-block" id="make_ho"><a class="viewcode-back" href="../../../../LOTlib.Examples.Magnetism.html#LOTlib.Examples.Magnetism.SimpleMagnetism.make_ho">[docs]</a><span class="k">def</span> <span class="nf">make_ho</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">LOTHypothesis</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">],</span> <span class="n">ALPHA</span><span class="o">=</span><span class="mf">0.999</span><span class="p">)</span> <span class="c"># alpha here trades off with the amount of data. Currently assuming no noise, but that&#39;s not necessary</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c"># ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+    <span class="c"># Run mcmc</span>
+    <span class="c"># ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+
+    <span class="kn">from</span> <span class="nn">LOTlib.Proposals.RegenerationProposal</span> <span class="kn">import</span> <span class="o">*</span>
+    <span class="c">#mp = MixtureProposal([RegenerationProposal(grammar), InsertDeleteProposal(grammar)] )</span>
+    <span class="n">mp</span> <span class="o">=</span> <span class="n">RegenerationProposal</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+
+    <span class="n">h0</span> <span class="o">=</span> <span class="n">LOTHypothesis</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">],</span> <span class="n">ALPHA</span><span class="o">=</span><span class="mf">0.999</span><span class="p">,</span> <span class="n">proposal_function</span><span class="o">=</span><span class="n">mp</span><span class="p">)</span> <span class="c"># alpha here trades off with the amount of data. Currently assuming no noise, but that&#39;s not necessary</span>
+
+
+    <span class="kn">from</span> <span class="nn">LOTlib.Inference.MetropolisHastings</span> <span class="kn">import</span> <span class="n">mh_sample</span>
+    <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">mh_sample</span><span class="p">(</span><span class="n">h0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="mi">4000000</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="k">print</span> <span class="n">h</span><span class="o">.</span><span class="n">posterior_score</span><span class="p">,</span> <span class="n">h</span><span class="o">.</span><span class="n">likelihood</span><span class="p">,</span> <span class="n">h</span><span class="o">.</span><span class="n">prior</span><span class="p">,</span>  <span class="n">cleanFunctionNodeString</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+        <span class="k">print</span> <span class="nb">map</span><span class="p">(</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">h</span><span class="p">(</span><span class="o">*</span><span class="n">d</span><span class="o">.</span><span class="n">input</span><span class="p">),</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../LOTlib.html" >LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Steve Piantadosi.
+      Last updated on Aug 27, 2014.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

@@ -19,15 +19,15 @@ from Model import *
 STEPS = 1000000
 ALPHA = 0.9
 
-#
-# def run():
-#     """ Standard run function."""
-#     h0 = SchemeFunction(grammar, ALPHA=ALPHA)
-#     for x in lot_iter(MHSampler(h0, data, STEPS)):
-#
-#         print x.posterior_score, x
-#         for di in lot_iter(data):
-#             print "\t", di.input, "->", x(*di.input), " ; should be ", di.output
+
+def run():
+    """ Standard run function."""
+    h0 = SchemeFunction(grammar, ALPHA=ALPHA)
+    for x in lot_iter(MHSampler(h0, data, STEPS)):
+
+        print x.posterior_score, x
+        for di in data:
+            print "\t", di.input, "->", x(*di.input), " ; should be ", di.output
 
 
 #=============================================================================================================
@@ -63,4 +63,4 @@ def scheme_generate():
                 print "\t", ei, " -> ", f(ei)
 
 if __name__ == "__main__":
-    scheme_generate()
+    run()

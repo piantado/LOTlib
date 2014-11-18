@@ -9,18 +9,15 @@ import re
 from copy import copy, deepcopy
 from math import log
 from random import random
+from LOTlib.Miscellaneous import None2Empty, lambdaTrue, Infinity
 try:
     import graphviz
 except ImportError:
     pass
 
-from LOTlib.Miscellaneous import None2Empty, lambdaTrue, Infinity
-
-"""
-==============================================================================================================
-== Helper functions 
-==============================================================================================================
-"""
+#=============================================================================================================
+#  Helper functions
+#=============================================================================================================
 
 def isFunctionNode(x):
     # just because this is nicer, and allows us to map, etc.
@@ -35,50 +32,10 @@ def cleanFunctionNodeString(x):
     return s
 
 
-'''
-def DOTstring_old(x, d=0, bv_names=dict()):
-    """
-    Outputs a string in (lambda (x) (+ x 3)) format.
+#=============================================================================================================
+# String casting functions
+#=============================================================================================================
 
-    """
-
-    if d == 0:
-        return 'digraph g {'+DOTstring_old(x,d=1)+'\n}'
-
-    if isinstance(x, str):
-        return x
-    elif isFunctionNode(x):
-
-        name = x.name
-        if isinstance(x, BVUseFunctionNode):
-            name = bv_names.get(x.name, x.name)
-
-        if x.args is None:
-            s = name+';\n'
-            return name
-        else:
-            if x.args is None:
-                return name
-            elif isinstance(x, BVAddFunctionNode):
-                assert name is 'lambda'
-                s = name + ';\n\t'
-                s = s+x.added_rule.name+';\n\t'
-                s = s+map(lambda a: DOTstring_old(a, d+1, bv_names=bv_names), x.args) + ';\n\t'
-                return s
-                # return "(%s (%s) %s)" % (name, x.added_rule.name, map(lambda a: DOTstring(a,d+1,bv_names=bv_names), x.args))
-            else:
-                s = name + ';\n\t'
-                s = s+map(lambda a: DOTstring_old(a, d+1, bv_names=bv_names), x.args) + ';\n\t'
-                return s
-                # return "(%s %s)" % (name, map(lambda a: DOTstring(a,d+1,bv_names=bv_names), x.args))
-'''
-
-
-"""
-==============================================================================================================================================
-== String casting functions
-==============================================================================================================================================
-"""
 
 def schemestring(x, d=0, bv_names=None):
     """Outputs a scheme string in (lambda (x) (+ x 3)) format.
@@ -168,11 +125,9 @@ def pystring(x, d=0, bv_names=None):
                 return name+'('+', '.join(map(lambda a: pystring(a, d=d+1, bv_names=bv_names), x.args))+')'
 
 
-"""
-==============================================================================================================
-== FunctionNode main class
-==============================================================================================================
-"""
+#=============================================================================================================
+# FunctionNode main class
+#=============================================================================================================
 
 class FunctionNode(object):
     """FunctionNode main class.
@@ -191,7 +146,8 @@ class FunctionNode(object):
         If a node has [ None ] as args, it is treated as a thunk
 
     """
-    def __init__(self, parent, returntype, name, args, generation_probability=0.0, resample_p=1.0, rule=None, a_args=None):
+    def __init__(self, parent, returntype, name, args,
+                 generation_probability=0.0, resample_p=1.0, rule=None, a_args=None):
         self.__dict__.update(locals())
         self.added_rule = None
         
@@ -220,7 +176,8 @@ class FunctionNode(object):
         """Copy a function node.
 
         Args:
-            *shallow* - if True, this does not copy the children (self.to points to the same as what we return)
+            shallow: if True, this does not copy the children (self.to points to the same as what we return)
+
         Note:
             The rule is NOT deeply copied (regardless of shallow)
 

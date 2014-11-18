@@ -5,10 +5,10 @@ A Hypothesis mainly supports .compute_prior() and .compute_likelihood(data), whi
   and search algorithms.
 
 """
-
 import LOTlib
 from LOTlib.Evaluation import Primitives
 from LOTlib.Miscellaneous import *
+
 
 class Hypothesis(object):
     """A hypothesis bundles together a value (hypothesis value) with a bunch of remembered states,
@@ -17,7 +17,7 @@ class Hypothesis(object):
     This class is typically a superclass of the thing you really want.
 
     Note:
-        *Temperatures*: By default, a Hypothesis has a prior_temperature and likelihood_temperature. These
+        Temperatures: By default, a Hypothesis has a prior_temperature and likelihood_temperature. These
           are taken into account in setting the posterior_score (for computer_prior and compute_likelihood),
           in the values returned by these, AND in the stored values under self.prior and self.likelihood
 
