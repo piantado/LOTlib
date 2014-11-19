@@ -36,7 +36,6 @@ def cleanFunctionNodeString(x):
 # String casting functions
 #=============================================================================================================
 
-
 def schemestring(x, d=0, bv_names=None):
     """Outputs a scheme string in (lambda (x) (+ x 3)) format.
 
@@ -62,7 +61,8 @@ def schemestring(x, d=0, bv_names=None):
                 return name
             elif isinstance(x, BVAddFunctionNode):
                 assert name is 'lambda'
-                return "(%s (%s) %s)" % (name, x.added_rule.name, map(lambda a: schemestring(a,d+1,bv_names=bv_names), x.args))
+                return "(%s (%s) %s)" % (name, x.added_rule.name,
+                                         map(lambda a: schemestring(a, d+1, bv_names=bv_names), x.args))
             else:
                 return "(%s %s)" % (name, map(lambda a: schemestring(a,d+1,bv_names=bv_names), x.args))
 
@@ -482,9 +482,9 @@ class FunctionNode(object):
         """
         return sep.join(map(str, self.all_leaves()))
 
-    ############################################################
-    ## Derived functions that build on the above core
-    ############################################################
+    #=========================================================================================================
+    # Derived functions that build on the above core
+    #=========================================================================================================
 
     def contains_function(self, x):
         """Checks if the FunctionNode contains x as function below."""
@@ -544,8 +544,12 @@ class FunctionNode(object):
         For instance (lambda x. lambda y . (and (empty? x) y))
         is a (SET (BOOL BOOL)), where in types, (A B) is something that takes an A and returns a B
 
+        Note:
+            If we don't have a function call (as in START) (i.e. self.name == ''), just use the type of
+            what's below
+
         """
-        if self.name == '':  # If we don't have a function call (as in START), just use the type of what's below
+        if self.name == '':
             assert len(self.args) == 1, "**** Nameless calls must have exactly 1 arg"
             return self.args[0].type()
         if not (isinstance(self, BVAddFunctionNode) and self.added_rule is not None):
@@ -572,15 +576,14 @@ class FunctionNode(object):
 
                 AND(OR(Y,Z), X)
 
-        This function essentially checks if the tree is in sorted (alphbetical)
-        order, but only for functions whose name is in symmetric_ops.
+        This function essentially checks if the tree is in sorted (alphbetical) order, but only for
+        functions whose name is in symmetric_ops.
 
         """
         if self.args is None or len(self.args) == 0:
             return True
 
         if self.name in symmetric_ops:
-
             # Then we must check children
             if self.args is not None:
                 for i in xrange(len(self.args)-1):
@@ -609,30 +612,21 @@ class FunctionNode(object):
 
         """
         if isFunctionNode(y):
-            if y.returntype != self.returntype:
+            if (y.returntype != self.returntype) or \
+               (y.name != self.name) or \
+               (len(y.args) != len(self.args)):
                 return False
-
-            if y.name != self.name:
-                return False
-
             if y.args is None:
                 return self.args is None
-
-            if len(y.args) != len(self.args):
-                return False
 
             for a, b in zip(self.args, y.args):
                 if isFunctionNode(a):
                     if not a.partial_subtree_root_match(b):
                         return False
                 else:
-                    if isFunctionNode(b):
+                    if isFunctionNode(b) or \
+                            (a != b):
                         return False  # cannot work!
-
-                    # neither is a function node
-                    if a != b:
-                        return False
-
             return True
         else:
             # else y is a string and we match if y is our returntype
@@ -640,7 +634,7 @@ class FunctionNode(object):
             return y == self.returntype
 
     def partial_subtree_match(self, y):
-        """Does *y* match a subtree anywhere?"""
+        """Does `y` match a subtree anywhere?"""
         for x in self:
             if x.partial_subtree_root_match(y):
                 return True
@@ -650,6 +644,8 @@ class FunctionNode(object):
     def random_partial_subtree(self, p=0.5):
         """Generate a random partial subtree of me.
 
+        We do this because there are waay too many unique subtrees to enumerate, and this allows a nice
+        variety of structures
 
         Example:
             >> prev_((seven_ if cardinality1_(x) else next_(next_(L_(x)))))
@@ -663,9 +659,6 @@ class FunctionNode(object):
             prev_(WORD)
             prev_((seven_ if BOOL else next_(WORD)))
             ...
-
-        We do this because there are waay too many unique subtrees to enumerate, and this allows a nice
-        variety of structures
 
         Note:
             Partial here means that we include nonterminals with probability p
