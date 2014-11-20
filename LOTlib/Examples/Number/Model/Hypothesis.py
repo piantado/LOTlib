@@ -19,7 +19,6 @@ class NumberExpression(RecursiveLOTHypothesis):
 
         Log_probability() with a penalty on whether or not recursion is used.
         """
-        recursion_penalty = 0
         if self.value.count_nodes() > MAX_NODES:
             self.prior = -Infinity
         else:
@@ -29,7 +28,8 @@ class NumberExpression(RecursiveLOTHypothesis):
                 recursion_penalty = LG_1MGAMMA
 
             self.prior = (recursion_penalty + self.value.log_probability()) / self.prior_temperature
-        self.posterior_score = self.prior + self.likelihood
+
+        self.update_posterior()
 
         return self.prior
 
@@ -42,5 +42,5 @@ class NumberExpression(RecursiveLOTHypothesis):
         if response == 'undef' or response == None:
             return log(1.0/10.0) # if undefined, just sample from a base distribution
         else:
-            return log( (1.0 - ALPHA)/10.0 + ALPHA * ( response == datum.output ) )
+            return log((1.0 - ALPHA)/10.0 + ALPHA * (response == datum.output))
 

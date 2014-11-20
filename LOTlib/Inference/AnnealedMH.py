@@ -1,15 +1,15 @@
 """
 
-    An annealed MH sampler
+    Annealing for MH sampler, with various schedules
 
 """
-from math import sin, pi
+from math import sin, pi, log, pow
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Set up some schedule classes for how temp varies
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class Schedule:
+class AnnealingSchedule:
     """
     A class to represent an annealing schedule. Should be subclassed.
     NOTE: "skip" steps are all run at the same temperature!
@@ -21,14 +21,14 @@ class Schedule:
         return self
 
 
-class ConstantSchedule(Schedule):
+class ConstantSchedule(AnnealingSchedule):
     def __init__(self, k):
         self.k = k
 
     def next(self):
         return self.k
 
-class InverseSchedule(Schedule):
+class InverseSchedule(AnnealingSchedule):
     """
     Temperature = max/(scale*time)
     """
@@ -40,8 +40,21 @@ class InverseSchedule(Schedule):
         self.ticks += 1
         return self.max / (self.scale*self.ticks)
 
-class SinSchedule(Schedule):
+class ExponentialSchedule(AnnealingSchedule):
     """
+    Temperature = c * alpha^t
+    """
+    def __init__(self, c, alpha):
+        self.__dict__.update(locals())
+        self.ticks = 0
+
+    def next(self):
+        self.ticks += 1
+        return self.c * pow(self.alpha, self.ticks)
+
+class SinSchedule(AnnealingSchedule):
+    """
+    Let's go crazy -- search at various temperatures
     Temperature = min + (max-min)*sin(2*pi*time/period)
     """
     def __init__(self, min, max, period):
@@ -53,6 +66,22 @@ class SinSchedule(Schedule):
     def next(self):
         self.ticks += 1
         return self.min + (self.max-self.min) * ( 1. + sin(self.ticks * 2 * pi / self.period))/2.
+
+class InverseLogSchedule(AnnealingSchedule):
+    """
+    Annealing schedule via c/log(1+t).
+    NOTE: *Very* slow to anneal.
+    In a slightly different context, the condition on c is that it is greater than or equal to the depth of the greatest local minimum
+    See: Cooling Schedules for Optimal Annealing, Mathematics of Operations Research, 1988
+    """
+    def __init__(self, c):
+        assert c >= 0
+        self.c = c
+        self.ticks = 0
+
+    def next(self):
+        self.ticks += 1
+        return self.c / log(1.+self.ticks)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## An annealed MH sampler
