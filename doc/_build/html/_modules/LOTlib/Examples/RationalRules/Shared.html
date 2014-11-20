@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LOTlib.Examples.RationalRules.Shared &mdash; LOTlib 0.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="LOTlib 0.2.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="LOTlib" href="../../../LOTlib.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for LOTlib.Examples.RationalRules.Shared</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shared functions for all RationalRules examples</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="n">q</span>
+
+<span class="c"># ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="c"># Set up our grammar. DNF defautly includes the logical connectives</span>
+<span class="c"># in disjunctive normal form, but we need to add predicates to it.</span>
+
+<span class="kn">from</span> <span class="nn">LOTlib.DefaultGrammars</span> <span class="kn">import</span> <span class="n">DNF</span>
+<span class="n">grammar</span> <span class="o">=</span> <span class="n">DNF</span>
+
+<span class="c"># Two predicates for checking x&#39;s color and shape</span>
+<span class="c"># Note: per style, functions in the LOT end in _</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;PREDICATE&#39;</span><span class="p">,</span> <span class="s">&#39;is_color_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="s">&#39;COLOR&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;PREDICATE&#39;</span><span class="p">,</span> <span class="s">&#39;is_shape_&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="s">&#39;SHAPE&#39;</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)</span>
+
+<span class="c"># Some colors/shapes each (for this simple demo)</span>
+<span class="c"># These are written in quotes so they can be evaled</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;COLOR&#39;</span><span class="p">,</span> <span class="n">q</span><span class="p">(</span><span class="s">&#39;red&#39;</span><span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;COLOR&#39;</span><span class="p">,</span> <span class="n">q</span><span class="p">(</span><span class="s">&#39;blue&#39;</span><span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;COLOR&#39;</span><span class="p">,</span> <span class="n">q</span><span class="p">(</span><span class="s">&#39;green&#39;</span><span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;COLOR&#39;</span><span class="p">,</span> <span class="n">q</span><span class="p">(</span><span class="s">&#39;mauve&#39;</span><span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;SHAPE&#39;</span><span class="p">,</span> <span class="n">q</span><span class="p">(</span><span class="s">&#39;square&#39;</span><span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;SHAPE&#39;</span><span class="p">,</span> <span class="n">q</span><span class="p">(</span><span class="s">&#39;circle&#39;</span><span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;SHAPE&#39;</span><span class="p">,</span> <span class="n">q</span><span class="p">(</span><span class="s">&#39;triangle&#39;</span><span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">grammar</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="s">&#39;SHAPE&#39;</span><span class="p">,</span> <span class="n">q</span><span class="p">(</span><span class="s">&#39;diamond&#39;</span><span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+
+<span class="c"># ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="c">## Make up some data</span>
+<span class="c"># Let&#39;s give data from a simple conjunction (note this example data is not exhaustive)</span>
+
+<span class="kn">from</span> <span class="nn">LOTlib.DataAndObjects</span> <span class="kn">import</span> <span class="n">FunctionData</span><span class="p">,</span> <span class="n">Obj</span>
+
+<span class="c"># FunctionData takes a list of arguments and a return value. The arguments are objects (which are handled correctly automatically</span>
+<span class="c"># by is_color_ and is_shape_</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">[</span> <span class="n">FunctionData</span><span class="p">(</span> <span class="p">[</span><span class="n">Obj</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;square&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;red&#39;</span><span class="p">)],</span> <span class="bp">True</span><span class="p">),</span> \
+         <span class="n">FunctionData</span><span class="p">(</span> <span class="p">[</span><span class="n">Obj</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;square&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;blue&#39;</span><span class="p">)],</span> <span class="bp">False</span><span class="p">),</span> \
+         <span class="n">FunctionData</span><span class="p">(</span> <span class="p">[</span><span class="n">Obj</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;triangle&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;blue&#39;</span><span class="p">)],</span> <span class="bp">False</span><span class="p">),</span> \
+         <span class="n">FunctionData</span><span class="p">(</span> <span class="p">[</span><span class="n">Obj</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="s">&#39;triangle&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;red&#39;</span><span class="p">)],</span> <span class="bp">False</span><span class="p">),</span> \
+         <span class="p">]</span>
+
+<span class="c"># ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="c">## Other standard exports</span>
+
+<span class="kn">from</span> <span class="nn">LOTlib.Hypotheses.RationalRulesLOTHypothesis</span> <span class="kn">import</span> <span class="n">RationalRulesLOTHypothesis</span>
+
+<div class="viewcode-block" id="make_h0"><a class="viewcode-back" href="../../../../LOTlib.Examples.RationalRules.html#LOTlib.Examples.RationalRules.Shared.make_h0">[docs]</a><span class="k">def</span> <span class="nf">make_h0</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">RationalRulesLOTHypothesis</span><span class="p">(</span><span class="n">grammar</span><span class="o">=</span><span class="n">DNF</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">rrAlpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    
+    <span class="kn">from</span> <span class="nn">LOTlib.Inference.MetropolisHastings</span> <span class="kn">import</span> <span class="n">MHSampler</span>
+    
+    <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">MHSampler</span><span class="p">(</span><span class="n">make_h0</span><span class="p">(),</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">print</span> <span class="n">h</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../LOTlib.html" >LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Steve Piantadosi.
+      Last updated on Aug 27, 2014.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

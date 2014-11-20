@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LOTlib.Hypotheses.SimpleLexicon &mdash; LOTlib 0.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="LOTlib 0.2.0 documentation" href="../../../index.html" />
+    <link rel="up" title="LOTlib" href="../../LOTlib.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for LOTlib.Hypotheses.SimpleLexicon</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    TODO:</span>
+<span class="sd">        - Make the.valueicon be indexable like an array/dict, rather than having to say h.value[...] say h[..]</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
+<span class="kn">from</span> <span class="nn">inspect</span> <span class="kn">import</span> <span class="n">isroutine</span>
+
+<span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">LOTlib.Hypotheses.Hypothesis</span> <span class="kn">import</span> <span class="n">Hypothesis</span>
+
+<div class="viewcode-block" id="SimpleLexicon"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.SimpleLexicon.SimpleLexicon">[docs]</a><span class="k">class</span> <span class="nc">SimpleLexicon</span><span class="p">(</span><span class="n">Hypothesis</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A class for mapping words to hypotheses.</span>
+
+<span class="sd">        By itself this has no likelihood function.</span>
+
+<span class="sd">        TODO: we can probably make this faster by not passing around the context sets so much.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">make_hypothesis</span><span class="p">,</span> <span class="n">words</span><span class="o">=</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            hypothesis - a function to generate hypotheses</span>
+<span class="sd">            words -- words to initially add (sampling from the prior)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Hypothesis</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span>
+
+        <span class="k">assert</span> <span class="n">isroutine</span><span class="p">(</span><span class="n">make_hypothesis</span><span class="p">)</span> <span class="c"># check that we can call</span>
+
+        <span class="c"># update with the supplied words, each generating from the grammar</span>
+        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">words</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_word</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SimpleLexicon.__copy__"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.SimpleLexicon.SimpleLexicon.__copy__">[docs]</a>    <span class="k">def</span> <span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Copy a.valueicon. We don&#39;t re-create the fucntions since that&#39;s unnecessary and slow&quot;&quot;&quot;</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">make_hypothesis</span><span class="p">,</span> <span class="n">words</span><span class="o">=</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">words</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="n">w</span><span class="p">])</span>
+
+        <span class="c"># And copy everything else</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;self&#39;</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">]:</span>
+                <span class="n">new</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">new</span>
+</div>
+<div class="viewcode-block" id="SimpleLexicon.__str__"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.SimpleLexicon.SimpleLexicon.__str__">[docs]</a>    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            This defaultly puts a \0 at the end so that we can sort -z if we want (e.g. if we print out a posterior first)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span> <span class="nb">str</span><span class="p">(</span><span class="n">w</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;:</span><span class="se">\t</span><span class="s">&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">iteritems</span><span class="p">())])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\0</span><span class="s">&#39;</span></div>
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>   <span class="k">return</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">==</span><span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">))</span> <span class="c"># simple but there are probably better ways</span>
+
+<div class="viewcode-block" id="SimpleLexicon.__call__"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.SimpleLexicon.SimpleLexicon.__call__">[docs]</a>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Just a wrapper so we can call like SimpleLexicon(&#39;hi&#39;, 4)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="n">word</span><span class="p">](</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="c"># this sets the word and automatically compute its function</span></div>
+<div class="viewcode-block" id="SimpleLexicon.set_word"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.SimpleLexicon.SimpleLexicon.set_word">[docs]</a>    <span class="k">def</span> <span class="nf">set_word</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            This sets word w to value v. v can be either None, a FunctionNode or a  Hypothesis, and</span>
+<span class="sd">            in either case it is copied here. When it is a Hypothesis, the value is extracted. If it is</span>
+<span class="sd">            None, we generate from the grammar</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># Conver to standard expressiosn</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_hypothesis</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">Hypothesis</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+</div>
+<div class="viewcode-block" id="SimpleLexicon.all_words"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.SimpleLexicon.SimpleLexicon.all_words">[docs]</a>    <span class="k">def</span> <span class="nf">all_words</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="SimpleLexicon.force_function"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.SimpleLexicon.SimpleLexicon.force_function">[docs]</a>    <span class="k">def</span> <span class="nf">force_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Allow force_function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">.</span><span class="n">force_function</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="c">###################################################################################</span>
+    <span class="c">## MH stuff</span>
+    <span class="c">###################################################################################</span>
+</div>
+<div class="viewcode-block" id="SimpleLexicon.propose"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.SimpleLexicon.SimpleLexicon.propose">[docs]</a>    <span class="k">def</span> <span class="nf">propose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">w</span> <span class="o">=</span> <span class="n">weighted_sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="c"># the word to change</span>
+        <span class="n">p</span><span class="p">,</span> <span class="n">fb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">.</span><span class="n">propose</span><span class="p">()</span>
+
+        <span class="n">new</span><span class="o">.</span><span class="n">set_word</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new</span><span class="p">,</span> <span class="n">fb</span>
+
+</div>
+<div class="viewcode-block" id="SimpleLexicon.compute_prior"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.SimpleLexicon.SimpleLexicon.compute_prior">[docs]</a>    <span class="k">def</span> <span class="nf">compute_prior</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prior</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">compute_prior</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">prior_temperature</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">posterior_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prior</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">likelihood</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">prior</span>
+
+    <span class="c"># This combines score_utterance with likelihood so that everything is much faster</span></div>
+<div class="viewcode-block" id="SimpleLexicon.compute_single_likelihood"><a class="viewcode-back" href="../../../LOTlib.Hypotheses.html#LOTlib.Hypotheses.SimpleLexicon.SimpleLexicon.compute_single_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">compute_single_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">di</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../LOTlib.html" >LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Steven Piantadosi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

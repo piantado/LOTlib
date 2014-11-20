@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LOTlib.Inference.PartitionMCMC &mdash; LOTlib 0.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="LOTlib 0.2.0 documentation" href="../../../index.html" />
+    <link rel="up" title="LOTlib" href="../../LOTlib.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for LOTlib.Inference.PartitionMCMC</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The intuition here is that one way to prevent chains from duplicating work is to divide up the space and ensure chains stay </span>
+<span class="sd">    in separate regions. This is accomplished here by setting the resample_p to very tiny except for the leaves, after</span>
+<span class="sd">    enumerating up to some depth in the grammar. Warning: the number of trees (and thus chains) will likely be exponential in the depth!</span>
+<span class="sd">    </span>
+<span class="sd">    This is at present NOT a correct sampler since it doesn&#39;t correctly handle proposals from one partition to another. It should be a correct sampler </span>
+<span class="sd">    within each partition.  </span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">LOTlib</span> <span class="kn">import</span> <span class="n">lot_iter</span>
+<span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="n">Infinity</span><span class="p">,</span> <span class="n">infrange</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
+
+
+<span class="kn">from</span> <span class="nn">MultipleChainMCMC</span> <span class="kn">import</span> <span class="n">MultipleChainMCMC</span>
+
+<span class="kn">from</span> <span class="nn">LOTlib.Subtrees</span> <span class="kn">import</span> <span class="n">trim_leaves</span>
+<span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="n">None2Empty</span>
+
+<div class="viewcode-block" id="BreakException"><a class="viewcode-back" href="../../../LOTlib.Inference.html#LOTlib.Inference.PartitionMCMC.BreakException">[docs]</a><span class="k">class</span> <span class="nc">BreakException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Break out of multiple loops</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="PartitionMCMC"><a class="viewcode-back" href="../../../LOTlib.Inference.html#LOTlib.Inference.PartitionMCMC.PartitionMCMC">[docs]</a><span class="k">class</span> <span class="nc">PartitionMCMC</span><span class="p">(</span><span class="n">MultipleChainMCMC</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">make_h0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">max_N</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="n">Infinity</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param grammar: -- the grammar we use</span>
+<span class="sd">        :param make_h0: -- make a hypothesis</span>
+<span class="sd">        :param data:    -- data for the posterior</span>
+<span class="sd">        :param max_N: -- the max number of samples we&#39;ll take</span>
+<span class="sd">        :param steps: -- how many steps</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># first figure out the depth we can go to without exceeding max_N</span>
+        <span class="n">partitions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">infrange</span><span class="p">():</span>
+                <span class="c">#print &quot;# trying &quot;, d</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grammar</span><span class="o">.</span><span class="n">enumerate_at_depth</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">leaves</span><span class="o">=</span><span class="bp">False</span><span class="p">)):</span>
+                    <span class="n">tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">max_N</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">BreakException</span>
+
+                <span class="c"># this gets set if we successfully exit the loop</span>
+                <span class="c"># so it will store the last set that didn&#39;t exceed size max_N</span>
+                <span class="n">partitions</span> <span class="o">=</span> <span class="n">tmp</span>
+        <span class="k">except</span> <span class="n">BreakException</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c"># Take each partition, which doesn&#39;t have leaves, and generate leaves, setting</span>
+        <span class="c"># it to a random generation (fill in the leaves with random hypotheses)</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">partitions</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">subnodes</span><span class="p">():</span>
+                <span class="c"># set to not resample these</span>
+                <span class="n">n</span><span class="o">.</span><span class="n">resample_p</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+                <span class="c"># and fill in the missing leaves with a random generation</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">args</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">grammar</span><span class="o">.</span><span class="n">is_nonterminal</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+                        <span class="n">n</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">grammar</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+        <span class="c"># initialize each chain</span>
+        <span class="n">MultipleChainMCMC</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="n">steps</span><span class="p">,</span> <span class="n">nchains</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">partitions</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="c"># And set each to the partition</span>
+        <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="p">,</span> <span class="n">partitions</span><span class="p">):</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span><span class="n">make_h0</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">p</span><span class="p">))</span>
+        
+        <span class="c"># and store these</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">partitions</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span> <span class="n">partitions</span><span class="p">)</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    
+    <span class="kn">from</span> <span class="nn">LOTlib.Examples.Number.Model.Utilities</span> <span class="kn">import</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">make_h0</span><span class="p">,</span> <span class="n">generate_data</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">generate_data</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span>
+    
+    <span class="c">#from LOTlib.Examples.RegularExpression.Shared import grammar, make_h0, data</span>
+        
+    <span class="c">#from LOTlib.Examples.RationalRules.Shared import grammar, data, make_h0</span>
+    
+    <span class="c">#PartitionMCMC(grammar, make_h0, data, 2, skip=0)</span>
+    <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">lot_iter</span><span class="p">(</span><span class="n">PartitionMCMC</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">make_h0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">max_N</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">)):</span>
+        <span class="k">print</span> <span class="n">h</span><span class="o">.</span><span class="n">posterior_score</span><span class="p">,</span> <span class="n">h</span>
+
+    
+ 
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../LOTlib.html" >LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Steven Piantadosi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

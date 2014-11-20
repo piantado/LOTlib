@@ -1,0 +1,405 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LOTlib.Inference package &mdash; LOTlib 0.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="LOTlib 0.2.0 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">LOTlib 0.2.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="lotlib-inference-package">
+<h1>LOTlib.Inference package<a class="headerlink" href="#lotlib-inference-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-LOTlib.Inference.EnumerationInference">
+<span id="lotlib-inference-enumerationinference-module"></span><h2>LOTlib.Inference.EnumerationInference module<a class="headerlink" href="#module-LOTlib.Inference.EnumerationInference" title="Permalink to this headline">¶</a></h2>
+<p>A simple class to do inference via enumeration</p>
+<dl class="class">
+<dt id="LOTlib.Inference.EnumerationInference.EnumerationInference">
+<em class="property">class </em><tt class="descclassname">LOTlib.Inference.EnumerationInference.</tt><tt class="descname">EnumerationInference</tt><big>(</big><em>grammar</em>, <em>make_h</em>, <em>data</em>, <em>steps=inf</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/EnumerationInference.html#EnumerationInference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.EnumerationInference.EnumerationInference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-LOTlib.Inference.MHShared">
+<span id="lotlib-inference-mhshared-module"></span><h2>LOTlib.Inference.MHShared module<a class="headerlink" href="#module-LOTlib.Inference.MHShared" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="LOTlib.Inference.MHShared.MH_acceptance">
+<tt class="descclassname">LOTlib.Inference.MHShared.</tt><tt class="descname">MH_acceptance</tt><big>(</big><em>cur</em>, <em>prop</em>, <em>fb</em>, <em>acceptance_temperature=1.0</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/MHShared.html#MH_acceptance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.MHShared.MH_acceptance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle all the weird corner cases for computing MH acceptance ratios
+And then returns a true/false for acceptance</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="LOTlib.Inference.MHShared.random">
+<tt class="descclassname">LOTlib.Inference.MHShared.</tt><tt class="descname">random</tt><big>(</big><big>)</big> &rarr; x in the interval [0, 1).<a class="headerlink" href="#LOTlib.Inference.MHShared.random" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-LOTlib.Inference.MemoizedMHSampler">
+<span id="lotlib-inference-memoizedmhsampler-module"></span><h2>LOTlib.Inference.MemoizedMHSampler module<a class="headerlink" href="#module-LOTlib.Inference.MemoizedMHSampler" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="LOTlib.Inference.MemoizedMHSampler.MemoizedMHSampler">
+<em class="property">class </em><tt class="descclassname">LOTlib.Inference.MemoizedMHSampler.</tt><tt class="descname">MemoizedMHSampler</tt><big>(</big><em>h0</em>, <em>data</em>, <em>memoize=inf</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/MemoizedMHSampler.html#MemoizedMHSampler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.MemoizedMHSampler.MemoizedMHSampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#LOTlib.Inference.MetropolisHastings.MHSampler" title="LOTlib.Inference.MetropolisHastings.MHSampler"><tt class="xref py py-class docutils literal"><span class="pre">LOTlib.Inference.MetropolisHastings.MHSampler</span></tt></a></p>
+<p>Same as MHSampler, but the values of compute_posterior are cached via LRUCache</p>
+<dl class="method">
+<dt id="LOTlib.Inference.MemoizedMHSampler.MemoizedMHSampler.compute_posterior">
+<tt class="descname">compute_posterior</tt><big>(</big><em>h</em>, <em>data</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/MemoizedMHSampler.html#MemoizedMHSampler.compute_posterior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.MemoizedMHSampler.MemoizedMHSampler.compute_posterior" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-LOTlib.Inference.MetropolisHastings">
+<span id="lotlib-inference-metropolishastings-module"></span><h2>LOTlib.Inference.MetropolisHastings module<a class="headerlink" href="#module-LOTlib.Inference.MetropolisHastings" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="LOTlib.Inference.MetropolisHastings.MHSampler">
+<em class="property">class </em><tt class="descclassname">LOTlib.Inference.MetropolisHastings.</tt><tt class="descname">MHSampler</tt><big>(</big><em>current_sample</em>, <em>data</em>, <em>steps=inf</em>, <em>proposer=None</em>, <em>skip=0</em>, <em>prior_temperature=1.0</em>, <em>likelihood_temperature=1.0</em>, <em>acceptance_temperature=1.0</em>, <em>trace=False</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/MetropolisHastings.html#MHSampler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.MetropolisHastings.MHSampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class to implement MH sampling.</p>
+<dl class="docutils">
+<dt>You can create a sampler object::</dt>
+<dd><p class="first">from LOTlib.Examples.Number.Shared import generate_data, NumberExpression, grammar
+data = generate_data(500)
+h0 = NumberExpression(grammar)
+sampler = MHSampler(h0, data, 10000)
+for h in sampler:</p>
+<blockquote class="last">
+<div>print sampler.acceptance_ratio(), h</div></blockquote>
+</dd>
+<dt>Or implicitly::</dt>
+<dd><p class="first">from LOTlib.Examples.Number.Shared import generate_data, NumberExpression, grammar
+data = generate_data(500)
+h0 = NumberExpression(grammar)
+for h in  MHSampler(h0, data, 10000):</p>
+<blockquote class="last">
+<div>print h</div></blockquote>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">A wrapper below called mh_sample is provided to maintain backward compatibility. But mh_sample
+will be removed in the future.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">If a proposer is specific in __init__, it should return a <em>new copy</em> of the object</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="LOTlib.Inference.MetropolisHastings.MHSampler.acceptance_ratio">
+<tt class="descname">acceptance_ratio</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/MetropolisHastings.html#MHSampler.acceptance_ratio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.MetropolisHastings.MHSampler.acceptance_ratio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the proportion of proposals that have been accepted</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LOTlib.Inference.MetropolisHastings.MHSampler.compute_posterior">
+<tt class="descname">compute_posterior</tt><big>(</big><em>h</em>, <em>data</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/MetropolisHastings.html#MHSampler.compute_posterior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.MetropolisHastings.MHSampler.compute_posterior" title="Permalink to this definition">¶</a></dt>
+<dd><p>A wrapper for hypothesis.compute_posterior(data) that can be overwritten in subclassses for fanciness
+Should return [np,nl], the prior and likelihood</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LOTlib.Inference.MetropolisHastings.MHSampler.internal_sample">
+<tt class="descname">internal_sample</tt><big>(</big><em>h</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/MetropolisHastings.html#MHSampler.internal_sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.MetropolisHastings.MHSampler.internal_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is called on each yielded h. It serves no function in MHSampler, but is necessary in others
+like TabooMCMC</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LOTlib.Inference.MetropolisHastings.MHSampler.next">
+<tt class="descname">next</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/MetropolisHastings.html#MHSampler.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.MetropolisHastings.MHSampler.next" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="LOTlib.Inference.MetropolisHastings.MHSampler.reset_counters">
+<tt class="descname">reset_counters</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/MetropolisHastings.html#MHSampler.reset_counters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.MetropolisHastings.MHSampler.reset_counters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset our acceptance and proposal counters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LOTlib.Inference.MetropolisHastings.MHSampler.set_state">
+<tt class="descname">set_state</tt><big>(</big><em>x</em>, <em>compute_posterior=True</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/MetropolisHastings.html#MHSampler.set_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.MetropolisHastings.MHSampler.set_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the current state, computing the posterior if needed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LOTlib.Inference.MetropolisHastings.MHSampler.take">
+<tt class="descname">take</tt><big>(</big><em>n</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/MetropolisHastings.html#MHSampler.take"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.MetropolisHastings.MHSampler.take" title="Permalink to this definition">¶</a></dt>
+<dd><p>Yield just the next N from this generator</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="LOTlib.Inference.MetropolisHastings.mh_sample">
+<em class="property">class </em><tt class="descclassname">LOTlib.Inference.MetropolisHastings.</tt><tt class="descname">mh_sample</tt><big>(</big><em>current_sample</em>, <em>data</em>, <em>steps=inf</em>, <em>proposer=None</em>, <em>skip=0</em>, <em>prior_temperature=1.0</em>, <em>likelihood_temperature=1.0</em>, <em>acceptance_temperature=1.0</em>, <em>trace=False</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/MetropolisHastings.html#mh_sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.MetropolisHastings.mh_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#LOTlib.Inference.MetropolisHastings.MHSampler" title="LOTlib.Inference.MetropolisHastings.MHSampler"><tt class="xref py py-class docutils literal"><span class="pre">LOTlib.Inference.MetropolisHastings.MHSampler</span></tt></a></p>
+<p>Just temporarily, this will prevent code from breaking, from the switch to MHSampler</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-LOTlib.Inference.MultipleChainMCMC">
+<span id="lotlib-inference-multiplechainmcmc-module"></span><h2>LOTlib.Inference.MultipleChainMCMC module<a class="headerlink" href="#module-LOTlib.Inference.MultipleChainMCMC" title="Permalink to this headline">¶</a></h2>
+<p>Multiple parallel chains running at once.</p>
+<p>This runs skip steps within each chain, looping to return samples in a roundrobin fashion,
+chain1, chain2, chain3, ...</p>
+<p>Also, steps is the <em>total</em> number of steps, not the number of steps for each chain
+This is subclassed by several other inference techniques</p>
+<dl class="class">
+<dt id="LOTlib.Inference.MultipleChainMCMC.MultipleChainMCMC">
+<em class="property">class </em><tt class="descclassname">LOTlib.Inference.MultipleChainMCMC.</tt><tt class="descname">MultipleChainMCMC</tt><big>(</big><em>make_h0</em>, <em>data</em>, <em>steps=inf</em>, <em>nchains=10</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/MultipleChainMCMC.html#MultipleChainMCMC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.MultipleChainMCMC.MultipleChainMCMC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="LOTlib.Inference.MultipleChainMCMC.MultipleChainMCMC.acceptance_ratio">
+<tt class="descname">acceptance_ratio</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/MultipleChainMCMC.html#MultipleChainMCMC.acceptance_ratio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.MultipleChainMCMC.MultipleChainMCMC.acceptance_ratio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the mean acceptance rate of all chains</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LOTlib.Inference.MultipleChainMCMC.MultipleChainMCMC.next">
+<tt class="descname">next</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/MultipleChainMCMC.html#MultipleChainMCMC.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.MultipleChainMCMC.MultipleChainMCMC.next" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="LOTlib.Inference.MultipleChainMCMC.MultipleChainMCMC.reset_counters">
+<tt class="descname">reset_counters</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/MultipleChainMCMC.html#MultipleChainMCMC.reset_counters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.MultipleChainMCMC.MultipleChainMCMC.reset_counters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-LOTlib.Inference.ParallelTempering">
+<span id="lotlib-inference-paralleltempering-module"></span><h2>LOTlib.Inference.ParallelTempering module<a class="headerlink" href="#module-LOTlib.Inference.ParallelTempering" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="LOTlib.Inference.ParallelTempering.ParallelTemperingSampler">
+<em class="property">class </em><tt class="descclassname">LOTlib.Inference.ParallelTempering.</tt><tt class="descname">ParallelTemperingSampler</tt><big>(</big><em>make_h0, data, temperatures=[1.0, 1.1, 1.5], within_steps=50, swaps=1, yield_only_t0=False, **kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/ParallelTempering.html#ParallelTemperingSampler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.ParallelTempering.ParallelTemperingSampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#LOTlib.Inference.MultipleChainMCMC.MultipleChainMCMC" title="LOTlib.Inference.MultipleChainMCMC.MultipleChainMCMC"><tt class="xref py py-class docutils literal"><span class="pre">LOTlib.Inference.MultipleChainMCMC.MultipleChainMCMC</span></tt></a></p>
+<p>Parallel tempering. Here the temperatures <em>all</em> refer to likelihood_temperatures</p>
+<dl class="method">
+<dt id="LOTlib.Inference.ParallelTempering.ParallelTemperingSampler.ll_at_temperature">
+<tt class="descname">ll_at_temperature</tt><big>(</big><em>i</em>, <em>t</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/ParallelTempering.html#ParallelTemperingSampler.ll_at_temperature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.ParallelTempering.ParallelTemperingSampler.ll_at_temperature" title="Permalink to this definition">¶</a></dt>
+<dd><p>The posterior  of chain i at temperature t</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LOTlib.Inference.ParallelTempering.ParallelTemperingSampler.next">
+<tt class="descname">next</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/ParallelTempering.html#ParallelTemperingSampler.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.ParallelTempering.ParallelTemperingSampler.next" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="LOTlib.Inference.ParallelTempering.random">
+<tt class="descclassname">LOTlib.Inference.ParallelTempering.</tt><tt class="descname">random</tt><big>(</big><big>)</big> &rarr; x in the interval [0, 1).<a class="headerlink" href="#LOTlib.Inference.ParallelTempering.random" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-LOTlib.Inference.PartitionMCMC">
+<span id="lotlib-inference-partitionmcmc-module"></span><h2>LOTlib.Inference.PartitionMCMC module<a class="headerlink" href="#module-LOTlib.Inference.PartitionMCMC" title="Permalink to this headline">¶</a></h2>
+<p>The intuition here is that one way to prevent chains from duplicating work is to divide up the space and ensure chains stay
+in separate regions. This is accomplished here by setting the resample_p to very tiny except for the leaves, after
+enumerating up to some depth in the grammar. Warning: the number of trees (and thus chains) will likely be exponential in the depth!</p>
+<p>This is at present NOT a correct sampler since it doesn&#8217;t correctly handle proposals from one partition to another. It should be a correct sampler
+within each partition.</p>
+<dl class="exception">
+<dt id="LOTlib.Inference.PartitionMCMC.BreakException">
+<em class="property">exception </em><tt class="descclassname">LOTlib.Inference.PartitionMCMC.</tt><tt class="descname">BreakException</tt><a class="reference internal" href="_modules/LOTlib/Inference/PartitionMCMC.html#BreakException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.PartitionMCMC.BreakException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></p>
+<p>Break out of multiple loops</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="LOTlib.Inference.PartitionMCMC.PartitionMCMC">
+<em class="property">class </em><tt class="descclassname">LOTlib.Inference.PartitionMCMC.</tt><tt class="descname">PartitionMCMC</tt><big>(</big><em>grammar</em>, <em>make_h0</em>, <em>data</em>, <em>max_N=1000</em>, <em>steps=inf</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/PartitionMCMC.html#PartitionMCMC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.PartitionMCMC.PartitionMCMC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#LOTlib.Inference.MultipleChainMCMC.MultipleChainMCMC" title="LOTlib.Inference.MultipleChainMCMC.MultipleChainMCMC"><tt class="xref py py-class docutils literal"><span class="pre">LOTlib.Inference.MultipleChainMCMC.MultipleChainMCMC</span></tt></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-LOTlib.Inference.PriorSample">
+<span id="lotlib-inference-priorsample-module"></span><h2>LOTlib.Inference.PriorSample module<a class="headerlink" href="#module-LOTlib.Inference.PriorSample" title="Permalink to this headline">¶</a></h2>
+<p>Inference - sample from the prior (as a baseline comparison)</p>
+<dl class="function">
+<dt id="LOTlib.Inference.PriorSample.prior_sample">
+<tt class="descclassname">LOTlib.Inference.PriorSample.</tt><tt class="descname">prior_sample</tt><big>(</big><em>h0</em>, <em>data</em>, <em>N</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/PriorSample.html#prior_sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.PriorSample.prior_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Just use the grammar and returntype of h0 to sample from the prior
+NOTE: Only implemented for LOTHypothesis</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-LOTlib.Inference.StochasticOptimization">
+<span id="lotlib-inference-stochasticoptimization-module"></span><h2>LOTlib.Inference.StochasticOptimization module<a class="headerlink" href="#module-LOTlib.Inference.StochasticOptimization" title="Permalink to this headline">¶</a></h2>
+<p>This uses a simple stochastic optimization scheme, that cycles through data,
+updating a sample a few times based only on <em>one</em> data point. This may help
+get out of local maxima
+NOTE: Wow, doesn&#8217;t work at all!</p>
+<dl class="function">
+<dt id="LOTlib.Inference.StochasticOptimization.datawise_optimize">
+<tt class="descclassname">LOTlib.Inference.StochasticOptimization.</tt><tt class="descname">datawise_optimize</tt><big>(</big><em>current_sample</em>, <em>data</em>, <em>steps=1000000</em>, <em>inner_steps=10</em>, <em>data_weight=1.0</em>, <em>ll_temperature=1.0</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/StochasticOptimization.html#datawise_optimize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.StochasticOptimization.datawise_optimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>cycle through data points, taking a few steps in the direction of that data point
+This uses ll_temperature to simulate having len(data)*data_weight number of data points</p>
+<p>steps &#8211; you take this many total steps (steps/inner_steps inner loops)
+inner steps &#8211; how many steps to take on a single data point
+data_weight &#8211; weight each single data point as len(data)*this</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="LOTlib.Inference.StochasticOptimization.random">
+<tt class="descclassname">LOTlib.Inference.StochasticOptimization.</tt><tt class="descname">random</tt><big>(</big><big>)</big> &rarr; x in the interval [0, 1).<a class="headerlink" href="#LOTlib.Inference.StochasticOptimization.random" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-LOTlib.Inference.TabooMCMC">
+<span id="lotlib-inference-taboomcmc-module"></span><h2>LOTlib.Inference.TabooMCMC module<a class="headerlink" href="#module-LOTlib.Inference.TabooMCMC" title="Permalink to this headline">¶</a></h2>
+<p>The more times we visit a hypothesis, the more we decrease its prior</p>
+<p>TODO: Try version where penalty decreases with time!
+TODO: This currently only extends LOTHypotheses, since we have to handle casting</p>
+<blockquote>
+<div>inside of h0 to WrapperClass. HOWEVER, we could make WrapperClass just dispatch the right methods
+if they don&#8217;t exist</div></blockquote>
+<dl class="class">
+<dt id="LOTlib.Inference.TabooMCMC.TabooMCMC">
+<em class="property">class </em><tt class="descclassname">LOTlib.Inference.TabooMCMC.</tt><tt class="descname">TabooMCMC</tt><big>(</big><em>h0</em>, <em>data</em>, <em>penalty=1.0</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/TabooMCMC.html#TabooMCMC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.TabooMCMC.TabooMCMC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#LOTlib.Inference.MetropolisHastings.MHSampler" title="LOTlib.Inference.MetropolisHastings.MHSampler"><tt class="xref py py-class docutils literal"><span class="pre">LOTlib.Inference.MetropolisHastings.MHSampler</span></tt></a></p>
+<p>An MCMC sampler that penalizes for visits to a hypothesis
+NOTE: rEquires storing of all hypotheses visited.</p>
+<dl class="method">
+<dt id="LOTlib.Inference.TabooMCMC.TabooMCMC.compute_posterior">
+<tt class="descname">compute_posterior</tt><big>(</big><em>h</em>, <em>data</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/TabooMCMC.html#TabooMCMC.compute_posterior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.TabooMCMC.TabooMCMC.compute_posterior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrap the posterior with a penalty for how often we&#8217;ve seen h. Computes the penalty on the prior</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="LOTlib.Inference.TabooMCMC.TabooMCMC.internal_sample">
+<tt class="descname">internal_sample</tt><big>(</big><em>h</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/TabooMCMC.html#TabooMCMC.internal_sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.TabooMCMC.TabooMCMC.internal_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Keep track of how many samples we&#8217;ve drawn for h</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-LOTlib.Inference.TemperedTransitions">
+<span id="lotlib-inference-temperedtransitions-module"></span><h2>LOTlib.Inference.TemperedTransitions module<a class="headerlink" href="#module-LOTlib.Inference.TemperedTransitions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="LOTlib.Inference.TemperedTransitions.random">
+<tt class="descclassname">LOTlib.Inference.TemperedTransitions.</tt><tt class="descname">random</tt><big>(</big><big>)</big> &rarr; x in the interval [0, 1).<a class="headerlink" href="#LOTlib.Inference.TemperedTransitions.random" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="LOTlib.Inference.TemperedTransitions.tempered_transitions_sample">
+<tt class="descclassname">LOTlib.Inference.TemperedTransitions.</tt><tt class="descname">tempered_transitions_sample</tt><big>(</big><em>inh, data, steps, proposer=None, skip=0, temperatures=[1.0, 1.05, 1.1], stats=None</em><big>)</big><a class="reference internal" href="_modules/LOTlib/Inference/TemperedTransitions.html#tempered_transitions_sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#LOTlib.Inference.TemperedTransitions.tempered_transitions_sample" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-LOTlib.Inference">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-LOTlib.Inference" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">LOTlib.Inference package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-LOTlib.Inference.EnumerationInference">LOTlib.Inference.EnumerationInference module</a></li>
+<li><a class="reference internal" href="#module-LOTlib.Inference.MHShared">LOTlib.Inference.MHShared module</a></li>
+<li><a class="reference internal" href="#module-LOTlib.Inference.MemoizedMHSampler">LOTlib.Inference.MemoizedMHSampler module</a></li>
+<li><a class="reference internal" href="#module-LOTlib.Inference.MetropolisHastings">LOTlib.Inference.MetropolisHastings module</a></li>
+<li><a class="reference internal" href="#module-LOTlib.Inference.MultipleChainMCMC">LOTlib.Inference.MultipleChainMCMC module</a></li>
+<li><a class="reference internal" href="#module-LOTlib.Inference.ParallelTempering">LOTlib.Inference.ParallelTempering module</a></li>
+<li><a class="reference internal" href="#module-LOTlib.Inference.PartitionMCMC">LOTlib.Inference.PartitionMCMC module</a></li>
+<li><a class="reference internal" href="#module-LOTlib.Inference.PriorSample">LOTlib.Inference.PriorSample module</a></li>
+<li><a class="reference internal" href="#module-LOTlib.Inference.StochasticOptimization">LOTlib.Inference.StochasticOptimization module</a></li>
+<li><a class="reference internal" href="#module-LOTlib.Inference.TabooMCMC">LOTlib.Inference.TabooMCMC module</a></li>
+<li><a class="reference internal" href="#module-LOTlib.Inference.TemperedTransitions">LOTlib.Inference.TemperedTransitions module</a></li>
+<li><a class="reference internal" href="#module-LOTlib.Inference">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/LOTlib.Inference.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">LOTlib 0.2.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Steven Piantadosi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

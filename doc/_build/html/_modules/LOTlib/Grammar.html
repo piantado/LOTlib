@@ -1,0 +1,713 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LOTlib.Grammar &mdash; LOTlib 0.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="LOTlib 0.2.0 documentation" href="../../index.html" />
+    <link rel="up" title="LOTlib" href="../LOTlib.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for LOTlib.Grammar</h1><div class="highlight"><pre>
+<span class="c"># *- coding: utf-8 -*-</span>
+<span class="k">try</span><span class="p">:</span>                <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span> <span class="kn">import</span> <span class="nn">numpypy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<span class="kn">from</span> <span class="nn">LOTlib</span> <span class="kn">import</span> <span class="n">lot_iter</span>
+<span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">LOTlib.GrammarRule</span> <span class="kn">import</span> <span class="n">GrammarRule</span><span class="p">,</span> <span class="n">BVAddGrammarRule</span>
+<span class="kn">from</span> <span class="nn">LOTlib.Hypotheses.Hypothesis</span> <span class="kn">import</span> <span class="n">Hypothesis</span>
+<span class="kn">from</span> <span class="nn">LOTlib.BVRuleContextManager</span> <span class="kn">import</span> <span class="n">BVRuleContextManager</span>
+
+
+<div class="viewcode-block" id="Grammar"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar">[docs]</a><span class="k">class</span> <span class="nc">Grammar</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            A PCFG-ish class that can handle special types of rules:</span>
+<span class="sd">                    - Rules that introduce bound variables</span>
+<span class="sd">                    - Rules that sample from a continuous distribution</span>
+<span class="sd">                    - Variable resampling probabilities among the rules</span>
+
+<span class="sd">                    TODO: Implement this:</span>
+<span class="sd">                    - This has a few special values of returntype, which are expected on the rhs of rules, and then generate continuous values</span>
+<span class="sd">                            - \*uniform\* - when the name is this, the value printed and evaled is a uniform random sample of [0,1) (which can be resampled via the PCFG)</span>
+<span class="sd">                            - \*normal\*  - 0 mean, 1 sd</span>
+<span class="sd">                            - \*exponential\* - rate = 1</span>
+
+<span class="sd">            NOTE: Bound variables have a rule id &lt; 0</span>
+
+<span class="sd">            This class fixes a bunch of problems that were in earlier versions, such as</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">BV_P</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">BV_RESAMPLE_P</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="s">&#39;START&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span> <span class="c"># A dict from nonterminals to lists of GrammarRules</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rule_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bv_count</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># How many rules in the grammar introduce bound variables?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bv_rule_id</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># A unique idenifier for each bv rule id (may get quite large)      . The actual stored rule are negative this</span>
+    
+        
+<div class="viewcode-block" id="Grammar.is_nonterminal"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.is_nonterminal">[docs]</a>    <span class="k">def</span> <span class="nf">is_nonterminal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; A nonterminal is just something that is a key for self.rules&quot;&quot;&quot;</span>
+
+    <span class="c">#       if x is a string       if x is a key</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Grammar.display_rules"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.display_rules">[docs]</a>    <span class="k">def</span> <span class="nf">display_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Prints all the rules to the console.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">rule</span>
+</div>
+<div class="viewcode-block" id="Grammar.__iter__"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.__iter__">[docs]</a>    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Define an iterator so we can say &quot;for rule in grammar...&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+                <span class="k">yield</span> <span class="n">r</span>
+</div>
+<div class="viewcode-block" id="Grammar.nonterminals"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.nonterminals">[docs]</a>    <span class="k">def</span> <span class="nf">nonterminals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Returns all non-terminals.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Grammar.add_rule"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.add_rule">[docs]</a>    <span class="k">def</span> <span class="nf">add_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nt</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">to</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">resample_p</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">bv_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bv_args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bv_prefix</span><span class="o">=</span><span class="s">&#39;y&#39;</span><span class="p">,</span> <span class="n">bv_p</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Adds a rule and returns the added rule.</span>
+
+<span class="sd">                *nt* - The Nonterminal. e.g. S in &quot;S -&gt; NP VP&quot;</span>
+
+<span class="sd">                *name* - The name of this function. NOTE: If you are introducing a bound variable, the name of this function must reflect that it is a lambda node! Currently, the only way to do this is to name it &#39;lambda&#39;.</span>
+
+<span class="sd">                *to* - What you expand to (usually a FunctionNode).</span>
+
+<span class="sd">                *p* - Unnormalized probability of expansion</span>
+
+<span class="sd">                *resample_p* - In resampling, what is the probability of choosing this node?</span>
+
+<span class="sd">                *bv_type* - What bound variable was introduced</span>
+
+<span class="sd">                *bv_args* - What are the args when we use a bv (None is terminals, else a type signature)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rule_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">assert</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&quot;To use null names, use an empty string (&#39;&#39;) as the name.&quot;</span>
+        <span class="k">if</span> <span class="n">bv_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;lambda&#39;</span><span class="p">,</span> <span class="s">&quot;When introducing bound variables, the name of the expanded function must be &#39;lambda&#39;.&quot;</span>
+            
+            <span class="n">newrule</span> <span class="o">=</span> <span class="n">BVAddGrammarRule</span><span class="p">(</span><span class="n">nt</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span><span class="n">to</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">resample_p</span><span class="o">=</span><span class="n">resample_p</span><span class="p">,</span> <span class="n">bv_type</span><span class="o">=</span><span class="n">bv_type</span><span class="p">,</span> <span class="n">bv_args</span><span class="o">=</span><span class="n">bv_args</span><span class="p">,</span> <span class="n">bv_prefix</span><span class="o">=</span><span class="n">bv_prefix</span><span class="p">,</span> <span class="n">bv_p</span><span class="o">=</span><span class="n">bv_p</span><span class="p">)</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">newrule</span> <span class="o">=</span> <span class="n">GrammarRule</span><span class="p">(</span><span class="n">nt</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">to</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">resample_p</span><span class="o">=</span><span class="n">resample_p</span><span class="p">)</span>
+            
+        <span class="c"># actually add it</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">[</span><span class="n">nt</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newrule</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">newrule</span>
+    </div>
+<div class="viewcode-block" id="Grammar.is_terminal_rule"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.is_terminal_rule">[docs]</a>    <span class="k">def</span> <span class="nf">is_terminal_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Check if a rule is &quot;terminal&quot; meaning that it doesn&#39;t contain any nonterminals in its expansion</span>
+<span class="sd">        &quot;&quot;&quot;</span> 
+        <span class="k">return</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">is_nonterminal</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">None2Empty</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">to</span><span class="p">)])</span>  
+    
+    
+        
+    <span class="c">############################################################</span>
+    <span class="c">## Generation</span>
+    <span class="c">############################################################</span>
+
+</div>
+<div class="viewcode-block" id="Grammar.generate"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Generate from the PCFG -- default is to start from x - either a nonterminal or a FunctionNode</span>
+<span class="sd">                *x* - what we start from -- can be None and then we use Grammar.start</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#print &quot;# Calling grammar.generate&quot;, d, type(x), x</span>
+
+        <span class="c"># Decide what to start from based on the default if start is not specified</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">,</span> <span class="s">&quot;The default start symbol </span><span class="si">%s</span><span class="s"> is not a defined nonterminal&quot;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span>
+
+        <span class="c"># Dispatch different kinds of generation</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="nb">list</span><span class="p">):</span>            
+            <span class="c"># If we get a list, just map along it to generate. We don&#39;t count lists as depth--only FunctionNodes</span>
+            <span class="k">return</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">xi</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xi</span><span class="p">),</span> <span class="n">x</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_nonterminal</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+
+            <span class="c"># sample a grammar rule</span>
+            <span class="n">r</span><span class="p">,</span> <span class="n">gp</span> <span class="o">=</span> <span class="n">weighted_sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">probs</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="n">return_probability</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+            <span class="c"># Make a stub for this functionNode </span>
+            <span class="n">fn</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">make_FunctionNodeStub</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gp</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> 
+
+            <span class="c"># Define a new context that is the grammar with the rule added. Then, when we exit, it&#39;s still right </span>
+            <span class="k">with</span> <span class="n">BVRuleContextManager</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">recurse_up</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span> <span class="c"># not sure why I can&#39;t use with/as:</span>
+                <span class="k">if</span> <span class="n">fn</span><span class="o">.</span><span class="n">args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>  <span class="c"># Can&#39;t recurse on None or else we genreate from self.start</span>
+                    <span class="n">fn</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>  <span class="c"># and generate below *in* this context (e.g. with the new rules added)</span>
+                
+                <span class="c"># and set the parents</span>
+                <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">fn</span><span class="o">.</span><span class="n">argFunctionNodes</span><span class="p">():</span>
+                    <span class="n">a</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">fn</span>
+
+            <span class="k">return</span> <span class="n">fn</span>
+
+        <span class="k">else</span><span class="p">:</span>  <span class="c"># must be a terminal</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="p">(</span><span class="s">&quot;*** Terminal must be a string! x=&quot;</span><span class="o">+</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">x</span>
+
+</div>
+<div class="viewcode-block" id="Grammar.iterate_subnodes"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.iterate_subnodes">[docs]</a>    <span class="k">def</span> <span class="nf">iterate_subnodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="n">lambdaTrue</span><span class="p">,</span> <span class="n">do_bv</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">yield_depth</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Iterate through all subnodes of node *t*, while updating the added rules (bound variables)</span>
+<span class="sd">                so that at each subnode, the grammar is accurate to what it was.</span>
+
+<span class="sd">                if *do_bv*=False, we don&#39;t do bound variables (useful for things like counting nodes, instead of having to update the grammar)</span>
+
+<span class="sd">                *yield_depth*: if True, we return (node, depth) instead of node</span>
+<span class="sd">                *predicate*: filter only the ones that match this</span>
+
+<span class="sd">                NOTE: if you DON&#39;T iterate all the way through, you end up acculmulating bv rules</span>
+<span class="sd">                so NEVER stop this iteration in the middle!</span>
+<span class="sd">                TODO: Make this more elegant -- use BVCM</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="n">predicate</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">d</span><span class="p">)</span> <span class="k">if</span> <span class="n">yield_depth</span> <span class="k">else</span> <span class="n">t</span>
+            
+        <span class="c">#Define a new context that is the grammar with the rule added. Then, when we exit, it&#39;s still right </span>
+        <span class="k">with</span> <span class="n">BVRuleContextManager</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">recurse_up</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>                    
+            <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">t</span><span class="o">.</span><span class="n">argFunctionNodes</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterate_subnodes</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">do_bv</span><span class="o">=</span><span class="n">do_bv</span><span class="p">,</span> <span class="n">yield_depth</span><span class="o">=</span><span class="n">yield_depth</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="n">predicate</span><span class="p">):</span> <span class="c"># pass up anything from below</span>
+                    <span class="k">yield</span> <span class="n">g</span>
+
+    </div>
+<div class="viewcode-block" id="Grammar.recompute_generation_probabilities"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.recompute_generation_probabilities">[docs]</a>    <span class="k">def</span> <span class="nf">recompute_generation_probabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Re-compute all the generation_probabilities</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">fn</span><span class="o">.</span><span class="n">rule</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> 
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterate_subnodes</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">do_bv</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">generation_probability</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">rule</span><span class="o">.</span><span class="n">p</span><span class="p">)</span> <span class="o">-</span> <span class="n">log</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">p</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">returntype</span><span class="p">]]))</span>
+</div>
+<div class="viewcode-block" id="Grammar.enumerate"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.enumerate">[docs]</a>    <span class="k">def</span> <span class="nf">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="n">Infinity</span><span class="p">,</span> <span class="n">nt</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">leaves</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Enumerate all trees up to depth n</span>
+<span class="sd">        :param d: - how deep to go? (defaults to Infinity)</span>
+<span class="sd">        :param nt: - the nonterminal type</span>
+<span class="sd">        :param leaves: - do we put terminals in the leaves or leave nonterminal types? This is useful in PartitionMCMC</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">infrange</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">enumerate_at_depth</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">nt</span><span class="o">=</span><span class="n">nt</span><span class="p">,</span> <span class="n">leaves</span><span class="o">=</span><span class="n">leaves</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">t</span>
+</div>
+<div class="viewcode-block" id="Grammar.enumerate_at_depth"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.enumerate_at_depth">[docs]</a>    <span class="k">def</span> <span class="nf">enumerate_at_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">nt</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">leaves</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate trees at depth d, no deeper or shallower</span>
+<span class="sd">        :param d: - the depth of trees you want to generate</span>
+<span class="sd">        :param nt: - the type of the nonterminal you want to return (None reverts to self.start)</span>
+<span class="sd">        :param leaves: - do we put terminals in the leaves or leave nonterminal types? This is useful in PartitionMCMC. This returns trees of depth d-1!</span>
+<span class="sd">        :return: -- yields the</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">nt</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">nt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span>
+
+        <span class="c"># handle garbage that may be passed in here</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_nonterminal</span><span class="p">(</span><span class="n">nt</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">nt</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span>
+
+        <span class="c"># TODO: THIS MIGHT HAVE TO GO INSIDE THE LOOP?</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">r</span><span class="o">.</span><span class="n">p</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">[</span><span class="n">nt</span><span class="p">]]))</span>
+
+        <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">leaves</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">[</span><span class="n">nt</span><span class="p">]:</span>  <span class="c"># note: can NOT use filter here, or else it doesn&#39;t include added rules</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_terminal_rule</span><span class="p">(</span><span class="n">r</span><span class="p">):</span>
+                        <span class="k">yield</span> <span class="n">r</span><span class="o">.</span><span class="n">make_FunctionNodeStub</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">(</span><span class="n">log</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">p</span><span class="p">)</span> <span class="o">-</span> <span class="n">Z</span><span class="p">),</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># if not leaves, we just put the nonterminal type in the leaves</span>
+                <span class="k">yield</span> <span class="n">nt</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">[</span><span class="n">nt</span><span class="p">]:</span>  <span class="c"># Note: can NOT use filter here, or else it doesn&#39;t include added rules. No sorting either!</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_terminal_rule</span><span class="p">(</span><span class="n">r</span><span class="p">):</span> <span class="c"># no good since it won&#39;t be deep enough</span>
+                    <span class="k">continue</span>
+
+                <span class="n">fn</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">make_FunctionNodeStub</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">(</span><span class="n">log</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">p</span><span class="p">)</span> <span class="o">-</span> <span class="n">Z</span><span class="p">),</span> <span class="bp">None</span><span class="p">)</span>
+
+                <span class="c"># the possible depths for the i&#39;th child</span>
+                <span class="c"># here we just ensure that nonterminals vary up to d, and otherwise</span>
+                <span class="n">child_i_depths</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_nonterminal</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">else</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="c"># the depths of each kid</span>
+                <span class="k">for</span> <span class="n">cd</span> <span class="ow">in</span>  <span class="n">lazyproduct</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">child_i_depths</span><span class="p">,</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">args</span><span class="p">))),</span> <span class="n">child_i_depths</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">cd</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">d</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>  <span class="c"># one must be equal to d-1; TODO: can be made more efficient via permutations. Also can skip terminals in args</span>
+                        <span class="k">continue</span>
+                    <span class="k">assert</span> <span class="nb">max</span><span class="p">(</span><span class="n">cd</span><span class="p">)</span> <span class="o">==</span> <span class="n">d</span><span class="o">-</span><span class="mi">1</span>
+
+                    <span class="n">myiter</span> <span class="o">=</span> <span class="n">lazyproduct</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">enumerate_at_depth</span><span class="p">(</span><span class="n">di</span><span class="p">,</span> <span class="n">nt</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">leaves</span><span class="o">=</span><span class="n">leaves</span><span class="p">)</span> <span class="k">for</span> <span class="n">di</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">cd</span><span class="p">,</span> <span class="n">fn</span><span class="o">.</span><span class="n">args</span><span class="p">)],</span>\
+                                         <span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">enumerate_at_depth</span><span class="p">(</span><span class="n">cd</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">nt</span><span class="o">=</span><span class="n">fn</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">leaves</span><span class="o">=</span><span class="n">leaves</span><span class="p">))</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+
+                            <span class="n">yieldfn</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span> <span class="c"># make a copy so we don&#39;t modify anything</span>
+
+                            <span class="c"># BVRuleContextManager here makes us remove the rule BEFORE yielding, or else this will be incorrect</span>
+                            <span class="c"># Wasteful but necessary.</span>
+                            <span class="k">with</span> <span class="n">BVRuleContextManager</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">recurse_up</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+                                <span class="n">yieldfn</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">myiter</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+
+                                <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">yieldfn</span><span class="o">.</span><span class="n">argFunctionNodes</span><span class="p">():</span> <span class="c"># update parents</span>
+                                    <span class="n">a</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">yieldfn</span>
+
+                            <span class="k">yield</span> <span class="n">copy</span><span class="p">(</span><span class="n">yieldfn</span><span class="p">)</span>
+
+                    <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>  <span class="c"># catch this here so we continue in this loop over rules</span>
+                        <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="Grammar.depth_to_terminal"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.depth_to_terminal">[docs]</a>    <span class="k">def</span> <span class="nf">depth_to_terminal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">openset</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">current_d</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Return a dictionary that maps both this grammar&#39;s rules and its nonterminals to a number, giving how quickly we</span>
+<span class="sd">            can go from that nonterminal or rule to a terminal.</span>
+
+<span class="sd">            *openset* -- stores the set of things we&#39;re currently trying to compute for. We must skip rules that contain anything in there, since</span>
+<span class="sd">            they have to be defined still, and so we want to avoid a loop.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="n">current_d</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> 
+            <span class="n">current_d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            
+        <span class="k">if</span> <span class="n">openset</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">openset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            
+        <span class="n">openset</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">GrammarRule</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">current_d</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># we are a terminal</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">current_d</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="o">+</span><span class="nb">max</span><span class="p">([</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">depth_to_terminal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">openset</span><span class="o">=</span><span class="n">openset</span><span class="p">,</span> <span class="n">current_d</span><span class="o">=</span><span class="n">current_d</span><span class="p">)</span> <span class="k">if</span> <span class="n">a</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">openset</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">:</span>
+                <span class="n">current_d</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># a terminal</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">current_d</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([(</span><span class="bp">self</span><span class="o">.</span><span class="n">depth_to_terminal</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">openset</span><span class="o">=</span><span class="n">openset</span><span class="p">,</span> <span class="n">current_d</span><span class="o">=</span><span class="n">current_d</span><span class="p">)</span> <span class="k">if</span> <span class="n">r</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">openset</span> <span class="k">else</span> <span class="n">Infinity</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">False</span><span class="p">,</span> <span class="s">&quot;Shouldn&#39;t get here!&quot;</span>
+        
+        <span class="n">openset</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">current_d</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+        
+</div>
+<div class="viewcode-block" id="Grammar.lp_regenerate_propose_to"><a class="viewcode-back" href="../../LOTlib.html#LOTlib.Grammar.Grammar.lp_regenerate_propose_to">[docs]</a>    <span class="k">def</span> <span class="nf">lp_regenerate_propose_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xZ</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">yZ</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Returns a log probability of starting at x and ending up at y from a regeneration move.</span>
+<span class="sd">                Any node is a candidate if the trees are identical except for what&#39;s below those nodes</span>
+<span class="sd">                (although what&#39;s below *can* be identical!)</span>
+
+<span class="sd">                NOTE: This does NOT take into account insert/delete</span>
+<span class="sd">                NOTE: Not so simple because we must count multiple paths</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># TODO: Can we remove yZ?</span>
+        <span class="c"># TODO: TEST THIS:</span>
+
+        <span class="c"># Wrap for hypotheses instead of trees</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Hypothesis</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">Hypothesis</span><span class="p">),</span> <span class="p">(</span><span class="s">&quot;*** If x is a hypothesis, y must be! &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lp_regenerate_propose_to</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="n">y</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="n">xZ</span><span class="o">=</span><span class="n">xZ</span><span class="p">,</span> <span class="n">yZ</span><span class="o">=</span><span class="n">yZ</span><span class="p">)</span>
+
+        <span class="n">RP</span> <span class="o">=</span> <span class="o">-</span><span class="n">Infinity</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">x</span><span class="o">==</span><span class="n">y</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">returntype</span> <span class="o">==</span> <span class="n">y</span><span class="o">.</span><span class="n">returntype</span><span class="p">):</span>
+
+            <span class="c"># compute the normalizer</span>
+            <span class="k">if</span> <span class="n">xZ</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">xZ</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">sample_node_normalizer</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">yZ</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">yZ</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">sample_node_normalizer</span><span class="p">()</span>
+
+            <span class="c"># Well we could select x&#39;s root to go to Y</span>
+            <span class="n">RP</span> <span class="o">=</span> <span class="n">logplusexp</span><span class="p">(</span><span class="n">RP</span><span class="p">,</span> <span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">resample_p</span><span class="p">)</span> <span class="o">-</span> <span class="n">log</span><span class="p">(</span><span class="n">xZ</span><span class="p">)</span> <span class="o">+</span> <span class="n">y</span><span class="o">.</span><span class="n">log_probability</span><span class="p">()</span> <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">y</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+
+                <span class="c"># how many kids are not equal, and where was the last?</span>
+                <span class="n">mismatch_count</span><span class="p">,</span> <span class="n">mismatch_index</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+
+                <span class="c"># print &#39;args are&#39;, x.args</span>
+
+                <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">xa</span><span class="p">,</span> <span class="n">ya</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">args</span><span class="p">)),</span> <span class="n">x</span><span class="o">.</span><span class="n">args</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="p">[],</span>
+                                                              <span class="n">y</span><span class="o">.</span><span class="n">args</span> <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="p">[]):</span>
+                        <span class="k">if</span> <span class="n">xa</span> <span class="o">!=</span> <span class="n">ya</span><span class="p">:</span> <span class="c"># checks whole subtree!</span>
+                            <span class="n">mismatch_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">mismatch_index</span> <span class="o">=</span> <span class="n">i</span>
+
+                <span class="k">if</span> <span class="n">mismatch_count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> <span class="c"># We have to have only selected x,y to regenerate</span>
+                    <span class="k">pass</span>
+                <span class="k">elif</span> <span class="n">mismatch_count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c"># we could propose to x, or x.args[mismatch_index], but nothing else (nothing else will fix the mismatch)</span>
+                    <span class="n">RP</span> <span class="o">=</span> <span class="n">logplusexp</span><span class="p">(</span><span class="n">RP</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lp_regenerate_propose_to</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">mismatch_index</span><span class="p">],</span> <span class="n">y</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">mismatch_index</span><span class="p">],</span> <span class="n">xZ</span><span class="o">=</span><span class="n">xZ</span><span class="p">,</span> <span class="n">yZ</span><span class="o">=</span><span class="n">yZ</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span> <span class="c"># identical trees -- we could propose to any, so that&#39;s just the tree probability below convolved with the resample p</span>
+                    <span class="k">for</span> <span class="n">xi</span> <span class="ow">in</span> <span class="n">dropfirst</span><span class="p">(</span><span class="n">x</span><span class="p">):</span> <span class="c"># we already counted ourself</span>
+                        <span class="n">RP</span> <span class="o">=</span> <span class="n">logplusexp</span><span class="p">(</span><span class="n">RP</span><span class="p">,</span> <span class="n">log</span><span class="p">(</span><span class="n">xi</span><span class="o">.</span><span class="n">resample_p</span><span class="p">)</span> <span class="o">-</span> <span class="n">log</span><span class="p">(</span><span class="n">xZ</span><span class="p">)</span> <span class="o">+</span> <span class="n">xi</span><span class="o">.</span><span class="n">log_probability</span><span class="p">()</span> <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">RP</span>
+
+
+<span class="c"># # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #</span></div></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">pass</span>
+    <span class="c">#from LOTlib.Examples.FOL.FOL import grammar</span>
+    <span class="c">#from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar</span>
+    <span class="c">#from LOTlib.Examples.Number.Shared import grammar</span>
+   <span class="c"># from LOTlib.Examples.RegularExpression.Shared import grammar</span>
+    <span class="kn">from</span> <span class="nn">LOTlib.Examples.Magnetism.Simple.Run</span> <span class="kn">import</span> <span class="n">grammar</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    grammar = Grammar()</span>
+<span class="sd">    grammar.add_rule(&#39;START&#39;, &#39;lambda&#39;, [&#39;A&#39;],  1.0, bv_type=&#39;B&#39;)</span>
+<span class="sd">    grammar.add_rule(&#39;A&#39;, &#39;af&#39;, [&#39;A&#39;, &#39;B&#39;], 1.0)</span>
+<span class="sd">    grammar.add_rule(&#39;A&#39;, &#39;&#39;, [&#39;a&#39;], 1.0)</span>
+<span class="sd">    #grammar.add_rule(&#39;A&#39;, &#39;x&#39;, [&#39;B&#39;], 1.0)</span>
+<span class="sd">    grammar.add_rule(&#39;B&#39;, &#39;&#39;, [&#39;b&#39;], 1.0)</span>
+<span class="sd">    grammar.add_rule(&#39;B&#39;, &#39;bf&#39;, [&#39;A&#39;, &#39;B&#39;], 1.0)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c">#for t in lot_iter(grammar.enumerate_at_depth(6, leaves=</span>
+    <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">lot_iter</span><span class="p">(</span><span class="n">grammar</span><span class="o">.</span><span class="n">enumerate</span><span class="p">()):</span>
+        <span class="k">print</span> <span class="n">t</span><span class="o">.</span><span class="n">depth</span><span class="p">(),</span> <span class="n">t</span>
+        <span class="k">assert</span> <span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span>
+        <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+    <span class="c">#for t in lot_iter(grammar.enumerate(leaves=False)):</span>
+    <span class="c">#    print t.depth(), t</span>
+    <span class="c">#    #assert t not in seen</span>
+
+
+    <span class="c">#for r in grammar.rules.keys():</span>
+    <span class="c">#    print &quot;&gt;&gt;&quot;, grammar.depth_to_terminal(r), r</span>
+    <span class="c">#for _ in xrange(1000):</span>
+    <span class="c">#    print grammar.generate()</span>
+        
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    for _ in xrange(1000):</span>
+<span class="sd">        t = grammar.generate()</span>
+<span class="sd">        print type(t), t</span>
+<span class="sd">        </span>
+<span class="sd">        from LOTlib.Proposals.RegenerationProposal import RegenerationProposal</span>
+<span class="sd">        rp = RegenerationProposal(grammar)</span>
+<span class="sd">        x = rp.propose_tree(t)[0]</span>
+<span class="sd">        print type(x), x</span>
+<span class="sd">        </span>
+<span class="sd">        print &quot;\n\n&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+     
+    <span class="c">#    print t.depth(), t</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    #from LOTlib.Examples.RationalRules.Shared import grammar</span>
+<span class="sd">    #from LOTlib.Examples.Number.Shared import grammar</span>
+<span class="sd">    #from LOTlib.DefaultGrammars import SimpleBoolean as grammar</span>
+<span class="sd">    SimpleBoolean= Grammar()</span>
+<span class="sd">    SimpleBoolean.add_rule(&#39;START&#39;, &#39;False&#39;, None, 1)</span>
+<span class="sd">    SimpleBoolean.add_rule(&#39;START&#39;, &#39;True&#39;, None, 1)</span>
+<span class="sd">    SimpleBoolean.add_rule(&#39;START&#39;, &#39;&#39;, [&#39;BOOL&#39;], 1.0)</span>
+<span class="sd">    </span>
+<span class="sd">    SimpleBoolean.add_rule(&#39;BOOL&#39;, &#39;and_&#39;, [&#39;BOOL&#39;, &#39;BOOL&#39;], 1.0)</span>
+<span class="sd">    SimpleBoolean.add_rule(&#39;BOOL&#39;, &#39;not_&#39;, [&#39;BOOL&#39;], 1.0)</span>
+<span class="sd">    </span>
+<span class="sd">    SimpleBoolean.add_rule(&#39;BOOL&#39;, &#39;&#39;, [&#39;PREDICATE&#39;], 5)</span>
+<span class="sd">     </span>
+<span class="sd">    for t in SimpleBoolean.increment_tree(x=&#39;BOOL&#39;, depth=6):</span>
+<span class="sd">        print t</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        #AB_GRAMMAR = PCFG()</span>
+<span class="sd">        #AB_GRAMMAR.add_rule(&#39;START&#39;, &#39;&#39;, [&#39;EXPR&#39;], 1.0)</span>
+<span class="sd">        #AB_GRAMMAR.add_rule(&#39;EXPR&#39;, &#39;&#39;, [&#39;A&#39;, &#39;EXPR&#39;], 1.0)</span>
+<span class="sd">        #AB_GRAMMAR.add_rule(&#39;EXPR&#39;, &#39;&#39;, [&#39;B&#39;, &#39;EXPR&#39;], 1.0)</span>
+
+<span class="sd">        #AB_GRAMMAR.add_rule(&#39;EXPR&#39;, &#39;&#39;, [&#39;A&#39;], 1.0)</span>
+<span class="sd">        #AB_GRAMMAR.add_rule(&#39;EXPR&#39;, &#39;&#39;, [&#39;B&#39;], 1.0)</span>
+
+<span class="sd">        #for i in xrange(1000):</span>
+<span class="sd">                #x = AB_GRAMMAR.generate(&#39;START&#39;)</span>
+<span class="sd">                #print x.log_probability(), x</span>
+
+
+<span class="sd">        grammar = Grammar()</span>
+<span class="sd">        grammar.add_rule(&#39;START&#39;, &#39;&#39;, [&#39;EXPR&#39;], 1.0)</span>
+<span class="sd">        #grammar.add_rule(&#39;EXPR&#39;, &#39;somefunc_&#39;, [&#39;EXPR&#39;, &#39;EXPR&#39;, &#39;EXPR&#39;], 1.0, resample_p=5.0)</span>
+<span class="sd">        grammar.add_rule(&#39;EXPR&#39;, &#39;plus_&#39;, [&#39;EXPR&#39;, &#39;EXPR&#39;], 4.0, resample_p=10.0)</span>
+<span class="sd">        grammar.add_rule(&#39;EXPR&#39;, &#39;times_&#39;, [&#39;EXPR&#39;, &#39;EXPR&#39;], 3.0, resample_p=5.0)</span>
+<span class="sd">        grammar.add_rule(&#39;EXPR&#39;, &#39;divide_&#39;, [&#39;EXPR&#39;, &#39;EXPR&#39;], 2.0)</span>
+<span class="sd">        grammar.add_rule(&#39;EXPR&#39;, &#39;subtract_&#39;, [&#39;EXPR&#39;, &#39;EXPR&#39;], 1.0)</span>
+<span class="sd">        grammar.add_rule(&#39;EXPR&#39;, &#39;x&#39;, [], 15.0) # these terminals should have None for their function type; the literals</span>
+<span class="sd">        grammar.add_rule(&#39;EXPR&#39;, &#39;1.0&#39;, [], 3.0)</span>
+<span class="sd">        grammar.add_rule(&#39;EXPR&#39;, &#39;13.0&#39;, [], 2.0)</span>
+
+<span class="sd">        ## We generate a few ways, mapping strings to the actual things</span>
+<span class="sd">        #print &quot;Testing increment (no lambda)&quot;</span>
+<span class="sd">        #TEST_INC = dict()</span>
+
+<span class="sd">        #for t in grammar.increment_tree(&#39;START&#39;,3):</span>
+<span class="sd">                #TEST_INC[str(t)] = t</span>
+
+<span class="sd">        #print &quot;Testing generate (no lambda)&quot;</span>
+<span class="sd">        TEST_GEN = dict()</span>
+<span class="sd">        TARGET = dict()</span>
+<span class="sd">        from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis</span>
+<span class="sd">        for i in xrange(10000):</span>
+<span class="sd">                t = grammar.generate(&#39;START&#39;)</span>
+<span class="sd">                # print &quot;&gt;&gt;&quot;, t, &#39; &#39;, dir(t)</span>
+<span class="sd">                TEST_GEN[str(t)] = t</span>
+
+<span class="sd">                if t.count_nodes() &lt; 10:</span>
+<span class="sd">                        TARGET[LOTHypothesis(grammar, value=copy(t) )] = t.log_probability()</span>
+<span class="sd">                        # print out log probability and tree</span>
+<span class="sd">                        print t, &#39; &#39;, t.log_probability()</span>
+
+
+
+
+<span class="sd">        #print &quot;Testing MCMC (no counts) (no lambda)&quot;</span>
+<span class="sd">        #TEST_MCMC = dict()</span>
+<span class="sd">        #MCMC_STEPS = 10000</span>
+<span class="sd">        #import LOTlib.MetropolisHastings</span>
+<span class="sd">        #from LOTlib.Hypothesis import LOTHypothesis</span>
+<span class="sd">        #hyp = LOTHypothesis(grammar)</span>
+<span class="sd">        #for x in LOTlib.MetropolisHastings.mh_sample(hyp, [], MCMC_STEPS):</span>
+<span class="sd">                ##print &quot;&gt;&gt;&quot;, x</span>
+<span class="sd">                #TEST_MCMC[str(x.value)] = copy(x.value)</span>
+
+<span class="sd">        ### Now print out the results and see what&#39;s up</span>
+<span class="sd">        #for x in TEST_GEN.values():</span>
+
+<span class="sd">                ## We&#39;ll only check values that appear in all</span>
+<span class="sd">                #if str(x) not in TEST_MCMC or str(x) not in TEST_INC: continue</span>
+
+<span class="sd">                ## If we print</span>
+<span class="sd">                #print TEST_INC[str(x)].log_probability(),  TEST_GEN[str(x)].log_probability(),  TEST_MCMC[str(x)].log_probability(), x</span>
+
+<span class="sd">                #assert abs( TEST_INC[str(x)].log_probability() - TEST_GEN[str(x)].log_probability()) &lt; 1e-9</span>
+<span class="sd">                #assert abs( TEST_INC[str(x)].log_probability() -  TEST_MCMC[str(x)].log_probability()) &lt; 1e-9</span>
+
+
+<span class="sd">        ## # # # # # # # # # # # # # # #</span>
+<span class="sd">        ### And now do a version with bound variables</span>
+<span class="sd">        ## # # # # # # # # # # # # # # #</span>
+
+<span class="sd">        grammar.add_rule(&#39;EXPR&#39;, &#39;apply&#39;, [&#39;FUNCTION&#39;, &#39;EXPR&#39;], 5.0)</span>
+<span class="sd">        grammar.add_rule(&#39;FUNCTION&#39;, &#39;lambda&#39;, [&#39;EXPR&#39;], 1.0, bv_type=&#39;EXPR&#39;, bv_args=None) # bvtype means we introduce a bound variable below</span>
+
+<span class="sd">        print &quot;Testing generate (lambda)&quot;</span>
+<span class="sd">        TEST_GEN = dict()</span>
+<span class="sd">        for i in xrange(10000):</span>
+<span class="sd">                x = grammar.generate(&#39;START&#39;)</span>
+<span class="sd">                TEST_GEN[str(x)] = x</span>
+<span class="sd">                #print x</span>
+<span class="sd">                #x.fullprint()</span>
+
+<span class="sd">        print &quot;Testing MCMC (lambda)&quot;</span>
+<span class="sd">        TEST_MCMC = dict()</span>
+<span class="sd">        TEST_MCMC_COUNT = defaultdict(int)</span>
+<span class="sd">        MCMC_STEPS = 50000</span>
+<span class="sd">        import LOTlib.MetropolisHastings</span>
+<span class="sd">        from LOTlib.Hypothesis import LOTHypothesis</span>
+<span class="sd">        hyp = LOTHypothesis(grammar)</span>
+<span class="sd">        for x in LOTlib.MetropolisHastings.mh_sample(hyp, [], MCMC_STEPS):</span>
+<span class="sd">                TEST_MCMC[str(x.value)] = copy(x.value)</span>
+<span class="sd">                TEST_MCMC_COUNT[str(x.value)] += 1 # keep track of these</span>
+<span class="sd">                #print x</span>
+<span class="sd">                #for kk in grammar.iterate_subnodes(x.value, do_bv=True, yield_depth=True):</span>
+<span class="sd">                        #print &quot;&gt;&gt;\t&quot;, kk</span>
+<span class="sd">                #print &quot;\n&quot;</span>
+<span class="sd">                #x.value.fullprint()</span>
+
+<span class="sd">        # Now print out the results and see what&#39;s up</span>
+<span class="sd">        for x in TEST_GEN.values():</span>
+
+<span class="sd">                # We&#39;ll only check values that appear in all</span>
+<span class="sd">                if str(x) not in TEST_MCMC: continue</span>
+
+<span class="sd">                #print TEST_GEN[str(x)].log_probability(),  TEST_MCMC[str(x)].log_probability(), x</span>
+
+<span class="sd">                if abs( TEST_GEN[str(x)].log_probability() - TEST_MCMC[str(x)].log_probability()) &gt; 1e-9:</span>
+<span class="sd">                        print &quot;----------------------------------------------------------------&quot;</span>
+<span class="sd">                        print &quot;--- Mismatch in tree probabilities:                          ---&quot;</span>
+<span class="sd">                        print &quot;----------------------------------------------------------------&quot;</span>
+<span class="sd">                        TEST_GEN[str(x)].fullprint()</span>
+<span class="sd">                        print &quot;----------------------------------------------------------------&quot;</span>
+<span class="sd">                        TEST_MCMC[str(x)].fullprint()</span>
+<span class="sd">                        print &quot;----------------------------------------------------------------&quot;</span>
+
+<span class="sd">                assert abs( TEST_GEN[str(x)].log_probability() - TEST_MCMC[str(x)].log_probability()) &lt; 1e-9</span>
+
+<span class="sd">        # Now check that the MCMC actually visits the nodes the right number of time</span>
+<span class="sd">        keys = [x for x in TEST_MCMC.keys() if TEST_MCMC[x].count_nodes() &lt;= 8 ] # get a set of common trees</span>
+<span class="sd">        cntZ = log(sum([ TEST_MCMC_COUNT[x] for x in keys]))</span>
+<span class="sd">        lpZ  = logsumexp([ TEST_MCMC[x].log_probability() for x in keys])</span>
+<span class="sd">        for x in sorted(keys, key=lambda x: TEST_MCMC[x].log_probability()):</span>
+<span class="sd">                #x.fullprint()</span>
+<span class="sd">                #print &quot;))&quot;, x</span>
+<span class="sd">                print TEST_MCMC_COUNT[x], log(TEST_MCMC_COUNT[x])-cntZ, TEST_MCMC[x].log_probability() - lpZ,  TEST_MCMC[x].log_probability(), q(TEST_MCMC[x]), hasattr(x, &#39;my_log_probability&#39;)</span>
+
+
+<span class="sd">                ## TODO: ADD ASSERTIONS ETC</span>
+
+
+<span class="sd">        # To check the computation of lp_regenerate_propose_to, which should return how likely we are to propose</span>
+<span class="sd">        # from one tree to another</span>
+<span class="sd">        #from LOTlib.Examples.Number.Shared import *</span>
+<span class="sd">        #x = NumberExpression(grammar).value</span>
+<span class="sd">        #NN = 100000</span>
+<span class="sd">        #d = defaultdict(int)</span>
+<span class="sd">        #for i in xrange(NN):</span>
+<span class="sd">                #y,_ = grammar.propose(x, insert_delete_probability=0.0)</span>
+<span class="sd">                #d[y] += 1</span>
+<span class="sd">        ## Show counts and expected counts</span>
+<span class="sd">        #for y in sorted( d.keys(), key=lambda z: d[z]):</span>
+<span class="sd">                #EC = round(exp(grammar.lp_regenerate_propose_to(x,y))*NN)</span>
+<span class="sd">                #if d[y] &gt; 10 or EC &gt; 10: # print only highish prob things</span>
+<span class="sd">                        #print d[y], EC, y</span>
+<span class="sd">        #print &quot;&gt;&gt;&quot;, x</span>
+
+
+
+
+
+
+
+
+<span class="sd">        # If success....</span>
+<span class="sd">        print &quot;---------------------------&quot;</span>
+<span class="sd">        print &quot;:-) No complaints here!&quot;</span>
+<span class="sd">        print &quot;---------------------------&quot;</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="sd">        ## We will use three four methods to generate a set of trees. Each of these should give the same probabilities:</span>
+<span class="sd">        # - increment_tree(&#39;START&#39;)</span>
+<span class="sd">        # - generate(&#39;START&#39;)</span>
+<span class="sd">        # - MCMC with proposals (via counts)</span>
+<span class="sd">        # - MCMC with proposals (via probabilities of found trees)</span>
+
+
+
+<span class="sd">        #for i in xrange(1000):</span>
+<span class="sd">                #x = ARITHMETIC_GRAMMAR.generate(&#39;START&#39;)</span>
+
+<span class="sd">                #print x.log_probability(), ARITHMETIC_GRAMMAR.RR_prior(x), x</span>
+<span class="sd">                #for xi in ARITHMETIC_GRAMMAR.iterate_subnodes(x):</span>
+<span class="sd">                        #print &quot;\t&quot;, xi</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../LOTlib.html" >LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Steven Piantadosi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

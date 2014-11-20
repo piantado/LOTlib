@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LOTlib.Examples.CCG.CCGLexicon &mdash; LOTlib 0.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="LOTlib 0.2.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="LOTlib" href="../../../LOTlib.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for LOTlib.Examples.CCG.CCGLexicon</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">LOTlib.Hypotheses.WeightedLexicon</span> <span class="kn">import</span> <span class="n">WeightedLexicon</span>
+<span class="kn">from</span> <span class="nn">LOTlib.DataAndObjects</span> <span class="kn">import</span> <span class="n">UtteranceData</span>
+<span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="n">flip</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
+
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log</span>
+
+<span class="kn">from</span> <span class="nn">Shared</span> <span class="kn">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="CCGLexicon"><a class="viewcode-back" href="../../../../LOTlib.Examples.CCG.html#LOTlib.Examples.CCG.CCGLexicon.CCGLexicon">[docs]</a><span class="k">class</span> <span class="nc">CCGLexicon</span><span class="p">(</span><span class="n">WeightedLexicon</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            A version for doing CCG, which parses in the likelihood</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="CCGLexicon.can_parse"><a class="viewcode-back" href="../../../../LOTlib.Examples.CCG.html#LOTlib.Examples.CCG.CCGLexicon.CCGLexicon.can_parse">[docs]</a>    <span class="k">def</span> <span class="nf">can_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sentence</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                A very quick and dirty backtracking parsing algorithm that uses the types</span>
+<span class="sd">                to see if we can parse, returning a sentence string, a type, and a function computing the truth value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sentence</span><span class="p">,</span> <span class="n">UtteranceData</span><span class="p">),</span> <span class="s">&quot;can_parse takes a sentence, not utterance data. Maybe you forgot .utterance?&quot;</span>
+
+        <span class="k">def</span> <span class="nf">inner_parse</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">==</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">==</span><span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c"># Only return if we are now a primitive type, BOOL</span>
+                <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;BOOL&#39;</span><span class="p">:</span> <span class="k">return</span> <span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c"># unlist these</span>
+                <span class="k">else</span><span class="p">:</span>              <span class="k">return</span> <span class="bp">False</span>
+
+            <span class="c"># Else we try to collapse each adjacent pair of words, compositionally</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="p">(</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">)</span> <span class="p">):</span> <span class="c"># the possible orders -- this ordering sets the priority of the parsing</span>
+                    <span class="n">c</span> <span class="o">=</span> <span class="n">can_compose</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">t</span><span class="p">[</span><span class="n">y</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">c</span><span class="p">:</span>
+                        <span class="n">sprime</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+                        <span class="n">tprime</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+                        <span class="n">mprime</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+                        <span class="k">assert</span> <span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="n">i</span> <span class="ow">and</span> <span class="nb">max</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span> <span class="c"># no monkey business</span>
+
+                        <span class="n">sprime</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;(</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="n">y</span><span class="p">]),]</span> <span class="c"># keep track of the parse</span>
+                        <span class="n">tprime</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">,]</span> <span class="c"># keep track of the resulting type</span>
+                        <span class="n">mprime</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span> <span class="k">lambda</span> <span class="n">C</span><span class="p">:</span> <span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">x</span><span class="p">](</span><span class="n">C</span><span class="p">))(</span><span class="n">m</span><span class="p">[</span><span class="n">y</span><span class="p">](</span><span class="n">C</span><span class="p">)),</span> <span class="p">]</span> <span class="c"># keep the wrapping for C</span>
+
+                        <span class="k">return</span> <span class="n">inner_parse</span><span class="p">(</span><span class="n">sprime</span><span class="p">,</span> <span class="n">tprime</span><span class="p">,</span> <span class="n">mprime</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">return</span> <span class="n">inner_parse</span><span class="p">(</span><span class="n">sentence</span><span class="p">,</span> \
+                           <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="p">(),</span> <span class="n">sentence</span><span class="p">),</span>\
+                           <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">sentence</span><span class="p">))</span>
+    <span class="c">#def propose(self):</span>
+        <span class="c">#&quot;&quot;&quot;</span>
+            <span class="c">#A proposal function that proposes to many things simultaneously, flipping a coin.</span>
+            <span class="c">#This is used because single proposals go very slowly!</span>
+        <span class="c">#&quot;&quot;&quot;</span>
+
+        <span class="c">#new = copy(self)</span>
+
+        <span class="c">#fb = 0.0</span>
+        <span class="c">#for w in self.value:</span>
+            <span class="c">#p,fb_ = self.value[w].propose()</span>
+            <span class="c">#fb += fb_</span>
+
+            <span class="c">#new.set_word(w, p)</span>
+
+        <span class="c">#return new, fb</span>
+</div>
+<div class="viewcode-block" id="CCGLexicon.compute_single_likelihood"><a class="viewcode-back" href="../../../../LOTlib.Examples.CCG.html#LOTlib.Examples.CCG.CCGLexicon.CCGLexicon.compute_single_likelihood">[docs]</a>    <span class="k">def</span> <span class="nf">compute_single_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">udi</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                TODO: WE CAN USE LIKELIHOOD FROM WEIGHTEDLEXICON, BUT THAT BEHAVES WEIRDLY WHEN THE</span>
+<span class="sd">                POSSIBLE UTTERANCES ARE SMALL</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">udi</span><span class="p">,</span> <span class="n">UtteranceData</span><span class="p">)</span>
+
+        <span class="c"># Types of utterances</span>
+        <span class="n">trues</span><span class="p">,</span> <span class="n">falses</span><span class="p">,</span> <span class="n">others</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partition_utterances</span><span class="p">(</span> <span class="n">udi</span><span class="o">.</span><span class="n">possible_utterances</span><span class="p">,</span> <span class="n">udi</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">udi</span><span class="o">.</span><span class="n">utterance</span>
+
+        <span class="c"># compute the weights</span>
+        <span class="n">all_weights</span>  <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">weightfunction</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">udi</span><span class="o">.</span><span class="n">context</span><span class="p">),</span> <span class="n">udi</span><span class="o">.</span><span class="n">possible_utterances</span> <span class="p">))</span>
+        <span class="n">true_weights</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">weightfunction</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">udi</span><span class="o">.</span><span class="n">context</span><span class="p">),</span> <span class="n">trues</span><span class="p">))</span>
+        <span class="n">met_weights</span>  <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span> <span class="k">lambda</span> <span class="n">u</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">weightfunction</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">udi</span><span class="o">.</span><span class="n">context</span><span class="p">),</span> <span class="n">falses</span><span class="p">))</span> <span class="o">+</span> <span class="n">true_weights</span>
+
+        <span class="c"># Unliked WeightedLexicon, this doesn&#39;t play nicely with the case where we are generating and</span>
+        <span class="c"># sometimes trues or mets are empty</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weightfunction</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">udi</span><span class="o">.</span><span class="n">context</span><span class="p">)</span> <span class="c"># the current word weight</span>
+        <span class="k">if</span>   <span class="p">(</span><span class="n">u</span> <span class="ow">in</span> <span class="n">trues</span><span class="p">):</span>  <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">palpha</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">w</span> <span class="o">/</span> <span class="n">true_weights</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">w</span> <span class="o">/</span> <span class="n">met_weights</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">palpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">w</span> <span class="o">/</span> <span class="n">all_weights</span> <span class="c"># choose from the trues</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">u</span> <span class="ow">in</span> <span class="n">falses</span><span class="p">):</span> <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">palpha</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">w</span> <span class="o">/</span> <span class="n">met_weights</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">palpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">w</span> <span class="o">/</span> <span class="n">all_weights</span> <span class="c"># choose from the trues</span>
+        <span class="k">else</span><span class="p">:</span>               <span class="n">p</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">palpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">w</span> <span class="o">/</span> <span class="n">all_weights</span>
+
+        <span class="k">return</span> <span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">utterance</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Evaluate this lexicon on a possible utterance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_parse</span><span class="p">(</span><span class="n">utterance</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ret</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
+            <span class="n">s</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="n">f</span> <span class="o">=</span> <span class="n">ret</span>
+            <span class="k">assert</span> <span class="n">t</span> <span class="o">==</span> <span class="s">&#39;BOOL&#39;</span> <span class="c"># we must eval to this type</span>
+
+            <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../../LOTlib.html" >LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Steve Piantadosi.
+      Last updated on Aug 27, 2014.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

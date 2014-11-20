@@ -1,0 +1,231 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LOTlib.Primitives.SetTheory &mdash; LOTlib 0.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="LOTlib 0.2.0 documentation" href="../../../index.html" />
+    <link rel="up" title="LOTlib" href="../../LOTlib.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../LOTlib.html" accesskey="U">LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for LOTlib.Primitives.SetTheory</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">Primitives</span> <span class="kn">import</span> <span class="n">LOTlib_primitive</span>
+
+<span class="c"># ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="c"># Set-theoretic primitives</span>
+<span class="c"># ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">set_</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span> <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">set_add_</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">s</span><span class="p">):</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">s</span>
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">union_</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">):</span> <span class="k">return</span> <span class="n">A</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">intersection_</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">):</span> <span class="k">return</span> <span class="n">A</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">setdifference_</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">):</span> <span class="k">return</span> <span class="n">A</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">select_</span><span class="p">(</span><span class="n">A</span><span class="p">):</span> <span class="c"># choose an element, but don&#39;t remove it</span>
+
+    <span class="k">try</span><span class="p">:</span> <span class="c"># quick selecting without copying</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">([</span><span class="nb">iter</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">()])</span>
+    <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="c">#if len(A) &gt; 0:</span>
+        <span class="c">#x = A.pop()</span>
+        <span class="c">#A.add(x)</span>
+        <span class="c">#return set([x]) # but return a set</span>
+    <span class="c">#else: return set() # empty set</span>
+
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">sample</span> <span class="k">as</span> <span class="n">random_sample</span>
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">sample_unique_</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">random_sample</span><span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">choice</span> <span class="k">as</span> <span class="n">random_choice</span>
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">sample_</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>           <span class="k">return</span> <span class="n">random_choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">S</span><span class="p">))</span>
+
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">exhaustive_</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">):</span> <span class="k">return</span> <span class="n">coextensive</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">)</span>
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">coextensive_</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">):</span> <span class="k">return</span> <span class="n">coextensive</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">)</span>
+<div class="viewcode-block" id="coextensive"><a class="viewcode-back" href="../../../LOTlib.Primitives.html#LOTlib.Primitives.SetTheory.coextensive">[docs]</a><span class="k">def</span> <span class="nf">coextensive</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">):</span> <span class="c"># are the two sets coextensive?</span>
+    <span class="c">#print A,B</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">B</span><span class="p">)</span> <span class="ow">and</span> <span class="n">B</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">A</span><span class="p">))</span>
+</div>
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">equal_</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">):</span> <span class="k">return</span> <span class="p">(</span><span class="n">A</span> <span class="o">==</span> <span class="n">B</span><span class="p">)</span>
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">equal_word_</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">):</span> <span class="k">return</span> <span class="p">(</span><span class="n">A</span> <span class="o">==</span> <span class="n">B</span><span class="p">)</span>
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">empty_</span><span class="p">(</span><span class="n">A</span><span class="p">):</span> <span class="k">return</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">nonempty_</span><span class="p">(</span><span class="n">A</span><span class="p">):</span> <span class="k">return</span> <span class="ow">not</span> <span class="n">empty_</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">cardinality1_</span><span class="p">(</span><span class="n">A</span><span class="p">):</span> <span class="k">return</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">cardinality2_</span><span class="p">(</span><span class="n">A</span><span class="p">):</span> <span class="k">return</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">cardinality3_</span><span class="p">(</span><span class="n">A</span><span class="p">):</span> <span class="k">return</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="o">==</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">cardinality4_</span><span class="p">(</span><span class="n">A</span><span class="p">):</span> <span class="k">return</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="o">==</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">cardinality5_</span><span class="p">(</span><span class="n">A</span><span class="p">):</span> <span class="k">return</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="o">==</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">cardinality_</span><span class="p">(</span><span class="n">A</span><span class="p">):</span> <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+
+<span class="c"># returns cardinalities of sets and otherwise numbers -- for duck typing sets/ints</span>
+<div class="viewcode-block" id="cardify"><a class="viewcode-back" href="../../../LOTlib.Primitives.html#LOTlib.Primitives.SetTheory.cardify">[docs]</a><span class="k">def</span> <span class="nf">cardify</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span> <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="k">return</span> <span class="n">x</span>
+</div>
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">cardinalityeq_</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">):</span> <span class="k">return</span> <span class="n">cardify</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">==</span> <span class="n">cardify</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">cardinalitygt_</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">):</span> <span class="k">return</span> <span class="n">cardify</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">cardify</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">cardinalitylt_</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">):</span> <span class="k">return</span> <span class="n">cardify</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">cardify</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">subset_</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">A</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">is_in_</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">S</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="ow">in</span> <span class="n">S</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">sample</span> <span class="k">as</span> <span class="n">random_sample</span>
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">pick_</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    sample from a set without replacement</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">S</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">elem</span>
+ 
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">choice</span> <span class="k">as</span> <span class="n">random_choice</span>
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">sample_</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    # sample from a set with replacement</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s">&#39;&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">random_choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">S</span><span class="p">))</span>
+ 
+<span class="nd">@LOTlib_primitive</span>
+<span class="k">def</span> <span class="nf">diff_</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    takes a set and an element of that set and</span>
+<span class="sd">    returns the set minus that element</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">S</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">LOTlib 0.2.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../LOTlib.html" >LOTlib</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Steve Piantadosi.
+      Last updated on Aug 27, 2014.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
