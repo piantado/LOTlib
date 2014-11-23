@@ -18,5 +18,4 @@ data = [
     )
 ]
 
-# Note: this data is in probabilities, not #yes / #no !
 mat_data = import_data_from_mat()
