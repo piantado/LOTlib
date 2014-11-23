@@ -6,13 +6,13 @@ import numpy as np
 from LOTlib.Hypotheses.GrammarHypothesis import GrammarHypothesis
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Inference.PriorSample import prior_sample
-from Model import *
+from LOTlib.Examples.NumberGame.Model import *
 
 # Global parameters for inference
 domain = 100
 alpha = 0.9
 num_iters = 10000
-h0 = make_h0(grammar=grammar, alpha=alpha)
+h0 = make_h0(grammar=grammar, domain=domain, alpha=alpha)
 
 
 #=============================================================================================================

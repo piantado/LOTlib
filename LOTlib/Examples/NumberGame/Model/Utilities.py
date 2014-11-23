@@ -1,14 +1,16 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.io import loadmat
 from LOTlib import MHSampler
+from LOTlib.DataAndObjects import FunctionData
 from LOTlib.Miscellaneous import logsumexp, logplusexp
 import Grammar as G, Hypothesis
 
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#~~~ Generate number set hypotheses
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#=============================================================================================================
+# Generate number set hypotheses
+#=============================================================================================================
 
 def normalizing_constant(hypotheses):
     """Estimate normalizing constant Z by logsumexp(posterior scores for all hypotheses)."""
@@ -20,14 +22,28 @@ def make_h0(grammar=G.grammar, **kwargs):
     return Hypothesis.NumberGameHypothesis(grammar, **kwargs)
 
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#~~~ Infer grammar rule probabilities with human data
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#=============================================================================================================
+# Infer grammar rule probabilities with human data
+#=============================================================================================================
 
-# h0 = make_h0(grammar, alpha=alpha)
-# trees = set(MHSampler(h0, data, steps=num_iters))
-# h = Hypothesis.GrammarProbHypothesis(grammar, trees)
+def import_data_from_mat():
+    mat = loadmat('number_game_data.mat')
+    number_game_data = []
 
+    for d in mat['data']:
+
+        input_data = d[0][0]
+        output_data = {}
+
+        for i in range(len(d[1][0])):
+            key = d[1][0]
+            associated_prob = d[2][0]
+            output_data[key] = associated_prob
+
+        function_datum = FunctionData(input=input_data, output=output_data)
+        number_game_data.append(function_datum)
+
+    return number_game_data
 
 
 def visualize_probs(probs, dist, rule_name='RULE_'):
@@ -41,37 +57,3 @@ def visualize_probs(probs, dist, rule_name='RULE_'):
     plt.show()
 
 
-
-
-
-
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#~~~ scrap
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
-# # Print top 10 hypotheses
-# def printBestHypotheses(hypotheses, n=10):
-#     best_hypotheses = sorted(hypotheses, key=lambda x: x.posterior_score)
-#     best_hypotheses.reverse()
-#     Z = normalizingConstant(hypotheses)
-#
-#     print 'printing top '+str(n)+' hypotheses\n'
-#     print '================================================================'
-#     for i in range(n):
-#         h = best_hypotheses[i].__call__()
-#         print (i+1), ' ~\t', 'Hypothesis:\t', str(h)
-#         print '\tPosterior:\t%.5f' % exp(h.posterior_score - Z)
-#         print '\t\tPrior:\t\t%.3f' % h.prior
-#         print '\t\tLikehd:\t\t%.3f' % h.likelihood
-#         print '================================================================\n'
-
-def get_rule(grammar, rule_name, rule_nt=None):
-        """Get the GrammarRule associated with this rule name."""
-        if rule_nt is None:
-            rules = [rule for sublist in grammar.rules.values() for rule in sublist]
-        else:
-            rules = grammar.rules[rule_nt]
-        rules = filter(lambda r: (r.name == rule_name), rules)   # there should only be 1 item in this list
-        return rules[0]

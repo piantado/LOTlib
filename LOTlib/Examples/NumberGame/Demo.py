@@ -12,7 +12,7 @@ domain = 100
 alpha = 0.9
 num_iters = 10000
 N = 10
-h0 = make_h0(grammar=grammar, alpha=alpha)
+h0 = make_h0(grammar=grammar, domain=domain, alpha=alpha)
 demo_data = [2, 4, 8, 16, 32, 64]
 
 
