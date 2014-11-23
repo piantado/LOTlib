@@ -44,7 +44,22 @@ class SimpleLexicon(Hypothesis):
 
         # And copy everything else
         for k in self.__dict__.keys():
-            if k not in ['self', 'value']:
+            if k not in ['self', 'value', 'make_hypothesis']:
+                new.__dict__[k] = copy(self.__dict__[k])
+
+        return new
+
+    def shallowcopy(self):
+        """
+        Copy but leave values pointing to old values
+        """
+        new = type(self)(self.make_hypothesis) # create the right class, but don't give words or else it tries to initialize them
+        for w in self.value.keys():
+            new.set_word(w, self.value[w])  # set to this, shallowly, since these will get proposed to
+
+        # And copy everything else
+        for k in self.__dict__.keys():
+            if k not in ['self', 'value', 'make_hypothesis']:
                 new.__dict__[k] = copy(self.__dict__[k])
 
         return new
@@ -94,7 +109,11 @@ class SimpleLexicon(Hypothesis):
     ###################################################################################
 
     def propose(self):
-        new = copy(self)
+        """
+        WARNING: WE NOW DON'T COPY ALL THE VALUES, MEANING THAT MODIFICATION OF ONE IN A HYPOTHESIS CAN
+        IN PRINCIPLE CHANGE MULTIPLE LEXICA. THE CURRENT WAY IS FASTER BUT MORE DANGEROUS
+        """
+        new = self.shallowcopy()
 
         w = weighted_sample(self.value.keys()) # the word to change
         p, fb = self.value[w].propose()

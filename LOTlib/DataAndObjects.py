@@ -125,7 +125,8 @@ class Context:
 
     """
     def __init__(self, objects, relations):
-        self.__dict__.update(locals())
+        self.objects = objects
+        self.relations = set(relations)
 
     def relation_(self, *args):
         return tuple(args) in self.relations

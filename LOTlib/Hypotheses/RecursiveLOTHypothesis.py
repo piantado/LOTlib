@@ -15,7 +15,7 @@ class RecursiveLOTHypothesis(LOTHypothesis):
           This change was made to simplify and speed things up.
     """
 
-    def __init__(self, grammar, recurse='recurse_', recurse_bound=25, **kwargs):
+    def __init__(self, grammar, recurse='recurse_', recurse_bound=25, args=['x'], **kwargs):
         """
         Initializer. recurse gives the name for the recursion operation internally.
         """
@@ -26,10 +26,10 @@ class RecursiveLOTHypothesis(LOTHypothesis):
         self.recursive_call_depth = 0 # how far down have we recursed?
 
         # automatically put 'recurse' onto kwargs['args']
-        assert recurse not in kwargs['args'] # not already specified
-        kwargs['args'] = [recurse] + kwargs['args']
+        assert recurse not in args # not already specified
+        args = [recurse] + args
 
-        LOTHypothesis.__init__(self, grammar, **kwargs)
+        LOTHypothesis.__init__(self, grammar, args=args, **kwargs)
 
     def recursive_call(self, *args):
         """

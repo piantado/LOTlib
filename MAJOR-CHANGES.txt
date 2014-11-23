@@ -1,3 +1,6 @@
+Nov 19 2014:
+        - RecursiveLexicon added to enable mutual recursion. 
+        - SimpleLexicon now no longer copies *all* values on proposal--new proposed one may point to old values
 Nov 17 2014:
         - Recursion defaultly removed from LOTHypothesis. Now, recursive calls must use RecursiveLOTHypothesis. (This saves all LOTHypotheses from having to wrap in a Y combinator)
         - Added Annealing and Schedule classes
