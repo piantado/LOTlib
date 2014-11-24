@@ -28,6 +28,7 @@ class MHSampler():
 
     Returns:
         If a proposer is specific in __init__, it should return a *new copy* of the object
+
     """
     def __init__(self, current_sample, data, steps=Infinity, proposer=None, skip=0, prior_temperature=1.0, likelihood_temperature=1.0, acceptance_temperature=1.0, trace=False):
         """

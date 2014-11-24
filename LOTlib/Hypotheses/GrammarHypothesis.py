@@ -2,6 +2,20 @@
 """
 With this class, we can propose hypotheses as a vector of grammar rule probabilities.
 
+Methods:
+    __init__
+    propose
+    compute_prior
+    compute_likelihood
+    rule_distribution
+    set_value
+
+    get_rule
+    get_rules
+    get_rule_by_index
+    get_rule_index
+
+
 """
 import numpy as np
 from scipy.stats import gamma
@@ -32,10 +46,21 @@ class GrammarHypothesis(VectorHypothesis):
         self.prior_scale = prior_scale
         self.prior = self.compute_prior()
 
+    def propose(self):
+        """New value is sampled from a normal centered @ old values, w/ proposal as covariance (inverse?)"""
+        # Note: Does not copy proposal
+        newv = np.random.multivariate_normal(self.value, self.proposal)
+        print newv
+
+        # TODO: is there a better way to do this? We can't do it in VectorHypothesis if there are other args
+        return GrammarHypothesis(self.grammar, self.hypotheses,
+                                 prior_shape=self.prior_shape, prior_scale=self.prior_scale,
+                                 value=newv, n=self.n, proposal=self.proposal), 0.0
+
     def compute_prior(self):
         shape = self.prior_shape
         scale = self.prior_scale
-        rule_priors = [gamma.logpdf(r, shape, scale=scale) for r in self.value]
+        rule_priors = [gamma.logpdf(v, shape, scale=scale) for v in self.value]
 
         prior = sum([r for r in rule_priors])      # TODO is this right?
         self.prior = prior
@@ -52,7 +77,7 @@ class GrammarHypothesis(VectorHypothesis):
 
         Returns:
             float: Likelihood summed over all outputs, summed over all hypotheses & weighted for each
-            hypothesis by posterior score p(h|d).
+            hypothesis by posterior score p(h|X).
 
         """
         # TODO: likelihood we get human input, this should not be calculated this way...
@@ -63,12 +88,19 @@ class GrammarHypothesis(VectorHypothesis):
         for d in data:
             for h in hypotheses: h.compute_posterior(d.input)
             Z = logsumexp([h.posterior_score for h in hypotheses])
+            print '&'*80
+            i = 0
 
             for h in hypotheses:
+                i += 1
+#                print i, '#'*30
+#                print likelihood
+#                print 'HYPO = ', h
                 w = h.posterior_score - Z
+#                print 'w = ', w
 
                 for key in d.output.keys():
-                    # calculate Pr (output_data==Yes | h)
+                    # calculate Pr (d produced by h)
                     p = h.compute_likelihood([key])
 
                     # calculate Pr (data of this hypothesis == human data)
@@ -76,10 +108,12 @@ class GrammarHypothesis(VectorHypothesis):
                     n = k + d.output[key][1]     # num. trials
                     bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
                     likelihood_human_data = bc + (k*p) + (n-k)*log1mexp(p)  # likelihood we got human output
+#                    print key, 'L_HUMAN = ', likelihood_human_data, '\tP = ', p
                     likelihood = logplusexp(likelihood, likelihood_human_data + w)
 
         self.likelihood = likelihood
         self.update_posterior()
+        print 'LIKELIHOOD = ', likelihood
         return likelihood
 
     def rule_distribution(self, data, rule_name, vals=np.arange(0, 2, .2)):

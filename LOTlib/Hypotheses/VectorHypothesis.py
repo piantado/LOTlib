@@ -20,10 +20,7 @@ class VectorHypothesis(Hypothesis):
         """new value is sampled from a normal centered @ old values, w/ proposal as covariance (inverse?)"""
         # Note: Does not copy proposal
         newv = numpy.random.multivariate_normal(self.value, self.proposal)
-        return type(self)(value=newv, n=self.n, proposal=self.proposal)  # symmetric proposals
-
-        #TODO why is there a `, 0.0` at the end of this return statement?
-        ### return VectorHypothesis(value=newv, n=self.n, proposal=self.proposal), 0.0  # symmetric proposals
+        return type(self)(value=newv, n=self.n, proposal=self.proposal), 0.0  # symmetric proposals
 
     def conditional_distribution(self, data, value_index, vals=numpy.arange(0, 2, .2)):
         """Compute posterior values for this grammar, varying specified value over a specified set.
