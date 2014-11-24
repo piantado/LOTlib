@@ -3,6 +3,7 @@ Inference with grammar rule probabilities.
 
 """
 import numpy as np
+from LOTlib import lot_iter
 from LOTlib.Hypotheses.GrammarHypothesis import GrammarHypothesis
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Inference.PriorSample import prior_sample
@@ -35,7 +36,7 @@ if __name__ == "__main__":
     """What grammar probabilities will best model our human data (grammar_data)?"""
     grammar_h0 = GrammarHypothesis(grammar, hypotheses)
     grammar_hypotheses = []
-    for grammar_h in MHSampler(grammar_h0, grammar_data, num_grammar):
+    for grammar_h in lot_iter(MHSampler(grammar_h0, grammar_data, num_grammar, trace=False)):
         print grammar_h.value
         print '!'*100
         grammar_hypotheses.append(grammar_h)

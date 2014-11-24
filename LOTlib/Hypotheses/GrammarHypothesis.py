@@ -18,6 +18,7 @@ Methods:
 
 """
 import numpy as np
+from math import exp, log
 from scipy.stats import gamma
 from LOTlib.Hypotheses.VectorHypothesis import VectorHypothesis
 from LOTlib.Miscellaneous import logplusexp, logsumexp, log1mexp, gammaln, Infinity
@@ -35,13 +36,14 @@ class GrammarHypothesis(VectorHypothesis):
         value (list): Vector of numbers corresponding to the items in `rules`.
 
     """
-    def __init__(self, grammar, hypotheses, prior_shape=2., prior_scale=1., **kwargs):
+    def __init__(self, grammar, hypotheses, prior_shape=2., prior_scale=1., value=None,  **kwargs):
         self.rules = [rule for sublist in grammar.rules.values() for rule in sublist]
         self.grammar = grammar
         self.hypotheses = hypotheses
-        p_vector = [rule.p for rule in self.rules]
-        n = len(p_vector)
-        VectorHypothesis.__init__(self, value=p_vector, n=n)
+        if value is None:
+            value = [rule.p for rule in self.rules]
+        n = len(value)
+        VectorHypothesis.__init__(self, value=value, n=n)
         self.prior_shape = prior_shape
         self.prior_scale = prior_scale
         self.prior = self.compute_prior()
@@ -49,8 +51,7 @@ class GrammarHypothesis(VectorHypothesis):
     def propose(self):
         """New value is sampled from a normal centered @ old values, w/ proposal as covariance (inverse?)"""
         # Note: Does not copy proposal
-        newv = np.random.multivariate_normal(self.value, self.proposal)
-        print newv
+        newv = self.value + 0.01*np.random.multivariate_normal(self.value, self.proposal)
 
         # TODO: is there a better way to do this? We can't do it in VectorHypothesis if there are other args
         return GrammarHypothesis(self.grammar, self.hypotheses,
@@ -83,33 +84,20 @@ class GrammarHypothesis(VectorHypothesis):
         # TODO: likelihood we get human input, this should not be calculated this way...
         # TODO: ...For example, (11 yes, 1 no) is equally as close to (12y, 0n) as (1y, 11n)
         hypotheses = self.hypotheses
-        likelihood = -Infinity
+        likelihood = 0.0
 
         for d in data:
-            for h in hypotheses: h.compute_posterior(d.input)
-            Z = logsumexp([h.posterior_score for h in hypotheses])
-            print '&'*80
-            i = 0
+            posteriors = [sum(h.compute_posterior(d.input)) for h in hypotheses]
+            Z = logsumexp(posteriors)
 
-            for h in hypotheses:
-                i += 1
-#                print i, '#'*30
-#                print likelihood
-#                print 'HYPO = ', h
-                w = h.posterior_score - Z
-#                print 'w = ', w
+            for q in d.output.keys():
 
-                for key in d.output.keys():
-                    # calculate Pr (d produced by h)
-                    p = h.compute_likelihood([key])
+                lptrue = logsumexp([ h.compute_likelihood([q]) + (post-Z) for h, post in zip(hypotheses,posteriors)])
 
-                    # calculate Pr (data of this hypothesis == human data)
-                    k = d.output[key][0]         # num. yes responses
-                    n = k + d.output[key][1]     # num. trials
-                    bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
-                    likelihood_human_data = bc + (k*p) + (n-k)*log1mexp(p)  # likelihood we got human output
-#                    print key, 'L_HUMAN = ', likelihood_human_data, '\tP = ', p
-                    likelihood = logplusexp(likelihood, likelihood_human_data + w)
+                k = d.output[q][0]         # num. yes responses
+                n = k + d.output[q][1]     # num. trials
+                bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
+                likelihood += bc + (k*lptrue) + (n-k)*log1mexp(lptrue)  # likelihood we got human output
 
         self.likelihood = likelihood
         self.update_posterior()
@@ -128,8 +116,11 @@ class GrammarHypothesis(VectorHypothesis):
         # Set probability for each rule corresponding to value index
         for i in range(1, len(value)):
             self.rules[i].p = value[i]
+
         # Recompute prior for each hypothesis, given new grammar probs
         for h in self.hypotheses:
+            # re-set the tree generation_probabilities
+            self.grammar.recompute_generation_probabilities(h.value)
             h.compute_prior()
 
     def get_rule(self, rule_name):

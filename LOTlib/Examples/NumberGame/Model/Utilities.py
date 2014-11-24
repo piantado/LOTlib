@@ -31,7 +31,7 @@ def import_data_from_mat():
     assuming 20 human participants.
 
     """
-    mat = loadmat('GrammarInference/number_game_data.mat')
+    mat = loadmat('../GrammarInference/number_game_data.mat')
     mat_data = mat['data']
     number_game_data = []
 
