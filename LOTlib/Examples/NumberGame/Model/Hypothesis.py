@@ -1,7 +1,7 @@
 
 from math import log
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-from LOTlib.Miscellaneous import logplusexp, logsumexp, log1mexp, gammaln, Infinity
+# from LOTlib.Miscellaneous import logplusexp, logsumexp, log1mexp, gammaln, Infinity
 # from LOTlib.Evaluation.Eval import *
 
 
@@ -28,7 +28,8 @@ class NumberGameHypothesis(LOTHypothesis):
         """
         s = self()     # set of numbers corresponding to this hypothesis
                        # NOTE: This may be None if the hypothesis has too many nodes
-        s = [item for item in s if item <= self.domain]
+        if isinstance(s, list):
+            s = [item for item in s if item <= self.domain]
         error_p = (1.-self.alpha) / self.domain
 
         def compute_single_likelihood(datum):

@@ -8,23 +8,43 @@ from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Inference.PriorSample import prior_sample
 from LOTlib.Examples.NumberGame.Model import *
 
-# Global parameters for inference
+# Parameters for number game inference
 domain = 100
 alpha = 0.9
 num_iters = 10000
-h0 = make_h0(grammar=grammar, domain=domain, alpha=alpha)
+
+# Parameters for grammar hypothesis inference
+num_grammar = 1000
 
 
 #=============================================================================================================
 
 if __name__ == "__main__":
 
-    hypotheses = set(prior_sample(h0, data, N=num_iters))
-    grammar_h = GrammarHypothesis(grammar, hypotheses)
+    """Generate some number game hypotheses."""
+    number_data = [2, 4, 8, 16, 32, 64, 5, 10, 15, 25, 35]
+    h0 = make_h0(grammar=grammar, domain=domain, alpha=alpha)
+    hypotheses = set(prior_sample(h0, number_data, N=num_iters))
+    # hypotheses = set()
+    # for h in MHSampler(h0, number_data, num_iters):
+    #     hypotheses.add(h)
 
-    vals = np.arange(0.2, 2, .2)    # NOTE: Cannot start at 0! (why??)
-    rule_dist = grammar_h.rule_distribution(data, 'range_set_', vals=vals)
-    print rule_dist
+    print '%'*120
+    print '%'*120
+
+    """What grammar probabilities will best model our human data (grammar_data)?"""
+    grammar_h0 = GrammarHypothesis(grammar, hypotheses)
+    grammar_hypotheses = []
+    for grammar_h in MHSampler(grammar_h0, grammar_data, num_grammar):
+        print grammar_h.value
+        print '!'*100
+        grammar_hypotheses.append(grammar_h)
+
+
+
+    # vals = np.arange(0.2, 2, .2)
+    # rule_dist = grammar_h.rule_distribution(data, 'range_set_', vals=vals)
+    # print rule_dist
 
     # visualize_probs(vals, rule_dist, 'union_')
 

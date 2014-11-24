@@ -19,7 +19,6 @@ def LOTlib_primitive(fn):
         global GLOBAL_PRIMITIVE_OPS
         GLOBAL_PRIMITIVE_OPS += 1
 
-        #if None2None and any([a is None for a in args]): return False
         return fn(*args, **kwargs)
 
     return inside

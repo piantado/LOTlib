@@ -116,7 +116,7 @@ class Hypothesis(object):
         else:
             l = -Infinity # This *could* be 0.0 if we wanted. Not clear what is best. 
             
-        self.posterior_score = p+l
+        self.update_posterior()
         return [p,l]
 
     def update_posterior(self):

@@ -1,10 +1,8 @@
 
-import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
-from LOTlib import MHSampler
 from LOTlib.DataAndObjects import FunctionData
-from LOTlib.Miscellaneous import logsumexp, logplusexp
+from LOTlib.Miscellaneous import logsumexp
 import Grammar as G, Hypothesis
 
 
