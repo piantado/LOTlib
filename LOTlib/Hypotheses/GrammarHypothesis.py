@@ -94,18 +94,19 @@ class GrammarHypothesis(VectorHypothesis):
         likelihood = 0.0
 
         for d in data:
-            posteriors = [sum(h.compute_posterior(d.input, updateflag=False)) for h in hypotheses]
+            # TODO: should this be likelihoods instead of posteriors?
+            posteriors = [h.compute_posterior(d.input, updateflag=True)[0] for h in hypotheses]
             Z = logsumexp(posteriors)
 
             for o in d.output.keys():
                 # probability for yes on output `o` is sum of posteriors for hypos that contain `o`
-                lptrue = logsumexp([(post-Z) if (not h() is None) and (o in h()) else -Infinity \
-                                    for h, post in zip(hypotheses,posteriors)])
+                p = logsumexp([(post-Z) if (not h() is None) and (o in h()) else -Infinity
+                               for h, post in zip(hypotheses,posteriors)])
 
                 k = d.output[o][0]         # num. yes responses
                 n = k + d.output[o][1]     # num. trials
                 bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
-                likelihood += bc + (k*lptrue) + (n-k)*log1mexp(lptrue)  # likelihood we got human output
+                likelihood += bc + (k*p) + (n-k)*log1mexp(p)  # likelihood we got human output
 
         self.likelihood = likelihood
         self.update_posterior()
