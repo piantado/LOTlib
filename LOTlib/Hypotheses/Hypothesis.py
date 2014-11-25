@@ -100,7 +100,7 @@ class Hypothesis(object):
         """
         raise NotImplementedError
 
-    def compute_posterior(self, d):
+    def compute_posterior(self, d, **kwargs):
         """Computes the posterior score by computing the prior and likelihood scores.
                 
         Defaultly if the prior is -inf, we don't compute the likelihood (and "pretend" it's -Infinity).
@@ -112,7 +112,7 @@ class Hypothesis(object):
         p = self.compute_prior()
         
         if p > -Infinity:        
-            l = self.compute_likelihood(d)
+            l = self.compute_likelihood(d, **kwargs)
         else:
             l = -Infinity # This *could* be 0.0 if we wanted. Not clear what is best. 
             

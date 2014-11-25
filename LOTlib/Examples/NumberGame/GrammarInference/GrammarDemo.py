@@ -18,7 +18,7 @@ num_iters = 10000
 num_grammar = 1000
 
 
-#=============================================================================================================
+# ============================================================================================================
 
 if __name__ == "__main__":
 
@@ -36,9 +36,12 @@ if __name__ == "__main__":
     """What grammar probabilities will best model our human data (grammar_data)?"""
     grammar_h0 = GrammarHypothesis(grammar, hypotheses)
     grammar_hypotheses = []
+    i = 0
     for grammar_h in lot_iter(MHSampler(grammar_h0, grammar_data, num_grammar, trace=False)):
-        print grammar_h.value
-        print '!'*100
+
+        print ['%.3f' % v for v in grammar_h.value]
+        i += 1
+        print i, '!'*120
         grammar_hypotheses.append(grammar_h)
 
 

@@ -19,6 +19,7 @@ Methods:
 """
 import numpy as np
 from math import exp, log
+import random
 from scipy.stats import gamma
 from LOTlib.Hypotheses.VectorHypothesis import VectorHypothesis
 from LOTlib.Miscellaneous import logplusexp, logsumexp, log1mexp, gammaln, Infinity
@@ -48,12 +49,18 @@ class GrammarHypothesis(VectorHypothesis):
         self.prior_scale = prior_scale
         self.prior = self.compute_prior()
 
-    def propose(self):
-        """New value is sampled from a normal centered @ old values, w/ proposal as covariance (inverse?)"""
-        # Note: Does not copy proposal
-        newv = self.value + 0.01*np.random.multivariate_normal(self.value, self.proposal)
+    def propose(self, num_values=5, step_size=.01):
+        """Propose a new GrammarHypothesis; used to propose new samples with methods like MH.
 
-        # TODO: is there a better way to do this? We can't do it in VectorHypothesis if there are other args
+        New value is sampled from a normal centered @ old values, w/ proposal as covariance (inverse?)
+
+        """
+        step = step_size*np.random.multivariate_normal(self.value, self.proposal)
+        newv = self.value
+        ## for i in random.sample(range(self.n), num_values):
+        for i in range(len(newv)):
+            newv[i] += step[i]
+
         return GrammarHypothesis(self.grammar, self.hypotheses,
                                  prior_shape=self.prior_shape, prior_scale=self.prior_scale,
                                  value=newv, n=self.n, proposal=self.proposal), 0.0
@@ -63,7 +70,7 @@ class GrammarHypothesis(VectorHypothesis):
         scale = self.prior_scale
         rule_priors = [gamma.logpdf(v, shape, scale=scale) for v in self.value]
 
-        prior = sum([r for r in rule_priors])      # TODO is this right?
+        prior = sum([r for r in rule_priors])
         self.prior = prior
         self.update_posterior()
         return prior
@@ -87,21 +94,22 @@ class GrammarHypothesis(VectorHypothesis):
         likelihood = 0.0
 
         for d in data:
-            posteriors = [sum(h.compute_posterior(d.input)) for h in hypotheses]
+            posteriors = [sum(h.compute_posterior(d.input, updateflag=False)) for h in hypotheses]
             Z = logsumexp(posteriors)
 
-            for q in d.output.keys():
+            for o in d.output.keys():
+                # probability for yes on output `o` is sum of posteriors for hypos that contain `o`
+                lptrue = logsumexp([(post-Z) if (not h() is None) and (o in h()) else -Infinity \
+                                    for h, post in zip(hypotheses,posteriors)])
 
-                lptrue = logsumexp([ h.compute_likelihood([q]) + (post-Z) for h, post in zip(hypotheses,posteriors)])
-
-                k = d.output[q][0]         # num. yes responses
-                n = k + d.output[q][1]     # num. trials
+                k = d.output[o][0]         # num. yes responses
+                n = k + d.output[o][1]     # num. trials
                 bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
                 likelihood += bc + (k*lptrue) + (n-k)*log1mexp(lptrue)  # likelihood we got human output
 
         self.likelihood = likelihood
         self.update_posterior()
-        print 'LIKELIHOOD = ', likelihood
+        print self.prior, likelihood, self.posterior_score
         return likelihood
 
     def rule_distribution(self, data, rule_name, vals=np.arange(0, 2, .2)):
