@@ -34,7 +34,7 @@ if __name__ == "__main__":
     print '%'*120
 
     """What grammar probabilities will best model our human data (grammar_data)?"""
-    grammar_h0 = GrammarHypothesis(grammar, hypotheses)
+    grammar_h0 = GrammarHypothesis(grammar, hypotheses, step_size=.1)
     grammar_hypotheses = []
     i = 0
     for grammar_h in lot_iter(MHSampler(grammar_h0, grammar_data, num_grammar, trace=False)):
@@ -42,6 +42,7 @@ if __name__ == "__main__":
         print ['%.3f' % v for v in grammar_h.value]
         i += 1
         print i, '!'*120
+        print grammar_h.prior, grammar_h.likelihood, grammar_h.posterior_score
         grammar_hypotheses.append(grammar_h)
 
 

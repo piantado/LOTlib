@@ -37,7 +37,8 @@ class GrammarHypothesis(VectorHypothesis):
         value (list): Vector of numbers corresponding to the items in `rules`.
 
     """
-    def __init__(self, grammar, hypotheses, prior_shape=2., prior_scale=1., value=None,  **kwargs):
+    def __init__(self, grammar, hypotheses, value=None, prior_shape=2., prior_scale=1.,
+                 propose_n=1, propose_step=.1, **kwargs):
         self.rules = [rule for sublist in grammar.rules.values() for rule in sublist]
         self.grammar = grammar
         self.hypotheses = hypotheses
@@ -47,23 +48,40 @@ class GrammarHypothesis(VectorHypothesis):
         VectorHypothesis.__init__(self, value=value, n=n)
         self.prior_shape = prior_shape
         self.prior_scale = prior_scale
+        self.propose_n = propose_n
+        self.propose_step = propose_step
         self.prior = self.compute_prior()
 
-    def propose(self, num_values=5, step_size=.01):
+    def propose(self):
         """Propose a new GrammarHypothesis; used to propose new samples with methods like MH.
+
+        num_values => propose_n
+        step_size => propose_step
 
         New value is sampled from a normal centered @ old values, w/ proposal as covariance (inverse?)
 
-        """
-        step = step_size*np.random.multivariate_normal(self.value, self.proposal)
-        newv = self.value
-        ## for i in random.sample(range(self.n), num_values):
-        for i in range(len(newv)):
-            newv[i] += step[i]
+        TODO: should we randomly select our rules? or is there a better way
 
-        return GrammarHypothesis(self.grammar, self.hypotheses,
-                                 prior_shape=self.prior_shape, prior_scale=self.prior_scale,
-                                 value=newv, n=self.n, proposal=self.proposal), 0.0
+        """
+        ## TODO: make sure there are no negative probabilities
+        # File "/home/eric/Documents/LOTlib/LOTlib/Grammar.py", line 187, in recompute_generation_probabilities
+        #    t.generation_probability = log(t.rule.p) - log(sum([x.p for x in self.rules[t.returntype]]))
+
+        ## step = self.propose_step * np.random.multivariate_normal(self.value, self.proposal)
+        # step = self.propose_step * np.random.multivariate_normal(self.value, self.proposal)
+
+        step = self.propose_step
+        newv = self.value
+
+        # change `propose_n` number of values/rules
+        for i in random.sample(range(len(newv)), self.propose_n):
+            if newv[i] + step > 0:
+                r = random.choice([-1, 1])
+                newv[i] += step * r
+
+        c = self.__copy__()
+        c.set_value(newv)
+        return c, 0.0
 
     def compute_prior(self):
         shape = self.prior_shape
@@ -150,3 +168,12 @@ class GrammarHypothesis(VectorHypothesis):
         rule_indexes = [i for i, r in enumerate(self.rules) if r.name == rule_name]
         assert (len(rule_indexes) == 1), "ERROR: More than 1 rule associated with this rule name!!!"
         return rule_indexes[0]
+
+    def __copy__(self):
+        """Make a shallow copy of this GrammarHypothesis."""
+        return GrammarHypothesis(
+            self.grammar, self.hypotheses,
+            value=self.value, n=self.n, proposal=self.proposal,
+            prior_shape=self.prior_shape, prior_scale=self.prior_scale,
+            propose_n=self.propose_n, propose_step=self.propose_step
+        )
