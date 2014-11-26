@@ -63,21 +63,13 @@ class GrammarHypothesis(VectorHypothesis):
         TODO: should we randomly select our rules? or is there a better way
 
         """
-        ## TODO: make sure there are no negative probabilities
-        # File "/home/eric/Documents/LOTlib/LOTlib/Grammar.py", line 187, in recompute_generation_probabilities
-        #    t.generation_probability = log(t.rule.p) - log(sum([x.p for x in self.rules[t.returntype]]))
-
-        ## step = self.propose_step * np.random.multivariate_normal(self.value, self.proposal)
-        # step = self.propose_step * np.random.multivariate_normal(self.value, self.proposal)
-
-        step = self.propose_step
+        step = self.propose_step * np.random.multivariate_normal(self.value, self.proposal)
         newv = self.value
 
         # change `propose_n` number of values/rules
         for i in random.sample(range(len(newv)), self.propose_n):
-            if newv[i] + step > 0:
-                r = random.choice([-1, 1])
-                newv[i] += step * r
+            if newv[i] + step[i] > 0.0:
+                newv[i] += step[i]
 
         c = self.__copy__()
         c.set_value(newv)
