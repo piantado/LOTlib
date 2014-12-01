@@ -17,9 +17,10 @@ Methods:
 
 
 """
-import numpy as np
+import copy
 from math import exp, log
 import random
+import numpy as np
 from scipy.stats import gamma
 from LOTlib.Hypotheses.VectorHypothesis import VectorHypothesis
 from LOTlib.Miscellaneous import logplusexp, logsumexp, log1mexp, gammaln, Infinity
@@ -104,8 +105,8 @@ class GrammarHypothesis(VectorHypothesis):
         likelihood = 0.0
 
         for d in data:
-            # TODO: should this be likelihoods instead of posteriors?
-            posteriors = [h.compute_posterior(d.input, updateflag=True)[0] for h in hypotheses]
+            # TODO: how can hypotheses be stored as vector if we need to re-compute posterior??
+            posteriors = [h.compute_posterior(d.input)[0] for h in hypotheses]
             Z = logsumexp(posteriors)
 
             for o in d.output.keys():
@@ -120,7 +121,6 @@ class GrammarHypothesis(VectorHypothesis):
 
         self.likelihood = likelihood
         self.update_posterior()
-        print self.prior, likelihood, self.posterior_score
         return likelihood
 
     def rule_distribution(self, data, rule_name, vals=np.arange(0, 2, .2)):
@@ -165,7 +165,7 @@ class GrammarHypothesis(VectorHypothesis):
         """Make a shallow copy of this GrammarHypothesis."""
         return GrammarHypothesis(
             self.grammar, self.hypotheses,
-            value=self.value, n=self.n, proposal=self.proposal,
+            value=copy.copy(self.value), n=self.n, proposal=copy.copy(self.proposal),
             prior_shape=self.prior_shape, prior_scale=self.prior_scale,
             propose_n=self.propose_n, propose_step=self.propose_step
         )

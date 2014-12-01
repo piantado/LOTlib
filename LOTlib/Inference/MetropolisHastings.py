@@ -46,7 +46,7 @@ class MHSampler():
         # how many samples have I yielded? This doesn't count skipped samples
         self.samples_yielded = 0
         
-        self.set_state(current_sample, compute_posterior = (current_sample is not None))
+        self.set_state(current_sample, compute_posterior=(current_sample is not None))
 
         self.reset_counters()
 
@@ -98,22 +98,25 @@ class MHSampler():
         pass
 
     def next(self):
+        cur_s = self.current_sample
         if self.samples_yielded >= self.steps:
             raise StopIteration
         else:
             for _ in xrange(self.skip+1):
+                self.proposal, fb = self.proposer(cur_s)
 
-                self.proposal, fb = self.proposer(self.current_sample)
-
-                # either compute this, or use the memoized version
+                # Either compute this, or use the memoized version
                 np, nl = self.compute_posterior(self.proposal, self.data)
-
                 #print np, nl, current_sample.prior, current_sample.likelihood
-                # NOTE: IT is important that we re-compute from the temperature since these may be altered externally from ParallelTempering and others
-                prop = (np/self.prior_temperature + nl/self.likelihood_temperature)
-                cur  = (self.current_sample.prior/self.prior_temperature + self.current_sample.likelihood/self.likelihood_temperature)
+
+                # Note: It is important that we re-compute from the temperature since these may be altered
+                #    externally from ParallelTempering and others
+                prop = (np/self.prior_temperature +
+                        nl/self.likelihood_temperature)
+                cur = (cur_s.prior/self.prior_temperature +
+                       cur_s.likelihood/self.likelihood_temperature)
                 
-                #print "# Current:", self.current_sample
+                #print "# Current:", cur_s
                 #print "# Proposal:", self.proposal
                 
                 if MH_acceptance(cur, prop, fb, acceptance_temperature=self.acceptance_temperature):
@@ -127,10 +130,13 @@ class MHSampler():
                 self.proposal_count += 1
 
             if self.trace:
-                print self.current_sample.posterior_score, self.current_sample.likelihood, self.current_sample.prior, qq(self.current_sample)
+                print cur_s.posterior_score, cur_s.likelihood, cur_s.prior, qq(cur_s)
 
             self.samples_yielded += 1
             return self.current_sample
+
+
+
 
 class mh_sample(MHSampler):
     """
@@ -141,7 +147,7 @@ class mh_sample(MHSampler):
 
 if __name__ == "__main__":
 
-    from LOTlib.Examples.Number.Global import generate_data, NumberExpression, grammar, get_knower_pattern
+    from LOTlib.Examples.Number.Model import generate_data, NumberExpression, grammar, get_knower_pattern
 
     data = generate_data(300)
     h0 = NumberExpression(grammar)
