@@ -64,7 +64,7 @@ def schemestring(x, d=0, bv_names=None):
                 return "(%s (%s) %s)" % (name, x.added_rule.name,
                                          map(lambda a: schemestring(a, d+1, bv_names=bv_names), x.args))
             else:
-                return "(%s %s)" % (name, map(lambda a: schemestring(a,d+1,bv_names=bv_names), x.args))
+                return "(%s %s)" % (name, map(lambda a: schemestring(a,d+1, bv_names=bv_names), x.args))
 
 def pystring(x, d=0, bv_names=None):
     """Output a string that can be evaluated by python; gives bound variables names based on their depth.
@@ -123,6 +123,8 @@ def pystring(x, d=0, bv_names=None):
                 return name
             else:
                 return name+'('+', '.join(map(lambda a: pystring(a, d=d+1, bv_names=bv_names), x.args))+')'
+
+
 
 
 #=============================================================================================================
@@ -682,6 +684,33 @@ class FunctionNode(object):
 
         return ret
 
+    def uniquify_bv(self, remap=None):
+        """
+        Go through and make each of my uuids on BVUseFunctionNodes unique
+        :return:
+        """
+        from uuid import uuid4
+
+        if remap is None:
+            remap = dict()
+
+        if isinstance(self, BVAddFunctionNode):
+            newbv = 'bv__'+uuid4().hex ## TODO: MAKE THIS THE SAME FUNCTION AS USED IN GRAMMAR_RULE
+            if self.added_rule is not None:
+                remap[self.added_rule.name] = newbv
+                self.added_rule.name = newbv
+        elif isinstance(self, BVUseFunctionNode):
+            self.name = remap.get(self.name, self.name)
+
+        for a in self.argFunctionNodes():
+            a.uniquify_bv(remap)
+
+
+
+
+
+
+
 class BVAddFunctionNode(FunctionNode):
     def __init__(self, parent, returntype, name, args,
                  generation_probability=0.0, resample_p=1.0, rule=None, a_args=None, added_rule=None):
@@ -701,7 +730,7 @@ class BVAddFunctionNode(FunctionNode):
         """
         fn = BVAddFunctionNode(self.parent, self.returntype, self.name, None,
                           generation_probability=self.generation_probability,
-                          resample_p=self.resample_p, rule=self.rule, a_args=self.a_args, added_rule=self.added_rule)
+                          resample_p=self.resample_p, rule=self.rule, a_args=self.a_args, added_rule=copy(self.added_rule))
         
         if (not shallow) and self.args is not None:
             fn.args = map(copy, self.args)
