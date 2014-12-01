@@ -68,7 +68,8 @@ class SimpleLexicon(Hypothesis):
         """
             This defaultly puts a \0 at the end so that we can sort -z if we want (e.g. if we print out a posterior first)
         """
-        return '\n'.join([ str(w)+':\t'+str(v) for w,v in sorted(self.value.iteritems())]) + '\0'
+        return '\n'.join([ "%-15s: %s"% (qq(w), str(v)) for w,v in sorted(self.value.iteritems())]) + '\0'
+
     def __hash__(self): return hash(str(self))
     def __eq__(self, other):   return (str(self)==str(other)) # simple but there are probably better ways
 

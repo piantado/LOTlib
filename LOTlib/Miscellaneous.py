@@ -471,29 +471,6 @@ def lambdaTrue(*x): return True
 def lambdaFalse(*x): return False
 def lambdaNAN(*x): return float("nan")
 
-def lambda_str(fn):
-    """
-            A nicer printer for pure lambda calculus
-    """
-    if fn is None: # just pass these through -- simplifies a lot
-        return None
-    elif fn.name == '':
-        assert len(fn.args)==1
-        return lambda_str(fn.args[0])
-    elif fn.name == 'lambda':
-        assert len(fn.args)==1
-        #return u"\u03BB%s.%s" % (fn.bv_name, lambda_str(fn.args[0]))
-        return "L%s.%s" % (fn.bv_name, lambda_str(fn.args[0]))
-    elif fn.name == 'apply_':
-        assert len(fn.args)==2
-        if fn.args[0].name == 'lambda':
-            return "((%s)(%s))" % tuple(map(lambda_str, fn.args))
-        else:
-            return "(%s(%s))" % tuple(map(lambda_str, fn.args))
-    else:
-        assert fn.args is None
-        return str(fn.name)
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Sorting utilities
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

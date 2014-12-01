@@ -63,7 +63,7 @@ class GrammarHypothesis(VectorHypothesis):
         TODO: should we randomly select our rules? or is there a better way
 
         """
-        step = self.propose_step * np.random.multivariate_normal(self.value, self.proposal)
+        step = self.propose_step * np.random.multivariate_normal([0.]*self.n, self.proposal)
         newv = self.value
 
         # change `propose_n` number of values/rules
