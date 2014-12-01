@@ -482,9 +482,9 @@ class FunctionNode(object):
         """
         return sep.join(map(str, self.all_leaves()))
 
-    #=========================================================================================================
-    # Derived functions that build on the above core
-    #=========================================================================================================
+    # ========================================================================================================
+    #  Derived functions that build on the above core
+    # ========================================================================================================
 
     def contains_function(self, x):
         """Checks if the FunctionNode contains x as function below."""

@@ -3,16 +3,18 @@ from LOTlib.DataAndObjects import FunctionData, sample_sets_of_objects, make_all
 from LOTlib.Evaluation.Primitives.Number import word_to_number
 from LOTlib.Examples.Number.Model.Hypothesis import ALPHA
 
-# # # # # # # # # # # # # # # # # # # # # # # # #
-# The target
+# ============================================================================================================
+#  The target
 
-#target = NumberExpression("one_ if cardinality1_(x) else next_(L_(setdifference_(x, select_(x))))") # we need to translate "if" ourselves
-#target = NumberExpression(value="if_(cardinality1_(x), one_, two_)")
+'''
+target = NumberExpression("one_ if cardinality1_(x) else next_(L_(setdifference_(x, select_(x))))") # we need to translate "if" ourselves
+target = NumberExpression(value="if_(cardinality1_(x), one_, two_)")
 # NOTE: Not necessary, but only for testing -- these are discovered in the real model via search
-#one_knower   = NumberExpression("one_ if cardinality1_(x) else undef")
-#two_knower   = NumberExpression("one_ if cardinality1_(x) else ( two_ if cardinality2_(x) else undef )")
-#three_knower = NumberExpression("one_ if cardinality1_(x) else ( two_ if (cardinality2_(x) ) else ( three_ if (cardinality3_(x) else undef) )")
-#four_knower  = NumberExpression("one_ if cardinality1_(x) else ( two_ if (cardinality2_(x) ) else ( three_ if (cardinality3_(x) else (four_ if (cardinality4_(x) else undef) ) )")
+one_knower   = NumberExpression("one_ if cardinality1_(x) else undef")
+two_knower   = NumberExpression("one_ if cardinality1_(x) else ( two_ if cardinality2_(x) else undef )")
+three_knower = NumberExpression("one_ if cardinality1_(x) else ( two_ if (cardinality2_(x) ) else ( three_ if (cardinality3_(x) else undef) )")
+four_knower  = NumberExpression("one_ if cardinality1_(x) else ( two_ if (cardinality2_(x) ) else ( three_ if (cardinality3_(x) else (four_ if (cardinality4_(x) else undef) ) )")
+'''
 
 WORDS = ['one_', 'two_', 'three_', 'four_', 'five_', 'six_', 'seven_', 'eight_', 'nine_', 'ten_']
 
@@ -43,8 +45,8 @@ def get_knower_pattern(ne):
     return ''.join([str(word_to_number[x]) if (x is not None and x is not 'undef') else 'U' for x in resp])
 
 
-# # # # # # # # # # # # # # # # # # # # # # # # #
-# All objects -- not very exciting
+# ============================================================================================================
+#  All objects -- not very exciting
 
 #here this is really just a dummy -- one type of object, which is replicated in sample_sets_of_objects
 all_objects = make_all_objects(shape=['duck'])

@@ -1,13 +1,13 @@
 from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis
 from LOTlib.Miscellaneous import log, Infinity, log1mexp
 
-##########################################################
-# Define a class for running MH
+# ============================================================================================================
+#  Define a class for running MH
 
-ALPHA = 0.75 # the probability of uttering something true
-GAMMA = -30.0 # the log probability penalty for recursion
+ALPHA = 0.75    # the probability of uttering something true
+GAMMA = -30.0   # the log probability penalty for recursion
 LG_1MGAMMA = log1mexp(GAMMA)
-MAX_NODES = 50 # How many FunctionNodes are allowed in a hypothesis? If we make this 20, things may slow
+MAX_NODES = 50  # How many FunctionNodes are allowed in a hypothesis? If we make this 20, things may slow
 
 class NumberExpression(RecursiveLOTHypothesis):
     
@@ -18,6 +18,7 @@ class NumberExpression(RecursiveLOTHypothesis):
         """Compute the number model prior.
 
         Log_probability() with a penalty on whether or not recursion is used.
+
         """
         if self.value.count_nodes() > MAX_NODES:
             self.prior = -Infinity
@@ -34,9 +35,10 @@ class NumberExpression(RecursiveLOTHypothesis):
         return self.prior
 
     def compute_single_likelihood(self, datum):
-        """
-            Computes the likelihood of data.
+        """Computes the likelihood of data.
+
             TODO: Make sure this precisely matches the number paper.
+
         """
         response = self(*datum.input)
         if response == 'undef' or response == None:
