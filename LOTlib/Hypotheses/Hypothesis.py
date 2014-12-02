@@ -48,8 +48,8 @@ class Hypothesis(object):
         return Hypothesis(value=self.value.copy(), prior_temperature=self.prior_temperature,
                           likelihood_temperature=self.likelihood_temperature)
 
-    #=========================================================================================================
-    # All instances of this must implement these:
+    # ========================================================================================================
+    #  All instances of this must implement these:
 
     def compute_prior(self):
         """Compute the prior and stores it in self.prior.
@@ -85,8 +85,8 @@ class Hypothesis(object):
         self.posterior_score = self.prior + self.likelihood
         return self.likelihood
 
-    #=========================================================================================================
-    # Methods for accessing likelihoods etc. on a big arrays of data
+    # ========================================================================================================
+    #  Methods for accessing likelihoods etc. on a big arrays of data
 
     def propose(self):
         """Generic proposal used by MCMC methods.
@@ -108,13 +108,13 @@ class Hypothesis(object):
         This saves us from computing likelihoods on hypotheses that we know are bad.
 
         """
-        Primitives.LOCAL_PRIMITIVE_OPS = 0 # Reset this
+        Primitives.LOCAL_PRIMITIVE_OPS = 0  # Reset this
         p = self.compute_prior()
         
         if p > -Infinity:        
             l = self.compute_likelihood(d, **kwargs)
         else:
-            l = -Infinity # This *could* be 0.0 if we wanted. Not clear what is best. 
+            l = -Infinity   # This *could* be 0.0 if we wanted. Not clear what is best.
             
         self.update_posterior()
         return [p,l]
@@ -123,15 +123,14 @@ class Hypothesis(object):
         """So we can save on space when writing this out in every hypothesis."""
         self.posterior_score = self.prior + self.likelihood
 
-    #=========================================================================================================
-    # optional implementation
-    # if you do gibbs sampling you need:
+    # ========================================================================================================
+    #  optional implementation --  if you do gibbs sampling you need:
     def enumerative_proposer(self):
         """Note: This method must be implemented when performing Gibbs sampling"""
         pass
 
-    #=========================================================================================================
-    ## These are just handy:
+    # ========================================================================================================
+    #  These are just handy:
     def __str__(self):
         return str(self.value)
     def __repr__(self):

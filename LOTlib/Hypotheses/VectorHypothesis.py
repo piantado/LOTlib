@@ -30,7 +30,8 @@ class VectorHypothesis(Hypothesis):
             vals(list): List of float values.  E.g. [0,.2,.4, ..., 2.]
 
         Returns:
-            list: List of posterior scores, where each item corresponds to an item in `vals` argument.
+            list: List of [prior, likelihood, posterior], where each item corresponds to an item in the
+            `vals` argument.
 
         """
         dist = []
@@ -39,8 +40,9 @@ class VectorHypothesis(Hypothesis):
             value = copy.copy(self.value)
             value[value_index] = p
             self.set_value(value)
-            dist.append(self.compute_posterior(data, updateflag=False))
+            p, l = self.compute_posterior(data, updateflag=False)
+            dist.append([p, l, p+l])
 
         self.set_value(old_value)
-        return dist
+        return zip(vals, dist)
 

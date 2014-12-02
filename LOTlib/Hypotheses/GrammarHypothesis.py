@@ -98,14 +98,14 @@ class GrammarHypothesis(VectorHypothesis):
             float: Likelihood summed over all outputs, summed over all hypotheses & weighted for each
             hypothesis by posterior score p(h|X).
 
+        TODO:
+            - vectorize
+
         """
-        # TODO: likelihood we get human input, this should not be calculated this way...
-        # TODO: ...For example, (11 yes, 1 no) is equally as close to (12y, 0n) as (1y, 11n)
         hypotheses = self.hypotheses
         likelihood = 0.0
 
         for d in data:
-            # TODO: how can hypotheses be stored as vector if we need to re-compute posterior??
             posteriors = [h.compute_posterior(d.input)[0] for h in hypotheses]
             Z = logsumexp(posteriors)
 
@@ -113,17 +113,16 @@ class GrammarHypothesis(VectorHypothesis):
                 # probability for yes on output `o` is sum of posteriors for hypos that contain `o`
                 p = logsumexp([(post-Z) if (not h() is None) and (o in h()) else -Infinity
                                for h, post in zip(hypotheses,posteriors)])
-
                 k = d.output[o][0]         # num. yes responses
                 n = k + d.output[o][1]     # num. trials
                 bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
-                likelihood += bc + (k*p) + (n-k)*log1mexp(p)  # likelihood we got human output
+                likelihood += bc + (k*p) + (n-k)*log1mexp(p)            # likelihood we got human output
 
         self.likelihood = likelihood
         self.update_posterior()
         return likelihood
 
-    def rule_distribution(self, data, rule_name, vals=np.arange(0, 2, .2)):
+    def rule_distribution(self, data, rule_name, vals=np.arange(0, 2, .1)):
         """Compute posterior values for this grammar, varying specified rule over a set of values."""
         rule_index = self.get_rule_index(rule_name)
         return self.conditional_distribution(data, rule_index, vals=vals)
