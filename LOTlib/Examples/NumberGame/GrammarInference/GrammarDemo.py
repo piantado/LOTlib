@@ -37,8 +37,15 @@ if __name__ == "__main__":
     grammar_h0 = GrammarHypothesis(grammar, hypotheses, proposal_step=.1, proposal_n=1)
     grammar_hypotheses = []
 
-    for d in grammar_h0.conditional_distribution(grammar_data, 11, np.arange(0.1, 5., 0.1)):
+    ipowf = grammar_h0.get_rule_index('ipowf_')
+    for d in grammar_h0.conditional_distribution(grammar_data, ipowf, np.arange(0.1, 5., 0.1)):
         print d
+
+    hypos = [h for h in hypotheses]
+
+    hypos = sorted(set(hypos), key=lambda x: x.posterior_score)
+    for h in hypos[-10:]:
+        print str(h), h.posterior_score, h.likelihood, h.prior
 
 
 
