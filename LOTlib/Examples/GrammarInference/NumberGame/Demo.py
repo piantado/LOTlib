@@ -8,6 +8,8 @@ from LOTlib.Hypotheses.GrammarHypothesis import GrammarHypothesis
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Inference.PriorSample import prior_sample
 from LOTlib.Examples.NumberGame.Model import *
+from LOTlib.Examples.GrammarInference.NumberGame.Model import *
+from Model import *
 
 # Parameters for number game inference
 domain = 100
@@ -23,8 +25,9 @@ num_grammar = 1000
 if __name__ == "__main__":
 
     """Generate some number game hypotheses."""
-    number_data = [2, 4, 8, 16, 32, 64, 5, 10, 15, 25, 35]
-    h0 = make_h0(grammar=grammar, domain=domain, alpha=alpha)
+    number_data = [2, 2, 2, 4, 4, 4, 8, 8, 8, 8, 8, 16, 16, 16, 32, 32, 32, 64, 64, 64, 64,
+                   5, 15, 25, 35, 40, 45, 65, 75, 85, 95, 100]
+    h0 = make_h0(grammar=grammar, domain=domain, alpha=0.99)
     hypotheses = set(prior_sample(h0, number_data, N=num_iters))
     # hypotheses = set()
     # for h in MHSampler(h0, number_data, num_iters):
@@ -37,8 +40,9 @@ if __name__ == "__main__":
     grammar_h0 = GrammarHypothesis(grammar, hypotheses, proposal_step=.1, proposal_n=1)
     grammar_hypotheses = []
 
-    for d in grammar_h0.rule_distribution(grammar_data, 'ipowf_', np.arange(0.1, 5., 0.1)):
-        print d
+    # print distribution over power rule:  [prior, likelihood, posterior]
+    # for d in grammar_h0.rule_distribution(toy_exp2, 'ipowf_', np.arange(0.1, 5., 0.1)):
+    #     print d
 
     hypos = [h for h in hypotheses]
 

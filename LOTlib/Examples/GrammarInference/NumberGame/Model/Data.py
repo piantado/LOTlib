@@ -10,7 +10,7 @@ from Utilities import import_data_from_mat
 Toy data
 
 """
-grammar_data = [
+toy_exp2 = [
     # powers of 2:  {n|n = 2^y}
     FunctionData(
         input=[2, 4, 16, 32, 64],
@@ -40,4 +40,4 @@ grammar_data = [
 Import Josh data
 
 """
-mat_data = import_data_from_mat()
+josh_data = import_data_from_mat()

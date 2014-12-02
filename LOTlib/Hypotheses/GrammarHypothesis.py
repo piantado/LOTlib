@@ -146,9 +146,16 @@ class GrammarHypothesis(VectorHypothesis):
         rule_index = self.get_rule_index(rule_name)
         return self.get_rule_by_index(rule_index)
 
-    def get_rules(self, rule_name):
-        """Get all GrammarRules associated with this rule name."""
-        return [r for r in self.rules if r.name == rule_name]
+    def get_rules(self, rule_name='XXX', rule_nt='XXX', rule_to='XXX'):
+        """Get all GrammarRules associated with this rule name, 'nt' type, and/or 'to' types."""
+        rules = self.rules
+        if rule_name is not 'XXX':
+            rules = [r for r in rules if r.name == rule_name]
+        if rule_nt is not 'XXX':
+            rules = [r for r in rules if r.nt == rule_nt]
+        if rule_to is not 'XXX':
+            rules = [r for r in rules if r.to == rule_to]
+        return rules
 
     def get_rule_by_index(self, rule_index):
         """Get the GrammarRule at this index."""
