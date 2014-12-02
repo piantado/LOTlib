@@ -10,7 +10,7 @@ from Utilities import import_data_from_mat
 Toy data
 
 """
-toy_exp2 = [
+toy_exp_1 = [
     # powers of 2:  {n|n = 2^y}
     FunctionData(
         input=[2, 4, 16, 32, 64],
@@ -35,6 +35,18 @@ toy_exp2 = [
     # )
 ]
 
+toy_exp_2 = [
+    FunctionData(
+        input=[1, 1, 1, 1, 3, 3, 3, 3, 7, 7, 7, 7, 15, 15, 15, 15, 31, 31, 31, 31, 63, 63, 63, 63],
+        output={7: (12, 0),
+                15: (12, 0),
+                31: (12, 0),
+                63: (12, 0),
+                8: (0, 12),
+                32: (0, 12),
+                50: (0, 12)}
+    )
+]
 
 """
 Import Josh data
