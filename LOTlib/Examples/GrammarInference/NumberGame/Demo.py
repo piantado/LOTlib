@@ -29,7 +29,7 @@ if __name__ == "__main__":
     #                5, 15, 25, 35, 40, 45, 65, 75, 85, 95, 100]
 
     h0 = make_h0(grammar=grammar, domain=domain, alpha=alpha)
-    hypotheses = set(prior_sample(h0, toy_exp_2[0].input, N=num_iters))
+    hypotheses = set(prior_sample(h0, toy_exp_3[0].input, N=num_iters))
 
     print '%'*120
     sorted_hypos = sorted(hypotheses, key=lambda x: x.posterior_score)
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     grammar_hypotheses = []
 
     # print distribution over power rule:  [prior, likelihood, posterior]
-    # for d in grammar_h0.rule_distribution(toy_exp_2, 'ipowf_', np.arange(0.1, 5., 0.1)):
+    # for d in grammar_h0.rule_distribution(toy_exp_3, 'ipowf_', np.arange(0.1, 5., 0.1)):
     #     print d
 
 

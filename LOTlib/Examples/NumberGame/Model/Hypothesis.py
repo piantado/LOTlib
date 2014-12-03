@@ -33,16 +33,16 @@ class NumberGameHypothesis(LOTHypothesis):
 
         def compute_single_likelihood(datum, updateflag=True):
             if s is not None and datum in s:
-                likelihood = log(self.alpha/len(s) + error_p)
+                return log(self.alpha/len(s) + error_p)
             else:
-                likelihood = log(error_p)
-            return likelihood
+                return log(error_p)
 
-        likelihoods = [compute_single_likelihood(d, updateflag=True) for d in data]
-        self.likelihood = sum(likelihoods) / self.likelihood_temperature
+        likelihoods = [compute_single_likelihood(d, updateflag=updateflag) for d in data]
+        likelihood = sum(likelihoods) / self.likelihood_temperature
         if updateflag:
+            self.likelihood = likelihood
             self.update_posterior()
-        return self.likelihood
+        return likelihood
 
     def compile_function(self):
         self.value_set = None

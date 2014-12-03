@@ -1,22 +1,31 @@
+
 from LOTlib.Grammar import Grammar
 
-grammar = Grammar()
-lamb = 2./3.
 
+lamb = 2./3.
+grammar = Grammar()
 grammar.add_rule('START', '', ['MATH'], lamb)
 grammar.add_rule('START', '', ['INTERVAL'], 1-lamb)
 
-# Math
+
+'''
+Math rules (30-40 of these)
+
+'''
 grammar.add_rule('MATH', 'mapset_', ['FUNC', 'DOMAIN'], 1.)
 grammar.add_rule('DOMAIN', 'range_set_', ['1', '100'], 1.)
-grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='EXPR', bv_p=1.)
 
+grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='EXPR', bv_p=1.)
 for i in range(2, 13):
     grammar.add_rule('EXPR', 'times_', ['EXPR', str(i)], 1.)
 for i in range(2, 11):
     grammar.add_rule('EXPR', 'ipowf_', ['EXPR', str(i)], 1.)
 
-# Interval (there will be ~5050 of these)
+
+'''
+Interval (there will be ~5050 of these)
+
+'''
 for n in range(1, 101):
     for m in range(n, 101):
         grammar.add_rule('INTERVAL', 'range_set_', [str(n), str(m)], 1.)
@@ -62,9 +71,17 @@ for n in range(1, 101):
 - 2^n, -32
 - primes
 - cubes
--
--
+
 
 5050:   all intervals 100 chose 2,  s.t. 1 <= n <= 100, n <= m <= 100  (incl. where n == m)
 
+
+TODO:
+    - modulo / 'ends in n' primitive
+    - is_prime primitive
+
 '''
+
+
+
+

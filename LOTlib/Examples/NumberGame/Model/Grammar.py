@@ -3,7 +3,7 @@ from LOTlib.Grammar import Grammar
 grammar = Grammar()
 
 # Default parameters for integer primitives
-TERMINAL_PRIOR = 1.
+TERMINAL_PRIOR = 2.
 INTEGERS = {
     1: 2.,
     2: 2.,
@@ -32,9 +32,9 @@ grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='EXPR', bv_p=1.)
 
 # Expressions
 # grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1.)
-# grammar.add_rule('EXPR', 'minus_', ['EXPR', 'EXPR'], 1.)
+grammar.add_rule('EXPR', 'minus_', ['EXPR', 'EXPR'], 1.)
 # grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 1.)
-grammar.add_rule('EXPR', 'ipowf_', ['EXPR', 'EXPR'], 3.)
+grammar.add_rule('EXPR', 'ipowf_', ['EXPR', 'EXPR'], 1.5)
 
 # Terminals
 for i in INTEGERS.keys():

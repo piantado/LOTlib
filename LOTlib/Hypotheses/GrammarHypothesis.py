@@ -89,7 +89,7 @@ class GrammarHypothesis(VectorHypothesis):
     def compute_likelihood(self, data, **kwargs):
         """Use hypotheses to estimate likelihood of generating the data.
 
-        This is taken as a weighted sum over all hypotheses.
+        This is taken as a weighted sum over all hypotheses, sum { p(h | X) }
 
         Args:
             data(list): List of FunctionData objects.
@@ -112,7 +112,7 @@ class GrammarHypothesis(VectorHypothesis):
             for o in d.output.keys():
                 # probability for yes on output `o` is sum of posteriors for hypos that contain `o`
                 p = logsumexp([(post-Z) if (not h() is None) and (o in h()) else -Infinity
-                               for h, post in zip(hypotheses,posteriors)])
+                               for h, post in zip(hypotheses, posteriors)])
                 k = d.output[o][0]         # num. yes responses
                 n = k + d.output[o][1]     # num. trials
                 bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
