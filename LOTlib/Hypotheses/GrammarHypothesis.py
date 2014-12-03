@@ -175,3 +175,10 @@ class GrammarHypothesis(VectorHypothesis):
             prior_shape=self.prior_shape, prior_scale=self.prior_scale,
             propose_n=self.propose_n, propose_step=self.propose_step
         )
+
+    def print_best_hypotheses(self, n=10):
+        hypotheses = self.hypotheses
+        sorted_hypos = sorted(hypotheses, key=lambda x: x.posterior_score)
+        for h in sorted_hypos[-n:]:
+            print str(h)
+            print h.posterior_score, h.likelihood, h.prior

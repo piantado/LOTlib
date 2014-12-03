@@ -13,8 +13,8 @@ from Model import *
 
 # Parameters for number game inference
 domain = 100
-alpha = 0.9
-num_iters = 100000
+alpha = 0.999
+num_iters = 50000
 
 # Parameters for grammar hypothesis inference
 num_grammar = 1000
@@ -28,10 +28,13 @@ if __name__ == "__main__":
     # number_data = [2, 2, 2, 4, 4, 4, 8, 8, 8, 8, 8, 16, 16, 16, 32, 32, 32, 64, 64, 64, 64,
     #                5, 15, 25, 35, 40, 45, 65, 75, 85, 95, 100]
 
-    h0 = make_h0(grammar=grammar, domain=domain, alpha=0.99)
+    h0 = make_h0(grammar=grammar, domain=domain, alpha=alpha)
     hypotheses = set(prior_sample(h0, toy_exp_2[0].input, N=num_iters))
 
     print '%'*120
+    sorted_hypos = sorted(hypotheses, key=lambda x: x.posterior_score)
+    for h in sorted_hypos[-10:]:
+        print str(h), h.prior, h.likelihood, h.posterior_score
     print '%'*120
 
     """What grammar probabilities will best model our human data?"""
@@ -39,12 +42,8 @@ if __name__ == "__main__":
     grammar_hypotheses = []
 
     # print distribution over power rule:  [prior, likelihood, posterior]
-    for d in grammar_h0.rule_distribution(toy_exp_2, 'ipowf_', np.arange(0.1, 5., 0.1)):
-        print d
-
-    sorted_hypos = sorted(hypotheses, key=lambda x: x.posterior_score)
-    for h in sorted_hypos[-10:]:
-        print str(h), h.posterior_score, h.likelihood, h.prior
+    # for d in grammar_h0.rule_distribution(toy_exp_2, 'ipowf_', np.arange(0.1, 5., 0.1)):
+    #     print d
 
 
 
