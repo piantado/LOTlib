@@ -12,12 +12,12 @@ from Model import *
 
 # Parameters for number game inference
 domain = 100
-alpha = 0.999
-n = 50000
+alpha = 0.99
+n = 10000000
 
 # Parameters for grammar hypothesis inference
 grammar_n = 1000
-data = toy_exp_3
+data = toy_single
 
 
 # ============================================================================================================
