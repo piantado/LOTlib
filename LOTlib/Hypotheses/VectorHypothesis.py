@@ -44,5 +44,5 @@ class VectorHypothesis(Hypothesis):
             dist.append([p, l, p+l])
 
         self.set_value(old_value)
-        return zip(vals, dist)
+        return vals, dist
 

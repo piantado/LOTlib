@@ -31,8 +31,8 @@ def import_data_from_mat():
     return number_game_data
 
 
-def visualize_probs(probs, dist, rule_name='RULE_'):
-    """Visualize results from probs_data_rule."""
+def visualize_dist(probs, dist, rule_name='RULE_'):
+    """Visualize results from VectorHypothesis.conditional_distribution."""
     fig, ax = plt.subplots()
     rects = plt.bar(probs, dist)
 
