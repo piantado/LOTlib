@@ -32,7 +32,12 @@ def import_data_from_mat():
 
 
 def visualize_dist(probs, dist, rule_name='RULE_'):
-    """Visualize results from VectorHypothesis.conditional_distribution."""
+    """Visualize results from VectorHypothesis.conditional_distribution.
+
+    The x-axis is the prior values we're inputting for the given rule (probs).
+    The y-axis is the summed posterior of the human data given these prior values
+
+    """
     fig, ax = plt.subplots()
     rects = plt.bar(probs, dist)
 
@@ -41,3 +46,12 @@ def visualize_dist(probs, dist, rule_name='RULE_'):
     plt.title('Prob. of human data given prob. for rule: '+rule_name)
     plt.show()
 
+def visualize_iter(sampler):
+    """The idea here is to wrap a sampler "for h in visualize_iter(mh_sampler): ..."
+
+    After the loop is done, we display a plot that shows the graph p(y in C | X [& g over time]).
+
+    
+
+
+    """

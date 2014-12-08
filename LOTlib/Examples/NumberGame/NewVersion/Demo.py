@@ -27,8 +27,8 @@ def run():
     prior_sampler = prior_sample(h0, demo_data, num_iters)
     mh_sampler = MHSampler(h0, demo_data, num_iters)
 
-    hypotheses = save_hypotheses(prior_sampler)
-    # hypotheses = load_hypotheses()
+    # hypotheses = save_hypotheses(prior_sampler)
+    hypotheses = load_hypotheses()
     print_top_hypotheses(hypotheses)
 
 

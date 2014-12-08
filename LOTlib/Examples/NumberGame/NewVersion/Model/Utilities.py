@@ -21,7 +21,7 @@ def save_hypotheses(sampler, filename='numbergame_hypotheses.p'):
     for h in lot_iter(sampler):
         hypotheses.add(h)
 
-    f = open("save.p", "wb")
+    f = open(filename, "wb")
     pickle.dump(hypotheses, f)
     return hypotheses
 
