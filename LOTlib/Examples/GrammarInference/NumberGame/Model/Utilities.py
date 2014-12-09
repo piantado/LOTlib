@@ -46,7 +46,7 @@ def visualize_dist(probs, dist, rule_name='RULE_'):
     plt.title('Prob. of human data given prob. for rule: '+rule_name)
     plt.show()
 
-def visualize_iter(sampler):
+def visualize_grammar_iter(sampler):
     """The idea here is to wrap a sampler "for h in visualize_iter(mh_sampler): ..."
 
     After the loop is done, we display a plot that shows the graph p(y in C | X [& g over time]).

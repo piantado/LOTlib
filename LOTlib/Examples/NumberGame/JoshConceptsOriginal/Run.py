@@ -27,7 +27,4 @@ if __name__ == "__main__":
     for h in hypos[-10:]:
         print str(h)
         print h.prior, h.likelihood, h.posterior_score
-    # hypotheses = FiniteBestSet(generator=prior_sampler, N=N, key="posterior_score")
-    # for h in hypotheses:
-    #     print str(h), h.posterior_score
 

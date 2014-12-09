@@ -38,11 +38,12 @@ class GrammarHypothesis(VectorHypothesis):
         value (list): Vector of numbers corresponding to the items in `rules`.
 
     """
-    def __init__(self, grammar, hypotheses, value=None, prior_shape=2., prior_scale=1.,
-                 propose_n=1, propose_step=.1, **kwargs):
-        self.rules = [rule for sublist in grammar.rules.values() for rule in sublist]
+    def __init__(self, grammar, hypotheses, rules=None, value=None,
+                 prior_shape=2., prior_scale=1., propose_n=1, propose_step=.1, **kwargs):
         self.grammar = grammar
         self.hypotheses = hypotheses
+        self.rules = [rule for sublist in grammar.rules.values() for rule in sublist] \
+            if rules is None else rules
         if value is None:
             value = [rule.p for rule in self.rules]
         n = len(value)
@@ -170,7 +171,7 @@ class GrammarHypothesis(VectorHypothesis):
     def __copy__(self):
         """Make a shallow copy of this GrammarHypothesis."""
         return GrammarHypothesis(
-            self.grammar, self.hypotheses,
+            self.grammar, self.hypotheses, rules=copy.copy(self.rules),
             value=copy.copy(self.value), n=self.n, proposal=copy.copy(self.proposal),
             prior_shape=self.prior_shape, prior_scale=self.prior_scale,
             propose_n=self.propose_n, propose_step=self.propose_step

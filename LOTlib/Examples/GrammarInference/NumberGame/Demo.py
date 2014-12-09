@@ -15,9 +15,14 @@ domain = 100
 alpha = 0.99
 n = 10000000
 
-# Parameters for grammar hypothesis inference
+# Parameters for GrammarHypothesis inference
 grammar_n = 1000
 data = toy_single
+
+# Variables for NumberGameHypothesis inference
+h0 = make_h0(grammar=grammar, domain=domain, alpha=alpha)
+prior_sampler = prior_sample(h0, data[0].input, N=n)
+mh_sampler = MHSampler(h0, data[0].input, n)
 
 
 # ============================================================================================================
@@ -46,12 +51,7 @@ def print_dist(vals, posteriors):
 def run():
     """Run demo"""
     '''Generate number game hypotheses'''
-    h0 = make_h0(grammar=grammar, domain=domain, alpha=alpha)
-    prior_sampler = prior_sample(h0, data[0].input, N=n)
-    mh_sampler = MHSampler(h0, data[0].input, n)
-    hypotheses = save_hypotheses(prior_sampler)
-
-    """
+    #hypotheses = save_hypotheses(prior_sampler)
     hypotheses = load_hypotheses()
     print_top_hypotheses(hypotheses)
 
@@ -61,13 +61,12 @@ def run():
     '''print distribution over power rule:  [prior, likelihood, posterior]'''
     vals, posteriors = grammar_h0.rule_distribution(data, 'ipowf_', np.arange(0.1, 5., 0.1))
     print_dist(vals, posteriors)
-    visualize_dist(vals, posteriors, 'union_')
+    #visualize_dist(vals, posteriors, 'union_')
 
     '''grammar hypothesis inference'''
-    mh_grammar_sampler = MHSampler(grammar_h0, data, grammar_n, trace=False)
-    prior_grammar_sampler = prior_sample(grammar_h0, data, grammar_n)
-    grammar_hypotheses = sample_grammar_hypotheses(mh_grammar_sampler)
-    """
+    #mh_grammar_sampler = MHSampler(grammar_h0, data, grammar_n, trace=False)
+    #prior_grammar_sampler = prior_sample(grammar_h0, data, grammar_n)
+    #grammar_hypotheses = sample_grammar_hypotheses(mh_grammar_sampler)
 
 
 if __name__ == "__main__":

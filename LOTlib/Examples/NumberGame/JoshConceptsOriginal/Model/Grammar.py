@@ -2,34 +2,34 @@
 from LOTlib.Grammar import Grammar
 
 
-lamb = 2./3.
-grammar = Grammar()
-grammar.add_rule('START', '', ['MATH'], lamb)
-grammar.add_rule('START', '', ['INTERVAL'], 1-lamb)
+def get_grammar(lambda_value=2./3.):
+    grammar = Grammar()
+    grammar.add_rule('START', 'in_domain_', ['MATH', '100'], lambda_value)
+    grammar.add_rule('START', '', ['INTERVAL'], (1-lambda_value))
 
+    '''
+    Math rules (30-40 of these)
 
-'''
-Math rules (30-40 of these)
+    '''
+    grammar.add_rule('MATH', 'mapset_', ['FUNC', 'DOMAIN_RANGE'], 1.)
+    grammar.add_rule('DOMAIN_RANGE', 'range_set_', ['1', '100'], 1.)
+    grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='EXPR', bv_p=1.)
+    for i in range(2, 13):
+        grammar.add_rule('EXPR', 'times_', ['EXPR', str(i)], 1.)
+    for i in range(2, 11):
+        grammar.add_rule('EXPR', 'ipowf_', ['EXPR', str(i)], 1.)
+    for i in range(0, 10):
+        grammar.add_rule('EXPR', 'ends_in_', ['EXPR', str(i)], 1.)
 
-'''
-grammar.add_rule('MATH', 'mapset_', ['FUNC', 'DOMAIN'], 1.)
-grammar.add_rule('DOMAIN', 'range_set_', ['1', '100'], 1.)
+    '''
+    Interval (there will be ~5050 of these)
 
-grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='EXPR', bv_p=1.)
-for i in range(2, 13):
-    grammar.add_rule('EXPR', 'times_', ['EXPR', str(i)], 1.)
-for i in range(2, 11):
-    grammar.add_rule('EXPR', 'ipowf_', ['EXPR', str(i)], 1.)
+    '''
+    for n in range(1, 101):
+        for m in range(n, 101):
+            grammar.add_rule('INTERVAL', 'range_set_', [str(n), str(m)], 1.)
 
-
-'''
-Interval (there will be ~5050 of these)
-
-'''
-for n in range(1, 101):
-    for m in range(n, 101):
-        grammar.add_rule('INTERVAL', 'range_set_', [str(n), str(m)], 1.)
-
+    return grammar
 
 
 
