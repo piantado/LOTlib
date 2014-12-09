@@ -80,6 +80,61 @@ toy_single = [
 ]
 
 
+toy_1n = [
+    FunctionData(
+        input=[2],
+        output={2: (9, 3),         # should be high with 2n
+                4: (9, 3),
+                8: (9, 3),
+                3: (9, 3),         # should be high with 3n
+                9: (9, 3),
+                15: (9, 3),
+                6: (9, 3),         # should be high with 2n OR 3n
+                12: (9, 3),
+                18: (9, 3),
+                11: (9, 3),        # should be high with 1n only
+                17: (9, 3),
+                29: (9, 3)}
+    )
+]
+
+toy_2n = [
+    FunctionData(
+        input=[2],
+        output={2: (12, 0),         # should be high with 2n
+                4: (12, 0),
+                8: (12, 0),
+                3: (0, 12),         # should be high with 3n
+                9: (0, 12),
+                15: (0, 12),
+                6: (12, 0),         # should be high with 2n OR 3n
+                12: (12, 0),
+                18: (12, 0),
+                11: (0, 12),        # should be high with 1n only
+                17: (0, 12),
+                29: (0, 12)}
+    )
+]
+
+toy_3n = [
+    FunctionData(
+        input=[2],
+        output={2: (0, 12),         # should be high with 2n
+                4: (12, 0),
+                8: (12, 0),
+                3: (0, 12),         # should be high with 3n
+                9: (12, 0),
+                15: (10, 2),
+                6: (0, 12),         # should be high with 2n OR 3n
+                12: (10, 2),
+                18: (12, 0),
+                11: (10, 2),        # should be high with 1n only
+                17: (10, 2),
+                29: (10, 2)}
+    )
+]
+
+
 """
 Import Josh data
 

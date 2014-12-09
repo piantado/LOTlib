@@ -1,7 +1,29 @@
+from LOTlib import lot_iter
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
 from LOTlib.DataAndObjects import FunctionData
 
+
+def sample_grammar_hypotheses(sampler):
+    grammar_hypotheses = []
+    i = 0
+    for grammar_h in lot_iter(sampler):
+        print ['%.3f' % v for v in grammar_h.value]
+        i += 1
+        print i, '!'*120
+        print grammar_h.prior, grammar_h.likelihood, grammar_h.posterior_score
+        grammar_hypotheses.append(grammar_h)
+    return grammar_hypotheses
+
+
+def print_dist(vals, posteriors):
+    print '@'*120
+    for val, post in zip(vals, posteriors):
+        print val, '\t', post
+    print '@'*120
+
+
+# ============================================================================================================
 
 def import_data_from_mat():
     """Script for loading Joshs' number game data.

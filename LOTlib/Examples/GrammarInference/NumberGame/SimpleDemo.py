@@ -1,9 +1,5 @@
-"""
-Inference with grammar rule probabilities.
 
-"""
 import numpy as np
-from LOTlib import lot_iter
 from LOTlib.Hypotheses.GrammarHypothesis import GrammarHypothesis
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Inference.PriorSample import prior_sample
@@ -11,13 +7,12 @@ from LOTlib.Examples.NumberGame.NewVersion.Model import *
 from Model import *
 
 # Parameters for number game inference
-domain = 100
 alpha = 0.99
-n = 10000000
+n = 30
 
 # Parameters for GrammarHypothesis inference
 grammar_n = 1000
-data = toy_single
+data = toy_single_2
 
 # Variables for NumberGameHypothesis inference
 h0 = make_h0(grammar=grammar, domain=domain, alpha=alpha)
