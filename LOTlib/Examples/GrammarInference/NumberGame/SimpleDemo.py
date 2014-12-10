@@ -30,8 +30,11 @@ def run():
     for h in lot_iter(mh_sampler):
         hypotheses.add(h)
 
+    print '%'*100
+    print 'NumberGameHypotheses: '
     for h in hypotheses:
         print h, h(), h.domain, h.alpha
+    print '\n'
 
     '''What grammar probabilities will best model our human data?'''
     grammar_h0 = GrammarHypothesis(simple_test_grammar, hypotheses, proposal_step=.1, proposal_n=1)

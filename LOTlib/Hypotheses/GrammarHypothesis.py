@@ -46,8 +46,7 @@ class GrammarHypothesis(VectorHypothesis):
             if rules is None else rules
         if value is None:
             value = [rule.p for rule in self.rules]
-            print 'VALUE '
-            print value
+            print 'GH Value: ', value
         n = len(value)
         VectorHypothesis.__init__(self, value=value, n=n)
         self.prior_shape = prior_shape
@@ -112,19 +111,18 @@ class GrammarHypothesis(VectorHypothesis):
             posteriors = [sum(h.compute_posterior(d.input)) for h in hypotheses]
             Z = logsumexp(posteriors)
             weights = [(post-Z) for post in posteriors]
-            print 'POSTERIORS\n', posteriors, '\n', Z, '\n'
+            print 'POSTERIORS: ', posteriors, '\nZ: ', Z, '\n'
+            print '%'*100
 
             for o in d.output.keys():
                 # probability for yes on output `o` is sum of posteriors for hypos that contain `o`
                 print 'OUTPUT = ', o
-                print '--- ', [(post-Z) for post in posteriors]
-
-                p = logsumexp([w if o in h() else -Infinity         # TODO: can h() ever be None??
-                               for h, w in zip(hypotheses, weights)])
+                # TODO: this will break if h() is None... can this ever happen??
+                p = logsumexp([w if o in h() else -Infinity for h, w in zip(hypotheses, weights)])
                 k = d.output[o][0]         # num. yes responses
                 n = k + d.output[o][1]     # num. trials
                 bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
-                print p
+                print '==>', p
                 likelihood += bc + (k*p) + (n-k)*log1mexp(p)            # likelihood we got human output
 
         self.likelihood = likelihood
