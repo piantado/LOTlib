@@ -14,10 +14,6 @@ LOTlib_VERSION = "0.2.0"
 
 import signal
 import sys
-from Inference.MetropolisHastings import MHSampler, mh_sample
-from Inference.PriorSample import prior_sample
-from DataAndObjects import FunctionData, UtteranceData, make_all_objects
-from Evaluation import Eval
 
 SIG_INTERRUPTED = False
 def signal_handler(signal, frame):

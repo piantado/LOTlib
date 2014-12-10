@@ -194,7 +194,7 @@ class Grammar:
         :param leaves: - do we put terminals in the leaves or leave nonterminal types? This is useful in PartitionMCMC
         :return:
         """
-        for i in infrange():
+        for i in infrange(d):
             for t in self.enumerate_at_depth(i, nt=nt, leaves=leaves):
                 yield t
 

@@ -3,7 +3,7 @@
     Annealing for MH sampler, with various schedules
 
 """
-from math import sin, pi, log, pow
+from math import sin, pi, log, pow, exp
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Set up some schedule classes for how temp varies
@@ -65,7 +65,19 @@ class SinSchedule(AnnealingSchedule):
 
     def next(self):
         self.ticks += 1
-        return self.min + (self.max-self.min) * ( 1. + sin(self.ticks * 2 * pi / self.period))/2.
+        return self.min + (self.max-self.min) * (1. + sin(self.ticks * 2 * pi / self.period))/2.
+
+class LogSinSchedule(SinSchedule):
+    """
+    Let's go crazy -- search at various temperatures -- on a log ladder
+    Temperature = min + (max-min)*sin(2*pi*time/period)
+    """
+    def __init__(self, min, max, period):
+        SinSchedule.__init__(self, log(min), log(max), period)
+
+    def next(self):
+        return exp(SinSchedule.next(self))
+
 
 class InverseLogSchedule(AnnealingSchedule):
     """

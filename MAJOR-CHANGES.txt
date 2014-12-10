@@ -1,3 +1,5 @@
+        - Removed mh_sample (use MHSampler instead)
+        
 Nov 19 2014:
         - RecursiveLexicon added to enable mutual recursion. 
         - SimpleLexicon now no longer copies *all* values on proposal--new proposed one may point to old values

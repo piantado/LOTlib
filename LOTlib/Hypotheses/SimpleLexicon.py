@@ -130,6 +130,55 @@ class SimpleLexicon(Hypothesis):
         return self.prior
 
     # This combines score_utterance with likelihood so that everything is much faster
-    def compute_single_likelihood(self, di):
+    def compute_single_likelihood(self, datum):
         raise NotImplementedError
 
+
+
+
+
+
+
+
+
+
+
+
+#
+#
+# """
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Some built-in lexica
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# """
+#
+# class OutlierLikelihoodLexicon(SimpleLexicon):
+#     """
+#          Built-in outlier likelihood function
+#     """
+#
+#     def compute_single_likelihood(self, datum):
+#         if self(datum) == datum.output:
+#             return log(self.alpha)
+#         else:
+#             return log(1.0-self.alpha)
+#
+#
+#
+# class SamplingLikelihoodLexicon(SimpleLexicon):
+#     """
+#         A lexicon where the
+#
+#     """
+#
+#     def compute_single_likelihood(self, datum):
+#         ret = self(datum)
+#         matches = [w for w in self.all_words() if self.value[w] == ret ]
+#
+#         p = (1.0-self.alpha) / len(self.all_words())
+#
+#         if datum.output in matches:
+#             p += self.alpha / len(matches)
+#
+#         return log(p)
+#

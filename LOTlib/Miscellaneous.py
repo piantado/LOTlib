@@ -156,12 +156,12 @@ def display_option_summary(obj):
 # Genuine Miscellany
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def infrange():
+def infrange(n=Infinity):
     """
     yields 0, 1, 2, 3, ...
     """
     i = 0
-    while True:
+    while i<n:
         yield i
         i += 1
 
@@ -477,22 +477,10 @@ def lambdaNAN(*x): return float("nan")
 
 def scramble_sort(lst, keyfunction):
     """
-        This is a sort that randomizes order among the ones with equal keys
+        This is a sort that randomizes order among the ones with equal keys.
+        I have no idea why this is here.
     """
     keys = map(lambda li: (keyfunction(li), random(), li), lst)
     
     return map(lambda x: x[2], sorted(keys))
     
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Convenient functions on sets of hypotheses
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-"""
-def MAP(s, key="posterior_score"):
-        best_score, best_h = -Infinity, None
-        for h in s:
-                v = getattr(h,key)
-                if v > best_score:
-                        best_score, best_h = v, h
-        return best_h
-"""

@@ -16,7 +16,7 @@ Much much faster scheme code is available from Steve.
 from LOTlib.Miscellaneous import unlist_singleton
 from EvaluationException import EvaluationException
 MAX_DEPTH = 25
-MAX_LENGTH = 10
+MAX_LENGTH = 25
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # exceptions for combinators
@@ -40,8 +40,8 @@ def combinator_reduce(lst, depth=MAX_DEPTH):
 
     if not isinstance(lst, list): return lst
     elif len(lst) == 0: return list()
-    elif (depth < 0): raise CombinatorEvaluationDepthException
-    elif (len(lst) > MAX_LENGTH): CombinatorEvaluationLengthException
+    elif depth < 0: raise CombinatorEvaluationDepthException
+    elif len(lst) > MAX_LENGTH: raise CombinatorEvaluationLengthException
     else:
         op, args = lst[0], lst[1:]
         newdepth = depth-1
@@ -60,7 +60,7 @@ def combinator_reduce(lst, depth=MAX_DEPTH):
             rest = map(lambda x: unlist_singleton(combinator_reduce(x, newdepth)), args)
 
             if len(rest) == 0: return lst
-            else:              return [op,]+rest
+            else:              return [op, ] + rest
 
 if __name__ == "__main__":
 

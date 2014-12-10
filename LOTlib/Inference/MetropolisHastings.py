@@ -104,6 +104,8 @@ class MHSampler():
             for _ in xrange(self.skip+1):
 
                 self.proposal, fb = self.proposer(self.current_sample)
+                assert self.proposal is not self.current_sample, "*** Proposal cannot be the same as the current sample!"
+                assert self.proposal.value is not self.current_sample.value, "*** Proposal cannot be the same as the current sample!"
 
                 # either compute this, or use the memoized version
                 np, nl = self.compute_posterior(self.proposal, self.data)
@@ -131,13 +133,6 @@ class MHSampler():
 
             self.samples_yielded += 1
             return self.current_sample
-
-class mh_sample(MHSampler):
-    """
-    Just temporarily, this will prevent code from breaking, from the switch to MHSampler
-    """
-    pass
-
 
 if __name__ == "__main__":
 
