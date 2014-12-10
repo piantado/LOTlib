@@ -46,6 +46,8 @@ class GrammarHypothesis(VectorHypothesis):
             if rules is None else rules
         if value is None:
             value = [rule.p for rule in self.rules]
+            print 'VALUE '
+            print value
         n = len(value)
         VectorHypothesis.__init__(self, value=value, n=n)
         self.prior_shape = prior_shape
@@ -117,6 +119,7 @@ class GrammarHypothesis(VectorHypothesis):
                 k = d.output[o][0]         # num. yes responses
                 n = k + d.output[o][1]     # num. trials
                 bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
+                print p
                 likelihood += bc + (k*p) + (n-k)*log1mexp(p)            # likelihood we got human output
 
         self.likelihood = likelihood

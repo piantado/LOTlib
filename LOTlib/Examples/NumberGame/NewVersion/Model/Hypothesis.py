@@ -60,5 +60,6 @@ class NumberGameHypothesis(LOTHypothesis):
 
         return self.value_set
 
-
+    def __copy__(self):
+        return NumberGameHypothesis(self.grammar, alpha=self.alpha, domain=self.domain)
 

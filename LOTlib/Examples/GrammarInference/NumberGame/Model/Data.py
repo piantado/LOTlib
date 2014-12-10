@@ -93,8 +93,8 @@ toy_1n = [
                 12: (9, 3),
                 18: (9, 3),
                 11: (9, 3),        # should be high with 1n only
-                17: (9, 3),
-                29: (9, 3)}
+                13: (9, 3),
+                17: (9, 3)}
     )
 ]
 
@@ -111,8 +111,8 @@ toy_2n = [
                 12: (12, 0),
                 18: (12, 0),
                 11: (0, 12),        # should be high with 1n only
-                17: (0, 12),
-                29: (0, 12)}
+                13: (0, 12),
+                17: (0, 12)}
     )
 ]
 
@@ -120,17 +120,17 @@ toy_3n = [
     FunctionData(
         input=[2],
         output={2: (0, 12),         # should be high with 2n
-                4: (12, 0),
-                8: (12, 0),
-                3: (0, 12),         # should be high with 3n
+                4: (0, 12),
+                8: (0, 12),
+                3: (12, 0),         # should be high with 3n
                 9: (12, 0),
-                15: (10, 2),
-                6: (0, 12),         # should be high with 2n OR 3n
-                12: (10, 2),
+                15: (12, 0),
+                6: (12, 0),         # should be high with 2n OR 3n
+                12: (12, 0),
                 18: (12, 0),
-                11: (10, 2),        # should be high with 1n only
-                17: (10, 2),
-                29: (10, 2)}
+                11: (0, 12),        # should be high with 1n only
+                13: (0, 12),
+                17: (0, 12)}
     )
 ]
 
