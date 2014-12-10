@@ -2,7 +2,7 @@
 Map output number (e.g. 8) to a number of yes/no's.  E.g. (10, 2) ~ (10 yes, 2 no).
 
 """
-from LOTlib import FunctionData
+from LOTlib.DataAndObjects import FunctionData
 from Utilities import import_data_from_mat
 
 

@@ -139,19 +139,6 @@ class MHSampler():
             self.samples_yielded += 1
             return self.current_sample
 
-<<<<<<< HEAD
-=======
-
-
-
-class mh_sample(MHSampler):
-    """
-    Just temporarily, this will prevent code from breaking, from the switch to MHSampler
-    """
-    pass
-
-
->>>>>>> 9739dd5b4219b5036503efb440f678056daac9d2
 if __name__ == "__main__":
 
     from LOTlib.Examples.Number.Model import generate_data, NumberExpression, grammar, get_knower_pattern
