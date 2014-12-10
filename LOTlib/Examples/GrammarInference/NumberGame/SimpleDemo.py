@@ -8,7 +8,7 @@ from Model import *
 
 # Parameters for number game inference
 alpha = 0.99
-n = 30
+n = 1000
 domain = 20
 
 # Parameters for GrammarHypothesis inference
@@ -27,9 +27,11 @@ def run():
     """Run demo"""
     '''Generate number game hypotheses'''
     hypotheses = set()
-    for h in lot_iter(prior_sampler):
+    for h in lot_iter(mh_sampler):
         hypotheses.add(h)
-        print h, h(), h.domain
+
+    for h in hypotheses:
+        print h, h(), h.domain, h.alpha
 
     '''What grammar probabilities will best model our human data?'''
     grammar_h0 = GrammarHypothesis(simple_test_grammar, hypotheses, proposal_step=.1, proposal_n=1)

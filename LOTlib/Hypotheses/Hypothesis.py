@@ -115,9 +115,9 @@ class Hypothesis(object):
             l = self.compute_likelihood(d, **kwargs)
         else:
             l = -Infinity   # This *could* be 0.0 if we wanted. Not clear what is best.
-            
-        self.update_posterior()
-        return [p,l]
+
+        self.posterior_score = p + l
+        return [p, l]
 
     def update_posterior(self):
         """So we can save on space when writing this out in every hypothesis."""
