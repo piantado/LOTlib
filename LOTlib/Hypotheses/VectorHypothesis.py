@@ -18,9 +18,8 @@ class VectorHypothesis(Hypothesis):
 
     def propose(self):
         """new value is sampled from a normal centered @ old values, w/ proposal as covariance (inverse?)"""
-        # Note: Does not copy proposal
         newv = numpy.random.multivariate_normal(self.value, self.proposal)
-        return type(self)(value=newv, n=self.n, proposal=self.proposal), 0.0  # symmetric proposals
+        return type(self)(value=newv, n=self.n, proposal=self.proposal), 0.0
 
     def conditional_distribution(self, data, value_index, vals=numpy.arange(0, 2, .2)):
         """Compute posterior values for this grammar, varying specified value over a specified set.
@@ -31,7 +30,8 @@ class VectorHypothesis(Hypothesis):
             vals(list): List of float values.  E.g. [0,.2,.4, ..., 2.]
 
         Returns:
-            list: List of posterior scores, where each item corresponds to an item in `vals` argument.
+            list: List of [prior, likelihood, posterior], where each item corresponds to an item in the
+            `vals` argument.
 
         """
         dist = []
@@ -40,8 +40,9 @@ class VectorHypothesis(Hypothesis):
             value = copy.copy(self.value)
             value[value_index] = p
             self.set_value(value)
-            dist.append(self.compute_posterior(data))
+            p, l = self.compute_posterior(data, updateflag=False)
+            dist.append([p, l, p+l])
 
         self.set_value(old_value)
-        return dist
+        return vals, dist
 

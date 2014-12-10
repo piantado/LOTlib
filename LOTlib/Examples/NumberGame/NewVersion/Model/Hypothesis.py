@@ -19,6 +19,7 @@ class NumberGameHypothesis(LOTHypothesis):
         LOTHypothesis.__init__(self, grammar, args=[], **kwargs)
         self.alpha = alpha
         self.domain = domain
+        self.value_set = None
 
     def compute_likelihood(self, data, updateflag=True, **kwargs):
         """Likelihood of specified data being produced by this hypothesis.
@@ -28,21 +29,38 @@ class NumberGameHypothesis(LOTHypothesis):
         """
         s = self()      # set of numbers corresponding to this hypothesis
                         # NOTE: This may be None if the hypothesis has too many nodes
-        if isinstance(s, list):
-            s = [item for item in s if item <= self.domain]
         error_p = (1.-self.alpha) / self.domain
 
         def compute_single_likelihood(datum, updateflag=True):
             if s is not None and datum in s:
-                likelihood = log(self.alpha/len(s) + error_p)
+                return log(self.alpha/len(s) + error_p)
             else:
-                likelihood = log(error_p)
-            return likelihood
+                return log(error_p)
 
-        likelihoods = [compute_single_likelihood(d, updateflag=True) for d in data]
-        self.likelihood = sum(likelihoods) / self.likelihood_temperature
+        likelihoods = [compute_single_likelihood(d, updateflag=updateflag) for d in data]
+        likelihood = sum(likelihoods) / self.likelihood_temperature
         if updateflag:
+            self.likelihood = likelihood
             self.update_posterior()
-        return self.likelihood
+        return likelihood
+
+    def compile_function(self):
+        self.value_set = None
+        return LOTHypothesis.compile_function(self)
+
+    def __call__(self, *args, **kwargs):
+        if self.value_set is None:
+            value_set = LOTHypothesis.__call__(self)
+            # Restrict our concept to being within our domain; also handle 'None' call values
+            if isinstance(value_set, set):
+                value_set = [x for x in value_set if x <= self.domain]
+            else:
+                value_set = []
+            self.value_set = value_set
+
+        return self.value_set
+
+    def __copy__(self):
+        return NumberGameHypothesis(self.grammar, alpha=self.alpha, domain=self.domain)
 
 

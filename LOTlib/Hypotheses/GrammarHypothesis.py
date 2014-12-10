@@ -17,9 +17,10 @@ Methods:
 
 
 """
-import numpy as np
+import copy
 from math import exp, log
 import random
+import numpy as np
 from scipy.stats import gamma
 from LOTlib.Hypotheses.VectorHypothesis import VectorHypothesis
 from LOTlib.Miscellaneous import logplusexp, logsumexp, log1mexp, gammaln, Infinity
@@ -37,13 +38,15 @@ class GrammarHypothesis(VectorHypothesis):
         value (list): Vector of numbers corresponding to the items in `rules`.
 
     """
-    def __init__(self, grammar, hypotheses, value=None, prior_shape=2., prior_scale=1.,
-                 propose_n=1, propose_step=.1, **kwargs):
-        self.rules = [rule for sublist in grammar.rules.values() for rule in sublist]
+    def __init__(self, grammar, hypotheses, rules=None, value=None,
+                 prior_shape=2., prior_scale=1., propose_n=1, propose_step=.1, **kwargs):
         self.grammar = grammar
         self.hypotheses = hypotheses
+        self.rules = [rule for sublist in grammar.rules.values() for rule in sublist] \
+            if rules is None else rules
         if value is None:
             value = [rule.p for rule in self.rules]
+            print 'GH Value: ', value
         n = len(value)
         VectorHypothesis.__init__(self, value=value, n=n)
         self.prior_shape = prior_shape
@@ -88,7 +91,7 @@ class GrammarHypothesis(VectorHypothesis):
     def compute_likelihood(self, data, **kwargs):
         """Use hypotheses to estimate likelihood of generating the data.
 
-        This is taken as a weighted sum over all hypotheses.
+        This is taken as a weighted sum over all hypotheses, sum { p(h | X) }
 
         Args:
             data(list): List of FunctionData objects.
@@ -97,33 +100,36 @@ class GrammarHypothesis(VectorHypothesis):
             float: Likelihood summed over all outputs, summed over all hypotheses & weighted for each
             hypothesis by posterior score p(h|X).
 
+        TODO:
+            - vectorize
+
         """
-        # TODO: likelihood we get human input, this should not be calculated this way...
-        # TODO: ...For example, (11 yes, 1 no) is equally as close to (12y, 0n) as (1y, 11n)
         hypotheses = self.hypotheses
         likelihood = 0.0
 
         for d in data:
-            # TODO: should this be likelihoods instead of posteriors?
-            posteriors = [h.compute_posterior(d.input, updateflag=True)[0] for h in hypotheses]
+            posteriors = [sum(h.compute_posterior(d.input)) for h in hypotheses]
             Z = logsumexp(posteriors)
+            weights = [(post-Z) for post in posteriors]
+            print 'POSTERIORS: ', posteriors, '\nZ: ', Z, '\n'
+            print '%'*100
 
             for o in d.output.keys():
                 # probability for yes on output `o` is sum of posteriors for hypos that contain `o`
-                p = logsumexp([(post-Z) if (not h() is None) and (o in h()) else -Infinity
-                               for h, post in zip(hypotheses,posteriors)])
-
+                print 'OUTPUT = ', o
+                # TODO: this will break if h() is None... can this ever happen??
+                p = logsumexp([w if o in h() else -Infinity for h, w in zip(hypotheses, weights)])
                 k = d.output[o][0]         # num. yes responses
                 n = k + d.output[o][1]     # num. trials
                 bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
-                likelihood += bc + (k*p) + (n-k)*log1mexp(p)  # likelihood we got human output
+                print '==>', p
+                likelihood += bc + (k*p) + (n-k)*log1mexp(p)            # likelihood we got human output
 
         self.likelihood = likelihood
         self.update_posterior()
-        print self.prior, likelihood, self.posterior_score
         return likelihood
 
-    def rule_distribution(self, data, rule_name, vals=np.arange(0, 2, .2)):
+    def rule_distribution(self, data, rule_name, vals=np.arange(0, 2, .1)):
         """Compute posterior values for this grammar, varying specified rule over a set of values."""
         rule_index = self.get_rule_index(rule_name)
         return self.conditional_distribution(data, rule_index, vals=vals)
@@ -147,9 +153,16 @@ class GrammarHypothesis(VectorHypothesis):
         rule_index = self.get_rule_index(rule_name)
         return self.get_rule_by_index(rule_index)
 
-    def get_rules(self, rule_name):
-        """Get all GrammarRules associated with this rule name."""
-        return [r for r in self.rules if r.name == rule_name]
+    def get_rules(self, rule_name='XXX', rule_nt='XXX', rule_to='XXX'):
+        """Get all GrammarRules associated with this rule name, 'nt' type, and/or 'to' types."""
+        rules = self.rules
+        if rule_name is not 'XXX':
+            rules = [r for r in rules if r.name == rule_name]
+        if rule_nt is not 'XXX':
+            rules = [r for r in rules if r.nt == rule_nt]
+        if rule_to is not 'XXX':
+            rules = [r for r in rules if r.to == rule_to]
+        return rules
 
     def get_rule_by_index(self, rule_index):
         """Get the GrammarRule at this index."""
@@ -164,8 +177,15 @@ class GrammarHypothesis(VectorHypothesis):
     def __copy__(self):
         """Make a shallow copy of this GrammarHypothesis."""
         return GrammarHypothesis(
-            self.grammar, self.hypotheses,
-            value=self.value, n=self.n, proposal=self.proposal,
+            self.grammar, self.hypotheses, rules=copy.copy(self.rules),
+            value=copy.copy(self.value), n=self.n, proposal=copy.copy(self.proposal),
             prior_shape=self.prior_shape, prior_scale=self.prior_scale,
             propose_n=self.propose_n, propose_step=self.propose_step
         )
+
+    def print_best_hypotheses(self, n=10):
+        hypotheses = self.hypotheses
+        sorted_hypos = sorted(hypotheses, key=lambda x: x.posterior_score)
+        for h in sorted_hypos[-n:]:
+            print str(h)
+            print h.posterior_score, h.likelihood, h.prior
