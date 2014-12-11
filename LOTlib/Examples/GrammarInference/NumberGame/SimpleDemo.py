@@ -11,7 +11,7 @@ n = 1000
 domain = 20
 
 # Parameters for GrammarHypothesis inference
-grammar_n = 100000
+grammar_n = 10000
 data = toy_2n
 
 # Variables for NumberGameHypothesis inference
@@ -37,6 +37,9 @@ def run():
     '''What grammar probabilities will best model our human data?'''
     grammar_h0 = GrammarHypothesis(simple_test_grammar, hypotheses, proposal_step=.1, proposal_n=1)
 
+    for r in grammar_h0.rules:
+        print r
+
     '''print distribution over power rule:  [prior, likelihood, posterior]'''
     # vals, posteriors = grammar_h0.rule_distribution(data, 'ipowf_', np.arange(0.1, 5., 0.1))
     # print_dist(vals, posteriors)
@@ -51,8 +54,8 @@ def run():
     sorted_g_hypos = sorted(grammar_hypotheses, key=lambda x: x.posterior_score)
     for gh in sorted_g_hypos[-10:]:
         print '*'*90
-        print str(gh)
-        print gh.prior, gh.likelihood, gh.posterior_score
+        print 'Vector: ', str(gh)
+        print 'Prior: ', gh.prior, '\tLikelihood: ', gh.likelihood,'\tPostScore: ', gh.posterior_score
 
 
 if __name__ == "__main__":
