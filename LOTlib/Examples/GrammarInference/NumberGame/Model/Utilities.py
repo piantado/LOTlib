@@ -8,10 +8,11 @@ def sample_grammar_hypotheses(sampler):
     grammar_hypotheses = []
     i = 0
     for grammar_h in lot_iter(sampler):
-        print ['%.3f' % v for v in grammar_h.value]
         i += 1
-        print i, '!'*120
-        print grammar_h.prior, grammar_h.likelihood, grammar_h.posterior_score
+        if i % (sampler.steps/20) == 0:
+            print ['%.3f' % v for v in grammar_h.value]
+            print i, '!'*120
+            print grammar_h.prior, grammar_h.likelihood, grammar_h.posterior_score
         grammar_hypotheses.append(grammar_h)
     return grammar_hypotheses
 

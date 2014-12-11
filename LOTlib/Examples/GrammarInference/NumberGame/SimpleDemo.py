@@ -1,5 +1,4 @@
 
-import numpy as np
 from LOTlib.Hypotheses.GrammarHypothesis import GrammarHypothesis
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Inference.PriorSample import prior_sample
@@ -12,12 +11,11 @@ n = 1000
 domain = 20
 
 # Parameters for GrammarHypothesis inference
-grammar_n = 1000
-data = toy_2n
+grammar_n = 10000
+data = toy_3n
 
 # Variables for NumberGameHypothesis inference
 h0 = make_h0(grammar=simple_test_grammar, domain=domain, alpha=alpha)
-prior_sampler = prior_sample(h0, data[0].input, N=n)
 mh_sampler = MHSampler(h0, data[0].input, n)
 
 
@@ -45,9 +43,15 @@ def run():
     #visualize_dist(vals, posteriors, 'union_')
 
     '''grammar hypothesis inference'''
-    #prior_grammar_sampler = prior_sample(grammar_h0, data, grammar_n)
     mh_grammar_sampler = MHSampler(grammar_h0, data, grammar_n, trace=False)
     grammar_hypotheses = sample_grammar_hypotheses(mh_grammar_sampler)
+
+    print '%'*100, '\nTOP GRAMMAR VECTORS:'
+    # print sum(gh.value)
+    sorted_g_hypos = sorted(grammar_hypotheses, key=lambda x: x.posterior_score)
+    for gh in sorted_g_hypos[-10:]:
+        print str(gh)
+        print gh.prior, gh.likelihood, gh.posterior_score
 
 
 if __name__ == "__main__":

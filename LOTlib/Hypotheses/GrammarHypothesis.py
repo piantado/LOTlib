@@ -111,18 +111,19 @@ class GrammarHypothesis(VectorHypothesis):
             posteriors = [sum(h.compute_posterior(d.input)) for h in hypotheses]
             Z = logsumexp(posteriors)
             weights = [(post-Z) for post in posteriors]
-            print 'POSTERIORS: ', posteriors, '\nZ: ', Z, '\n'
-            print '%'*100
+            #print 'POSTERIORS: ', posteriors, '\nZ: ', Z, '\n', 'WEIGHTS: ', weights
+            #print '%'*100
 
             for o in d.output.keys():
                 # probability for yes on output `o` is sum of posteriors for hypos that contain `o`
-                print 'OUTPUT = ', o
+                #print 'OUTPUT = ', o
                 # TODO: this will break if h() is None... can this ever happen??
                 p = logsumexp([w if o in h() else -Infinity for h, w in zip(hypotheses, weights)])
+                p = -1e-10 if p >= 0 else p      #
                 k = d.output[o][0]         # num. yes responses
                 n = k + d.output[o][1]     # num. trials
                 bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
-                print '==>', p
+                #print '==>', p
                 likelihood += bc + (k*p) + (n-k)*log1mexp(p)            # likelihood we got human output
 
         self.likelihood = likelihood
