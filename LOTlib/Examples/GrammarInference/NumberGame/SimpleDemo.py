@@ -11,7 +11,7 @@ n = 1000
 domain = 20
 
 # Parameters for GrammarHypothesis inference
-grammar_n = 10000
+grammar_n = 50000
 data = toy_2n
 
 # Variables for NumberGameHypothesis inference

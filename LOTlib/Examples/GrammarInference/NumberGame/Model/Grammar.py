@@ -15,6 +15,7 @@ simple_test_grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='X', bv_p=1
 simple_test_grammar.add_rule('EXPR', 'times_', ['X', '1'], 1.)
 simple_test_grammar.add_rule('EXPR', 'times_', ['X', '2'], 1.)
 simple_test_grammar.add_rule('EXPR', 'times_', ['X', '3'], 1.)
+simple_test_grammar.add_rule('EXPR', 'times_', ['X', '7'], 1.)
 
 
 
