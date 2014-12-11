@@ -11,8 +11,8 @@ n = 1000
 domain = 20
 
 # Parameters for GrammarHypothesis inference
-grammar_n = 10000
-data = toy_3n
+grammar_n = 100000
+data = toy_2n
 
 # Variables for NumberGameHypothesis inference
 h0 = make_h0(grammar=simple_test_grammar, domain=domain, alpha=alpha)
@@ -50,6 +50,7 @@ def run():
     # print sum(gh.value)
     sorted_g_hypos = sorted(grammar_hypotheses, key=lambda x: x.posterior_score)
     for gh in sorted_g_hypos[-10:]:
+        print '*'*90
         print str(gh)
         print gh.prior, gh.likelihood, gh.posterior_score
 
