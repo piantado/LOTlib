@@ -48,6 +48,7 @@ class GrammarHypothesis(VectorHypothesis):
         self.prior_scale = prior_scale
         self.propose_n = propose_n
         self.propose_step = propose_step
+        self.propose_idxs = self.get_propose_idxs()
         self.prior = self.compute_prior()
 
     def propose(self):
@@ -60,23 +61,14 @@ class GrammarHypothesis(VectorHypothesis):
 
         """
         step = np.random.multivariate_normal([0.]*self.n, self.proposal) * self.propose_step
-        newv = copy.copy(self.value)
-
-        # get list of indexes to alter -- we want to skip rules that have no alternatives/siblings
-        proposal_indexes = range(self.n)
-        nonterminals = self.grammar.nonterminals()
-        for nt in nonterminals:
-            idxs, r = self.get_rules(rule_nt=nt)
-            if len(idxs) == 1:
-                proposal_indexes.remove(idxs[0])
+        c = self.__copy__()
 
         # randomly sample from our allowable indexes
-        for i in random.sample(proposal_indexes, self.propose_n):
-            if newv[i] + step[i] > 0.0:
-                newv[i] += step[i]
+        for i in random.sample(self.propose_idxs, self.propose_n):
+            if c.value[i] + step[i] > 0.0:
+                c.value[i] += step[i]
 
-        c = self.__copy__()
-        c.set_value(newv)
+        c.set_value(c.value)
         return c, 0.0
 
     def compute_prior(self):
@@ -163,6 +155,16 @@ class GrammarHypothesis(VectorHypothesis):
         if rule_to is not 'XXX':
             rules = [(i, r) for i, r in rules if r.to == rule_to]
         return zip(*rules) if len(rules)>0 else [(), ()]
+
+    def get_propose_idxs(self):
+        """get list of indexes to alter -- we want to skip rules that have no alternatives/siblings"""
+        proposal_indexes = range(self.n)
+        nonterminals = self.grammar.nonterminals()
+        for nt in nonterminals:
+            idxs, r = self.get_rules(rule_nt=nt)
+            if len(idxs) == 1:
+                proposal_indexes.remove(idxs[0])
+        return proposal_indexes
 
     def __copy__(self):
         """Make a shallow copy of this GrammarHypothesis."""

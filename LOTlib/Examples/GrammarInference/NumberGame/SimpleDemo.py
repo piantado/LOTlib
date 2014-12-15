@@ -11,8 +11,8 @@ n = 1000
 domain = 20
 
 # Parameters for GrammarHypothesis inference
-grammar_n = 50000
-data = toy_2n
+grammar_n = 10000
+data = toy_3n
 
 # Variables for NumberGameHypothesis inference
 h0 = make_h0(grammar=simple_test_grammar, domain=domain, alpha=alpha)
