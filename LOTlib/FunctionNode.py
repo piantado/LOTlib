@@ -10,10 +10,7 @@ from copy import copy, deepcopy
 from math import log
 from random import random
 from LOTlib.Miscellaneous import None2Empty, lambdaTrue, Infinity
-try:
-    import graphviz
-except ImportError:
-    pass
+
 
 #=============================================================================================================
 #  Helper functions
@@ -30,102 +27,6 @@ def cleanFunctionNodeString(x):
     s = re.sub("lambda", u"\u03BB", str(x))  # make lambdas the single char
     s = re.sub("_", '', s)  # remove underscores
     return s
-
-
-#=============================================================================================================
-# String casting functions
-#=============================================================================================================
-
-def schemestring(x, d=0, bv_names=None):
-    """Outputs a scheme string in (lambda (x) (+ x 3)) format.
-
-    Args:
-        bv_names: A dictionary from the uuids to nicer names.
-
-    """
-    if isinstance(x, str):
-        return x
-    elif isFunctionNode(x):
-
-        if bv_names is None:
-            bv_names = dict()
-
-        name = x.name
-        if isinstance(x, BVUseFunctionNode):
-            name = bv_names.get(x.name, x.name)
-
-        if x.args is None:
-            return name
-        else:
-            if x.args is None:
-                return name
-            elif isinstance(x, BVAddFunctionNode):
-                assert name is 'lambda'
-                return "(%s (%s) %s)" % (name, x.added_rule.name,
-                                         map(lambda a: schemestring(a, d+1, bv_names=bv_names), x.args))
-            else:
-                return "(%s %s)" % (name, map(lambda a: schemestring(a,d+1, bv_names=bv_names), x.args))
-
-def pystring(x, d=0, bv_names=None):
-    """Output a string that can be evaluated by python; gives bound variables names based on their depth.
-
-    Args:
-        bv_names: A dictionary from the uuids to nicer names.
-
-    """
-    if isinstance(x, str): 
-        return x 
-    elif isFunctionNode(x):
-        
-        if bv_names is None:
-            bv_names = dict()    
-        
-        if x.name == "if_": # this gets translated
-            assert len(x.args) == 3, "if_ requires 3 arguments!"
-            # This converts from scheme (if bool s t) to python (s if bool else t)
-            b = pystring(x.args[0], d=d+1, bv_names=bv_names)
-            s = pystring(x.args[1], d=d+1, bv_names=bv_names)
-            t = pystring(x.args[2], d=d+1, bv_names=bv_names)
-            return '( %s if %s else %s )' % (s, b, t)
-        elif x.name == '':
-            assert len(x.args) == 1, "Null names must have exactly 1 argument"
-            return pystring(x.args[0], d=d, bv_names=bv_names)
-        elif x.name == "apply_":
-            assert x.args is not None and len(x.args)==2, "Apply requires exactly 2 arguments"
-            #print ">>>>", self.args
-            return '( %s )( %s )' % tuple(map(lambda x: pystring(x, d=d, bv_names=bv_names), x.args))
-        elif x.name == "or_sc_": # short-circuit or
-            return "(%s)" % ' or '.join(map(lambda x: pystring(x, d=d, bv_names=bv_names), x.args))
-        elif x.name == "and_sc_": # short-circuit and
-            return "(%s)" % ' and '.join(map(lambda x: pystring(x, d=d, bv_names=bv_names), x.args))
-        elif x.name == 'lambda':
-            # On a lambda, we must add the introduced bv, and then remove it again afterwards
-            
-            bvn = ''
-            if isinstance(x, BVAddFunctionNode) and x.added_rule is not None:
-                bvn = x.added_rule.bv_prefix+str(d)
-                bv_names[x.added_rule.name] = bvn
-            
-            assert len(x.args) == 1
-            ret = 'lambda %s: %s' % ( bvn, pystring(x.args[0], d=d+1, bv_names=bv_names) )
-            
-            if x.added_rule is not None:
-                del bv_names[x.added_rule.name]
-                
-            return ret  
-        else:
-            
-            name = x.name
-            if isinstance(x, BVUseFunctionNode):
-                name = bv_names.get(x.name, x.name) 
-        
-            if x.args is None:             
-                return name
-            else:
-                return name+'('+', '.join(map(lambda a: pystring(a, d=d+1, bv_names=bv_names), x.args))+')'
-
-
-
 
 #=============================================================================================================
 # FunctionNode main class
@@ -310,60 +211,6 @@ class FunctionNode(object):
         else:
             assert False, "FunctionNode must only use cons to call liststring!"
 
-    def make_dot(self, ls=None, n='0', parent_n=None):
-        """Setup self.dot as a graphviz / DOT format graph for this FunctionNode.
-
-        We proceed through each node in the graph, creating unique names for each child by concat'ing
-        child int to the parent string. E.g. node '01' may have children '010', '011', '012', ...
-
-        This is done because in DOT format we need to enumerate edges between nodes, so we need a unique
-        string name to draw edges. For example, node name 'plus_' will be ambiguous for '(plus_ (plus_ ...'
-
-        Args:
-            ls (list): List of items... the first item in the list is either the operator, or the only
-                thing in the list.
-            n (str): Name of this FunctionNode.
-            parent_n (str): Name of parent FunctionNode.
-
-        Requires:
-            graphviz: install graphviz from www.graphviz.org, then enter::  $ pip install graphviz
-
-        References:
-            en.wikipedia.org/wiki/DOT_(graph_description_language)
-            pypi.python.org/pypi/graphviz
-
-        """
-        # Initialize
-        if not hasattr(self, 'dot'):
-            self.dot = graphviz.Digraph(comment='The DOT Graph')
-        if ls is None:
-            ls = self.as_list()[0]
-        this_n = n
-        d = self.dot
-
-        # handle items like 'bound=100' (are there others that will be like this?
-        if not isinstance(ls, list) and (parent_n is None):
-            if not (parent_n is None):
-                d.node(this_n, label=str(ls), shape='square')
-                d.edge(parent_n, this_n, style='dotted')
-
-        if isinstance(ls, list):
-            # node for this FunctionNode
-            if len(ls) >= 1:
-                d.node(this_n, label=str(ls[0]), shape='plaintext')
-                if not (parent_n is None):
-                    d.edge(parent_n, this_n, style='solid')
-            # children FunctionNodes...
-            if len(ls) > 1:
-                for i in range(1, len(ls)):
-                    # Recursive call
-                    self.make_dot(ls[i], n=this_n+str(i), parent_n=this_n)
-
-    def dot_string(self):
-        """Return DOT graph format string; see make_dot docstring."""
-        if not hasattr(self, 'dot'):
-            self.make_dot()
-        return self.dot.source
 
     # NOTE: in the future we may want to change this to do fancy things
     def __str__(self):
@@ -829,3 +676,9 @@ class BVUseFunctionNode(FunctionNode):
         return fn
 
 
+
+"""
+NOTE: This must come at the end to meet dependencies
+"""
+
+from LOTlib.Visualization.Stringification import pystring

@@ -1,4 +1,8 @@
         - Removed mh_sample (use MHSampler instead)
+        - moved FunctionNode->String functions to Visualization.Stringification, as well as FunctionNode->Dot
+        - Moved FiniteBestSet to LOTlib.Utilities
+        - created MCMCSummary
+        
         
 Nov 19 2014:
         - RecursiveLexicon added to enable mutual recursion. 

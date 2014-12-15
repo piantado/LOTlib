@@ -4,8 +4,6 @@
 
     TODO:
         - Make the.valueicon be indexable like an array/dict, rather than having to say h.value[...] say h[..]
-
-
 """
 from copy import copy
 from inspect import isroutine
@@ -17,11 +15,10 @@ class SimpleLexicon(Hypothesis):
     """
         A class for mapping words to hypotheses.
 
-        By itself this has no likelihood function.
-
-        TODO: we can probably make this faster by not passing around the context sets so much.
-
+        This defaultly assumes that the data comes from sampling with probability alpha from
+        the true utteranecs
     """
+
     def __init__(self, make_hypothesis, words=(), **kwargs):
         """
             hypothesis - a function to generate hypotheses
@@ -129,9 +126,6 @@ class SimpleLexicon(Hypothesis):
         self.posterior_score = self.prior + self.likelihood
         return self.prior
 
-    # This combines score_utterance with likelihood so that everything is much faster
-    def compute_single_likelihood(self, datum):
-        raise NotImplementedError
 
 
 
@@ -142,43 +136,3 @@ class SimpleLexicon(Hypothesis):
 
 
 
-
-
-#
-#
-# """
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Some built-in lexica
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# """
-#
-# class OutlierLikelihoodLexicon(SimpleLexicon):
-#     """
-#          Built-in outlier likelihood function
-#     """
-#
-#     def compute_single_likelihood(self, datum):
-#         if self(datum) == datum.output:
-#             return log(self.alpha)
-#         else:
-#             return log(1.0-self.alpha)
-#
-#
-#
-# class SamplingLikelihoodLexicon(SimpleLexicon):
-#     """
-#         A lexicon where the
-#
-#     """
-#
-#     def compute_single_likelihood(self, datum):
-#         ret = self(datum)
-#         matches = [w for w in self.all_words() if self.value[w] == ret ]
-#
-#         p = (1.0-self.alpha) / len(self.all_words())
-#
-#         if datum.output in matches:
-#             p += self.alpha / len(matches)
-#
-#         return log(p)
-#

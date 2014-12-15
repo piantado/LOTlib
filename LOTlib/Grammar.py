@@ -11,7 +11,6 @@ from LOTlib.GrammarRule import GrammarRule, BVAddGrammarRule
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
 from LOTlib.BVRuleContextManager import BVRuleContextManager
 
-
 class Grammar:
     """
             A PCFG-ish class that can handle special types of rules:
@@ -214,7 +213,6 @@ class Grammar:
             yield nt
             raise StopIteration
 
-        # TODO: THIS MIGHT HAVE TO GO INSIDE THE LOOP?
         Z = log(sum([r.p for r in self.rules[nt]]))
 
         if d == 0:
@@ -306,9 +304,6 @@ class Grammar:
                 NOTE: This does NOT take into account insert/delete
                 NOTE: Not so simple because we must count multiple paths
         """
-
-        # TODO: Can we remove yZ?
-        # TODO: TEST THIS:
 
         # Wrap for hypotheses instead of trees
         if isinstance(x, Hypothesis):

@@ -1,6 +1,6 @@
 from copy import copy
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-from LOTlib.Hypotheses.WeightedLexicon import WeightedLexicon
+from LOTlib.Hypotheses.Lexicon.WeightedLexicon import WeightedLexicon
 import Grammar as G
 
 

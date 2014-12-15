@@ -91,7 +91,6 @@ def exists_(F,S): return exists(F,S)
 def exists(F,S):
     #if not isinstance(S,list): return None
     for s in S:
-        print s
         if F(s): return True
     return False
 

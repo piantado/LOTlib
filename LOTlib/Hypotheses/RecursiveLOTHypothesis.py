@@ -59,7 +59,7 @@ class RecursiveLOTHypothesis(LOTHypothesis):
             return (lambda *args: raise_exception(TooBigException))
         else:
             try:
-                # Here, we evaluate it, and then defaultly pass recursive_call as the first "Recurse"
+                # Here, we evaluate it, and then defaultly pass recursive_call as the first "recurse"
                 f = evaluate_expression(str(self))
                 return lambda *args: f(self.recursive_call, *args)
             except Exception as e:

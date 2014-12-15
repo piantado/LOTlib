@@ -1,7 +1,7 @@
 from copy import copy
 from math import log
 
-from LOTlib.Hypotheses.WeightedLexicon import WeightedLexicon
+from LOTlib.Hypotheses.Lexicon.WeightedLexicon import WeightedLexicon
 from LOTlib.DataAndObjects import UtteranceData
 from LOTlib.Examples.CCG.Model.Utilities import can_compose
 from LOTlib.DataAndObjects import Context

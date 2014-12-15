@@ -4,6 +4,8 @@ of a SimpleLexicon that allows word definitions to call other word definitions.
 
 In the future, we should see how we could invent predicates from nothing in order to explain data (via Ystar)
 
+TODO: RE-WRITE TO USE UTTERANCEDATA
+
 """
 from LOTlib import lot_iter
 from LOTlib.DataAndObjects import FunctionData

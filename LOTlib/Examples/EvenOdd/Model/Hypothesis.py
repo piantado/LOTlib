@@ -1,5 +1,5 @@
 from math import log
-from LOTlib.Hypotheses.RecursiveLexicon import RecursiveLexicon
+from LOTlib.Hypotheses.Lexicon.RecursiveLexicon import RecursiveLexicon
 from LOTlib.Evaluation.EvaluationException import RecursionDepthException
 
 class EvenOddLexicon(RecursiveLexicon):

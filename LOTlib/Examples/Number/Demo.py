@@ -16,6 +16,7 @@ import LOTlib.Inference.ParallelTempering
 import LOTlib.Inference.TemperedTransitions
 from LOTlib.Miscellaneous import q, qq
 from LOTlib.Examples.Number.Model import *
+from LOTlib.MCMCSummary.TopN import TopN
 
 LARGE_DATA_SIZE = 10000 # this is what we compute the average LL on
 DATA_SIZE = 300
@@ -27,7 +28,6 @@ if __name__ == "__main__":
 
     # ========================================================================================================
     #  Generate some data
-
     data = generate_data(DATA_SIZE)
 
 
@@ -40,14 +40,14 @@ if __name__ == "__main__":
     '''
 
     # store hypotheses we've found
-    allhyp = FiniteBestSet(max=True,N=1000)
+    allhyp = TopN(N=1000)
 
     # ========================================================================================================
     #  A bunch of different MCMC algorithms to try. mh_sample is from the Rational Rules paper and
     #   it generally works very well.
 
-    tempered_transitions = LOTlib.Inference.TemperedTransitions.tempered_transitions_sample(
-        h0, data, 500000, skip=0, temperatures=[1.0, 1.25, 1.5])
+    # tempered_transitions = LOTlib.Inference.TemperedTransitions.tempered_transitions_sample(
+    #     h0, data, 500000, skip=0, temperatures=[1.0, 1.25, 1.5])
     '''
     parallel_tempering = LOTlib.Inference.ParallelTempering.ParallelTemperingSampler(
         h0, data, STEPS, within_steps=10, yield_all=True, temperatures=[1.0,1.05, 1.1])
@@ -59,7 +59,7 @@ if __name__ == "__main__":
             print q(get_knower_pattern(h)), h.posterior_score, h.compute_prior(), h.compute_likelihood(data), qq(h)
 
         # add h to our priority queue, with priority of its log probability, h.posterior_score
-        allhyp.push(h, h.posterior_score)
+        allhyp.add(h)
 
     # ========================================================================================================
     #  now re-evaluate everything we found on new data

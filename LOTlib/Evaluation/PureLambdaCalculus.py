@@ -7,44 +7,10 @@
 from copy import copy
 from EvaluationException import EvaluationException
 from LOTlib.FunctionNode import FunctionNode, BVAddFunctionNode, BVUseFunctionNode
+from LOTlib.Visualization.Stringification import lambdastring
 
 MAX_RECURSE_DEPTH = 25
 MAX_NODES = 50 # how many is the max, in all stages of eval?
-
-
-def lambda_str(fn, d=0, bv_names=None):
-    """
-            A nicer printer for pure lambda calculus
-    """
-    if bv_names is None:
-        bv_names = dict()
-
-    if fn is None: # just pass these through -- simplifies a lot
-        return None
-    elif fn.name == '':
-        assert len(fn.args)==1
-        return lambda_str(fn.args[0])
-    elif isinstance(fn, BVAddFunctionNode):
-        assert len(fn.args)==1 and fn.name == 'lambda'
-        if fn.added_rule is not None:
-            bvn = fn.added_rule.bv_prefix+str(d)
-            bv_names[fn.added_rule.name] = bvn
-        return u"\u03BB%s.%s" % (bvn, lambda_str(fn.args[0], d=d+1, bv_names=bv_names)) # unicode version with lambda
-        #return "L%s.%s" % (bvn, lambda_str(fn.args[0], d=d+1, bv_names=bv_names))
-    elif fn.name == 'apply_':
-        assert len(fn.args)==2
-        if fn.args[0].name == 'lambda':
-            return "((%s)(%s))" % tuple(map(lambda a: lambda_str(a, d=d+1, bv_names=bv_names), fn.args))
-        else:
-            return "(%s(%s))"   % tuple(map(lambda a: lambda_str(a, d=d+1, bv_names=bv_names), fn.args))
-    elif isinstance(fn, BVUseFunctionNode):
-        assert fn.args is None
-        return bv_names[fn.name]
-    else:
-        assert fn.args is None
-        return str(fn.name)
-
-
 
 def lambda_reduce(fn):
     # Just a wrapper to copy
@@ -125,8 +91,8 @@ if __name__=="__main__":
         t = G.generate()
 
         try:
-            print lambda_str(t)
-            print lambda_str(lambda_reduce(t))
+            print lambdastring(t)
+            print lambdastring(lambda_reduce(t))
         except EvaluationException as e:
-            print "***", e, lambda_str(t)
+            print "***", e, lambdastring(t)
         print "\n"
