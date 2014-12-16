@@ -1,7 +1,7 @@
 
 import pickle
 from LOTlib import lot_iter
-from LOTlib.FiniteBestSet import FiniteBestSet
+from LOTlib.Utilities.FiniteBestSet import FiniteBestSet
 from LOTlib.Miscellaneous import logsumexp
 import Grammar as G, Hypothesis
 
@@ -32,14 +32,15 @@ def load_hypotheses(filename='numbergame_hypotheses.p'):
     return hypotheses
 
 
-def print_top_hypotheses(hypotheses, n=10):
+def top_ng_hypotheses(hypotheses, n=10):
     sorted_hypotheses = sorted(hypotheses, key=lambda x: x.posterior_score)
     print '%'*120
     for h in sorted_hypotheses[-n:]:
         print str(h)
         print h.prior, h.likelihood, h.posterior_score
     print '%'*120
-    # FBS version
-    '''hypotheses = FiniteBestSet(generator=prior_sampler, N=N, key="posterior_score")
-    for h in hypotheses:
-        print str(h), h.posterior_score'''
+    # # FBS version
+    # hypotheses = FiniteBestSet(generator=prior_sampler, N=N, key="posterior_score")
+    # for h in hypotheses:
+    #     print str(h), h.posterior_score'''
+    return sorted_hypotheses[-n:]

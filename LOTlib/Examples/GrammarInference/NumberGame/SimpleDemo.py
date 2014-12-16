@@ -5,58 +5,56 @@ from LOTlib.Inference.PriorSample import prior_sample
 from LOTlib.Examples.NumberGame.NewVersion.Model import *
 from Model import *
 
-# Parameters for number game inference
+
+# ============================================================================================================
+# Parameters
+data = toy_3n
+
+# for NumberGameHypothesis inference
 alpha = 0.99
 n = 1000
 domain = 20
 
-# Parameters for GrammarHypothesis inference
+# for GrammarHypothesis inference
 grammar_n = 10000
-data = toy_3n
+cap = 1000
 
-# Variables for NumberGameHypothesis inference
-h0 = make_h0(grammar=simple_test_grammar, domain=domain, alpha=alpha)
-mh_sampler = MHSampler(h0, data[0].input, n)
-
-
-# ============================================================================================================
 
 def run():
-    """Run demo"""
-    '''Generate number game hypotheses'''
-    hypotheses = set()
-    for h in lot_iter(mh_sampler):
-        hypotheses.add(h)
+    # ========================================================================================================
+    # Generate some NumberGameHypotheses
 
-    print '%'*100
-    print 'NumberGameHypotheses: '
+    h0 = make_h0(grammar=simple_test_grammar, domain=domain, alpha=alpha)
+    mh_sampler = MHSampler(h0, data[0].input, n)
+    hypotheses = set([h for h in lot_iter(mh_sampler)])
+
+    print '%'*100, '\nNumberGameHypotheses:'
     for h in hypotheses:
         print h, h(), h.domain, h.alpha
-    print '\n'
 
-    '''What grammar probabilities will best model our human data?'''
+    # ========================================================================================================
+    # What grammar probabilities (i.e. priors) will best model our human data?
+
     grammar_h0 = GrammarHypothesis(simple_test_grammar, hypotheses, proposal_step=.1, proposal_n=1)
-
     for r in grammar_h0.rules:
         print r
 
-    '''print distribution over power rule:  [prior, likelihood, posterior]'''
-    # vals, posteriors = grammar_h0.rule_distribution(data, 'ipowf_', np.arange(0.1, 5., 0.1))
-    # print_dist(vals, posteriors)
-    #visualize_dist(vals, posteriors, 'union_')
-
-    '''grammar hypothesis inference'''
     mh_grammar_sampler = MHSampler(grammar_h0, data, grammar_n, trace=False)
-    grammar_hypotheses = sample_grammar_hypotheses(mh_grammar_sampler)
-
-    print '%'*100, '\nTOP GRAMMAR VECTORS:'
-    # print sum(gh.value)
-    sorted_g_hypos = sorted(grammar_hypotheses, key=lambda x: x.posterior_score)
-    for gh in sorted_g_hypos[-10:]:
-        print '*'*90
-        print 'Vector: ', str(gh)
-        print 'Prior: ', gh.prior, '\tLikelihood: ', gh.likelihood,'\tPostScore: ', gh.posterior_score
+    mh_grammar_summary = sample_grammar_hypotheses(mh_grammar_sampler, skip=grammar_n/cap, cap=cap)
+    mh_grammar_summary.print_top_samples()
+    mh_grammar_summary.graph_samples()
 
 
 if __name__ == "__main__":
     run()
+
+
+#
+#
+# '''print distribution over power rule:  [prior, likelihood, posterior]'''
+# # vals, posteriors = grammar_h0.rule_distribution(data, 'ipowf_', np.arange(0.1, 5., 0.1))
+# # print_dist(vals, posteriors)
+# #visualize_dist(vals, posteriors, 'union_')
+#
+#
+

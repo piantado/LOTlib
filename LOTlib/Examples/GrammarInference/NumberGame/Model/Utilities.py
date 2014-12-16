@@ -2,19 +2,19 @@ from LOTlib import lot_iter
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
 from LOTlib.DataAndObjects import FunctionData
+from LOTlib.MCMCSummary.VectorSummary import *
 
-
-def sample_grammar_hypotheses(sampler):
-    grammar_hypotheses = []
+def sample_grammar_hypotheses(sampler, skip, cap):
+    summary = VectorSummary(skip=skip, cap=cap)
     i = 0
-    for grammar_h in lot_iter(sampler):
+    for h in summary(sampler):
         i += 1
         if i % (sampler.steps/20) == 0:
-            print ['%.3f' % v for v in grammar_h.value]
-            print i, '!'*120
-            print grammar_h.prior, grammar_h.likelihood, grammar_h.posterior_score
-        grammar_hypotheses.append(grammar_h)
-    return grammar_hypotheses
+            print ['%.3f' % v for v in h.value]
+            print i, '-'*100
+            print h.prior, h.likelihood, h.posterior_score
+
+    return summary
 
 
 def print_dist(vals, posteriors):
