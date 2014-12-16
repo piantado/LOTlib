@@ -44,10 +44,6 @@ class NumberGameHypothesis(LOTHypothesis):
             self.update_posterior()
         return likelihood
 
-    def compile_function(self):
-        self.value_set = None
-        return LOTHypothesis.compile_function(self)
-
     def __call__(self, *args, **kwargs):
         if self.value_set is None:
             value_set = LOTHypothesis.__call__(self)
@@ -59,6 +55,10 @@ class NumberGameHypothesis(LOTHypothesis):
             self.value_set = value_set
 
         return self.value_set
+
+    def compile_function(self):
+        self.value_set = None
+        return LOTHypothesis.compile_function(self)
 
     def __copy__(self):
         return NumberGameHypothesis(self.grammar, alpha=self.alpha, domain=self.domain)

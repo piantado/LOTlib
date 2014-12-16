@@ -22,7 +22,7 @@ cap = 1000
 
 def run():
     # ========================================================================================================
-    # Generate some NumberGameHypotheses
+    # Sample some NumberGameHypotheses
 
     h0 = make_h0(grammar=simple_test_grammar, domain=domain, alpha=alpha)
     mh_sampler = MHSampler(h0, data[0].input, n)
@@ -33,7 +33,7 @@ def run():
         print h, h(), h.domain, h.alpha
 
     # ========================================================================================================
-    # What grammar probabilities (i.e. priors) will best model our human data?
+    # Sample some GrammarHypotheses
 
     grammar_h0 = GrammarHypothesis(simple_test_grammar, hypotheses, proposal_step=.1, proposal_n=1)
     for r in grammar_h0.rules:

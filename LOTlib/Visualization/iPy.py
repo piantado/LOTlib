@@ -7,7 +7,6 @@ Tools for visualizing useful things.
 from IPython.display import clear_output
 import sys
 
-
 def print_iters(i, num_iters, increm=20):
     """Print incremental statements as we generate a large number of hypotheses.
 
