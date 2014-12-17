@@ -50,6 +50,7 @@ class LOTHypothesis(FunctionHypothesis):
         self.likelihood = 0.0
 
     def __call__(self, *args):
+        ## NOTE: This no longer catches all exceptions.
         try:
             return FunctionHypothesis.__call__(self, *args)
         except TypeError as e:
