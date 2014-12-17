@@ -6,13 +6,12 @@ from LOTlib.Examples.NumberGame.NewVersion.Model import *
 from Model import *
 
 
-# ============================================================================================================
+# ------------------------------------------------------------------------------------------------------------
 # Parameters
 data = toy_3n
 
 # for NumberGameHypothesis inference
 alpha = 0.99
-n = 1000
 domain = 20
 
 # for GrammarHypothesis inference
@@ -21,18 +20,23 @@ cap = 1000
 
 
 def run():
-    # ========================================================================================================
+    # --------------------------------------------------------------------------------------------------------
     # Sample some NumberGameHypotheses
 
-    h0 = make_h0(grammar=simple_test_grammar, domain=domain, alpha=alpha)
-    mh_sampler = MHSampler(h0, data[0].input, n)
-    hypotheses = set([h for h in lot_iter(mh_sampler)])
+    # h0 = make_h0(grammar=simple_test_grammar, domain=domain, alpha=alpha)
+    # mh_sampler = MHSampler(h0, data[0].input, n)
+    # hypotheses = set([h for h in lot_iter(mh_sampler)])
+    hypotheses = []
+    for fn in simple_test_grammar.enumerate(d=5):
+        h = NumberGameHypothesis(grammar=simple_test_grammar, domain=domain, alpha=alpha)
+        h.set_value(fn)
+        hypotheses.append(h)
 
     print '%'*100, '\nNumberGameHypotheses:'
     for h in hypotheses:
         print h, h(), h.domain, h.alpha
 
-    # ========================================================================================================
+    # --------------------------------------------------------------------------------------------------------
     # Sample some GrammarHypotheses
 
     grammar_h0 = GrammarHypothesis(simple_test_grammar, hypotheses, proposal_step=.1, proposal_n=1)

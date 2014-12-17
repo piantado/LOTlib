@@ -185,10 +185,10 @@ class Grammar:
         for t in self.iterate_subnodes(fn, do_bv=True):
             t.generation_probability = log(t.rule.p) - log(sum([x.p for x in self.rules[t.returntype]]))
 
-    def enumerate(self, d=Infinity, nt=None, leaves=True):
+    def enumerate(self, d=20, nt=None, leaves=True):
         """
         Enumerate all trees up to depth n
-        :param d: - how deep to go? (defaults to Infinity)
+        :param d: - how deep to go? (defaults to 20 -- if Infinity, enumerate() runs forever)
         :param nt: - the nonterminal type
         :param leaves: - do we put terminals in the leaves or leave nonterminal types? This is useful in PartitionMCMC
         :return:

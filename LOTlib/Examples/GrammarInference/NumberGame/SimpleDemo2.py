@@ -6,29 +6,21 @@ from LOTlib.Examples.NumberGame.NewVersion.Model import *
 from Model import *
 
 
-# ============================================================================================================
-# Parameters
-data = toy_3n
+def run(data=toy_3n, alpha=0.99, domain=20, grammar_n=10000, cap=100):
+    """
+    Arguments:
+        data(list): List of FunctionNodes to use as input/output data.
+        alpha(float): Noise parameter for NumberGameHypothesis.
+        domain(int): Domain parameter for NumberGameHypothesis.
+        grammar_n(int): Number of GrammarHypotheses to sample.
+        cap(int): VectorSummary will collect this many GrammarHypothesis samples.
 
-# for NumberGameHypothesis inference
-alpha = 0.99
-n = 1000
-domain = 20
-
-# for GrammarHypothesis inference
-grammar_n = 10000
-cap = 1000
-
-
-def run():
-    # ========================================================================================================
+    """
+    # --------------------------------------------------------------------------------------------------------
     # Sample some NumberGameHypotheses
 
-    h0 = make_h0(grammar=simple_grammar_2, domain=domain, alpha=alpha)
-    mh_sampler = MHSampler(h0, data[0].input, n)
-
     hypotheses = []
-    for fn in simple_grammar_2.enumerate_at_depth(5):
+    for fn in simple_grammar_2.enumerate(d=5):
         h = NumberGameHypothesis(grammar=simple_grammar_2, domain=domain, alpha=alpha)
         h.set_value(fn)
         hypotheses.append(h)
@@ -37,7 +29,7 @@ def run():
     for h in hypotheses:
         print h, h(), h.domain, h.alpha
 
-    # ========================================================================================================
+    # --------------------------------------------------------------------------------------------------------
     # Sample some GrammarHypotheses
 
     grammar_h0 = GrammarHypothesis(simple_grammar_2, hypotheses, proposal_step=.1, proposal_n=1)
