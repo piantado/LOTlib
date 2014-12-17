@@ -1,5 +1,6 @@
 from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis
 from LOTlib.Miscellaneous import log, Infinity, log1mexp
+from LOTlib.Evaluation.EvaluationException import EvaluationException
 
 # ============================================================================================================
 #  Define a class for running MH
@@ -13,6 +14,12 @@ class NumberExpression(RecursiveLOTHypothesis):
     
     def __init__(self, grammar, value=None, f=None, proposal_function=None, args=['x'], **kwargs):
         RecursiveLOTHypothesis.__init__(self, grammar, value=value, proposal_function=proposal_function, args=['x'], **kwargs)
+
+    def __call__(self, *args):
+        try:
+            return RecursiveLOTHypothesis.__call__(self, *args)
+        except EvaluationException: # catch recursion and too big
+            return None
 
     def compute_prior(self):
         """Compute the number model prior.
@@ -40,6 +47,7 @@ class NumberExpression(RecursiveLOTHypothesis):
             TODO: Make sure this precisely matches the number paper.
 
         """
+
         response = self(*datum.input)
         if response == 'undef' or response == None:
             return log(1.0/10.0) # if undefined, just sample from a base distribution

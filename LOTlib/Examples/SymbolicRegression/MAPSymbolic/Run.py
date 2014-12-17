@@ -9,9 +9,10 @@ import numpy
 from math import sin
 from LOTlib import lot_iter
 from LOTlib.Miscellaneous import qq
-from LOTlib.Examples.SymbolicRegression.Grammar import grammar, NCONSTANTS, CONSTANT_NAMES
+from Grammar import grammar
 from Hypothesis import MAPSymbolicRegressionHypothesis
 from Data import generate_data
+
 
 
 STEPS = 500000

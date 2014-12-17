@@ -1,6 +1,6 @@
 from math import sin
-from LOTlib.DataAndObjects import *
-from LOTlib.Miscellaneous import *
+import random
+from LOTlib.DataAndObjects import FunctionData
 
 data_sd = 0.10 # the SD of the likelihood
 
@@ -13,7 +13,7 @@ def generate_data(data_size):
     # initialize the data
     data = []
     for i in range(data_size):
-        x = random()
+        x = random.random()
         data.append( FunctionData(input=[x], output=target(x), ll_sd=data_sd) )
 
     return data
