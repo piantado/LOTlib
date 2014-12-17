@@ -53,6 +53,9 @@ class GrammarRule(object):
             Equality is determined through "is" so that we can remove a rule from lists via list.remove
         """
         return (self is other)
+
+    def short_str(self):
+        return str(self.nt) + " -> " + self.name + (str(self.to) if self.to is not None else '')
         
 
     def __ne__(self, other):

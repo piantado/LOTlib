@@ -6,7 +6,8 @@ from LOTlib.FunctionNode import isFunctionNode, BVUseFunctionNode, BVAddFunction
 def schemestring(x, d=0, bv_names=None):
     """Outputs a scheme string in (lambda (x) (+ x 3)) format.
 
-    Args:
+    Arguments:
+        x: We return the string for this FunctionNode.
         bv_names: A dictionary from the uuids to nicer names.
 
     """

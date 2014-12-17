@@ -9,8 +9,9 @@ class VectorSummary(MCMCSummary):
 
     def graph_samples(self):
         # Numpy array of sampled values for each vector element altered in proposals
-        propose_idxs = self.samples[0].propose_idxs
-        y_labels = [self.samples[0].rules[i].name for i in propose_idxs]
+        s0 = self.samples[0]
+        propose_idxs = s0.propose_idxs
+        y_labels = [s0.rules[i].short_str() for i in propose_idxs]
 
         vector_data = zip(*[[s.value[i] for i in propose_idxs] for s in self.samples])
         vector_data = [np.array(l) for l in vector_data]

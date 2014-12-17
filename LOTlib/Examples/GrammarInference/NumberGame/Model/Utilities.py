@@ -4,9 +4,11 @@ from scipy.io import loadmat
 from LOTlib.DataAndObjects import FunctionData
 from LOTlib.MCMCSummary.VectorSummary import *
 
+
 def sample_grammar_hypotheses(sampler, skip, cap):
     summary = VectorSummary(skip=skip, cap=cap)
     i = 0
+    print '^*'*60, '\nGenerating GrammarHypothesis Samples\n', '^*'*60
     for h in summary(sampler):
         i += 1
         if i % (sampler.steps/20) == 0:

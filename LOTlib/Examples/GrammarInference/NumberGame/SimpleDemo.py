@@ -14,6 +14,7 @@ def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=
     Enumerate some NumberGameHypotheses, then use these to sample some GrammarHypotheses over `data`.
 
     Arguments:
+        grammar(LOTlib.Grammar): This is our grammar.
         data(list): List of FunctionNodes to use as input/output data.
         alpha(float): Noise parameter for NumberGameHypothesis.
         domain(int): Domain parameter for NumberGameHypothesis.
@@ -42,7 +43,7 @@ def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=
         h.set_value(fn)
         hypotheses.append(h)
 
-    print '%'*100, '\nNumberGameHypotheses:'
+    print '='*100, '\nNumberGameHypotheses:'
     for h in hypotheses:
         print h, h(), h.domain, h.alpha
 
@@ -50,6 +51,7 @@ def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=
     # Sample some GrammarHypotheses
 
     grammar_h0 = GrammarHypothesis(grammar, hypotheses, proposal_step=.1, proposal_n=1)
+    print '='*100, '\nGrammarRules:'
     for r in grammar_h0.rules:
         print r
 
