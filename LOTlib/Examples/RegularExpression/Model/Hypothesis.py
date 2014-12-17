@@ -1,5 +1,6 @@
 from LOTlib.FunctionNode import isFunctionNode
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+from LOTlib.Evaluation.EvaluationException import EvaluationException
 import re
 
 
@@ -13,14 +14,19 @@ class RegexHypothesis(LOTHypothesis):
         This doesn't require any basic_primitives -- the grammar node names are used by to_regex too
 
     """
-    def value2function(self, v):
-        regex = to_regex(v)
+    def compile_function(self):
+        regex = to_regex(self.value)
         c = re.compile(regex)
         return (lambda s: (c.match(s) is not None))
 
     def __str__(self):
         return to_regex(self.value)
 
+    def __call__(self, *args):
+        try:
+            return LOTHypothesis.__call__(self, *args)
+        except EvaluationException:
+            return None
 
 def to_regex(fn):
     """Map a tree to a regular expression.

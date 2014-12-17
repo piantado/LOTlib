@@ -4,7 +4,7 @@ from scipy.optimize import fmin
 from LOTlib.Evaluation.Eval import evaluate_expression
 from LOTlib.Hypotheses.GaussianLOTHypothesis import GaussianLOTHypothesis
 from LOTlib.Miscellaneous import normlogpdf, Infinity
-from LOTlib.Examples.SymbolicRegression.Grammar import CONSTANT_NAMES
+from Grammar import CONSTANT_NAMES
 
 
 MAXITER=100 # max iterations for the optimization to run

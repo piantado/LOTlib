@@ -1,5 +1,7 @@
 from Primitives import LOTlib_primitive
 
+import itertools
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Basic logic
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -89,10 +91,7 @@ def not_exists_(F,S): return not exists_(F,S)
 @LOTlib_primitive
 def exists_(F,S): return exists(F,S)
 def exists(F,S):
-    #if not isinstance(S,list): return None
-    for s in S:
-        if F(s): return True
-    return False
+    return any(itertools.imap(F,S)) # This appears to be faster than writing it ourself
 
 @LOTlib_primitive
 def not_forall_(F,S): return not forall(F,S)
@@ -101,10 +100,7 @@ def not_forall_(F,S): return not forall(F,S)
 def forall_(F,S): return forall(F,S)
 
 def forall(F,S):
-    #if not isinstance(S,list): return None
-    for s in S:
-        if not F(s): return False
-    return True
+    return all(itertools.imap(F,S))
 
 @LOTlib_primitive
 def iota_(F,S):
@@ -117,3 +113,5 @@ def iota_(F,S):
             if match is None: match = s
             else: return None  # We matched more than one
     return match
+
+

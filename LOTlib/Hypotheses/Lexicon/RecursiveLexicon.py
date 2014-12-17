@@ -23,7 +23,7 @@ class RecursiveLexicon(SimpleLexicon):
         Wrap in self as a first argument that we don't have to in the grammar. This way, we can use self(word, X Y) as above.
         """
         self.recursive_call_depth = 0
-        return self.value[word](self.recursive_call, *args)  # pass in "self" as lex
+        return self.value[word](self.recursive_call, *args)  # pass in "self" as lex, using the recursive version
 
     def recursive_call(self, word, *args):
         """

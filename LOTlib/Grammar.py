@@ -4,6 +4,7 @@ except ImportError: import numpypy as np
 
 from copy import copy
 from collections import defaultdict
+import itertools
 
 from LOTlib import lot_iter
 from LOTlib.Miscellaneous import *
@@ -37,7 +38,13 @@ class Grammar:
         self.bv_count = 0 # How many rules in the grammar introduce bound variables?
         self.bv_rule_id = 0 # A unique idenifier for each bv rule id (may get quite large)      . The actual stored rule are negative this
     
-        
+    def __str__(self):
+        """
+        Display a grammar
+        """
+        return '\n'.join([str(r) for r in itertools.chain(*[self.rules[nt] for nt in self.rules.keys()])])
+
+
     def is_nonterminal(self, x):
         """ A nonterminal is just something that is a key for self.rules"""
 

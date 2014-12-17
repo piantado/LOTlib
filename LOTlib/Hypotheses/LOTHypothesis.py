@@ -50,11 +50,9 @@ class LOTHypothesis(FunctionHypothesis):
         self.likelihood = 0.0
 
     def __call__(self, *args):
+        ## NOTE: This no longer catches all exceptions.
         try:
             return FunctionHypothesis.__call__(self, *args)
-        except EvaluationException:     # Handle these as None by default
-            # print "EvaluationException in LOTHypothesis, returning None"
-            return None
         except TypeError as e:
             print "TypeError in function call: ", e, str(self), "  ;  ", type(self)
             raise TypeError

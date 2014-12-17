@@ -9,7 +9,7 @@ See also: Jeffreys, W. H., and Berger, J. O. (1992), "Ockham's Razor and Bayesia
 """
 from LOTlib.Hypotheses.GaussianLOTHypothesis import GaussianLOTHypothesis
 from LOTlib.FiniteBestSet import FiniteBestSet
-from LOTlib.Inference.MetropolisHastings import mh_sample
+from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Miscellaneous import qq
 from Data import data
 from Grammar import grammar
@@ -23,7 +23,7 @@ def run(*args):
 
     # We store the top 100 from each run
     pq = FiniteBestSet(N=100, max=True, key="posterior_score")
-    pq.add(mh_sample(h0, data, STEPS, skip=SKIP))
+    pq.add(MHSampler(h0, data, STEPS, skip=SKIP))
 
     return pq
 

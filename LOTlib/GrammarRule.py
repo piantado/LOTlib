@@ -46,7 +46,7 @@ class GrammarRule(object):
             assert (to is None) or (len(to) == 1), "*** GrammarRules with empty names must have only 1 argument"
 
     def __repr__(self):
-        return str(self.nt) + " -> " + self.name + (str(self.to) if self.to is not None else '') + " w/ p=" +str(self.p)+ ", resample_p=" + str(self.resample_p) 
+        return str(self.nt) + " -> " + self.name + (str(self.to) if self.to is not None else '') + "\tw/ p=" +str(self.p)+ ", resample_p=" + str(self.resample_p)
 
     def __eq__(self, other):
         """
