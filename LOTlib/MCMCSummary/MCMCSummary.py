@@ -16,12 +16,12 @@ class MCMCSummary:
         >> summary = InferenceSummary(skip=1000, cap=100)
 
         # Can be used either as an independent object...
-        for h in lot_iter(mh_sampler):
-            summary.add(h)
+        >> for h in lot_iter(mh_sampler):
+        >>     summary.add(h)
 
         # Or as a generator...
-        for h in summary(mh_sampler):
-            do_other_stuff(h)
+        >> for h in summary(mh_sampler):
+        >>     do_other_stuff(h)
 
     """
     def __init__(self, skip=100, cap=100):
