@@ -27,8 +27,8 @@ def run():
     from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
     h0 = LOTHypothesis(grammar, args=['x', 'y'], ALPHA=0.999, proposal_function=mp) # alpha here trades off with the amount of data. Currently assuming no noise, but that's not necessary
 
-    from LOTlib.Inference.MetropolisHastings import mh_sample
-    for h in lot_iter(mh_sample(h0, data, skip=100)):
+    from LOTlib.Inference.MetropolisHastings import MHSampler
+    for h in lot_iter(MHSampler(h0, data, skip=100)):
         print h.posterior_score, h.likelihood, h.prior, cleanFunctionNodeString(h)
         #print map( lambda d: h(*d.input), data)
         #print "\n"
