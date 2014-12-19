@@ -9,7 +9,8 @@ from LOTlib.Examples.NumberGame.NewVersion.Model import *
 from Model import *
 
 
-def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=5, grammar_n=10000, cap=100):
+def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=5, grammar_n=10000, cap=100,
+        plot_type='violin'):
     """
     Enumerate some NumberGameHypotheses, then use these to sample some GrammarHypotheses over `data`.
 
@@ -20,6 +21,7 @@ def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=
         domain(int): Domain parameter for NumberGameHypothesis.
         grammar_n(int): Number of GrammarHypotheses to sample.
         cap(int): VectorSummary will collect this many GrammarHypothesis samples.
+        plot(str): String input indicating type of plot to graph: [violin | line | MLE | MAP].
 
     Confirmed working:
         * run(grammar=simple_test_grammar, data=toy_3n)     [12/15]
@@ -58,7 +60,14 @@ def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=
     mh_grammar_sampler = MHSampler(grammar_h0, data, grammar_n, trace=False)
     mh_grammar_summary = sample_grammar_hypotheses(mh_grammar_sampler, skip=grammar_n/cap, cap=cap)
     mh_grammar_summary.print_top_samples()
-    mh_grammar_summary.graph_samples()
+    if plot_type == 'violin':
+        mh_grammar_summary.violinplot()
+    if plot_type == 'line':
+        mh_grammar_summary.lineplot()
+    if plot_type == 'MLE':
+        pass
+    if plot_type == 'MAP':
+        pass
 
 
 if __name__ == "__main__":
