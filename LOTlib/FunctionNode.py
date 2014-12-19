@@ -12,12 +12,12 @@ from random import random
 from LOTlib.Miscellaneous import None2Empty, lambdaTrue, Infinity
 
 
-#=============================================================================================================
-#  Helper functions
-#=============================================================================================================
+# ------------------------------------------------------------------------------------------------------------
+# Helper functions
+# ------------------------------------------------------------------------------------------------------------
 
 def isFunctionNode(x):
-    # just because this is nicer, and allows us to map, etc.
+    # Just because this is nicer, and allows us to map, etc.
     """Returns true if *x* is of type FunctionNode."""
     return isinstance(x, FunctionNode)
 
@@ -28,14 +28,14 @@ def cleanFunctionNodeString(x):
     s = re.sub("_", '', s)  # remove underscores
     return s
 
-#=============================================================================================================
+# ------------------------------------------------------------------------------------------------------------
 # FunctionNode main class
-#=============================================================================================================
+# ------------------------------------------------------------------------------------------------------------
 
 class FunctionNode(object):
     """FunctionNode main class.
 
-    Args:
+    Arguments
         returntype: The return type of the FunctionNode.
         name: The name of the function.
         args: Arguments of the function
@@ -69,7 +69,6 @@ class FunctionNode(object):
         self.__dict__ = q.__dict__
         self.__class__ = q.__class__    # to update in case q is a different subtype of FunctionNode.
                                         # NOTE: Setting __class__ is not a recommended thing to do.
-
         # and we must fix the kid refs. Everything else should be right.
         for a in self.argFunctionNodes():
             a.parent = self
@@ -78,7 +77,7 @@ class FunctionNode(object):
     def __copy__(self, shallow=False):
         """Copy a function node.
 
-        Args:
+        Arguments
             shallow: if True, this does not copy the children (self.to points to the same as what we return)
 
         Note:
@@ -102,7 +101,7 @@ class FunctionNode(object):
         
     def is_nonfunction(self):
         """Returns True if the Node contains no function arguments, False otherwise."""
-        return (self.args is None)
+        return self.args is None
 
     def is_function(self):
         """Returns True if the Node contains function arguments, False otherwise."""
@@ -124,8 +123,9 @@ class FunctionNode(object):
         """Recurse through the tree and ensure that the parent refs are good."""
         for t in self.argFunctionNodes():
             if (t.parent is not self) or (t.check_parent_refs() is not True):
-                print "Bad parent reference at %s"%t.name
-                print "If it prints, the full string is %s, a subnode of %s, whose parent is %s" % (t, self, t.parent)
+                print "Bad parent reference at %s" % t.name
+                print "If it prints, the full string is %s, a subnode of %s, whose parent is %s" % \
+                      (t, self, t.parent)
                 return False
             
         return True
@@ -154,7 +154,7 @@ class FunctionNode(object):
 
         This function is subclassed so by BVAdd and BVUse so that those handle other cases
 
-        Args:
+        Arguments
             d: An optional argument that keeps track of how far down the tree we are
             bv_names: A dictionary keeping track of the names of bound variables (keys = UUIDs,
                 values = names)
@@ -171,8 +171,7 @@ class FunctionNode(object):
             x.extend([a.as_list(d=d+1, bv_names=bv_names) if isFunctionNode(a) else a for a in self.args])
         
         return x
-        
-    
+
     def quickstring(self):
         """A (maybe??) faster string function used for hashing.
 
@@ -211,7 +210,6 @@ class FunctionNode(object):
         else:
             assert False, "FunctionNode must only use cons to call liststring!"
 
-
     # NOTE: in the future we may want to change this to do fancy things
     def __str__(self):
         return pystring(self)
@@ -236,22 +234,22 @@ class FunctionNode(object):
         """
         return pystring(self) == pystring(other)
 
-    ## TODO: overwrite these with something faster
+    # TODO: overwrite these with something faster
     # hash trees. This just converts to string -- maybe too slow?
     def __hash__(self):
-
-        # An attempt to speed things up -- not so great!
-        #hsh = self.ruleid
-        #if self.args is not None:
-            #for a in filter(isFunctionNode, self.args):
-                #hsh = hsh ^ hash(a)
-        #return hsh
+        # # An attempt to speed things up -- not so great!
+        # hsh = self.ruleid
+        # if self.args is not None:
+        #     for a in filter(isFunctionNode, self.args):
+        #         hsh = hsh ^ hash(a)
+        # return hsh
+        #
+        # # use a quicker string hash
+        # return hash(self.quickstring())
 
         # normal string hash -- faster?
         return hash(str(self))
 
-        # use a quicker string hash
-        #return hash(self.quickstring())
 
     def __cmp__(self, x):
         return cmp(str(self), str(x))
@@ -325,15 +323,15 @@ class FunctionNode(object):
     def string_below(self, sep=" "):
         """The string of terminals (leaves) below the current FunctionNode in the parse tree.
 
-        Args:
+        Arguments
             sep: is the delimiter between terminals. E.g. sep="," => "the,fuzzy,cat"
 
         """
         return sep.join(map(str, self.all_leaves()))
 
-    # ========================================================================================================
+    # --------------------------------------------------------------------------------------------------------
     #  Derived functions that build on the above core
-    # ========================================================================================================
+    # --------------------------------------------------------------------------------------------------------
 
     def contains_function(self, x):
         """Checks if the FunctionNode contains x as function below."""
@@ -559,6 +557,9 @@ class FunctionNode(object):
 
 
 class BVAddFunctionNode(FunctionNode):
+    """
+    (doc?)
+    """
     def __init__(self, parent, returntype, name, args,
                  generation_probability=0.0, resample_p=1.0, rule=None, a_args=None, added_rule=None):
         FunctionNode.__init__(self, parent, returntype, name, args,
@@ -571,14 +572,14 @@ class BVAddFunctionNode(FunctionNode):
         Note:
             The rule is NOT deeply copied (regardless of shallow)
 
-        Args:
+        Arguments:
             shallow: if True, this does not copy the children (self.to points to the same as what we return)
 
         """
         fn = BVAddFunctionNode(self.parent, self.returntype, self.name, None,
-                          generation_probability=self.generation_probability,
-                          resample_p=self.resample_p, rule=self.rule, a_args=self.a_args, added_rule=copy(self.added_rule))
-        
+            generation_probability=self.generation_probability, resample_p=self.resample_p,
+            rule=self.rule, a_args=self.a_args, added_rule=copy(self.added_rule))
+
         if (not shallow) and self.args is not None:
             fn.args = map(copy, self.args)
         else:
@@ -589,11 +590,10 @@ class BVAddFunctionNode(FunctionNode):
 
         return fn
 
-    
     def as_list(self, d=0, bv_names=None):
         """Returns a list representation of the FunctionNode with function/self.name as the first element.
 
-        Args:
+        Arguments:
             d: An optional argument that keeps track of how far down the tree we are.
             bv_names: A dictionary keeping track of the names of bound variables (keys = UUIDs,
             values = names).
@@ -624,6 +624,9 @@ class BVAddFunctionNode(FunctionNode):
 
 
 class BVUseFunctionNode(FunctionNode):
+    """
+    (doc?)
+    """
     def __init__(self, parent, returntype, name, args,
                  generation_probability=0.0, resample_p=1.0, rule=None, a_args=None, bv_prefix=None):
         FunctionNode.__init__(self, parent, returntype, name, args,
@@ -633,7 +636,7 @@ class BVUseFunctionNode(FunctionNode):
     def as_list(self, d=0, bv_names=None):
         """Returns a list representation of the FunctionNode with function/self.name as the first element.
 
-        Args:
+        Arguments
             d: An optional argument that keeps track of how far down the tree we are
             bv_names: A dictionary keeping track of the names of bound variables (keys = UUIDs,
             values = names)
@@ -656,7 +659,7 @@ class BVUseFunctionNode(FunctionNode):
         Note:
             The rule is NOT deeply copied (regardless of shallow)
 
-        Args:
+        Arguments
             shallow: if True, this does not copy the children (self.to points to the same as what we return)
 
         """
@@ -676,9 +679,5 @@ class BVUseFunctionNode(FunctionNode):
         return fn
 
 
-
-"""
-NOTE: This must come at the end to meet dependencies
-"""
-
+# NOTE: This must come at the end to meet dependencies
 from LOTlib.Visualization.Stringification import pystring

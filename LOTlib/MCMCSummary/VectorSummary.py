@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
@@ -7,14 +8,14 @@ class VectorSummary(MCMCSummary):
     def __init__(self, skip=100, cap=100):
         MCMCSummary.__init__(self, skip=skip, cap=cap)
 
-    def graph_samples(self):
+    # --------------------------------------------------------------------------------------------------------
+
+    def violinplot(self):
         # Numpy array of sampled values for each vector element altered in proposals
         s0 = self.samples[0]
         propose_idxs = s0.propose_idxs
         y_labels = [s0.rules[i].short_str() for i in propose_idxs]
-
-        vector_data = zip(*[[s.value[i] for i in propose_idxs] for s in self.samples])
-        vector_data = [np.array(l) for l in vector_data]
+        vector_data = self.zip_vector(propose_idxs)
 
         def draw_violinplot(data):
             """Clear axis & draw a labelled violin plot of the specified data."""
@@ -37,13 +38,45 @@ class VectorSummary(MCMCSummary):
             draw_violinplot(data)
             fig.canvas.draw_idle()
 
-        # Add slider to plot; slider updates violinplot as a function of how many samples have been generated
+        # Slider updates violinplot as a function of how many samples have been generated
         slider_ax = plt.axes([0.1, 0.1, 0.8, 0.02])
         slider = Slider(slider_ax, "after N samples", valmin=1., valmax=self.sample_count, valinit=1.)
         slider.on_changed(update_violinplot)
 
         plt.show()
         return violin_stats
+
+    # --------------------------------------------------------------------------------------------------------
+
+    def lineplot(self):
+        """ http://matplotlib.org/examples/pylab_examples/subplots_demo.html """
+        # Numpy array of sampled values for each vector element altered in proposals
+        s0 = self.samples[0]
+        propose_idxs = s0.propose_idxs
+        n = len(propose_idxs)
+        y_labels = [s0.rules[i].short_str() for i in propose_idxs]
+        vector_data = self.zip_vector(propose_idxs)
+
+        # N subplots sharing both x/y axes
+        f, axs = plt.subplots(n, sharex=True, sharey=True)
+        axs[0].set_title('\tGrammar Priors as a Function of MCMC Samples')
+        y_min = math.ceil(min([v for vector in vector_data for v in vector]))
+        y_max = math.ceil(max([v for vector in vector_data for v in vector]))
+        for i in range(n):
+            axs[i].plot(vector_data[i])
+            axs[i].set_yticks(np.linspace(y_min, y_max, 5))
+            # axs[i].scatter(vector_data[i])
+            rule_label = axs[i].twinx()
+            rule_label.set_yticks([0.5])
+            rule_label.set_yticklabels([y_labels[i]])
+
+        # Fine-tune figure; make subplots close to each other and hide x ticks for all but bottom plot.
+        f.subplots_adjust(hspace=0)
+        plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
+        plt.show()
+
+
+
 
     def print_top_samples(self):
         if self.top_samples is None:
@@ -55,5 +88,18 @@ class VectorSummary(MCMCSummary):
             print 'Prior: %.3f' % g_h.prior, '\tLikelihood: %.3f' % g_h.likelihood, \
                 '\tPostScore: %.3f' % g_h.posterior_score
 
+    def zip_vector(self, idxs):
+        """Return a n-long list - each member is a time series of samples for a single vector item.
+
+        In `self.samples`, we have a list of samples; basically instead of this:
+            [sample1, sample2, sample3, ...]
+
+        We want to return this:
+            [[s1[0], s2[0], s3[0], ...], [s1[1], s2[1], s3[1], ...], ...]
+
+        """
+        zipped_vector = zip(*[[s.value[i] for i in idxs] for s in self.samples])
+        zipped_vector = [np.array(l) for l in zipped_vector]
+        return zipped_vector
 
 
