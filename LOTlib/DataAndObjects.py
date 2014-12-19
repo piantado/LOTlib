@@ -1,28 +1,29 @@
 """
-        Defines different classes for different types of data and models.
-        It also provides "Obj"s for bundling together features
+Defines different classes for different types of data and models.
 
-        For functions, we have a data object of the form [output, args]
+It also provides "Obj"s for bundling together features
+
+For functions, we have a data object of the form [output, args]
+
 """
 from copy import deepcopy
 
 from LOTlib.Miscellaneous import weighted_sample, qq
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ------------------------------------------------------------------------------------------------------------
 
 class FunctionData:
     """
-            This is a nicely wrapped kind of data--if we give it to a FunctionHypothesis, it knows
-            to extract the "input" (NOT the output) and run those on FunctionHypothesis.value(*input)
-            So when you have functional hypotheses, this is a convenient form of data
-    """
+    This is a nicely wrapped kind of data--if we give it to a FunctionHypothesis, it knows to extract the
+    "input" (NOT the output) and run those on FunctionHypothesis.value(*input) so when you have functional
+    hypotheses, this is a convenient form of data
 
+    """
     def __init__(self, input, output, **kwargs):
-        """
-                Creates a new FunctionData object. input must be either a list or a tuple.
-        """
-        assert isinstance(input, list) or isinstance(input, tuple), "FunctionData.input must be a list!" # # since we apply to this
+        """Creates a new FunctionData object; input must be either a list or a tuple."""
+        # Since we apply to this, it must be a list
+        assert isinstance(input, list) or isinstance(input, tuple), "FunctionData.input must be a list!"
         self.input = input
         self.output = output
         self.__dict__.update(kwargs)
@@ -31,23 +32,22 @@ class FunctionData:
         return '<' + ','.join(map(str, self.input)) + " -> " + str(self.output) + '>'
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ------------------------------------------------------------------------------------------------------------
 
 class UtteranceData:
-    """
-            A wrapper for utterances.
+    """A wrapper for utterances.
 
-            An utterance data point is a word, in a context, with some set of possible words we could have said.
+    An utterance data point is a word, in a context, with some set of possible words we could have said.
+
     """
     def __init__(self, utterance, context, possible_utterances):
-        """
-                Creates a new Utterance.
+        """Creates a new Utterance.
 
-                *utterance* - the word that's spoken
+        Arguments:
+            utterance (doc?): the word that's spoken
+            context (doc?): the environmental/linguistic context in which the word is spoken
+            possible_utterances (doc?): a set of other words we could have spoken, given the context
 
-                *context* - the environmental/linguistic context in which the word is spoken
-
-                *possible_utterances* - a set of other words we could have spoken, given the context
         """
         self.__dict__.update(locals())
 
@@ -55,7 +55,7 @@ class UtteranceData:
         return qq(str(self.utterance))+' in '+ str(self.context) + " from " + str(self.possible_utterances)
 
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ------------------------------------------------------------------------------------------------------------
 
 class Obj:
     """ Represent bundles of features"""
@@ -106,7 +106,6 @@ def make_all_objects(**f):
     return out_objs
 
 
-
 def sample_sets_of_objects(N, objs):
     """
     Makes a set of size N appropriate to using "set" functions on -- this means it must contain copies, not duplicate references
@@ -114,7 +113,8 @@ def sample_sets_of_objects(N, objs):
     s = weighted_sample(objs, N=N, returnlist=True) # the set of objects
     return map(deepcopy, s) # the set must NOT be just the pointers sampled, since then set() operations will collapse them!
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# ------------------------------------------------------------------------------------------------------------
 
 class Context:
     """

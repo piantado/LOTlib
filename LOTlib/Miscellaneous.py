@@ -1,88 +1,103 @@
 # -*- coding: utf-8 -*-
 
 """
-        Miscellaneous functions for LOTlib
-"""
+Miscellaneous functions for LOTlib.
 
+"""
 # Special handling to deal with numpypy (which actually tends to be slower for LOTlib)
-try:                import numpy as np
+import collections
+import math
+from math import exp, log, pi
+from random import random, sample
+import re
+import sys
+import types    # For checking if something is a function: isinstance(f, types.FunctionType)
+try: import numpy as np
 except ImportError: import numpypy as np
 
-
-from random import random, sample
-from math import exp, log, pi
-import sys
-import math
-import collections
-
-import re
-import types # for checking if something is a function: isinstance(f, types.FunctionType)
-
-## Some useful constants
+# Some useful constants
 Infinity = float("inf")
 inf = Infinity
 Inf = Infinity
 Null = []
-TAU = 6.28318530718 # fuck pi
+TAU = 6.28318530718     # fuck pi
 
-## For R-friendly
-T=True
-F=False
+# For R-friendly
+T = True
+F = False
 
-def first(x): return x[0]
-def second(x): return x[1]
-def third(x):  return x[2]
-def fourth(x):  return x[3]
-def fifth(x):  return x[4]
-def sixth(x):  return x[5]
-def seventh(x):  return x[6]
-def eighth(x):  return x[7]
+
+# ------------------------------------------------------------------------------------------------------------
+
+def first(x):
+    return x[0]
+def second(x):
+    return x[1]
+def third(x):
+    return x[2]
+def fourth(x):
+    return x[3]
+def fifth(x):
+    return x[4]
+def sixth(x):
+    return x[5]
+def seventh(x):
+    return x[6]
+def eighth(x):
+    return x[7]
+
 
 def dropfirst(g):
-    """
-        Yield all but the first in a generator
-    """
+    """Yield all but the first in a generator."""
     keep = False
     for x in g:
         if keep: yield x
         keep = True        
 
+
 def None2Empty(x):
     # Treat Nones as empty
-    if x is None: return []
-    else:         return x
+    return [] if x is None else x
+
 
 def make_mutable(x):
     # TODO: update with other types
-    if isinstance(x, frozenset): return set(x)
-    elif isinstance(x, tuple): return list(x)
+    if isinstance(x, frozenset):
+        return set(x)
+    elif isinstance(x, tuple):
+        return list(x)
     else: 
         raise NotImplementedError
 
+
 def make_immutable(x):
     # TODO: update with other types
-    if isinstance(x, set ): return frozenset(x)
-    elif isinstance(x, list): return tuple(x)
+    if isinstance(x, set ):
+        return frozenset(x)
+    elif isinstance(x, list):
+        return tuple(x)
     else:
         raise NotImplementedError
 
 
 def unlist_singleton(x):
-    """
-            Remove any sequences of nested lists with one element.
+    """Remove any sequences of nested lists with one element.
 
-            e.g. [[[1,3,4]]] -> [1,3,4]
+    Example:
+        [[[1,3,4]]] -> [1,3,4]
+
     """
     if isinstance(x,list) and len(x) == 1:
         return unlist_singleton(x[0])
     else:
         return x
 
-def list2sexpstr(lst):
-    """
-            Prints a python list-of-lists as an s-expression
 
-            [['K', 'K'], [['S', 'K'], ['I', 'I']]] --> ((K K) ((S K)(I I)))
+def list2sexpstr(lst):
+    """Prints a python list-of-lists as an s-expression.
+
+    [['K', 'K'], [['S', 'K'], ['I', 'I']]] --> ((K K) ((S K)(I I)))
+
     """
     s = re.sub(r'[\'\",]', r'', str(lst))
     s = re.sub(r'\[', '(', s) # changed r'(' to '('
@@ -90,48 +105,60 @@ def list2sexpstr(lst):
     return s
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ------------------------------------------------------------------------------------------------------------
 # Display functions
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ------------------------------------------------------------------------------------------------------------
 
 def q(x, quote='\''):
-    """
-            Quotes a string
-    """
+    """Quotes a string."""
     if isinstance(x,str) or isinstance(x, unicode):
         return quote+x+quote
     else:
         return quote+str(x)+quote
 
-def qq(x): return q(x,quote="\"")
 
-def display(x): print x
+def qq(x):
+    return q(x,quote="\"")
+
+
+def display(x):
+    print x
+
 
 # for functional programming, print something and return it
 def printr(x):
     print x
     return x
 
-def r2(x): return round(x,2)
-def r3(x): return round(x,3)
-def r4(x): return round(x,4)
-def r5(x): return round(x,5)
+
+def r2(x):
+    return round(x,2)
+def r3(x):
+    return round(x,3)
+def r4(x):
+    return round(x,4)
+def r5(x):
+    return round(x,5)
+
 
 def tf201(x):
-    if x: return 1
-    else: return 0
+    if x:
+        return 1
+    else:
+        return 0
 
 
-## Functions for I/O
+# Functions for I/O
 def display_option_summary(obj):
-    """
-            Prints out a friendly format of all options -- for headers of output files
-            This takes in an OptionParser object as an argument. As in, (options, args) = parser.parse_args()
+    """Prints out a friendly format of all options -- for headers of output files.
+
+    This takes in an OptionParser object as an argument. As in, (options, args) = parser.parse_args()
+
     """
     from time import strftime, time, localtime
     import os
 
-    print "####################################################################################################"
+    print "#"*90
     try: print "# Username: ", os.getlogin()
     except OSError: pass
 
@@ -146,15 +173,15 @@ def display_option_summary(obj):
 
     for slot in dir(obj):
         attr = getattr(obj, slot)
-        if not isinstance(attr, (types.BuiltinFunctionType, types.FunctionType, types.MethodType)) and (slot is not "__doc__") and (slot is not "__module__"):
+        if not isinstance(attr, (types.BuiltinFunctionType, types.FunctionType, types.MethodType)) \
+           and (slot is not "__doc__") and (slot is not "__module__"):
             print "#", slot, "=", attr
-    print "####################################################################################################"
+    print "#"*90
 
 
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ------------------------------------------------------------------------------------------------------------
 # Genuine Miscellany
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ------------------------------------------------------------------------------------------------------------
 
 def infrange(n=Infinity):
     """
@@ -171,19 +198,18 @@ def takeN(g, n):
             break
         yield v
 
-
-
 # a wrapper so we can call this in the below weirdo composition
-def raise_exception(e): raise e
+def raise_exception(e):
+    raise e
+
 
 def ifelse(x,y,z):
     if x: return y
     else: return z
 
+
 def unique(gen):
-    """
-            Make a generator unique, returning each element only once
-    """
+    """Make a generator unique, returning each element only once."""
     s = set()
     for gi in gen:
         if gi not in s:
@@ -191,9 +217,7 @@ def unique(gen):
             s.add(gi)
 
 def UniquifyFunction(gen):
-        """
-        A decorator to make a function only return unique values
-        """
+        """A decorator to make a function only return unique values."""
         def f(*args, **kwargs):
                 for x in unique(gen(*args, **kwargs)):
                         yield x
@@ -282,9 +306,9 @@ def lazyproduct(iterators, restart_ith):
                         # and no break so we iterate the next
             yield state
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ------------------------------------------------------------------------------------------------------------
 # Math functions
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ------------------------------------------------------------------------------------------------------------
 
 # Special handilng for numpypy that doesn't use gammaln, assertion error otherwise
 try:
@@ -353,6 +377,7 @@ def norm_lpdf_multivariate(x, mu, sigma):
     result = -0.5 * (x_mu * inv * x_mu.T)
     return norm_const + result
 
+
 def logrange(mn,mx,steps):
     """
             Logarithmically-spaced steps from mn to mx, with steps number inbetween
@@ -366,11 +391,13 @@ def logrange(mn,mx,steps):
     r = np.append(r, mx)
     return np.exp(r)
 
+
 def geometric_ldensity(n,p):
     """ Log density of a geomtric distribution """
     return (n-1)*log(1.0-p)+log(p)
 
 from math import expm1, log1p
+
 def log1mexp(a):
     """
             Computes log(1-exp(a)) according to Machler, "Accurately computing ..."
@@ -382,6 +409,7 @@ def log1mexp(a):
     if a < -log(2.0): return log1p(-exp(a))
     else:             return log(-expm1(a))
 
+
 def EV(fn, *args):
     """
         Estimates (via sampling) the expected value of a function that returns
@@ -391,41 +419,49 @@ def EV(fn, *args):
     vals = [fn(*args) for _ in range(100)]
     return np.average(vals)
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ------------------------------------------------------------------------------------------------------------
 # Sampling functions
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ------------------------------------------------------------------------------------------------------------
 
-def sample1(*args): return sample_one(*args)
+def sample1(*args):
+    return sample_one(*args)
+
+
 def sample_one(*args):
-    if len(args) == 1: return sample(args[0],1)[0] # use the list you were given
-    else:              return sample(args, 1)[0]   # treat the arguments as a list
+    if len(args) == 1:
+        return sample(args[0],1)[0]     # use the list you were given
+    else:
+        return sample(args, 1)[0]       # treat the arguments as a list
 
-def flip(p): return (random() < p)
+
+def flip(p):
+    return random() < p
 
 
-## TODO: THIS FUNCTION SUCKS PLEASE FIX IT
-## TODO: Change this so that if N is large enough, you sort
-# takes unnormalized probabilities and returns a list of the log probability and the object
-# returnlist makes the return always a list (even if N=1); otherwise it is a list for N>1 only
-# NOTE: This now can take probs as a function, which is then mapped!
+# TODO: THIS FUNCTION SUCKS PLEASE FIX IT
+# TODO: Change this so that if N is large enough, you sort
 def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, returnlist=False, Z=None):
-    """
-            When we return_probability, it is *always* a log probability
-    """
-    # check how probabilities are specified
-    # either as an argument, or attribute of objs (either probability or lp
-    # NOTE: THis ALWAYS returns a log probability
+    """When we return_probability, it is *always* a log probability.
 
+    Takes unnormalized probabilities and returns a list of the log probability and the object returnlist
+    makes the return always a list (even if N=1); otherwise it is a list for N>1 only
+
+    Note:
+        This now can take probs as a function, which is then mapped!
+
+    """
+    # Check how probabilities are specified either as an argument, or attribute of objs (either probability
+    #  or log prob).  Note: This ALWAYS returns a log probability
     if len(objs) == 0: return None
 
-    # convert to support indexing if we need it
+    # Convert to support indexing if we need it
     if isinstance(objs, set):
         objs = list(objs)
 
     myprobs = None
-    if probs is None: # defaultly, we use .lp
-        myprobs = [1.0] * len(objs) # sample uniform
-    elif isinstance(probs, types.FunctionType): # NOTE: this does not work for class instance methods
+    if probs is None:   # Defaultly, we use .lp
+        myprobs = [1.0] * len(objs)     # Sample uniform
+    elif isinstance(probs, types.FunctionType):     # Note: this does not work for class instance methods
         myprobs = map(probs, objs)
     else:
         myprobs = map(float, probs)
@@ -440,27 +476,32 @@ def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, 
     for n in range(N):
         r = random()
         for i in range(len(objs)):
-            if log: r = r - exp(myprobs[i] - Z) # log domain
-            else: r = r - (myprobs[i]/Z) # probability domain
-            #print r, myprobs
+            # Set r based on log domain  or  probability domain.
+            r = r - exp(myprobs[i] - Z) if log else r - (myprobs[i]/Z)
+
+            # print r, myprobs
             if r <= 0:
                 if return_probability:
                     lp = 0
-                    if log: lp = myprobs[i] - Z
-                    else:   lp = math.log(myprobs[i]) - math.log(Z)
+                    if log:
+                        lp = myprobs[i] - Z
+                    else:
+                        lp = math.log(myprobs[i]) - math.log(Z)
 
-                    out.append( [objs[i],lp] )
+                    out.append([objs[i],lp])
                     break
                 else:
-                    out.append( objs[i] )
+                    out.append(objs[i])
                     break
 
-    if N == 1 and (not returnlist): return out[0]  # don't give back a list if you just want one
-    else:      return out
+    if N == 1 and (not returnlist):
+        return out[0]   # Don't give back a list if you just want one.
+    else:
+        return out
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ------------------------------------------------------------------------------------------------------------
 # Lambda calculus
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ------------------------------------------------------------------------------------------------------------
 
 # Some innate lambdas
 def lambdaZero(*x): return 0
@@ -471,16 +512,18 @@ def lambdaTrue(*x): return True
 def lambdaFalse(*x): return False
 def lambdaNAN(*x): return float("nan")
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ------------------------------------------------------------------------------------------------------------
 # Sorting utilities
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ------------------------------------------------------------------------------------------------------------
 
 def scramble_sort(lst, keyfunction):
-    """
-        This is a sort that randomizes order among the ones with equal keys.
-        I have no idea why this is here.
+    """This is a sort that randomizes order among the ones with equal keys.
+
+    Steve says: 'I have no idea why this is here.'
+
     """
     keys = map(lambda li: (keyfunction(li), random(), li), lst)
     
     return map(lambda x: x[2], sorted(keys))
-    
+
+
