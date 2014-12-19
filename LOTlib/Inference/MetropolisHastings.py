@@ -98,14 +98,15 @@ class MHSampler():
         pass
 
     def next(self):
-        cur_s = self.current_sample
+
         if self.samples_yielded >= self.steps:
             raise StopIteration
         else:
             for _ in xrange(self.skip+1):
+                cur_s = self.current_sample
+
                 self.proposal, fb = self.proposer(cur_s)
 
-                self.proposal, fb = self.proposer(self.current_sample)
                 assert self.proposal is not self.current_sample, "*** Proposal cannot be the same as the current sample!"
                 assert self.proposal.value is not self.current_sample.value, "*** Proposal cannot be the same as the current sample!"
 
