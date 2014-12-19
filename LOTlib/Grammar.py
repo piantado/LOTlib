@@ -11,6 +11,7 @@ from LOTlib.Miscellaneous import *
 from LOTlib.GrammarRule import GrammarRule, BVAddGrammarRule
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
 from LOTlib.BVRuleContextManager import BVRuleContextManager
+from LOTlib.FunctionNode import FunctionNode
 
 class Grammar:
     """
@@ -25,9 +26,6 @@ class Grammar:
                             - \*normal\*  - 0 mean, 1 sd
                             - \*exponential\* - rate = 1
 
-            NOTE: Bound variables have a rule id < 0
-
-            This class fixes a bunch of problems that were in earlier versions, such as
     """
 
     def __init__(self, BV_P=10.0, BV_RESAMPLE_P=1.0, start='START'):
@@ -36,19 +34,19 @@ class Grammar:
         self.rules = defaultdict(list) # A dict from nonterminals to lists of GrammarRules
         self.rule_count = 0
         self.bv_count = 0 # How many rules in the grammar introduce bound variables?
-        self.bv_rule_id = 0 # A unique idenifier for each bv rule id (may get quite large)      . The actual stored rule are negative this
-    
+
     def __str__(self):
         """
         Display a grammar
         """
         return '\n'.join([str(r) for r in itertools.chain(*[self.rules[nt] for nt in self.rules.keys()])])
 
+    def nrules(self):
+        return sum([len(self.rules[nt]) for nt in self.rules.keys()])
 
     def is_nonterminal(self, x):
         """ A nonterminal is just something that is a key for self.rules"""
 
-    #       if x is a string       if x is a key
         return isinstance(x, str) and (x in self.rules)
 
 
@@ -183,7 +181,15 @@ class Grammar:
                 for g in self.iterate_subnodes(a, d=d+1, do_bv=do_bv, yield_depth=yield_depth, predicate=predicate): # pass up anything from below
                     yield g
 
-    
+
+    def log_probability(self, fn):
+        """
+        Compute the log probability of this fn, updating its generation_probabilities
+        NOTE: This modifies, but we can pass it a copy!
+        """
+        self.recompute_generation_probabilities(fn)
+        return fn.log_probability()
+
     def recompute_generation_probabilities(self, fn):
         """
             Re-compute all the generation_probabilities
@@ -302,320 +308,6 @@ class Grammar:
         return current_d[x]
         
 
-    def lp_regenerate_propose_to(self, x, y, xZ=None, yZ=None):
-        """
-                Returns a log probability of starting at x and ending up at y from a regeneration move.
-                Any node is a candidate if the trees are identical except for what's below those nodes
-                (although what's below *can* be identical!)
 
-                NOTE: This does NOT take into account insert/delete
-                NOTE: Not so simple because we must count multiple paths
-        """
 
-        # Wrap for hypotheses instead of trees
-        if isinstance(x, Hypothesis):
-            assert isinstance(y, Hypothesis), ("*** If x is a hypothesis, y must be! "+str(y) )
-            return self.lp_regenerate_propose_to(x.value,y.value,xZ=xZ, yZ=yZ)
 
-        RP = -Infinity
-
-        if (isinstance(x,str) and isinstance(y,str) and x==y) or (x.returntype == y.returntype):
-
-            # compute the normalizer
-            if xZ is None: xZ = x.sample_node_normalizer()
-            if yZ is None: yZ = y.sample_node_normalizer()
-
-            # Well we could select x's root to go to Y
-            RP = logplusexp(RP, log(x.resample_p) - log(xZ) + y.log_probability() )
-
-            if x.name == y.name:
-
-                # how many kids are not equal, and where was the last?
-                mismatch_count, mismatch_index = 0, 0
-
-                # print 'args are', x.args
-
-                if x.args is not None:
-                    for i, xa, ya in zip(xrange(len(x.args)), x.args if x.args is not None else [],
-                                                              y.args if y.args is not None else []):
-                        if xa != ya: # checks whole subtree!
-                            mismatch_count += 1
-                            mismatch_index = i
-
-                if mismatch_count > 1: # We have to have only selected x,y to regenerate
-                    pass
-                elif mismatch_count == 1: # we could propose to x, or x.args[mismatch_index], but nothing else (nothing else will fix the mismatch)
-                    RP = logplusexp(RP, self.lp_regenerate_propose_to(x.args[mismatch_index], y.args[mismatch_index], xZ=xZ, yZ=yZ))
-                else: # identical trees -- we could propose to any, so that's just the tree probability below convolved with the resample p
-                    for xi in dropfirst(x): # we already counted ourself
-                        RP = logplusexp(RP, log(xi.resample_p) - log(xZ) + xi.log_probability() )
-
-        return RP
-
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-if __name__ == "__main__":
-    pass
-    #from LOTlib.Examples.FOL.FOL import grammar
-    #from LOTlib.Examples.Magnetism.SimpleMagnetism import grammar
-    #from LOTlib.Examples.Number.Shared import grammar
-   # from LOTlib.Examples.RegularExpression.Shared import grammar
-    from LOTlib.Examples.Magnetism.Simple.Run import grammar
-
-    """
-    grammar = Grammar()
-    grammar.add_rule('START', 'lambda', ['A'],  1.0, bv_type='B')
-    grammar.add_rule('A', 'af', ['A', 'B'], 1.0)
-    grammar.add_rule('A', '', ['a'], 1.0)
-    #grammar.add_rule('A', 'x', ['B'], 1.0)
-    grammar.add_rule('B', '', ['b'], 1.0)
-    grammar.add_rule('B', 'bf', ['A', 'B'], 1.0)
-    """
-
-    #for t in lot_iter(grammar.enumerate_at_depth(6, leaves=
-    seen = set()
-    for t in lot_iter(grammar.enumerate()):
-        print t.depth(), t
-        assert t not in seen
-        seen.add(t)
-
-    #for t in lot_iter(grammar.enumerate(leaves=False)):
-    #    print t.depth(), t
-    #    #assert t not in seen
-
-
-    #for r in grammar.rules.keys():
-    #    print ">>", grammar.depth_to_terminal(r), r
-    #for _ in xrange(1000):
-    #    print grammar.generate()
-        
-    """
-    for _ in xrange(1000):
-        t = grammar.generate()
-        print type(t), t
-        
-        from LOTlib.Proposals.RegenerationProposal import RegenerationProposal
-        rp = RegenerationProposal(grammar)
-        x = rp.propose_tree(t)[0]
-        print type(x), x
-        
-        print "\n\n"
-    """
-    
-     
-    #    print t.depth(), t
-
-"""
-    #from LOTlib.Examples.RationalRules.Shared import grammar
-    #from LOTlib.Examples.Number.Shared import grammar
-    #from LOTlib.DefaultGrammars import SimpleBoolean as grammar
-    SimpleBoolean= Grammar()
-    SimpleBoolean.add_rule('START', 'False', None, 1)
-    SimpleBoolean.add_rule('START', 'True', None, 1)
-    SimpleBoolean.add_rule('START', '', ['BOOL'], 1.0)
-    
-    SimpleBoolean.add_rule('BOOL', 'and_', ['BOOL', 'BOOL'], 1.0)
-    SimpleBoolean.add_rule('BOOL', 'not_', ['BOOL'], 1.0)
-    
-    SimpleBoolean.add_rule('BOOL', '', ['PREDICATE'], 5)
-     
-    for t in SimpleBoolean.increment_tree(x='BOOL', depth=6):
-        print t
-"""
-
-
-"""
-        #AB_GRAMMAR = PCFG()
-        #AB_GRAMMAR.add_rule('START', '', ['EXPR'], 1.0)
-        #AB_GRAMMAR.add_rule('EXPR', '', ['A', 'EXPR'], 1.0)
-        #AB_GRAMMAR.add_rule('EXPR', '', ['B', 'EXPR'], 1.0)
-
-        #AB_GRAMMAR.add_rule('EXPR', '', ['A'], 1.0)
-        #AB_GRAMMAR.add_rule('EXPR', '', ['B'], 1.0)
-
-        #for i in xrange(1000):
-                #x = AB_GRAMMAR.generate('START')
-                #print x.log_probability(), x
-
-
-        grammar = Grammar()
-        grammar.add_rule('START', '', ['EXPR'], 1.0)
-        #grammar.add_rule('EXPR', 'somefunc_', ['EXPR', 'EXPR', 'EXPR'], 1.0, resample_p=5.0)
-        grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 4.0, resample_p=10.0)
-        grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 3.0, resample_p=5.0)
-        grammar.add_rule('EXPR', 'divide_', ['EXPR', 'EXPR'], 2.0)
-        grammar.add_rule('EXPR', 'subtract_', ['EXPR', 'EXPR'], 1.0)
-        grammar.add_rule('EXPR', 'x', [], 15.0) # these terminals should have None for their function type; the literals
-        grammar.add_rule('EXPR', '1.0', [], 3.0)
-        grammar.add_rule('EXPR', '13.0', [], 2.0)
-
-        ## We generate a few ways, mapping strings to the actual things
-        #print "Testing increment (no lambda)"
-        #TEST_INC = dict()
-
-        #for t in grammar.increment_tree('START',3):
-                #TEST_INC[str(t)] = t
-
-        #print "Testing generate (no lambda)"
-        TEST_GEN = dict()
-        TARGET = dict()
-        from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-        for i in xrange(10000):
-                t = grammar.generate('START')
-                # print ">>", t, ' ', dir(t)
-                TEST_GEN[str(t)] = t
-
-                if t.count_nodes() < 10:
-                        TARGET[LOTHypothesis(grammar, value=copy(t) )] = t.log_probability()
-                        # print out log probability and tree
-                        print t, ' ', t.log_probability()
-
-
-
-
-        #print "Testing MCMC (no counts) (no lambda)"
-        #TEST_MCMC = dict()
-        #MCMC_STEPS = 10000
-        #import LOTlib.MetropolisHastings
-        #from LOTlib.Hypothesis import LOTHypothesis
-        #hyp = LOTHypothesis(grammar)
-        #for x in LOTlib.MetropolisHastings.mh_sample(hyp, [], MCMC_STEPS):
-                ##print ">>", x
-                #TEST_MCMC[str(x.value)] = copy(x.value)
-
-        ### Now print out the results and see what's up
-        #for x in TEST_GEN.values():
-
-                ## We'll only check values that appear in all
-                #if str(x) not in TEST_MCMC or str(x) not in TEST_INC: continue
-
-                ## If we print
-                #print TEST_INC[str(x)].log_probability(),  TEST_GEN[str(x)].log_probability(),  TEST_MCMC[str(x)].log_probability(), x
-
-                #assert abs( TEST_INC[str(x)].log_probability() - TEST_GEN[str(x)].log_probability()) < 1e-9
-                #assert abs( TEST_INC[str(x)].log_probability() -  TEST_MCMC[str(x)].log_probability()) < 1e-9
-
-
-        ## # # # # # # # # # # # # # # #
-        ### And now do a version with bound variables
-        ## # # # # # # # # # # # # # # #
-
-        grammar.add_rule('EXPR', 'apply', ['FUNCTION', 'EXPR'], 5.0)
-        grammar.add_rule('FUNCTION', 'lambda', ['EXPR'], 1.0, bv_type='EXPR', bv_args=None) # bvtype means we introduce a bound variable below
-
-        print "Testing generate (lambda)"
-        TEST_GEN = dict()
-        for i in xrange(10000):
-                x = grammar.generate('START')
-                TEST_GEN[str(x)] = x
-                #print x
-                #x.fullprint()
-
-        print "Testing MCMC (lambda)"
-        TEST_MCMC = dict()
-        TEST_MCMC_COUNT = defaultdict(int)
-        MCMC_STEPS = 50000
-        import LOTlib.MetropolisHastings
-        from LOTlib.Hypothesis import LOTHypothesis
-        hyp = LOTHypothesis(grammar)
-        for x in LOTlib.MetropolisHastings.mh_sample(hyp, [], MCMC_STEPS):
-                TEST_MCMC[str(x.value)] = copy(x.value)
-                TEST_MCMC_COUNT[str(x.value)] += 1 # keep track of these
-                #print x
-                #for kk in grammar.iterate_subnodes(x.value, do_bv=True, yield_depth=True):
-                        #print ">>\t", kk
-                #print "\n"
-                #x.value.fullprint()
-
-        # Now print out the results and see what's up
-        for x in TEST_GEN.values():
-
-                # We'll only check values that appear in all
-                if str(x) not in TEST_MCMC: continue
-
-                #print TEST_GEN[str(x)].log_probability(),  TEST_MCMC[str(x)].log_probability(), x
-
-                if abs( TEST_GEN[str(x)].log_probability() - TEST_MCMC[str(x)].log_probability()) > 1e-9:
-                        print "----------------------------------------------------------------"
-                        print "--- Mismatch in tree probabilities:                          ---"
-                        print "----------------------------------------------------------------"
-                        TEST_GEN[str(x)].fullprint()
-                        print "----------------------------------------------------------------"
-                        TEST_MCMC[str(x)].fullprint()
-                        print "----------------------------------------------------------------"
-
-                assert abs( TEST_GEN[str(x)].log_probability() - TEST_MCMC[str(x)].log_probability()) < 1e-9
-
-        # Now check that the MCMC actually visits the nodes the right number of time
-        keys = [x for x in TEST_MCMC.keys() if TEST_MCMC[x].count_nodes() <= 8 ] # get a set of common trees
-        cntZ = log(sum([ TEST_MCMC_COUNT[x] for x in keys]))
-        lpZ  = logsumexp([ TEST_MCMC[x].log_probability() for x in keys])
-        for x in sorted(keys, key=lambda x: TEST_MCMC[x].log_probability()):
-                #x.fullprint()
-                #print "))", x
-                print TEST_MCMC_COUNT[x], log(TEST_MCMC_COUNT[x])-cntZ, TEST_MCMC[x].log_probability() - lpZ,  TEST_MCMC[x].log_probability(), q(TEST_MCMC[x]), hasattr(x, 'my_log_probability')
-
-
-                ## TODO: ADD ASSERTIONS ETC
-
-
-        # To check the computation of lp_regenerate_propose_to, which should return how likely we are to propose
-        # from one tree to another
-        #from LOTlib.Examples.Number.Shared import *
-        #x = NumberExpression(grammar).value
-        #NN = 100000
-        #d = defaultdict(int)
-        #for i in xrange(NN):
-                #y,_ = grammar.propose(x, insert_delete_probability=0.0)
-                #d[y] += 1
-        ## Show counts and expected counts
-        #for y in sorted( d.keys(), key=lambda z: d[z]):
-                #EC = round(exp(grammar.lp_regenerate_propose_to(x,y))*NN)
-                #if d[y] > 10 or EC > 10: # print only highish prob things
-                        #print d[y], EC, y
-        #print ">>", x
-
-
-
-
-
-
-
-
-        # If success....
-        print "---------------------------"
-        print ":-) No complaints here!"
-        print "---------------------------"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        ## We will use three four methods to generate a set of trees. Each of these should give the same probabilities:
-        # - increment_tree('START')
-        # - generate('START')
-        # - MCMC with proposals (via counts)
-        # - MCMC with proposals (via probabilities of found trees)
-
-
-
-        #for i in xrange(1000):
-                #x = ARITHMETIC_GRAMMAR.generate('START')
-
-                #print x.log_probability(), ARITHMETIC_GRAMMAR.RR_prior(x), x
-                #for xi in ARITHMETIC_GRAMMAR.iterate_subnodes(x):
-                        #print "\t", xi
-"""

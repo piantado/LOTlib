@@ -103,9 +103,8 @@ class MHSampler():
             raise StopIteration
         else:
             for _ in xrange(self.skip+1):
-                cur_s = self.current_sample
 
-                self.proposal, fb = self.proposer(cur_s)
+                self.proposal, fb = self.proposer(self.current_sample)
 
                 assert self.proposal is not self.current_sample, "*** Proposal cannot be the same as the current sample!"
                 assert self.proposal.value is not self.current_sample.value, "*** Proposal cannot be the same as the current sample!"
@@ -118,8 +117,8 @@ class MHSampler():
                 #    externally from ParallelTempering and others
                 prop = (np/self.prior_temperature +
                         nl/self.likelihood_temperature)
-                cur = (cur_s.prior/self.prior_temperature +
-                       cur_s.likelihood/self.likelihood_temperature)
+                cur = (self.current_sample.prior/self.prior_temperature +
+                       self.current_sample.likelihood/self.likelihood_temperature)
                 
                 #print "# Current:", cur_s
                 #print "# Proposal:", self.proposal
@@ -135,7 +134,7 @@ class MHSampler():
                 self.proposal_count += 1
 
             if self.trace:
-                print cur_s.posterior_score, cur_s.likelihood, cur_s.prior, qq(cur_s)
+                print self.current_sample.posterior_score, self.current_sample.likelihood, self.current_sample.prior, qq(self.current_sample)
 
             self.samples_yielded += 1
             return self.current_sample

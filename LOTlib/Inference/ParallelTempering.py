@@ -43,7 +43,11 @@ class ParallelTemperingSampler(MultipleChainMCMC):
                 prop = self.ll_at_temperature(i, self.chains[i+1].likelihood_temperature) + self.ll_at_temperature(i+1, self.chains[i].likelihood_temperature)
 
                 if MH_acceptance(cur, prop, 0.0):
-                    self.chains[i].current_sample, self.chains[i+1].current_sample = self.chains[i+1].current_sample,   self.chains[i].current_sample
+                    tmp = self.chains[i].current_sample
+                    self.chains[i].set_state( self.chains[i+1].current_sample, False)
+                    self.chains[i+1].set_state(tmp, False)
+
+                    # OLD: self.chains[i].current_sample, self.chains[i+1].current_sample = self.chains[i+1].current_sample, self.chains[i].current_sample
 
         if self.yield_only_t0 and self.chain_idx != 0:
             return self.next() # keep going until we're on the one we yield
@@ -53,10 +57,13 @@ class ParallelTemperingSampler(MultipleChainMCMC):
 
 
 if __name__ == "__main__":
-    from LOTlib.Examples.Number.Global import generate_data, NumberExpression, grammar
+
+    from LOTlib import lot_iter
+    from LOTlib.Miscellaneous import Infinity
+    from LOTlib.Examples.Number.Model import generate_data, NumberExpression, grammar
     data = generate_data(300)
 
     make_h0 = lambda : NumberExpression(grammar)
 
-    for h in ParallelTemperingSampler(make_h0, data, steps=100, yield_only_t0=True):
+    for h in lot_iter(ParallelTemperingSampler(make_h0, data, steps=Infinity, yield_only_t0=True)):
         print h.posterior_score, h

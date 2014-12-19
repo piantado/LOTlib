@@ -38,7 +38,7 @@ class InsertDeleteProposal(LOTProposal):
 
     """
 
-    def __init__(self, grammar, insert_delete_probability=0.5):
+    def __init__(self, grammar):
         self.__dict__.update(locals())
 
     
