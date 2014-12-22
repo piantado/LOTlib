@@ -1,6 +1,7 @@
 """
-class to test MetropolisHastings.py
-follows the standards in https://docs.python.org/2/library/unittest.html
+
+TODO: We need to add replicatingrules and apply for the other proposal methods to be tested!
+
 """
 
 
@@ -8,11 +9,14 @@ from collections import Counter
 from math import exp
 from scipy.stats import chisquare
 
-from TreeTester import TreeTester # defines check_tree and setUp
+from TreeTesters import InfiniteTreeTester # defines check_tree and setUp
 
 NSAMPLES = 1000
 
-class ProposalTest(TreeTester):
+class ProposalTest(InfiniteTreeTester):
+    """
+    This tests if proposals return well-formed trees.
+    """
 
     def test_RegenerationProposal(self):
         from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
@@ -26,9 +30,10 @@ class ProposalTest(TreeTester):
 
                 # Check the proposal
                 self.check_tree(p)
-            assert sum(cnt.values()) == NSAMPLES
 
             ## check that the proposals are what they should be -- rp.lp_propose is correct!
+            obsc = [cnt[t] for t in self.trees]
+            expc = [exp(t.log_probability())*n for t in self.trees]
             csq, pv = chisquare([cnt[t] for t in self.trees],
                                 [exp(rp.lp_propose(tree, x))*NSAMPLES for x in self.trees])
 

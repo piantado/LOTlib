@@ -27,13 +27,19 @@ class InverseInlineProposal(LOTProposal):
         """
         self.__dict__.update(locals())
         LOTProposal.__init__(self, grammar)
-        
+
+        # check that we used "apply_" instead of "apply"
+        for r in self.grammar:
+            assert r.name is not "apply", "*** Need to use 'apply_' instead of 'apply' "
+            assert r.name is not "lambda_", "*** Need to use 'lambda' instead of 'lambda' "
+            # the asymmetry here is disturbing, but lambda is a keyword and apply is a function
+
         self.insertable_rules = defaultdict(list) # Hash each nonterminal to (a,l) where a and l are the apply and lambda rules you need
         for nt in self.grammar.rules.keys():
-            
             for a in filter(lambda r: (r.name=="apply_") and (r.nt == nt), self.grammar):
                 for l in filter( lambda r: isinstance(r, BVAddGrammarRule) and (r.nt == a.to[0]) and (r.bv_args is None), self.grammar): # For each lambda whose "below" is the right type. bv_args are not implemented yet
                     self.insertable_rules[nt].append( (a,l) )
+        # print "# Insertable rules:\t", self.insertable_rules
 
 
     def can_abstract_at(self, x):
@@ -70,7 +76,7 @@ class InverseInlineProposal(LOTProposal):
         if n.name != "apply_":
             return False
 
-        assert len(n.args)==2
+        assert len(n.args) == 2
         l, a = n.args
 
         assert (not isinstance(l.added_rule, BVUseFunctionNode)) or l.added_rule.bv_args is None # NOTE: l.added_rule.name checks if the bound variable is actually used, but only works for bv_args=None

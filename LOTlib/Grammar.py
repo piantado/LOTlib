@@ -22,7 +22,9 @@ class Grammar:
         - Variable resampling probabilities among the rules
 
     Note:
+        * In general, grammars should NOT allow rules of the same name and type signature.
         * This class fixes a bunch of problems that were in earlier versions, such as (doc?)
+
     """
     def __init__(self, BV_P=10.0, BV_RESAMPLE_P=1.0, start='START'):
         self.__dict__.update(locals())

@@ -58,14 +58,16 @@ def pystring(x, d=0, bv_names=None):
         elif x.name == '':
             assert len(x.args) == 1, "Null names must have exactly 1 argument"
             return pystring(x.args[0], d=d, bv_names=bv_names)
+        elif x.name == ',': # comma join
+            return ','.join(map(lambda a: pystring(a, d=d, bv_names=bv_names), x.args))
         elif x.name == "apply_":
             assert x.args is not None and len(x.args)==2, "Apply requires exactly 2 arguments"
             #print ">>>>", self.args
-            return '( %s )( %s )' % tuple(map(lambda x: pystring(x, d=d, bv_names=bv_names), x.args))
+            return '( %s )( %s )' % tuple(map(lambda a: pystring(a, d=d, bv_names=bv_names), x.args))
         elif x.name == "or_sc_": # short-circuit or
-            return "(%s)" % ' or '.join(map(lambda x: pystring(x, d=d, bv_names=bv_names), x.args))
+            return "(%s)" % ' or '.join(map(lambda a: pystring(a, d=d, bv_names=bv_names), x.args))
         elif x.name == "and_sc_": # short-circuit and
-            return "(%s)" % ' and '.join(map(lambda x: pystring(x, d=d, bv_names=bv_names), x.args))
+            return "(%s)" % ' and '.join(map(lambda a: pystring(a, d=d, bv_names=bv_names), x.args))
         elif x.name == 'lambda':
             # On a lambda, we must add the introduced bv, and then remove it again afterwards
 
