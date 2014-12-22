@@ -10,7 +10,7 @@ class VectorSummary(MCMCSummary):
 
     # --------------------------------------------------------------------------------------------------------
 
-    def violinplot(self):
+    def violinplot_value(self):
         # Numpy array of sampled values for each vector element altered in proposals
         s0 = self.samples[0]
         propose_idxs = s0.propose_idxs
@@ -48,7 +48,7 @@ class VectorSummary(MCMCSummary):
 
     # --------------------------------------------------------------------------------------------------------
 
-    def lineplot(self):
+    def lineplot_value(self):
         """ http://matplotlib.org/examples/pylab_examples/subplots_demo.html """
         # Numpy array of sampled values for each vector element altered in proposals
         s0 = self.samples[0]
@@ -75,8 +75,33 @@ class VectorSummary(MCMCSummary):
         plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
         plt.show()
 
+    # --------------------------------------------------------------------------------------------------------
 
+    def lineplot_gh_metric(self, metric='post'):
+        """
+        Draw a line plot for the GrammarHypothesis, evaluated by GH.posterior_score, MAP, or MLE.
+        """
+        assert metric in ('post', 'MLE', 'MAP'), "invalid plot metric!"
+        fig, ax = plt.subplots()
+        fig.subplots_adjust(bottom=0.2, left=0.1)
+        ax.set_title('Evaluation for GrammarHypotheses Sampled by MCMC')
 
+        if metric == 'post':
+            mcmc_values = [gh.posterior_score for gh in self.samples]
+        if metric == 'MAP':
+            mcmc_values = [gh.max_a_posteriori() for gh in self.samples]
+        if metric == 'MLE':
+            mcmc_values = [gh.max_like_estimate() for gh in self.samples]
+        ax.plot(mcmc_values)
+        plt.show()
+
+    # --------------------------------------------------------------------------------------------------------
+
+    def plot_top_hypotheses(self):
+        """Do the graph like they have in joshConcepts.pdf"""
+        pass
+
+    # --------------------------------------------------------------------------------------------------------
 
     def print_top_samples(self):
         if self.top_samples is None:

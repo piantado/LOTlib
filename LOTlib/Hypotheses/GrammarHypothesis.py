@@ -109,7 +109,7 @@ class GrammarHypothesis(VectorHypothesis):
                 # probability for yes on output `o` is sum of posteriors for hypos that contain `o`
                 # TODO: this will break if h() is None... can this ever happen??
                 p = logsumexp([w if o in h() else -Infinity for h, w in zip(hypotheses, weights)])
-                p = -1e-10 if p >= 0 else p      #
+                p = -1e-10 if p >= 0 else p
                 k = d.output[o][0]         # num. yes responses
                 n = k + d.output[o][1]     # num. trials
                 bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
@@ -175,9 +175,20 @@ class GrammarHypothesis(VectorHypothesis):
             propose_n=self.propose_n, propose_step=self.propose_step
         )
 
-    def print_best_hypotheses(self, n=10):
+    def get_top_hypotheses(self, n=10):
+        """Return the best `n` hypotheses from `self.hypotheses`."""
         hypotheses = self.hypotheses
         sorted_hypos = sorted(hypotheses, key=lambda x: x.posterior_score)
-        for h in sorted_hypos[-n:]:
+        return sorted_hypos[-n:]
+
+    def print_top_hypotheses(self, n=10):
+        """Print the best `n` hypotheses from `self.hypotheses`."""
+        for h in self.get_top_hypotheses(n=n):
             print str(h)
             print h.posterior_score, h.likelihood, h.prior
+
+    def max_a_posteriori(self):
+        return max([h.posterior_score for h in self.hypotheses])
+
+    def max_like_estimate(self):
+        return max([h.likelihood for h in self.hypotheses])

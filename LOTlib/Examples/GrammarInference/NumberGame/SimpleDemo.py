@@ -4,7 +4,6 @@ A simple demo of inference with GrammarHypothesis, VectorSummary, NumberGameHypo
 """
 from LOTlib.Hypotheses.GrammarHypothesis import GrammarHypothesis
 from LOTlib.Inference.MetropolisHastings import MHSampler
-from LOTlib.Inference.PriorSample import prior_sample
 from LOTlib.Examples.NumberGame.NewVersion.Model import *
 from Model import *
 
@@ -36,6 +35,7 @@ def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=
         >> run()
 
     """
+    assert plot_type in ('violin', 'values', 'post', 'MLE', 'MAP'), "invalid plot type!"
     # --------------------------------------------------------------------------------------------------------
     # Enumerate some NumberGameHypotheses.
 
@@ -61,13 +61,11 @@ def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=
     mh_grammar_summary = sample_grammar_hypotheses(mh_grammar_sampler, skip=grammar_n/cap, cap=cap)
     mh_grammar_summary.print_top_samples()
     if plot_type == 'violin':
-        mh_grammar_summary.violinplot()
-    if plot_type == 'line':
-        mh_grammar_summary.lineplot()
-    if plot_type == 'MLE':
-        pass
-    if plot_type == 'MAP':
-        pass
+        mh_grammar_summary.violinplot_value()
+    if plot_type == 'values':
+        mh_grammar_summary.lineplot_value()
+    if plot_type in ('post', 'MLE', 'MAP'):
+        mh_grammar_summary.lineplot_gh_metric(metric=plot_type)
 
 
 if __name__ == "__main__":
