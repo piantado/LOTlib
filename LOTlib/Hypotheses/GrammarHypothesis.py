@@ -81,10 +81,10 @@ class GrammarHypothesis(VectorHypothesis):
         self.update_posterior()
         return prior
 
-    def compute_likelihood(self, data, **kwargs):
-        """Use hypotheses to estimate likelihood of generating the data.
+    def compute_likelihood(self, data, update_post=True, **kwargs):
+        """Use bayesian model averaging with `self.hypotheses` to estimate likelihood of generating the data.
 
-        This is taken as a weighted sum over all hypotheses, sum { p(h | X) }
+        This is taken as a weighted sum over all hypotheses, sum_h { p(h | X) } .
 
         Args:
             data(list): List of FunctionData objects.
@@ -115,8 +115,9 @@ class GrammarHypothesis(VectorHypothesis):
                 bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
                 likelihood += bc + (k*p) + (n-k)*log1mexp(p)            # likelihood we got human output
 
-        self.likelihood = likelihood
-        self.update_posterior()
+        if update_post:
+            self.likelihood = likelihood
+            self.update_posterior()
         return likelihood
 
     def rule_distribution(self, data, rule_name, vals=np.arange(0, 2, .1)):
