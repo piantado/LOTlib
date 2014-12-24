@@ -1,3 +1,5 @@
+
+import pickle
 from LOTlib import lot_iter
 
 class MCMCSummary:
@@ -62,3 +64,7 @@ class MCMCSummary:
     def set_top_samples(self, n=10, key=lambda x: x.posterior_score):
         self.top_samples = sorted(self.samples, key=key)[-n:]
         return self.top_samples
+
+    def pickle_summary(self, filename='MCMC_summary_data.p'):
+        f = open(filename, "wb")
+        pickle.dump(self, f)
