@@ -10,7 +10,7 @@ from Model import *
 
 
 def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=5, grammar_n=10000, cap=100,
-        plot_type='violin', pickle_data=False):
+        plot_type=None, pickle_data=False):
     """
     Enumerate some NumberGameHypotheses, then use these to sample some GrammarHypotheses over `data`.
 
@@ -59,7 +59,9 @@ def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=
 
     mh_grammar_sampler = MHSampler(grammar_h0, data, grammar_n, trace=False)
     mh_grammar_summary = sample_grammar_hypotheses(mh_grammar_sampler, skip=grammar_n/cap, cap=cap)
-    mh_grammar_summary.plot(plot_type)
+
+    if plot_type is not None:
+        mh_grammar_summary.plot(plot_type)
     if pickle_data == 'save':
         mh_grammar_summary.pickle_summary()
     if pickle_data == 'load':
@@ -69,7 +71,8 @@ def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=
 
 
 if __name__ == "__main__":
-    run()
+    run(grammar=complex_grammar, data=toy_2pownp1, domain=20, alpha=0.99, enum_d=6, grammar_n=10000, cap=1000,
+        plot_type=None, pickle_data='save')
 
 
 #
