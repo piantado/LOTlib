@@ -66,5 +66,6 @@ class MCMCSummary:
         return self.top_samples
 
     def pickle_summary(self, filename='MCMC_summary_data.p'):
+        """Pickle this MCMCSummary!"""
         f = open(filename, "wb")
         pickle.dump(self, f)

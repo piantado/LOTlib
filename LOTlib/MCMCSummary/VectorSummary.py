@@ -180,26 +180,41 @@ class VectorSummary(MCMCSummary):
         zipped_vector = [np.array(l) for l in zipped_vector]
         return zipped_vector
 
-    def median_value(self):
-        """Return a vector for the median of each value item accross `self.samples`."""
-        vector_data = self.zip_vector(range(1, self.samples[0].n))
-        return [np.median(v) for v in vector_data]
+    def median_value(self, idxs=None):
+        """Return a vector for the median of each value item accross `self.samples`, items in `idxs`."""
+        if idxs is None:
+            idxs = range(1, self.samples[0].n)
+        vector_data = self.zip_vector(range(1, idxs))
+        return [np.mean(v) for v in vector_data]
 
-    def mean_value(self):
-        """Return a vector for the median of each value item accross `self.samples`."""
-        vector_data = self.zip_vector(range(1, self.samples[0].n))
+    def mean_value(self, idxs=None):
+        """Return a vector for the mean of each value item accross `self.samples`, items in `idxs`."""
+        if idxs is None:
+            idxs = range(1, self.samples[0].n)
+        vector_data = self.zip_vector(idxs)
         return [np.mean(v) for v in vector_data]
 
     # --------------------------------------------------------------------------------------------------------
-    # Top Samples / Hypotheses Methods
+    # Get Top Samples / Hypotheses
 
-    def get_top_samples(self, n=10, key=(lambda x: x.posterior_score)):
-        """Get the top `n` GrammarHypothesis samples in `self.samples`, sorted by specified key."""
-        sorted_samples = sorted(self.samples, key=key)
+    def get_top_samples(self, n=10, s_idxs=None, key=(lambda x: x.posterior_score)):
+        """Get the top `n` GrammarHypothesis samples in `self.samples`, sorted by specified key.
+
+        Args:
+            n (int): Get the top `n` samples.
+            idx (int): We only consider samples 1 through this one. E.g. if idx = 2, we only consider the
+              first 3 samples.
+            key (function): Lambda function, this tells us how to sort our samples to get the top `n`.
+
+        """
+        if s_idxs is None:        # Consider only the samples with indexes specified by `idxs`
+            s_idxs = range(0, self.sample_count)
+        samples = [self.samples[i] for i in s_idxs]
+        sorted_samples = sorted(samples, key=key)
         sorted_samples.reverse()
         return sorted_samples[-n:]
 
-    def get_top_hypotheses(self, n=10, gh_key='recent', h_key=(lambda x: x.posterior_score)):
+    def get_top_hypotheses(self, n=10, idx=None, gh_key='recent', h_key=(lambda x: x.posterior_score)):
         """Get the `n` top hypotheses, not GrammarHypotheses but the ones stored in `self.hypotheses`.
 
         Using the `gh_key`, we pick just 1 GrammarHypothesis sample, and we get the top hypotheses
@@ -212,21 +227,24 @@ class VectorSummary(MCMCSummary):
             h_key (function): Lambda function, this tells us how to sort `gh.hypotheses`.
 
         """
+        if idx is None:
+            idx = self.sample_count
+        sample_idxs = range(0, idx)
+
         if gh_key is 'recent':      # Most recent sample
-            gh = self.samples[-1]
+            gh = self.samples[idx]
         if gh_key is 'MLE':         # Most likely GH
-            gh = self.get_top_samples(n=1, key=(lambda x: x.likelihood))[0]
+            gh = self.get_top_samples(n=1, s_idxs=sample_idxs, key=(lambda x: x.likelihood))[0]
         if gh_key is 'MAP':         # Max Post. GH  (should prob be very close to MLE
-            gh = self.get_top_samples(n=1, key=(lambda x: x.posterior_score))[0]
+            gh = self.get_top_samples(n=1, s_idxs=sample_idxs, key=(lambda x: x.posterior_score))[0]
         if gh_key is 'mean':        # Mean GH (this should create a new one... right?
-            mean_value = self.mean_value()
+            mean_value = self.mean_value(sample_idxs)
             gh = self.samples[-1].__copy__()
             gh.set_value(mean_value)
 
         sorted_hypotheses = sorted(gh.hypotheses, key=h_key)
         sorted_hypotheses.reverse()
-        top_hypotheses = sorted_hypotheses[-n:]
-        return
+        return sorted_hypotheses[-n:]
 
     def print_top_samples(self):
         print '~'*100, '\nTop GrammarHypotheses:'
@@ -235,3 +253,15 @@ class VectorSummary(MCMCSummary):
             print 'Vector: ', ['%.3f' % v for v in g_h.value]
             print 'Prior: %.3f' % g_h.prior, '\tLikelihood: %.3f' % g_h.likelihood, \
                 '\tPostScore: %.3f' % g_h.posterior_score
+
+    def print_top_hypotheses(self, n=10, idx=None, gh_key='mean'):
+        """Print the top hypotheses for the `gh_key` GrammarHypothesis specified, for samples[0:idx]."""
+        top_hypotheses = self.get_top_hypotheses(n=n, idx=idx, gh_key=gh_key)
+        print '='*100, '\nTop Hypotheses for ', gh_key, '[0:', idx, '] GrammarHypothesis:'
+        for h in top_hypotheses:
+            print '*'*90
+            print 'Hypothesis: ', ['%.3f' % str(h)]
+            print 'Prior: %.3f' % h.prior, '\tLikelihood: %.3f' % h.likelihood, \
+                  '\tPosterior: %.3f' % h.posterior_score
+
+
