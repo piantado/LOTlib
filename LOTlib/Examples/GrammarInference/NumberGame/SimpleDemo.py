@@ -2,6 +2,7 @@
 A simple demo of inference with GrammarHypothesis, VectorSummary, NumberGameHypothesis, & MHSampler.
 
 """
+import pickle
 from LOTlib.Hypotheses.GrammarHypothesis import GrammarHypothesis
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Examples.NumberGame.NewVersion.Model import *
@@ -58,10 +59,13 @@ def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=
 
     mh_grammar_sampler = MHSampler(grammar_h0, data, grammar_n, trace=False)
     mh_grammar_summary = sample_grammar_hypotheses(mh_grammar_sampler, skip=grammar_n/cap, cap=cap)
-    mh_grammar_summary.print_top_samples()
     mh_grammar_summary.plot(plot_type)
-    if pickle_data:
+    if pickle_data == 'save':
         mh_grammar_summary.pickle_summary()
+    if pickle_data == 'load':
+        f = open('MCMC_summary_data.p', "rb")
+        pickle.load(f)
+    # mh_grammar_summary.print_top_hypotheses()
 
 
 if __name__ == "__main__":
