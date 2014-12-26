@@ -45,33 +45,50 @@ def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=
         h.set_value(fn)
         hypotheses.append(h)
 
+    # --------------------------------------------------------------------------------------------------------
+    # Print all NumberGameHypotheses that were generated
+
     print '='*100, '\nNumberGameHypotheses:'
     for h in hypotheses:
         print h, h(), h.domain, h.alpha
 
     # --------------------------------------------------------------------------------------------------------
-    # Sample some GrammarHypotheses
+    # Print all GrammarRules in our Grammar, with corresponding value index
 
     grammar_h0 = GrammarHypothesis(grammar, hypotheses, proposal_step=.1, proposal_n=1)
     print '='*100, '\nGrammarRules:'
-    for r in grammar_h0.rules:
-        print r
+    for i, r in enumerate(grammar_h0.rules):
+        print i, '\t|  ', r
 
-    mh_grammar_sampler = MHSampler(grammar_h0, data, grammar_n, trace=False)
-    mh_grammar_summary = sample_grammar_hypotheses(mh_grammar_sampler, skip=grammar_n/cap, cap=cap)
+    # --------------------------------------------------------------------------------------------------------
+    # Sample some GrammarHypotheses / load MCMCSummary from pickle
+
+    if pickle_data == 'load':
+        f = open('MCMC_summary_data.p', "rb")
+        mh_grammar_summary = pickle.load(f)
+    else:
+        mh_grammar_sampler = MHSampler(grammar_h0, data, grammar_n, trace=False)
+        mh_grammar_summary = sample_grammar_hypotheses(mh_grammar_sampler, skip=grammar_n/cap, cap=cap)
+
+    # --------------------------------------------------------------------------------------------------------
+    # Plot stuff
 
     if plot_type is not None:
         mh_grammar_summary.plot(plot_type)
+    # 0mh_grammar_summary.print_top_hypotheses()
+
+    # --------------------------------------------------------------------------------------------------------
+    # Save pickled MCMCSummary
+
     if pickle_data == 'save':
         mh_grammar_summary.pickle_summary()
-    if pickle_data == 'load':
-        f = open('MCMC_summary_data.p', "rb")
-        pickle.load(f)
-    # mh_grammar_summary.print_top_hypotheses()
+
+
 
 
 if __name__ == "__main__":
-    run(grammar=complex_grammar, data=toy_2pownp1, domain=20, alpha=0.99, enum_d=6, grammar_n=10000, cap=1000,
+    run(grammar=complex_grammar, data=toy_2pownp1,
+        domain=20, alpha=0.99, enum_d=6, grammar_n=10000, cap=1000,
         plot_type=None, pickle_data='save')
 
 
