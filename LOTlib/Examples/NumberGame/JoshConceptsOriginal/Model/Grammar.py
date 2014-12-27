@@ -2,10 +2,11 @@
 from LOTlib.Grammar import Grammar
 
 
-def get_grammar(lambda_value=2./3.):
+def get_grammar(lambda_mix=2./3.):
     grammar = Grammar()
-    grammar.add_rule('START', 'in_domain_', ['MATH', '100'], lambda_value)
-    grammar.add_rule('START', '', ['INTERVAL'], (1-lambda_value))
+    # grammar.add_rule('START', 'in_domain_', ['MATH', '100'], lambda_value)  # TODO: is in_domain_ a prim??
+    grammar.add_rule('START', '', ['MATH'], lambda_mix)
+    grammar.add_rule('START', '', ['INTERVAL'], (1-lambda_mix))
 
     '''
     Math rules (30-40 of these)

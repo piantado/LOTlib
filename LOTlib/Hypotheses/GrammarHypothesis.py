@@ -54,16 +54,16 @@ class GrammarHypothesis(VectorHypothesis):
     def propose(self):
         """Propose a new GrammarHypothesis; used to propose new samples with methods like MH.
 
-        num_values => propose_n
-        step_size => propose_step
-
         New value is sampled from a normal centered @ old values, w/ proposal as covariance (inverse?)
+
+        Note:
+          * `self.propose_step` is used to determine how far to step with proposals.
 
         """
         step = np.random.multivariate_normal([0.]*self.n, self.proposal) * self.propose_step
         c = self.__copy__()
 
-        # randomly sample from our allowable indexes
+        # randomly choose `self.propose_n` of our proposable indexes
         for i in random.sample(self.propose_idxs, self.propose_n):
             if c.value[i] + step[i] > 0.0:
                 c.value[i] += step[i]
@@ -141,21 +141,28 @@ class GrammarHypothesis(VectorHypothesis):
             self.grammar.recompute_generation_probabilities(h.value)
             h.compute_prior()
 
-    def get_rules(self, rule_name='XXX', rule_nt='XXX', rule_to='XXX'):
+    def get_rules(self, rule_name=False, rule_nt=False, rule_to=False):
         """Get all GrammarRules associated with this rule name, 'nt' type, and/or 'to' types.
+
+        Note:
+            rule_name is a string, rule_nt is a string, rule_to is a string, EVEN THOUGH rule.to is a list.
 
         Returns:
             Pair of lists [idxs, rules]: idxs is a list of rules indexes, rules is a list of GrammarRules
 
         """
         rules = [(i, r) for i, r in enumerate(self.rules)]
-        if rule_name is not 'XXX':
+
+        # Filter our rules that don't match our criteria
+        if rule_name is not False:
             rules = [(i, r) for i, r in rules if r.name == rule_name]
-        if rule_nt is not 'XXX':
+        if rule_nt is not False:
             rules = [(i, r) for i, r in rules if r.nt == rule_nt]
-        if rule_to is not 'XXX':
-            rules = [(i, r) for i, r in rules if r.to == rule_to]
-        return zip(*rules) if len(rules)>0 else [(), ()]
+        if rule_to is not False:
+            rules = [(i, r) for i, r in rules if rule_to in r.to]
+
+        # Zip rules into separate `idxs` & `rules` lists
+        return zip(*rules) if len(rules) > 0 else [(), ()]
 
     def get_propose_idxs(self):
         """get list of indexes to alter -- we want to skip rules that have no alternatives/siblings"""
