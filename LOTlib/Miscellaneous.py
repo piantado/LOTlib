@@ -429,7 +429,8 @@ def sample1(*args):
 
 def sample_one(*args):
     if len(args) == 1:
-        return sample(args[0],1)[0]     # use the list you were given
+        return sample(args[0], 1)[0]     # use the list you were given
+        return sample(args[0], 1)[0]     # use the list you were given
     else:
         return sample(args, 1)[0]       # treat the arguments as a list
 

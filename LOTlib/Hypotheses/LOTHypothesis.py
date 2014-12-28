@@ -79,10 +79,10 @@ class LOTHypothesis(FunctionHypothesis):
                 print "# ", e
                 return (lambda *args: raise_exception(EvaluationException) )
 
-    def __copy__(self):
+    def __copy__(self, copy_value=True):
         """Make a deepcopy of everything except grammar (which is the, presumably, static grammar)."""
         # Since this is inherited, call the constructor on everything, copying what should be copied
-        thecopy = type(self)(self.grammar, value=copy(self.value), f=self.f, proposal_function=self.proposal_function)
+        thecopy = type(self)(self.grammar, value=copy(self.value) if copy_value else self.value, f=self.f, proposal_function=self.proposal_function)
 
         # And then then copy the rest
         for k in self.__dict__.keys():

@@ -23,8 +23,12 @@ class TopN(MCMCSummary):
         if self.count % self.thin == 0:
             self.fbs.add(h)
 
-    def get_all(self,sorted=False):
+    def get_all(self, sorted=False):
         for h in self.fbs.get_all(sorted=sorted):
+            yield h
+
+    def __iter__(self):
+        for h in self.fbs.get_all():
             yield h
 
     def Z(self):
@@ -52,7 +56,7 @@ class TopN(MCMCSummary):
                 self.add(h)
         elif isinstance(y, collections.Iterable):
             for yi in y:
-                self.update(y)
+                self.update(yi)
         elif isinstance(y, FiniteBestSet):
             self.fbs.merge(y)
         else:

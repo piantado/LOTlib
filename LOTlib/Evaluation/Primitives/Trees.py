@@ -1,4 +1,4 @@
-from Primitives import LOTlib_primitive
+from LOTlib.Evaluation.Eval import LOTlib_primitive
 from LOTlib.FunctionNode import FunctionNode, isFunctionNode
 
 import re ## TODO: WHY? PROBABLY BAD FORM

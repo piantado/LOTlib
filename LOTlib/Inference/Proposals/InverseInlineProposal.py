@@ -1,20 +1,20 @@
 from LOTProposal import LOTProposal
-from LOTlib.Miscellaneous import sample1, lambdaTrue, dropfirst
+from LOTlib.Miscellaneous import sample1, lambdaOne, dropfirst
 from random import random
 from math import log
 from collections import defaultdict
 from LOTlib.GrammarRule import *
 from LOTlib.FunctionNode import pystring
+from LOTlib.FunctionNode import NodeSamplingException
 
-
-def lp_sample_equal_to(n, x, predicate=lambdaTrue):
+def lp_sample_equal_to(n, x, resampleProbability=lambdaOne):
     """
         What is the log probability of sampling x or something equal to it from n? 
     """
     assert x in n, str(x)+"\t\t"+str(n)
     
-    Z = n.sample_node_normalizer(predicate=predicate)
-    return log(sum([t.resample_p if (t==x) and predicate(t) else 0.0 for t in n])) - log(Z)
+    Z = n.sample_node_normalizer(resampleProbability=resampleProbability)
+    return log(sum([resampleProbability(t) if (t==x) else 0.0 for t in n])) - log(Z)
 
 class InverseInlineProposal(LOTProposal):
     """
@@ -27,13 +27,19 @@ class InverseInlineProposal(LOTProposal):
         """
         self.__dict__.update(locals())
         LOTProposal.__init__(self, grammar)
-        
+
+        # check that we used "apply_" instead of "apply"
+        for r in self.grammar:
+            assert r.name is not "apply", "*** Need to use 'apply_' instead of 'apply' "
+            assert r.name is not "lambda_", "*** Need to use 'lambda' instead of 'lambda' "
+            # the asymmetry here is disturbing, but lambda is a keyword and apply is a function
+
         self.insertable_rules = defaultdict(list) # Hash each nonterminal to (a,l) where a and l are the apply and lambda rules you need
         for nt in self.grammar.rules.keys():
-            
             for a in filter(lambda r: (r.name=="apply_") and (r.nt == nt), self.grammar):
                 for l in filter( lambda r: isinstance(r, BVAddGrammarRule) and (r.nt == a.to[0]) and (r.bv_args is None), self.grammar): # For each lambda whose "below" is the right type. bv_args are not implemented yet
                     self.insertable_rules[nt].append( (a,l) )
+        # print "# Insertable rules:\t", self.insertable_rules
 
 
     def can_abstract_at(self, x):
@@ -70,7 +76,7 @@ class InverseInlineProposal(LOTProposal):
         if n.name != "apply_":
             return False
 
-        assert len(n.args)==2
+        assert len(n.args) == 2
         l, a = n.args
 
         assert (not isinstance(l.added_rule, BVUseFunctionNode)) or l.added_rule.bv_args is None # NOTE: l.added_rule.name checks if the bound variable is actually used, but only works for bv_args=None
@@ -97,8 +103,10 @@ class InverseInlineProposal(LOTProposal):
         if random() < 0.5 : # Am inverse-inlining move
         
             # where the lambda goes
-            n, np = newt.sample_subnode(self.can_abstract_at)
-            if n is None: return [newt, 0.0]
+            try:
+                n, np = newt.sample_subnode(resampleProbability=self.can_abstract_at)
+            except NodeSamplingException:
+                return [newt, 0.0]
             
             # Pick the rule we will use
             ir = self.insertable_rules[n.returntype]
@@ -108,12 +116,14 @@ class InverseInlineProposal(LOTProposal):
             
             # what the argument is. Must have a returntype equal to the second apply type
             arg_predicate = lambda z: z.returntype == ar.to[1] and self.is_valid_argument(n, z) #how do we choose args?
-            argval, _ = n.sample_subnode(predicate=arg_predicate )
-            if argval is None: return [newt, 0.0]
+            try:
+                argval, _ = n.sample_subnode(resampleProbability=arg_predicate )
+            except NodeSamplingException:
+                return [newt, 0.0]
             argval = copy(argval) # necessary since the argval in the tree gets overwritten
             below = copy(n) # necessary since n gets setto the new apply rule  
             
-            # now make the function nodes. The generation_probabiltiies will be reset later, as will the parents for applyfn and bvfn
+            # now make the function nodes. The generation_probabilities will be reset later, as will the parents for applyfn and bvfn
             n.setto(ar.make_FunctionNodeStub(self.grammar, 0.0, None)) # n's parent is preserved
             
             lambdafn = lr.make_FunctionNodeStub(self.grammar, 0.0, n) ## this must be n, not applyfn, since n will eventually be setto applyfn
@@ -131,14 +141,15 @@ class InverseInlineProposal(LOTProposal):
             #assert newt.check_parent_refs()
             
             # to go forward, you choose a node, a rule, and an argument
-            f = np + (-log(len(ir))) + lp_sample_equal_to(n,argval, predicate=arg_predicate)
+            f = np + (-log(len(ir))) + lp_sample_equal_to(n, argval, resampleProbability=arg_predicate)
             newZ = newt.sample_node_normalizer(self.can_inline_at)
-            b = (log(n.resample_p) - log(newZ))
+            b = (log(arg_predicate(n)*1.0) - log(newZ))
             
         else: # An inlining move
-
-            n, np = newt.sample_subnode(self.can_inline_at)
-            if n is None: return [newt, 0.0]
+            try:
+                n, np = newt.sample_subnode(resampleProbability=self.can_inline_at)
+            except NodeSamplingException:
+                return [newt, 0.0]
          
             #print "CHOOSING n=", n
             #print "PARENT n=", n.parent
@@ -158,14 +169,14 @@ class InverseInlineProposal(LOTProposal):
             f = np
 
             # choose n, choose a, choose the rule
+            fargvalp = lambda z: (z.returntype == argval.returntype) and self.is_valid_argument(newn, z)
             new_nZ = newt.sample_node_normalizer(self.can_abstract_at) # prob of choosing n
-            argvalp = lp_sample_equal_to(newn, argval, predicate= lambda z: (z.returntype == argval.returntype) and self.is_valid_argument(newn, z))
-            b = (log(newn.resample_p) - log(new_nZ)) + argvalp + (-log(len(ir)))
+            argvalp = lp_sample_equal_to(newn, argval, resampleProbability=fargvalp)
+            b = (log(fargvalp(newn)) - log(new_nZ)) + argvalp + (-log(len(ir)))
         
-        ## and fix the generation probabilites, because otherwiset hey are ruined by all the mangling above
+        ## and fix the generation probabilites, because otherwise they are ruined by all the mangling above
         self.grammar.recompute_generation_probabilities(newt)
         assert newt.check_parent_refs() # Can comment out -- here for debugging
-        
         
         return [newt, f-b]
             

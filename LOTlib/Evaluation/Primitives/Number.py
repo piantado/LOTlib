@@ -1,4 +1,4 @@
-from Primitives import LOTlib_primitive
+from LOTlib.Evaluation.Eval import LOTlib_primitive
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # counting list
@@ -16,7 +16,7 @@ next_hash['ten_'] = 'undef'
 prev_hash['one_'] = 'undef'
 prev_hash['ten_'] = 'nine_'
 next_hash['X'] = 'X'
-prev_hash['X'] = 'X'
+prev_hash[''] = 'X'
 
 # Map a word like 'four_' to its number, 4
 word_to_number = dict()

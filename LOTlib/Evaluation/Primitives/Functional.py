@@ -1,6 +1,9 @@
-from Primitives import LOTlib_primitive
+from LOTlib.Evaluation.Eval import LOTlib_primitive
 from LOTlib.Miscellaneous import raise_exception
 from LOTlib.Evaluation.EvaluationException import RecursionDepthException
+
+## TODO: Add transitive closure of an operation
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~ The Y combinator and a bounded version
@@ -79,10 +82,13 @@ def car_(x):
 
 first_ = car_
 
-## TODO: Add transitive closure of an operation
 @LOTlib_primitive
 def filter_(f,x):
     return filter(f,x)
+
+@LOTlib_primitive
+def filterset_(f,x):
+    return set(filter(f,x))
 
 @LOTlib_primitive
 def mapset_(f,A):

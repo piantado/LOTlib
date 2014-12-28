@@ -71,9 +71,6 @@ def is_master_process():
     """
     return (size==0) or (rank == MASTER_PROCESS)
 
-def listifnot(x):
-    if isinstance(x,list): return x
-    else:                  return [x]
 
 def synchronize_variable(f):
     """
@@ -158,7 +155,7 @@ def MPI_unorderedmap(f, generator):
         for g in MPI_unorderedmap(f,gen):
             pass
 
-        for instance
+        for instance.
     """
     capture_slaves()
     assert is_master_process()
@@ -192,7 +189,7 @@ def MPI_unorderedmap(f, generator):
                         gotAllArgs = True
 
                     #print "# Sending ", arg, " to ", i
-                    comm.send([f, None, listifnot(arg)], dest=i, tag=RUN_TAG)
+                    comm.send([f, None, arg], dest=i, tag=RUN_TAG)
 
                     running[i] = True
     except Exception as e:
@@ -223,7 +220,7 @@ def MPI_map(f, args, random_order=True, outfile=None, mpi_done=False, yieldfrom=
 
     if size == 1:
         print "# *** NOTE: 'MPI_map' running as 'map' since size=1!"
-        return map(lambda x: f( *listifnot(x)), args)
+        return map(lambda x: f( *x), args)
 
     # calling this is a sink that all slave processes fall into, waiting
     capture_slaves(outfile)
@@ -253,7 +250,7 @@ def MPI_map(f, args, random_order=True, outfile=None, mpi_done=False, yieldfrom=
 
                 if (not running[i]) and (started_count < arglen):
                     #print "# Main sending ", args[ind[started_count]], " to ", i
-                    comm.send([f, ind[started_count],  listifnot(args[ind[started_count]])], dest=i, tag=RUN_TAG)
+                    comm.send([f, ind[started_count],  args[ind[started_count]] ], dest=i, tag=RUN_TAG)
                     started_count += 1
                     running[i] = True
 

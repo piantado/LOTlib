@@ -17,8 +17,9 @@ REQUIREMENTS
 - numpy
 - scipy
 
-The following are frequently used, but not required:
+The following are frequently used, but not required for most functions:
 
+- matplotlib (plotting)
 - mpi4py (if using MPI; I recommend running with mpich3)
 - pyparsing (for parsing)
 - cachetools (for memoization)

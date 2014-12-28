@@ -8,7 +8,7 @@
 from copy import copy
 from inspect import isroutine
 
-from LOTlib.Miscellaneous import *
+from LOTlib.Miscellaneous import flip, Infinity, qq, weighted_sample
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
 
 class SimpleLexicon(Hypothesis):
@@ -19,10 +19,11 @@ class SimpleLexicon(Hypothesis):
         the true utteranecs
     """
 
-    def __init__(self, make_hypothesis, words=(), **kwargs):
+    def __init__(self, make_hypothesis, words=(), propose_p=0.25, **kwargs):
         """
             hypothesis - a function to generate hypotheses
             words -- words to initially add (sampling from the prior)
+            propose_p -- the probability of proposing to each word
         """
         Hypothesis.__init__(self, value=dict(), **kwargs)
         self.__dict__.update(locals())
@@ -108,15 +109,22 @@ class SimpleLexicon(Hypothesis):
 
     def propose(self):
         """
-        WARNING: WE NOW DON'T COPY ALL THE VALUES, MEANING THAT MODIFICATION OF ONE IN A HYPOTHESIS CAN
-        IN PRINCIPLE CHANGE MULTIPLE LEXICA. THE CURRENT WAY IS FASTER BUT MORE DANGEROUS
+        Default proposal to a lexicon -- now at least one, plus some coin flips
+        :return:
         """
-        new = self.shallowcopy()
 
+        new = copy(self) ## Now we just copy the whole thing
+
+        # Propose one for sure
         w = weighted_sample(self.value.keys()) # the word to change
         p, fb = self.value[w].propose()
-
         new.set_word(w, p)
+
+        for x in self.all_words():
+            if w != x and flip(self.propose_p):
+                xp, xfb = self.value[x].propose()
+                new.set_word(x, xp)
+                fb += xfb
 
         return new, fb
 

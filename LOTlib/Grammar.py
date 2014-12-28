@@ -22,9 +22,11 @@ class Grammar:
         - Variable resampling probabilities among the rules
 
     Note:
+        * In general, grammars should NOT allow rules of the same name and type signature.
         * This class fixes a bunch of problems that were in earlier versions, such as (doc?)
+
     """
-    def __init__(self, BV_P=10.0, BV_RESAMPLE_P=1.0, start='START'):
+    def __init__(self, BV_P=10.0, start='START'):
         self.__dict__.update(locals())
         self.rules = defaultdict(list)  # A dict from nonterminals to lists of GrammarRules.
         self.rule_count = 0
@@ -48,7 +50,7 @@ class Grammar:
             print rule
 
     def __iter__(self):
-        """Define an iterator so we can say 'for rule in grammar...'."""
+        """Define an iterator over all rules so we can say 'for rule in grammar...'."""
         for k in self.rules.keys():
             for r in self.rules[k]:
                 yield r
@@ -57,7 +59,7 @@ class Grammar:
         """Returns all non-terminals."""
         return self.rules.keys()
 
-    def add_rule(self, nt, name, to, p, resample_p=1.0, bv_type=None, bv_args=None, bv_prefix='y', bv_p=None):
+    def add_rule(self, nt, name, to, p, bv_type=None, bv_args=None, bv_prefix='y', bv_p=None):
         """Adds a rule and returns the added rule.
 
         Arguments
@@ -67,7 +69,6 @@ class Grammar:
               do this is to name it 'lambda'.
             to (list<str>): What you expand to (usually a FunctionNode).
             p (float): Unnormalized probability of expansion
-            resample_p (float): In resampling, what is the probability of choosing this node?
             bv_type (str): What bound variable was introduced
             bv_args (list): What are the args when we use a bv (None is terminals, else a type signature)
 
@@ -78,10 +79,9 @@ class Grammar:
             assert name.lower() == 'lambda', \
                 "When introducing bound variables, the name of the expanded function must be 'lambda'."
 
-            newrule = BVAddGrammarRule(nt, name,to, p=p, resample_p=resample_p,
-                                       bv_type=bv_type, bv_args=bv_args, bv_prefix=bv_prefix, bv_p=bv_p)
+            newrule = BVAddGrammarRule(nt, name,to, p=p, bv_type=bv_type, bv_args=bv_args, bv_prefix=bv_prefix, bv_p=bv_p)
         else:
-            newrule = GrammarRule(nt,name,to, p=p, resample_p=resample_p)
+            newrule = GrammarRule(nt,name,to, p=p)
 
         self.rules[nt].append(newrule)
         return newrule

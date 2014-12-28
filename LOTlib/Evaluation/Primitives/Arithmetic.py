@@ -1,4 +1,4 @@
-from Primitives import LOTlib_primitive
+from LOTlib.Evaluation.Eval import LOTlib_primitive
 
 import math
 from numpy import sign

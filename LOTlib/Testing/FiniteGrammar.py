@@ -16,15 +16,15 @@ grammar.add_rule('A1', 'A1_', ['d'], 0.8)
 
 grammar.add_rule('A2', 'A2_', ['e'], 1.0)
 
-# Give these different names so we can't derive identical trees multiple ways
+# NOTE: we give these different names so we can't derive identical trees multiple ways
 # (by, e.g., not using a lambda)
-grammar.add_rule('A0', 'apply1', ['L0', 'A1'], 0.20)
+grammar.add_rule('A0', 'apply_', ['L0', 'A1'], 0.20)
 grammar.add_rule('L0', 'lambda', ['B0'], 0.11, bv_p=0.07, bv_type='B1')
 
-grammar.add_rule('A0', 'apply2', ['L1', 'A1'], 0.20)
+grammar.add_rule('A0', 'apply2_', ['L1', 'A1'], 0.20)
 grammar.add_rule('L1', 'lambda', ['B0'], 0.12, bv_p=0.08, bv_type='B1', bv_args=['B2'])
 
-grammar.add_rule('A0', 'apply3', ['L2', 'A1'], 0.20)
+grammar.add_rule('A0', 'apply3_', ['L2', 'A1'], 0.20)
 grammar.add_rule('L2', 'lambda', ['B0'], 0.13, bv_p=0.09, bv_type='B1', bv_args=[])
 
 grammar.add_rule('B0', 'B0_', ['f', 'B1'], 0.89)
