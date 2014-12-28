@@ -2,15 +2,15 @@
 A simple demo of inference with GrammarHypothesis, VectorSummary, NumberGameHypothesis, & MHSampler.
 
 """
+import pickle
 from LOTlib.Hypotheses.GrammarHypothesis import GrammarHypothesis
 from LOTlib.Inference.MetropolisHastings import MHSampler
-from LOTlib.Inference.PriorSample import prior_sample
 from LOTlib.Examples.NumberGame.NewVersion.Model import *
 from Model import *
 
 
 def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=5, grammar_n=10000, cap=100,
-        plot_type='violin'):
+        plot_type=None, pickle_data=False):
     """
     Enumerate some NumberGameHypotheses, then use these to sample some GrammarHypotheses over `data`.
 
@@ -45,33 +45,51 @@ def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=
         h.set_value(fn)
         hypotheses.append(h)
 
+    # --------------------------------------------------------------------------------------------------------
+    # Print all NumberGameHypotheses that were generated
+
     print '='*100, '\nNumberGameHypotheses:'
     for h in hypotheses:
         print h, h(), h.domain, h.alpha
 
     # --------------------------------------------------------------------------------------------------------
-    # Sample some GrammarHypotheses
+    # Print all GrammarRules in our Grammar, with corresponding value index
 
     grammar_h0 = GrammarHypothesis(grammar, hypotheses, proposal_step=.1, proposal_n=1)
     print '='*100, '\nGrammarRules:'
-    for r in grammar_h0.rules:
-        print r
+    for i, r in enumerate(grammar_h0.rules):
+        print i, '\t|  ', r
 
-    mh_grammar_sampler = MHSampler(grammar_h0, data, grammar_n, trace=False)
-    mh_grammar_summary = sample_grammar_hypotheses(mh_grammar_sampler, skip=grammar_n/cap, cap=cap)
-    mh_grammar_summary.print_top_samples()
-    if plot_type == 'violin':
-        mh_grammar_summary.violinplot()
-    if plot_type == 'line':
-        mh_grammar_summary.lineplot()
-    if plot_type == 'MLE':
-        pass
-    if plot_type == 'MAP':
-        pass
+    # --------------------------------------------------------------------------------------------------------
+    # Sample some GrammarHypotheses / load MCMCSummary from pickle
+
+    if pickle_data == 'load':
+        f = open('MCMC_summary_data.p', "rb")
+        mh_grammar_summary = pickle.load(f)
+    else:
+        mh_grammar_sampler = MHSampler(grammar_h0, data, grammar_n, trace=False)
+        mh_grammar_summary = sample_grammar_hypotheses(mh_grammar_sampler, skip=grammar_n/cap, cap=cap)
+
+    # --------------------------------------------------------------------------------------------------------
+    # Plot stuff
+
+    if plot_type is not None:
+        mh_grammar_summary.plot(plot_type)
+    # 0mh_grammar_summary.print_top_hypotheses()
+
+    # --------------------------------------------------------------------------------------------------------
+    # Save pickled MCMCSummary
+
+    if pickle_data == 'save':
+        mh_grammar_summary.pickle_summary()
+
+
 
 
 if __name__ == "__main__":
-    run()
+    run(grammar=complex_grammar, data=toy_2pownp1,
+        domain=20, alpha=0.99, enum_d=6, grammar_n=10000, cap=1000,
+        plot_type=None, pickle_data='save')
 
 
 #

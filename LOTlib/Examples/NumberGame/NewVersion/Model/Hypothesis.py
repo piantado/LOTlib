@@ -1,18 +1,12 @@
 
 from math import log
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-# from LOTlib.Miscellaneous import logplusexp, logsumexp, log1mexp, gammaln, Infinity
-# from LOTlib.Evaluation.Eval import *
 
-
-# ============================================================================================================
-#  Domain-specific hypothesis wrapper class
-# ============================================================================================================
 
 class NumberGameHypothesis(LOTHypothesis):
-    """Wrapper class for hypotheses in the number game.
+    """Domain-specific wrapper class for hypotheses in the number game.
 
-    Hypotheses evaluate to a set of numbers.
+    Hypotheses evaluate to a subset of integers in [1, domain].
 
     """
     def __init__(self, grammar, alpha=0.9, domain=100, **kwargs):

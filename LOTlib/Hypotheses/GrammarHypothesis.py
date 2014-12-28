@@ -54,16 +54,16 @@ class GrammarHypothesis(VectorHypothesis):
     def propose(self):
         """Propose a new GrammarHypothesis; used to propose new samples with methods like MH.
 
-        num_values => propose_n
-        step_size => propose_step
-
         New value is sampled from a normal centered @ old values, w/ proposal as covariance (inverse?)
+
+        Note:
+          * `self.propose_step` is used to determine how far to step with proposals.
 
         """
         step = np.random.multivariate_normal([0.]*self.n, self.proposal) * self.propose_step
         c = self.__copy__()
 
-        # randomly sample from our allowable indexes
+        # randomly choose `self.propose_n` of our proposable indexes
         for i in random.sample(self.propose_idxs, self.propose_n):
             if c.value[i] + step[i] > 0.0:
                 c.value[i] += step[i]
@@ -81,10 +81,10 @@ class GrammarHypothesis(VectorHypothesis):
         self.update_posterior()
         return prior
 
-    def compute_likelihood(self, data, **kwargs):
-        """Use hypotheses to estimate likelihood of generating the data.
+    def compute_likelihood(self, data, update_post=True, **kwargs):
+        """Use bayesian model averaging with `self.hypotheses` to estimate likelihood of generating the data.
 
-        This is taken as a weighted sum over all hypotheses, sum { p(h | X) }
+        This is taken as a weighted sum over all hypotheses, sum_h { p(h | X) } .
 
         Args:
             data(list): List of FunctionData objects.
@@ -109,14 +109,15 @@ class GrammarHypothesis(VectorHypothesis):
                 # probability for yes on output `o` is sum of posteriors for hypos that contain `o`
                 # TODO: this will break if h() is None... can this ever happen??
                 p = logsumexp([w if o in h() else -Infinity for h, w in zip(hypotheses, weights)])
-                p = -1e-10 if p >= 0 else p      #
+                p = -1e-10 if p >= 0 else p
                 k = d.output[o][0]         # num. yes responses
                 n = k + d.output[o][1]     # num. trials
                 bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
                 likelihood += bc + (k*p) + (n-k)*log1mexp(p)            # likelihood we got human output
 
-        self.likelihood = likelihood
-        self.update_posterior()
+        if update_post:
+            self.likelihood = likelihood
+            self.update_posterior()
         return likelihood
 
     def rule_distribution(self, data, rule_name, vals=np.arange(0, 2, .1)):
@@ -140,21 +141,28 @@ class GrammarHypothesis(VectorHypothesis):
             self.grammar.recompute_generation_probabilities(h.value)
             h.compute_prior()
 
-    def get_rules(self, rule_name='XXX', rule_nt='XXX', rule_to='XXX'):
+    def get_rules(self, rule_name=False, rule_nt=False, rule_to=False):
         """Get all GrammarRules associated with this rule name, 'nt' type, and/or 'to' types.
+
+        Note:
+            rule_name is a string, rule_nt is a string, rule_to is a string, EVEN THOUGH rule.to is a list.
 
         Returns:
             Pair of lists [idxs, rules]: idxs is a list of rules indexes, rules is a list of GrammarRules
 
         """
         rules = [(i, r) for i, r in enumerate(self.rules)]
-        if rule_name is not 'XXX':
+
+        # Filter our rules that don't match our criteria
+        if rule_name is not False:
             rules = [(i, r) for i, r in rules if r.name == rule_name]
-        if rule_nt is not 'XXX':
+        if rule_nt is not False:
             rules = [(i, r) for i, r in rules if r.nt == rule_nt]
-        if rule_to is not 'XXX':
-            rules = [(i, r) for i, r in rules if r.to == rule_to]
-        return zip(*rules) if len(rules)>0 else [(), ()]
+        if rule_to is not False:
+            rules = [(i, r) for i, r in rules if rule_to in r.to]
+
+        # Zip rules into separate `idxs` & `rules` lists
+        return zip(*rules) if len(rules) > 0 else [(), ()]
 
     def get_propose_idxs(self):
         """get list of indexes to alter -- we want to skip rules that have no alternatives/siblings"""
@@ -175,9 +183,20 @@ class GrammarHypothesis(VectorHypothesis):
             propose_n=self.propose_n, propose_step=self.propose_step
         )
 
-    def print_best_hypotheses(self, n=10):
+    def get_top_hypotheses(self, n=10):
+        """Return the best `n` hypotheses from `self.hypotheses`."""
         hypotheses = self.hypotheses
         sorted_hypos = sorted(hypotheses, key=lambda x: x.posterior_score)
-        for h in sorted_hypos[-n:]:
+        return sorted_hypos[-n:]
+
+    def print_top_hypotheses(self, n=10):
+        """Print the best `n` hypotheses from `self.hypotheses`."""
+        for h in self.get_top_hypotheses(n=n):
             print str(h)
             print h.posterior_score, h.likelihood, h.prior
+
+    def max_a_posteriori(self):
+        return max([h.posterior_score for h in self.hypotheses])
+
+    def max_like_estimate(self):
+        return max([h.likelihood for h in self.hypotheses])
