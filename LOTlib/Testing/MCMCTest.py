@@ -8,29 +8,33 @@ from TreeTesters import FiniteTreeTester, InfiniteTreeTester
 NSAMPLES = 10000
 SKIP = 5
 
-class GrammarTest(FiniteTreeTester):
-
-    def test_MHSampler(self):
-        from LOTlib.Inference.MetropolisHastings import MHSampler
-        sampler = MHSampler(self.make_h0(), [], steps=NSAMPLES, skip=SKIP)
-        print "MHSampler p value:", self.evaluate_sampler(sampler)
-
-
-    def test_PriorSampler(self):
-        from LOTlib.Inference.PriorSample import PriorSampler
-        sampler = PriorSampler(self.make_h0(), [], steps=NSAMPLES)
-        print "PriorSampler p value:", self.evaluate_sampler(sampler)
-
-    def test_ParallelTempering(self):
-        #TODO: This isn't a strong test of ParallelTempering, since there's no data!
-        from LOTlib.Inference.ParallelTempering import ParallelTemperingSampler
-        sampler = ParallelTemperingSampler(self.make_h0, [], steps=3*NSAMPLES, skip=SKIP, yield_only_t0=True, temperatures=[1.0, 2.0, 3.0],) ## need more samples in ParallelTempering; NOTE: We could switch how its coded
-        print "ParallelTemperingSampler p value:", self.evaluate_sampler(sampler)
+# class GrammarTest(FiniteTreeTester):
+#     """
+#     Test various samplers with RegenerationProposals
+#     """
+#
+#     def test_MHSampler(self):
+#         from LOTlib.Inference.MetropolisHastings import MHSampler
+#         sampler = MHSampler(self.make_h0(), [], steps=NSAMPLES, skip=SKIP)
+#         print "MHSampler p value:", self.evaluate_sampler(sampler)
+#
+#
+#     def test_PriorSampler(self):
+#         from LOTlib.Inference.PriorSample import PriorSampler
+#         sampler = PriorSampler(self.make_h0(), [], steps=NSAMPLES)
+#         print "PriorSampler p value:", self.evaluate_sampler(sampler)
+#
+#     def test_ParallelTempering(self):
+#         #TODO: This isn't a strong test of ParallelTempering, since there's no data!
+#         from LOTlib.Inference.ParallelTempering import ParallelTemperingSampler
+#         sampler = ParallelTemperingSampler(self.make_h0, [], steps=3*NSAMPLES, skip=SKIP, yield_only_t0=True, temperatures=[1.0, 2.0, 3.0],) ## need more samples in ParallelTempering; NOTE: We could switch how its coded
+#         print "ParallelTemperingSampler p value:", self.evaluate_sampler(sampler)
 
 
 class MCMCProposalTest(InfiniteTreeTester):
     """
-    This test MCMC under different proposals
+    This tests MCMC under different proposal functions.
+    NOTE: These generate .png plots that should be visually inspected.
     """
 
     def test_RegenerationProposals(self):

@@ -6,7 +6,7 @@ from LOTlib.FunctionNode import *
 from LOTProposal import LOTProposal
 from LOTlib.GrammarRule import *
 from LOTlib.BVRuleContextManager import BVRuleContextManager
-
+from LOTlib.FunctionNode import NodeSamplingException
 
 def is_replicating_GrammarRule(r):
     """
@@ -21,8 +21,8 @@ def is_replicating_FunctionNode(x):
     """
     return any([x.returntype == a.returntype for a in x.argFunctionNodes()])
 
-def is_not_BVAddFunctionNode(x):
-    return not isinstance(x, BVAddFunctionNode)
+def isNotBVAddFunctionNode(x):
+    return (not isinstance(x, BVAddFunctionNode))
 
 class InsertDeleteProposal(LOTProposal):
     """
@@ -51,8 +51,10 @@ class InsertDeleteProposal(LOTProposal):
             
             # Choose a node at random to insert on
             # TODO: We could precompute the nonterminals we can do this move on, if we wanted
-            ni, lp = newt.sample_subnode(is_not_BVAddFunctionNode)
-            if ni is None or ni.args is None: return [newt, fb]
+            try:
+                ni, lp = newt.sample_subnode(isNotBVAddFunctionNode)
+            except NodeSamplingException:
+                return [newt, fb]
             
             # Since it's an insert, see if there is a (replicating) rule that expands
             # from ni.returntype to some ni.returntype
@@ -92,23 +94,31 @@ class InsertDeleteProposal(LOTProposal):
             # what is the prob mass of the new stuff?
             new_lp_below =  sum([fn.args[i].log_probability() if (i!=replace_i and isFunctionNode(fn.args[i])) else 0. for i in xrange(len(fn.args))])
             # What is the new normalizer?
-            newZ = newt.sample_node_normalizer(is_not_BVAddFunctionNode)
+            newZ = newt.sample_node_normalizer(isNotBVAddFunctionNode)
             assert newZ > 0
             # To sample forward: choose the node ni, choose the replicating rule, choose which "to" to expand (we could have put it on any of the replicating rules that are identical), and genreate the rest of the tree
             f = lp + (-log(len(replicating_rules))) + (log(after_same_children)-log(len(replicatingindices))) + new_lp_below
             # To go backwards, choose the inserted rule, and any of the identical children, out of all replicators
-            b = (log(fn.resample_p) - log(newZ)) + (log(after_same_children) - log(len(fn.args)))
+            b = (log(1.0*isNotBVAddFunctionNode(fn)) - log(newZ)) + (log(after_same_children) - log(len(fn.args)))
             
         else: # A delete move!
             
             # Sample a node at random
-            ni, lp = newt.sample_subnode(is_not_BVAddFunctionNode)
-            if ni is None or ni.args is None:  return [newt, fb]
+            try:
+                ni, lp = newt.sample_subnode(isNotBVAddFunctionNode) # this could raise exception
+
+                # Really, it had to be not None
+                if ni.args is None:
+                    raise NodeSamplingException
+
+            except NodeSamplingException:
+                return [newt, fb]
             
             # Figure out which of my children have the same type as me
             replicating_kid_indices = filter(lambda i: isFunctionNode(ni.args[i]) and ni.args[i].returntype == ni.returntype, range(len(ni.args)))
             nrk = len(replicating_kid_indices) # how many replicating kids
-            if nrk == 0:  return [newt, fb] # if no replicating rules here
+            if nrk == 0:
+                return [newt, fb] # if no replicating rules here
             
             replicating_rules = filter(is_replicating_GrammarRule, self.grammar.rules[ni.returntype])
             assert len(replicating_rules) > 0 # better be some or where did ni come from?
@@ -131,11 +141,11 @@ class InsertDeleteProposal(LOTProposal):
             self.grammar.recompute_generation_probabilities(ni)
             
             # And compute f/b probs
-            newZ = newt.sample_node_normalizer(is_not_BVAddFunctionNode)
+            newZ = newt.sample_node_normalizer(resampleProbability=isNotBVAddFunctionNode)
             # To go forward, choose the node, and then from all equivalent children
             f = lp + (log(before_same_children) - log(nrk))
             # To go back, choose the node, choose the replicating rule, choose where to put it, and generate the rest of the tree
-            b = (log(ni.resample_p) - log(newZ))  + -log(len(replicating_rules)) + (log(before_same_children) - log(nrk)) + old_lp_below
+            b = (log(1.0*isNotBVAddFunctionNode(ni)) - log(newZ))  + -log(len(replicating_rules)) + (log(before_same_children) - log(nrk)) + old_lp_below
 
         return [newt, f-b]
     

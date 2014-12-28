@@ -1,11 +1,3 @@
-"""
-This class is a wrapper for representing "rules" in the grammar.
-
-TODO:
-    One day we will change "nt" to returntype to match with the FunctionNodes
-
-
-"""
 from FunctionNode import FunctionNode, BVAddFunctionNode, BVUseFunctionNode
 from copy import copy
 from LOTlib.Miscellaneous import None2Empty
@@ -13,12 +5,12 @@ from uuid import uuid4
 
 class GrammarRule(object):
     """
+    Represent a rule in the grammar
     Arguments
         nt (str): the nonterminal
         name (str): the name of this function
         to (list<str>): what you expand to (usually a FunctionNode).
         p (float): unnormalized probability of expansion
-        resample_p (float):
         bv_prefix (?): may be needed for GrammarRules introduced *by* BVGrammarRules, so that when we
           display them we can map to bv_prefix+depth
 
@@ -36,7 +28,7 @@ class GrammarRule(object):
         The rule id (rid) is very important -- it's what we use expansion determine equality
 
     """
-    def __init__(self, nt, name, to, p=1.0, resample_p=1.0, bv_prefix=None):
+    def __init__(self, nt, name, to, p=1.0, bv_prefix=None):
         p = float(p)
         self.__dict__.update(locals())
         for a in None2Empty(to):
@@ -46,9 +38,9 @@ class GrammarRule(object):
                 "*** GrammarRules with empty names must have only 1 argument"
 
     def __repr__(self):
-        """Print string in format: 'NT -> [TO]   w/ p=1.0, resample_p=1.0'."""
+        """Print string in format: 'NT -> [TO]   w/ p=1.0'."""
         return str(self.nt) + " -> " + self.name + (str(self.to) if self.to is not None else '') + \
-            "\tw/ p=" + str(self.p) + ", resample_p=" + str(self.resample_p)
+            "\tw/ p=" + str(self.p)
 
     def __eq__(self, other):
         """Equality is determined through "is" so that we can remove a rule from lists via list.remove()."""
@@ -68,13 +60,10 @@ class GrammarRule(object):
 
 
 class BVAddGrammarRule(GrammarRule):
-    """A kind of GrammarRule that supports introducing BVs.
-
-    This gives a little type checking so that we don't call this with the wrong rules
-        
     """
-    def __init__(self, nt, name, to, p=1.0, resample_p=1.0,
-                 bv_prefix="y", bv_type=None, bv_args=None, bv_p=None):
+    A kind of GrammarRule that supports introduces a bound variable, as in at a lambda.
+    """
+    def __init__(self, nt, name, to, p=1.0, bv_prefix="y", bv_type=None, bv_args=None, bv_p=None):
         """
         Arguments:
             nt(str): the nonterminal
@@ -82,7 +71,6 @@ class BVAddGrammarRule(GrammarRule):
             to(list<str>): what you expand to (usually a FunctionNode).
             rid(?): the rule id number
             p(float): unnormalized probability of expansion
-            resample_p(float): the probability of choosing this node in an expansion
             bv_type(str): return type of the introduced bound variable
             bv_args(?): what are the args when we use a bv (None is terminals, else a type signature)
 
@@ -92,12 +80,13 @@ class BVAddGrammarRule(GrammarRule):
         """
         p = float(p)
         self.__dict__.update(locals())
+        assert name is 'lambda' # For now, let's assume these must be lambdas.
         assert bv_type is not None, "Did you mean to use a GrammarRule instead of a BVGrammarRule?"
         assert isinstance(bv_type, str), "bv_type must be a string! Make sure it's not a tuple or list."
         
     def __repr__(self):
         return str(self.nt) + " -> " + self.name + (str(self.to) if self.to is not None else '') + \
-            "\tw/ p=" + str(self.p) + ", resample_p=" + str(self.resample_p) + \
+            "\tw/ p=" + str(self.p) + "," + \
             "\tBV:" + str(self.bv_type) + ";" + str(self.bv_args) + ";" + self.bv_prefix
     
     def make_bv_rule(self, grammar):
@@ -113,7 +102,7 @@ class BVAddGrammarRule(GrammarRule):
         if bvp is None:
             bvp = grammar.BV_P
         return BVUseGrammarRule(self.bv_type, self.bv_args,
-                                p=bvp, resample_p=grammar.BV_RESAMPLE_P, bv_prefix=self.bv_prefix)
+                                p=bvp, bv_prefix=self.bv_prefix)
    
     def make_FunctionNodeStub(self, grammar, gp, parent):
         """Return a FunctionNode with none of the arguments realized. That's a "stub"
@@ -134,9 +123,14 @@ class BVAddGrammarRule(GrammarRule):
 
 
 class BVUseGrammarRule(GrammarRule):
-    """TODO: write docstring"""
-    def __init__(self, nt, to, p=1.0, resample_p=1.0, bv_prefix=None):
-        GrammarRule.__init__(self, nt, 'bv__'+uuid4().hex, to, p, resample_p, bv_prefix)
+    """
+    A Grammar rule that is the use of a bound variable. (e.g. in (lambda (y) ...), this rule is active in the ...
+    and allows you to make y).
+
+    Each of these has a unique name via uuid.
+    """
+    def __init__(self, nt, to, p=1.0, bv_prefix=None):
+        GrammarRule.__init__(self, nt, 'bv__'+uuid4().hex, to, p, bv_prefix)
 
     def make_FunctionNodeStub(self, grammar, gp, parent):
         # NOTE: It is VERY important to copy to, or else we end up wtih garbage

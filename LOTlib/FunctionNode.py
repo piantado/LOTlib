@@ -9,7 +9,7 @@ import re
 from copy import copy, deepcopy
 from math import log
 from random import random
-from LOTlib.Miscellaneous import None2Empty, lambdaTrue, Infinity
+from LOTlib.Miscellaneous import lambdaTrue, lambdaOne, Infinity
 
 
 # ------------------------------------------------------------------------------------------------------------
@@ -28,6 +28,18 @@ def cleanFunctionNodeString(x):
     s = re.sub("_", '', s)  # remove underscores
     return s
 
+
+# ------------------------------------------------------------------------------------------------------------
+# Handle exceptions when sampling
+# ------------------------------------------------------------------------------------------------------------
+
+class NodeSamplingException(Exception):
+    """
+        Raised when we try to sample a subnode, but nothing has nonzero probability.
+    """
+    pass
+
+
 # ------------------------------------------------------------------------------------------------------------
 # FunctionNode main class
 # ------------------------------------------------------------------------------------------------------------
@@ -40,8 +52,6 @@ class FunctionNode(object):
         name: The name of the function.
         args: Arguments of the function
         generation_probability: Unnormalized generation probability.
-        resample_p: The probability of choosing this node in resampling. Takes any number >0 (all are
-            normalized)
         rule: The rule that was used in generating the FunctionNode
         bv: Stores the actual *rule* that was added (so that we can re-add it when we loop through the tree).
 
@@ -50,7 +60,7 @@ class FunctionNode(object):
 
     """
     def __init__(self, parent, returntype, name, args,
-                 generation_probability=0.0, resample_p=1.0, rule=None, a_args=None):
+                 generation_probability=0.0, rule=None, a_args=None):
         self.__dict__.update(locals())
         self.added_rule = None
         
@@ -86,7 +96,7 @@ class FunctionNode(object):
         """
         fn = FunctionNode(self.parent, self.returntype, self.name, None,
                           generation_probability=self.generation_probability,
-                          resample_p=self.resample_p, rule=self.rule)
+                          rule=self.rule)
 
         if (not shallow) and self.args is not None:
             fn.args = map(copy, self.args)
@@ -189,7 +199,7 @@ class FunctionNode(object):
         """A handy printer for debugging"""
         tabstr = "  .  " * d
         print tabstr, self.returntype, self.name, \
-            "\t", self.generation_probability, "\t", self.resample_p, self.added_rule
+            "\t", self.generation_probability, "\t", self.added_rule
         if self.args is not None:
             for a in self.args:
                 if isFunctionNode(a):
@@ -227,7 +237,7 @@ class FunctionNode(object):
 
         In (lambda (x) x) and (lambda (y) y) will be equal (since they map to identical strings via
         pystring), even though the nodes below x and y will not themselves be equal. This is because
-        pystring(x) and pystring(y) will not know where these came from and will just cmopare the uuids.
+        pystring(x) and pystring(y) will not know where these came from and will just compare the uuids.
 
         But pystring on the lambda keeps track of where bound variables were introduced.
 
@@ -361,26 +371,33 @@ class FunctionNode(object):
         depths.append(-1)  # for no function nodes (+1=0)
         return max(depths)+1
 
-    def sample_node_normalizer(self, predicate=lambdaTrue):
-        """Compute Z to be the sum of all subnodes' resample_p."""
-        return sum([ t.resample_p for t in filter(predicate, self)])
-    
-    def sample_subnode(self, predicate=lambdaTrue):
+    def sample_node_normalizer(self, resampleProbability=lambdaOne):
+        """
+        Compute Z to be the sum of all subnodes' value from resampleProbability.
+        * resampleProbability -- a function that gives the resample probability (NOT log prob.) of each node.
+        NOTE: We allow resampleProbability to return a boolean, for 0/1 probability.
+        """
+        return sum([ 1.0*resampleProbability(x) for x in self])
+
+    def sample_subnode(self, resampleProbability=lambdaOne):
         """Sample a subnode at random.
 
         We return a sampled tree and the log probability of sampling it
 
         """
-        Z = self.sample_node_normalizer(predicate=predicate) # the total probability
-        
-        if Z == 0.0: return None, -Infinity # nothing works!
-        
+        Z = self.sample_node_normalizer(resampleProbability=resampleProbability) # the total probability
+        if not (Z > 0.0):
+            raise NodeSamplingException
+
         r = random() * Z # now select a random number (giving a random node)
-        
-        for t in filter(predicate, self):
-            r -= t.resample_p
+
+        for t in self:
+            trp = resampleProbability(t)
+            r -= 1.0 * trp
             if r <= 0:
-                return [t, log(t.resample_p) - log(Z)]
+                return [t, log(trp) - log(Z)]
+
+        assert False, "Should not get here"
 
     # get a description of the input and output types
     # if collapse_terminal then we just map non-FunctionNodes to "TERMINAL"
@@ -561,9 +578,9 @@ class BVAddFunctionNode(FunctionNode):
     (doc?)
     """
     def __init__(self, parent, returntype, name, args,
-                 generation_probability=0.0, resample_p=1.0, rule=None, a_args=None, added_rule=None):
+                 generation_probability=0.0, rule=None, a_args=None, added_rule=None):
         FunctionNode.__init__(self, parent, returntype, name, args,
-                              generation_probability, resample_p, rule, a_args)
+                              generation_probability, rule, a_args)
         self.added_rule = added_rule
 
     def __copy__(self, shallow=False):
@@ -577,7 +594,7 @@ class BVAddFunctionNode(FunctionNode):
 
         """
         fn = BVAddFunctionNode(self.parent, self.returntype, self.name, None,
-            generation_probability=self.generation_probability, resample_p=self.resample_p,
+            generation_probability=self.generation_probability,
             rule=self.rule, a_args=self.a_args, added_rule=copy(self.added_rule))
 
         if (not shallow) and self.args is not None:
@@ -628,9 +645,9 @@ class BVUseFunctionNode(FunctionNode):
     (doc?)
     """
     def __init__(self, parent, returntype, name, args,
-                 generation_probability=0.0, resample_p=1.0, rule=None, a_args=None, bv_prefix=None):
+                 generation_probability=0.0, rule=None, a_args=None, bv_prefix=None):
         FunctionNode.__init__(self, parent, returntype, name, args,
-                              generation_probability, resample_p, rule, a_args)
+                              generation_probability, rule, a_args)
         self.bv_prefix = bv_prefix
 
     def as_list(self, d=0, bv_names=None):
@@ -665,7 +682,7 @@ class BVUseFunctionNode(FunctionNode):
         """
         fn = BVUseFunctionNode(self.parent, self.returntype, self.name, None,
                                generation_probability=self.generation_probability,
-                               resample_p=self.resample_p, rule=self.rule, a_args=self.a_args,
+                               rule=self.rule, a_args=self.a_args,
                                bv_prefix=self.bv_prefix)
         
         if (not shallow) and self.args is not None:

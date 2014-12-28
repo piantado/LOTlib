@@ -1,3 +1,10 @@
+Dec 28 2014        
+        - Removed resample_p -- now you must specify a custom function in FunctionNode (resampleProbability). Removed in GrammarRule too. 
+	- Changed impossible proposals to raise a ProposalFailedException
+	- fixed copying twice in LOTProposal
+        - @LOT_primitive now adds to eval, no need to call register_primitive; moved LOTlib.Primitives.Primitives to LOTlib.Evaluation.Eval
+        - Moved Number primitives to Examples.Number.Model.Primitives
+        - Removed listifnot from MPI. Now MPI_map and MPI_unorderedmap *must* be given an iterable of lists
 Dec 18 2014
         - Updates to testing framework -- some MCMC tests, proposal, grammar. Old version is in Testing/old
         - moved lp_regenerate_propose_to_grammar to RegenerationProposal

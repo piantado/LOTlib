@@ -1,4 +1,4 @@
-from Primitives import LOTlib_primitive
+from LOTlib.Evaluation.Eval import LOTlib_primitive
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Access arbitrary features
@@ -13,6 +13,10 @@ def is_shape_(x,y): return (x.shape == y)
 
 @LOTlib_primitive
 def is_pattern_(x,y): return (x.pattern == y)
+
+@LOTlib_primitive
+def getattr_(x,a,y):
+    return getattr(x,a) == y
 
 @LOTlib_primitive
 def switch_(i,*ar):

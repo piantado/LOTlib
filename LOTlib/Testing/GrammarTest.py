@@ -5,9 +5,9 @@ follows the standards in https://docs.python.org/2/library/unittest.html
 
 
 from math import exp
-from TreeTester import TreeTester # defines check_tree
+from TreeTesters import FiniteTreeTester # defines check_tree
 
-class GrammarTest(TreeTester):
+class GrammarTest(FiniteTreeTester):
 
     def test_log_probability(self):
         """

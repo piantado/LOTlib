@@ -86,8 +86,8 @@ class InfiniteTreeTester(unittest.TestCase):
 
         # assert min(expc) > 5 # or else chisq sux
 
-        # for t, c, s in zip(self.trees, obsc, expc):
-        #     print c, s, t
+        for t, c, s in zip(self.trees, obsc, expc):
+            print c, s, t
         print (csq, pv), sum(obsc)
 
         self.assertGreater(pv, PVALUE, msg="Sampler failed chi squared!")
