@@ -52,12 +52,15 @@ from LOTlib.Grammar import Grammar
 
 
 # ============================================================================================================
-# Mixture model grammar with math rules & interval rules as the 2 probabilities mixed.
+# Mixture model grammar
+# =====================
 #
-#  This is identical to the model used in Josh Tenenbaum's thesis, except that (hopefully) we can do cooler
+# This is identical to the model used in Josh Tenenbaum's thesis, except that (hopefully) we can do cooler
 #  stuff with optimizing the hyperparameter lambda (aka `lambda_mix`) sampling GrammarHypotheses!
 #
-
+# Math rules & interval rules are the 2 probabilities mixed in this model.
+#
+#
 def mix_grammar(lambda_mix=2./3.):
 
     grammar = Grammar()
@@ -112,12 +115,15 @@ def mix_grammar(lambda_mix=2./3.):
 
 
 # ============================================================================================================
+# Individual-Priors Grammar
+# =========================
+#
 # This has the same rules as the mixture model above, except each rule has an individual probability.
 #
 #  * With GrammarHypothesis, we can sample much more intricate models than the mixture model.
 #  * However, we also will have like 5000 rules to choose from now . . .
 #
-
+#
 def individual_grammar():
     grammar = Grammar()
 
@@ -151,18 +157,48 @@ def individual_grammar():
 
 
 # ============================================================================================================
+# LOTlib-Style Grammar
+# ====================
+#
 # This grammar should generate all the hypotheses of the grammars listed above (and others!) as subset of
-#  a larger language (possible w/ recursion).
+#  a larger language (possible w/ recursion). Basically, this grammar can recurse wherever there is an 'X',
+#  and has leaves wherever there is a 'CONST'...
 #
-#  We don't know what will happen so we can see, and compare it w/ our results above as well as Josh's
-#  original results.
+# We don't know what will happen so we can see, and compare it w/ our results above as well as Josh's
+#  original results. Science!
 #
-
+# Note:
+#   if we get rules like [X -> X*X] inflated to a high probability, we will probably get super-large
+#   hypotheses that will break things
+#
+#
 def lot_grammar():
-    #
-    # TODO this grammar . . .
-    #
     grammar = Grammar()
+
+    # Initial range stuff -- note that we have a mixture model with range[1,100] & range[CONST,CONST],
+    #  where CONST is the same constant atom used in the math expressions below.
+    grammar.add_rule('START', 'mapset_', ['FUNC', 'RANGE'], 1.)
+    grammar.add_rule('RANGE', 'range_set_', ['CONST', 'CONST'], 1.)
+    grammar.add_rule('RANGE', 'range_set_', ['1', '100'], 1.)
+    grammar.add_rule('FUNC', 'lambda', ['X'], 1., bv_type='X', bv_p=1.)
+
+    # Math expressions
+    grammar.add_rule('X', 'isprime_', ['X'], 1.)
+    grammar.add_rule('X', 'ipowf_', ['CONST', 'CONST'], 1.)
+    grammar.add_rule('X', 'ipowf_', ['X', 'CONST'], 1.)
+    grammar.add_rule('X', 'ipowf_', ['CONST', 'X'], 1.)
+    grammar.add_rule('X', 'ipowf_', ['X', 'X'], 1.)
+    grammar.add_rule('X', 'times_', ['CONST', 'CONST'], 1.)
+    grammar.add_rule('X', 'times_', ['X', 'CONST'], 1.)
+    grammar.add_rule('X', 'times_', ['X', 'X'], 1.)
+    grammar.add_rule('X', 'plus_', ['CONST', 'CONST'], 1.)
+    grammar.add_rule('X', 'plus_', ['X', 'CONST'], 1.)
+    grammar.add_rule('X', 'plus_', ['X', 'X'], 1.)
+    grammar.add_rule('X', 'ends_in_', ['X', 'CONST'], 1.)
+
+    # Constants
+    for i in range(0, 101):
+        grammar.add_rule('CONST', '', [str(i)], 1.)
 
     return grammar
 
