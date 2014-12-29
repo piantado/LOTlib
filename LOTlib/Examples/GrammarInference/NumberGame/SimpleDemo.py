@@ -87,7 +87,7 @@ def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=
 
 
 if __name__ == "__main__":
-    run(grammar=complex_grammar, data=toy_2pownp1,
+    run(grammar=complex_grammar, data=toy_3n,
         domain=20, alpha=0.99, enum_d=6, grammar_n=10000, cap=1000,
         plot_type=None, pickle_data='save')
 

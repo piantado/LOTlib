@@ -202,7 +202,7 @@ class GrammarHypothesis(VectorHypothesis):
         return probs_in_c
 
     # --------------------------------------------------------------------------------------------------------
-    # GrammarRule / `self.value` methods
+    # Value vector / GrammarRule methods
 
     def set_value(self, value):
         """Set value and grammar rules for this hypothesis."""
