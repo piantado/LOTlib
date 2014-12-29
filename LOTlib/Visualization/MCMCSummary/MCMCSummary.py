@@ -2,6 +2,7 @@
 import pickle
 from LOTlib import lot_iter
 
+
 class MCMCSummary:
     """Superclass for collecting, computing, and displaying summary statistics from model runs.
 

@@ -8,13 +8,11 @@ Note:
     hypothesis.
 
 """
-import LOTlib
-import Model.Primitives # This will register them all
 from LOTlib import lot_iter
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Miscellaneous import q, qq
 from LOTlib.Examples.Number.Model import *
-from LOTlib.MCMCSummary.TopN import TopN
+from LOTlib.Visualization.MCMCSummary import TopN
 
 LARGE_DATA_SIZE = 10000 # this is what we compute the average LL on
 DATA_SIZE = 300

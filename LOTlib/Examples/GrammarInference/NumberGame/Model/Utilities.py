@@ -1,8 +1,7 @@
-from LOTlib import lot_iter
-import matplotlib.pyplot as plt
 from scipy.io import loadmat
+
 from LOTlib.DataAndObjects import FunctionData
-from LOTlib.MCMCSummary.VectorSummary import *
+from LOTlib.Visualization.MCMCSummary.VectorSummary import *
 
 
 def sample_grammar_hypotheses(sampler, skip, cap):

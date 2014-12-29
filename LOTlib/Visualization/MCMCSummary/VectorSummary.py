@@ -212,11 +212,12 @@ class VectorSummary(MCMCSummary):
 
         plt.show()
 
-
-
-
+    # --------------------------------------------------------------------------------------------------------
     # --------------------------------------------------------------------------------------------------------
     # Plotting methods  (this stuff is tested & it works!)
+    # --------------------------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------------------------------------
+
 
     def plot(self, plot_type='violin'):
         assert plot_type in ('violin', 'values', 'post', 'MLE', 'MAP'), "invalid plot type!"
@@ -338,14 +339,18 @@ class VectorSummary(MCMCSummary):
 
         Notes:
             * for now, this is only built for NumberGameHypothesis.
-            * there should be a slider so we can see how each of these changes over samples (like violinplot)
             * this should be 3 barplots: bayesian model averaging (weighted likelihood), MLE, & MAP
               ==> can these just be combined on 1 plot?  ==> checkbox instead of radiobutton? (future)
+
+            * For now, just do 'recent' (not mean, MLE, MAP)
 
         """
         # Update the bar plots when you move the slider
         def draw_barplots(idx):
             gh = self.samples[idx]
+
+
+
             y_likelihoods = [0]*gh.domain
 
             for i in range(1, gh.domain):                                # TODO: gh won't have `domain`
