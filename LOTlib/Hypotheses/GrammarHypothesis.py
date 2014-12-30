@@ -156,6 +156,7 @@ class GrammarHypothesis(VectorHypothesis):
                 likelihoods[y] = 1.
             else:
                 likelihoods[y] = (h_mle.alpha - 1)
+        return likelihoods
 
     def in_concept_map(self, domain):
         """
@@ -170,6 +171,7 @@ class GrammarHypothesis(VectorHypothesis):
                 likelihoods[y] = 1.
             else:
                 likelihoods[y] = (h_map.alpha - 1)
+        return likelihoods
 
     def in_concept_avg(self, domain):
         """
@@ -197,8 +199,8 @@ class GrammarHypothesis(VectorHypothesis):
                 w = h.posterior_score - Z
                 if y in C:
                     p_in_concept += exp(w)
-
             probs_in_c[y] = p_in_concept
+
         return probs_in_c
 
     # --------------------------------------------------------------------------------------------------------
@@ -217,6 +219,7 @@ class GrammarHypothesis(VectorHypothesis):
             # re-set the tree generation_probabilities
             self.grammar.recompute_generation_probabilities(h.value)
             h.compute_prior()
+            h.update_posterior()
 
     def get_rules(self, rule_name=False, rule_nt=False, rule_to=False):
         """Get all GrammarRules associated with this rule name, 'nt' type, and/or 'to' types.

@@ -10,7 +10,7 @@ from Model import *
 
 
 def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=5, grammar_n=10000, cap=100,
-        plot_type=None, pickle_data=False):
+        print_stuff=True, plot_type=None, pickle_data=False):
     """
     Enumerate some NumberGameHypotheses, then use these to sample some GrammarHypotheses over `data`.
 
@@ -45,20 +45,21 @@ def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=
         h.set_value(fn)
         hypotheses.append(h)
 
-    # --------------------------------------------------------------------------------------------------------
-    # Print all NumberGameHypotheses that were generated
+    if print_stuff:
+        # ----------------------------------------------------------------------------------------------------
+        # Print all NumberGameHypotheses that were generated
 
-    print '='*100, '\nNumberGameHypotheses:'
-    for h in hypotheses:
-        print h, h(), h.domain, h.alpha
+        print '='*100, '\nNumberGameHypotheses:'
+        for h in hypotheses:
+            print h, h(), h.domain, h.alpha
 
-    # --------------------------------------------------------------------------------------------------------
-    # Print all GrammarRules in our Grammar, with corresponding value index
+        # ----------------------------------------------------------------------------------------------------
+        # Print all GrammarRules in our Grammar, with corresponding value index
 
-    grammar_h0 = GrammarHypothesis(grammar, hypotheses, proposal_step=.1, proposal_n=1)
-    print '='*100, '\nGrammarRules:'
-    for i, r in enumerate(grammar_h0.rules):
-        print i, '\t|  ', r
+        grammar_h0 = GrammarHypothesis(grammar, hypotheses, proposal_step=.1, proposal_n=1)
+        print '='*100, '\nGrammarRules:'
+        for i, r in enumerate(grammar_h0.rules):
+            print i, '\t|  ', r
 
     # --------------------------------------------------------------------------------------------------------
     # Sample some GrammarHypotheses / load MCMCSummary from pickle
@@ -87,7 +88,7 @@ def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=
 
 
 if __name__ == "__main__":
-    run(grammar=complex_grammar, data=toy_3n,
+    run(grammar=complex_grammar, data=toy_2pownp1,
         domain=20, alpha=0.99, enum_d=6, grammar_n=10000, cap=1000,
         plot_type=None, pickle_data='save')
 
