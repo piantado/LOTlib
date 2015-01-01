@@ -34,7 +34,8 @@ def import_data_from_mat():
     assuming 20 human participants.
 
     """
-    mat = loadmat('number_game_data.mat')
+    mat = loadmat('/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
+                  '/NumberGame/number_game_data.mat')
     mat_data = mat['data']
     number_game_data = []
 
@@ -47,7 +48,7 @@ def import_data_from_mat():
             key = d[1][0][i]
             associated_prob = d[2][0][i]
             associated_yes = int(associated_prob * 20)
-            output_data[key] = (associated_yes, 1-associated_yes)    # est. (# yes, # no) responses
+            output_data[key] = (associated_yes, 20-associated_yes)    # est. (# yes, # no) responses
 
         function_datum = FunctionData(input=input_data, output=output_data)
         number_game_data.append(function_datum)
