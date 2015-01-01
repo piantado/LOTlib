@@ -2,6 +2,13 @@
 """
 With this class, we can propose hypotheses as a vector of grammar rule probabilities.
 
+Let's say that we have a set of 'domain hypotheses', for example representing a concept in the number
+domain such as 'powers of two between 1 and 100'. These 'domain hypotheses' are found in `self.hypotheses`.
+
+Each GrammarHypothesis stands for a model of hyperparameters - a 'parameter hypothesis' - used to generate a
+set of domain hypotheses.
+
+
 Methods:
     __init__
     propose
@@ -12,11 +19,14 @@ Methods:
 
     get_rules
 
+Note:
+    Parts of this are currently designed just to work with NumberGameHypothesis... these should be expanded.
 
 """
 import copy
 from math import exp, log
 import random
+import pickle
 import numpy as np
 from scipy.stats import gamma
 from LOTlib.Hypotheses.VectorHypothesis import VectorHypothesis
@@ -35,21 +45,24 @@ class GrammarHypothesis(VectorHypothesis):
         value (list): Vector of numbers corresponding to the items in `rules`.
 
     """
-    def __init__(self, grammar, hypotheses, value=None,
-                 prior_shape=2., prior_scale=1., propose_n=1, propose_step=.1, **kwargs):
+    def __init__(self, grammar, hypotheses, rules=None, load=None, value=None,
+                 prior_shape=2., prior_scale=1., propose_n=1, propose_step=.1,
+                 **kwargs):
         self.grammar = grammar
-        self.hypotheses = hypotheses
-        self.rules = [r for sublist in grammar.rules.values() for r in sublist]
-        if value is None:
+        self.hypotheses = self.load_hypotheses(load) if load else hypotheses
+        if not rules:
+            self.rules = [r for sublist in grammar.rules.values() for r in sublist]
+        if not value:
             value = [rule.p for rule in self.rules]
         n = len(value)
-        VectorHypothesis.__init__(self, value=value, n=n)
+        VectorHypothesis.__init__(self, value=value, n=n, **kwargs)
         self.prior_shape = prior_shape
         self.prior_scale = prior_scale
         self.propose_n = propose_n
         self.propose_step = propose_step
         self.propose_idxs = self.get_propose_idxs()
-        self.prior = self.compute_prior()
+        self.compute_prior()
+        self.update()
 
     # --------------------------------------------------------------------------------------------------------
     # MCMC-Related methods
@@ -64,27 +77,52 @@ class GrammarHypothesis(VectorHypothesis):
 
         """
         step = np.random.multivariate_normal([0.]*self.n, self.proposal) * self.propose_step
-        c = self.__copy__()
+        new_value = [0]*self.n
 
         # randomly choose `self.propose_n` of our proposable indexes
         for i in random.sample(self.propose_idxs, self.propose_n):
-            if c.value[i] + step[i] > 0.0:
-                c.value[i] += step[i]
+            if new_value[i] + step[i] > 0.0:
+                new_value[i] += step[i]
 
-        c.set_value(c.value)
+        c = self.__copy__()
+        c.set_value(new_value)
         return c, 0.0
 
     def __copy__(self):
-        """Make a shallow copy of this GrammarHypothesis."""
+        """Copy of this GrammarHypothesis; `self.grammar` & `self.hypothesis` don't deep copy."""
         return GrammarHypothesis(
-            copy.copy(self.grammar), self.hypotheses,
+            self.grammar, self.hypotheses, rules=self.rules,
             value=copy.copy(self.value), n=self.n, proposal=copy.copy(self.proposal),
             prior_shape=self.prior_shape, prior_scale=self.prior_scale,
             propose_n=self.propose_n, propose_step=self.propose_step
         )
 
+    def set_value(self, value):
+        """Set value and grammar rules for this hypothesis."""
+        assert len(value) == len(self.rules), "ERROR: Invalid value vector!!!"
+        self.value = value
+        self.rules = [r for sublist in self.grammar.rules.values() for r in sublist]
+        self.update()
+
+    def update(self):
+        """Update `self.grammar` & priors for `self.hypotheses` relative to `self.value`.
+
+        We'll need to do this whenever we calculate things like predictive, because we need to use
+          the `posterior_score` of each domain hypothesis get weights for our predictions.
+
+        """
+        # Set probability for each rule corresponding to value index
+        for i in range(1, self.n):
+            self.rules[i].p = self.value[i]
+
+        # Recompute prior for each hypothesis, given new grammar probs
+        for h in self.hypotheses:
+            self.grammar.recompute_generation_probabilities(h.value)
+            h.compute_prior()
+            h.update_posterior()
+
     # --------------------------------------------------------------------------------------------------------
-    # Bayesian inference
+    # Bayesian inference with GrammarHypothesis
 
     def compute_prior(self):
         shape = self.prior_shape
@@ -112,6 +150,7 @@ class GrammarHypothesis(VectorHypothesis):
             - vectorize
 
         """
+        self.update()
         hypotheses = self.hypotheses
         likelihood = 0.0
 
@@ -121,8 +160,9 @@ class GrammarHypothesis(VectorHypothesis):
             weights = [(post-Z) for post in posteriors]
 
             for o in d.output.keys():
+                C = h()
+                assert C, "Error: hypothesis returned None!!"
                 # probability for yes on output `o` is sum of posteriors for hypos that contain `o`
-                # TODO: this will break if h() is None... can this ever happen??
                 p = logsumexp([w if o in h() else -Infinity for h, w in zip(hypotheses, weights)])
                 p = -1e-10 if p >= 0 else p
                 k = d.output[o][0]         # num. yes responses
@@ -139,8 +179,8 @@ class GrammarHypothesis(VectorHypothesis):
     # p (y in C | H)  where H is our hypothesis space
     #
     # Note:
-    #   this is NOT the same as compute_likelihood - that is a generative model, this is determining if
-    #   input would be assessed as part of our concept
+    #   This is NOT the same as `self.compute_likelihood` - that is a generative model, this is determining
+    #   whether input would be part of our domain hypothesis concept(s).
     #
 
     def in_concept_mle(self, domain):
@@ -173,6 +213,7 @@ class GrammarHypothesis(VectorHypothesis):
                 likelihoods[y] = (h_map.alpha - 1)
         return likelihoods
 
+    # TODO is this right ?????????????
     def in_concept_avg(self, domain):
         """
         p(y in C | `self.hypotheses`)
@@ -182,44 +223,29 @@ class GrammarHypothesis(VectorHypothesis):
 
         ==> This is the weighted bayesian model averaging described in (Murphy, 2007)
 
-        TODO:
-          * Better docs here
-          * Is the weighted posterior thing right?
-
         """
+        self.update()
         probs_in_c = {}
 
-        # TODO is this right ?????????????
         for y in domain:
-            p_in_concept = 0
+            prob_in_c = 0
             Z = logsumexp([h.posterior_score for h in self.hypotheses])
+
+            # for h in self.hypotheses:
+            #     h.set_value(h.value)
+            # print self.hypotheses[0].prior, self.hypotheses[3].prior, self.hypotheses[5].prior
 
             for h in self.hypotheses:
                 C = h()
                 w = h.posterior_score - Z
                 if y in C:
-                    p_in_concept += exp(w)
-            probs_in_c[y] = p_in_concept
+                    prob_in_c += exp(w)
+            probs_in_c[y] = prob_in_c
 
         return probs_in_c
 
     # --------------------------------------------------------------------------------------------------------
-    # Value vector / GrammarRule methods
-
-    def set_value(self, value):
-        """Set value and grammar rules for this hypothesis."""
-        assert len(value) == len(self.rules), "ERROR: Invalid value vector!!!"
-        self.value = value
-        # Set probability for each rule corresponding to value index
-        for i in range(1, len(value)):
-            self.rules[i].p = value[i]
-
-        # Recompute prior for each hypothesis, given new grammar probs
-        for h in self.hypotheses:
-            # re-set the tree generation_probabilities
-            self.grammar.recompute_generation_probabilities(h.value)
-            h.compute_prior()
-            h.update_posterior()
+    # GrammarRule methods
 
     def get_rules(self, rule_name=False, rule_nt=False, rule_to=False):
         """Get all GrammarRules associated with this rule name, 'nt' type, and/or 'to' types.
@@ -231,7 +257,7 @@ class GrammarHypothesis(VectorHypothesis):
             Pair of lists [idxs, rules]: idxs is a list of rules indexes, rules is a list of GrammarRules
 
         """
-        rules = [(i, r) for i, r in enumerate(self.rules)]
+        rules = [(i, r) for i, r in enumerate(self.rules) if r.nt is not 'IGNORE']
 
         # Filter our rules that don't match our criteria
         if rule_name is not False:
@@ -245,7 +271,7 @@ class GrammarHypothesis(VectorHypothesis):
         return zip(*rules) if len(rules) > 0 else [(), ()]
 
     def get_propose_idxs(self):
-        """get list of indexes to alter -- we want to skip rules that have no alternatives/siblings"""
+        """Get indexes to propose to => only rules with siblings."""
         proposal_indexes = range(self.n)
         nonterminals = self.grammar.nonterminals()
         for nt in nonterminals:
@@ -262,22 +288,41 @@ class GrammarHypothesis(VectorHypothesis):
         return self.conditional_distribution(data, idxs[0], vals=vals)
 
     # --------------------------------------------------------------------------------------------------------
-    # Top hypotheses
+    # Top domain hypotheses
 
     def get_top_hypotheses(self, n=10, key=(lambda x: x.posterior_score)):
         """Return the best `n` hypotheses from `self.hypotheses`."""
+        self.update()
         hypotheses = self.hypotheses
         sorted_hypos = sorted(hypotheses, key=key)
         return sorted_hypos[-n:]
 
     def print_top_hypotheses(self, n=10):
         """Print the best `n` hypotheses from `self.hypotheses`."""
+        self.update()
         for h in self.get_top_hypotheses(n=n):
             print str(h)
             print h.posterior_score, h.likelihood, h.prior
 
     def max_a_posteriori(self):
+        self.update()
         return max([h.posterior_score for h in self.hypotheses])
 
     def max_like_estimate(self):
+        self.update()
         return max([h.likelihood for h in self.hypotheses])
+
+    # --------------------------------------------------------------------------------------------------------
+    # Pickling domain hypotheses
+
+    def load_hypotheses(self, filename=None):
+        if filename:
+            f = open(filename, "rb")
+            self.hypotheses = pickle.load(f)
+            return self.hypotheses
+
+    def save_hypotheses(self, filename=None):
+        if filename:
+            f = open(filename, "wb")
+            pickle.dump(self.hypotheses, f)
+
