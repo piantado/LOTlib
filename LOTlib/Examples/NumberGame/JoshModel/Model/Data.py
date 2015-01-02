@@ -1,4 +1,5 @@
-from somewhere.Utilities import import_data_from_mat
+from LOTlib.Examples.GrammarInference.NumberGame.Model.Utilities import import_data_from_mat
+
 
 """
 Import Josh data
