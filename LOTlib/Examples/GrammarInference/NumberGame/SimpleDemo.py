@@ -5,12 +5,14 @@ A simple demo of inference with GrammarHypothesis, VectorSummary, NumberGameHypo
 import pickle
 from LOTlib.Hypotheses.GrammarHypothesis import GrammarHypothesis
 from LOTlib.Inference.MetropolisHastings import MHSampler
+from LOTlib.Examples.NumberGame.JoshModel.Model import *
 from LOTlib.Examples.NumberGame.NewVersion.Model import *
 from Model import *
 
 
-def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=5, grammar_n=10000, cap=100,
-        print_stuff=True, plot_type=None, pickle_data=False):
+def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
+        alpha=0.99, enum_d=5, grammar_n=10000, cap=100,
+        print_stuff='grammar_h', plot_type=None, pickle_data=False):
     """
     Enumerate some NumberGameHypotheses, then use these to sample some GrammarHypotheses over `data`.
 
@@ -36,29 +38,45 @@ def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=
         >> run()
 
     """
+
+    if josh is 'mix':
+        ParameterHypothesis = MixtureGrammarHypothesis
+        DomainHypothesis = JoshConceptsHypothesis
+    elif josh is 'indep':
+        ParameterHypothesis = ShallowGrammarHypothesis
+        DomainHypothesis = JoshConceptsHypothesis
+    elif josh is 'lot':
+        ParameterHypothesis = GrammarHypothesis
+        DomainHypothesis = JoshConceptsHypothesis
+    else:
+        ParameterHypothesis = GrammarHypothesis
+        DomainHypothesis = NumberGameHypothesis
+
     # --------------------------------------------------------------------------------------------------------
     # Enumerate some NumberGameHypotheses.
 
     hypotheses = []
     for fn in grammar.enumerate(d=enum_d):
-        h = NumberGameHypothesis(grammar=grammar, domain=domain, alpha=alpha)
+        h = DomainHypothesis(grammar=grammar, domain=domain, alpha=alpha)
         h.set_value(fn)
         hypotheses.append(h)
 
-    if print_stuff:
-        # ----------------------------------------------------------------------------------------------------
-        # Print all NumberGameHypotheses that were generated
+    # --------------------------------------------------------------------------------------------------------
+    # Print all NumberGameHypotheses that were generated
 
+    if print_stuff is True or 'ngh' in print_stuff:
         print '='*100, '\nNumberGameHypotheses:'
         for h in hypotheses:
             print h, h(), h.domain, h.alpha
+    print 'Number of NumberGameHypotheses: ', len(hypotheses)
 
-        # ----------------------------------------------------------------------------------------------------
-        # Print all GrammarRules in our Grammar, with corresponding value index
+    # --------------------------------------------------------------------------------------------------------
+    # Print all GrammarRules in our Grammar, with corresponding value index
 
-        grammar_h0 = GrammarHypothesis(grammar, hypotheses, proposal_step=.1, proposal_n=1)
+    if print_stuff is True or 'rules' in print_stuff:
         print '='*100, '\nGrammarRules:'
-        for i, r in enumerate(grammar_h0.rules):
+        rules = [r for sublist in grammar.rules.values() for r in sublist]
+        for i, r in enumerate(rules):
             print i, '\t|  ', r
 
     # --------------------------------------------------------------------------------------------------------
@@ -68,6 +86,7 @@ def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=
         f = open('MCMC_summary_data.p', "rb")
         mh_grammar_summary = pickle.load(f)
     else:
+        grammar_h0 = ParameterHypothesis(grammar, hypotheses, propose_step=.1, propose_n=1)
         mh_grammar_sampler = MHSampler(grammar_h0, data, grammar_n, trace=False)
         mh_grammar_summary = sample_grammar_hypotheses(mh_grammar_sampler, skip=grammar_n/cap, cap=cap)
 
@@ -76,7 +95,10 @@ def run(grammar=simple_test_grammar, data=toy_3n, domain=20, alpha=0.99, enum_d=
 
     if plot_type is not None:
         mh_grammar_summary.plot(plot_type)
-    # 0mh_grammar_summary.print_top_hypotheses()
+        # return mh_grammar_summary
+
+    if print_stuff is True or 'grammar_h' in print_stuff:
+        mh_grammar_summary.print_top_samples()
 
     # --------------------------------------------------------------------------------------------------------
     # Save pickled MCMCSummary
