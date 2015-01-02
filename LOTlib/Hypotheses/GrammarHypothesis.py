@@ -50,14 +50,15 @@ class GrammarHypothesis(VectorHypothesis):
                  **kwargs):
         self.grammar = grammar
         self.hypotheses = self.load_hypotheses(load) if load else hypotheses
-        if not rules:
-            self.rules = [r for sublist in grammar.rules.values() for r in sublist]
-        if not value:
+        self.rules = [r for sublist in grammar.rules.values() for r in sublist]
+        if value is None:
             value = [rule.p for rule in self.rules]
         n = len(value)
         VectorHypothesis.__init__(self, value=value, n=n, **kwargs)
         self.prior_shape = prior_shape
         self.prior_scale = prior_scale
+        if int(self.n / 50) > propose_n:
+            propose_n = int(self.n / 50)
         self.propose_n = propose_n
         self.propose_step = propose_step
         self.propose_idxs = self.get_propose_idxs()
@@ -77,7 +78,7 @@ class GrammarHypothesis(VectorHypothesis):
 
         """
         step = np.random.multivariate_normal([0.]*self.n, self.proposal) * self.propose_step
-        new_value = [0]*self.n
+        new_value = copy.copy(self.value)
 
         # randomly choose `self.propose_n` of our proposable indexes
         for i in random.sample(self.propose_idxs, self.propose_n):
@@ -90,9 +91,9 @@ class GrammarHypothesis(VectorHypothesis):
 
     def __copy__(self):
         """Copy of this GrammarHypothesis; `self.grammar` & `self.hypothesis` don't deep copy."""
-        return GrammarHypothesis(
-            self.grammar, self.hypotheses, rules=self.rules,
-            value=copy.copy(self.value), n=self.n, proposal=copy.copy(self.proposal),
+        return type(self)(
+            self.grammar, self.hypotheses,
+            value=copy.copy(self.value), proposal=copy.copy(self.proposal),
             prior_shape=self.prior_shape, prior_scale=self.prior_scale,
             propose_n=self.propose_n, propose_step=self.propose_step
         )
@@ -100,6 +101,8 @@ class GrammarHypothesis(VectorHypothesis):
     def set_value(self, value):
         """Set value and grammar rules for this hypothesis."""
         assert len(value) == len(self.rules), "ERROR: Invalid value vector!!!"
+        if not isinstance(value, np.ndarray):
+            value = np.array(value)
         self.value = value
         self.rules = [r for sublist in self.grammar.rules.values() for r in sublist]
         self.update()
