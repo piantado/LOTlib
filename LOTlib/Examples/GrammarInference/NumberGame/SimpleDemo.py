@@ -12,33 +12,51 @@ from Model import *
 
 def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
         alpha=0.99, enum_d=5, grammar_n=10000, cap=100,
-        print_stuff='grammar_h', plot_type=None, pickle_data=False):
+        print_stuff='grammar_h', plot_type=None, pickle_data=False, filename=None):
     """
     Enumerate some NumberGameHypotheses, then use these to sample some GrammarHypotheses over `data`.
 
-    Arguments:
-        grammar(LOTlib.Grammar): This is our grammar.
-        data(list): List of FunctionNodes to use as input/output data.
-        alpha(float): Noise parameter for NumberGameHypothesis.
-        domain(int): Domain parameter for NumberGameHypothesis.
-        grammar_n(int): Number of GrammarHypotheses to sample.
-        cap(int): VectorSummary will collect this many GrammarHypothesis samples.
-        plot(str): String input indicating type of plot to graph: [violin | line | MLE | MAP].
+    Arguments
+    ---------
+        grammar(LOTlib.Grammar):
+            This is our grammar.
+        josh(str):
+            Are we using stuff from `LOTlib.Examples.NumberGame.JoshModel`? ['mix' | 'indep' | 'lot' | None]
+        data(list):
+            List of FunctionNodes to use as input/output data.
+        domain(int):
+            Domain parameter for NumberGameHypothesis.
+        alpha(float):
+            Noise parameter for NumberGameHypothesis.
+        enum_d(int):
+            How deep do we go when enumerating ngh's?
+        grammar_n(int):
+            Number of GrammarHypotheses to sample.
+        cap(int):
+            VectorSummary will collect this many GrammarHypothesis samples.
+        print_stuff(str/bool):
+            What do we print? ['ngh' | 'rules | 'grammar_h' | True | False]
+        plot_type(str):
+            Indicate which type of plot to draw: ['violin' | 'line' | 'MLE' | 'MAP' | None].
+        pickle_data(str):
+            This tells us if we load of save the summary: ['load' | 'save' | None].
+        filename(str):
+            If we're pickling, this is the file name to load/save.
 
-    Confirmed working:
+    Confirmed working
+    -----------------
         * run(grammar=simple_test_grammar, data=toy_3n)     [12/15]
         * run(grammar=simple_grammar_2, data=toy_3n)        [12/16]
 
-    Note:
+    Note
+    ----
         These currently have to be run within ipython notebook for plotting to work.
-
         Just open a notebook and execute this:
 
         >> from SimpleDemo import *
         >> run()
 
     """
-
     if josh is 'mix':
         ParameterHypothesis = MixtureGrammarHypothesis
         DomainHypothesis = JoshConceptsHypothesis
@@ -83,7 +101,7 @@ def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
     # Sample some GrammarHypotheses / load MCMCSummary from pickle
 
     if pickle_data == 'load':
-        f = open('MCMC_summary_data.p', "rb")
+        f = open(filename, "rb")
         mh_grammar_summary = pickle.load(f)
     else:
         grammar_h0 = ParameterHypothesis(grammar, hypotheses, propose_step=.1, propose_n=1)
@@ -104,7 +122,7 @@ def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
     # Save pickled MCMCSummary
 
     if pickle_data == 'save':
-        mh_grammar_summary.pickle_summary()
+        mh_grammar_summary.pickle_summary(filename=filename)
 
 
 
@@ -113,9 +131,9 @@ if __name__ == "__main__":
     # run(grammar=complex_grammar, data=toy_2pownp1,
     #     domain=20, alpha=0.99, enum_d=6, grammar_n=10000, cap=1000,
     #     plot_type=None, pickle_data='save')
-    run(grammar=mix_grammar, josh='mix', data=josh_data, domain=20,
-        alpha=0.99, enum_d=5, grammar_n=1000, cap=100,
-        print_stuff=('grammar_h'), plot_type=None, pickle_data=False)
+    run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
+        alpha=0.9, enum_d=5, grammar_n=1000, cap=100,
+        print_stuff=('grammar_h'), plot_type=None, pickle_data='save')
 
 
 #
