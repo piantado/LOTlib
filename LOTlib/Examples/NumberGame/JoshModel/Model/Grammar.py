@@ -61,57 +61,53 @@ from LOTlib.Grammar import Grammar
 # Math rules & interval rules are the 2 probabilities mixed in this model.
 #
 #
-def mix_grammar(lambda_mix=2./3.):
+mix_grammar = Grammar()
+mix_grammar.add_rule('START', '', ['MATH'], 1.)
+mix_grammar.add_rule('START', '', ['INTERVAL'], 1.)
 
-    grammar = Grammar()
-    grammar.add_rule('START', '', ['MATH'], lambda_mix)
-    grammar.add_rule('START', '', ['INTERVAL'], (1-lambda_mix))
+# --------------------------------------------------------------------------------------------------------
+# Math rules (30-40 of these)
 
-    # --------------------------------------------------------------------------------------------------------
-    # Math rules (30-40 of these)
+mix_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'DOMAIN_RANGE'], 1.)
+mix_grammar.add_rule('DOMAIN_RANGE', 'range_set_', ['1', '100'], 1.)
+mix_grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='X', bv_p=1.)
 
-    grammar.add_rule('MATH', 'mapset_', ['FUNC', 'DOMAIN_RANGE'], 1.)
-    grammar.add_rule('DOMAIN_RANGE', 'range_set_', ['1', '100'], 1.)
-    grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='X', bv_p=1.)
+# Odd numbers
+mix_grammar.add_rule('EXPR', 'plus_', ['ODD', str(1)], 1.)
+mix_grammar.add_rule('ODD', 'times_', ['X', str(2)], 1.)
 
-    # Odd numbers
-    grammar.add_rule('EXPR', 'plus_', ['ODD', str(1)], 1.)
-    grammar.add_rule('ODD', 'times_', ['X', str(2)], 1.)
+# Primes
+mix_grammar.add_rule('EXPR', 'isprime_', ['X'], 1.)
 
-    # Primes
-    grammar.add_rule('EXPR', 'isprime_', ['X'], 1.)
+# Squares, cubes
+mix_grammar.add_rule('EXPR', 'ipowf_', ['X', str(2)], 1.)
+mix_grammar.add_rule('EXPR', 'ipowf_', ['X', str(3)], 1.)
 
-    # Squares, cubes
-    grammar.add_rule('EXPR', 'ipowf_', ['X', str(2)], 1.)
-    grammar.add_rule('EXPR', 'ipowf_', ['X', str(3)], 1.)
+# { 2^n  -  32 }
+register_primitive(lambda x: x if x in (2, 4, 8, 16, 64) else 0, name='pow2n_d32_')
+mix_grammar.add_rule('EXPR', 'pow2n_d32_', ['X'], 1.)
+# { 2^n  &  37 }
+register_primitive(lambda x: x if x in (2, 4, 8, 16, 32, 37, 64) else 0, name='pow2n_u37_')
+mix_grammar.add_rule('EXPR', 'pow2n_u37_', ['X'], 1.)
 
-    # { 2^n  -  32 }
-    register_primitive(lambda x: x if x in (2, 4, 8, 16, 64) else 0, name='pow2n_d32_')
-    grammar.add_rule('EXPR', 'pow2n_d32_', ['X'], 1.)
-    # { 2^n  &  37 }
-    register_primitive(lambda x: x if x in (2, 4, 8, 16, 32, 37, 64) else 0, name='pow2n_u37_')
-    grammar.add_rule('EXPR', 'pow2n_u37_', ['X'], 1.)
+# [2,12] * n
+for i in range(2, 13):
+    mix_grammar.add_rule('EXPR', 'times_', ['X', str(i)], 1.)
 
-    # [2,12] * n
-    for i in range(2, 13):
-        grammar.add_rule('EXPR', 'times_', ['X', str(i)], 1.)
+# [2,10] ^ m
+for i in range(2, 11):
+    mix_grammar.add_rule('EXPR', 'ipowf_', [str(i), 'X'], 1.)
 
-    # [2,10] ^ m
-    for i in range(2, 11):
-        grammar.add_rule('EXPR', 'ipowf_', [str(i), 'X'], 1.)
+# Ends in [0,9]
+for i in range(0, 10):
+    mix_grammar.add_rule('EXPR', 'ends_in_', ['X', str(i)], 1.)
 
-    # Ends in [0,9]
-    for i in range(0, 10):
-        grammar.add_rule('EXPR', 'ends_in_', ['X', str(i)], 1.)
+# --------------------------------------------------------------------------------------------------------
+# Interval Rules (there will be ~5050 of these)
 
-    # --------------------------------------------------------------------------------------------------------
-    # Interval Rules (there will be ~5050 of these)
-
-    for n in range(1, 101):
-        for m in range(n, 101):
-            grammar.add_rule('INTERVAL', 'range_set_', [str(n), str(m)], 1.)
-
-    return grammar
+for n in range(1, 101):
+    for m in range(n, 101):
+        mix_grammar.add_rule('INTERVAL', 'range_set_', [str(n), str(m)], 1.)
 
 
 # ============================================================================================================
@@ -124,36 +120,33 @@ def mix_grammar(lambda_mix=2./3.):
 #  * However, we also will have like 5000 rules to choose from now . . .
 #
 #
-def individual_grammar():
-    grammar = Grammar()
+individual_grammar = Grammar()
 
-    # Math rules
-    grammar.add_rule('START', 'mapset_', ['FUNC', 'DOMAIN_RANGE'], 1.)
-    grammar.add_rule('DOMAIN_RANGE', 'range_set_', ['1', '100'], 1.)
-    grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='X', bv_p=1.)
+# Math rules
+individual_grammar.add_rule('START', 'mapset_', ['FUNC', 'DOMAIN_RANGE'], 1.)
+individual_grammar.add_rule('DOMAIN_RANGE', 'range_set_', ['1', '100'], 1.)
+individual_grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='X', bv_p=1.)
 
-    grammar.add_rule('EXPR', 'plus_', ['ODD', str(1)], 1.)
-    grammar.add_rule('ODD', 'times_', ['X', str(2)], 1.)
-    grammar.add_rule('EXPR', 'isprime_', ['X'], 1.)
-    grammar.add_rule('EXPR', 'ipowf_', ['X', str(2)], 1.)
-    grammar.add_rule('EXPR', 'ipowf_', ['X', str(3)], 1.)
-    register_primitive(lambda x: x if x in (2, 4, 8, 16, 64) else 0, name='pow2n_d32_')
-    grammar.add_rule('EXPR', 'pow2n_d32_', ['X'], 1.)
-    register_primitive(lambda x: x if x in (2, 4, 8, 16, 32, 37, 64) else 0, name='pow2n_u37_')
-    grammar.add_rule('EXPR', 'pow2n_u37_', ['X'], 1.)
-    for i in range(2, 13):
-        grammar.add_rule('EXPR', 'times_', ['X', str(i)], 1.)
-    for i in range(2, 11):
-        grammar.add_rule('EXPR', 'ipowf_', [str(i), 'X'], 1.)
-    for i in range(0, 10):
-        grammar.add_rule('EXPR', 'ends_in_', ['X', str(i)], 1.)
+individual_grammar.add_rule('EXPR', 'plus_', ['ODD', str(1)], 1.)
+individual_grammar.add_rule('ODD', 'times_', ['X', str(2)], 1.)
+individual_grammar.add_rule('EXPR', 'isprime_', ['X'], 1.)
+individual_grammar.add_rule('EXPR', 'ipowf_', ['X', str(2)], 1.)
+individual_grammar.add_rule('EXPR', 'ipowf_', ['X', str(3)], 1.)
+register_primitive(lambda x: x if x in (2, 4, 8, 16, 64) else 0, name='pow2n_d32_')
+individual_grammar.add_rule('EXPR', 'pow2n_d32_', ['X'], 1.)
+register_primitive(lambda x: x if x in (2, 4, 8, 16, 32, 37, 64) else 0, name='pow2n_u37_')
+individual_grammar.add_rule('EXPR', 'pow2n_u37_', ['X'], 1.)
+for i in range(2, 13):
+    individual_grammar.add_rule('EXPR', 'times_', ['X', str(i)], 1.)
+for i in range(2, 11):
+    individual_grammar.add_rule('EXPR', 'ipowf_', [str(i), 'X'], 1.)
+for i in range(0, 10):
+    individual_grammar.add_rule('EXPR', 'ends_in_', ['X', str(i)], 1.)
 
-    # Interval Rules
-    for n in range(1, 101):
-        for m in range(n, 101):
-            grammar.add_rule('START', 'range_set_', [str(n), str(m)], 1.)
-
-    return grammar
+# Interval Rules
+for n in range(1, 101):
+    for m in range(n, 101):
+        individual_grammar.add_rule('START', 'range_set_', [str(n), str(m)], 1.)
 
 
 # ============================================================================================================
@@ -172,34 +165,48 @@ def individual_grammar():
 #   hypotheses that will break things
 #
 #
-def lot_grammar():
-    grammar = Grammar()
+lot_grammar = Grammar()
 
-    # Initial range stuff -- note that we have a mixture model with range[1,100] & range[CONST,CONST],
-    #  where CONST is the same constant atom used in the math expressions below.
-    grammar.add_rule('START', 'mapset_', ['FUNC', 'RANGE'], 1.)
-    grammar.add_rule('RANGE', 'range_set_', ['CONST', 'CONST'], 1.)
-    grammar.add_rule('RANGE', 'range_set_', ['1', '100'], 1.)
-    grammar.add_rule('FUNC', 'lambda', ['X'], 1., bv_type='X', bv_p=1.)
+# Initial range stuff -- note that we have a mixture model with range[1,100] & range[CONST,CONST],
+#  where CONST is the same constant atom used in the math expressions below.
+lot_grammar.add_rule('START', 'mapset_', ['FUNC', 'RANGE'], 1.)
+lot_grammar.add_rule('RANGE', 'range_set_', ['CONST', 'CONST'], 1.)
+lot_grammar.add_rule('RANGE', 'range_set_', ['1', '21'], 1.)
+lot_grammar.add_rule('FUNC', 'lambda', ['X'], 1., bv_type='X', bv_p=1.)
 
-    # Math expressions
-    grammar.add_rule('X', 'isprime_', ['X'], 1.)
-    grammar.add_rule('X', 'ipowf_', ['CONST', 'CONST'], 1.)
-    grammar.add_rule('X', 'ipowf_', ['X', 'CONST'], 1.)
-    grammar.add_rule('X', 'ipowf_', ['CONST', 'X'], 1.)
-    grammar.add_rule('X', 'ipowf_', ['X', 'X'], 1.)
-    grammar.add_rule('X', 'times_', ['CONST', 'CONST'], 1.)
-    grammar.add_rule('X', 'times_', ['X', 'CONST'], 1.)
-    grammar.add_rule('X', 'times_', ['X', 'X'], 1.)
-    grammar.add_rule('X', 'plus_', ['CONST', 'CONST'], 1.)
-    grammar.add_rule('X', 'plus_', ['X', 'CONST'], 1.)
-    grammar.add_rule('X', 'plus_', ['X', 'X'], 1.)
-    grammar.add_rule('X', 'ends_in_', ['X', 'CONST'], 1.)
+# Math expressions
+lot_grammar.add_rule('X', 'isprime_', ['X'], 1.)
+lot_grammar.add_rule('X', 'ipowf_', ['CONST', 'CONST'], 1.)
+lot_grammar.add_rule('X', 'ipowf_', ['X', 'CONST'], 1.)
+lot_grammar.add_rule('X', 'ipowf_', ['CONST', 'X'], 1.)
+lot_grammar.add_rule('X', 'ipowf_', ['X', 'X'], 1.)
+lot_grammar.add_rule('X', 'times_', ['CONST', 'CONST'], 1.)
+lot_grammar.add_rule('X', 'times_', ['X', 'CONST'], 1.)
+lot_grammar.add_rule('X', 'times_', ['X', 'X'], 1.)
+lot_grammar.add_rule('X', 'plus_', ['CONST', 'CONST'], 1.)
+lot_grammar.add_rule('X', 'plus_', ['X', 'CONST'], 1.)
+lot_grammar.add_rule('X', 'plus_', ['X', 'X'], 1.)
+lot_grammar.add_rule('X', 'ends_in_', ['X', 'CONST'], 1.)
 
-    # Constants
-    for i in range(0, 101):
-        grammar.add_rule('CONST', '', [str(i)], 1.)
+# Constants
+for i in range(1, 21):
+    lot_grammar.add_rule('CONST', '', [str(i)], 1.)
 
-    return grammar
+
+
+# TRY: range 'START' & range 'END'
+# TRY: keep 'CONST' or something like it, but tell GrammarHypothesis to ignore this?  ==> 'IGNORE' nt
+#
+# TRY: another thing to do would be playing with greater values in propose_n... with 5000 rules,
+#      we need to propose to more than 1 value at a time
+
+# bayesian data analysis  +  probabilistic, structured LOT model
+# fitting priors in LOT models... what's new is we're doing a BDA that can recover plausible priors for LOT
+#  models
+
+# theres other work in psychophysics that tries to recover / infer priors (things like 'what are your
+# priors on direction of motion' or what are your priors on speed?') draws on classic structured AI
+# approaches, combined with cool data analysis that can pull out the priors
+# ==> from here, you can do cool things with these structured models to suppose whats really happening
 
 
