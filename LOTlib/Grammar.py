@@ -180,12 +180,6 @@ class Grammar:
         self.recompute_generation_probabilities(fn)
         return fn.log_probability()
 
-    def recompute_generation_probabilities(self, fn):
-        """Re-compute all the generation_probabilities."""
-        assert fn.rule is not None 
-        for t in self.iterate_subnodes(fn, do_bv=True):
-            t.generation_probability = log(t.rule.p) - log(sum([x.p for x in self.rules[t.returntype]]))
-
     def enumerate(self, d=20, nt=None, leaves=True):
         """Enumerate all trees up to depth n.
 

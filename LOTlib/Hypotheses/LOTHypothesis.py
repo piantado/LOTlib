@@ -12,7 +12,7 @@ from LOTlib.Evaluation.EvaluationException import TooBigException, EvaluationExc
 class LOTHypothesis(FunctionHypothesis):
     """A FunctionHypothesis built from a grammar.
 
-    Args:
+    Arguments:
         grammar (LOTLib.Grammar): The grammar for the hypothesis.
         value: The value for the hypothesis.
         f: If specified, we don't recompile the whole function.
@@ -32,7 +32,7 @@ class LOTHypothesis(FunctionHypothesis):
         self.ALPHA = ALPHA
         self.maxnodes = maxnodes
 
-        # save all of our keywords (though we don't need v)
+        # Save all of our keywords (though we don't need v)
         self.__dict__.update(locals())
 
         # If this is not specified, defaultly use grammar
@@ -43,14 +43,14 @@ class LOTHypothesis(FunctionHypothesis):
 
         FunctionHypothesis.__init__(self, value=value, f=f, args=args, **kwargs)
         # Save a proposal function
-        ## TODO: How to handle this in copying?
+        # TODO: How to handle this in copying?
         if proposal_function is None:
             self.proposal_function = RegenerationProposal(self.grammar)
 
         self.likelihood = 0.0
 
     def __call__(self, *args):
-        ## NOTE: This no longer catches all exceptions.
+        # NOTE: This no longer catches all exceptions.
         try:
             return FunctionHypothesis.__call__(self, *args)
         except TypeError as e:
@@ -100,19 +100,43 @@ class LOTHypothesis(FunctionHypothesis):
         ret[0].posterior_score = "<must compute posterior!>" # Catch use of proposal.posterior_score, without posteriors!
         return ret
 
-    def compute_prior(self):
-        """Compute the log of the prior probability."""
+    def compute_prior(self, recompute=None, vectorized=None):
+        """Compute the log of the prior probability.
+
+        Arguments
+        ---------
+        recompute(LOTlib.grammar):
+            If this is a grammar, then we use it to recompute generation
+            probabilities for the sub-nodes in `self.value`.
+        vectorized(LOTlib.grammar):
+            If this is a grammar, we compute vectorized prior.
+
+        """
+        # Point to vectorized version
+        if vectorized:
+            return self.compute_prior_vectorized(vectorized)
+
+        # Re-compute the FunctionNode `self.value` generation probabilities
+        if recompute:
+            self.recompute_generation_probabilities(recompute)
+
+        # Compute this hypothesis prior
         if self.value.count_subnodes() > self.maxnodes:
             self.prior = -Infinity
         else:
-            # compute the prior with either RR or not.
+            # Compute prior with either RR or not.
             self.prior = self.value.log_probability() / self.prior_temperature
 
-        self.posterior_score = self.prior + self.likelihood
-
+        self.update_posterior()
         return self.prior
 
-    #def compute_likelihood(self, data): # called in FunctionHypothesis.compute_likelihood
+    def compute_prior_vectorized(self, grammar):
+        rules = [r for sublist in grammar.rules.values() for r in sublist]
+
+
+        pass
+
+    # Def compute_likelihood(self, data): # called in FunctionHypothesis.compute_likelihood
     def compute_single_likelihood(self, datum):
         """Computes the likelihood of the data
 
@@ -123,3 +147,9 @@ class LOTHypothesis(FunctionHypothesis):
         assert isinstance(datum, FunctionData)
         return log(self.ALPHA * (self(*datum.input) == datum.output)
                    + (1.0-self.ALPHA) / 2.0)
+
+    def recompute_generation_probabilities(self, grammar):
+        """Re-compute all the generation_probabilities."""
+        assert self.value.rule is not None
+        for t in grammar.iterate_subnodes(self.value, do_bv=True):
+            t.generation_probability = log(t.rule.p) - log(sum([x.p for x in grammar.rules[t.returntype]]))
