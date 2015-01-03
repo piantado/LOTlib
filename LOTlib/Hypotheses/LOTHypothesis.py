@@ -1,30 +1,39 @@
 
-from FunctionHypothesis import FunctionHypothesis
 from copy import copy, deepcopy
-from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
-from LOTlib.Miscellaneous import Infinity, lambdaNone, raise_exception
+from math import log
+import numpy as np
 from LOTlib.DataAndObjects import FunctionData
 from LOTlib.Evaluation.Eval import evaluate_expression
-from math import log
 from LOTlib.Evaluation.EvaluationException import TooBigException, EvaluationException
+from LOTlib.Hypotheses.FunctionHypothesis import FunctionHypothesis
+from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
+from LOTlib.Miscellaneous import Infinity, lambdaNone, raise_exception
 
 
 class LOTHypothesis(FunctionHypothesis):
     """A FunctionHypothesis built from a grammar.
 
-    Arguments:
-        grammar (LOTLib.Grammar): The grammar for the hypothesis.
-        value: The value for the hypothesis.
-        f: If specified, we don't recompile the whole function.
-        start: The start symbol for the grammar.
-        ALPHA (float): Parameter for compute_single_likelihood that.
-        maxnodes (int): The maximum amount of nodes that the grammar can have
-        args (list): The arguments to the function.
-        proposal_function: Function that tells the program how to transition from one tree to another
-            (by default, it uses the RegenerationProposal function)
+    Arguments
+    ---------
+    grammar : LOTLib.Grammar
+        The grammar for the hypothesis.
+    value : FunctionNode
+        The value for the hypothesis.
+    f
+        If specified, we don't recompile the whole function.
+    start
+        The start symbol for the grammar.
+    ALPHA : float
+        Parameter for compute_single_likelihood that.
+    maxnodes : int
+        The maximum amount of nodes that the grammar can have
+    args : list
+        The arguments to the function.
+    proposal_function
+        Function that tells the program how to transition from one tree to another
+        (by default, it uses the RegenerationProposal function)
 
     """
-
     def __init__(self, grammar, value=None, f=None, start=None, ALPHA=0.9, maxnodes=25, args=['x'],
                  proposal_function=None, **kwargs):
         self.grammar = grammar
@@ -48,6 +57,7 @@ class LOTHypothesis(FunctionHypothesis):
             self.proposal_function = RegenerationProposal(self.grammar)
 
         self.likelihood = 0.0
+        self.compute_prior_vector()
 
     def __call__(self, *args):
         # NOTE: This no longer catches all exceptions.
@@ -105,10 +115,10 @@ class LOTHypothesis(FunctionHypothesis):
 
         Arguments
         ---------
-        recompute(LOTlib.grammar):
+        recompute : LOTlib.grammar
             If this is a grammar, then we use it to recompute generation
-            probabilities for the sub-nodes in `self.value`.
-        vectorized(LOTlib.grammar):
+            probabilities for the sub-nodes in `self.value`. If left as None, nothing happens.
+        vectorized : LOTlib.grammar
             If this is a grammar, we compute vectorized prior.
 
         """
@@ -118,7 +128,7 @@ class LOTHypothesis(FunctionHypothesis):
 
         # Re-compute the FunctionNode `self.value` generation probabilities
         if recompute:
-            self.recompute_generation_probabilities(recompute)
+            self.value.recompute_generation_probabilities(recompute)
 
         # Compute this hypothesis prior
         if self.value.count_subnodes() > self.maxnodes:
@@ -131,10 +141,25 @@ class LOTHypothesis(FunctionHypothesis):
         return self.prior
 
     def compute_prior_vectorized(self, grammar):
+        grammar_vector = np.log([r.p for sublist in grammar.rules.values() for r in sublist])
+        prior = sum(self.prior_vector * grammar_vector)
+        self.prior = prior
+        return prior
+
+    def compute_prior_vector(self, grammar):
+        """
+        Compute `self.prior_vector` by collecting counts of each rule used to generate `self.value`.
+
+        """
         rules = [r for sublist in grammar.rules.values() for r in sublist]
+        self.prior_vector = [0] * len(rules)
 
-
-        pass
+        # Use vector to collect the counts for each GrammarRule used to generate the FunctionNode
+        # TODO: will `grammar_rules` include self.value??
+        grammar_rules = [fn.added_rule for fn in self.value.subnodes()]
+        for rule in grammar_rules:
+            rule_idx = rules.index(rule)
+            self.prior_vector[rule_idx] += 1
 
     # Def compute_likelihood(self, data): # called in FunctionHypothesis.compute_likelihood
     def compute_single_likelihood(self, datum):
@@ -147,9 +172,3 @@ class LOTHypothesis(FunctionHypothesis):
         assert isinstance(datum, FunctionData)
         return log(self.ALPHA * (self(*datum.input) == datum.output)
                    + (1.0-self.ALPHA) / 2.0)
-
-    def recompute_generation_probabilities(self, grammar):
-        """Re-compute all the generation_probabilities."""
-        assert self.value.rule is not None
-        for t in grammar.iterate_subnodes(self.value, do_bv=True):
-            t.generation_probability = log(t.rule.p) - log(sum([x.p for x in grammar.rules[t.returntype]]))

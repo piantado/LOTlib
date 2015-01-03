@@ -9,12 +9,12 @@ import re
 from copy import copy, deepcopy
 from math import log
 from random import random
+from LOTlib.BVRuleContextManager import BVRuleContextManager
 from LOTlib.Miscellaneous import lambdaTrue, lambdaOne, Infinity
 
 
 # ------------------------------------------------------------------------------------------------------------
 # Helper functions
-# ------------------------------------------------------------------------------------------------------------
 
 def isFunctionNode(x):
     # Just because this is nicer, and allows us to map, etc.
@@ -31,32 +31,36 @@ def cleanFunctionNodeString(x):
 
 # ------------------------------------------------------------------------------------------------------------
 # Handle exceptions when sampling
-# ------------------------------------------------------------------------------------------------------------
 
 class NodeSamplingException(Exception):
-    """
-        Raised when we try to sample a subnode, but nothing has nonzero probability.
-    """
+    """Raised when we try to sample a subnode, but nothing has nonzero probability."""
     pass
 
 
 # ------------------------------------------------------------------------------------------------------------
 # FunctionNode main class
-# ------------------------------------------------------------------------------------------------------------
 
 class FunctionNode(object):
     """FunctionNode main class.
 
     Arguments
-        returntype: The return type of the FunctionNode.
-        name: The name of the function.
-        args: Arguments of the function
-        generation_probability: Unnormalized generation probability.
-        rule: The rule that was used in generating the FunctionNode
-        bv: Stores the actual *rule* that was added (so that we can re-add it when we loop through the tree).
+    ---------
+    returntype : type
+        The return type of the FunctionNode.
+    name : doc?
+        The name of the function.
+    args : doc?
+        Arguments of the function
+    generation_probability : doc?
+        Unnormalized generation probability.
+    rule : doc?
+        The rule that was used in generating the FunctionNode
+    bv : doc?
+        Stores the actual *rule* that was added (so that we can re-add it when we loop through the tree).
 
-    Note:
-        If a node has [ None ] as args, it is treated as a thunk
+    Note
+    ----
+    If a node has [ None ] as args, it is treated as a thunk
 
     """
     def __init__(self, parent, returntype, name, args,
@@ -88,10 +92,13 @@ class FunctionNode(object):
         """Copy a function node.
 
         Arguments
-            shallow: if True, this does not copy the children (self.to points to the same as what we return)
+        ---------
+        shallow : bool
+            if True, this does not copy the children (self.to points to the same as what we return)
 
-        Note:
-            The rule is NOT deeply copied (regardless of shallow)
+        Note
+        ----
+        The rule is NOT deeply copied (regardless of shallow)
 
         """
         fn = FunctionNode(self.parent, self.returntype, self.name, None,
@@ -120,8 +127,9 @@ class FunctionNode(object):
     def is_leaf(self):
         """Returns True if none of the kids are FunctionNodes, meaning this should be considered a "leaf".
 
-        Note:
-            A leaf may be a function, but its args are specified in the grammar.
+        Note
+        ----
+        A leaf may be a function, but its args are specified in the grammar.
 
         """
         return (self.args is None) or all([not isFunctionNode(c) for c in self.args])
@@ -143,14 +151,15 @@ class FunctionNode(object):
     def check_generation_probabilities(self, grammar):
         """Check this node's generation probabilities.
 
-        Note:
-            The can only be called on root -- no bvs allowed unless they are introduced,
-            or else grammar.recompute_generation_probabilities will not work right.
+        Note
+        ----
+        The can only be called on root -- no bvs allowed unless they are introduced, or else
+        grammar.recompute_generation_probabilities will not work right.
 
         """
         # and check the generation probabilities -- that these are set correctly
         gps  = [t.generation_probability for t in self]
-        grammar.recompute_generation_probabilities(self) # re-check these
+        self.recompute_generation_probabilities(grammar) # re-check these
         gps2 = [t.generation_probability for t in self]
         for a,b,n in zip(gps, gps2, self.subnodes()):
             if abs(a-b) > 0.0001:
@@ -165,9 +174,11 @@ class FunctionNode(object):
         This function is subclassed so by BVAdd and BVUse so that those handle other cases
 
         Arguments
-            d: An optional argument that keeps track of how far down the tree we are
-            bv_names: A dictionary keeping track of the names of bound variables (keys = UUIDs,
-                values = names)
+        ---------
+        d : int
+            An optional argument that keeps track of how far down the tree we are
+        bv_names : dict
+            A dictionary keeping track of the names of bound variables (keys = UUIDs, values = names)
 
         """
         # the tree should be represented as the empty set if the function node has no name
@@ -181,6 +192,8 @@ class FunctionNode(object):
             x.extend([a.as_list(d=d+1, bv_names=bv_names) if isFunctionNode(a) else a for a in self.args])
         
         return x
+
+    # --------------------------------------------------------------------------------------------------------
 
     def quickstring(self):
         """A (maybe??) faster string function used for hashing.
@@ -269,15 +282,23 @@ class FunctionNode(object):
 
     def log_probability(self):
         """Compute the log probability of a tree."""
-        return self.generation_probability + sum([x.log_probability() for x in self.argFunctionNodes()])
+        self.recompute_generation_probabilities()
+        Z = sum([x.log_probability() for x in self.argFunctionNodes()])
+        return self.generation_probability + Z
+
+    def recompute_generation_probabilities(self, grammar):
+        """Re-compute all the generation_probabilities."""
+        assert self.rule is not None
+        for t in grammar.iterate_subnodes(self, do_bv=True):
+            Z = log(sum([x.p for x in grammar.rules[t.returntype]]))
+            t.generation_probability = log(t.rule.p) - Z
 
     def subnodes(self):
-        """Return all subnodes -- no iterator.
+        """Return all subnodes -- no iterator. Useful for modifying (doc?)
 
-        Useful for modifying
-
-        Note:
-            If you want iterate using the grammar, use Grammar.iterate_subnodes
+        Note
+        ----
+        If you want iterate using the grammar, use Grammar.iterate_subnodes
 
         """
         return [g for g in self]
@@ -300,9 +321,10 @@ class FunctionNode(object):
     def __iter__(self):
         """Iterater for subnodes.
 
-        Note:
-            This will NOT work if you modify the tree. Then all goes to hell.
-            If the tree must be modified, use self.subnodes().
+        Note
+        ----
+        * This will NOT work if you modify the tree. Then all goes to hell.
+        * If the tree must be modified, use self.subnodes().
 
         """
         yield self
@@ -334,14 +356,15 @@ class FunctionNode(object):
         """The string of terminals (leaves) below the current FunctionNode in the parse tree.
 
         Arguments
-            sep: is the delimiter between terminals. E.g. sep="," => "the,fuzzy,cat"
+        ---------
+        sep : str
+            is the delimiter between terminals. E.g. sep="," => "the,fuzzy,cat"
 
         """
         return sep.join(map(str, self.all_leaves()))
 
     # --------------------------------------------------------------------------------------------------------
     #  Derived functions that build on the above core
-    # --------------------------------------------------------------------------------------------------------
 
     def contains_function(self, x):
         """Checks if the FunctionNode contains x as function below."""
@@ -408,9 +431,10 @@ class FunctionNode(object):
         For instance (lambda x. lambda y . (and (empty? x) y))
         is a (SET (BOOL BOOL)), where in types, (A B) is something that takes an A and returns a B
 
-        Note:
-            If we don't have a function call (as in START) (i.e. self.name == ''), just use the type of
-            what's below
+        Note
+        ----
+        If we don't have a function call (as in START) (i.e. self.name == ''), just use the type of
+        what's below
 
         """
         if self.name == '':
@@ -511,21 +535,23 @@ class FunctionNode(object):
         We do this because there are waay too many unique subtrees to enumerate, and this allows a nice
         variety of structures
 
-        Example:
-            >> prev_((seven_ if cardinality1_(x) else next_(next_(L_(x)))))
-            prev_(WORD)
-            prev_(WORD)
-            prev_((seven_ if cardinality1_(x) else WORD))
-            prev_(WORD)
-            prev_((seven_ if BOOL else next_(next_(L_(SET)))))
-            prev_(WORD)
-            prev_((seven_ if cardinality1_(SET) else next_(WORD)))
-            prev_(WORD)
-            prev_((seven_ if BOOL else next_(WORD)))
-            ...
+        Example
+        -------
+        >> prev_((seven_ if cardinality1_(x) else next_(next_(L_(x)))))
+        prev_(WORD)
+        prev_(WORD)
+        prev_((seven_ if cardinality1_(x) else WORD))
+        prev_(WORD)
+        prev_((seven_ if BOOL else next_(next_(L_(SET)))))
+        prev_(WORD)
+        prev_((seven_ if cardinality1_(SET) else next_(WORD)))
+        prev_(WORD)
+        prev_((seven_ if BOOL else next_(WORD)))
+        ...
 
-        Note:
-            Partial here means that we include nonterminals with probability p
+        Note
+        ----
+        Partial here means that we include nonterminals with probability p
 
         """
         if self.args is None:
@@ -549,7 +575,7 @@ class FunctionNode(object):
     def uniquify_bv(self, remap=None):
         """
         Go through and make each of my uuids on BVUseFunctionNodes unique
-        :return:
+
         """
         from uuid import uuid4
 
@@ -567,11 +593,50 @@ class FunctionNode(object):
         for a in self.argFunctionNodes():
             a.uniquify_bv(remap)
 
+    def iterate_subnodes(self, d=0, predicate=lambdaTrue, do_bv=True, yield_depth=False):
+        """Iterate through all subnodes of node *t*, while updating the added rules (bound variables)
+        so that at each subnode, the grammar is accurate to what it was.
+
+        Arguments
+        ---------
+        t : doc?
+            doc?
+        yield_depth : bool
+            If True, we return (node, depth) instead of node.
+        predicate : function
+            Filter only the ones that match this.
+        do_bv : bool
+            If False, we don't do bound variables (useful for things like counting nodes,
+          instead of having to update the grammar).
+        yield_depth : bool
+            doc?
+
+        Note
+        ----
+        if you DON'T iterate all the way through, you end up acculmulating bv rules so NEVER stop this
+        iteration in the middle!
+
+        TODO
+        ----
+        Make this more elegant -- use BVCM
+
+        """
+        if predicate(self):
+            yield (self, d) if yield_depth else self
+
+        # Define a new context that is the grammar with the rule added.
+        # Then, when we exit, it's still right.
+        with BVRuleContextManager(self, self, recurse_up=False):
+            for a in self.argFunctionNodes():
+                # Pass up anything from below
+                for g in self.iterate_subnodes(a, d=d+1, do_bv=do_bv,
+                                               yield_depth=yield_depth, predicate=predicate):
+                    yield g
 
 
-
-
-
+# ============================================================================================================
+# Other classes
+# ============================================================================================================
 
 class BVAddFunctionNode(FunctionNode):
     """
@@ -586,10 +651,12 @@ class BVAddFunctionNode(FunctionNode):
     def __copy__(self, shallow=False):
         """Copy a function node.
                 
-        Note:
+        Note
+        ----
             The rule is NOT deeply copied (regardless of shallow)
 
-        Arguments:
+        Arguments
+        ---------
             shallow: if True, this does not copy the children (self.to points to the same as what we return)
 
         """
@@ -610,13 +677,14 @@ class BVAddFunctionNode(FunctionNode):
     def as_list(self, d=0, bv_names=None):
         """Returns a list representation of the FunctionNode with function/self.name as the first element.
 
-        Arguments:
-            d: An optional argument that keeps track of how far down the tree we are.
-            bv_names: A dictionary keeping track of the names of bound variables (keys = UUIDs,
-            values = names).
+        Arguments
+        ---------
+        d : int
+            An optional argument that keeps track of how far down the tree we are.
+        bv_names : dict
+            A dictionary keeping track of the names of bound variables (keys = UUIDs, values = names).
 
         """
-        
         # initialize the bv_names variable if it's not defined
         if bv_names is None:
             bv_names = dict()    

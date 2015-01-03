@@ -30,7 +30,7 @@ class Grammar:
         self.__dict__.update(locals())
         self.rules = defaultdict(list)  # A dict from nonterminals to lists of GrammarRules.
         self.rule_count = 0
-        self.bv_count = 0 # How many rules in the grammar introduce bound variables?
+        self.bv_count = 0   # How many rules in the grammar introduce bound variables?
 
     def __str__(self):
         """Display a grammar."""
@@ -141,44 +141,6 @@ class Grammar:
         else:  # must be a terminal
             assert isinstance(x, str), ("*** Terminal must be a string! x="+x)
             return x
-
-    def iterate_subnodes(self, t, d=0, predicate=lambdaTrue, do_bv=True, yield_depth=False):
-        """Iterate through all subnodes of node *t*, while updating the added rules (bound variables) so that
-        at each subnode, the grammar is accurate to what it was.
-
-        Arguments:
-            t (doc?): doc?
-            yield_depth (bool): If True, we return (node, depth) instead of node.
-            predicate (function): Filter only the ones that match this.
-            do_bv (bool): If False, we don't do bound variables (useful for things like counting nodes,
-              instead of having to update the grammar).
-            yield_depth (bool): doc?
-
-        Note:
-            if you DON'T iterate all the way through, you end up acculmulating bv rules so NEVER stop this
-            iteration in the middle!
-
-        TODO:
-            Make this more elegant -- use BVCM
-
-        """
-        if predicate(t):
-            yield (t,d) if yield_depth else t
-            
-        # Define a new context that is the grammar with the rule added. Then, when we exit, it's still right.
-        with BVRuleContextManager(self, t, recurse_up=False):                    
-            for a in t.argFunctionNodes():
-                for g in self.iterate_subnodes(         # pass up anything from below
-                        a, d=d+1, do_bv=do_bv, yield_depth=yield_depth, predicate=predicate):
-                    yield g
-
-    def log_probability(self, fn):
-        """
-        Compute the log probability of this fn, updating its generation_probabilities
-        NOTE: This modifies, but we can pass it a copy!
-        """
-        self.recompute_generation_probabilities(fn)
-        return fn.log_probability()
 
     def enumerate(self, d=20, nt=None, leaves=True):
         """Enumerate all trees up to depth n.
