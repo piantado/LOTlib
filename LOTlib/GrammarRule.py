@@ -3,29 +3,38 @@ from copy import copy
 from LOTlib.Miscellaneous import None2Empty
 from uuid import uuid4
 
+
 class GrammarRule(object):
-    """
-    Represent a rule in the grammar
+    """Represent a rule in the grammar.
+
     Arguments
-        nt (str): the nonterminal
-        name (str): the name of this function
-        to (list<str>): what you expand to (usually a FunctionNode).
-        p (float): unnormalized probability of expansion
-        bv_prefix (?): may be needed for GrammarRules introduced *by* BVGrammarRules, so that when we
-          display them we can map to bv_prefix+depth
+    ---------
+    nt : str
+        the nonterminal
+    name : str
+        the name of this function
+    to : list<str>
+        what you expand to (usually a FunctionNode).
+    p : float
+        unnormalized probability of expansion
+    bv_prefix : ?
+        may be needed for GrammarRules introduced *by* BVGrammarRules, so that when we
+        display them we can map to bv_prefix+depth
 
-    Examples:
-        # A rule where "expansion" is a nonempty list is a real expansion:
-        >> GrammarRule( "EXPR", "plus", ["EXPR", "EXPR"], ...) -> plus(EXPR,EXPR)
-        # A rule where "expansion" is [] is a thunk
-        >> GrammarRule( "EXPR", "plus", [], ...) -> plus()
-        # A rule where "expansion" is [] is a real terminal (non-thunk)
-        >> GrammarRule( "EXPR", "five", None, ...) -> five
-        # A rule where "name" is '' expands without parens:
-        >> GrammarRule( "EXPR", '', "SUBEXPR", ...) -> EXPR->SUBEXPR
+    Examples
+    --------
+    # A rule where "expansion" is a nonempty list is a real expansion:
+    >> GrammarRule( "EXPR", "plus", ["EXPR", "EXPR"], ...) -> plus(EXPR,EXPR)
+    # A rule where "expansion" is [] is a thunk
+    >> GrammarRule( "EXPR", "plus", [], ...) -> plus()
+    # A rule where "expansion" is [] is a real terminal (non-thunk)
+    >> GrammarRule( "EXPR", "five", None, ...) -> five
+    # A rule where "name" is '' expands without parens:
+    >> GrammarRule( "EXPR", '', "SUBEXPR", ...) -> EXPR->SUBEXPR
 
-    Note:
-        The rule id (rid) is very important -- it's what we use expansion determine equality
+    Note
+    ----
+    The rule id (rid) is very important -- it's what we use expansion determine equality
 
     """
     def __init__(self, nt, name, to, p=1.0, bv_prefix=None):
@@ -62,22 +71,30 @@ class GrammarRule(object):
 class BVAddGrammarRule(GrammarRule):
     """
     A kind of GrammarRule that supports introduces a bound variable, as in at a lambda.
+
+    Arguments
+    ---------
+    nt :str
+        the nonterminal
+    name : str
+        the name of this function
+    to : list<str>
+        what you expand to (usually a FunctionNode).
+    rid : ?
+        the rule id number
+    p : float
+        unnormalized probability of expansion
+    bv_type : str
+        return type of the introduced bound variable
+    bv_args : ?
+        what are the args when we use a bv (None is terminals, else a type signature)
+
+    Note
+    ----
+    If we use this, we should have BV (i.e. argument `bv_type` should be specified).
+
     """
     def __init__(self, nt, name, to, p=1.0, bv_prefix="y", bv_type=None, bv_args=None, bv_p=None):
-        """
-        Arguments:
-            nt(str): the nonterminal
-            name(str): the name of this function
-            to(list<str>): what you expand to (usually a FunctionNode).
-            rid(?): the rule id number
-            p(float): unnormalized probability of expansion
-            bv_type(str): return type of the introduced bound variable
-            bv_args(?): what are the args when we use a bv (None is terminals, else a type signature)
-
-        Note:
-            If we use this, we should have BV (i.e. argument `bv_type` should be specified).
-
-        """
         p = float(p)
         self.__dict__.update(locals())
         assert name is 'lambda' # For now, let's assume these must be lambdas.
@@ -107,12 +124,16 @@ class BVAddGrammarRule(GrammarRule):
     def make_FunctionNodeStub(self, grammar, gp, parent):
         """Return a FunctionNode with none of the arguments realized. That's a "stub"
 
-        Arguments:
-            d(int): the current depth
-            gp(float): the generation probability
-            parent(?):
+        Arguments
+        ---------
+        d : int
+            the current depth
+        gp : float
+            the generation probability
+        parent : ?
 
-        Note:
+        Note
+        ----
         * The None's in the next line need to get set elsewhere, since they will depend on the depth and
         other rules
         * It is VERY important to copy to, or else we end up wtih garbage
@@ -128,6 +149,7 @@ class BVUseGrammarRule(GrammarRule):
     and allows you to make y).
 
     Each of these has a unique name via uuid.
+
     """
     def __init__(self, nt, to, p=1.0, bv_prefix=None):
         GrammarRule.__init__(self, nt, 'bv__'+uuid4().hex, to, p, bv_prefix)

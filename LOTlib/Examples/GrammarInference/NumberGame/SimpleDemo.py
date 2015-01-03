@@ -128,7 +128,7 @@ def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
 
 if __name__ == "__main__":
     run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
-        alpha=0.9, enum_d=5, grammar_n=20, cap=20,
+        alpha=0.9, enum_d=5, grammar_n=1000, cap=100,
         print_stuff='grammar_h', plot_type=None,
         pickle_data='save', filename='mix_model_summary.p')
     # run(grammar=complex_grammar, data=toy_2pownp1,

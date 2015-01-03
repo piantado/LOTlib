@@ -8,6 +8,7 @@ from LOTlib.Evaluation.EvaluationException import TooBigException, EvaluationExc
 from LOTlib.Hypotheses.FunctionHypothesis import FunctionHypothesis
 from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
 from LOTlib.Miscellaneous import Infinity, lambdaNone, raise_exception
+from LOTlib.GrammarRule import BVUseGrammarRule
 
 
 class LOTHypothesis(FunctionHypothesis):
@@ -33,6 +34,12 @@ class LOTHypothesis(FunctionHypothesis):
         Function that tells the program how to transition from one tree to another
         (by default, it uses the RegenerationProposal function)
 
+    Attributes
+    ----------
+    grammar_vector : np.ndarray
+        This is a vector of
+    prior_vector : np.ndarray
+
     """
     def __init__(self, grammar, value=None, f=None, start=None, ALPHA=0.9, maxnodes=25, args=['x'],
                  proposal_function=None, **kwargs):
@@ -57,6 +64,7 @@ class LOTHypothesis(FunctionHypothesis):
             self.proposal_function = RegenerationProposal(self.grammar)
 
         self.likelihood = 0.0
+        self.compute_grammar_vector()
         self.compute_prior_vector()
 
     def __call__(self, *args):
@@ -87,7 +95,7 @@ class LOTHypothesis(FunctionHypothesis):
             except Exception as e:
                 print "# Warning: failed to execute evaluate_expression on " + str(self)
                 print "# ", e
-                return (lambda *args: raise_exception(EvaluationException) )
+                return lambda *args: raise_exception(EvaluationException)
 
     def __copy__(self, copy_value=True):
         """Make a deepcopy of everything except grammar (which is the, presumably, static grammar)."""
@@ -110,25 +118,25 @@ class LOTHypothesis(FunctionHypothesis):
         ret[0].posterior_score = "<must compute posterior!>" # Catch use of proposal.posterior_score, without posteriors!
         return ret
 
-    def compute_prior(self, recompute=None, vectorized=None):
+    def compute_prior(self, recompute=False, vectorized=False):
         """Compute the log of the prior probability.
 
         Arguments
         ---------
         recompute : LOTlib.grammar
-            If this is a grammar, then we use it to recompute generation
-            probabilities for the sub-nodes in `self.value`. If left as None, nothing happens.
+            If this is a grammar, then we use it to recompute generation probabilities for the sub-nodes
+            in `self.value`. If True, we use `self.grammar`. If left as None, nothing happens.
         vectorized : LOTlib.grammar
             If this is a grammar, we compute vectorized prior.
 
         """
         # Point to vectorized version
         if vectorized:
-            return self.compute_prior_vectorized(vectorized)
+            return self.compute_prior_vectorized()
 
         # Re-compute the FunctionNode `self.value` generation probabilities
         if recompute:
-            self.value.recompute_generation_probabilities(recompute)
+            self.value.recompute_generation_probabilities(self.grammar)
 
         # Compute this hypothesis prior
         if self.value.count_subnodes() > self.maxnodes:
@@ -140,26 +148,37 @@ class LOTHypothesis(FunctionHypothesis):
         self.update_posterior()
         return self.prior
 
-    def compute_prior_vectorized(self, grammar):
-        grammar_vector = np.log([r.p for sublist in grammar.rules.values() for r in sublist])
-        prior = sum(self.prior_vector * grammar_vector)
+    def compute_prior_vectorized(self):
+        """Compute `self.prior` using `self.prior_vector`."""
+        prior = sum(self.prior_vector * self.grammar_vector)
         self.prior = prior
         return prior
 
-    def compute_prior_vector(self, grammar):
+    def compute_grammar_vector(self):
+        rules = [r for sublist in self.grammar.rules.values() for r in sublist]
+        self.grammar_vector = np.log([r.p for r in rules])
+
+    def compute_prior_vector(self):
         """
         Compute `self.prior_vector` by collecting counts of each rule used to generate `self.value`.
 
+        TODO
+        ----
+        BV rules in vector - do we add these as an extra item to count? or what do we do here..?
+
         """
-        rules = [r for sublist in grammar.rules.values() for r in sublist]
+        rules = [r for sublist in self.grammar.rules.values() for r in sublist]
         self.prior_vector = [0] * len(rules)
 
         # Use vector to collect the counts for each GrammarRule used to generate the FunctionNode
         # TODO: will `grammar_rules` include self.value??
-        grammar_rules = [fn.added_rule for fn in self.value.subnodes()]
+        grammar_rules = [fn.rule for fn in self.value.subnodes()]
         for rule in grammar_rules:
-            rule_idx = rules.index(rule)
-            self.prior_vector[rule_idx] += 1
+            if isinstance(rule, BVUseGrammarRule):
+                pass    # rule_idx = [GET index of rule with same nt as rule]
+            else:
+                rule_idx = rules.index(rule)
+                self.prior_vector[rule_idx] += 1
 
     # Def compute_likelihood(self, data): # called in FunctionHypothesis.compute_likelihood
     def compute_single_likelihood(self, datum):

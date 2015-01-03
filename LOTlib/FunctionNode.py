@@ -289,7 +289,7 @@ class FunctionNode(object):
     def recompute_generation_probabilities(self, grammar):
         """Re-compute all the generation_probabilities."""
         assert self.rule is not None
-        for t in grammar.iterate_subnodes(self, do_bv=True):
+        for t in self.iterate_subnodes(grammar, self, do_bv=True):
             Z = log(sum([x.p for x in grammar.rules[t.returntype]]))
             t.generation_probability = log(t.rule.p) - Z
 
@@ -298,7 +298,7 @@ class FunctionNode(object):
 
         Note
         ----
-        If you want iterate using the grammar, use Grammar.iterate_subnodes
+        If you want iterate using the grammar, use iterate_subnodes
 
         """
         return [g for g in self]
@@ -583,7 +583,8 @@ class FunctionNode(object):
             remap = dict()
 
         if isinstance(self, BVAddFunctionNode):
-            newbv = 'bv__'+uuid4().hex ## TODO: MAKE THIS THE SAME FUNCTION AS USED IN GRAMMAR_RULE
+            # TODO: MAKE THIS THE SAME FUNCTION AS USED IN GRAMMAR_RULE
+            newbv = 'bv__'+uuid4().hex
             if self.added_rule is not None:
                 remap[self.added_rule.name] = newbv
                 self.added_rule.name = newbv
@@ -593,12 +594,14 @@ class FunctionNode(object):
         for a in self.argFunctionNodes():
             a.uniquify_bv(remap)
 
-    def iterate_subnodes(self, d=0, predicate=lambdaTrue, do_bv=True, yield_depth=False):
+    def iterate_subnodes(self, grammar, t, d=0, predicate=lambdaTrue, do_bv=True, yield_depth=False):
         """Iterate through all subnodes of node *t*, while updating the added rules (bound variables)
         so that at each subnode, the grammar is accurate to what it was.
 
         Arguments
         ---------
+        grammar : LOTlib.Grammar
+            This is the grammar we're iterating through
         t : doc?
             doc?
         yield_depth : bool
@@ -621,15 +624,15 @@ class FunctionNode(object):
         Make this more elegant -- use BVCM
 
         """
-        if predicate(self):
-            yield (self, d) if yield_depth else self
+        if predicate(t):
+            yield (t, d) if yield_depth else t
 
         # Define a new context that is the grammar with the rule added.
         # Then, when we exit, it's still right.
-        with BVRuleContextManager(self, self, recurse_up=False):
-            for a in self.argFunctionNodes():
+        with BVRuleContextManager(grammar, t, recurse_up=False):
+            for a in t.argFunctionNodes():
                 # Pass up anything from below
-                for g in self.iterate_subnodes(a, d=d+1, do_bv=do_bv,
+                for g in self.iterate_subnodes(grammar, a, d=d+1, do_bv=do_bv,
                                                yield_depth=yield_depth, predicate=predicate):
                     yield g
 
@@ -653,11 +656,11 @@ class BVAddFunctionNode(FunctionNode):
                 
         Note
         ----
-            The rule is NOT deeply copied (regardless of shallow)
+        The rule is NOT deeply copied (regardless of shallow)
 
         Arguments
         ---------
-            shallow: if True, this does not copy the children (self.to points to the same as what we return)
+        shallow: if True, this does not copy the children (self.to points to the same as what we return)
 
         """
         fn = BVAddFunctionNode(self.parent, self.returntype, self.name, None,

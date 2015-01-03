@@ -1,4 +1,3 @@
-from GrammarRule import GrammarRule
 
 class BVRuleContextManager(object):
     
