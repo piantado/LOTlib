@@ -282,9 +282,7 @@ class FunctionNode(object):
 
     def log_probability(self):
         """Compute the log probability of a tree."""
-        self.recompute_generation_probabilities()
-        Z = sum([x.log_probability() for x in self.argFunctionNodes()])
-        return self.generation_probability + Z
+        return self.generation_probability + sum([x.log_probability() for x in self.argFunctionNodes()])
 
     def recompute_generation_probabilities(self, grammar):
         """Re-compute all the generation_probabilities."""
