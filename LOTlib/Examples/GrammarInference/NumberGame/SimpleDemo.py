@@ -92,7 +92,7 @@ def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
         print '='*100, '\nNumberGameHypotheses:'
         for h in hypotheses:
             print h, h(), h.domain, h.alpha
-    print 'Number of NumberGameHypotheses: ', len(hypotheses)
+        print 'Number of NumberGameHypotheses: ', len(hypotheses)
 
     # --------------------------------------------------------------------------------------------------------
     # Print all GrammarRules in our Grammar, with corresponding value index
@@ -149,7 +149,7 @@ if __name__ == "__main__":
     # --------------------------------------------------------------------------------------------------------
     run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
         alpha=0.9, enum_d=5, grammar_n=1000, cap=100,
-        print_stuff=[], plot_type=None,
+        print_stuff=[], plot_type=None, plot_widget=False,
         pickle_data='save', filename='nonvector_mix_1000iter.p')
 
     # --------------------------------------------------------------------------------------------------------

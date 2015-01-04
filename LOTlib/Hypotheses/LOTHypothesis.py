@@ -118,16 +118,27 @@ class LOTHypothesis(FunctionHypothesis):
         ret[0].posterior_score = "<must compute posterior!>" # Catch use of proposal.posterior_score, without posteriors!
         return ret
 
+    # Def compute_likelihood(self, data): # called in FunctionHypothesis.compute_likelihood
+    def compute_single_likelihood(self, datum):
+        """Computes the likelihood of the data
+
+        The data here is from LOTlib.Data and is of the type FunctionData
+        This assumes binary function data -- maybe it should be a BernoulliLOTHypothesis
+
+        """
+        assert isinstance(datum, FunctionData)
+        return log(self.ALPHA * (self(*datum.input) == datum.output)
+                   + (1.0-self.ALPHA) / 2.0)
+
     def compute_prior(self, recompute=False, vectorized=False):
         """Compute the log of the prior probability.
 
         Arguments
         ---------
-        recompute : LOTlib.grammar
-            If this is a grammar, then we use it to recompute generation probabilities for the sub-nodes
-            in `self.value`. If True, we use `self.grammar`. If left as None, nothing happens.
-        vectorized : LOTlib.grammar
-            If this is a grammar, we compute vectorized prior.
+        recompute : bool
+            If True, we use `self.grammar` to recompute generation probabilities for `self.value`.
+        vectorized : bool
+            If True, we compute vectorized prior.
 
         """
         # Point to vectorized version
@@ -150,12 +161,19 @@ class LOTHypothesis(FunctionHypothesis):
         return self.prior
 
     def compute_prior_vectorized(self):
-        """Compute `self.prior` using `self.prior_vector`."""
-        prior = sum(self.prior_vector * self.grammar_vector)
-        self.prior = prior
-        return prior
+        """
+        Compute `self.prior` using `self.prior_vector`.
+
+        """
+        prior_vector = self.prior_vector * self.grammar_vector
+        self.prior = prior_vector.sum()
+        return self.prior
 
     def set_grammar_vector(self):
+        """
+        Set `self.grammar_vector` -- this is a vector of rule probabilities:  1  x  [# grammar rules]
+
+        """
         rules = [r for sublist in self.grammar.rules.values() for r in sublist]
         self.grammar_vector = np.log([r.p for r in rules])
 
@@ -169,7 +187,7 @@ class LOTHypothesis(FunctionHypothesis):
 
         """
         rules = [r for sublist in self.grammar.rules.values() for r in sublist]
-        self.prior_vector = [0] * len(rules)
+        self.prior_vector = np.array([0] * len(rules))
 
         # Use vector to collect the counts for each GrammarRule used to generate the FunctionNode
         # TODO: will `grammar_rules` include self.value??
@@ -180,15 +198,3 @@ class LOTHypothesis(FunctionHypothesis):
             else:
                 rule_idx = rules.index(rule)
                 self.prior_vector[rule_idx] += 1
-
-    # Def compute_likelihood(self, data): # called in FunctionHypothesis.compute_likelihood
-    def compute_single_likelihood(self, datum):
-        """Computes the likelihood of the data
-
-        The data here is from LOTlib.Data and is of the type FunctionData
-        This assumes binary function data -- maybe it should be a BernoulliLOTHypothesis
-
-        """
-        assert isinstance(datum, FunctionData)
-        return log(self.ALPHA * (self(*datum.input) == datum.output)
-                   + (1.0-self.ALPHA) / 2.0)
