@@ -64,8 +64,8 @@ class LOTHypothesis(FunctionHypothesis):
             self.proposal_function = RegenerationProposal(self.grammar)
 
         self.likelihood = 0.0
-        self.compute_grammar_vector()
-        self.compute_prior_vector()
+        self.set_grammar_vector()
+        self.set_prior_vector()
 
     def __call__(self, *args):
         # NOTE: This no longer catches all exceptions.
@@ -88,7 +88,7 @@ class LOTHypothesis(FunctionHypothesis):
     def compile_function(self):
         """Called in set_value to compile into a function."""
         if self.value.count_nodes() > self.maxnodes:
-            return (lambda *args: raise_exception(TooBigException) )
+            return lambda *args: raise_exception(TooBigException)
         else:
             try:
                 return evaluate_expression(str(self))
@@ -132,10 +132,11 @@ class LOTHypothesis(FunctionHypothesis):
         """
         # Point to vectorized version
         if vectorized:
+            self.set_grammar_vector()
             return self.compute_prior_vectorized()
 
         # Re-compute the FunctionNode `self.value` generation probabilities
-        if recompute:
+        if recompute and not vectorized:
             self.value.recompute_generation_probabilities(self.grammar)
 
         # Compute this hypothesis prior
@@ -154,11 +155,11 @@ class LOTHypothesis(FunctionHypothesis):
         self.prior = prior
         return prior
 
-    def compute_grammar_vector(self):
+    def set_grammar_vector(self):
         rules = [r for sublist in self.grammar.rules.values() for r in sublist]
         self.grammar_vector = np.log([r.p for r in rules])
 
-    def compute_prior_vector(self):
+    def set_prior_vector(self):
         """
         Compute `self.prior_vector` by collecting counts of each rule used to generate `self.value`.
 

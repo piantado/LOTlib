@@ -12,7 +12,8 @@ from Model import *
 
 def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
         alpha=0.99, enum_d=5, grammar_n=10000, skip=10, cap=100,
-        print_stuff='grammar_h', plot_type=None, pickle_data=False, filename=None):
+        print_stuff='grammar_h', plot_type=None, plot_widget=False,
+        pickle_data=False, filename=None):
     """
     Enumerate some NumberGameHypotheses, then use these to sample some GrammarHypotheses over `data`.
 
@@ -34,8 +35,8 @@ def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
         Number of GrammarHypotheses to sample.
     cap(int):
         VectorSummary will collect this many GrammarHypothesis samples.
-    print_stuff(str/bool):
-        What do we print? ['ngh' | 'rules | 'grammar_h' | True | False]
+    print_stuff(bool/str):
+        What do we print? [True | list(str) | 'ngh' | 'rules | 'grammar_h']
     plot_type(str):
         Indicate which type of plot to draw: ['violin' | 'line' | 'MLE' | 'MAP' | None].
     pickle_data(str):
@@ -79,6 +80,12 @@ def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
         hypotheses.append(h)
 
     # --------------------------------------------------------------------------------------------------------
+    # Sample NumberGameHypotheses
+    # h0 = make_h0(grammar=simple_test_grammar, domain=domain, alpha=alpha)
+    # mh_sampler = MHSampler(h0, data[0].input, n)
+    # hypotheses = set([h for h in lot_iter(mh_sampler)])
+
+    # --------------------------------------------------------------------------------------------------------
     # Print all NumberGameHypotheses that were generated
 
     if print_stuff is True or 'ngh' in print_stuff:
@@ -105,14 +112,16 @@ def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
     else:
         grammar_h0 = ParameterHypothesis(grammar, hypotheses, propose_step=.1, propose_n=1)
         mh_grammar_sampler = MHSampler(grammar_h0, data, grammar_n, trace=False)
-        mh_grammar_summary = sample_grammar_hypotheses(mh_grammar_sampler, skip=grammar_n/cap, cap=cap)
+        mh_grammar_summary = sample_grammar_hypotheses(mh_grammar_sampler, skip=skip, cap=cap,
+                                                       print_=bool(print_stuff))
 
     # --------------------------------------------------------------------------------------------------------
     # Plot stuff
 
     if plot_type is not None:
         mh_grammar_summary.plot(plot_type)
-        # return mh_grammar_summary
+        if plot_widget:
+            return mh_grammar_summary
 
     if print_stuff is True or 'grammar_h' in print_stuff:
         mh_grammar_summary.print_top_samples()
@@ -124,29 +133,36 @@ def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
         mh_grammar_summary.pickle_summary(filename=filename)
 
 
-
+# ============================================================================================================
 
 if __name__ == "__main__":
+
+    # --------------------------------------------------------------------------------------------------------
+    # import cProfile
+    # cProfile.run("""run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
+    #                     alpha=0.9, enum_d=5, grammar_n=100, skip=1, cap=100,
+    #                     print_stuff=[], plot_type='violin', pickle_data='save',
+    #                     filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/'+
+    #                     'LOTlib/Examples/GrammarInference/NumberGame/'+
+    #                     'mix_model_summary.p')""", filename="nonvector_mix_100iter.profile")
+
+    # --------------------------------------------------------------------------------------------------------
     run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
         alpha=0.9, enum_d=5, grammar_n=1000, cap=100,
-        print_stuff='grammar_h', plot_type=None,
-        pickle_data='save', filename='mix_model_summary.p')
+        print_stuff=[], plot_type=None,
+        pickle_data='save', filename='nonvector_mix_1000iter.p')
+
+    # --------------------------------------------------------------------------------------------------------
     # run(grammar=complex_grammar, data=toy_2pownp1,
     #     domain=20, alpha=0.99, enum_d=6, grammar_n=10000, cap=1000,
     #     plot_type=None, pickle_data='save')
 
 
 #
-# '''sample NumberGameHypotheses'''
-# h0 = make_h0(grammar=simple_test_grammar, domain=domain, alpha=alpha)
-# mh_sampler = MHSampler(h0, data[0].input, n)
-# hypotheses = set([h for h in lot_iter(mh_sampler)])
-#
 #
 # '''print distribution over power rule:  [prior, likelihood, posterior]'''
 # # vals, posteriors = grammar_h0.rule_distribution(data, 'ipowf_', np.arange(0.1, 5., 0.1))
 # # print_dist(vals, posteriors)
 # #visualize_dist(vals, posteriors, 'union_')
-#
-#
+
 

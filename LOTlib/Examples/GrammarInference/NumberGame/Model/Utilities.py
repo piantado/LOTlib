@@ -1,20 +1,22 @@
-from scipy.io import loadmat
 
+from scipy.io import loadmat
 from LOTlib.DataAndObjects import FunctionData
 from LOTlib.Visualization.MCMCSummary.VectorSummary import *
 
 
-def sample_grammar_hypotheses(sampler, skip, cap):
+def sample_grammar_hypotheses(sampler, skip, cap, print_=False):
     summary = VectorSummary(skip=skip, cap=cap)
-    i = 0
-    print '^*'*60, '\nGenerating GrammarHypothesis Samples\n', '^*'*60
-    for h in summary(sampler):
-        i += 1
-        if i % (sampler.steps/20) == 0:
-            print ['%.3f' % v for v in h.value]
-            print i, '-'*100
-            print h.prior, h.likelihood, h.posterior_score
-
+    if print_:
+        i = 0
+        print '^*'*60, '\nGenerating GrammarHypothesis Samples\n', '^*'*60
+        for h in summary(sampler):
+            i += 1
+            if i % (sampler.steps/20) == 0:
+                print ['%.3f' % v for v in h.value]
+                print i, '-'*100
+                print h.prior, h.likelihood, h.posterior_score
+    else:
+        for h in summary(sampler): pass
     return summary
 
 

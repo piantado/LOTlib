@@ -120,7 +120,7 @@ class GrammarHypothesis(VectorHypothesis):
 
         # Recompute prior for each hypothesis, given new grammar probs
         for h in self.hypotheses:
-            h.compute_prior(recompute=True, vectorized=True)
+            h.compute_prior(recompute=True, vectorized=False)
             h.update_posterior()
 
     # --------------------------------------------------------------------------------------------------------
