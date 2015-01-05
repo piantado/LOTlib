@@ -53,8 +53,8 @@ class GrammarHypothesis(VectorHypothesis):
         self.rules = [r for sublist in grammar.rules.values() for r in sublist]
         if value is None:
             value = [rule.p for rule in self.rules]
-        n = len(value)
-        VectorHypothesis.__init__(self, value=value, n=n, **kwargs)
+        self.n = len(value)
+        VectorHypothesis.__init__(self, value=value, n=self.n, **kwargs)
         self.prior_shape = prior_shape
         self.prior_scale = prior_scale
         if int(self.n / 50) > propose_n:
@@ -162,8 +162,6 @@ class GrammarHypothesis(VectorHypothesis):
             weights = [(post-Z) for post in posteriors]
 
             for o in d.output.keys():
-                C = h()
-                assert C, "Error: hypothesis returned None!!"
                 # probability for yes on output `o` is sum of posteriors for hypos that contain `o`
                 p = logsumexp([w if o in h() else -Infinity for h, w in zip(hypotheses, weights)])
                 p = -1e-10 if p >= 0 else p
@@ -273,7 +271,10 @@ class GrammarHypothesis(VectorHypothesis):
         return zip(*rules) if len(rules) > 0 else [(), ()]
 
     def get_propose_idxs(self):
-        """Get indexes to propose to => only rules with siblings."""
+        """
+        Get indexes to propose to => only rules with siblings.
+
+        """
         proposal_indexes = range(self.n)
         nonterminals = self.grammar.nonterminals()
         for nt in nonterminals:
@@ -283,10 +284,12 @@ class GrammarHypothesis(VectorHypothesis):
         return proposal_indexes
 
     def rule_distribution(self, data, rule_name, vals=np.arange(0, 2, .1)):
-        """Compute posterior values for this grammar, varying specified rule over a set of values."""
+        """
+        Compute posterior values for this grammar, varying specified rule over a set of values.
+
+        """
         idxs, rules = self.get_rules(rule_name=rule_name)
         assert len(idxs) == 1, "\nERROR: More than 1 GrammarRule with this name!\n"
-
         return self.conditional_distribution(data, idxs[0], vals=vals)
 
     # --------------------------------------------------------------------------------------------------------
