@@ -65,7 +65,7 @@ class LOTHypothesis(FunctionHypothesis):
 
         self.likelihood = 0.0
         self.set_grammar_vector()
-        self.set_prior_vector()
+        self.set_rules_vector()
 
     def __call__(self, *args):
         # NOTE: This no longer catches all exceptions.
@@ -165,7 +165,7 @@ class LOTHypothesis(FunctionHypothesis):
         Compute `self.prior` using `self.prior_vector`.
 
         """
-        prior_vector = self.prior_vector * self.grammar_vector
+        prior_vector = self.rules_vector * self.grammar_vector
         self.prior = prior_vector.sum()
         return self.prior
 
@@ -174,27 +174,37 @@ class LOTHypothesis(FunctionHypothesis):
         Set `self.grammar_vector` -- this is a vector of rule probabilities:  1  x  [# grammar rules]
 
         """
-        rules = [r for sublist in self.grammar.rules.values() for r in sublist]
-        self.grammar_vector = np.log([r.p for r in rules])
+        self.grammar_vector = np.log([r.p for r in self.rules])
 
-    def set_prior_vector(self):
+    def set_rules_vector(self):
         """
-        Compute `self.prior_vector` by collecting counts of each rule used to generate `self.value`.
+        Compute `self.rules_vector` by collecting counts of each rule used to generate `self.value`.
 
         TODO
         ----
-        BV rules in vector - do we add these as an extra item to count? or what do we do here..?
+        * BV rules in vector - do we add these as an extra item to count? or what do we do here..?
+        * How does FunctionNode.subnodes() work?
+
+        Note
+        ----
+        `rule_indexes` is a hash table of vector indices -- much less expensive than self.rules.index(rule)
 
         """
-        rules = [r for sublist in self.grammar.rules.values() for r in sublist]
-        self.prior_vector = np.array([0] * len(rules))
+        self.rules = [r for sublist in self.grammar.rules.values() for r in sublist]
+        rule_indexes = {r: i for i, r in enumerate(self.rules)}
+        self.rules_vector = np.zeros(len(self.rules))
 
         # Use vector to collect the counts for each GrammarRule used to generate the FunctionNode
         # TODO: will `grammar_rules` include self.value??
         grammar_rules = [fn.rule for fn in self.value.subnodes()]
         for rule in grammar_rules:
-            if isinstance(rule, BVUseGrammarRule):
-                pass    # rule_idx = [GET index of rule with same nt as rule]
-            else:
-                rule_idx = rules.index(rule)
-                self.prior_vector[rule_idx] += 1
+            # if isinstance(rule, BVUseGrammarRule):
+            #     rule_idx = [maybe get index of rule with same nt as rule]
+            try:
+                rule_idx = rule_indexes[rule]
+                self.rules_vector[rule_idx] += 1
+            except Exception:
+                if isinstance(rule, BVUseGrammarRule):
+                    pass
+                else:
+                    print Exception
