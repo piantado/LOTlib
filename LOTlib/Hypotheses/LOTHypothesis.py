@@ -64,8 +64,7 @@ class LOTHypothesis(FunctionHypothesis):
             self.proposal_function = RegenerationProposal(self.grammar)
 
         self.likelihood = 0.0
-        self.set_grammar_vector()
-        self.set_rules_vector()
+        self.rules_vector = None
 
     def __call__(self, *args):
         # NOTE: This no longer catches all exceptions.
@@ -143,7 +142,6 @@ class LOTHypothesis(FunctionHypothesis):
         """
         # Point to vectorized version
         if vectorized:
-            self.set_grammar_vector()
             return self.compute_prior_vectorized()
 
         # Re-compute the FunctionNode `self.value` generation probabilities
@@ -165,6 +163,10 @@ class LOTHypothesis(FunctionHypothesis):
         Compute `self.prior` using `self.prior_vector`.
 
         """
+        if self.rules_vector is None:
+            self.set_rules_vector()
+        self.set_grammar_vector()
+
         prior_vector = self.rules_vector * self.grammar_vector
         self.prior = prior_vector.sum()
         return self.prior
@@ -187,7 +189,8 @@ class LOTHypothesis(FunctionHypothesis):
 
         Note
         ----
-        `rule_indexes` is a hash table of vector indices -- much less expensive than self.rules.index(rule)
+        `rule_indexes` is a hash table of vector indices -- when collecting rule counts this is much
+        faster than self.rules.index(rule)  [for grammars with many rules, rules.index() is very expensive]
 
         """
         self.rules = [r for sublist in self.grammar.rules.values() for r in sublist]

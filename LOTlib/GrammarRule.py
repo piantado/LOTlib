@@ -74,7 +74,7 @@ class BVAddGrammarRule(GrammarRule):
 
     Arguments
     ---------
-    nt :str
+    nt : str
         the nonterminal
     name : str
         the name of this function

@@ -35,8 +35,8 @@ def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
         Number of GrammarHypotheses to sample.
     cap(int):
         VectorSummary will collect this many GrammarHypothesis samples.
-    print_stuff(bool/str):
-        What do we print? [True | list(str) | 'ngh' | 'rules | 'grammar_h']
+    print_stuff(str/list):
+        What do we print? ['all' | 'ngh' | 'rules | 'grammar_h' | list(str)]
     plot_type(str):
         Indicate which type of plot to draw: ['violin' | 'line' | 'MLE' | 'MAP' | None].
     pickle_data(str):
@@ -88,7 +88,7 @@ def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
     # --------------------------------------------------------------------------------------------------------
     # Print all NumberGameHypotheses that were generated
 
-    if print_stuff is True or 'ngh' in print_stuff:
+    if print_stuff is 'all' or 'ngh' in print_stuff:
         print '='*100, '\nNumberGameHypotheses:'
         for h in hypotheses:
             print h, h(), h.domain, h.alpha
@@ -97,7 +97,7 @@ def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
     # --------------------------------------------------------------------------------------------------------
     # Print all GrammarRules in our Grammar, with corresponding value index
 
-    if print_stuff is True or 'rules' in print_stuff:
+    if print_stuff is 'all' or 'rules' in print_stuff:
         print '='*100, '\nGrammarRules:'
         rules = [r for sublist in grammar.rules.values() for r in sublist]
         for i, r in enumerate(rules):
@@ -123,7 +123,7 @@ def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
         if plot_widget:
             return mh_grammar_summary
 
-    if print_stuff is True or 'grammar_h' in print_stuff:
+    if print_stuff is 'all' or 'grammar_h' in print_stuff:
         mh_grammar_summary.print_top_samples()
 
     # --------------------------------------------------------------------------------------------------------
