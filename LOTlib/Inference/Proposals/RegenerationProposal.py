@@ -75,7 +75,7 @@ class RegenerationProposal(LOTProposal):
                         RP = logplusexp(RP, self.lp_propose(x.args[mismatch_index], y.args[mismatch_index], resampleProbability=resampleProbability, xZ=xZ))
 
                 else: # identical trees -- we could propose to any, so that's just the tree probability below convolved with the resample p
-                    for xi in self.grammar.iterate_subnodes(x):
+                    for xi in x.iterate_subnodes(self.grammar):
                         if xi is not x: # but we already counted ourself (NOTE: Must be "is", not ==)
                             # Here we use grammar.log_probability since the grammar may have changed with bv
                             RP = logplusexp(RP, log(resampleProbability(xi)*1.0) - log(xZ) + self.grammar.log_probability(copy(xi)))

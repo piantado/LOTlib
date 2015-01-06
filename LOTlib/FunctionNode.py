@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-A function node -- a tree part representing a function and its arguments.
+A function node (fn): a tree part representing a function and its arguments.
 
 Also used for PCFG rules, where the arguments are nonterminal symbols.
 
@@ -60,7 +60,7 @@ class FunctionNode(object):
 
     Note
     ----
-    If a node has [ None ] as args, it is treated as a thunk
+    * If a node has [ None ] as args, it is treated as a thunk
 
     """
     def __init__(self, parent, returntype, name, args,
@@ -592,7 +592,7 @@ class FunctionNode(object):
         for a in self.argFunctionNodes():
             a.uniquify_bv(remap)
 
-    def iterate_subnodes(self, grammar, t, d=0, predicate=lambdaTrue, do_bv=True, yield_depth=False):
+    def iterate_subnodes(self, grammar, t=None, d=0, predicate=lambdaTrue, do_bv=True, yield_depth=False):
         """Iterate through all subnodes of node *t*, while updating the added rules (bound variables)
         so that at each subnode, the grammar is accurate to what it was.
 
@@ -605,7 +605,7 @@ class FunctionNode(object):
         yield_depth : bool
             If True, we return (node, depth) instead of node.
         predicate : function
-            Filter only the ones that match this.
+            Filter only the nodes that match this function (i.e. eval (function(fn) == True) on each fn).
         do_bv : bool
             If False, we don't do bound variables (useful for things like counting nodes,
           instead of having to update the grammar).
@@ -622,6 +622,8 @@ class FunctionNode(object):
         Make this more elegant -- use BVCM
 
         """
+        if not t:
+            t = self
         if predicate(t):
             yield (t, d) if yield_depth else t
 

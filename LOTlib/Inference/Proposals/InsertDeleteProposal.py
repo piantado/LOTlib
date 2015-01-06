@@ -79,7 +79,7 @@ class InsertDeleteProposal(LOTProposal):
                 
                 # fix the fact that ni's generation probabilities may be wrong
                 # TODO: MAY NOT BE NEEDED?
-                self.grammar.recompute_generation_probabilities(ni)
+                ni.recompute_generation_probabilities(self.grammar)
                 
                 # and generate the args below
                 for i,a in enumerate(fn.args):
@@ -138,7 +138,7 @@ class InsertDeleteProposal(LOTProposal):
             
             # fix the generation probs
             # TODO: Is this necessary? probably not w/o bound variables
-            self.grammar.recompute_generation_probabilities(ni)
+            ni.recompute_generation_probabilities(self.grammar)
             
             # And compute f/b probs
             newZ = newt.sample_node_normalizer(resampleProbability=isNotBVAddFunctionNode)

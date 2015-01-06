@@ -217,7 +217,7 @@ class GrammarTest(unittest.TestCase):
         for i in range(100):
             X = self.G.generate('START')
             lps  = [x.generation_probability for x in X]
-            self.G.recompute_generation_probabilities(X)
+            X.recompute_generation_probabilities(self.G)
             lps2 = [x.generation_probability for x in X] 
             
             for a,b in zip(lps, lps2):

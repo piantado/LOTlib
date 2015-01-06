@@ -50,7 +50,7 @@ class InfiniteTreeTester(unittest.TestCase):
         # Check that the bv function nodes are of the right type
         # And that we added and removed rules appropriately
         added_rules = [] # just see what we added
-        for ti in self.grammar.iterate_subnodes(t):
+        for ti in t.iterate_subnodes(self.grammar):
             if re.match(r'bv_', ti.name):
                 self.assertTrue(isinstance(ti, BVUseFunctionNode))
 
