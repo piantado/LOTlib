@@ -1,5 +1,5 @@
 
-from copy import copy, deepcopy
+import copy
 from math import log
 import numpy as np
 from LOTlib.DataAndObjects import FunctionData
@@ -99,12 +99,13 @@ class LOTHypothesis(FunctionHypothesis):
     def __copy__(self, copy_value=True):
         """Make a deepcopy of everything except grammar (which is the, presumably, static grammar)."""
         # Since this is inherited, call the constructor on everything, copying what should be copied
-        thecopy = type(self)(self.grammar, value=copy(self.value) if copy_value else self.value, f=self.f, proposal_function=self.proposal_function)
+        thecopy = type(self)(self.grammar, value=copy.copy(self.value) if copy_value else self.value,
+                             f=self.f, proposal_function=self.proposal_function)
 
         # And then then copy the rest
         for k in self.__dict__.keys():
             if k not in ['self', 'grammar', 'value', 'proposal_function', 'f']:
-                thecopy.__dict__[k] = copy(self.__dict__[k])
+                thecopy.__dict__[k] = copy.copy(self.__dict__[k])
 
         return thecopy
 
@@ -185,7 +186,7 @@ class LOTHypothesis(FunctionHypothesis):
         TODO
         ----
         * BV rules in vector - do we add these as an extra item to count? or what do we do here..?
-        * How does FunctionNode.subnodes() work?
+        * Should the fix on the line where we set `grammar_rules` be in FunctionNode instead of here?
 
         Note
         ----
@@ -198,8 +199,8 @@ class LOTHypothesis(FunctionHypothesis):
         self.rules_vector = np.zeros(len(self.rules))
 
         # Use vector to collect the counts for each GrammarRule used to generate the FunctionNode
-        # TODO: will `grammar_rules` include self.value??
-        grammar_rules = [fn.rule for fn in self.value.subnodes()]
+        #  `subnodes()` gives a list starting with 2 duplicate nodes, so skip 1st item of list
+        grammar_rules = [fn.rule for fn in self.value.subnodes()[1:]]
         for rule in grammar_rules:
             # if isinstance(rule, BVUseGrammarRule):
             #     rule_idx = [maybe get index of rule with same nt as rule]
