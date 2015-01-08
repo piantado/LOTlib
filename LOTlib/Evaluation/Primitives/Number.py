@@ -1,8 +1,5 @@
 from LOTlib.Evaluation.Eval import primitive
 
-<<<<<<< HEAD
-@primitive
-=======
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # counting list
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -30,21 +27,20 @@ word_to_number['undef'] = 'U'
 
 prev_hash[None] = None
 
-@LOTlib_primitive
+@primitive
 def next_(w): return next_hash[w]
 
-@LOTlib_primitive
+@primitive
 def prev_(w): return prev_hash[w]
 
-@LOTlib_primitive
+@primitive
 def ifU_(C,X):
     if C:
         return X
     else:
         return 'undef'
 
-@LOTlib_primitive
->>>>>>> 70a7de6bb738796c27c3989c4f18198d231fd98c
+@primitive
 def ends_in_(n, d):
     """Return true if number `n` ends with digit `d`, false otherwise. E.g. ends_in_(427, 7) == True"""
     if (n % 10) == d:
