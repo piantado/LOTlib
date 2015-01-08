@@ -138,6 +138,7 @@ def capture_slaves(outfile=None):
         worker_process(outfile=outfile)
 
 def MPI_done():
+
     assert is_master_process()
 
     # Tell all to exit from this map (Not exit overall)
@@ -165,40 +166,45 @@ def MPI_unorderedmap(f, generator):
         for g in iter(generator):
             yield f(g)
 
-    generator = iter(generator) # just so we can pass in lists
-    running = [False]*size  # which processes are running?
+        raise StopIteration
+    else:
+        generator = iter(generator) # just so we can pass in lists
+        running = [False]*size  # which processes are running?
 
-    gotAllArgs = False
-    try:
-        while (not gotAllArgs) or any(running):
-            for i in xrange(1,size):
-                if comm.Iprobe(source=i, tag=RUN_TAG): # test for a message
+        gotAllArgs = False
+        try:
+            while (not gotAllArgs) or any(running):
+                # print gotAllArgs, running
+                for i in xrange(1,size):
+                    if comm.Iprobe(source=i, tag=RUN_TAG): # test for a message
 
-                    ri, r = comm.recv(source=i, tag=RUN_TAG) # get the message
+                        ri, r = comm.recv(source=i, tag=RUN_TAG) # get the message
 
-                    yield r
+                        yield r
 
-                    running[i] = False # so we send it a new job
+                        running[i] = False # so we send it a new job
 
-                if (not running[i]) and not gotAllArgs: # give it a job
+                    if (not running[i]) and not gotAllArgs: # give it a job
 
-                    # Get the next argument
-                    try:
-                        arg = generator.next()
-                    except StopIteration:
-                        gotAllArgs = True
+                        # Get the next argument
+                        try:
+                            arg = generator.next()
 
-                    #print "# Sending ", arg, " to ", i
-                    comm.send([f, None, arg], dest=i, tag=RUN_TAG)
+                            #print "# Sending ", arg, " to ", i
+                            comm.send([f, None, arg], dest=i, tag=RUN_TAG)
 
-                    running[i] = True
-    except Exception as e:
-        print >>sys.stderr, "EXCEPTION IN MPI_unorderedmap. Shutting down", e
-        MPI_done()  # shut down everyone (on, e.g., interrupt, etc)
-        raise
+                            running[i] = True
+
+                        except StopIteration:
+                            gotAllArgs = True
+
+        except Exception as e:
+            print >>sys.stderr, "EXCEPTION IN MPI_unorderedmap. Shutting down", e
+            MPI_done()  # shut down everyone (on, e.g., interrupt, etc)
+            raise
 
 
-
+        raise StopIteration
 
 
 
@@ -266,6 +272,7 @@ def MPI_map(f, args, random_order=True, outfile=None, mpi_done=False, yieldfrom=
 
         # if we don't need the slave processes anymore
         if mpi_done: MPI_done()
+
     except Exception as e:
         print >>sys.stderr, "EXCEPTION IN MPI_map. Shutting down", e
         MPI_done() # shut down everyone (on, e.g., interrupt, etc)

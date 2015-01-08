@@ -18,7 +18,8 @@ grammar.add_rule('BOOL', 'False',   None, 1.0/2.)
 
 # note that this can take basically any types for return values
 grammar.add_rule('WORD', 'if_',    ['BOOL', 'WORD', 'WORD'], 0.5)
-grammar.add_rule('WORD', 'ifU_',    ['BOOL', 'WORD'], 0.5)  # if returning undef if condition not met
+grammar.add_rule('WORD', 'if_',    ['BOOL', 'WORD', q('undef')], 0.5)
+# grammar.add_rule('WORD', 'ifU_',    ['BOOL', 'WORD'], 0.5)  # if returning undef if condition not met
 
 grammar.add_rule('BOOL', 'cardinality1_',    ['SET'], 1.0)
 grammar.add_rule('BOOL', 'cardinality2_',    ['SET'], 1.0)

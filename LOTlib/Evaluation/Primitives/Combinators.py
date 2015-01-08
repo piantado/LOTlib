@@ -1,4 +1,4 @@
-from LOTlib.Evaluation.Eval import LOTlib_primitive
+from LOTlib.Evaluation.Eval import primitive
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Combinators -- all curried
@@ -7,7 +7,7 @@ from LOTlib.Evaluation.Eval import LOTlib_primitive
 #       which will get evaled in python
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-@LOTlib_primitive
+@primitive
 def I_(x):
     """I combinator - identity function.
 
@@ -18,7 +18,7 @@ def I_(x):
     """
     return x
 
-@LOTlib_primitive
+@primitive
 def K_(x):
     """K combinator - one-argument constant function.
 
@@ -29,7 +29,7 @@ def K_(x):
     """
     return lambda y: x
 
-@LOTlib_primitive
+@primitive
 def S_(x):
     """Substitution operator - magic stuff.
 

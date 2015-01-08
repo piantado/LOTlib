@@ -1,6 +1,6 @@
-from LOTlib.Evaluation.Eval import LOTlib_primitive
+from LOTlib.Evaluation.Eval import primitive
 
-@LOTlib_primitive
+@primitive
 def ends_in_(n, d):
     """Return true if number `n` ends with digit `d`, false otherwise. E.g. ends_in_(427, 7) == True"""
     if (n % 10) == d:
@@ -8,7 +8,7 @@ def ends_in_(n, d):
     else:
         return False
 
-@LOTlib_primitive
+@primitive
 def isprime_(n):
     """Is `n` a prime number?"""
     for a in range(2, int(n**0.5)+1):
@@ -16,7 +16,7 @@ def isprime_(n):
             return False
     return True
 
-@LOTlib_primitive
+@primitive
 def primes_in_set_(A):
     def isPrime(a):
         for j in range(2, int(a**0.5)+1):
@@ -26,7 +26,7 @@ def primes_in_set_(A):
 
     return [n for n in A if isPrime(n)]
 
-@LOTlib_primitive
+@primitive
 def in_domain_(A, domain):
     return [n for n in A if (n <= domain)]
 

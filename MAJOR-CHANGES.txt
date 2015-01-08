@@ -1,3 +1,5 @@
+Jan 7 2014
+	- Changed @LOTlib_primitive to @primitive
 Dec 28 2014        
         - Removed resample_p -- now you must specify a custom function in FunctionNode (resampleProbability). Removed in GrammarRule too. 
 	- Changed impossible proposals to raise a ProposalFailedException

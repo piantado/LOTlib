@@ -1,17 +1,17 @@
-from LOTlib.Evaluation.Eval import LOTlib_primitive
+from LOTlib.Evaluation.Eval import primitive
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # For language / semantics
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-@LOTlib_primitive
+@primitive
 def presup_(a,b):
     if a: return b
     else:
         if b: return "undefT" # distinguish these so that we can get presup out
         else: return "undefF"
 
-@LOTlib_primitive
+@primitive
 def is_undef_(x):
     return is_undef(x)
 
@@ -21,7 +21,7 @@ def is_undef(x):
     else:
         return (x is None) or (x =="undefT") or (x == "undefF") or (x == "undef")
 
-@LOTlib_primitive
+@primitive
 def collapse_undef(x):
     """
         Change undefT->True and undefF->False

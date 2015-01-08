@@ -1,28 +1,28 @@
-from LOTlib.Evaluation.Eval import LOTlib_primitive
+from LOTlib.Evaluation.Eval import primitive
 from LOTlib.Miscellaneous import Infinity
 from math import isnan, isinf
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Set-theoretic primitives
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-@LOTlib_primitive
+@primitive
 def set_(*args): return set(args)
 
-@LOTlib_primitive
+@primitive
 def set_add_(x,s):
     s.add(x)
     return s
 
-@LOTlib_primitive
+@primitive
 def union_(A,B): return A.union(B)
 
-@LOTlib_primitive
+@primitive
 def intersection_(A,B): return A.intersection(B)
 
-@LOTlib_primitive
+@primitive
 def setdifference_(A,B): return A.difference(B)
 
-@LOTlib_primitive
+@primitive
 def select_(A): # choose an element, but don't remove it
 
     try: # quick selecting without copying
@@ -36,55 +36,59 @@ def select_(A): # choose an element, but don't remove it
         #return set([x]) # but return a set
     #else: return set() # empty set
 
+
+@primitive
+def issubset_(A, B): return A.issubset(B)
+
 from random import sample as random_sample
-@LOTlib_primitive
+@primitive
 def sample_unique_(S):
     return random_sample(S,1)[0]
 
 from random import choice as random_choice
-@LOTlib_primitive
+@primitive
 def sample_(S):
     if len(S) == 0: return set()
     else:           return random_choice(list(S))
 
 
-@LOTlib_primitive
+@primitive
 def exhaustive_(A,B): return coextensive(A,B)
 
-@LOTlib_primitive
+@primitive
 def coextensive_(A,B): return coextensive(A,B)
 def coextensive(A,B): # are the two sets coextensive?
     #print A,B
     return (A.issubset(B) and B.issubset(A))
 
-@LOTlib_primitive
+@primitive
 def equal_(A,B): return (A == B)
 
-@LOTlib_primitive
+@primitive
 def equal_word_(A,B): return (A == B)
 
-@LOTlib_primitive
+@primitive
 def empty_(A): return (len(A)==0)
 
-@LOTlib_primitive
+@primitive
 def nonempty_(A): return (len(A) > 0)
 
-@LOTlib_primitive
+@primitive
 def cardinality1_(A): return (len(A)==1)
 
-@LOTlib_primitive
+@primitive
 def cardinality2_(A): return (len(A)==2)
 
-@LOTlib_primitive
+@primitive
 def cardinality3_(A): return (len(A)==3)
 
-@LOTlib_primitive
+@primitive
 def cardinality4_(A): return (len(A)==4)
 
-@LOTlib_primitive
+@primitive
 def cardinality5_(A): return (len(A)==5)
 
-@LOTlib_primitive
+@primitive
 def cardinality_(A): return len(A)
 
 # returns cardinalities of sets and otherwise numbers -- for duck typing sets/ints
@@ -92,24 +96,24 @@ def cardify(x):
     if isinstance(x, set): return len(x)
     else: return x
 
-@LOTlib_primitive
+@primitive
 def cardinalityeq_(A,B): return cardify(A) == cardify(B)
 
-@LOTlib_primitive
+@primitive
 def cardinalitygt_(A,B): return cardify(A) > cardify(B)
 
-@LOTlib_primitive
+@primitive
 def cardinalitylt_(A,B): return cardify(A) > cardify(B)
 
-@LOTlib_primitive
+@primitive
 def subset_(A,B):
     return A.issubset(B)
 
-@LOTlib_primitive
+@primitive
 def is_in_(x,S):
     return (x in S)
 
-@LOTlib_primitive
+@primitive
 def diff_(S, p):
     """
     takes a set and an element of that set and
@@ -117,7 +121,7 @@ def diff_(S, p):
     """
     return S.difference(set(p))
 
-@LOTlib_primitive
+@primitive
 def range_set_(x, y, bound=Infinity):
     if y < x or y-x > bound or isnan(x) or isnan(y) or isinf(x) or isinf(y):
         return set()

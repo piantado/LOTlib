@@ -1,4 +1,4 @@
-from LOTlib.Evaluation.Eval import LOTlib_primitive
+from LOTlib.Evaluation.Eval import primitive
 from LOTlib.Miscellaneous import flip, Infinity
 import numpy
 
@@ -6,11 +6,11 @@ import numpy
 # Stochastic Primitives
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-@LOTlib_primitive
+@primitive
 def flip_(p=0.5):
     return flip(p)
 
-@LOTlib_primitive
+@primitive
 def binomial_(n, p):
     if 0 < n < Infinity and 0. <= p <= 1 and (isinstance(n, int) or n.is_integer()):
         return numpy.random.binomial(int(n), p)
