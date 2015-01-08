@@ -2,6 +2,7 @@
 import pickle
 from LOTlib import lot_iter
 
+
 class MCMCSummary:
     """Superclass for collecting, computing, and displaying summary statistics from model runs.
 
@@ -40,6 +41,8 @@ class MCMCSummary:
         This allows us to make a pipeline. See Example in main docstring: '# Or as a generator...'.
 
         """
+        if hasattr(generator, 'data'):
+            self.data = generator.data
         for sample in lot_iter(generator):
             self.add(sample)
             yield sample

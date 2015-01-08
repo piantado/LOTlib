@@ -15,7 +15,6 @@ import numpy
 import sys
 import LOTlib
 from LOTlib import lot_iter
-from LOTlib.MCMCSummary.TopN import TopN
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Miscellaneous import q, display_option_summary, qq
 from LOTlib.MPI.MPI_map import MPI_unorderedmap, is_master_process
@@ -23,6 +22,7 @@ from LOTlib.Examples.Number.Model import *
 
 ## Parse command line options:
 from optparse import OptionParser
+from LOTlib.Visualization.MCMCSummary import TopN
 
 parser = OptionParser()
 parser.add_option("--out",

@@ -51,6 +51,9 @@ class GrammarHypothesis(VectorHypothesis):
         self.propose_idxs = self.get_propose_idxs()
         self.prior = self.compute_prior()
 
+    # --------------------------------------------------------------------------------------------------------
+    # MCMC-Related methods
+
     def propose(self):
         """Propose a new GrammarHypothesis; used to propose new samples with methods like MH.
 
@@ -70,6 +73,18 @@ class GrammarHypothesis(VectorHypothesis):
 
         c.set_value(c.value)
         return c, 0.0
+
+    def __copy__(self):
+        """Make a shallow copy of this GrammarHypothesis."""
+        return GrammarHypothesis(
+            copy.copy(self.grammar), self.hypotheses,
+            value=copy.copy(self.value), n=self.n, proposal=copy.copy(self.proposal),
+            prior_shape=self.prior_shape, prior_scale=self.prior_scale,
+            propose_n=self.propose_n, propose_step=self.propose_step
+        )
+
+    # --------------------------------------------------------------------------------------------------------
+    # Bayesian inference
 
     def compute_prior(self):
         shape = self.prior_shape
@@ -120,12 +135,76 @@ class GrammarHypothesis(VectorHypothesis):
             self.update_posterior()
         return likelihood
 
-    def rule_distribution(self, data, rule_name, vals=np.arange(0, 2, .1)):
-        """Compute posterior values for this grammar, varying specified rule over a set of values."""
-        idxs, rules = self.get_rules(rule_name=rule_name)
-        assert len(idxs) == 1, "\nERROR: More than 1 GrammarRule with this name!\n"
+    # --------------------------------------------------------------------------------------------------------
+    # p (y in C | H)  where H is our hypothesis space
+    #
+    # Note:
+    #   this is NOT the same as compute_likelihood - that is a generative model, this is determining if
+    #   input would be assessed as part of our concept
+    #
 
-        return self.conditional_distribution(data, idxs[0], vals=vals)
+    def in_concept_mle(self, domain):
+        """
+        p(y in C | h_mle)   where h_mle is the max likelihood hypothesis
+
+        """
+        h_mle = self.get_top_hypotheses(n=1, key=(lambda x: x.likelihood))[0]
+        C = h_mle()
+        likelihoods = {}
+        for y in domain:
+            if y in C:
+                likelihoods[y] = 1.
+            else:
+                likelihoods[y] = (h_mle.alpha - 1)
+        return likelihoods
+
+    def in_concept_map(self, domain):
+        """
+        p(y in C | h_map)   where h_map is the max a posteriori hypothesis
+
+        """
+        h_map = self.get_top_hypotheses(n=1, key=(lambda x: x.posterior_score))[0]
+        C = h_map()
+        likelihoods = {}
+        for y in domain:
+            if y in C:
+                likelihoods[y] = 1.
+            else:
+                likelihoods[y] = (h_map.alpha - 1)
+        return likelihoods
+
+    def in_concept_avg(self, domain):
+        """
+        p(y in C | `self.hypotheses`)
+
+        for each hypothesis h, if y in C_h, accumulated w_h where w is the weight of a hypothesis,
+        determined by the hypothesis's posterior score p(h | y)
+
+        ==> This is the weighted bayesian model averaging described in (Murphy, 2007)
+
+        TODO:
+          * Better docs here
+          * Is the weighted posterior thing right?
+
+        """
+        probs_in_c = {}
+
+        # TODO is this right ?????????????
+        for y in domain:
+            p_in_concept = 0
+            Z = logsumexp([h.posterior_score for h in self.hypotheses])
+
+            for h in self.hypotheses:
+                C = h()
+                w = h.posterior_score - Z
+                if y in C:
+                    p_in_concept += exp(w)
+            probs_in_c[y] = p_in_concept
+
+        return probs_in_c
+
+    # --------------------------------------------------------------------------------------------------------
+    # Value vector / GrammarRule methods
 
     def set_value(self, value):
         """Set value and grammar rules for this hypothesis."""
@@ -140,6 +219,7 @@ class GrammarHypothesis(VectorHypothesis):
             # re-set the tree generation_probabilities
             self.grammar.recompute_generation_probabilities(h.value)
             h.compute_prior()
+            h.update_posterior()
 
     def get_rules(self, rule_name=False, rule_nt=False, rule_to=False):
         """Get all GrammarRules associated with this rule name, 'nt' type, and/or 'to' types.
@@ -174,19 +254,20 @@ class GrammarHypothesis(VectorHypothesis):
                 proposal_indexes.remove(idxs[0])
         return proposal_indexes
 
-    def __copy__(self):
-        """Make a shallow copy of this GrammarHypothesis."""
-        return GrammarHypothesis(
-            copy.copy(self.grammar), self.hypotheses,
-            value=copy.copy(self.value), n=self.n, proposal=copy.copy(self.proposal),
-            prior_shape=self.prior_shape, prior_scale=self.prior_scale,
-            propose_n=self.propose_n, propose_step=self.propose_step
-        )
+    def rule_distribution(self, data, rule_name, vals=np.arange(0, 2, .1)):
+        """Compute posterior values for this grammar, varying specified rule over a set of values."""
+        idxs, rules = self.get_rules(rule_name=rule_name)
+        assert len(idxs) == 1, "\nERROR: More than 1 GrammarRule with this name!\n"
 
-    def get_top_hypotheses(self, n=10):
+        return self.conditional_distribution(data, idxs[0], vals=vals)
+
+    # --------------------------------------------------------------------------------------------------------
+    # Top hypotheses
+
+    def get_top_hypotheses(self, n=10, key=(lambda x: x.posterior_score)):
         """Return the best `n` hypotheses from `self.hypotheses`."""
         hypotheses = self.hypotheses
-        sorted_hypos = sorted(hypotheses, key=lambda x: x.posterior_score)
+        sorted_hypos = sorted(hypotheses, key=key)
         return sorted_hypos[-n:]
 
     def print_top_hypotheses(self, n=10):
