@@ -4,6 +4,7 @@ A simple demo of inference with GrammarHypothesis, VectorSummary, NumberGameHypo
 """
 import pickle
 from LOTlib.Hypotheses.GrammarHypothesis import GrammarHypothesis
+from LOTlib.Hypotheses.GrammarHypothesisVectorized import GrammarHypothesisVectorized
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Examples.NumberGame.JoshModel.Model import *
 from LOTlib.Examples.NumberGame.NewVersion.Model import *
@@ -64,10 +65,10 @@ def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
         ParameterHypothesis = ShallowGrammarHypothesis
         DomainHypothesis = JoshConceptsHypothesis
     elif josh is 'lot':
-        ParameterHypothesis = GrammarHypothesis
+        ParameterHypothesis = GrammarHypothesisVectorized
         DomainHypothesis = JoshConceptsHypothesis
     else:
-        ParameterHypothesis = GrammarHypothesis
+        ParameterHypothesis = GrammarHypothesisVectorized
         DomainHypothesis = NumberGameHypothesis
 
     # --------------------------------------------------------------------------------------------------------
@@ -158,15 +159,15 @@ if __name__ == "__main__":
     # --------------------------------------------------------------------------------------------------------
     run(grammar=complex_grammar, data=toy_npow2p1, domain=20,
         alpha=0.9, enum_d=6, grammar_n=1000, skip=10, cap=100,
-        print_stuff='grammar_h', plot_type=[], pickle_data='save',
-        filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference' +
-                 '/NumberGame/out/p/vector_complex_npow2p1_1000.p')
+        print_stuff='grammar_h rules', plot_type=[], pickle_data='save',
+        filename='/home/eric/Documents/LOTlib/LOTlib/Examples/GrammarInference/NumberGame' +
+                 '/out/p/1_13/vector_complex_npow2p1_1000.p')
 
     # import cProfile
     # cProfile.run("""run(grammar=complex_grammar, data=toy_npow2p1, domain=20,
     #                     alpha=0.9, enum_d=6, grammar_n=1000, skip=10, cap=100,
-    #                     print_stuff='grammar_h', plot_type=[], pickle_data=False)""",
-    #              filename="out/profile/vector_complex_npow2p1_1000.profile")
+    #                     print_stuff=[], plot_type=[], pickle_data=False)""",
+    #              filename="out/p/1_13/vector_complex_npow2p1_1000.profile")
 
     # --------------------------------------------------------------------------------------------------------
 
