@@ -1,4 +1,4 @@
-from LOTlib.Evaluation.Eval import LOTlib_primitive
+from LOTlib.Evaluation.Eval import primitive
 from LOTlib.Miscellaneous import raise_exception
 from LOTlib.Evaluation.EvaluationException import RecursionDepthException
 
@@ -51,50 +51,50 @@ def Ystar(*l):
 # Lambda calculus & Scheme
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-@LOTlib_primitive
+@primitive
 def lambda_(f,args):
     f.args = args
     return f
 
-@LOTlib_primitive
+@primitive
 def map_(f,A):
     return [f(a) for a in A]
 
-@LOTlib_primitive
+@primitive
 def apply_(f,*args):
     return f(*args)
 
-@LOTlib_primitive
+@primitive
 def cons_(x,y):
     return [x,y]
 
-@LOTlib_primitive
+@primitive
 def cdr_(x):
     try:    return x[1:]
     except IndexError: return []
 
 rest_  = cdr_
 
-@LOTlib_primitive
+@primitive
 def car_(x):
     try:    return x[0]
     except IndexError: return []
 
 first_ = car_
 
-@LOTlib_primitive
+@primitive
 def filter_(f,x):
     return filter(f,x)
 
-@LOTlib_primitive
+@primitive
 def filterset_(f,x):
     return set(filter(f,x))
 
-@LOTlib_primitive
+@primitive
 def mapset_(f,A):
     return {f(a) for a in A}
 
-@LOTlib_primitive
+@primitive
 def Ystar_(*args):
     return Ystar(*args)
 

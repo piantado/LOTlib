@@ -143,7 +143,7 @@ class InverseInlineProposal(LOTProposal):
             # to go forward, you choose a node, a rule, and an argument
             f = np + (-log(len(ir))) + lp_sample_equal_to(n, argval, resampleProbability=arg_predicate)
             newZ = newt.sample_node_normalizer(self.can_inline_at)
-            b = (log(arg_predicate(n)*1.0) - log(newZ))
+            b = (log(self.can_inline_at(n)*1.0) - log(newZ))
             
         else: # An inlining move
             try:
@@ -169,10 +169,11 @@ class InverseInlineProposal(LOTProposal):
             f = np
 
             # choose n, choose a, choose the rule
-            fargvalp = lambda z: (z.returntype == argval.returntype) and self.is_valid_argument(newn, z)
+            arg_predicate = lambda z: (z.returntype == argval.returntype) and self.is_valid_argument(newn, z)
             new_nZ = newt.sample_node_normalizer(self.can_abstract_at) # prob of choosing n
-            argvalp = lp_sample_equal_to(newn, argval, resampleProbability=fargvalp)
-            b = (log(fargvalp(newn)) - log(new_nZ)) + argvalp + (-log(len(ir)))
+            argvalp = lp_sample_equal_to(newn, argval, resampleProbability=arg_predicate)
+            assert len(ir)>0
+            b = (log(self.can_abstract_at(newn)) - log(new_nZ)) + argvalp + (-log(len(ir)))
         
         ## and fix the generation probabilites, because otherwise they are ruined by all the mangling above
         newt.recompute_generation_probabilities(self.grammar)

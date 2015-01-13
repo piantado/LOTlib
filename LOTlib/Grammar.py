@@ -190,9 +190,11 @@ class Grammar:
         else:
             # Note: can NOT use filter here, or else it doesn't include added rules. No sorting either!
             for r in self.rules[nt]:
+
                 # No good since it won't be deep enough
                 if self.is_terminal_rule(r):
                     continue
+
 
                 fn = r.make_FunctionNodeStub(self, (log(r.p) - Z), None)
 
@@ -202,6 +204,7 @@ class Grammar:
 
                 # The depths of each kid
                 for cd in lazyproduct(map(child_i_depths, xrange(len(fn.args))), child_i_depths):
+
                     # One must be equal to d-1
                     # TODO: can be made more efficient via permutations. Also can skip terminals in args.
                     if max(cd) < d-1:

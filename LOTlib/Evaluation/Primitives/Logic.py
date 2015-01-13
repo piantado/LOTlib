@@ -1,4 +1,4 @@
-from LOTlib.Evaluation.Eval import LOTlib_primitive
+from LOTlib.Evaluation.Eval import primitive
 
 import itertools
 
@@ -6,103 +6,103 @@ import itertools
 # Basic logic
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-@LOTlib_primitive
+@primitive
 def id_(A): return A # an identity function
 
-@LOTlib_primitive
+@primitive
 def and_(A,B): return (A and B)
 
-@LOTlib_primitive
+@primitive
 def AandnotB_(A,B): return (A and (not B))
 
-@LOTlib_primitive
+@primitive
 def notAandB_(A,B): return ((not A) and B)
 
-@LOTlib_primitive
+@primitive
 def AornotB_(A,B): return (A or (not B))
 
-@LOTlib_primitive
+@primitive
 def A_(A,B): return A
 
-@LOTlib_primitive
+@primitive
 def notA_(A,B): return not A
 
-@LOTlib_primitive
+@primitive
 def B_(A,B): return B
 
-@LOTlib_primitive
+@primitive
 def notB_(A,B): return not B
 
-@LOTlib_primitive
+@primitive
 def nand_(A,B): return not (A and B)
 
-@LOTlib_primitive
+@primitive
 def or_(A,B): return (A or B)
 
-@LOTlib_primitive
+@primitive
 def nor_(A,B): return not (A or B)
 
-@LOTlib_primitive
+@primitive
 def xor_(A,B): return (A and (not B)) or ((not A) and B)
 
-@LOTlib_primitive
+@primitive
 def not_(A): return (not A)
 
-@LOTlib_primitive
+@primitive
 def implies_(A,B): return (A or (not B))
 
-@LOTlib_primitive
+@primitive
 def iff_(A,B): return ((A and B) or ((not A) and (not B)))
 
-@LOTlib_primitive
+@primitive
 def if_(C,X,Y):
     if C: return X
     else: return Y
 
-@LOTlib_primitive
+@primitive
 def gt_(x,y): return x>y
 
-@LOTlib_primitive
+@primitive
 def gte_(x,y): return x>=y
 
-@LOTlib_primitive
+@primitive
 def lt_(x,y): return x<y
 
-@LOTlib_primitive
+@primitive
 def lte_(x,y): return x<=y
 
-@LOTlib_primitive
+@primitive
 def eq_(x,y): return x==y
 
-@LOTlib_primitive
+@primitive
 def zero_(x,y): return x==0.0
 
 
-@LOTlib_primitive
+@primitive
 def streq_(x,y): return str(x)==str(y)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Quantification
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-@LOTlib_primitive
+@primitive
 def not_exists_(F,S): return not exists_(F,S)
 
-@LOTlib_primitive
+@primitive
 def exists_(F,S): return exists(F,S)
 def exists(F,S):
     return any(itertools.imap(F,S)) # This appears to be faster than writing it ourself
 
-@LOTlib_primitive
+@primitive
 def not_forall_(F,S): return not forall(F,S)
 
-@LOTlib_primitive
+@primitive
 def forall_(F,S): return forall(F,S)
 
 def forall(F,S):
     return all(itertools.imap(F,S))
 
-@LOTlib_primitive
+@primitive
 def iota_(F,S):
     """
         The unique F in S. If none, or not unique, return None

@@ -12,8 +12,8 @@ import sys
 # LOCAL_PRIMITIVE_OPS = 0
 # GLOBAL_PRIMITIVE_OPS = 0
 
-def LOTlib_primitive(fn):
-    """A decorator for basic primitives that increments our counters."""
+def primitive(fn):
+    """A decocator for basic primitives that increments our counters. Used to be known as @LOTlib_primitive"""
 
     """
     def inside(*args, **kwargs):

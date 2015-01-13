@@ -55,6 +55,9 @@ class PartitionMCMC(MultipleChainMCMC):
         # Take each partition, which doesn't have leaves, and generate leaves, setting
         # it to a random generation (fill in the leaves with random hypotheses)
         for p in partitions:
+
+            print "# Partition:", p
+
             for n in p.subnodes():
                 # set to not resample these
                 n.resample_p = 0.0
@@ -63,6 +66,14 @@ class PartitionMCMC(MultipleChainMCMC):
                 for i, a in enumerate(n.args):
                     if grammar.is_nonterminal(a):
                         n.args[i] = grammar.generate(a)
+
+
+
+
+
+
+
+
 
         # initialize each chain
         MultipleChainMCMC.__init__(self, lambda: None, data, steps=steps, nchains=len(partitions), **kwargs)

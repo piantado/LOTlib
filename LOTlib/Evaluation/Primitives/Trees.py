@@ -1,4 +1,4 @@
-from LOTlib.Evaluation.Eval import LOTlib_primitive
+from LOTlib.Evaluation.Eval import primitive
 from LOTlib.FunctionNode import FunctionNode, isFunctionNode
 
 import re ## TODO: WHY? PROBABLY BAD FORM
@@ -8,20 +8,20 @@ import re ## TODO: WHY? PROBABLY BAD FORM
 # In a tree T, check relations between some elements. Sometimes T is
 # not used, but we leave it in all functions for simplicity
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-@LOTlib_primitive
+@primitive
 def is_(x,y): return (x is y)
 
-@LOTlib_primitive
+@primitive
 def equals_(x,y): return (x == y)
 
-@LOTlib_primitive
+@primitive
 def co_referents_(T,x):
     """
             The co-referents of x in t
     """
     return filter(lambda si: co_refers(si,x), T)
 
-@LOTlib_primitive
+@primitive
 def sisters_(x, y, equality=False):
     """
             Check if x,y are sisters in T
@@ -39,11 +39,11 @@ def immediately_dominates(x, y):
 
     return False
 
-@LOTlib_primitive
+@primitive
 def immediately_dominates_(x, y):
     return immediately_dominates(x,y)
 
-@LOTlib_primitive
+@primitive
 def dominates_(x,y):
     """
             This checks if x >> y, but using object identity ("is") rather than equality
@@ -56,7 +56,7 @@ def dominates_(x,y):
                 return True
     return False
 
-@LOTlib_primitive
+@primitive
 def tree_up_(x):
     if isFunctionNode(x):
         return x.parent
@@ -64,21 +64,21 @@ def tree_up_(x):
         return None
 
 
-@LOTlib_primitive
+@primitive
 def children_(x):
     if isinstance(x, FunctionNode): return [ c for c in x.args ]
     else: return []
 
-@LOTlib_primitive
+@primitive
 def descendants_(x):
     if isinstance(x, FunctionNode): return [ c for c in x ]
     else: return []
 
-@LOTlib_primitive
+@primitive
 def tree_root_(T):
     return T
 
-@LOTlib_primitive
+@primitive
 def is_nonterminal_type_(x,y): return is_nonterminal_type(x,y)
 
 no_coref_regex = re.compile(r"\..+$")
@@ -95,7 +95,7 @@ def is_nonterminal_type(x,y):
 
     return (x==y)
 
-@LOTlib_primitive
+@primitive
 def ancestors_(x):
     if not isFunctionNode(x):
         return []
@@ -106,23 +106,23 @@ def ancestors_(x):
         x = x.parent
     return out
 
-@LOTlib_primitive
+@primitive
 def whole_tree_(T):
     # LIST type of all elements of T
     return [ti for ti in T ]
 
-@LOTlib_primitive
+@primitive
 def tree_is_(x,y): return (x is y)
 
 
-@LOTlib_primitive
+@primitive
 def non_xes_(x,T):
     return filter(lambda v: v is not x, T)
 
 import re
 
 coref_matcher = re.compile(r".+\.([0-9]+)$") ## Co-reference (via strings)
-@LOTlib_primitive
+@primitive
 def co_refers_(x,y):
 
     if x is y: return False # By stipulation, nothing co-refers to itself

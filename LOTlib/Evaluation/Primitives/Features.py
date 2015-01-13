@@ -1,24 +1,24 @@
-from LOTlib.Evaluation.Eval import LOTlib_primitive
+from LOTlib.Evaluation.Eval import primitive
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Access arbitrary features
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Some of our own primitivesS
-@LOTlib_primitive
+@primitive
 def is_color_(x,y): return (x.color == y)
 
-@LOTlib_primitive
+@primitive
 def is_shape_(x,y): return (x.shape == y)
 
-@LOTlib_primitive
+@primitive
 def is_pattern_(x,y): return (x.pattern == y)
 
-@LOTlib_primitive
+@primitive
 def getattr_(x,a,y):
     return getattr(x,a) == y
 
-@LOTlib_primitive
+@primitive
 def switch_(i,*ar):
     """
         Index into an array. NOTE: with run-time priors, the *entire* array gets evaluated.
@@ -26,6 +26,6 @@ def switch_(i,*ar):
     """
     return ar[i]
 
-@LOTlib_primitive
+@primitive
 def switchf_(i,x,*ar):
     return ar[i](x)

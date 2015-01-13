@@ -11,11 +11,13 @@ $time mpiexec -hostfile /home/piantado/Libraries/LOTlib/hosts.mpich2 -n 36 pytho
               --top=50 --chains=25 --large=1000 --dmin=0 --dmax=300 --dstep=10 --mpi --out=/path/to/file.pkl
 
 """
+import numpy
+import sys
 import LOTlib
 from LOTlib import lot_iter
 from LOTlib.Inference.MetropolisHastings import MHSampler
-from LOTlib.Miscellaneous import q, display_option_summary
-from LOTlib.MPI.MPI_map import MPI_map, is_master_process
+from LOTlib.Miscellaneous import q, display_option_summary, qq
+from LOTlib.MPI.MPI_map import MPI_unorderedmap, is_master_process
 from LOTlib.Examples.Number.Model import *
 
 ## Parse command line options:
@@ -30,7 +32,7 @@ parser.add_option("--steps",
                   dest="STEPS", type="int", default=200000,
                   help="Number of samples to run")
 parser.add_option("--top",
-                  dest="TOP_COUNT", type="int", default=1000,
+                  dest="TOP_COUNT", type="int", default=100,
                   help="Top number of hypotheses to store")
 parser.add_option("--chains",
                   dest="CHAINS", type="int", default=1,
@@ -62,7 +64,7 @@ parser.add_option("-q",
 if options.DATA == -1:
     options.DATA_AMOUNTS = range(options.DATA_MIN, options.DATA_MAX, options.DATA_STEP)
 else:
-    options.DATA_AMOUNTS = [ options.DATA ]
+    options.DATA_AMOUNTS = [options.DATA]
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -71,9 +73,9 @@ else:
 def run(data_size):
     """
     This out on the DATA_RANGE amounts of data and returns *all* hypothese in the top options.TOP_COUNT
-
     """
-    if LOTlib.SIG_INTERRUPTED: return []  # So we don't waste time making data for everything that isn't run
+
+    if LOTlib.SIG_INTERRUPTED: return TopN()  # So we don't waste time making data for everything that isn't run
 
     # initialize the data
     data = generate_data(data_size)
@@ -94,31 +96,26 @@ if __name__ == "__main__":
 
     if is_master_process():
         display_option_summary(options)
-
-    # choose the appropriate map function
-    allret = MPI_map(run, map(lambda x: [x], options.DATA_AMOUNTS * options.CHAINS))
-
-    # Handle all of the output
-    allfs = TopN()
-    allfs.update(allret)
-
-    ## If we want to print the summary with the "large" data size (average posterior score computed empirically)
-    if options.LARGE_DATA_SIZE > 0 and is_master_process():
-
-        #now evaluate on different amounts of data too:
         huge_data = generate_data(options.LARGE_DATA_SIZE)
 
-        H = list(allfs.get_all(sorted=True))
+    # choose the appropriate map function
+    argarray = map(lambda x: [x], options.DATA_AMOUNTS * options.CHAINS)
 
-        for h in H:
-            h.compute_posterior(huge_data)
+    seen = set()
+    for fs in MPI_unorderedmap(run, numpy.random.permutation(argarray)):
+        for h in fs.get_all():
+            if h not in seen:
+                seen.add(h)
+                h.compute_posterior(huge_data)
 
-        # show the *average* ll for each hypothesis
-        for h in sorted(H, key=lambda x: x.likelihood):
+                if h.prior > float("-inf"):
+                    print h.prior, \
+                        h.likelihood /float(options.LARGE_DATA_SIZE), \
+                        q(get_knower_pattern(h)), \
+                        qq(h)
 
-            if h.prior > float("-inf"):
-                print h.prior, h.likelihood/float(options.LARGE_DATA_SIZE), q(Utilities.get_knower_pattern(h)),  q(h) # a quoted x
+            sys.stdout.flush()
 
     import pickle
     with open(options.OUT_PATH, 'w') as f:
-        pickle.dump(allfs, f)
+        pickle.dump(seen, f)
