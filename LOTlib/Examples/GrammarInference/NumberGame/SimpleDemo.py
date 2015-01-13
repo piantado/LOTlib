@@ -118,7 +118,7 @@ def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
     # --------------------------------------------------------------------------------------------------------
     # Plot stuff
 
-    if plot_type is not None:
+    if plot_type:
         mh_grammar_summary.plot(plot_type)
         if plot_widget:
             return mh_grammar_summary
@@ -138,6 +138,8 @@ def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
 if __name__ == "__main__":
 
     # --------------------------------------------------------------------------------------------------------
+    # Mixture model
+    # --------------------------------------------------------------------------------------------------------
     # import cProfile
     # cProfile.run("""run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
     #                     alpha=0.9, enum_d=5, grammar_n=100, skip=1, cap=100,
@@ -146,16 +148,28 @@ if __name__ == "__main__":
     #                     'LOTlib/Examples/GrammarInference/NumberGame/'+
     #                     'mix_model_summary.p')""", filename="nonvector_mix_100iter.profile")
 
-    # --------------------------------------------------------------------------------------------------------
-    run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
-        alpha=0.9, enum_d=5, grammar_n=1000, cap=100,
-        print_stuff=[], plot_type=None, plot_widget=False,
-        pickle_data='save', filename='nonvector_mix_1000iter.p')
+    # run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
+    #     alpha=0.9, enum_d=5, grammar_n=1000, cap=100,
+    #     print_stuff=[], plot_type=None, plot_widget=False,
+    #     pickle_data='save', filename='nonvector_mix_1000iter.p')
 
     # --------------------------------------------------------------------------------------------------------
-    # run(grammar=complex_grammar, data=toy_2pownp1,
-    #     domain=20, alpha=0.99, enum_d=6, grammar_n=10000, cap=1000,
-    #     plot_type=None, pickle_data='save')
+    # Original number game
+    # --------------------------------------------------------------------------------------------------------
+    run(grammar=complex_grammar, data=toy_npow2p1, domain=20,
+        alpha=0.9, enum_d=6, grammar_n=1000, skip=10, cap=100,
+        print_stuff='grammar_h', plot_type=[], pickle_data='save',
+        filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference' +
+                 '/NumberGame/out/p/vector_complex_npow2p1_1000.p')
+
+    # import cProfile
+    # cProfile.run("""run(grammar=complex_grammar, data=toy_npow2p1, domain=20,
+    #                     alpha=0.9, enum_d=6, grammar_n=1000, skip=10, cap=100,
+    #                     print_stuff='grammar_h', plot_type=[], pickle_data=False)""",
+    #              filename="out/profile/vector_complex_npow2p1_1000.profile")
+
+    # --------------------------------------------------------------------------------------------------------
+
 
 
 #

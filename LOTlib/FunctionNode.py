@@ -51,7 +51,7 @@ class FunctionNode(object):
         The name of the function.
     args : doc?
         Arguments of the function
-    generation_probability : doc?
+    generation_probability : float
         Unnormalized generation probability.
     rule : doc?
         The rule that was used in generating the FunctionNode
@@ -285,11 +285,23 @@ class FunctionNode(object):
         return self.generation_probability + sum([x.log_probability() for x in self.argFunctionNodes()])
 
     def recompute_generation_probabilities(self, grammar):
-        """Re-compute all the generation_probabilities."""
+        """
+        Re-compute all the generation_probabilities.
+
+        """
         assert self.rule is not None
         for t in self.iterate_subnodes(grammar, self, do_bv=True):
             Z = log(sum([x.p for x in grammar.rules[t.returntype]]))
             t.generation_probability = log(t.rule.p) - Z
+
+    def compute_generation_probability(self, grammar):
+        """
+        Compute the generation probability for this node's root (not considering children).
+
+        """
+        assert self.rule is not None, "FunctionNode cannot calculate prob. when rule is None!"
+        Z = log(sum([x.p for x in grammar.rules[self.returntype]]))
+        return log(self.rule.p) - Z
 
     def subnodes(self):
         """Return all subnodes -- no iterator. Useful for modifying (doc?)
