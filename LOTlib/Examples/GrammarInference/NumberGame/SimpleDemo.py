@@ -157,11 +157,11 @@ if __name__ == "__main__":
     # --------------------------------------------------------------------------------------------------------
     # Original number game
     # --------------------------------------------------------------------------------------------------------
-    run(grammar=complex_grammar, data=toy_npow2p1, domain=20,
-        alpha=0.9, enum_d=6, grammar_n=1000, skip=10, cap=100,
-        print_stuff='grammar_h rules', plot_type=[], pickle_data='save',
-        filename='/home/eric/Documents/LOTlib/LOTlib/Examples/GrammarInference/NumberGame' +
-                 '/out/p/1_13/vector_complex_npow2p1_1000.p')
+    run(grammar=simple_test_grammar, data=toy_3n, domain=20,
+        alpha=0.99, enum_d=6, grammar_n=10000, skip=100, cap=100,
+        print_stuff='all', plot_type=[], pickle_data='save',
+        filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference/NumberGame'
+                 '/out/1_13/vector_simptest_3n_10000.p')
 
     # import cProfile
     # cProfile.run("""run(grammar=complex_grammar, data=toy_npow2p1, domain=20,

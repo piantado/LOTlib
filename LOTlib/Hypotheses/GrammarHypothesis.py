@@ -120,7 +120,7 @@ class GrammarHypothesis(VectorHypothesis):
 
         # Recompute prior for each hypothesis, given new grammar probs
         for h in self.hypotheses:
-            h.compute_prior(recompute=True, vectorized=True)
+            h.compute_prior(recompute=True, vectorized=False)
             h.update_posterior()
 
     # --------------------------------------------------------------------------------------------------------
@@ -147,9 +147,6 @@ class GrammarHypothesis(VectorHypothesis):
         Returns:
             float: Likelihood summed over all outputs, summed over all hypotheses & weighted for each
             hypothesis by posterior score p(h|X).
-
-        TODO:
-            - vectorize
 
         """
         self.update()
