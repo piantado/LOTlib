@@ -20,7 +20,7 @@
 #   p_in_concept = rowsum(v * Ri_j) for Ri_j in Ri   # i.e. multiply ea. col in Ri by v
 
 
-from math import exp
+from math import exp, log
 import numpy as np
 from LOTlib.GrammarRule import BVUseGrammarRule
 from LOTlib.Hypotheses.GrammarHypothesis import GrammarHypothesis
@@ -45,7 +45,7 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
                     if isinstance(rule, BVUseGrammarRule):
                         pass
                     else:
-                        print Exception
+                        raise Exception
 
         self.L = [None] * len(data)
         self.R = [None] * len(data)
@@ -81,7 +81,9 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
 
             # Compute likelihood of producing same output (yes/no) as data
             for m, o in enumerate(d.output.keys()):
-                p = logsumexp(w * self.R[i][:, m])      # col `m` of boolean matrix `R[i]` weighted by `w`
+                # p = logsumexp(w * self.R[i][:, m])      # col `m` of boolean matrix `R[i]` weighted by `w`
+                p = log(sum(np.exp(w) * self.R[i][:, m]))
+
                 # print 'w', w
                 # print 'p', p
                 p = -1e-10 if p >= 0 else p
