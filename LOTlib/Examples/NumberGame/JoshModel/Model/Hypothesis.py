@@ -49,48 +49,28 @@ class MixtureGrammarHypothesis(GrammarHypothesis):
             value = np.array([1.0, 1.0])
         GrammarHypothesis.__init__(self, grammar, hypotheses, value=value, **kwargs)
 
-    def set_value(self, value):
-        """
-        This is what's different for this class. We only have one value -- lambda in our mixture model.
+    def update(self):
+        """This is what's different for this class. We only have one value -- lambda in our mixture model.
 
         We use lambda then to re-set our grammar rules (hand code: MATH == lambda, INTERVAL == (1-lambda).)
 
-        """
-        assert len(value) == 2, "ERROR: Invalid value!!!"
-        if not isinstance(value, np.ndarray):
-            value = np.array(value)
-        self.value = value
-        self.n = len(value)
+        We'll need to do this whenever we calculate things like predictive, because we need to use
+          the `posterior_score` of each domain hypothesis get weights for our predictions.
 
-        # TODO: possibly also just keep 1 of these fixed at 1...
+        """
         # Set probability for each rule corresponding to value index
         for rule in self.get_rules(rule_to='MATH')[1]:
-            rule.p = value[0]
+            rule.p = self.value[0]
         for rule in self.get_rules(rule_to='INTERVAL')[1]:
-            rule.p = value[1]
+            rule.p = self.value[1]
 
-        self.update()
+        # Recompute prior for each hypothesis, given new grammar probs
+        for h in self.hypotheses:
+            h.compute_prior(recompute=True, vectorized=False)
+            h.update_posterior()
 
     def get_propose_idxs(self):
         """Get indexes to propose to => for Mix...Hypothesis, we use a special self.value system."""
         return [0, 1]
 
 
-class ShallowGrammarHypothesis(GrammarHypothesis):
-    """
-    Here, we only do values that come from the 'START' node (i.e. 2-depth trees)
-
-    """
-    def __init__(self, grammar, hypotheses, value=None, **kwargs):
-        if not value:
-            value = [r.p for r in self.get_rules(rule_nt='START')]
-        GrammarHypothesis.__init__(self, grammar, hypotheses, value=value, **kwargs)
-
-    def set_value(self, value):
-        assert len(value) is self.n, "ERROR: Invalid value!!!"
-        self.value = value
-        propose_rules = [r for r in self.get_rules(rule_nt='START')]
-        for i in range(self.n):
-            propose_rules[i] = value[i]
-
-        self.update()

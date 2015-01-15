@@ -62,15 +62,15 @@ from LOTlib.Grammar import Grammar
 #
 #
 mix_grammar = Grammar()
-mix_grammar.add_rule('START', '', ['MATH'], 1.)
 mix_grammar.add_rule('START', '', ['INTERVAL'], 1.)
-
-# --------------------------------------------------------------------------------------------------------
-# Math rules (30-40 of these)
+mix_grammar.add_rule('START', '', ['MATH'], 1.)
 
 mix_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'DOMAIN_RANGE'], 1.)
 mix_grammar.add_rule('DOMAIN_RANGE', 'range_set_', ['1', '100'], 1.)
 mix_grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='X', bv_p=1.)
+
+# ------------------------------------------------------------------------------------------------------------
+# Math rules (30-40 of these)
 
 # Odd numbers
 mix_grammar.add_rule('EXPR', 'plus_', ['ODD', str(1)], 1.)
@@ -102,7 +102,7 @@ for i in range(2, 11):
 for i in range(0, 10):
     mix_grammar.add_rule('EXPR', 'ends_in_', ['X', str(i)], 1.)
 
-# --------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------
 # Interval Rules (there will be ~5050 of these)
 
 for n in range(1, 101):
@@ -144,10 +144,9 @@ for i in range(0, 10):
     individual_grammar.add_rule('EXPR', 'ends_in_', ['X', str(i)], 1.)
 
 # Interval Rules
-for n in range(1, 101):
-    for m in range(n, 101):
-        individual_grammar.add_rule('START', 'range_set_', [str(n), str(m)], 1.)
-
+individual_grammar.add_rule('START', 'range_set_', ['CONST', 'CONST'], 1.)
+for i in range(1, 101):
+    individual_grammar.add_rule('CONST', '', [str(i)], 1.)
 
 # ============================================================================================================
 # LOTlib-Style Grammar
@@ -189,7 +188,7 @@ lot_grammar.add_rule('X', 'plus_', ['X', 'X'], 1.)
 lot_grammar.add_rule('X', 'ends_in_', ['X', 'CONST'], 1.)
 
 # Constants
-for i in range(1, 21):
+for i in range(1, 101):
     lot_grammar.add_rule('CONST', '', [str(i)], 1.)
 
 

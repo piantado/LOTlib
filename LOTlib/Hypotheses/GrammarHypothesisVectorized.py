@@ -29,6 +29,12 @@ from LOTlib.Miscellaneous import logsumexp, gammaln, log1mexp
 
 class GrammarHypothesisVectorized(GrammarHypothesis):
 
+    def update(self):
+        """Update `self.rules` relative to `self.value`."""
+        # Set probability for each rule corresponding to value index
+        for i in range(1, self.n):
+            self.rules[i].p = self.value[i]
+
     def initialize_vector(self, data):
         """
         Initialize our rule count & domain-hypothesis-likelihood vectors (C, L, R).
