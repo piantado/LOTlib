@@ -33,7 +33,6 @@ class MCMCSummary:
         self.samples = []
         self.sample_count = 0
         self.count = 0
-        self.top_samples = None
 
     def __call__(self, generator):
         """Pass this a generator, add each element as it's yielded.
