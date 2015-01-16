@@ -122,7 +122,9 @@ for n in range(1, 101):
 #
 individual_grammar = Grammar()
 
+# ------------------------------------------------------------------------------------------------------------
 # Math rules
+
 individual_grammar.add_rule('START', 'mapset_', ['FUNC', 'DOMAIN_RANGE'], 1.)
 individual_grammar.add_rule('DOMAIN_RANGE', 'range_set_', ['1', '100'], 1.)
 individual_grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='X', bv_p=1.)
@@ -143,10 +145,13 @@ for i in range(2, 11):
 for i in range(0, 10):
     individual_grammar.add_rule('EXPR', 'ends_in_', ['X', str(i)], 1.)
 
+# ------------------------------------------------------------------------------------------------------------
 # Interval Rules
+
 individual_grammar.add_rule('START', 'range_set_', ['CONST', 'CONST'], 1.)
 for i in range(1, 101):
     individual_grammar.add_rule('CONST', '', [str(i)], 1.)
+
 
 # ============================================================================================================
 # LOTlib-Style Grammar
@@ -170,7 +175,7 @@ lot_grammar = Grammar()
 #  where CONST is the same constant atom used in the math expressions below.
 lot_grammar.add_rule('START', 'mapset_', ['FUNC', 'RANGE'], 1.)
 lot_grammar.add_rule('RANGE', 'range_set_', ['CONST', 'CONST'], 1.)
-lot_grammar.add_rule('RANGE', 'range_set_', ['1', '21'], 1.)
+lot_grammar.add_rule('RANGE', 'range_set_', ['1', '100'], 1.)
 lot_grammar.add_rule('FUNC', 'lambda', ['X'], 1., bv_type='X', bv_p=1.)
 
 # Math expressions

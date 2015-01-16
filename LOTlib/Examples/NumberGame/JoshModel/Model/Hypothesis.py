@@ -1,8 +1,8 @@
 
 from math import log
 import numpy as np
+from LOTlib.Hypotheses.GrammarHypothesisVectorized import GrammarHypothesisVectorized
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-from LOTlib.Hypotheses.GrammarHypothesis import GrammarHypothesis, Infinity
 
 
 # ------------------------------------------------------------------------------------------------------------
@@ -39,7 +39,7 @@ class JoshConceptsHypothesis(LOTHypothesis):
 # ------------------------------------------------------------------------------------------------------------
 # GrammarHypothesis classes
 
-class MixtureGrammarHypothesis(GrammarHypothesis):
+class MixtureGrammarHypothesis(GrammarHypothesisVectorized):
     """
     This will let us single out 'MATH' rules & 'INTERVAL' rules as `lambda` & `(1-lambda)`.
 
@@ -47,7 +47,7 @@ class MixtureGrammarHypothesis(GrammarHypothesis):
     def __init__(self, grammar, hypotheses, value=None, **kwargs):
         if value is None:
             value = np.array([1.0, 1.0])
-        GrammarHypothesis.__init__(self, grammar, hypotheses, value=value, **kwargs)
+        GrammarHypothesisVectorized.__init__(self, grammar, hypotheses, value=value, **kwargs)
 
     def update(self):
         """This is what's different for this class. We only have one value -- lambda in our mixture model.
@@ -72,5 +72,13 @@ class MixtureGrammarHypothesis(GrammarHypothesis):
     def get_propose_idxs(self):
         """Get indexes to propose to => for Mix...Hypothesis, we use a special self.value system."""
         return [0, 1]
+
+    def set_value(self, value):
+        assert len(value) == 2, "ERROR: Invalid value vector!!!"
+        if not isinstance(value, np.ndarray):
+            value = np.array(value)
+        self.value = value
+        self.rules = [r for sublist in self.grammar.rules.values() for r in sublist]
+        self.update()
 
 
