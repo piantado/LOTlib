@@ -20,6 +20,7 @@
 #   p_in_concept = rowsum(v * Ri_j) for Ri_j in Ri   # i.e. multiply ea. col in Ri by v
 
 
+import copy
 from math import exp, log
 import numpy as np
 from LOTlib.GrammarRule import BVUseGrammarRule
@@ -29,18 +30,48 @@ from LOTlib.Miscellaneous import logsumexp, gammaln, log1mexp
 
 class GrammarHypothesisVectorized(GrammarHypothesis):
 
+    def __init__(self, grammar, hypotheses, H=None, C=None, **kwargs):
+        GrammarHypothesis.__init__(self, grammar, hypotheses, **kwargs)
+        if C is not None:
+            self.C = C
+        if H is not None:
+            self.H = H
+        else:
+            self.initialize_vector()
+
+    def __copy__(self):
+        """
+        It's important to copy `H` and `C` here since these are the most expensive computations.
+
+        """
+        try:
+            H = self.H
+            C = self.C
+        except Exception:
+            H = C = None
+
+        return type(self)(
+            self.grammar, self.hypotheses,
+            H=H, C=C,
+            value=copy.copy(self.value), proposal=copy.copy(self.proposal),
+            prior_shape=self.prior_shape, prior_scale=self.prior_scale,
+            propose_n=self.propose_n, propose_step=self.propose_step
+        )
+
     def update(self):
         """Update `self.rules` relative to `self.value`."""
         # Set probability for each rule corresponding to value index
         for i in range(1, self.n):
             self.rules[i].p = self.value[i]
 
-    def initialize_vector(self, data):
+    def initialize_vector(self):
         """
-        Initialize our rule count & domain-hypothesis-likelihood vectors (C, L, R).
+        Initialize our rule count vector (`self.C`) & hypothesis concept list (`self.H`).
 
         """
+        self.H = [h() for h in self.hypotheses]
         self.C = np.zeros((len(self.hypotheses), len(self.rules)))
+
         rule_idxs = {r: i for i, r in enumerate(self.rules)}
         for j, h in enumerate(self.hypotheses):
             grammar_rules = [fn.rule for fn in h.value.subnodes()[1:]]
@@ -53,6 +84,9 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
                     else:
                         raise Exception
 
+    def initialize_vecta(self, data):
+        # These things might be shared somehow between common GrammarHypotheses...
+        # ------------------------------------------------------------------------
         self.L = [None] * len(data)
         self.R = [None] * len(data)
         for i, d in enumerate(data):
@@ -60,24 +94,19 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
             self.R[i] = np.zeros((len(self.hypotheses), len(d.output.keys())))
             # For each Output data point...
             for m, o in enumerate(d.output.keys()):
-                self.R[i][:, m] = [int(o in h()) for h in self.hypotheses]  # For ea. hypo.
+                self.R[i][:, m] = [int(o in h_concept) for h_concept in self.H]  # For ea. hypo.
 
     def compute_likelihood(self, data, update_post=True, **kwargs):
         """
         Compute the likelihood of producing human data, given:  H (self.hypotheses)  &  x (self.value)
 
         """
-        try:                        # only call `self.initialize_vector` the first time we compute likelihood
-            if self.C:
-                pass
-        except Exception:
-            self.initialize_vector(data)
+        self.initialize_vecta(data)
 
+        # These must be computed for this specific GrammarHypothesis
+        # ----------------------------------------------------------
         x = np.log(np.array(self.value))    # vector of rule probabilites
         P = np.dot(self.C, x)               # prior for each hypothesis
-        # print 'x', x
-        # print 'C', self.C
-        # print 'P', P
         likelihood = 0.0
 
         for i, d in enumerate(data):
@@ -87,11 +116,8 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
 
             # Compute likelihood of producing same output (yes/no) as data
             for m, o in enumerate(d.output.keys()):
-                # p = logsumexp(w * self.R[i][:, m])      # col `m` of boolean matrix `R[i]` weighted by `w`
-                p = log(sum(np.exp(w) * self.R[i][:, m]))
-
-                # print 'w', w
-                # print 'p', p
+                # col `m` of boolean matrix `R[i]` weighted by `w`  -- TODO could this be logsumexp?
+                p = log((np.exp(w) * self.R[i][:, m]).sum())
                 p = -1e-10 if p >= 0 else p
                 k = d.output[o][0]         # num. yes responses
                 n = k + d.output[o][1]     # num. trials
