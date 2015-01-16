@@ -56,11 +56,11 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
             for rule in grammar_rules:
                 try:
                     self.C[j, rule_idxs[rule]] += 1
-                except Exception:
+                except Exception as e:
                     if isinstance(rule, BVUseGrammarRule):
                         pass
                     else:
-                        raise Exception
+                        raise e
 
     def init_H(self):
         """
@@ -99,7 +99,7 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
 
         # The following must be computed for this specific GrammarHypothesis
         # ------------------------------------------------------------------
-        x = np.log(np.array(self.value))    # vector of rule probabilites
+        x = self.normalize_value_vector()   # vector of rule probabilites
         P = np.dot(self.C, x)               # prior for each hypothesis
         likelihood = 0.0
 
@@ -112,7 +112,8 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
             for m, o in enumerate(d.output.keys()):
                 # col `m` of boolean matrix `R[i]` weighted by `w`  -- TODO could this be logsumexp?
                 p = log((np.exp(w) * self.R[d][:, m]).sum())
-                p = -1e-10 if p >= 0 else p
+                if p >= 0:
+                    print 'P ERROR!'
                 k = d.output[o][0]          # num. yes responses
                 n = k + d.output[o][1]      # num. trials
                 bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
@@ -122,6 +123,20 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
             self.likelihood = likelihood
             self.update_posterior()
         return likelihood
+
+    def normalize_value_vector(self):
+        # Make dictionary of normalization constants for each nonterminal
+        nt_Z = {}
+        for nt in self.grammar.nonterminals():
+            Z = sum([r.p for r in self.get_rules(rule_nt=nt)[1]])
+            nt_Z[nt] = Z
+
+        # Normalize each probability in `self.value`
+        normalized = np.zeros(len(self.value))
+        for i, p in enumerate(self.value):
+            normalized[i] = p / nt_Z[self.rules[i].nt]
+
+        return np.log(normalized)
 
     def __copy__(self):
         return type(self)(
