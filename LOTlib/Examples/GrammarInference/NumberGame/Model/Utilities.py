@@ -1,4 +1,5 @@
 
+import os
 from scipy.io import loadmat
 from LOTlib.DataAndObjects import FunctionData
 from LOTlib.Visualization.MCMCSummary.VectorSummary import *
@@ -16,7 +17,8 @@ def sample_grammar_hypotheses(sampler, skip, cap, print_=False):
                 print i, '-'*100
                 print h.prior, h.likelihood, h.posterior_score
     else:
-        for h in summary(sampler): pass
+        for h in summary(sampler):
+            pass
     return summary
 
 
@@ -36,8 +38,8 @@ def import_data_from_mat():
     assuming 20 human participants.
 
     """
-    mat = loadmat('/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
-                  '/NumberGame/number_game_data.mat')
+    path = os.getcwd()
+    mat = loadmat(path+'/number_game_data.mat')
     mat_data = mat['data']
     number_game_data = []
 
