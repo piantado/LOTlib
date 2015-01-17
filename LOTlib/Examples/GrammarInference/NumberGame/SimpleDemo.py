@@ -2,7 +2,9 @@
 A simple demo of inference with GrammarHypothesis, VectorSummary, NumberGameHypothesis, & MHSampler.
 
 """
+import os
 import time
+import csv
 import pickle
 from LOTlib.Hypotheses.GrammarHypothesis import GrammarHypothesis
 from LOTlib.Hypotheses.GrammarHypothesisVectorized import GrammarHypothesisVectorized
@@ -15,7 +17,7 @@ from Model import *
 def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
         alpha=0.99, enum_d=5, grammar_n=10000, skip=10, cap=100,
         print_stuff='grammar_h', plot_type=None, plot_widget=False,
-        pickle_data=False, filename=None):
+        pickle_data=False, filename=None, csv_save=False):
     """
     Enumerate some NumberGameHypotheses, then use these to sample some GrammarHypotheses over `data`.
 
@@ -111,8 +113,30 @@ def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
     else:
         grammar_h0 = ParameterHypothesis(grammar, hypotheses, propose_step=.1, propose_n=1)
         mh_grammar_sampler = MHSampler(grammar_h0, data, grammar_n, trace=False)
-        mh_grammar_summary = sample_grammar_hypotheses(mh_grammar_sampler, skip=skip, cap=cap,
-                                                       print_=bool(print_stuff))
+
+        summary = VectorSummary(skip=skip, cap=cap)
+        if print_stuff:
+            print '^*'*60, '\nGenerating GrammarHypothesis Samples\n', '^*'*60
+            for i, h in enumerate(summary(mh_grammar_sampler)):
+                if i % (mh_grammar_sampler.steps/20) == 0:
+                    print ['%.3f' % v for v in h.value], '\n', i, '-'*100
+                    print h.prior, h.likelihood, h.posterior_score
+        else:
+            if csv_save:
+                f = open(csv_save, 'wb')
+                f.close()
+                for i, h in enumerate(summary(mh_grammar_sampler)):
+                    if (i % (mh_grammar_sampler.steps/20) == 0):
+                        with open(csv_save, 'rb') as r:
+                            reader = csv.reader(r)
+                            old_file = [row for row in reader]
+                        with open(csv_save, 'wb') as w:
+                            writer = csv.writer(w)
+                            writer.writerows(old_file)
+                            writer.writerow(h.value)
+
+                pass
+        return summary
 
     # --------------------------------------------------------------------------------------------------------
     # Plot stuff
@@ -135,59 +159,60 @@ def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
 # ============================================================================================================
 
 if __name__ == "__main__":
+    path = os.getcwd()
 
     # --------------------------------------------------------------------------------------------------------
     # Mixture model
     # --------------------------------------------------------------------------------------------------------
+
     # import cProfile
     # cProfile.run("""run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
-    #                     alpha=0.9, enum_d=5, grammar_n=100, skip=1, cap=100,
-    #                     print_stuff=[], plot_type='violin', pickle_data='save',
-    #                     filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/'+
-    #                     'LOTlib/Examples/GrammarInference/NumberGame/'+
-    #                     'mix_model_summary.p')""", filename="nonvector_mix_100iter.profile")
-
-    # run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
-    #     alpha=0.9, enum_d=5, grammar_n=1000, cap=100,
-    #     print_stuff=[], plot_type=None, plot_widget=False,
-    #     pickle_data='save', filename='nonvector_mix_1000iter.p')
-
-    import cProfile
-    cProfile.run("""run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
-                        alpha=0.9, enum_d=5, grammar_n=50, skip=10, cap=100,
-                        print_stuff=[], plot_type=[], pickle_data=False)""",
-                 filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
-                          '/NumberGame/out/profile/mix_model_50.profile')
+    #                     alpha=0.9, enum_d=5, grammar_n=50, skip=10, cap=100,
+    #                     print_stuff=[], plot_type=[], pickle_data=False)""",
+    #              filename=path+'/out/profile/mix_model_50.profile')
 
     run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
-        alpha=0.9, enum_d=7, grammar_n=300, skip=3, cap=100,
+        alpha=0.9, enum_d=7, grammar_n=10000, skip=10, cap=100,
         print_stuff='', plot_type=[], pickle_data='save',
-        filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
-                 '/NumberGame/out/p/mix_model_300.p')
+        filename=path+'/out/p/mix_model_10000.p',
+        csv_save=path+'/out/csv/mix_model_10000.csv')
 
     # --------------------------------------------------------------------------------------------------------
+    # Individual rule probabilities model
+    # --------------------------------------------------------------------------------------------------------
 
-    cProfile.run("""run(grammar=individual_grammar, josh='lot', data=josh_data, domain=100,
-                        alpha=0.9, enum_d=5, grammar_n=100, skip=10, cap=100,
-                        print_stuff=[], plot_type=[], pickle_data=False)""",
-                 filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
-                          '/NumberGame/out/profile/individual_100.profile')
-    
+    # import cProfile
+    # cProfile.run("""run(grammar=individual_grammar, josh='lot', data=josh_data, domain=100,
+    #                     alpha=0.9, enum_d=5, grammar_n=100, skip=10, cap=100,
+    #                     print_stuff=[], plot_type=[], pickle_data=False)""",
+    #              filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
+    #                       '/NumberGame/out/profile/individual_100.profile')
+
     run(grammar=individual_grammar, josh='lot', data=josh_data, domain=100,
-        alpha=0.9, enum_d=7, grammar_n=2000, skip=10, cap=100,
+        alpha=0.9, enum_d=7, grammar_n=500000, skip=5000, cap=100,
         print_stuff='', plot_type=[], pickle_data='save',
-        filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
-                 '/NumberGame/out/p/individual_1000.p')
-
+        filename=path+'/out/p/individual_500000.p',
+        csv_save=path+'/out/csv/individual_500000.csv')
 
     # --------------------------------------------------------------------------------------------------------
-    # Original number game
+    # LOT grammar
     # --------------------------------------------------------------------------------------------------------
-    # run(grammar=complex_grammar, data=toy_3n, domain=20,
+
+    run(grammar=lot_grammar, josh='', data=josh_data, domain=100,
+        alpha=0.9, enum_d=7, grammar_n=500000, skip=5000, cap=100,
+        print_stuff='', plot_type=[], pickle_data='save',
+        filename=path+'/out/p/individual_500000.p',
+        csv_save=path+'/out/csv/individual_500000.csv')
+
+    # --------------------------------------------------------------------------------------------------------
+    # TESTING  |  Original number game
+    # --------------------------------------------------------------------------------------------------------
+
+    # run(grammar=complex_grammar, data=toy_2n, domain=20,
     #     alpha=0.99, enum_d=6, grammar_n=1000, skip=10, cap=100,
     #     print_stuff='rules', plot_type=[], pickle_data='save',
     #     filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference/NumberGame'
-    #              '/out/1_14/vector_complex_3n_1000.p')
+    #              '/out/newest_complex_2n_1000.p')
 
     # import cProfile
     # cProfile.run("""run(grammar=complex_grammar, data=toy_npow2p1, domain=20,
