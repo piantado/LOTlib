@@ -125,6 +125,16 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
         return likelihood
 
     def normalize_value_vector(self):
+        """Return a copy of `self.value`, with each value normalized relative to other rules with same nt.
+
+        Note
+        ----
+        This is the only thing we need to call `self.update()` for.
+        --> In line `Z = sum(...)`, we use `r.p`.
+
+        """
+        self.update()
+
         # Make dictionary of normalization constants for each nonterminal
         nt_Z = {}
         for nt in self.grammar.nonterminals():
@@ -142,7 +152,7 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
         return type(self)(
             self.grammar, self.hypotheses,
             H=self.H, C=self.C, L=self.L, R=self.R,
-            value=copy.copy(self.value), proposal=copy.copy(self.proposal),
+            value=copy.copy(self.value), proposal=self.proposal,
             prior_shape=self.prior_shape, prior_scale=self.prior_scale,
             propose_n=self.propose_n, propose_step=self.propose_step
         )
