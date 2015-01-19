@@ -54,7 +54,7 @@ class NumberGameHypothesis(LOTHypothesis):
         self.value_set = None
         return LOTHypothesis.compile_function(self)
 
-    def __copy__(self):
+    def __copy__(self, copy_value=False):
         return NumberGameHypothesis(self.grammar, alpha=self.alpha, domain=self.domain)
 
 
