@@ -100,11 +100,7 @@ class FiniteBestSet(object):
                 self.unique_set.add(x) # add to the set
 
                 # if we have too many elements
-                if len(self) > self.N:
-                    rr = heapq.heappop(self.Q)
-
-                    if rr.x in self.unique_set:
-                        self.unique_set.remove(rr.x) # clean out the removed from the set
+                self.trim()
 
     def get_all(self, **kwargs):
         """ Return all elements (arbitrary order). Does NOT return a copy. This uses kwargs so that we can call one 'sorted' """
@@ -125,6 +121,16 @@ class FiniteBestSet(object):
                 self.add(yi.x, yi.priority*y.max_multiplier) # mult y by y.max_multiplier to convert it back to the original scale
         else:
             raise NotImplementedError
+
+    # trim excess, usually only needed if N is set after loading
+    def trim(self):
+        # if we have too many elements
+        if len(self) > self.N:
+            rr = heapq.heappop(self.Q)
+
+            if rr.x in self.unique_set:
+                self.unique_set.remove(rr.x) # clean out the removed from the set
+
 
 if __name__ == "__main__":
 

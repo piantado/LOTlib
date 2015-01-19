@@ -410,7 +410,7 @@ def log1mexp(a):
     else:             return log(-expm1(a))
 
 
-def EV(fn, *args):
+def EV(fn, iters, *args):
     """
         Estimates (via sampling) the expected value of a function that returns
         a numerical value. Pass any args to specified function as additional args
