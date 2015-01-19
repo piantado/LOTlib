@@ -72,19 +72,20 @@ def run(grammar=simple_test_grammar, josh='', data=toy_3n, domain=20,
         DomainHypothesis = NumberGameHypothesis
 
     # --------------------------------------------------------------------------------------------------------
-    # Enumerate some NumberGameHypotheses.
+    # Sample/enumerate some NumberGameHypotheses.
 
-    hypotheses = []
-    for fn in grammar.enumerate(d=enum_d):
-        h = DomainHypothesis(grammar=grammar, domain=domain, alpha=alpha)
-        h.set_value(fn)
-        hypotheses.append(h)
-
-    # --------------------------------------------------------------------------------------------------------
-    # Sample NumberGameHypotheses
-    # h0 = make_h0(grammar=simple_test_grammar, domain=domain, alpha=alpha)
-    # mh_sampler = MHSampler(h0, data[0].input, n)
-    # hypotheses = set([h for h in lot_iter(mh_sampler)])
+    if enum_d is 'mcmc':
+        h0 = DomainHypothesis(grammar=simple_test_grammar, domain=domain, alpha=alpha)
+        mh_sampler = MHSampler(h0, data[0].input, 50000)
+        hypotheses = set([h for h in lot_iter(mh_sampler)])
+        hypotheses = sorted(hypotheses, key=(lambda h: -h.posterior_score))
+        hypotheses = hypotheses[0:10000]        # Only keep the top 10,000 ngame hypotheses
+    else:
+        hypotheses = []
+        for fn in grammar.enumerate(d=enum_d):
+            h = DomainHypothesis(grammar=grammar, domain=domain, alpha=alpha)
+            h.set_value(fn)
+            hypotheses.append(h)
 
     # --------------------------------------------------------------------------------------------------------
     # Print all NumberGameHypotheses that were generated
@@ -113,28 +114,30 @@ def run(grammar=simple_test_grammar, josh='', data=toy_3n, domain=20,
     else:
         grammar_h0 = ParameterHypothesis(grammar, hypotheses, propose_step=.1, propose_n=1)
         mh_grammar_sampler = MHSampler(grammar_h0, data, grammar_n, trace=False)
+        mh_grammar_summary = VectorSummary(skip=skip, cap=cap)
 
-        summary = VectorSummary(skip=skip, cap=cap)
-        if print_stuff:
+        if csv_save:
+            f = open(csv_save, 'wb')
+            f.close()
+        if 'samples' in print_stuff:
             print '^*'*60, '\nGenerating GrammarHypothesis Samples\n', '^*'*60
-            for i, h in enumerate(summary(mh_grammar_sampler)):
+
+        for i, h in enumerate(mh_grammar_summary(mh_grammar_sampler)):
+            # Save every N/1000 samples
+            if csv_save:
+                if i % (mh_grammar_sampler.steps/300) is 0:
+                    with open(csv_save, 'rb') as r:
+                        reader = csv.reader(r)
+                        old_rows = [row for row in reader]
+                    with open(csv_save, 'wb') as w:
+                        writer = csv.writer(w)
+                        writer.writerows(old_rows)
+                        writer.writerows([[i, r.nt, r.name, str(r.to), r.p] for r in h.rules])
+            # Print every N/20 samples
+            if 'samples' in print_stuff:
                 if i % (mh_grammar_sampler.steps/20) == 0:
                     print ['%.3f' % v for v in h.value], '\n', i, '-'*100
                     print h.prior, h.likelihood, h.posterior_score
-        else:
-            if csv_save:
-                with open(csv_save, 'wb') as w:
-                    writer = csv.writer(w)
-                    writer.writerow([str(r) for r in grammar_h0.rules])
-                for i, h in enumerate(summary(mh_grammar_sampler)):
-                    if i % (mh_grammar_sampler.steps/20) is 0:
-                        with open(csv_save, 'rb') as r:
-                            reader = csv.reader(r)
-                            old_file = [row for row in reader]
-                        with open(csv_save, 'wb') as w:
-                            writer = csv.writer(w)
-                            writer.writerows(old_file)
-                            writer.writerow(h.value)
 
     # --------------------------------------------------------------------------------------------------------
     # Plot stuff
@@ -186,21 +189,21 @@ if __name__ == "__main__":
     #              filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
     #                       '/NumberGame/out/profile/individual_100.profile')
 
-    run(grammar=individual_grammar, josh='lot', data=josh_data, domain=100,
-        alpha=0.9, enum_d=7, grammar_n=100000, skip=1000, cap=100,
-        print_stuff='', plot_type=[], pickle_data='save',
-        filename=path+'/out/p/individual_100000.p',
-        csv_save=path+'/out/csv/individual_100000.csv')
+    # run(grammar=individual_grammar, josh='lot', data=josh_data, domain=100,
+    #     alpha=0.9, enum_d=7, grammar_n=300, skip=3, cap=100,
+    #     print_stuff='', plot_type='', pickle_data='save',
+    #     filename=path+'/out/p/individual_1000.p',
+    #     csv_save=path+'/out/csv/individual_1000.csv')
 
     # --------------------------------------------------------------------------------------------------------
     # LOT grammar
     # --------------------------------------------------------------------------------------------------------
 
     run(grammar=lot_grammar, josh='', data=josh_data, domain=100,
-        alpha=0.9, enum_d=6, grammar_n=100000, skip=1000, cap=100,
-        print_stuff='', plot_type='', pickle_data='save',
-        filename=path+'/out/p/lot_100000.p',
-        csv_save=path+'/out/csv/lot_100000.csv')
+        alpha=0.9, enum_d='mcmc', grammar_n=1000, skip=1000, cap=100,
+        print_stuff='samples', plot_type='', pickle_data='save',
+        filename=path+'/out/p/lot_1000.p',
+        csv_save=path+'/out/csv/lot_1000.csv')
 
     # --------------------------------------------------------------------------------------------------------
     # TESTING  |  Original number game
@@ -220,13 +223,6 @@ if __name__ == "__main__":
     #                       '/NumberGame/out/1_14/vector_complex_npow2p1_10000.profile')
 
     # --------------------------------------------------------------------------------------------------------
-
-
-hypotheses = []
-for fn in grammar.enumerate(d=6):
-    h = NumberGameHypothesis(grammar=lot_grammar, domain=100, alpha=0.9)
-    h.set_value(fn)
-    hypotheses.append(h)
 
 
 #
