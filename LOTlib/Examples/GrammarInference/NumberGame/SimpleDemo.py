@@ -14,10 +14,10 @@ from LOTlib.Examples.NumberGame.NewVersion.Model import *
 from Model import *
 
 
-def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
+def run(grammar=simple_test_grammar, josh='', data=toy_3n, domain=20,
         alpha=0.99, enum_d=5, grammar_n=10000, skip=10, cap=100,
-        print_stuff='grammar_h', plot_type=None, plot_widget=False,
-        pickle_data=False, filename=None, csv_save=False):
+        print_stuff='grammar_h', plot_type='', plot_widget=False,
+        pickle_data='', filename='', csv_save=''):
     """
     Enumerate some NumberGameHypotheses, then use these to sample some GrammarHypotheses over `data`.
 
@@ -123,10 +123,11 @@ def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
                     print h.prior, h.likelihood, h.posterior_score
         else:
             if csv_save:
-                f = open(csv_save, 'wb')
-                f.close()
+                with open(csv_save, 'wb') as w:
+                    writer = csv.writer(w)
+                    writer.writerow([str(r) for r in grammar_h0.rules])
                 for i, h in enumerate(summary(mh_grammar_sampler)):
-                    if (i % (mh_grammar_sampler.steps/20) == 0):
+                    if i % (mh_grammar_sampler.steps/20) is 0:
                         with open(csv_save, 'rb') as r:
                             reader = csv.reader(r)
                             old_file = [row for row in reader]
@@ -134,9 +135,6 @@ def run(grammar=simple_test_grammar, josh=False, data=toy_3n, domain=20,
                             writer = csv.writer(w)
                             writer.writerows(old_file)
                             writer.writerow(h.value)
-
-                pass
-        return summary
 
     # --------------------------------------------------------------------------------------------------------
     # Plot stuff
@@ -171,11 +169,11 @@ if __name__ == "__main__":
     #                     print_stuff=[], plot_type=[], pickle_data=False)""",
     #              filename=path+'/out/profile/mix_model_50.profile')
 
-    run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
-        alpha=0.9, enum_d=7, grammar_n=10000, skip=10, cap=100,
-        print_stuff='', plot_type=[], pickle_data='save',
-        filename=path+'/out/p/mix_model_10000.p',
-        csv_save=path+'/out/csv/mix_model_10000.csv')
+    # run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
+    #     alpha=0.9, enum_d=7, grammar_n=1000, skip=10, cap=100,
+    #     print_stuff='', plot_type=[], pickle_data='save',
+    #     filename=path+'/out/p/mix_model_1000.p',
+    #     csv_save=path+'/out/csv/mix_model_1000.csv')
 
     # --------------------------------------------------------------------------------------------------------
     # Individual rule probabilities model
@@ -189,20 +187,20 @@ if __name__ == "__main__":
     #                       '/NumberGame/out/profile/individual_100.profile')
 
     run(grammar=individual_grammar, josh='lot', data=josh_data, domain=100,
-        alpha=0.9, enum_d=7, grammar_n=500000, skip=5000, cap=100,
+        alpha=0.9, enum_d=7, grammar_n=100000, skip=1000, cap=100,
         print_stuff='', plot_type=[], pickle_data='save',
-        filename=path+'/out/p/individual_500000.p',
-        csv_save=path+'/out/csv/individual_500000.csv')
+        filename=path+'/out/p/individual_100000.p',
+        csv_save=path+'/out/csv/individual_100000.csv')
 
     # --------------------------------------------------------------------------------------------------------
     # LOT grammar
     # --------------------------------------------------------------------------------------------------------
 
     run(grammar=lot_grammar, josh='', data=josh_data, domain=100,
-        alpha=0.9, enum_d=7, grammar_n=500000, skip=5000, cap=100,
-        print_stuff='', plot_type=[], pickle_data='save',
-        filename=path+'/out/p/individual_500000.p',
-        csv_save=path+'/out/csv/individual_500000.csv')
+        alpha=0.9, enum_d=6, grammar_n=100000, skip=1000, cap=100,
+        print_stuff='', plot_type='', pickle_data='save',
+        filename=path+'/out/p/lot_100000.p',
+        csv_save=path+'/out/csv/lot_100000.csv')
 
     # --------------------------------------------------------------------------------------------------------
     # TESTING  |  Original number game
@@ -224,12 +222,18 @@ if __name__ == "__main__":
     # --------------------------------------------------------------------------------------------------------
 
 
+hypotheses = []
+for fn in grammar.enumerate(d=6):
+    h = NumberGameHypothesis(grammar=lot_grammar, domain=100, alpha=0.9)
+    h.set_value(fn)
+    hypotheses.append(h)
+
 
 #
 #
 # '''print distribution over power rule:  [prior, likelihood, posterior]'''
 # # vals, posteriors = grammar_h0.rule_distribution(data, 'ipowf_', np.arange(0.1, 5., 0.1))
-# # print_dist(vals, posteriors)
+# # print_dist(vals, posdfteriors)
 # #visualize_dist(vals, posteriors, 'union_')
 
 
