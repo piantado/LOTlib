@@ -174,9 +174,11 @@ lot_grammar = Grammar()
 # Initial range stuff -- note that we have a mixture model with range[1,100] & range[CONST,CONST],
 #  where CONST is the same constant atom used in the math expressions below.
 lot_grammar.add_rule('START', 'mapset_', ['FUNC', 'RANGE'], 1.)
-lot_grammar.add_rule('RANGE', 'range_set_', ['CONST', 'CONST'], 1.)
+lot_grammar.add_rule('RANGE', 'range_set_', ['RANGE_CONST', 'RANGE_CONST'], 1.)
 lot_grammar.add_rule('RANGE', 'range_set_', ['1', '100'], 1.)
 lot_grammar.add_rule('FUNC', 'lambda', ['X'], 1., bv_type='X', bv_p=1.)
+for i in range(1, 101):
+    lot_grammar.add_rule('RANGE_CONST', '', [str(i)], 1.)
 
 # Math expressions
 lot_grammar.add_rule('X', 'isprime_', ['X'], 1.)
@@ -193,7 +195,7 @@ lot_grammar.add_rule('X', 'plus_', ['X', 'X'], 1.)
 lot_grammar.add_rule('X', 'ends_in_', ['X', 'CONST'], 1.)
 
 # Constants
-for i in range(1, 101):
+for i in range(1, 11):
     lot_grammar.add_rule('CONST', '', [str(i)], 1.)
 
 
