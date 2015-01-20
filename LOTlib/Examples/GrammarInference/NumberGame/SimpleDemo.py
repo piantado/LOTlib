@@ -250,11 +250,11 @@ if __name__ == "__main__":
     #              gh_file='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
     #                       '/NumberGame/out/profile/individual_100.profile')
 
-    run(grammar=individual_grammar, josh='lot', data=josh_data, domain=100,
-        alpha=0.9, ngh='enum7', grammar_n=500000, skip=10, cap=100,
-        print_stuff='samples', plot_type='', gh_pickle='save',
-        gh_file=path+'/out/p/individual_500000.p',
-        csv_save=path+'/out/csv/individual_500000')
+    # run(grammar=individual_grammar, josh='lot', data=josh_data, domain=100,
+    #     alpha=0.9, ngh='enum7', grammar_n=500000, skip=10, cap=100,
+    #     print_stuff='samples', plot_type='', gh_pickle='save',
+    #     gh_file=path+'/out/p/individual_500000.p',
+    #     csv_save=path+'/out/csv/individual_500000')
 
     # --------------------------------------------------------------------------------------------------------
     # LOT grammar
@@ -284,32 +284,47 @@ if __name__ == "__main__":
     #                       '/NumberGame/out/1_14/vector_complex_npow2p1_10000.profile')
 
     # --------------------------------------------------------------------------------------------------------
-    # Testing NumberGame hypothesis space
+    # NumberGame hypothesis space
     # --------------------------------------------------------------------------------------------------------
 
-    # h0 = NumberGameHypothesis(grammar=lot_grammar, domain=100, alpha=0.9)
-    #
-    # num_samples = 100000
-    # num_chains = 10
-    #
-    # sample_set_sizes = {}
-    # sample_size_means = {}
-    #
-    # # Loop for conditioned on each data input
-    # for d in josh_data:
-    #     sample_set_sizes[d.input] = []
-    #
-    #     # Number of chains to run on each datum
-    #     for i in range(num_chains):
-    #         mh_sampler = MHSampler(h0, d.input, num_samples)
-    #         hypotheses = set([h for h in lot_iter(mh_sampler)])
-    #         sample_set_sizes[d.input].append(len(hypotheses))
-    #
-    #     sample_size_means[d.input] = sum(sample_set_sizes[d.input]) / num_chains
+    num_samples = 100000
+    num_chains = 10
 
+    sample_set_sizes = {}
+    sample_size_means = {}
+    sample_set_interx = {}
 
+    # Loop for conditioned on each data input
+    for d in josh_data:
+        sample_set_sizes[str(d.input)] = []
 
+        # Number of chains to run on each datum
+        for i in range(num_chains):
+            h0 = NumberGameHypothesis(grammar=lot_grammar, domain=100, alpha=0.9)
+            mh_sampler = MHSampler(h0, d.input, num_samples)
+            hypotheses = set([h for h in lot_iter(mh_sampler)])
 
+            sample_set_sizes[str(d.input)].append(len(hypotheses))
+
+            if not str(d.input) in sample_set_interx:
+                sample_set_interx[str(d.input)] = hypotheses
+            else:
+                sample_set_interx[str(d.input)].intersection_update(hypotheses)
+
+            # Write to file each chain
+            with open('hypothesis_space_lens.txt', 'a') as f:
+                str_chain = 'chain' + str(i) + ' | ' + str(d.input) + ' ==> ' + str(len(hypotheses))
+                str_union = '\t\t' + str(d.input) + ' ==> |Interx(samples)| = ' + str(len(sample_set_interx[str(d.input)]))
+                str_mean  = '\t\t' + str(d.input) + ' ==> mean_len(samples) = ' + str(sum(sample_set_sizes[str(d.input)]) / num_chains)
+                f.write(str_chain + '\n' + str_union + '\n' + str_mean + '\n\n')
+
+        # Write final intersection/mean size for all chains for each datum
+        sample_size_means[str(d.input)] = sum(sample_set_sizes[str(d.input)]) / num_chains
+        str_union = str(d.input) + ' ==> |Interx(samples)| = ' + str(len(sample_set_interx[str(d.input)]))
+        str_mean = str(d.input) + ' ==> mean(samples) = ' + str(sample_size_means[str(d.input)])
+
+        with open('hypothesis_space_lens.txt', 'a') as f:
+            f.write(str_union + '\n' + str_mean + '%'*81 + '\n\n')
 
     # --------------------------------------------------------------------------------------------------------
 
