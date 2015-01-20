@@ -181,7 +181,7 @@ for i in range(1, 101):
     lot_grammar.add_rule('RANGE_CONST', '', [str(i)], 1.)
 
 # Math expressions
-lot_grammar.add_rule('X', 'isprime_', ['X'], 1.)
+# lot_grammar.add_rule('X', 'isprime_', ['X'], 1.)
 lot_grammar.add_rule('X', 'ipowf_', ['CONST', 'CONST'], 1.)
 lot_grammar.add_rule('X', 'ipowf_', ['X', 'CONST'], 1.)
 lot_grammar.add_rule('X', 'ipowf_', ['CONST', 'X'], 1.)
