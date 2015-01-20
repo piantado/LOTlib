@@ -21,8 +21,11 @@ class NumberGameHypothesis(LOTHypothesis):
         If datum item not in set, it still has (1 - alpha) likelihood of being generated.
 
         """
-        s = self()      # set of numbers corresponding to this hypothesis
-                        # NOTE: This may be None if the hypothesis has too many nodes
+        try:
+            s = self()      # set of numbers corresponding to this hypothesis
+                            # NOTE: This may be None if the hypothesis has too many nodes
+        except OverflowError:
+            s = set()       # If our hypothesis call blows things up...   TODO handle this better!!
         error_p = (1.-self.alpha) / self.domain
 
         def compute_single_likelihood(datum, updateflag=True):
