@@ -134,14 +134,12 @@ def run(grammar=simple_test_grammar, josh='', data=toy_3n,
         mh_grammar_summary = pickle.load(f)
     else:
         if csv_save:
-            f = open(csv_save+'_values.csv', 'wb')
-            writer = csv.writer(f)
-            writer.writerow(['i', 'nt', 'name', 'to', 'p'])
-            f.close()
-            f = open(csv_save+'_bayes.csv', 'wb')
-            writer = csv.writer(f)
-            writer.writerow(['Prior', 'Likelihood', 'Posterior Score'])
-            f.close()
+            with open(csv_save+'_values.csv', 'wb') as w:
+                writer = csv.writer(w)
+                writer.writerow(['i', 'nt', 'name', 'to', 'p'])
+            with open(csv_save+'_bayes.csv', 'wb') as w:
+                writer = csv.writer(w)
+                writer.writerow(['i', 'Prior', 'Likelihood', 'Posterior Score'])
         if 'samples' in print_stuff:
             print '^*'*60, '\nGenerating GrammarHypothesis Samples\n', '^*'*60
 
@@ -154,21 +152,13 @@ def run(grammar=simple_test_grammar, josh='', data=toy_3n,
             # Save to csv every N/1000 samples
             if csv_save:
                 if i % (mh_grammar_sampler.steps/1000) is 0:
-                    with open(csv_save+'_values.csv', 'rb') as r:
-                        reader = csv.reader(r)
-                        old_rows = [row for row in reader]
-                    with open(csv_save+'_values.csv', 'wb') as w:
+                    with open(csv_save+'_values.csv', 'a') as w:
                         writer = csv.writer(w)
-                        writer.writerows(old_rows)
                         writer.writerows([[i, r.nt, r.name, str(r.to), r.p] for r in h.rules])
-                    with open(csv_save+'_bayes.csv', 'rb') as r:
-                        reader = csv.reader(r)
-                        old_rows = [row for row in reader]
-                    with open(csv_save+'_bayes.csv', 'wb') as w:
+                    with open(csv_save+'_bayes.csv', 'a') as w:
                         writer = csv.writer(w)
-                        writer.writerows(old_rows)
                         if mh_grammar_summary.sample_count:
-                            writer.writerow([h.prior, h.likelihood, h.posterior_score])
+                            writer.writerow([i, h.prior, h.likelihood, h.posterior_score])
 
             # Print every N/20 samples
             if 'samples' in print_stuff:
@@ -176,6 +166,7 @@ def run(grammar=simple_test_grammar, josh='', data=toy_3n,
                     print ['%.3f' % v for v in h.value], '\n', i, '-'*100
                     print h.prior, h.likelihood, h.posterior_score
 
+    # --------------------------------------------------------------------------------------------------------
     # Save comparison of MAP gh to human data for each input/output combo
     if csv_save:
         with open(csv_save+'_data.csv', 'wb') as w:
@@ -192,7 +183,7 @@ def run(grammar=simple_test_grammar, josh='', data=toy_3n,
 
                 for o in d.output.keys():
                     # Probability for yes on output `o` is sum of posteriors for hypos that contain `o`
-                    p_human = d.output[o][0] / (d.output[o][0] + d.output[o][1])
+                    p_human = float(d.output[o][0]) / float(d.output[o][0] + d.output[o][1])
                     p_model = sum([exp(w) if o in h() else 0 for h, w in zip(hypotheses, weights)])
                     writer.writerow([d.input, o, p_human, p_model])
 
@@ -215,7 +206,7 @@ def run(grammar=simple_test_grammar, josh='', data=toy_3n,
     # Save pickled MCMCSummary
 
     if gh_pickle == 'save':
-        mh_grammar_summary.pickle_summary(gh_file=gh_file)
+        mh_grammar_summary.pickle_summary(filename=gh_file)
 
 
 # ============================================================================================================
@@ -250,11 +241,11 @@ if __name__ == "__main__":
     #              gh_file='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
     #                       '/NumberGame/out/profile/individual_100.profile')
 
-    # run(grammar=individual_grammar, josh='lot', data=josh_data, domain=100,
-    #     alpha=0.9, ngh='enum7', grammar_n=500000, skip=10, cap=100,
-    #     print_stuff='samples', plot_type='', gh_pickle='save',
-    #     gh_file=path+'/out/p/individual_500000.p',
-    #     csv_save=path+'/out/csv/individual_500000')
+    run(grammar=individual_grammar, josh='lot', data=josh_data, domain=100,
+        alpha=0.9, ngh='enum7', grammar_n=500000, skip=1, cap=1000,
+        print_stuff='samples', plot_type='', gh_pickle='save',
+        gh_file=path+'/out/p/individual_500000_1_21.p',
+        csv_save=path+'/out/csv/individual_500000_1_21')
 
     # --------------------------------------------------------------------------------------------------------
     # LOT grammar
@@ -292,7 +283,7 @@ if __name__ == "__main__":
 
     sample_set_sizes = {}
     sample_size_means = {}
-    sample_set_interx = {}
+    sample_set_union = {}
 
     # Loop for conditioned on each data input
     for d in josh_data:
@@ -306,25 +297,31 @@ if __name__ == "__main__":
 
             sample_set_sizes[str(d.input)].append(len(hypotheses))
 
-            if not str(d.input) in sample_set_interx:
-                sample_set_interx[str(d.input)] = hypotheses
+            if not str(d.input) in sample_set_union:
+                sample_set_union[str(d.input)] = hypotheses
             else:
-                sample_set_interx[str(d.input)].intersection_update(hypotheses)
+                sample_set_union[str(d.input)].union_update(hypotheses)
 
             # Write to file each chain
-            with open('hypothesis_space_lens.txt', 'a') as f:
+            with open('out/hypothesis_space_lens_1_21.txt', 'a') as f:
                 str_chain = 'chain' + str(i) + ' | ' + str(d.input) + ' ==> ' + str(len(hypotheses))
-                str_union = '\t\t' + str(d.input) + ' ==> |Interx(samples)| = ' + str(len(sample_set_interx[str(d.input)]))
-                str_mean  = '\t\t' + str(d.input) + ' ==> mean_len(samples) = ' + str(sum(sample_set_sizes[str(d.input)]) / num_chains)
+                str_union = '\t\t' + str(d.input) + ' ==> |Union(samples)| = ' + str(len(sample_set_union[str(d.input)]))
+                str_mean  = '\t\t' + str(d.input) + ' ==> mean_len(samples) = ' + str(sum(sample_set_sizes[str(d.input)]) / i)
                 f.write(str_chain + '\n' + str_union + '\n' + str_mean + '\n\n')
 
         # Write final intersection/mean size for all chains for each datum
         sample_size_means[str(d.input)] = sum(sample_set_sizes[str(d.input)]) / num_chains
-        str_union = str(d.input) + ' ==> |Interx(samples)| = ' + str(len(sample_set_interx[str(d.input)]))
+        str_union = str(d.input) + ' ==> |Union(samples)| = ' + str(len(sample_set_union[str(d.input)]))
         str_mean = str(d.input) + ' ==> mean(samples) = ' + str(sample_size_means[str(d.input)])
 
-        with open('hypothesis_space_lens.txt', 'a') as f:
+        with open('out/hypothesis_space_lens_1_21.txt', 'a') as f:
             f.write(str_union + '\n' + str_mean + '%'*81 + '\n\n')
+
+    with open('out/hypothesis_space_lens_1_21.txt', 'a') as f:
+        all_union = set()
+        for s in sample_set_union:
+            all_union = all_union.union(sample_set_union[s])
+        f.write('%'*81 + '\n' + '%'*81 + '\n' + 'OVERALL UNION SIZE = ' + str(len(all_union)))
 
     # --------------------------------------------------------------------------------------------------------
 
