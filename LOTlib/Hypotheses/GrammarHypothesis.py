@@ -62,7 +62,7 @@ class GrammarHypothesis(VectorHypothesis):
         self.propose_n = propose_n
         self.propose_step = propose_step
         self.propose_idxs = self.get_propose_idxs()
-        self.compute_prior()
+        # self.compute_prior()
         self.update()
 
     # --------------------------------------------------------------------------------------------------------
