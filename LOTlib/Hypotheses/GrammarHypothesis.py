@@ -82,8 +82,9 @@ class GrammarHypothesis(VectorHypothesis):
 
         # randomly choose `self.propose_n` of our proposable indexes
         for i in random.sample(self.propose_idxs, self.propose_n):
-            if new_value[i] + step[i] > 0.0:
-                new_value[i] += step[i]
+            # if new_value[i] + step[i] > 0.0:
+            #     new_value[i] += step[i]
+            new_value[i] += step[i]    # -- change
 
         c = self.__copy__()
         c.set_value(new_value)
@@ -131,7 +132,11 @@ class GrammarHypothesis(VectorHypothesis):
         scale = self.prior_scale
         rule_priors = [gamma.logpdf(v, shape, scale=scale) for v in self.value]
 
-        prior = sum([r for r in rule_priors])
+        # If there are any negative values in our vector, prior is 0
+        if [v for v in self.value if v < 0.0]:
+            prior = -Infinity
+        else:
+            prior = sum([r for r in rule_priors])
         self.prior = prior
         self.update_posterior()
         return prior

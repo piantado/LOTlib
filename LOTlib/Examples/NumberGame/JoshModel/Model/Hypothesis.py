@@ -1,6 +1,7 @@
 
 from math import log
 import numpy as np
+from LOTlib.GrammarRule import BVUseGrammarRule
 from LOTlib.Hypotheses.GrammarHypothesisVectorized import GrammarHypothesisVectorized
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
@@ -65,9 +66,9 @@ class MixtureGrammarHypothesis(GrammarHypothesisVectorized):
             rule.p = self.value[1]
 
         # Recompute prior for each hypothesis, given new grammar probs
-        for h in self.hypotheses:
-            h.compute_prior(recompute=True, vectorized=False)
-            h.update_posterior()
+        # for h in self.hypotheses:
+        #     h.compute_prior(recompute=True, vectorized=False)
+        #     h.update_posterior()
 
     def get_propose_idxs(self):
         """Get indexes to propose to => for Mix...Hypothesis, we use a special self.value system."""
@@ -80,5 +81,43 @@ class MixtureGrammarHypothesis(GrammarHypothesisVectorized):
         self.value = value
         self.rules = [r for sublist in self.grammar.rules.values() for r in sublist]
         self.update()
+
+    def normalize_value_vector(self):
+        """
+        here, |x| is 2 instead of |rules|.
+
+        """
+        # Make dictionary of normalization constants for each nonterminal
+        nt_Z = {}
+        for nt in self.grammar.nonterminals():
+            Z = sum([r.p for r in self.get_rules(rule_nt=nt)[1]])
+            nt_Z[nt] = Z
+
+        # Normalize each probability in `self.value`
+        normalized = np.zeros(2)
+        normalized[0] = self.value[0] / nt_Z['MATH']
+        normalized[1] = self.value[1] / nt_Z['INTERVAL']
+
+        return np.log(normalized)
+
+    def init_C(self):
+        """
+        Here, C is  `|hypotheses| x 2`  instead of   `|hypotheses| x |rules|`
+
+        """
+        self.C = np.zeros((len(self.hypotheses), 2))
+        rule_idxs = {'MATH': 0, 'INTERVAL': 1}
+
+        for j, h in enumerate(self.hypotheses):
+            grammar_rules = [fn.rule for fn in h.value.subnodes()[1:]]
+            for rule in grammar_rules:
+                try:
+                    if rule.nt in ('MATH', 'INTERVAL'):
+                        self.C[j, rule_idxs[rule.nt]] += 1
+                except Exception as e:
+                    if isinstance(rule, BVUseGrammarRule):
+                        pass
+                    else:
+                        raise e
 
 
