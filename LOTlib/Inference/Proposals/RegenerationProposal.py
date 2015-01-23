@@ -1,4 +1,5 @@
 from LOTProposal import LOTProposal
+from LOTlib.Inference.Proposals import ProposalFailedException
 from LOTlib.FunctionNode import NodeSamplingException
 from LOTlib.Miscellaneous import lambdaOne, Infinity, logplusexp, dropfirst
 from LOTlib.FunctionNode import FunctionNode
@@ -22,8 +23,8 @@ class RegenerationProposal(LOTProposal):
             # sample a subnode
             n, lp = newt.sample_subnode(resampleProbability=resampleProbability)
         except NodeSamplingException:
-            # If we've been given resampleProbability that can't sample, just stay where we are
-            return [newt, 0.0]
+            # If we've been given resampleProbability that can't sample
+            raise ProposalFailedException
 
         # In the context of the parent, resample n according to the grammar
         # We recurse_up in order to add all the parent's rules

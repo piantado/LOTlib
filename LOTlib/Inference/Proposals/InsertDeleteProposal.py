@@ -1,6 +1,5 @@
-from math import log
-from random import random
 
+from LOTlib.Inference.Proposals import ProposalFailedException
 from LOTlib.Miscellaneous import sample1
 from LOTlib.FunctionNode import *
 from LOTProposal import LOTProposal
@@ -54,7 +53,7 @@ class InsertDeleteProposal(LOTProposal):
             try:
                 ni, lp = newt.sample_subnode(isNotBVAddFunctionNode)
             except NodeSamplingException:
-                return [newt, fb]
+                raise ProposalFailedException
             
             # Since it's an insert, see if there is a (replicating) rule that expands
             # from ni.returntype to some ni.returntype
@@ -112,13 +111,13 @@ class InsertDeleteProposal(LOTProposal):
                     raise NodeSamplingException
 
             except NodeSamplingException:
-                return [newt, fb]
+                raise ProposalFailedException
             
             # Figure out which of my children have the same type as me
             replicating_kid_indices = filter(lambda i: isFunctionNode(ni.args[i]) and ni.args[i].returntype == ni.returntype, range(len(ni.args)))
             nrk = len(replicating_kid_indices) # how many replicating kids
             if nrk == 0:
-                return [newt, fb] # if no replicating rules here
+                raise ProposalFailedException
             
             replicating_rules = filter(is_replicating_GrammarRule, self.grammar.rules[ni.returntype])
             assert len(replicating_rules) > 0 # better be some or where did ni come from?

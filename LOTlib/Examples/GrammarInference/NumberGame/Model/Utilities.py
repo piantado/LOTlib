@@ -36,8 +36,7 @@ def import_data_from_mat():
     assuming 20 human participants.
 
     """
-    mat = loadmat('/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
-                  '/NumberGame/number_game_data.mat')
+    mat = loadmat('number_game_data.mat')
     mat_data = mat['data']
     number_game_data = []
 

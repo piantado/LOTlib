@@ -152,32 +152,31 @@ if __name__ == "__main__":
     #     print_stuff=[], plot_type=None, plot_widget=False,
     #     pickle_data='save', filename='nonvector_mix_1000iter.p')
 
-    import cProfile
-    cProfile.run("""run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
-                        alpha=0.9, enum_d=5, grammar_n=50, skip=10, cap=100,
-                        print_stuff=[], plot_type=[], pickle_data=False)""",
-                 filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
-                          '/NumberGame/out/profile/mix_model_50.profile')
+    # import cProfile
+    # cProfile.run("""run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
+    #                     alpha=0.9, enum_d=5, grammar_n=50, skip=10, cap=100,
+    #                     print_stuff=[], plot_type=[], pickle_data=False)""",
+    #              filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
+    #                       '/NumberGame/out/profile/mix_model_50.profile')
 
     run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
         alpha=0.9, enum_d=7, grammar_n=300, skip=3, cap=100,
         print_stuff='', plot_type=[], pickle_data='save',
-        filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
-                 '/NumberGame/out/p/mix_model_300.p')
+        filename='mix_model_300.p')
 
     # --------------------------------------------------------------------------------------------------------
-
-    cProfile.run("""run(grammar=individual_grammar, josh='lot', data=josh_data, domain=100,
-                        alpha=0.9, enum_d=5, grammar_n=100, skip=10, cap=100,
-                        print_stuff=[], plot_type=[], pickle_data=False)""",
-                 filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
-                          '/NumberGame/out/profile/individual_100.profile')
-    
-    run(grammar=individual_grammar, josh='lot', data=josh_data, domain=100,
-        alpha=0.9, enum_d=7, grammar_n=2000, skip=10, cap=100,
-        print_stuff='', plot_type=[], pickle_data='save',
-        filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
-                 '/NumberGame/out/p/individual_1000.p')
+    #
+    # cProfile.run("""run(grammar=individual_grammar, josh='lot', data=josh_data, domain=100,
+    #                     alpha=0.9, enum_d=5, grammar_n=100, skip=10, cap=100,
+    #                     print_stuff=[], plot_type=[], pickle_data=False)""",
+    #              filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
+    #                       '/NumberGame/out/profile/individual_100.profile')
+    #
+    # run(grammar=individual_grammar, josh='lot', data=josh_data, domain=100,
+    #     alpha=0.9, enum_d=7, grammar_n=2000, skip=10, cap=100,
+    #     print_stuff='', plot_type=[], pickle_data='save',
+    #     filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
+    #              '/NumberGame/out/p/individual_1000.p')
 
 
     # --------------------------------------------------------------------------------------------------------

@@ -4,7 +4,7 @@ from random import random
 from math import log
 from collections import defaultdict
 from LOTlib.GrammarRule import *
-from LOTlib.FunctionNode import pystring
+from LOTlib.Inference.Proposals import ProposalFailedException
 from LOTlib.FunctionNode import NodeSamplingException
 
 def lp_sample_equal_to(n, x, resampleProbability=lambdaOne):
@@ -100,13 +100,13 @@ class InverseInlineProposal(LOTProposal):
         f,b = 0.0, 0.0
             
         # ------------------
-        if random() < 0.5 : # Am inverse-inlining move
+        if random() < 0.5: # Am inverse-inlining move
         
             # where the lambda goes
             try:
                 n, np = newt.sample_subnode(resampleProbability=self.can_abstract_at)
             except NodeSamplingException:
-                return [newt, 0.0]
+                raise ProposalFailedException
             
             # Pick the rule we will use
             ir = self.insertable_rules[n.returntype]
@@ -119,7 +119,7 @@ class InverseInlineProposal(LOTProposal):
             try:
                 argval, _ = n.sample_subnode(resampleProbability=arg_predicate )
             except NodeSamplingException:
-                return [newt, 0.0]
+                raise ProposalFailedException
             argval = copy(argval) # necessary since the argval in the tree gets overwritten
             below = copy(n) # necessary since n gets setto the new apply rule  
             
@@ -149,7 +149,7 @@ class InverseInlineProposal(LOTProposal):
             try:
                 n, np = newt.sample_subnode(resampleProbability=self.can_inline_at)
             except NodeSamplingException:
-                return [newt, 0.0]
+                raise ProposalFailedException
          
             #print "CHOOSING n=", n
             #print "PARENT n=", n.parent

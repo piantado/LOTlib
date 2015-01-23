@@ -56,7 +56,7 @@ class PartitionMCMC(MultipleChainMCMC):
         # it to a random generation (fill in the leaves with random hypotheses)
         for p in partitions:
 
-            print "# Partition:", p
+            # print "# Partition:", p
 
             for n in p.subnodes():
                 # set to not resample these
