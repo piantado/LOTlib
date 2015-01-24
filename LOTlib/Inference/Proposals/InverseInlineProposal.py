@@ -37,9 +37,15 @@ class InverseInlineProposal(LOTProposal):
         self.insertable_rules = defaultdict(list) # Hash each nonterminal to (a,l) where a and l are the apply and lambda rules you need
         for nt in self.grammar.rules.keys():
             for a in filter(lambda r: (r.name=="apply_") and (r.nt == nt), self.grammar):
-                for l in filter( lambda r: isinstance(r, BVAddGrammarRule) and (r.nt == a.to[0]) and (r.bv_args is None), self.grammar): # For each lambda whose "below" is the right type. bv_args are not implemented yet
+                for l in filter( lambda r: isinstance(r, BVAddGrammarRule) and (r.nt == a.to[0]) and (r.bv_args is None) and (r.bv_type==a.to[1]), self.grammar): # For each lambda whose "below" is the right type. bv_args are not implemented yet
                     self.insertable_rules[nt].append( (a,l) )
-        # print "# Insertable rules:\t", self.insertable_rules
+
+        # print "# Insertable rules:"
+        # for k,v in self.insertable_rules.items():
+        #     print k
+        #     for a,l in v:
+        #         print "\t", a, "----------", l
+
 
 
     def can_abstract_at(self, x):
@@ -81,8 +87,8 @@ class InverseInlineProposal(LOTProposal):
 
         assert (not isinstance(l.added_rule, BVUseFunctionNode)) or l.added_rule.bv_args is None # NOTE: l.added_rule.name checks if the bound variable is actually used, but only works for bv_args=None
 
-        return (l.rule.bv_args is None or len(l.rule.bv_args) == 0) and (l.added_rule.name in l.args[0]) and self.is_valid_argument(l.args[0], a) and self.can_abstract_at(l.args[0])
-    
+        return (l.rule.bv_args is None or len(l.rule.bv_args) == 0) and l.args[0].contains_function(l.added_rule.name) and (l.args[0].returntype == n.returntype) and self.is_valid_argument(l.args[0], a) and self.can_abstract_at(l.args[0])
+
         
     def propose_tree(self, t):
         """
@@ -101,16 +107,18 @@ class InverseInlineProposal(LOTProposal):
             
         # ------------------
         if random() < 0.5: # Am inverse-inlining move
-        
+
             # where the lambda goes
             try:
                 n, np = newt.sample_subnode(resampleProbability=self.can_abstract_at)
             except NodeSamplingException:
                 raise ProposalFailedException
-            
+
+            # print "# INVERSE-INLINE"
+
             # Pick the rule we will use
             ir = self.insertable_rules[n.returntype]
-            ar,lr = sample1(ir) # the apply and lambda rules
+            ar, lr = sample1(ir) # the apply and lambda rules
             assert ar.nt == n.returntype
             assert lr.nt == ar.to[0]
             
@@ -120,12 +128,13 @@ class InverseInlineProposal(LOTProposal):
                 argval, _ = n.sample_subnode(resampleProbability=arg_predicate )
             except NodeSamplingException:
                 raise ProposalFailedException
+
             argval = copy(argval) # necessary since the argval in the tree gets overwritten
             below = copy(n) # necessary since n gets setto the new apply rule  
             
             # now make the function nodes. The generation_probabilities will be reset later, as will the parents for applyfn and bvfn
             n.setto(ar.make_FunctionNodeStub(self.grammar, 0.0, None)) # n's parent is preserved
-            
+
             lambdafn = lr.make_FunctionNodeStub(self.grammar, 0.0, n) ## this must be n, not applyfn, since n will eventually be setto applyfn
             bvfn = lambdafn.added_rule.make_FunctionNodeStub(self.grammar, 0.0, None) # this takes the place of argval everywhere below
             below.replace_subnodes(lambda x:x==argval, bvfn) # substitute below the lambda            
@@ -138,8 +147,7 @@ class InverseInlineProposal(LOTProposal):
             n.args = lambdafn, argval
 
             assert self.can_inline_at(n) # this had better be true
-            #assert newt.check_parent_refs()
-            
+
             # to go forward, you choose a node, a rule, and an argument
             f = np + (-log(len(ir))) + lp_sample_equal_to(n, argval, resampleProbability=arg_predicate)
             newZ = newt.sample_node_normalizer(self.can_inline_at)
@@ -150,23 +158,26 @@ class InverseInlineProposal(LOTProposal):
                 n, np = newt.sample_subnode(resampleProbability=self.can_inline_at)
             except NodeSamplingException:
                 raise ProposalFailedException
-         
-            #print "CHOOSING n=", n
-            #print "PARENT n=", n.parent
-            
+
+            # print "# INLINE"
+
             # Replace the subnodes 
             newn = n.args[0].args[0] # what's below the lambda
             argval = n.args[1]
             bvn = n.args[0].added_rule.name # the name of the added variable
-            
-            newn.replace_subnodes(lambda x: x.name == bvn, argval)
+
+            newn.replace_subnodes(lambda x: isinstance(x,BVUseFunctionNode) and x.name == bvn, argval)
             
             n.setto(newn)            
             assert self.can_abstract_at(n) # this had better be true
+
+            # figure out which rule we are supposed to use
+            possible_rules = [r for r in self.grammar.rules[n.returntype] if r.name==n.name and tuple(r.to) == tuple(n.argTypes()) ]
+            assert len(possible_rules) == 1 # for now?
+            n.rule = possible_rules[0]
+
             ir = self.insertable_rules[n.returntype] # for the backward probability
-            
-            # just the probability of choosing this apply
-            f = np
+            f = np # just the probability of choosing this apply
 
             # choose n, choose a, choose the rule
             arg_predicate = lambda z: (z.returntype == argval.returntype) and self.is_valid_argument(newn, z)

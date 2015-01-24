@@ -34,6 +34,60 @@ def schemestring(x, d=0, bv_names=None):
             else:
                 return "(%s %s)" % (name, map(lambda a: schemestring(a,d+1, bv_names=bv_names), x.args))
 
+
+def fullstring(x, d=0, bv_names=None):
+    """
+    A string mapping function that is for equality checking. This is necessary because pystring silently ignores
+    FunctionNode.names that are ''. Here, we print out everything, including returntypes
+    :param x:
+    :param d:
+    :param bv_names:
+    :return:
+    """
+
+    if isinstance(x, str):
+        return x
+    elif isFunctionNode(x):
+
+        if bv_names is None:
+            bv_names = dict()
+
+
+        if x.name == 'lambda':
+            # On a lambda, we must add the introduced bv, and then remove it again afterwards
+
+            bvn = ''
+            if isinstance(x, BVAddFunctionNode) and x.added_rule is not None:
+                bvn = x.added_rule.bv_prefix+str(d)
+                bv_names[x.added_rule.name] = bvn
+
+            assert len(x.args) == 1
+            ret = 'lambda<%s> %s: %s' % ( x.returntype, bvn, fullstring(x.args[0], d=d+1, bv_names=bv_names) )
+
+            if x.added_rule is not None:
+                del bv_names[x.added_rule.name]
+
+            return ret
+        else:
+
+            name = x.name
+            if isinstance(x, BVUseFunctionNode):
+                name = bv_names.get(x.name, x.name)
+
+            if x.args is None:
+                return "%s<%s>"%(name, x.returntype)
+            else:
+                return "%s<%s>(%s)" % (name,
+                                       x.returntype,
+                                       ', '.join(map(lambda a: fullstring(a, d=d+1, bv_names=bv_names), x.args)))
+
+
+
+
+
+
+
+
 def pystring(x, d=0, bv_names=None):
     """Output a string that can be evaluated by python; gives bound variables names based on their depth.
 
