@@ -62,13 +62,13 @@ class RationalRulesLOTHypothesis(LOTHypothesis):
         LOTHypothesis.__init__(self, grammar, value=value, *args, **kwargs)
 
 
-    def __copy__(self):
+    def __copy__(self, copy_value=True):
         """
                 Return a copy of myself.
         """
 
         # Since this is inherited, call the constructor on everything, copying what should be copied
-        thecopy = type(self)(self.grammar, rrAlpha=self.rrAlpha)
+        thecopy = type(self)(self.grammar, rrAlpha=self.rrAlpha, value=copy(self.value) if copy_value else self.value,)
 
         # And then then copy the rest
         for k in self.__dict__.keys():

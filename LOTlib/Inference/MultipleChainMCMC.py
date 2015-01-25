@@ -20,7 +20,8 @@ class MultipleChainMCMC(object):
         self.chain_idx = -1 # what chain are we on? This get incremented before anything, so it starts with 0
         self.nsamples = 0
         assert nchains>0, "Must have > 0 chains specified (you sent %s)"%nchains
-        
+        ## TODO: HANDLE THE CASE WHERE STEPS IS NOT DIVISIBLE BY CHAINS
+
         self.chains = [MHSampler( make_h0(), data, steps=steps/nchains, **kwargs) for _ in xrange(nchains)]
 
     def __iter__(self):
@@ -39,7 +40,7 @@ class MultipleChainMCMC(object):
         """
             Return the mean acceptance rate of all chains
         """
-        return mean([c.acceptance_ratio() for c in self.chains])
+        return [c.acceptance_ratio() for c in self.chains]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if __name__ == "__main__":

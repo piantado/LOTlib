@@ -6,56 +6,18 @@
 import LOTlib
 import os
 from itertools import product
-from LOTlib.MPI.ParallelBufferedIO import ParallelBufferedIO
-from LOTlib.MPI.MPI_map import synchronize_variable, MPI_map
-#MPI_map = map
+from Evaluation import load_model
+from LOTlib.MPI.MPI_map import MPI_map, get_rank
 
 from optparse import OptionParser
 
 parser = OptionParser()
-parser.add_option("--out", dest="OUT", type="string", help="Output prefix", default="output/inference")
+parser.add_option("--out", dest="OUT", type="string", help="Output prefix", default="output-InfereceSchemes")
 parser.add_option("--samples", dest="SAMPLES", type="int", default=100000, help="Number of samples to run")
 parser.add_option("--repetitions", dest="REPETITONS", type="int", default=100, help="Number of repetitions to run")
-parser.add_option("--model", dest="MODEL", type="str", default="Number300", help="Which model to run on (Number, Galileo, RationalRules, SimpleMagnetism, RegularExpression)")
 parser.add_option("--print-every", dest="PRINTEVERY", type="int", default=1000, help="Evaluation prints every this many")
 options, _ = parser.parse_args()
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Define the test model
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-if options.MODEL == "Number300":
-    # Load the data
-    from LOTlib.Examples.Number import generate_data, grammar, make_h0
-    data = synchronize_variable(lambda: generate_data(100)  )
-
-elif options.MODEL == "Number300":
-    # Load the data
-    from LOTlib.Examples.Number import generate_data, grammar, make_h0
-    data = synchronize_variable(lambda: generate_data(300)  )
-    
-elif options.MODEL == "Number1000":
-    # Load the data
-    from LOTlib.Examples.Number import generate_data, grammar, make_h0
-    data = synchronize_variable(lambda: generate_data(1000)  )
-
-elif options.MODEL == "Galileo":
-    from LOTlib.Examples.SymbolicRegression.Galileo import data, grammar, make_h0
-
-elif options.MODEL == "RationalRules":
-
-    from LOTlib.Examples.RationalRules import grammar, data, make_h0
-
-elif options.MODEL == "SimpleMagnetism":
-    from LOTlib.Examples.Magnetism.Simple import grammar, data, make_h0
-
-elif options.MODEL == "RegularExpression":
-    from LOTlib.Examples.RegularExpression import grammar, data, make_h0
-else:
-    raise NotImplementedError(options.MODEL)
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Run MCMC
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # These get defined for each process
@@ -67,15 +29,14 @@ from LOTlib.Inference.TabooMCMC import TabooMCMC
 from LOTlib.Inference.ParticleSwarm import ParticleSwarm, ParticleSwarmPriorResample
 from LOTlib.Inference.MultipleChainMCMC import MultipleChainMCMC
 from LOTlib.Inference.PartitionMCMC import PartitionMCMC
-# Where we store the output
-out_hypotheses = open(os.devnull,'w') #ParallelBufferedIO(options.OUT + "-hypotheses.txt")
-out_aggregate  = ParallelBufferedIO(options.OUT + "-aggregate.txt")
 
-def run_one(iteration, sampler_type):
+def run_one(iteration, model, sampler_type):
     if LOTlib.SIG_INTERRUPTED: # do this so we don't create (big) hypotheses
         return
 
+    data, make_h0 = load_model(model)
     h0 = make_h0()
+    grammar = h0.grammar
 
     # Create a sampler
     if sampler_type == 'mh_sample_A':               sampler = MHSampler(h0, data, options.SAMPLES,  likelihood_temperature=1.0)
@@ -100,36 +61,36 @@ def run_one(iteration, sampler_type):
     elif sampler_type == 'taboo_C':                 sampler = TabooMCMC(h0, data, steps=options.SAMPLES, skip=0, penalty= 0.100)
     elif sampler_type == 'taboo_D':                 sampler = TabooMCMC(h0, data, steps=options.SAMPLES, skip=0, penalty= 1.000)
     elif sampler_type == 'taboo_E':                 sampler = TabooMCMC(h0, data, steps=options.SAMPLES, skip=0, penalty=10.000)
-    elif sampler_type == 'partitionMCMC_A':         sampler = PartitionMCMC(grammar, make_h0, data, 100, steps=options.SAMPLES)
-    elif sampler_type == 'partitionMCMC_B':         sampler = PartitionMCMC(grammar, make_h0, data, 1000, steps=options.SAMPLES)
-    elif sampler_type == 'partitionMCMC_C':         sampler = PartitionMCMC(grammar, make_h0, data, 10000, steps=options.SAMPLES)
+    elif sampler_type == 'partitionMCMC_A':         sampler = PartitionMCMC(grammar, make_h0, data, 10, steps=options.SAMPLES)
+    elif sampler_type == 'partitionMCMC_B':         sampler = PartitionMCMC(grammar, make_h0, data, 100, steps=options.SAMPLES)
+    elif sampler_type == 'partitionMCMC_C':         sampler = PartitionMCMC(grammar, make_h0, data, 1000, steps=options.SAMPLES)
     elif sampler_type == 'enumeration_A':           sampler = EnumerationInference(grammar, make_h0, data, steps=options.SAMPLES)
     else: assert False, "Bad sampler type: %s" % sampler_type
 
-    # Run evaluate on it, printing to the right locations
-    evaluate_sampler(sampler, trace=False, prefix="\t".join(map(str, [options.MODEL, iteration, sampler_type])),  out_hypotheses=out_hypotheses, out_aggregate=out_aggregate, print_every=options.PRINTEVERY)
+    with open("output/out-aggregate.%s" % get_rank(), 'a') as out_aggregate:
+        with open(os.devnull,'w')  as out_hypotheses:
+            # Run evaluate on it, printing to the right locations
+            evaluate_sampler(sampler, trace=False, prefix="\t".join(map(str, [model, iteration, sampler_type])),  out_hypotheses=out_hypotheses, out_aggregate=out_aggregate, print_every=options.PRINTEVERY)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Create all parameters
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # For each process, create the lsit of parameter
-params = [ list(g) for g in product(range(options.REPETITONS), [
-                                                                'multiple_chains_A', 'multiple_chains_B', 'multiple_chains_C',
-                                                                'taboo_A', 'taboo_B', 'taboo_C', 'taboo_D',
-                                                                'particle_swarm_A', 'particle_swarm_B', 'particle_swarm_C',
-                                                                'particle_swarm_prior_sample_A', 'particle_swarm_prior_sample_B', 'particle_swarm_prior_sample_C',
-                                                                'mh_sample_A', 'mh_sample_B', 'mh_sample_C', 'mh_sample_D', 'mh_sample_E',
-                                                                'parallel_tempering_A', 'parallel_tempering_B', 'parallel_tempering_C',
-                                                                'partitionMCMC_A', 'partitionMCMC_B', 'partitionMCMC_C',
-                                                                'enumeration_A'
-                                                                ])]
+params = [list(g) for g in product(range(options.REPETITONS),\
+                                    ['Galileo', 'SimpleMagnetism', 'RationalRules', 'RegularExpression', 'Number100', 'Number300', 'Number1000'],
+                                    ['multiple_chains_A', 'multiple_chains_B', 'multiple_chains_C',
+                                     'taboo_A', 'taboo_B', 'taboo_C', 'taboo_D',
+                                     'particle_swarm_A', 'particle_swarm_B', 'particle_swarm_C',
+                                     'particle_swarm_prior_sample_A', 'particle_swarm_prior_sample_B', 'particle_swarm_prior_sample_C',
+                                     'mh_sample_A', 'mh_sample_B', 'mh_sample_C', 'mh_sample_D', 'mh_sample_E',
+                                     'parallel_tempering_A', 'parallel_tempering_B', 'parallel_tempering_C',
+                                     'partitionMCMC_A', 'partitionMCMC_B', 'partitionMCMC_C',
+                                     'enumeration_A'])]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Actually run
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 MPI_map(run_one, params, random_order=False)
-
-#map( lambda a: run_one(*a), params)
 

@@ -1,4 +1,4 @@
 
 from Model import *
-from Run import run_mh
-import MemoryDecay, TwoConcepts, Run
+from Demo import run_mh
+import MemoryDecay, TwoConcepts, Demo

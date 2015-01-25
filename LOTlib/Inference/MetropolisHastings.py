@@ -99,7 +99,7 @@ class MHSampler():
 
     def next(self):
 
-        if self.samples_yielded > self.steps:
+        if self.samples_yielded >= self.steps:
             raise StopIteration
         else:
             for _ in xrange(self.skip+1):

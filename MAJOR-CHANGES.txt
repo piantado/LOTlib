@@ -1,3 +1,4 @@
+        - On failure of a proposal type, proposers now raise ProposalFailedException, rather than returning [newt,0.0]
 Jan 7 2014
 	- Changed @LOTlib_primitive to @primitive
 Dec 28 2014        

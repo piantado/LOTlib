@@ -208,17 +208,25 @@ class FunctionNode(object):
             # Don't use + to concatenate strings.
             return '{} {}'.format(str(self.name), ','.join(map(str, self.args)))
 
-    def fullprint(self, d=0):
+    def fullprint(self, d=0, show_rule=False):
         """A handy printer for debugging"""
         tabstr = "  .  " * d
         print tabstr, self.returntype, self.name, \
-            "\t", self.generation_probability, "\t", self.added_rule
+            "\t", self.generation_probability, "\t", self.added_rule,
+
+        if show_rule:
+           print "\t\t", self.rule
+        else:
+            print
+
+
         if self.args is not None:
             for a in self.args:
                 if isFunctionNode(a):
-                    a.fullprint(d+1)
+                    a.fullprint(d+1, show_rule=show_rule)
                 else:
                     print tabstr, a
+
 
     def liststring(self, cons="cons_"):
         """This "evals" cons_ so that we can conveniently build lists (of lists) without having to eval.
@@ -249,13 +257,16 @@ class FunctionNode(object):
         This is actually a little subtle due to bound variables.
 
         In (lambda (x) x) and (lambda (y) y) will be equal (since they map to identical strings via
-        pystring), even though the nodes below x and y will not themselves be equal. This is because
-        pystring(x) and pystring(y) will not know where these came from and will just compare the uuids.
+        fullstring), even though the nodes below x and y will not themselves be equal. This is because
+        fullstring(x) and fullstring(y) will not know where these came from and will just compare the uuids.
 
-        But pystring on the lambda keeps track of where bound variables were introduced.
+        But fullstring on the lambda keeps track of where bound variables were introduced.
+
+        NOTE: We need to do thsi using fullstring instead of pystring in order to avoid the fact that pystring ignores
+        returntypes and nodes whose name is ''
 
         """
-        return pystring(self) == pystring(other)
+        return fullstring(self) == fullstring(other)
 
     # TODO: overwrite these with something faster
     # hash trees. This just converts to string -- maybe too slow?
@@ -323,6 +334,15 @@ class FunctionNode(object):
             # TODO: In python 3, use yeild from
             for n in filter(isFunctionNode, self.args):
                 yield n
+
+    def argTypes(self):
+        # A list of the strings or returntypes of by args
+        # This should be equal to what my rule produced
+        if self.args is None:
+            return None
+        else:
+           return [a.returntype if isinstance(a, FunctionNode) else a for a in self.args]
+
 
     def is_terminal(self):
         """A FunctionNode is considered a "terminal" if it has no FunctionNodes below."""
@@ -780,4 +800,4 @@ class BVUseFunctionNode(FunctionNode):
 
 
 # NOTE: This must come at the end to meet dependencies
-from LOTlib.Visualization.Stringification import pystring
+from LOTlib.Visualization.Stringification import pystring, fullstring

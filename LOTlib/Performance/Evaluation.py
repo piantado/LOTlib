@@ -6,23 +6,44 @@
                 MAYBE USE: #LOTlib.Hypothesis.POSTERIOR_CALL_COUNTER and report how many calls we've made
 """
 
+import sys
+import re
 from collections import defaultdict
 from time import time
 from numpy import mean, diff
-import sys
 
 from LOTlib import lot_iter
 from LOTlib.Miscellaneous import logsumexp, r3, r5
 
 
+def load_model(modelname):
+    """
+    Loads a model, returning (data, make_h0)
+    If modelname has a :<number> (e.g. Number.200) then it calls generate_data with that amount of data
+    :param modelName:
+    :return:
+    """
+    try:
+        if re.search(r"\:", modelname):
+            model, ndata = re.split(r":", modelname)
+            exec("from LOTlib.Examples.%s import grammar, generate_data, make_h0" % model)
+            data = generate_data(int(ndata))
+        else:
+            model = modelname
+            exec("from LOTlib.Examples.%s import grammar, data, make_h0" % model)
+    except ImportError as e:
+        print >>sys.stderr, "*** Import error with %s" % modelname
+        raise e
+
+    return data, make_h0
+
 def mydisplay(lst,n=10):
     # A nice display of the first n, guaranteeing that there will be n
     ret = map(r3, lst[:n])
 
-    # Make it the right lenght, in case its too short
-    ## TODO: CAN DO THIS FASTER WITHOUT THE WHILE
-    while len(ret) < n: ret.append("NA")
-
+    # Make it the right length, in case its too short
+    while len(ret) < n:
+        ret.append("NA")
 
     return ret
 
