@@ -1,5 +1,6 @@
 
 from math import log
+from LOTlib.Evaluation.EvaluationException import TooBigException
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
 
@@ -43,12 +44,15 @@ class NumberGameHypothesis(LOTHypothesis):
 
     def __call__(self, *args, **kwargs):
         if self.value_set is None:
-            value_set = LOTHypothesis.__call__(self)
-            # Restrict our concept to being within our domain; also handle 'None' call values
+            try:                    # Sometimes self.value has too many nodes!
+                value_set = LOTHypothesis.__call__(self)
+            except TooBigException:
+                value_set = set()
+            # Restrict our concept to being within our domain
             if isinstance(value_set, set):
                 value_set = [x for x in value_set if x <= self.domain]
             else:
-                value_set = []
+                value_set = set()   # Sometimes self() returns None
             self.value_set = value_set
 
         return self.value_set
