@@ -49,17 +49,18 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
 
         """
         self.C = np.zeros((len(self.hypotheses), len(self.rules)))
-        rule_idxs = {r: i for i, r in enumerate(self.rules)}
+        rule_idxs = {str(r): i for i, r in enumerate(self.rules)}
 
         for j, h in enumerate(self.hypotheses):
             grammar_rules = [fn.rule for fn in h.value.subnodes()[1:]]
             for rule in grammar_rules:
                 try:
-                    self.C[j, rule_idxs[rule]] += 1
+                    self.C[j, rule_idxs[str(rule)]] += 1
                 except Exception as e:
                     if isinstance(rule, BVUseGrammarRule):
                         pass
                     else:
+                        print str(h)
                         raise e
 
     def init_H(self):
