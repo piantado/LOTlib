@@ -281,15 +281,15 @@ if __name__ == "__main__":
     # LOT grammar
     # --------------------------------------------------------------------------------------------------------
 
-    run(grammar=lot_grammar, data=josh_data, domain=100, alpha=0.9, grammar_n=0, print_stuff='',
-        ngh='mcmc100000save', ngh_file=path+'/hypo/mcmc50000.p')
+    # run(grammar=lot_grammar, data=josh_data, domain=100, alpha=0.9, grammar_n=0, print_stuff='',
+    #     ngh='mcmc100000save', ngh_file=path+'/hypo/mcmc50000.p')
 
-    # run(grammar=lot_grammar, josh='', data=josh_data, domain=100, alpha=0.9,
-    #     ngh='load', ngh_file=path+'/hypo/mcmc50000.p',
-    #     grammar_n=100000, skip=100, cap=1000,
-    #     print_stuff='samples', plot_type='', gh_pickle='save',
-    #     gh_file=path+'/out/1_24/lot_100k.p',
-    #     csv_save=path+'/out/1_24/lot_100k')
+    for i in range(0, 5):
+        run(grammar=lot_grammar, josh='', data=josh_data, domain=100, alpha=0.9,
+            ngh='load', ngh_file=path+'/hypo/mcmc50000.p',
+            grammar_n=30000, skip=30, cap=1000,
+            print_stuff='', plot_type='', gh_pickle='',
+            csv_save=path+'/out/1_24/lot_30k_'+str(i))
 
     # --------------------------------------------------------------------------------------------------------
     # TESTING  |  Original number game
