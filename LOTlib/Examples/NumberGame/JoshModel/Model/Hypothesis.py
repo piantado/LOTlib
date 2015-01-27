@@ -3,7 +3,8 @@ from math import log
 import numpy as np
 from LOTlib.GrammarRule import BVUseGrammarRule
 from LOTlib.Hypotheses.GrammarHypothesisVectorized import GrammarHypothesisVectorized
-from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis, Infinity
+from LOTlib.Examples.NumberGame.NewVersion.Model import NumberGameHypothesis
 
 
 # ------------------------------------------------------------------------------------------------------------
@@ -36,9 +37,52 @@ class JoshConceptsHypothesis(LOTHypothesis):
         self.update_posterior()
         return self.likelihood
 
+class NoDoubleConstNGHypothesis(NumberGameHypothesis):
+    def compute_prior(self, recompute=False, vectorized=False):
+        """Compute the log of the prior probability.
+
+        """
+        # Re-compute the FunctionNode `self.value` generation probabilities
+        if recompute:
+            self.value.recompute_generation_probabilities(self.grammar)
+
+        # Compute this hypothesis prior
+        if self.value.count_subnodes() > self.maxnodes:
+            self.prior = -Infinity
+        else:
+            # Compute prior with either RR or not.
+            self.prior = self.value.log_probability() / self.prior_temperature
+
+        leaves = [leaf for leaf in self.value.all_leaves()]
+        if leaves.count('Const') >= 2:
+            self.prior = -Infinity
+
+        self.update_posterior()
+        return self.prior
+
 
 # ------------------------------------------------------------------------------------------------------------
 # GrammarHypothesis classes
+
+class NoConstGrammarHypothesis(GrammarHypothesisVectorized):
+    def get_propose_idxs(self):
+        """
+        Skip 'Const' rules
+
+        """
+        proposal_indexes = range(self.n)
+        nonterminals = self.grammar.nonterminals()
+
+        for nt in nonterminals:
+            # Don't propose to constants!
+            if nt.upper() is not 'CONST':
+                idxs, r = self.get_rules(rule_nt=nt)
+                # Only rules with alternatives/siblings
+                if len(idxs) == 1:
+                    proposal_indexes.remove(idxs[0])
+
+        return proposal_indexes
+
 
 class MixtureGrammarHypothesis(GrammarHypothesisVectorized):
     """
