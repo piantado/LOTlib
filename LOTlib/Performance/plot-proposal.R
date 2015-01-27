@@ -6,7 +6,7 @@ library(gridExtra) # needed for "unit"
 ## Evaluation of proposals
 ##############################################################
 
-d <- read.table("output/proposal-aggregate.txt")
+d <- read.table("o.txt")
 #d <- read.table("output/pi.txt")
 names(d)[1:6] <- c("model", "iteration", "parameter", "steps", "time", "Z")
 
@@ -28,7 +28,7 @@ p <- ggplot(d, aes(x=steps, y=Z, color=code, linetype=strength)) +
 	facet_wrap( ~ model, scales="free_y") # free_y makes our y axes free
 p
 
-ggsave("output/proposal.pdf", width=16, height=12)
+ggsave("proposal.pdf", width=16, height=12)
 
 
 

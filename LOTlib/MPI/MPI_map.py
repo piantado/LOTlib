@@ -164,7 +164,7 @@ def MPI_unorderedmap(f, generator):
     if size == 1:
         print "# *** NOTE: 'MPI_unorderedmap' running as 'map' since size=1!"
         for g in iter(generator):
-            yield f(g)
+            yield f(*g)
 
         raise StopIteration
     else:

@@ -1,4 +1,5 @@
         - On failure of a proposal type, proposers now raise ProposalFailedException, rather than returning [newt,0.0]
+        - Changes to FunctionNode.__eq__ that now make it take into account "invisible" nodes (FunctionNodes that have a name of '')
 Jan 7 2014
 	- Changed @LOTlib_primitive to @primitive
 Dec 28 2014        

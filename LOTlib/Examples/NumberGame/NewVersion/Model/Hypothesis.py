@@ -16,6 +16,12 @@ class NumberGameHypothesis(LOTHypothesis):
         self.domain = domain
         self.value_set = None
 
+    def compute_single_likelihood(self, datum, s, error_p, updateflag=True):
+        if s is not None and datum in s:
+            return log(self.alpha/len(s) + error_p)
+        else:
+            return log(error_p)
+
     def compute_likelihood(self, data, updateflag=True, **kwargs):
         """Likelihood of specified data being produced by this hypothesis.
 
@@ -29,13 +35,7 @@ class NumberGameHypothesis(LOTHypothesis):
             s = set()       # If our hypothesis call blows things up...   TODO handle this better!!
         error_p = (1.-self.alpha) / self.domain
 
-        def compute_single_likelihood(datum, updateflag=True):
-            if s is not None and datum in s:
-                return log(self.alpha/len(s) + error_p)
-            else:
-                return log(error_p)
-
-        likelihoods = [compute_single_likelihood(d, updateflag=updateflag) for d in data]
+        likelihoods = [self.compute_single_likelihood(d, s, error_p, updateflag=updateflag) for d in data]
         likelihood = sum(likelihoods) / self.likelihood_temperature
         if updateflag:
             self.likelihood = likelihood

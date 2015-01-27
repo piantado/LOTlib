@@ -189,8 +189,10 @@ lot_grammar.add_rule('EXPR', 'ipowf_', ['EXPR', 'EXPR'], 1.)        # NOTE: ther
 lot_grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 1.)
 lot_grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1.)
 lot_grammar.add_rule('EXPR', 'ends_in_', ['EXPR', 'EXPR'], 1.)
+
+lot_grammar.add_rule('EXPR', '', ['OPCONST'], 20.)
 for i in range(1, 11):
-    lot_grammar.add_rule('EXPR', '', [str(i)], 2.)
+    lot_grammar.add_rule('OPCONST', '', [str(i)], 2.)
 
 # ------------------------------------------------------------------------------------------------------------
 # Interval rules
