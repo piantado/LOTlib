@@ -30,7 +30,7 @@ def mpirun(d):
 def run(grammar=simple_test_grammar, mixture_model=0, data=toy_3n,
         domain=100, alpha=0.99, ngh='enum6', ngh_file='',
         grammar_n=10000, skip=10, cap=100,
-        print_stuff='grammar_h', plot_type='', plot_widget=False,
+        print_stuff='samples', plot_type='', plot_widget=False,
         gh_pickle='', gh_file='', csv_save=''):
     """
     Enumerate some NumberGameHypotheses, then use these to sample some GrammarHypotheses over `data`.
@@ -214,7 +214,8 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=toy_3n,
 
     # Save model-human comparison for MAP & initial gh's
     if csv_save:
-        top_gh = mh_grammar_summary.get_top_samples(n=1)[0]
+        sorted_samples = [sorted(mh_grammar_summary.samples, key=(lambda h: -h.posterior_score))]
+        top_gh = sorted_samples[0]
         csv_compare_model_human(csv_save+'_data_MAP.csv', top_gh)
 
         gh0 = mh_grammar_summary.samples[0]
@@ -284,15 +285,15 @@ if __name__ == "__main__":
     # LOT grammar
     # --------------------------------------------------------------------------------------------------------
 
-    run(grammar=lot_grammar, data=josh_data, domain=100, alpha=0.9, grammar_n=0, print_stuff='',
-        ngh='save', ngh_file=path+'/ngh_mcmc100k.p')
+    # run(grammar=lot_grammar, data=josh_data, domain=100, alpha=0.9, grammar_n=0, print_stuff='',
+    #     ngh='save', ngh_file=path+'/ngh_mcmc100k.p')
 
-    # run(grammar=lot_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9,
-    #     ngh='load', ngh_file=path+'/hypo/mcmc50000.p',
-    #     grammar_n=100000, skip=100, cap=1000,
-    #     print_stuff='samples', plot_type='', gh_pickle='save',
-    #     gh_file=path+'/out/1_24/lot_100k.p',
-    #     csv_save=path+'/out/1_24/lot_100k')
+    run(grammar=lot_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9, print_stuff='',
+        grammar_n=200000, skip=200, cap=1000,
+        ngh_file=path+'/ngh_mcmc100k.p', ngh='load',
+        gh_file=path+'/out/1_26/lot_200k_1.p', gh_pickle='save',
+        csv_save=path+'/out/1_26/lot_200k_1')
+
 
     # --------------------------------------------------------------------------------------------------------
     # TESTING  |  Original number game
