@@ -55,7 +55,7 @@ def isprime_(n):
         for a in range(2, int(n**0.5)+1):
             if n % a == 0:
                 return 0
-    except ValueError:
+    except ValueError or MemoryError:
         return 0
     return n
 
