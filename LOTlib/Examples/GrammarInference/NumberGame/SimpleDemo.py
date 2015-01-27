@@ -124,12 +124,11 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
 
     if 'save' in ngh:
 
-        results = MPI_unorderedmap(mpirun, [[d] for d in data * 20])
-        # results = map(mpirun, [d for d in data * 20])
-
         ngh_samples = set()
-        for hypotheses in results:
-            ngh_samples = ngh_samples.union(hypotheses)
+        for i in range(0,10):
+            results = MPI_unorderedmap(mpirun, [[d] for d in data * 2])
+            for hypotheses in results:
+                ngh_samples = ngh_samples.union(hypotheses)
 
         # Only keep the top 10,000 ngame hypotheses
         ngh_samples = sorted(ngh_samples, key=(lambda h: -h.posterior_score))
