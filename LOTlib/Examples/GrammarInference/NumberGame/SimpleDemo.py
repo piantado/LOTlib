@@ -16,9 +16,8 @@ from Model import *
 
 
 
-
 def mpirun(d):
-    h0 = NumberGameHypothesis(grammar=grammar, domain=100, alpha=0.9)
+    h0 = NumberGameHypothesis(grammar=lot_grammar, domain=100, alpha=0.9)
     mh_sampler = MHSampler(h0, d.input, 100000)
     hypotheses = set([h for h in lot_iter(mh_sampler)])
     hypotheses = sorted(hypotheses, key=(lambda h: -h.posterior_score))
@@ -27,7 +26,7 @@ def mpirun(d):
     return hypotheses
 
 
-def run(grammar=simple_test_grammar, mixture_model=0, data=toy_3n,
+def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
         domain=100, alpha=0.99, ngh='enum6', ngh_file='',
         grammar_n=10000, skip=10, cap=100,
         print_stuff='samples', plot_type='', plot_widget=False,
@@ -118,11 +117,16 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=toy_3n,
 
     if 'save' in ngh:
 
-        results = MPI_unorderedmap(mpirun, map(lambda d: [d], data * 20))
+        results = MPI_unorderedmap(mpirun, [[d] for d in data * 20])
 
         ngh_samples = set()
         for hypotheses in results:
             ngh_samples = ngh_samples.union(hypotheses)
+
+        # Only keep the top 10,000 ngame hypotheses
+        ngh_samples = sorted(ngh_samples, key=(lambda h: -h.posterior_score))
+        if len(ngh_samples) > 50000:
+            ngh_samples = ngh_samples[0:50000]
 
         f = open(ngh_file, "wb")
         pickle.dump(ngh_samples, f)
