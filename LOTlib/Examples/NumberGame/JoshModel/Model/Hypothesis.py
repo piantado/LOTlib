@@ -1,6 +1,7 @@
 
 from math import log
 import numpy as np
+from LOTlib.FunctionNode import FunctionNode
 from LOTlib.GrammarRule import BVUseGrammarRule
 from LOTlib.Hypotheses.GrammarHypothesisVectorized import GrammarHypothesisVectorized
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis, Infinity
@@ -55,8 +56,7 @@ class NoDoubleConstNGHypothesis(NumberGameHypothesis):
 
         # Don't use this tree if we have 2 constants as children in some subnode
         for fn in self.value.subnodes()[1:]:
-            args = [arg.name for arg in fn.args]
-            if args.count('Const') >= 2:
+            if all([arg.name == '' and len(arg.args)==1 and isinstance(arg.args[0], FunctionNode) and arg.args[0].returntype=='OPCONST' for arg in fn.argFunctionNodes()]):
                 self.prior = -Infinity
                 break
 

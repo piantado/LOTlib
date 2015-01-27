@@ -3,7 +3,6 @@
     Simple evaluation of proposal schemes. Test various mixtures of them.
 """
 
-import os
 from itertools import product
 from optparse import OptionParser
 

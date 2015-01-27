@@ -73,6 +73,7 @@ def evaluate_sampler(my_sampler, print_every=1000, out_hypotheses=sys.stdout, ou
             Z = logsumexp(post) # just compute total probability mass found -- the main measure
 
             out_aggregate.write('\t'.join(map(str, [prefix, n, r3(time()-startt), r5(Z), len(post)]+mydisplay(post))) + '\n')
+            out_aggregate.flush()
 
     # Now once we're done, output the hypothesis stats
     for k,v in visited_at.items():
@@ -81,6 +82,7 @@ def evaluate_sampler(my_sampler, print_every=1000, out_hypotheses=sys.stdout, ou
         if len(v) > 1: mean_diff = mean(diff(v))
 
         out_hypotheses.write('\t'.join(map(str, [prefix, k.posterior_score, k.prior, k.likelihood, len(v), min(v), max(v), mean_diff, sum(diff(v)==0) ])) +'\n') # number of rejects from this
+        out_hypotheses.flush()
 
     return 0.0
 

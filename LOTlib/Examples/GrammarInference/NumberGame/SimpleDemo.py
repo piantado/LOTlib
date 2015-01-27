@@ -15,26 +15,19 @@ from LOTlib.MPI.MPI_map import MPI_unorderedmap
 from Model import *
 
 
+from LOTlib.Visualization.MCMCSummary.TopN import TopN
 
 def mpirun(d):
-    h0 = NumberGameHypothesis(grammar=lot_grammar, domain=100, alpha=0.9)
+    h0 = NoDoubleConstNGHypothesis(grammar=lot_grammar, domain=100, alpha=0.9)
     mh_sampler = MHSampler(h0, d.input, 100000)
 
-    hypotheses = set()
-    hypo_miniset = set()
-    for h in lot_iter(mh_sampler):
-        hypo_miniset.add(h)
-        if len(hypo_miniset) > 200:
-            hypotheses = hypotheses.union(hypo_miniset)
-            hypo_miniset = set()
-            if len(hypotheses) > 1000:
-                hypotheses = sorted(hypotheses, key=(lambda h: -h.posterior_score))
-                hypotheses = set(hypotheses[0:500])
+    hypotheses = TopN(N=1000)
 
-    if len(hypotheses) > 500:
-        hypotheses = sorted(hypotheses, key=(lambda h: -h.posterior_score))
-        hypotheses = hypotheses[0:500]
-    return hypotheses
+    for h in lot_iter(mh_sampler):
+        # print h.posterior_score, h
+        hypotheses.add(h)
+
+    return [h for h in hypotheses.get_all()]
 
 
 def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
@@ -130,7 +123,7 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
 
         ngh_samples = set()
         for i in range(0,10):
-            results = MPI_unorderedmap(mpirun, [[d] for d in data * 2])
+            results = MPI_unorderedmap(mpirun, [[d] for d in data * 1])
             for hypotheses in results:
                 ngh_samples = ngh_samples.union(hypotheses)
             if len(ngh_samples) > 50000:

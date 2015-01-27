@@ -43,6 +43,7 @@ def ifU_(C,X):
 @primitive
 def ends_in_(n, d):
     """Return `n` if it ends with digit `d`, 0 otherwise. E.g. ends_in_(427, 7) == 1"""
+
     if (n % 10) == d:
         return n
     else:
@@ -51,12 +52,16 @@ def ends_in_(n, d):
 @primitive
 def isprime_(n):
     """Is `n` a prime number?"""
+    if n > 1000:
+        raise OverflowError
+
     try:
-        for a in range(2, int(n**0.5)+1):
+        for a in xrange(2, int(n**0.5)+1):
             if n % a == 0:
                 return 0
     except (ValueError, MemoryError):
-        return 0
+        raise OverflowError
+
     return n
 
 @primitive
