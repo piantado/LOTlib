@@ -18,8 +18,15 @@ from Model import *
 
 def mpirun(d):
     h0 = NumberGameHypothesis(grammar=lot_grammar, domain=100, alpha=0.9)
-    mh_sampler = MHSampler(h0, d.input, 100000)
-    hypotheses = set([h for h in lot_iter(mh_sampler)])
+    mh_sampler = MHSampler(h0, d.input, 100)
+
+    hypotheses = set()
+    for h in lot_iter(mh_sampler):
+        hypotheses.add(h)
+        if len(hypotheses) > 1500:
+            hypotheses = sorted(hypotheses, key=(lambda h: -h.posterior_score))
+            hypotheses = set(list(hypotheses)[0:500])
+
     hypotheses = sorted(hypotheses, key=(lambda h: -h.posterior_score))
     if len(hypotheses) > 500:
         hypotheses = hypotheses[0:500]
@@ -118,6 +125,7 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
     if 'save' in ngh:
 
         results = MPI_unorderedmap(mpirun, [[d] for d in data * 20])
+        # results = map(mpirun, [d for d in data * 20])
 
         ngh_samples = set()
         for hypotheses in results:
@@ -289,14 +297,14 @@ if __name__ == "__main__":
     # LOT grammar
     # --------------------------------------------------------------------------------------------------------
 
-    # run(grammar=lot_grammar, data=josh_data, domain=100, alpha=0.9, grammar_n=0, print_stuff='',
-    #     ngh='save', ngh_file=path+'/ngh_mcmc100k.p')
+    run(grammar=lot_grammar, data=josh_data, domain=100, alpha=0.9, grammar_n=0, print_stuff='',
+        ngh='save', ngh_file=path+'/ngh_mcmc100k.p')
 
-    run(grammar=lot_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9, print_stuff='',
-        grammar_n=200000, skip=200, cap=1000,
-        ngh_file=path+'/ngh_mcmc100k.p', ngh='load',
-        gh_file=path+'/out/1_26/lot_200k_1.p', gh_pickle='save',
-        csv_save=path+'/out/1_26/lot_200k_1')
+    # run(grammar=lot_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9, print_stuff='',
+    #     grammar_n=200000, skip=200, cap=1000,
+    #     ngh_file=path+'/ngh_mcmc100k.p', ngh='load',
+    #     gh_file=path+'/out/1_26/lot_200k_1.p', gh_pickle='save',
+    #     csv_save=path+'/out/1_26/lot_200k_1')
 
 
     # --------------------------------------------------------------------------------------------------------
