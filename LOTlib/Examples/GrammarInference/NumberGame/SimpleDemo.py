@@ -8,20 +8,18 @@ import re
 import csv
 from math import exp
 import pickle
-from LOTlib.Hypotheses.GrammarHypothesis import GrammarHypothesis
-from LOTlib.Hypotheses.GrammarHypothesisVectorized import GrammarHypothesisVectorized
-from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Examples.NumberGame.JoshModel.Model import *
 from LOTlib.Examples.NumberGame.NewVersion.Model import *
+from LOTlib.Inference.MetropolisHastings import MHSampler
+from LOTlib.MPI.MPI_map import MPI_unorderedmap
 from Model import *
 
 
 
-from LOTlib.MPI.MPI_map import MPI_unorderedmap
 
 def mpirun(d):
     h0 = NumberGameHypothesis(grammar=grammar, domain=100, alpha=0.9)
-    mh_sampler = MHSampler(h0, d.input, 1000)
+    mh_sampler = MHSampler(h0, d.input, 100000)
     hypotheses = set([h for h in lot_iter(mh_sampler)])
     hypotheses = sorted(hypotheses, key=(lambda h: -h.posterior_score))
     if len(hypotheses) > 500:
@@ -29,7 +27,7 @@ def mpirun(d):
     return hypotheses
 
 
-def run(grammar=simple_test_grammar, josh='', data=toy_3n,
+def run(grammar=simple_test_grammar, mixture_model=0, data=toy_3n,
         domain=100, alpha=0.99, ngh='enum6', ngh_file='',
         grammar_n=10000, skip=10, cap=100,
         print_stuff='grammar_h', plot_type='', plot_widget=False,
@@ -81,15 +79,12 @@ def run(grammar=simple_test_grammar, josh='', data=toy_3n,
         >> run()
 
     """
-    if josh is 'mix':
+    if mixture_model:
         ParameterHypothesis = MixtureGrammarHypothesis
         DomainHypothesis = JoshConceptsHypothesis
-    elif josh is 'lot':
-        ParameterHypothesis = GrammarHypothesisVectorized
-        DomainHypothesis = JoshConceptsHypothesis
     else:
-        ParameterHypothesis = GrammarHypothesisVectorized
-        DomainHypothesis = NumberGameHypothesis
+        ParameterHypothesis = NoConstGrammarHypothesis
+        DomainHypothesis = JoshConceptsHypothesis
 
     # --------------------------------------------------------------------------------------------------------
     # Sample/enumerate/load/save some NumberGameHypotheses
@@ -101,13 +96,13 @@ def run(grammar=simple_test_grammar, josh='', data=toy_3n,
         for h in hypotheses:
             h.grammar = grammar
     # MCMC
-    # elif 'mcmc' in ngh:
-    #     h0 = DomainHypothesis(grammar=grammar, domain=domain, alpha=alpha)
-    #     mh_sampler = MHSampler(h0, data[0].input, int(re.sub('[a-z]', '', ngh)))
-    #     hypotheses = set([h for h in lot_iter(mh_sampler)])
-    #     hypotheses = sorted(hypotheses, key=(lambda h: -h.posterior_score))
-    #     if len(hypotheses) > 10000:
-    #         hypotheses = hypotheses[0:10000]        # Only keep the top 10,000 ngame hypotheses
+    elif 'mcmc' in ngh:
+        h0 = DomainHypothesis(grammar=grammar, domain=domain, alpha=alpha)
+        mh_sampler = MHSampler(h0, data[0].input, int(re.sub('[a-z]', '', ngh)))
+        hypotheses = set([h for h in lot_iter(mh_sampler)])
+        hypotheses = sorted(hypotheses, key=(lambda h: -h.posterior_score))
+        if len(hypotheses) > 10000:
+            hypotheses = hypotheses[0:10000]        # Only keep the top 10,000 ngame hypotheses
     # Enumerate
     elif 'enum' in ngh:
         hypotheses = []
@@ -117,14 +112,17 @@ def run(grammar=simple_test_grammar, josh='', data=toy_3n,
             hypotheses.append(h)
     else:
         hypotheses = []
-    # Save
+
+    # --------------------------------------------------------------------------------------------------------
+    # Save NGH's (MCMC with parallelization!)
+
     if 'save' in ngh:
 
         results = MPI_unorderedmap(mpirun, map(lambda d: [d], data * 20))
 
         ngh_samples = set()
         for hypotheses in results:
-             ngh_samples = ngh_samples.union(hypotheses)
+            ngh_samples = ngh_samples.union(hypotheses)
 
         f = open(ngh_file, "wb")
         pickle.dump(ngh_samples, f)
@@ -287,9 +285,9 @@ if __name__ == "__main__":
     # --------------------------------------------------------------------------------------------------------
 
     run(grammar=lot_grammar, data=josh_data, domain=100, alpha=0.9, grammar_n=0, print_stuff='',
-        ngh='mcmc100save', ngh_file=path+'/hypo/mcmc50000.p')
+        ngh='save', ngh_file=path+'/ngh_mcmc100k.p')
 
-    # run(grammar=lot_grammar, josh='', data=josh_data, domain=100, alpha=0.9,
+    # run(grammar=lot_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9,
     #     ngh='load', ngh_file=path+'/hypo/mcmc50000.p',
     #     grammar_n=100000, skip=100, cap=1000,
     #     print_stuff='samples', plot_type='', gh_pickle='save',
