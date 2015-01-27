@@ -53,9 +53,12 @@ class NoDoubleConstNGHypothesis(NumberGameHypothesis):
             # Compute prior with either RR or not.
             self.prior = self.value.log_probability() / self.prior_temperature
 
-        leaves = [leaf for leaf in self.value.all_leaves()]
-        if leaves.count('Const') >= 2:
-            self.prior = -Infinity
+        # Don't use this tree if we have 2 constants as children in some subnode
+        for fn in self.value.subnodes()[1:]:
+            args = [arg.name for arg in fn.args]
+            if args.count('Const') >= 2:
+                self.prior = -Infinity
+                break
 
         self.update_posterior()
         return self.prior
