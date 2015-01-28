@@ -98,6 +98,7 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
         hypotheses = pickle.load(f)
         for h in hypotheses:
             h.grammar = grammar
+            h.alpha = alpha
     # MCMC
     elif 'mcmc' in ngh:
         h0 = DomainHypothesis(grammar=grammar, domain=domain, alpha=alpha)
@@ -126,14 +127,6 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
             results = MPI_unorderedmap(mpirun, [[d] for d in data * 1])
             for hypotheses in results:
                 ngh_samples = ngh_samples.union(hypotheses)
-            if len(ngh_samples) > 50000:
-                ngh_samples = sorted(ngh_samples, key=(lambda h: -h.posterior_score))
-                ngh_samples = ngh_samples[0:50000]
-
-        # Only keep the top 10,000 ngame hypotheses
-        ngh_samples = sorted(ngh_samples, key=(lambda h: -h.posterior_score))
-        if len(ngh_samples) > 50000:
-            ngh_samples = ngh_samples[0:50000]
 
         f = open(ngh_file, "wb")
         pickle.dump(ngh_samples, f)
@@ -289,11 +282,11 @@ if __name__ == "__main__":
     #              gh_file='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
     #                       '/NumberGame/out/profile/individual_100.profile')
 
-    # run(grammar=individual_grammar, josh='lot', data=josh_data, domain=100, alpha=0.9,
-    #     ngh='enum7', grammar_n=10000, skip=10, cap=1000,
-    #     print_stuff='samples', plot_type='', gh_pickle='',
-    #     # gh_file=path+'/out/p/1_22/individual_5000000.p',
-    #     csv_save=path+'/out/csv/1_22/individual_10000')
+    # run(grammar=individual_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9,
+    #     ngh='enum7', grammar_n=100000, skip=100, cap=1000,
+    #     print_stuff='', plot_type='', gh_pickle='',
+    #     # gh_file=path+'/out/p/1_22/individual_100k.p',
+    #     csv_save=path+'/out/1_28/individual_200k')
 
     # --------------------------------------------------------------------------------------------------------
     # LOT grammar
@@ -305,8 +298,8 @@ if __name__ == "__main__":
     run(grammar=lot_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9, print_stuff='',
         grammar_n=5000000, skip=500, cap=10000,
         ngh_file=path+'/ngh_mcmc100k.p', ngh='load',
-        gh_file=path+'/out/1_27/lot_5mil_1.p', gh_pickle='save',
-        csv_save=path+'/out/1_27/lot_5mil_1')
+        # gh_file=path+'/out/1_27/lot_5mil_1.p', gh_pickle='save',
+        csv_save=path+'/out/1_28/lot_5mil_1')
 
 
     # --------------------------------------------------------------------------------------------------------
