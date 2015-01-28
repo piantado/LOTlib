@@ -76,13 +76,16 @@ class NoConstGrammarHypothesis(GrammarHypothesisVectorized):
         proposal_indexes = range(self.n)
         nonterminals = self.grammar.nonterminals()
 
+        # Don't propose to constants!
+        idxs, r = self.get_rules(rule_nt='CONST')
+        for i in idxs:
+            proposal_indexes.remove(i)
+
         for nt in nonterminals:
-            # Don't propose to constants!
-            if nt.upper() is not 'CONST':
-                idxs, r = self.get_rules(rule_nt=nt)
-                # Only rules with alternatives/siblings
-                if len(idxs) == 1:
-                    proposal_indexes.remove(idxs[0])
+            # Only rules with alternatives/siblings
+            idxs, r = self.get_rules(rule_nt=nt)
+            if len(idxs) == 1:
+                proposal_indexes.remove(idxs[0])
 
         return proposal_indexes
 
