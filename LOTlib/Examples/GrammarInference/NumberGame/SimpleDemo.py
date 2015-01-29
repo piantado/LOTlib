@@ -263,7 +263,7 @@ if __name__ == "__main__":
     # cProfile.run("""run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
     #                     alpha=0.9, ngh=5, grammar_n=50, skip=10, cap=100,
     #                     print_stuff=[], plot_type=[], gh_pickle=False)""",
-    #              gh_file=path+'/out/profile/mix_model_50.profile')
+    #              filename=path+'/out/profile/mix_model_50.profile')
 
     # run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100, alpha=0.9,
     #     ngh='enum7', grammar_n=1000, skip=1, cap=1000,
@@ -279,7 +279,7 @@ if __name__ == "__main__":
     # cProfile.run("""run(grammar=individual_grammar, josh='lot', data=josh_data, domain=100,
     #                     alpha=0.9, ngh=5, grammar_n=100, skip=10, cap=100,
     #                     print_stuff=[], plot_type=[], gh_pickle=False)""",
-    #              gh_file='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
+    #              filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
     #                       '/NumberGame/out/profile/individual_100.profile')
 
     # run(grammar=individual_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9,
@@ -295,11 +295,14 @@ if __name__ == "__main__":
     # run(grammar=lot_grammar, data=josh_data, domain=100, alpha=0.9, grammar_n=0, print_stuff='',
     #     ngh='save', ngh_file=path+'/ngh_mcmc100k.p')
 
-    run(grammar=lot_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9, print_stuff='',
-        grammar_n=5000000, skip=500, cap=10000,
-        ngh_file=path+'/ngh_mcmc100k.p', ngh='load',
-        # gh_file=path+'/out/1_27/lot_5mil_1.p', gh_pickle='save',
-        csv_save=path+'/out/1_28/lot_5mil_1')
+
+
+
+    import cProfile
+    cProfile.run("""run(grammar=lot_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9,
+        print_stuff='samples',
+            grammar_n=50, skip=1, cap=100, ngh_file=path+'/ngh_mcmc100k.p', ngh='load')
+        """, filename=path+'/out/1_29/lot_50.profile')
 
 
     # --------------------------------------------------------------------------------------------------------
@@ -316,12 +319,13 @@ if __name__ == "__main__":
     # cProfile.run("""run(grammar=complex_grammar, data=toy_npow2p1, domain=20,
     #                     alpha=0.9, ngh=6, grammar_n=10000, skip=10, cap=100,
     #                     print_stuff=[], plot_type=[], gh_pickle=False)""",
-    #              gh_file='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
+    #              filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
     #                       '/NumberGame/out/1_14/vector_complex_npow2p1_10000.profile')
 
     # --------------------------------------------------------------------------------------------------------
     # Union size of NumberGame hypothesis space accross chains
     # --------------------------------------------------------------------------------------------------------
+
 
     # num_samples = 100000
     # num_chains = 10
