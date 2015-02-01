@@ -98,6 +98,7 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
         hypotheses = pickle.load(f)
         for h in hypotheses:
             h.grammar = grammar
+            h.alpha = alpha
     # MCMC
     elif 'mcmc' in ngh:
         h0 = DomainHypothesis(grammar=grammar, domain=domain, alpha=alpha)
@@ -126,14 +127,6 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
             results = MPI_unorderedmap(mpirun, [[d] for d in data * 1])
             for hypotheses in results:
                 ngh_samples = ngh_samples.union(hypotheses)
-            if len(ngh_samples) > 50000:
-                ngh_samples = sorted(ngh_samples, key=(lambda h: -h.posterior_score))
-                ngh_samples = ngh_samples[0:50000]
-
-        # Only keep the top 10,000 ngame hypotheses
-        ngh_samples = sorted(ngh_samples, key=(lambda h: -h.posterior_score))
-        if len(ngh_samples) > 50000:
-            ngh_samples = ngh_samples[0:50000]
 
         f = open(ngh_file, "wb")
         pickle.dump(ngh_samples, f)
@@ -157,6 +150,29 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
             print i, '\t|  ', r
 
     # --------------------------------------------------------------------------------------------------------
+    # Save comparison of MAP gh to human data for each input/output combo
+
+    def csv_compare_model_human(filename, gh, idx):
+        gh.update()
+        for h in gh.hypotheses:
+            h.compute_prior(recompute=True)
+            h.update_posterior()
+
+        with open(filename, 'a') as f:
+            writer = csv.writer(f)
+            hypotheses = gh.hypotheses
+            for d in data:
+                posteriors = [sum(h.compute_posterior(d.input)) for h in hypotheses]
+                Z = logsumexp(posteriors)
+                weights = [(post-Z) for post in posteriors]
+
+                for o in d.output.keys():
+                    # Probability for yes on output `o` is sum of posteriors for hypos that contain `o`
+                    p_human = float(d.output[o][0]) / float(d.output[o][0] + d.output[o][1])
+                    p_model = sum([exp(w) if o in h() else 0 for h, w in zip(hypotheses, weights)])
+                    writer.writerow([idx, d.input, o, p_human, p_model])
+
+    # --------------------------------------------------------------------------------------------------------
     # Fill VectorSummary
 
     # Load from pickle file
@@ -171,6 +187,13 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
             with open(csv_save+'_bayes.csv', 'wb') as w:
                 writer = csv.writer(w)
                 writer.writerow(['i', 'Prior', 'Likelihood', 'Posterior Score'])
+            with open(csv_save+'_data_MAP.csv', 'wb') as w:
+                writer = csv.writer(w)
+                writer.writerow(['i', 'input', 'output', 'human p', 'model p'])
+            with open(csv_save+'_data_h0.csv', 'wb') as w:
+                writer = csv.writer(w)
+                writer.writerow(['i', 'input', 'output', 'human p', 'model p'])
+
         if 'samples' in print_stuff:
             print '^*'*60, '\nGenerating GrammarHypothesis Samples\n', '^*'*60
 
@@ -179,11 +202,13 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
             mh_grammar_sampler = MHSampler(grammar_h0, data, grammar_n, trace=False)
             mh_grammar_summary = VectorSummary(skip=skip, cap=cap)
 
+            csv_compare_model_human(csv_save+'_data_h0.csv', grammar_h0, 0)
+
             for i, h in enumerate(mh_grammar_summary(mh_grammar_sampler)):
 
-                # Save to csv every N/2000 samples
+                # Save to csv every 100 samples from 0 to 100k, then every 1000
                 if csv_save:
-                    if i % (mh_grammar_sampler.steps/2000) is 0:
+                    if (i < 100000 and i % 100 is 0) or (i % 1000 is 0):
                         with open(csv_save+'_values.csv', 'a') as w:
                             writer = csv.writer(w)
                             writer.writerows([[i, r.nt, r.name, str(r.to), r.p] for r in h.rules])
@@ -192,45 +217,16 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
                             if mh_grammar_summary.sample_count:
                                 writer.writerow([i, h.prior, h.likelihood, h.posterior_score])
 
+                        top_gh = sorted(mh_grammar_summary.samples, key=(lambda x: -x.posterior_score))[0]
+                        csv_compare_model_human(csv_save+'_data_MAP.csv', top_gh, i)
+
                 # Print every N/20 samples
                 if 'samples' in print_stuff:
                     if i % (mh_grammar_sampler.steps/20) is 0:
                         print ['%.3f' % v for v in h.value], '\n', i, '-'*100
                         print h.prior, h.likelihood, h.posterior_score
 
-    # --------------------------------------------------------------------------------------------------------
-    # Save comparison of MAP gh to human data for each input/output combo
 
-    def csv_compare_model_human(filename, gh):
-        gh.update()
-        for h in gh.hypotheses:
-            h.compute_prior(recompute=True)
-            h.update_posterior()
-
-        with open(filename, 'wb') as w:
-            writer = csv.writer(w)
-            writer.writerow(['input', 'output', 'human p', 'model p'])
-
-            hypotheses = gh.hypotheses
-            for d in data:
-                posteriors = [sum(h.compute_posterior(d.input)) for h in hypotheses]
-                Z = logsumexp(posteriors)
-                weights = [(post-Z) for post in posteriors]
-
-                for o in d.output.keys():
-                    # Probability for yes on output `o` is sum of posteriors for hypos that contain `o`
-                    p_human = float(d.output[o][0]) / float(d.output[o][0] + d.output[o][1])
-                    p_model = sum([exp(w) if o in h() else 0 for h, w in zip(hypotheses, weights)])
-                    writer.writerow([d.input, o, p_human, p_model])
-
-    # Save model-human comparison for MAP & initial gh's
-    if csv_save:
-        sorted_samples = [sorted(mh_grammar_summary.samples, key=(lambda h: -h.posterior_score))]
-        top_gh = sorted_samples[0]
-        csv_compare_model_human(csv_save+'_data_MAP.csv', top_gh)
-
-        gh0 = mh_grammar_summary.samples[0]
-        csv_compare_model_human(csv_save+'_data_h0.csv', gh0)
 
     # Save GrammarHypothesis
     if 'save' in gh_pickle:
@@ -267,7 +263,7 @@ if __name__ == "__main__":
     # cProfile.run("""run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
     #                     alpha=0.9, ngh=5, grammar_n=50, skip=10, cap=100,
     #                     print_stuff=[], plot_type=[], gh_pickle=False)""",
-    #              gh_file=path+'/out/profile/mix_model_50.profile')
+    #              filename=path+'/out/profile/mix_model_50.profile')
 
     # run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100, alpha=0.9,
     #     ngh='enum7', grammar_n=1000, skip=1, cap=1000,
@@ -283,27 +279,30 @@ if __name__ == "__main__":
     # cProfile.run("""run(grammar=individual_grammar, josh='lot', data=josh_data, domain=100,
     #                     alpha=0.9, ngh=5, grammar_n=100, skip=10, cap=100,
     #                     print_stuff=[], plot_type=[], gh_pickle=False)""",
-    #              gh_file='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
+    #              filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
     #                       '/NumberGame/out/profile/individual_100.profile')
 
-    # run(grammar=individual_grammar, josh='lot', data=josh_data, domain=100, alpha=0.9,
-    #     ngh='enum7', grammar_n=10000, skip=10, cap=1000,
-    #     print_stuff='samples', plot_type='', gh_pickle='',
-    #     # gh_file=path+'/out/p/1_22/individual_5000000.p',
-    #     csv_save=path+'/out/csv/1_22/individual_10000')
+    # run(grammar=individual_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9,
+    #     ngh='enum7', grammar_n=100000, skip=100, cap=1000,
+    #     print_stuff='', plot_type='', gh_pickle='',
+    #     # gh_file=path+'/out/p/1_22/individual_100k.p',
+    #     csv_save=path+'/out/1_28/individual_200k')
 
     # --------------------------------------------------------------------------------------------------------
     # LOT grammar
     # --------------------------------------------------------------------------------------------------------
 
-    run(grammar=lot_grammar, data=josh_data, domain=100, alpha=0.9, grammar_n=0, print_stuff='',
-        ngh='save', ngh_file=path+'/ngh_mcmc100k.p')
+    # run(grammar=lot_grammar, data=josh_data, domain=100, alpha=0.9, grammar_n=0, print_stuff='',
+    #     ngh='save', ngh_file=path+'/ngh_mcmc100k.p')
 
-    # run(grammar=lot_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9, print_stuff='',
-    #     grammar_n=200000, skip=200, cap=1000,
-    #     ngh_file=path+'/ngh_mcmc100k.p', ngh='load',
-    #     gh_file=path+'/out/1_26/lot_200k_1.p', gh_pickle='save',
-    #     csv_save=path+'/out/1_26/lot_200k_1')
+
+
+
+    import cProfile
+    cProfile.run("""run(grammar=lot_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9,
+        print_stuff='samples',
+            grammar_n=50, skip=1, cap=100, ngh_file=path+'/ngh_mcmc100k.p', ngh='load')
+        """, filename=path+'/out/1_29/lot_50.profile')
 
 
     # --------------------------------------------------------------------------------------------------------
@@ -320,12 +319,13 @@ if __name__ == "__main__":
     # cProfile.run("""run(grammar=complex_grammar, data=toy_npow2p1, domain=20,
     #                     alpha=0.9, ngh=6, grammar_n=10000, skip=10, cap=100,
     #                     print_stuff=[], plot_type=[], gh_pickle=False)""",
-    #              gh_file='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
+    #              filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
     #                       '/NumberGame/out/1_14/vector_complex_npow2p1_10000.profile')
 
     # --------------------------------------------------------------------------------------------------------
     # Union size of NumberGame hypothesis space accross chains
     # --------------------------------------------------------------------------------------------------------
+
 
     # num_samples = 100000
     # num_chains = 10
