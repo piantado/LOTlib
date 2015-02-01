@@ -50,6 +50,20 @@ class MHSampler():
 
         self.reset_counters()
 
+    def at_temperature(self, t, whichtemperature):
+        """
+        This at these temperatures.
+        """
+        pt, lt, at = self.prior_temperature, self.likelihood_temperature, self.acceptance_temperature
+        if whichtemperature == 'prior_temperature':
+            pt = t
+        elif whichtemperature == 'likelihood_temperature':
+            lt = t
+        elif whichtemperature == 'acceptance_temperature':
+            at = t
+
+        return (self.current_sample.prior/pt + self.current_sample.likelihood/lt)/at
+
     def set_state(self, x, compute_posterior=True):
         """
         Set the current state, computing the posterior if needed
