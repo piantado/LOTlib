@@ -1,13 +1,13 @@
+# Plots the evaluation for *evaluate-temperatures.py* only (otherwise the column numbers need to be changed, and the path)
+
 library(ggplot2)
 library(stringr)
 library(gridExtra) # needed for "unit"
 
-##############################################################
-## Evaluation of proposals
-##############################################################
-
-d <- read.table("o.txt")
-#d <- read.table("output/pi.txt")
+d <- NULL
+for(f in list.files("output", pattern="out-agg*", full.names=TRUE)) {
+        d <- rbind(d, read.table(f))
+}
 names(d)[1:6] <- c("model", "iteration", "parameter", "steps", "time", "Z")
 
 # recode to two factors: strength 2/10/1 and code 

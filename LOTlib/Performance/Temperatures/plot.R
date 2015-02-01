@@ -1,12 +1,14 @@
+# Plots the evaluation for *evaluate-temperatures.py* only (otherwise the column numbers need to be changed, and the path)
+
 library(ggplot2)
 library(stringr)
 library(gridExtra) # needed for "unit"
 
-##############################################################
-## Evaluation of temperatures
-##############################################################
+d <- NULL
+for(f in list.files("output", pattern="out-agg*", full.names=TRUE)) {
+        d <- rbind(d, read.table(f))
+}
 
-d <- read.table("o.txt")
 names(d)[1:7] <- c("model", "iteration", "nchains", "temperature", "steps", "time", "Z")
 
 
