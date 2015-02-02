@@ -49,13 +49,13 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
 
         """
         self.C = np.zeros((len(self.hypotheses), len(self.rules)))
-        rule_idxs = {str(r): i for i, r in enumerate(self.rules)}
+        rule_idxs = {str([r.name, r.nt, r.to]): i for i, r in enumerate(self.rules)}
 
         for j, h in enumerate(self.hypotheses):
             grammar_rules = [fn.rule for fn in h.value.subnodes()[1:]]
             for rule in grammar_rules:
                 try:
-                    self.C[j, rule_idxs[str(rule)]] += 1
+                    self.C[j, rule_idxs[str([rule.name, rule.nt, rule.to])]] += 1
                 except Exception as e:
                     if isinstance(rule, BVUseGrammarRule):
                         pass
@@ -100,7 +100,7 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
 
         # The following must be computed for this specific GrammarHypothesis
         # ------------------------------------------------------------------
-        x = self.normalize_value_vector()   # vector of rule probabilites
+        x = self.normalize_rule_vector()    # vector of rule probabilites
         P = np.dot(self.C, x)               # prior for each hypothesis
         likelihood = 0.0
 
@@ -125,13 +125,13 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
             self.update_posterior()
         return likelihood
 
-    def normalize_value_vector(self):
-        """Return a copy of `self.value`, with each value normalized relative to other rules with same nt.
+    def normalize_rule_vector(self):
+        """Return a rule probabilities, each normalized relative to other rules with same nt.
 
         Note
         ----
-        This is the only thing we need to call `self.update()` for.
-        --> In line `Z = sum(...)`, we use `r.p`.
+        This is the only time where we need to call `self.update()`, since this is the
+        only time where we reference `self.rules`.
 
         """
         self.update()
@@ -143,9 +143,9 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
             nt_Z[nt] = Z
 
         # Normalize each probability in `self.value`
-        normalized = np.zeros(len(self.value))
-        for i, p in enumerate(self.value):
-            normalized[i] = p / nt_Z[self.rules[i].nt]
+        normalized = np.zeros(len(self.rules))
+        for i, r in enumerate(self.rules):
+            normalized[i] = r.p / nt_Z[self.rules[i].nt]
 
         return np.log(normalized)
 
@@ -164,5 +164,5 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
 
         """
         # Set probability for each rule corresponding to value index
-        for i in range(1, self.n):
+        for i in range(0, self.n):
             self.rules[i].p = self.value[i]
