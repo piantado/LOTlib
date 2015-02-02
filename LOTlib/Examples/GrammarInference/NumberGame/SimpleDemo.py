@@ -64,7 +64,7 @@ def csv_appendfiles(filename, gh, i, mh_grammar_summary, data):
     """
     with open(filename+'_values.csv', 'a') as w:
         writer = csv.writer(w)
-        writer.writerows([[i, r.nt, r.name, str(r.to), r.p] for r in gh.rules])
+        writer.writerows([[i, r.nt, r.name, str(r.to), gh.value[j]] for j,r in enumerate(gh.rules)])
     with open(filename+'_bayes.csv', 'a') as w:
         writer = csv.writer(w)
         if mh_grammar_summary.sample_count:
@@ -135,18 +135,6 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
     gh_file(str):
         If we're pickling, this is the file name to load/save.
 
-    Confirmed working
-    -----------------
-    * run(grammar=simple_test_grammar, data=toy_3n)     [12/15]
-    * run(grammar=simple_grammar_2, data=toy_3n)        [12/16]
-
-    Note
-    ----
-    These currently have to be run within ipython notebook for plotting to work.
-    Just open a notebook and execute the following::
-        >> from SimpleDemo import *
-        >> run()
-
     """
     if mixture_model:
         ParameterHypothesis = MixtureGrammarHypothesis
@@ -215,8 +203,6 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
         for i, r in enumerate(rules):
             print i, '\t|  ', r
 
-
-
     # --------------------------------------------------------------------------------------------------------
     # Fill VectorSummary
 
@@ -240,9 +226,9 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
 
             for i, gh in enumerate(mh_grammar_summary(mh_grammar_sampler)):
 
-                # Save to csv every 100 samples from 0 to 100k, then every 1000
+                # Save to csv every 200 samples from 0 to 10k, then every 1000
                 if csv_save:
-                    if (i < 100000 and i % 100 is 0) or (i % 1000 is 0):
+                    if (i < 10000 and i % 200 is 0) or (i % 5000 is 0):
                         csv_appendfiles(csv_save, gh, i, mh_grammar_summary, data)
 
                 # Print every N/20 samples
@@ -250,8 +236,6 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
                     if i % (mh_grammar_sampler.steps/20) is 0:
                         print ['%.3f' % v for v in h.value], '\n', i, '-'*100
                         print h.prior, h.likelihood, h.posterior_score
-
-
 
     # Save GrammarHypothesis
     if 'save' in gh_pickle:
@@ -290,46 +274,30 @@ if __name__ == "__main__":
     #                     print_stuff=[], plot_type=[], gh_pickle=False)""",
     #              filename=path+'/out/profile/mix_model_50.profile')
 
-    # run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100, alpha=0.9,
-    #     ngh='enum7', grammar_n=1000, skip=1, cap=1000,
-    #     print_stuff='samples', plot_type='', gh_pickle='',
-    #     # gh_file=path+'/out/p/mix_model_1000.p',
-    #     csv_save=path+'/out/csv/1_22/mix_1000')
-
-    run(grammar=mix_grammar, mixture_model=1, data=josh_data, domain=100, alpha=0.9,
-        ngh='enum7', grammar_n=10000, skip=100, cap=100,
-        print_stuff='', plot_type='', gh_pickle='save', gh_file=path+'/out/1_29/mix_10k.p',
-        csv_save=path+'/out/1_29/mix_10k')
+    # run(grammar=mix_grammar, mixture_model=1, data=josh_data, domain=100, alpha=0.9,
+    #     ngh='enum7', grammar_n=1000, skip=10, cap=100,
+    #     print_stuff='', plot_type='', gh_pickle='save', gh_file=path+'/out/1_29/mix_10k.p',
+    #     csv_save=path+'/out/1_29/mix_10k')
 
     # --------------------------------------------------------------------------------------------------------
     # Individual rule probabilities model
     # --------------------------------------------------------------------------------------------------------
 
-    # import cProfile
-    # cProfile.run("""run(grammar=individual_grammar, josh='lot', data=josh_data, domain=100,
-    #                     alpha=0.9, ngh=5, grammar_n=100, skip=10, cap=100,
-    #                     print_stuff=[], plot_type=[], gh_pickle=False)""",
-    #              filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
-    #                       '/NumberGame/out/profile/individual_100.profile')
-
-    # run(grammar=individual_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9,
-    #     ngh='enum7', grammar_n=100000, skip=100, cap=1000,
-    #     print_stuff='', plot_type='', gh_pickle='',
-    #     # gh_file=path+'/out/p/1_22/individual_100k.p',
-    #     csv_save=path+'/out/1_28/individual_200k')
+    run(grammar=individual_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9,
+        ngh='enum7', grammar_n=1000000, skip=200, cap=5000,
+        print_stuff='', plot_type='', gh_pickle='save',
+        gh_file=path+'/out/2_2/indep_1mil_1.p',
+        csv_save=path+'/out/2_2/indep_1mil_1')
 
     # --------------------------------------------------------------------------------------------------------
     # LOT grammar
     # --------------------------------------------------------------------------------------------------------
 
-    # run(grammar=lot_grammar, data=josh_data, domain=100, alpha=0.9, grammar_n=0, print_stuff='',
-    #     ngh='save', ngh_file=path+'/ngh_mcmc100k.p')
-
-    # import cProfile
-    # cProfile.run("""run(grammar=lot_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9,
-    #     print_stuff='samples',
-    #         grammar_n=50, skip=1, cap=100, ngh_file=path+'/ngh_mcmc100k.p', ngh='load')
-    #     """, filename=path+'/out/1_29/lot_50.profile')
+    # run(grammar=lot_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9,
+    #     ngh='enum7', grammar_n=1000000, skip=200, cap=5000,
+    #     print_stuff='', plot_type='', gh_pickle='save',
+    #     gh_file=path+'/out/2_2/lot_1mil_1.p',
+    #     csv_save=path+'/out/2_2/lot_1mil_1')
 
     # --------------------------------------------------------------------------------------------------------
     # TESTING  |  Original number game
@@ -340,64 +308,6 @@ if __name__ == "__main__":
     #     print_stuff='rules', plot_type=[], gh_pickle='save',
     #     gh_file='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference/NumberGame'
     #              '/out/newest_complex_2n_1000.p')
-
-    # import cProfile
-    # cProfile.run("""run(grammar=complex_grammar, data=toy_npow2p1, domain=20,
-    #                     alpha=0.9, ngh=6, grammar_n=10000, skip=10, cap=100,
-    #                     print_stuff=[], plot_type=[], gh_pickle=False)""",
-    #              filename='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference'
-    #                       '/NumberGame/out/1_14/vector_complex_npow2p1_10000.profile')
-
-    # --------------------------------------------------------------------------------------------------------
-    # Union size of NumberGame hypothesis space accross chains
-    # --------------------------------------------------------------------------------------------------------
-
-
-    # num_samples = 100000
-    # num_chains = 10
-    #
-    # sample_set_sizes = {}
-    # sample_size_means = {}
-    # sample_set_union = {}
-    #
-    # # Loop for conditioned on each data input
-    # for d in josh_data:
-    #     sample_set_sizes[str(d.input)] = []
-    #
-    #     # Number of chains to run on each datum
-    #     for i in range(num_chains):
-    #         h0 = NumberGameHypothesis(grammar=lot_grammar, domain=100, alpha=0.9)
-    #         mh_sampler = MHSampler(h0, d.input, num_samples)
-    #         hypotheses = set([h for h in lot_iter(mh_sampler)])
-    #
-    #         sample_set_sizes[str(d.input)].append(len(hypotheses))
-    #
-    #         if not str(d.input) in sample_set_union:
-    #             sample_set_union[str(d.input)] = hypotheses
-    #         else:
-    #             sample_set_union[str(d.input)] = sample_set_union[str(d.input)].union(hypotheses)
-    #
-    #         # Write to file each chain
-    #         with open('out/hypothesis_space_lens_1_21.txt', 'a') as f:
-    #             str_chain = 'chain' + str(i) + ' | ' + str(d.input) + ' ==> ' + str(len(hypotheses))
-    #             str_union = '\t\t' + str(d.input) + ' ==> |Union(samples)| = ' + str(len(sample_set_union[str(d.input)]))
-    #             str_mean  = '\t\t' + str(d.input) + ' ==> mean_len(samples) = ' + str(sum(sample_set_sizes[
-    #                 str(d.input)]) / (i+1))
-    #             f.write(str_chain + '\n' + str_union + '\n' + str_mean + '\n\n')
-    #
-    #     # Write final intersection/mean size for all chains for each datum
-    #     sample_size_means[str(d.input)] = sum(sample_set_sizes[str(d.input)]) / num_chains
-    #     str_union = str(d.input) + ' ==> |Union(samples)| = ' + str(len(sample_set_union[str(d.input)]))
-    #     str_mean = str(d.input) + ' ==> mean(samples) = ' + str(sample_size_means[str(d.input)])
-    #
-    #     with open('out/hypothesis_space_lens_1_21.txt', 'a') as f:
-    #         f.write(str_union + '\n' + str_mean + '%'*81 + '\n\n')
-    #
-    # with open('out/hypothesis_space_lens_1_21.txt', 'a') as f:
-    #     all_union = set()
-    #     for s in sample_set_union:
-    #         all_union = all_union.union(sample_set_union[s])
-    #     f.write('%'*81 + '\n' + '%'*81 + '\n' + 'OVERALL UNION SIZE = ' + str(len(all_union)))
 
     # --------------------------------------------------------------------------------------------------------
 
