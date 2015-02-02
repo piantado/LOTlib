@@ -12,12 +12,75 @@ from LOTlib.Examples.NumberGame.JoshModel.Model import *
 from LOTlib.Examples.NumberGame.NewVersion.Model import *
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.MPI.MPI_map import MPI_unorderedmap
+from LOTlib.Visualization.MCMCSummary.TopN import TopN
 from Model import *
 
+# ------------------------------------------------------------------------------------------------------------
+# CSV-saving methods
 
-from LOTlib.Visualization.MCMCSummary.TopN import TopN
+def csv_compare_model_human(filename, gh, idx, data):
+    gh.update()
+    for h in gh.hypotheses:
+        h.compute_prior(recompute=True)
+        h.update_posterior()
+
+    with open(filename, 'a') as f:
+        writer = csv.writer(f)
+        hypotheses = gh.hypotheses
+        for d in data:
+            posteriors = [sum(h.compute_posterior(d.input)) for h in hypotheses]
+            Z = logsumexp(posteriors)
+            weights = [(post-Z) for post in posteriors]
+
+            for o in d.output.keys():
+                # Probability for yes on output `o` is sum of posteriors for hypos that contain `o`
+                p_human = float(d.output[o][0]) / float(d.output[o][0] + d.output[o][1])
+                p_model = sum([exp(w) if o in h() else 0 for h, w in zip(hypotheses, weights)])
+                writer.writerow([idx, d.input, o, p_human, p_model])
+
+def csv_initfiles(filename):
+    """
+    Create new csv files for filename_values, filename_bayes, filename_data_MAP, filename_data_h0.
+
+    """
+    with open(filename+'_values.csv', 'wb') as w:
+        writer = csv.writer(w)
+        writer.writerow(['i', 'nt', 'name', 'to', 'p'])
+    with open(filename+'_bayes.csv', 'wb') as w:
+        writer = csv.writer(w)
+        writer.writerow(['i', 'Prior', 'Likelihood', 'Posterior Score'])
+    with open(filename+'_data_MAP.csv', 'wb') as w:
+        writer = csv.writer(w)
+        writer.writerow(['i', 'input', 'output', 'human p', 'model p'])
+    with open(filename+'_data_h0.csv', 'wb') as w:
+        writer = csv.writer(w)
+        writer.writerow(['i', 'input', 'output', 'human p', 'model p'])
+
+def csv_appendfiles(filename, gh, i, mh_grammar_summary, data):
+    """
+    Append Bayes data to `_bayes` file, values to `_values` file, and MAP hypothesis human
+    correlation data to `_data_MAP` file.
+
+    """
+    with open(filename+'_values.csv', 'a') as w:
+        writer = csv.writer(w)
+        writer.writerows([[i, r.nt, r.name, str(r.to), r.p] for r in gh.rules])
+    with open(filename+'_bayes.csv', 'a') as w:
+        writer = csv.writer(w)
+        if mh_grammar_summary.sample_count:
+            writer.writerow([i, gh.prior, gh.likelihood, gh.posterior_score])
+
+    top_gh = sorted(mh_grammar_summary.samples, key=(lambda x: -x.posterior_score))[0]
+    csv_compare_model_human(filename+'_data_MAP.csv', top_gh, i, data)
+
+# ------------------------------------------------------------------------------------------------------------
+# MPI
 
 def mpirun(d):
+    """
+    Lets us generate our initial NumberGameHypotheses using MPI.
+
+    """
     h0 = NoDoubleConstNGHypothesis(grammar=lot_grammar, domain=100, alpha=0.9)
     mh_sampler = MHSampler(h0, d.input, 100000)
 
@@ -29,6 +92,9 @@ def mpirun(d):
 
     return [h for h in hypotheses.get_all()]
 
+
+# ============================================================================================================
+# The `run` script
 
 def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
         domain=100, alpha=0.99, ngh='enum6', ngh_file='',
@@ -149,28 +215,7 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
         for i, r in enumerate(rules):
             print i, '\t|  ', r
 
-    # --------------------------------------------------------------------------------------------------------
-    # Save comparison of MAP gh to human data for each input/output combo
 
-    def csv_compare_model_human(filename, gh, idx):
-        gh.update()
-        for h in gh.hypotheses:
-            h.compute_prior(recompute=True)
-            h.update_posterior()
-
-        with open(filename, 'a') as f:
-            writer = csv.writer(f)
-            hypotheses = gh.hypotheses
-            for d in data:
-                posteriors = [sum(h.compute_posterior(d.input)) for h in hypotheses]
-                Z = logsumexp(posteriors)
-                weights = [(post-Z) for post in posteriors]
-
-                for o in d.output.keys():
-                    # Probability for yes on output `o` is sum of posteriors for hypos that contain `o`
-                    p_human = float(d.output[o][0]) / float(d.output[o][0] + d.output[o][1])
-                    p_model = sum([exp(w) if o in h() else 0 for h, w in zip(hypotheses, weights)])
-                    writer.writerow([idx, d.input, o, p_human, p_model])
 
     # --------------------------------------------------------------------------------------------------------
     # Fill VectorSummary
@@ -181,18 +226,7 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
         mh_grammar_summary = pickle.load(f)
     else:
         if csv_save:
-            with open(csv_save+'_values.csv', 'wb') as w:
-                writer = csv.writer(w)
-                writer.writerow(['i', 'nt', 'name', 'to', 'p'])
-            with open(csv_save+'_bayes.csv', 'wb') as w:
-                writer = csv.writer(w)
-                writer.writerow(['i', 'Prior', 'Likelihood', 'Posterior Score'])
-            with open(csv_save+'_data_MAP.csv', 'wb') as w:
-                writer = csv.writer(w)
-                writer.writerow(['i', 'input', 'output', 'human p', 'model p'])
-            with open(csv_save+'_data_h0.csv', 'wb') as w:
-                writer = csv.writer(w)
-                writer.writerow(['i', 'input', 'output', 'human p', 'model p'])
+            csv_initfiles(csv_save)
 
         if 'samples' in print_stuff:
             print '^*'*60, '\nGenerating GrammarHypothesis Samples\n', '^*'*60
@@ -202,23 +236,14 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
             mh_grammar_sampler = MHSampler(grammar_h0, data, grammar_n, trace=False)
             mh_grammar_summary = VectorSummary(skip=skip, cap=cap)
 
-            csv_compare_model_human(csv_save+'_data_h0.csv', grammar_h0, 0)
+            csv_compare_model_human(csv_save+'_data_h0.csv', grammar_h0, 0, data)
 
-            for i, h in enumerate(mh_grammar_summary(mh_grammar_sampler)):
+            for i, gh in enumerate(mh_grammar_summary(mh_grammar_sampler)):
 
                 # Save to csv every 100 samples from 0 to 100k, then every 1000
                 if csv_save:
                     if (i < 100000 and i % 100 is 0) or (i % 1000 is 0):
-                        with open(csv_save+'_values.csv', 'a') as w:
-                            writer = csv.writer(w)
-                            writer.writerows([[i, r.nt, r.name, str(r.to), r.p] for r in h.rules])
-                        with open(csv_save+'_bayes.csv', 'a') as w:
-                            writer = csv.writer(w)
-                            if mh_grammar_summary.sample_count:
-                                writer.writerow([i, h.prior, h.likelihood, h.posterior_score])
-
-                        top_gh = sorted(mh_grammar_summary.samples, key=(lambda x: -x.posterior_score))[0]
-                        csv_compare_model_human(csv_save+'_data_MAP.csv', top_gh, i)
+                        csv_appendfiles(csv_save, gh, i, mh_grammar_summary, data)
 
                 # Print every N/20 samples
                 if 'samples' in print_stuff:
@@ -271,6 +296,11 @@ if __name__ == "__main__":
     #     # gh_file=path+'/out/p/mix_model_1000.p',
     #     csv_save=path+'/out/csv/1_22/mix_1000')
 
+    run(grammar=mix_grammar, mixture_model=1, data=josh_data, domain=100, alpha=0.9,
+        ngh='enum7', grammar_n=10000, skip=100, cap=100,
+        print_stuff='', plot_type='', gh_pickle='save', gh_file=path+'/out/1_29/mix_10k.p',
+        csv_save=path+'/out/1_29/mix_10k')
+
     # --------------------------------------------------------------------------------------------------------
     # Individual rule probabilities model
     # --------------------------------------------------------------------------------------------------------
@@ -295,15 +325,11 @@ if __name__ == "__main__":
     # run(grammar=lot_grammar, data=josh_data, domain=100, alpha=0.9, grammar_n=0, print_stuff='',
     #     ngh='save', ngh_file=path+'/ngh_mcmc100k.p')
 
-
-
-
-    import cProfile
-    cProfile.run("""run(grammar=lot_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9,
-        print_stuff='samples',
-            grammar_n=50, skip=1, cap=100, ngh_file=path+'/ngh_mcmc100k.p', ngh='load')
-        """, filename=path+'/out/1_29/lot_50.profile')
-
+    # import cProfile
+    # cProfile.run("""run(grammar=lot_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9,
+    #     print_stuff='samples',
+    #         grammar_n=50, skip=1, cap=100, ngh_file=path+'/ngh_mcmc100k.p', ngh='load')
+    #     """, filename=path+'/out/1_29/lot_50.profile')
 
     # --------------------------------------------------------------------------------------------------------
     # TESTING  |  Original number game
