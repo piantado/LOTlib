@@ -2,11 +2,11 @@
 """
     Simple evaluation of proposal schemes. Test various mixtures of them.
 """
-
+import re
 from itertools import product
 from optparse import OptionParser
 
-from Evaluation import load_model
+from LOTlib.Performance.Evaluation import load_model
 from LOTlib.MPI.MPI_map import MPI_map, get_rank
 from LOTlib.Miscellaneous import q
 
@@ -16,6 +16,7 @@ parser.add_option("--samples", dest="SAMPLES", type="int", default=100000, help=
 parser.add_option("--chains", dest="CHAINS", type="int", default=10, help="Number of chains to run in parallel")
 parser.add_option("--repetitions", dest="REPETITONS", type="int", default=100, help="Number of repetitions to run")
 parser.add_option("--print-every", dest="PRINTEVERY", type="int", default=1000, help="Evaluation prints every this many")
+parser.add_option("--models", dest="MODELS", type="str", default='Number2015:100,Number2015:300', help="Which models do we run on?")
 options, _ = parser.parse_args()
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -57,7 +58,7 @@ def run_one(iteration, model, probs=None):
 
 # For each process, create the list of parameter
 params = map(list, product( range(options.REPETITONS),
-                            ['SymbolicRegression.Galileo', 'Magnetism.Simple', 'RationalRules', 'RegularExpression', 'Number:100', 'Number:300', 'Number:1000'],
+                            re.split(r',', options.MODELS),
                             [ (1., 1., 1.),
                               (2., 1., 1.),
                               (1., 2., 1.),

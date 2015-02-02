@@ -130,7 +130,12 @@ class Grammar:
                 # Can't recurse on None or else we genreate from self.start
                 if fn.args is not None:
                     # and generate below *in* this context (e.g. with the new rules added)
-                    fn.args = self.generate(fn.args)
+                    try:
+                        fn.args = self.generate(fn.args)
+                    except RuntimeError as e:
+                        print "*** Runtime error in %s" % fn
+                        raise e
+
 
                 # and set the parents
                 for a in fn.argFunctionNodes():

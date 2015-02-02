@@ -378,7 +378,7 @@ def norm_lpdf_multivariate(x, mu, sigma):
     return norm_const + result
 
 
-def logrange(mn,mx,steps):
+def logrange(mn, mx, steps):
     """
             Logarithmically-spaced steps from mn to mx, with steps number inbetween
             mn - min value
@@ -387,7 +387,7 @@ def logrange(mn,mx,steps):
     """
     mn = np.log(mn)
     mx = np.log(mx)
-    r = np.arange(mn, mx, (mx-mn)/(steps-1))
+    r = np.arange(mn, mx-1e-5, (mx-mn)/(steps-1)) # 1e-5 for numerical precision; otherwise we may add an extra
     r = np.append(r, mx)
     return np.exp(r)
 

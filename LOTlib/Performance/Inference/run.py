@@ -5,18 +5,20 @@
 
 import LOTlib
 import os
+import re
 from itertools import product
-from Evaluation import load_model
+from LOTlib.Performance.Evaluation import load_model
 from LOTlib.MPI.MPI_map import MPI_map, get_rank
 
 from optparse import OptionParser
-
 parser = OptionParser()
 parser.add_option("--out", dest="OUT", type="string", help="Output prefix", default="output-InfereceSchemes")
 parser.add_option("--samples", dest="SAMPLES", type="int", default=100000, help="Number of samples to run")
 parser.add_option("--repetitions", dest="REPETITONS", type="int", default=100, help="Number of repetitions to run")
 parser.add_option("--print-every", dest="PRINTEVERY", type="int", default=1000, help="Evaluation prints every this many")
+parser.add_option("--models", dest="MODELS", type="str", default='SymbolicRegression.Galileo,Magnetism.Simple,RationalRules,RegularExpression,Number:100,Number:300', help="Which models do we run on?")
 options, _ = parser.parse_args()
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -78,7 +80,7 @@ def run_one(iteration, model, sampler_type):
 
 # For each process, create the lsit of parameter
 params = [list(g) for g in product(range(options.REPETITONS),\
-                                    ['Galileo', 'SimpleMagnetism', 'RationalRules', 'RegularExpression', 'Number100', 'Number300', 'Number1000'],
+                                    re.split(r',', options.MODELS),
                                     ['multiple_chains_A', 'multiple_chains_B', 'multiple_chains_C',
                                      'taboo_A', 'taboo_B', 'taboo_C', 'taboo_D',
                                      'particle_swarm_A', 'particle_swarm_B', 'particle_swarm_C',

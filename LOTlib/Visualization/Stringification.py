@@ -64,8 +64,11 @@ def fullstring(x, d=0, bv_names=None):
             assert len(x.args) == 1
             ret = 'lambda<%s> %s: %s' % ( x.returntype, bvn, fullstring(x.args[0], d=d+1, bv_names=bv_names) )
 
-            if x.added_rule is not None:
-                del bv_names[x.added_rule.name]
+            if isinstance(x, BVAddFunctionNode) and x.added_rule is not None:
+                try:
+                    del bv_names[x.added_rule.name]
+                except KeyError:
+                    x.fullprint()
 
             return ret
         else:
@@ -80,9 +83,6 @@ def fullstring(x, d=0, bv_names=None):
                 return "%s<%s>(%s)" % (name,
                                        x.returntype,
                                        ', '.join(map(lambda a: fullstring(a, d=d+1, bv_names=bv_names), x.args)))
-
-
-
 
 
 
@@ -133,8 +133,11 @@ def pystring(x, d=0, bv_names=None):
             assert len(x.args) == 1
             ret = 'lambda %s: %s' % ( bvn, pystring(x.args[0], d=d+1, bv_names=bv_names) )
 
-            if x.added_rule is not None:
-                del bv_names[x.added_rule.name]
+            if isinstance(x, BVAddFunctionNode) and x.added_rule is not None:
+                try:
+                    del bv_names[x.added_rule.name]
+                except KeyError:
+                    x.fullprint()
 
             return ret
         else:

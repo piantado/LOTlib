@@ -1,11 +1,12 @@
 import collections
 
 from LOTlib.Miscellaneous import logsumexp, qq
-from LOTlib.Visualization.MCMCSummary import MCMCSummary
+from MCMCSummary import MCMCSummary
 from LOTlib.Utilities.FiniteBestSet import FiniteBestSet
 
+from SampleFilter import SampleFilter
 
-class TopN(MCMCSummary):
+class TopN(MCMCSummary, SampleFilter):
     """
     This "summary" uses a FiniteBestSet to store the top N
 
