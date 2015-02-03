@@ -2,7 +2,7 @@
 import os
 from scipy.io import loadmat
 from LOTlib.DataAndObjects import FunctionData
-from LOTlib.Visualization.MCMCSummary.VectorSummary import *
+from LOTlib.MCMCSummary.VectorSummary import *
 
 
 def sample_grammar_hypotheses(sampler, skip, cap, print_=False):

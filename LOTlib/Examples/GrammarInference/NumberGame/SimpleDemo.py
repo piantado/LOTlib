@@ -12,7 +12,7 @@ from LOTlib.Examples.NumberGame.JoshModel.Model import *
 from LOTlib.Examples.NumberGame.NewVersion.Model import *
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.MPI.MPI_map import MPI_unorderedmap
-from LOTlib.Visualization.MCMCSummary.TopN import TopN
+from LOTlib.MCMCSummary.TopN import TopN
 from Model import *
 
 # ------------------------------------------------------------------------------------------------------------
@@ -62,16 +62,18 @@ def csv_appendfiles(filename, gh, i, mh_grammar_summary, data):
     correlation data to `_data_MAP` file.
 
     """
-    with open(filename+'_values.csv', 'a') as w:
-        writer = csv.writer(w)
-        writer.writerows([[i, r.nt, r.name, str(r.to), gh.value[j]] for j,r in enumerate(gh.rules)])
-    with open(filename+'_bayes.csv', 'a') as w:
-        writer = csv.writer(w)
-        if mh_grammar_summary.sample_count:
-            writer.writerow([i, gh.prior, gh.likelihood, gh.posterior_score])
+    if (i < 10000 and i % 100 is 0) or (i % 1000 is 0):
+        with open(filename+'_values.csv', 'a') as w:
+            writer = csv.writer(w)
+            writer.writerows([[i, r.nt, r.name, str(r.to), gh.value[j]] for j,r in enumerate(gh.rules)])
+        with open(filename+'_bayes.csv', 'a') as w:
+            writer = csv.writer(w)
+            if mh_grammar_summary.sample_count:
+                writer.writerow([i, gh.prior, gh.likelihood, gh.posterior_score])
 
-    top_gh = sorted(mh_grammar_summary.samples, key=(lambda x: -x.posterior_score))[0]
-    csv_compare_model_human(filename+'_data_MAP.csv', top_gh, i, data)
+    if (i % 30000) is 0:
+        top_gh = sorted(mh_grammar_summary.samples, key=(lambda x: -x.posterior_score))[0]
+        csv_compare_model_human(filename+'_data_MAP.csv', top_gh, i, data)
 
 # ------------------------------------------------------------------------------------------------------------
 # MPI
@@ -228,8 +230,7 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
 
                 # Save to csv every 200 samples from 0 to 10k, then every 1000
                 if csv_save:
-                    if (i < 10000 and i % 200 is 0) or (i % 5000 is 0):
-                        csv_appendfiles(csv_save, gh, i, mh_grammar_summary, data)
+                    csv_appendfiles(csv_save, gh, i, mh_grammar_summary, data)
 
                 # Print every N/20 samples
                 if 'samples' in print_stuff:
@@ -294,7 +295,7 @@ if __name__ == "__main__":
     # --------------------------------------------------------------------------------------------------------
 
     # run(grammar=lot_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9,
-    #     ngh='enum7', grammar_n=1000000, skip=200, cap=5000,
+    #     ngh='load', ngh_file=path+'/ngh_mcmc100k.p', grammar_n=1000000, skip=200, cap=5000,
     #     print_stuff='', plot_type='', gh_pickle='save',
     #     gh_file=path+'/out/2_2/lot_1mil_1.p',
     #     csv_save=path+'/out/2_2/lot_1mil_1')
