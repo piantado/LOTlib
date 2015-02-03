@@ -128,9 +128,14 @@ class GrammarHypothesis(VectorHypothesis):
     # Bayesian inference with GrammarHypothesis
 
     def compute_prior(self):
+        """
+        Compute priors, according only to values that are proposed to.
+
+        """
         shape = self.prior_shape
         scale = self.prior_scale
-        rule_priors = [gamma.logpdf(v, shape, scale=scale) for v in self.value]
+        propose_values = [self.value[i] for i in self.get_propose_idxs()]
+        rule_priors = [gamma.logpdf(v, shape, scale=scale) for v in propose_values]
 
         # If there are any negative values in our vector, prior is 0
         if [v for v in self.value if v < 0.0]:
