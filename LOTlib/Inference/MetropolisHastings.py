@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-import LOTlib
+
 from LOTlib.Miscellaneous import q, qq, Infinity
 from MHShared import MH_acceptance
 
+from Sampler import Sampler
 
-class MHSampler():
+class MHSampler(Sampler):
     """A class to implement MH sampling.
 
     You can create a sampler object::
@@ -64,23 +65,12 @@ class MHSampler():
 
         return (self.current_sample.prior/pt + self.current_sample.likelihood/lt)/at
 
-    def set_state(self, x, compute_posterior=True):
-        """
-        Set the current state, computing the posterior if needed
-        """
-        
-        self.current_sample = x
-        
-        if compute_posterior:
-            self.current_sample.compute_posterior(self.data)
-
 
     def reset_counters(self):
         """
         Reset our acceptance and proposal counters
         """
-        self.acceptance_count = 0
-        self.proposal_count = 0
+        self.acceptance_count, self.proposal_count = 0, 0
 
     def acceptance_ratio(self):
         """
@@ -88,21 +78,6 @@ class MHSampler():
         """
         return float(self.acceptance_count) / float(self.proposal_count)
 
-    def take(self, n):
-        """
-                Yield just the next N from this generator
-        """
-        raise NotImplementedError
-
-    def compute_posterior(self, h, data):
-        """
-                A wrapper for hypothesis.compute_posterior(data) that can be overwritten in subclassses for fanciness
-                Should return [np,nl], the prior and likelihood
-        """
-        return h.compute_posterior(data)
-
-    def __iter__(self):
-        return self
 
     def internal_sample(self, h):
         """
@@ -125,7 +100,6 @@ class MHSampler():
 
                 # either compute this, or use the memoized version
                 np, nl = self.compute_posterior(self.proposal, self.data)
-                #print np, nl, current_sample.prior, current_sample.likelihood
 
                 # Note: It is important that we re-compute from the temperature since these may be altered
                 #    externally from ParallelTempering and others

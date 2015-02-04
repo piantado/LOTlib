@@ -9,12 +9,21 @@
 """
 from LOTlib.Miscellaneous import Infinity
 from MetropolisHastings import MHSampler
-from numpy import mean
+from Sampler import Sampler
 
 
-class MultipleChainMCMC(object):
+class MultipleChainMCMC(Sampler):
     
-    def __init__(self, make_h0, data, steps=Infinity, nchains=10, **kwargs):
+    def __init__(self, make_h0, data, steps=Infinity, nchains=10, make_sampler=None, **kwargs):
+        """
+        :param make_h0: -- a function to make h0 for each chain
+        :param data:  -- what data we use
+        :param steps:  -- how many steps (total, across all chains)
+        :param nchains:  -- how many chains
+        :param make_sampler: -- a function that takes make_h0, data, and steps
+        :param kwargs: -- special args to sampler
+        :return:
+        """
 
         self.nchains = nchains
         self.chain_idx = -1 # what chain are we on? This get incremented before anything, so it starts with 0
@@ -22,7 +31,10 @@ class MultipleChainMCMC(object):
         assert nchains>0, "Must have > 0 chains specified (you sent %s)"%nchains
         ## TODO: HANDLE THE CASE WHERE STEPS IS NOT DIVISIBLE BY CHAINS
 
-        self.chains = [MHSampler( make_h0(), data, steps=steps/nchains, **kwargs) for _ in xrange(nchains)]
+        if make_sampler is None:
+            make_sampler = lambda mh0, data, **kwargs: MHSampler( make_h0(), data, steps=steps/nchains, **kwargs)
+
+        self.chains = [make_sampler( make_h0, data, **kwargs) for _ in xrange(nchains)]
 
     def __iter__(self):
         return self

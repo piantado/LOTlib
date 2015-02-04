@@ -26,6 +26,8 @@ class RegenerationProposal(LOTProposal):
             # If we've been given resampleProbability that can't sample
             raise ProposalFailedException
 
+        assert getattr(n, "resample_p", 1.0) > 0.0
+
         # In the context of the parent, resample n according to the grammar
         # We recurse_up in order to add all the parent's rules
         with BVRuleContextManager(self.grammar, n.parent, recurse_up=True): 

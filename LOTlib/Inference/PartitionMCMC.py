@@ -16,6 +16,7 @@ from MultipleChainMCMC import MultipleChainMCMC
 
 from LOTlib.Subtrees import trim_leaves
 from LOTlib.Miscellaneous import None2Empty
+from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
 
 class BreakException(Exception):
     """
@@ -24,6 +25,12 @@ class BreakException(Exception):
     pass
 
 class PartitionMCMC(MultipleChainMCMC):
+    """
+        Partition-based MCMC.
+
+        Note that it currently only works with RegenerationProposal
+
+    """
 
     def __init__(self, grammar, make_h0, data, max_N=1000, steps=Infinity, **kwargs):
         """
@@ -52,15 +59,20 @@ class PartitionMCMC(MultipleChainMCMC):
         except BreakException:
             pass
 
+        assert len(partitions) > 0
+
+        # and store these so we can see them later
+        self.partitions = map(copy, partitions)
+
         # Take each partition, which doesn't have leaves, and generate leaves, setting
         # it to a random generation (fill in the leaves with random hypotheses)
         for p in partitions:
 
-            # print "# Partition:", p
+            print "# Initializing partition:", p
 
             for n in p.subnodes():
                 # set to not resample these
-                n.resample_p = 0.0
+                setattr(n, 'resample_p', 0.0) ## NOTE: This is an old version of how proposals were made, but we use it here
 
                 # and fill in the missing leaves with a random generation
                 for i, a in enumerate(n.args):
@@ -68,36 +80,39 @@ class PartitionMCMC(MultipleChainMCMC):
                         n.args[i] = grammar.generate(a)
 
 
-
-
-
-
-
-
-
         # initialize each chain
         MultipleChainMCMC.__init__(self, lambda: None, data, steps=steps, nchains=len(partitions), **kwargs)
-        
+
+        # Now we need to define a class to wrap in resample_p
+        class MyProposal(RegenerationProposal):
+            def propose_tree(self, t):
+                return RegenerationProposal.propose_tree(self, t, resampleProbability=lambda x: getattr(x,'resample_p', 1.0))
+
         # And set each to the partition
         for c, p in zip(self.chains, partitions):
-            c.set_state(make_h0(value=p))
-        
-        # and store these
-        self.partitions = map(copy, partitions)
+            # We need to make sure the proposal_function is set to use reample_p, which is set above
+            v = make_h0(value=p, proposal_function=MyProposal(grammar) )
+            c.set_state(v, compute_posterior=False) # and make v use the right proposal function
+
+    def active_partition(self):
+        """
+        Which partition did the sample just come from?
+        :return:
+        """
+        return self.partitions[self.chain_idx]
 
 
 if __name__ == "__main__":
     
-    from LOTlib.Examples.Number.Model.Utilities import grammar, make_h0, generate_data
+    from LOTlib.Examples.Number.Model import grammar, make_h0, generate_data
     data = generate_data(300)
     
     #from LOTlib.Examples.RegularExpression.Shared import grammar, make_h0, data
-        
     #from LOTlib.Examples.RationalRules.Shared import grammar, data, make_h0
-    
-    #PartitionMCMC(grammar, make_h0, data, 2, skip=0)
-    for h in lot_iter(PartitionMCMC(grammar, make_h0, data, max_N=10, skip=0)):
-        print h.posterior_score, h
+
+    pmc = PartitionMCMC(grammar, make_h0, data, max_N=10, skip=0)
+    for h in lot_iter(pmc):
+        print h.posterior_score, pmc.active_partition(), "\t", h
 
     
  

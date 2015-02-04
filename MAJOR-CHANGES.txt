@@ -1,3 +1,4 @@
+        - added abstract Sampler class to make samplers compositional. Now you can make a PartitionMCMC of a ParallelTempering, for instance
 Feb 1 2015
         - On failure of a proposal type, proposers now raise ProposalFailedException, rather than returning [newt,0.0]
         - Changes to FunctionNode.__eq__ that now make it take into account "invisible" nodes (FunctionNodes that have a name of '')
