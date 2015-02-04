@@ -235,8 +235,8 @@ def run(grammar=simple_test_grammar, mixture_model=0, data=josh_data,
                 # Print every N/20 samples
                 if 'samples' in print_stuff:
                     if i % (mh_grammar_sampler.steps/20) is 0:
-                        print ['%.3f' % v for v in h.value], '\n', i, '-'*100
-                        print h.prior, h.likelihood, h.posterior_score
+                        print ['%.3f' % v for v in gh.value], '\n', i, '-'*100
+                        print gh.prior, gh.likelihood, gh.posterior_score
 
     # Save GrammarHypothesis
     if 'save' in gh_pickle:
@@ -275,20 +275,39 @@ if __name__ == "__main__":
     #                     print_stuff=[], plot_type=[], gh_pickle=False)""",
     #              filename=path+'/out/profile/mix_model_50.profile')
 
-    # run(grammar=mix_grammar, mixture_model=1, data=josh_data, domain=100, alpha=0.9,
-    #     ngh='enum7', grammar_n=1000, skip=10, cap=100,
-    #     print_stuff='', plot_type='', gh_pickle='save', gh_file=path+'/out/1_29/mix_10k.p',
-    #     csv_save=path+'/out/1_29/mix_10k')
+    mix_grammar_test = Grammar()
+
+    mix_grammar_test.add_rule('START', '', ['MATH'], 1.)
+    mix_grammar_test.add_rule('MATH', 'mapset_', ['FUNC', 'DOMAIN_RANGE'], 1.)
+    mix_grammar_test.add_rule('DOMAIN_RANGE', 'range_set_', ['1', '100'], 1.)
+    mix_grammar_test.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='X', bv_p=1.)
+    mix_grammar_test.add_rule('EXPR', 'ipowf_', [str(2), 'X'], 1.)
+
+    mix_grammar_test.add_rule('START', '', ['INTERVAL'], 1.)
+    mix_grammar_test.add_rule('INTERVAL', 'range_set_', ['1', '100'], 1.)
+
+    interval_data = [FunctionData(
+        input=[16],
+        output={99: (30, 0), 64: (0, 30)})]
+
+    math_data = [FunctionData(
+        input=[16],
+        output={99: (0, 30), 64: (30, 0)})]
+
+    run(grammar=mix_grammar_test, mixture_model=1, data=math_data, domain=100, alpha=0.9,
+        ngh='enum7', grammar_n=1000, skip=10, cap=100,
+        print_stuff='samples', plot_type='', gh_pickle='',  # gh_file=path+'/out/2_4/mix_math_1k.p',
+        csv_save=path+'/out/2_4/mix_math_1k')
 
     # --------------------------------------------------------------------------------------------------------
     # Individual rule probabilities model
     # --------------------------------------------------------------------------------------------------------
 
-    run(grammar=individual_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9,
-        ngh='enum7', grammar_n=1000000, skip=200, cap=5000,
-        print_stuff='', plot_type='', gh_pickle='save',
-        gh_file=path+'/out/2_2/indep_1mil_1.p',
-        csv_save=path+'/out/2_2/indep_1mil_1')
+    # run(grammar=individual_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9,
+    #     ngh='enum7', grammar_n=1000000, skip=200, cap=5000,
+    #     print_stuff='', plot_type='', gh_pickle='save',
+    #     gh_file=path+'/out/2_2/indep_1mil_1.p',
+    #     csv_save=path+'/out/2_2/indep_1mil_1')
 
     # --------------------------------------------------------------------------------------------------------
     # LOT grammar
