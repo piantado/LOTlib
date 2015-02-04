@@ -43,9 +43,10 @@ class GrammarHypothesis(VectorHypothesis):
         hypotheses (LOTlib.Hypothesis): List of hypotheses, generated beforehand.
         rules (list): List of all rules in the grammar.
         value (list): Vector of numbers corresponding to the items in `rules`.
+        proposal (ndarray): Proposal matrix of size |propose_idxs| x |propose_idxs|.
 
     """
-    def __init__(self, grammar, hypotheses, rules=None, load=None, value=None,
+    def __init__(self, grammar, hypotheses, rules=None, load=None, value=None, proposal=None,
                  prior_shape=2., prior_scale=1., propose_n=1, propose_step=.1,
                  **kwargs):
         self.grammar = grammar
@@ -54,12 +55,14 @@ class GrammarHypothesis(VectorHypothesis):
         if value is None:
             value = [rule.p for rule in self.rules]
         self.n = len(value)
-        VectorHypothesis.__init__(self, value=value, n=self.n, **kwargs)
+        self.propose_idxs = self.get_propose_idxs()
+        if proposal is None:
+            proposal = np.eye(len(self.propose_idxs))
+        VectorHypothesis.__init__(self, value=value, n=self.n, proposal=proposal)
         self.prior_shape = prior_shape
         self.prior_scale = prior_scale
         self.propose_n = propose_n
         self.propose_step = propose_step
-        self.propose_idxs = self.get_propose_idxs()
         # self.compute_prior()
         self.update()
 
@@ -75,12 +78,12 @@ class GrammarHypothesis(VectorHypothesis):
           * `self.propose_step` is used to determine how far to step with proposals.
 
         """
-        step = np.random.multivariate_normal([0.]*self.n, self.proposal) * self.propose_step
+        step = np.random.multivariate_normal([0.]*len(self.propose_idxs), self.proposal) * self.propose_step
         new_value = copy.copy(self.value)
 
         # randomly choose `self.propose_n` of our proposable indexes
         for i in random.sample(self.propose_idxs, self.propose_n):
-            new_value[i] += step[i]
+            new_value[i] += step[self.propose_idxs.index(i)]
 
         c = self.__copy__()
         c.set_value(new_value)

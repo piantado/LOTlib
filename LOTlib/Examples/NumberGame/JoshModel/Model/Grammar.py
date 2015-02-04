@@ -105,10 +105,6 @@ for i in range(0, 10):
 # ------------------------------------------------------------------------------------------------------------
 # Interval Rules (there will be ~5050 of these)
 
-# for n in range(1, 101):
-#     for m in range(n, 101):
-#         mix_grammar.add_rule('INTERVAL', 'range_set_', [str(n), str(m)], 1.)
-
 mix_grammar.add_rule('INTERVAL', 'range_set_', ['CONST', 'CONST'], 1.)
 for i in range(1, 101):
     mix_grammar.add_rule('CONST', '', [str(i)], 1.)
