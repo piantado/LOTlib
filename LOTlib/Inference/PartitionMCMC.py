@@ -72,13 +72,13 @@ class PartitionMCMC(MultipleChainMCMC):
 
             for n in p.subnodes():
                 # set to not resample these
-                setattr(n, 'resample_p', 0.0) ## NOTE: This is an old version of how proposals were made, but we use it here
+                setattr(n, 'resample_p', 0.0) ## NOTE: This is an old version of how proposals were made, but we use it here to store in each node a prob of being resampled
 
                 # and fill in the missing leaves with a random generation
                 for i, a in enumerate(n.args):
                     if grammar.is_nonterminal(a):
                         n.args[i] = grammar.generate(a)
-
+        print "# Initialized %s partitions" % len(partitions)
 
         # initialize each chain
         MultipleChainMCMC.__init__(self, lambda: None, data, steps=steps, nchains=len(partitions), **kwargs)
@@ -90,11 +90,12 @@ class PartitionMCMC(MultipleChainMCMC):
 
         # And set each to the partition
         for c, p in zip(self.chains, partitions):
-            # We need to make sure the proposal_function is set to use reample_p, which is set above
+            # We need to make sure the proposal_function is set to use resample_p, which is set above
             v = make_h0(value=p, proposal_function=MyProposal(grammar) )
             c.set_state(v, compute_posterior=False) # and make v use the right proposal function
 
-    def active_partition(self):
+
+    def current_partition(self):
         """
         Which partition did the sample just come from?
         :return:
@@ -112,7 +113,7 @@ if __name__ == "__main__":
 
     pmc = PartitionMCMC(grammar, make_h0, data, max_N=10, skip=0)
     for h in lot_iter(pmc):
-        print h.posterior_score, pmc.active_partition(), "\t", h
+        print h.posterior_score, pmc.current_partition(), "\t", h
 
     
  

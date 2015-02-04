@@ -60,8 +60,8 @@ class LOTHypothesis(FunctionHypothesis):
             value = grammar.generate(self.start)
 
         FunctionHypothesis.__init__(self, value=value, f=f, args=args, **kwargs)
+
         # Save a proposal function
-        # TODO: How to handle this in copying?
         if proposal_function is None:
             self.proposal_function = RegenerationProposal(self.grammar)
 

@@ -10,7 +10,7 @@
 from LOTlib.Miscellaneous import Infinity
 from MetropolisHastings import MHSampler
 from Sampler import Sampler
-
+from copy import copy
 
 class MultipleChainMCMC(Sampler):
     
@@ -29,12 +29,15 @@ class MultipleChainMCMC(Sampler):
         self.chain_idx = -1 # what chain are we on? This get incremented before anything, so it starts with 0
         self.nsamples = 0
         assert nchains>0, "Must have > 0 chains specified (you sent %s)"%nchains
-        ## TODO: HANDLE THE CASE WHERE STEPS IS NOT DIVISIBLE BY CHAINS
 
-        if make_sampler is None:
-            make_sampler = lambda mh0, data, **kwargs: MHSampler( make_h0(), data, steps=steps/nchains, **kwargs)
+        self.chains = [self.make_sampler( make_h0, data, steps=steps/nchains, **kwargs) for _ in xrange(nchains)]
 
-        self.chains = [make_sampler( make_h0, data, **kwargs) for _ in xrange(nchains)]
+    def make_sampler(self, make_h0, data, **kwargs):
+        """
+        This is called to make each of our internal samplers. It can be overwritten if you want something fnacy
+        :return:
+        """
+        return MHSampler( make_h0(), data, **kwargs)
 
     def __iter__(self):
         return self
@@ -53,6 +56,15 @@ class MultipleChainMCMC(Sampler):
             Return the mean acceptance rate of all chains
         """
         return [c.acceptance_ratio() for c in self.chains]
+
+    def set_state(self, s, **kwargs):
+        """
+        Set the state of this sampler. By necessity, we set the states of all samplers to copies. This is required when, for instance, we
+        next parallel tempering within PartitionMCMC
+        :param s: the state we set
+        """
+        for c in self.chains:
+            c.set_state(copy(s), **kwargs) # it had better be a copy or all hell breaks loose
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if __name__ == "__main__":
