@@ -58,7 +58,7 @@ class GrammarHypothesis(VectorHypothesis):
         self.propose_idxs = self.get_propose_idxs()
         if proposal is None:
             proposal = np.eye(len(self.propose_idxs))
-        VectorHypothesis.__init__(self, value=value, n=self.n, **kwargs)
+        VectorHypothesis.__init__(self, value=value, n=self.n, proposal=proposal)
         self.prior_shape = prior_shape
         self.prior_scale = prior_scale
         self.propose_n = propose_n
