@@ -57,8 +57,6 @@ class GrammarHypothesis(VectorHypothesis):
         VectorHypothesis.__init__(self, value=value, n=self.n, **kwargs)
         self.prior_shape = prior_shape
         self.prior_scale = prior_scale
-        if int(self.n / 50) > propose_n:
-            propose_n = int(self.n / 50)
         self.propose_n = propose_n
         self.propose_step = propose_step
         self.propose_idxs = self.get_propose_idxs()
@@ -82,9 +80,7 @@ class GrammarHypothesis(VectorHypothesis):
 
         # randomly choose `self.propose_n` of our proposable indexes
         for i in random.sample(self.propose_idxs, self.propose_n):
-            # if new_value[i] + step[i] > 0.0:
-            #     new_value[i] += step[i]
-            new_value[i] += step[i]    # -- change
+            new_value[i] += step[i]
 
         c = self.__copy__()
         c.set_value(new_value)
