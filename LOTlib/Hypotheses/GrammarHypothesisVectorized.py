@@ -100,7 +100,7 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
 
         # The following must be computed for this specific GrammarHypothesis
         # ------------------------------------------------------------------
-        x = self.normalize_rule_vector()    # vector of rule probabilites
+        x = self.normalized_value()         # vector of rule probabilites
         P = np.dot(self.C, x)               # prior for each hypothesis
         likelihood = 0.0
 
@@ -125,7 +125,7 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
             self.update_posterior()
         return likelihood
 
-    def normalize_rule_vector(self):
+    def normalized_value(self):
         """Return a rule probabilities, each normalized relative to other rules with same nt.
 
         Note
@@ -134,18 +134,18 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
         only time where we reference `self.rules`.
 
         """
-        self.update()
+        # self.update()
 
         # Make dictionary of normalization constants for each nonterminal
         nt_Z = {}
         for nt in self.grammar.nonterminals():
-            Z = sum([r.p for r in self.get_rules(rule_nt=nt)[1]])
+            Z = sum([self.value[i] for i in self.get_rules(rule_nt=nt)[0]])
             nt_Z[nt] = Z
 
         # Normalize each probability in `self.value`
         normalized = np.zeros(len(self.rules))
         for i, r in enumerate(self.rules):
-            normalized[i] = r.p / nt_Z[self.rules[i].nt]
+            normalized[i] = self.value[i] / nt_Z[self.rules[i].nt]
 
         return np.log(normalized)
 
