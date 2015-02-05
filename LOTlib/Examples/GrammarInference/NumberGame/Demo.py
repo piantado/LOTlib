@@ -1,52 +1,72 @@
-"""
-Inference with grammar rule probabilities.
+from Run import *
 
-"""
-import numpy as np
-from LOTlib import lot_iter
-from LOTlib.Hypotheses.GrammarHypothesis import GrammarHypothesis
-from LOTlib.Inference.MetropolisHastings import MHSampler
-from LOTlib.Inference.PriorSample import prior_sample
-from LOTlib.Examples.NumberGame.NewVersion.Model import *
-from Model import *
+# --------------------------------------------------------------------------------------------------------
+# Mixture model
 
-# Parameters for number game inference
-domain = 100
-alpha = 0.99
-n = 10000000
+# import cProfile
+# cProfile.run("""run(grammar=mix_grammar, josh='mix', data=josh_data, domain=100,
+#                     alpha=0.9, ngh=5, grammar_n=50, skip=10, cap=100,
+#                     print_stuff=[], plot_type=[], gh_pickle=False)""",
+#              filename=path+'/out/profile/mix_model_50.profile')
 
-# Parameters for GrammarHypothesis inference
-grammar_n = 1000
-data = toy_single
+mix_grammar_test = Grammar()
 
-# Variables for NumberGameHypothesis inference
-h0 = make_h0(grammar=grammar, domain=domain, alpha=alpha)
-prior_sampler = prior_sample(h0, data[0].input, N=n)
-mh_sampler = MHSampler(h0, data[0].input, n)
+mix_grammar_test.add_rule('START', '', ['MATH'], 1.)
+mix_grammar_test.add_rule('MATH', 'mapset_', ['FUNC', 'DOMAIN_RANGE'], 1.)
+mix_grammar_test.add_rule('DOMAIN_RANGE', 'range_set_', ['1', '100'], 1.)
+mix_grammar_test.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='X', bv_p=1.)
+mix_grammar_test.add_rule('EXPR', 'ipowf_', [str(2), 'X'], 1.)
+
+mix_grammar_test.add_rule('START', '', ['INTERVAL'], 1.)
+mix_grammar_test.add_rule('INTERVAL', 'range_set_', ['1', '100'], 1.)
+
+interval_data = [FunctionData(
+    input=[16],
+    output={99: (30, 0), 64: (0, 30)})]
+
+math_data = [FunctionData(
+    input=[16],
+    output={99: (0, 30), 64: (30, 0)})]
+
+run(grammar=mix_grammar_test, mixture_model=1, data=math_data,
+    ngh='enum7', iters=1000, skip=10, cap=100,
+    print_stuff='s', plot_type='', pickle_file='',  # gh_file=path+'/out/2_4/mix_math_1k.p',
+    csv_file=path+'/out/2_4/mix_math_1k')
+
+# --------------------------------------------------------------------------------------------------------
+# Individual rule probabilities model
+
+# run(grammar=individual_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9,
+#     ngh='enum7', grammar_n=1000000, skip=200, cap=5000,
+#     print_stuff='', plot_type='', gh_pickle='save',
+#     gh_file=path+'/out/2_2/indep_1mil_1.p',
+#     csv_save=path+'/out/2_2/indep_1mil_1')
+
+# --------------------------------------------------------------------------------------------------------
+# LOT grammar
+
+# run(grammar=lot_grammar, mixture_model=0, data=josh_data, domain=100, alpha=0.9,
+#     ngh='load', ngh_file=path+'/ngh_mcmc100k.p', grammar_n=1000000, skip=200, cap=5000,
+#     print_stuff='', plot_type='', gh_pickle='save',
+#     gh_file=path+'/out/2_2/lot_1mil_1.p',
+#     csv_save=path+'/out/2_2/lot_1mil_1')
+
+# --------------------------------------------------------------------------------------------------------
+# TESTING  |  Original number game
+
+# run(grammar=complex_grammar, data=toy_2n, domain=20,
+#     alpha=0.99, ngh=6, grammar_n=1000, skip=10, cap=100,
+#     print_stuff='rules', plot_type=[], gh_pickle='save',
+#     gh_file='/Users/ebigelow35/Desktop/skool/piantado/LOTlib/LOTlib/Examples/GrammarInference/NumberGame'
+#              '/out/newest_complex_2n_1000.p')
+
+# --------------------------------------------------------------------------------------------------------
 
 
-# ============================================================================================================
+#
+#
+# '''print distribution over power rule:  [prior, likelihood, posterior]'''
+# # vals, posteriors = grammar_h0.rule_distribution(data, 'ipowf_', np.arange(0.1, 5., 0.1))
+# # print_dist(vals, posdfteriors)
+# #visualize_dist(vals, posteriors, 'union_')
 
-def run():
-    """Run demo"""
-    '''Generate number game hypotheses'''
-    #hypotheses = save_hypotheses(prior_sampler)
-    hypotheses = load_hypotheses()
-    print_top_hypotheses(hypotheses)
-
-    '''What grammar probabilities will best model our human data?'''
-    grammar_h0 = GrammarHypothesis(grammar, hypotheses, proposal_step=.1, proposal_n=1)
-
-    '''print distribution over power rule:  [prior, likelihood, posterior]'''
-    vals, posteriors = grammar_h0.rule_distribution(data, 'ipowf_', np.arange(0.1, 5., 0.1))
-    print_dist(vals, posteriors)
-    #visualize_dist(vals, posteriors, 'union_')
-
-    '''grammar hypothesis inference'''
-    #mh_grammar_sampler = MHSampler(grammar_h0, data, grammar_n, trace=False)
-    #prior_grammar_sampler = prior_sample(grammar_h0, data, grammar_n)
-    #grammar_hypotheses = sample_grammar_hypotheses(mh_grammar_sampler)
-
-
-if __name__ == "__main__":
-    run()
