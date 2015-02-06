@@ -1,7 +1,4 @@
 
-from random import randint
-from LOTlib.Miscellaneous import Infinity
-from MHShared import MH_acceptance
 from ParallelTempering import ParallelTemperingSampler
 from scipy import interpolate
 

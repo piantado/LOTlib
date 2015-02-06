@@ -41,6 +41,8 @@ class LOTHypothesis(FunctionHypothesis):
     prior_vector : np.ndarray
 
     """
+    NoCopy = {'self', 'grammar', 'value', 'proposal_function', 'f'} # These are things we don't copy
+
     def __init__(self, grammar, value=None, f=None, start=None, ALPHA=0.9, maxnodes=25, args=['x'],
                  proposal_function=None, **kwargs):
         self.grammar = grammar
@@ -58,8 +60,8 @@ class LOTHypothesis(FunctionHypothesis):
             value = grammar.generate(self.start)
 
         FunctionHypothesis.__init__(self, value=value, f=f, args=args, **kwargs)
+
         # Save a proposal function
-        # TODO: How to handle this in copying?
         if proposal_function is None:
             self.proposal_function = RegenerationProposal(self.grammar)
 
@@ -103,9 +105,8 @@ class LOTHypothesis(FunctionHypothesis):
                              f=self.f, proposal_function=self.proposal_function)
 
         # And then then copy the rest
-        for k in self.__dict__.keys():
-            if k not in ['self', 'grammar', 'value', 'proposal_function', 'f']:
-                thecopy.__dict__[k] = copy.copy(self.__dict__[k])
+        for k in set(self.__dict__.keys()).difference(LOTHypothesis.NoCopy):
+            thecopy.__dict__[k] = copy.copy(self.__dict__[k])
 
         return thecopy
 

@@ -9,20 +9,35 @@
 """
 from LOTlib.Miscellaneous import Infinity
 from MetropolisHastings import MHSampler
-from numpy import mean
+from Sampler import Sampler
+from copy import copy
 
-
-class MultipleChainMCMC(object):
+class MultipleChainMCMC(Sampler):
     
-    def __init__(self, make_h0, data, steps=Infinity, nchains=10, **kwargs):
+    def __init__(self, make_h0, data, steps=Infinity, nchains=10, make_sampler=None, **kwargs):
+        """
+        :param make_h0: -- a function to make h0 for each chain
+        :param data:  -- what data we use
+        :param steps:  -- how many steps (total, across all chains)
+        :param nchains:  -- how many chains
+        :param make_sampler: -- a function that takes make_h0, data, and steps
+        :param kwargs: -- special args to sampler
+        :return:
+        """
 
         self.nchains = nchains
         self.chain_idx = -1 # what chain are we on? This get incremented before anything, so it starts with 0
         self.nsamples = 0
         assert nchains>0, "Must have > 0 chains specified (you sent %s)"%nchains
-        ## TODO: HANDLE THE CASE WHERE STEPS IS NOT DIVISIBLE BY CHAINS
 
-        self.chains = [MHSampler( make_h0(), data, steps=steps/nchains, **kwargs) for _ in xrange(nchains)]
+        self.chains = [self.make_sampler( make_h0, data, steps=steps/nchains, **kwargs) for _ in xrange(nchains)]
+
+    def make_sampler(self, make_h0, data, **kwargs):
+        """
+        This is called to make each of our internal samplers. It can be overwritten if you want something fnacy
+        :return:
+        """
+        return MHSampler( make_h0(), data, **kwargs)
 
     def __iter__(self):
         return self
@@ -41,6 +56,15 @@ class MultipleChainMCMC(object):
             Return the mean acceptance rate of all chains
         """
         return [c.acceptance_ratio() for c in self.chains]
+
+    def set_state(self, s, **kwargs):
+        """
+        Set the state of this sampler. By necessity, we set the states of all samplers to copies. This is required when, for instance, we
+        next parallel tempering within PartitionMCMC
+        :param s: the state we set
+        """
+        for c in self.chains:
+            c.set_state(copy(s), **kwargs) # it had better be a copy or all hell breaks loose
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if __name__ == "__main__":

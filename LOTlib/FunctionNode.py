@@ -63,6 +63,8 @@ class FunctionNode(object):
     * If a node has [ None ] as args, it is treated as a thunk
 
     """
+    NoCopy = {'self', 'parent', 'returntype', 'name', 'generation_probability', 'rule', 'args', 'parent'}
+
     def __init__(self, parent, returntype, name, args,
                  generation_probability=0.0, rule=None, a_args=None):
         self.__dict__.update(locals())
@@ -104,6 +106,10 @@ class FunctionNode(object):
         fn = FunctionNode(self.parent, self.returntype, self.name, None,
                           generation_probability=self.generation_probability,
                           rule=self.rule)
+
+        # And then then copy the rest -- needed for if we add info to FunctionNodes, like a resample_p
+        for k in set(self.__dict__.keys()).difference(FunctionNode.NoCopy): # None of these!
+            fn.__dict__[k] = copy(self.__dict__[k])
 
         if (not shallow) and self.args is not None:
             fn.args = map(copy, self.args)

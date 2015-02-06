@@ -3,7 +3,6 @@ from random import randint
 from LOTlib.Miscellaneous import Infinity
 from MHShared import MH_acceptance
 from MultipleChainMCMC import MultipleChainMCMC
-from scipy import interpolate
 
 class ParallelTemperingSampler(MultipleChainMCMC):
     """
@@ -103,7 +102,7 @@ class ParallelTemperingSampler(MultipleChainMCMC):
 
         if self.yield_only_t0 and self.chain_idx != 0:
             return self.next() # keep going until we're on the one we yield
-            ## TODO: FIX THIS SINCE IT WILL BREAK FOR HUGE NUMBERS OF CHAINS
+            ## TODO: FIX THIS SINCE IT WILL BREAK FOR HUGE NUMBERS OF CHAINS due toi recursion depth
         else:
             return self.chains[self.chain_idx].next()
 
