@@ -37,14 +37,11 @@ $ python Run.py -q -p -csv out/gh_100k -ngh out/ngh_100k.p -g lot_grammar -d jos
 """
 
 import pickle, os
-from math import exp
 from optparse import OptionParser
-from LOTlib.Examples.NumberGame.JoshModel.Model import *
-from LOTlib.Examples.NumberGame.NewVersion.Model import *
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.MPI.MPI_map import MPI_unorderedmap
 from LOTlib.MCMCSummary.TopN import TopN
-from Model import *
+from LOTlib.Examples.GrammarInference.Model import *
 
 
 # ============================================================================================================

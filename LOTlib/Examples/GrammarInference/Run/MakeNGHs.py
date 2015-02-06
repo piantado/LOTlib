@@ -36,12 +36,11 @@ $ python Demo.py -f out/ngh_lot100k.p -do 100 -a 0.9 -g lot_grammar -d josh_data
 
 
 from optparse import OptionParser
-from LOTlib.Examples.NumberGame.JoshModel.Model import *
-from LOTlib.Examples.NumberGame.NewVersion.Model import *
+from LOTlib.Examples.NumberGame.Model import *
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.MPI.MPI_map import MPI_unorderedmap
 from LOTlib.MCMCSummary.TopN import TopN
-from Model import *
+from LOTlib.Examples.GrammarInference.Model import *
 
 
 # ============================================================================================================
