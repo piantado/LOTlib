@@ -31,12 +31,15 @@ Command-line Args
 
 Example
 -------
-$ python Run.py -q -p -csv out/gh_100k -ngh out/ngh_100k.p -g lot_grammar -d josh_data -i 100000 -sk 100 -cap 1000
+# Independent model
+$ python Run.py -q -P -C out/gh_100k -H enum7 --domain=100 --alpha=0.9 -g independent_grammar -d josh_data -i 100000 -s 100 -c 1000
+# LOT model
+$ python Run.py -q -P -C out/gh_100k -H out/ngh_100k.p -g lot_grammar -d josh_data -i 100000 -s 100 -c 1000
 
 
 """
 
-import pickle, os
+import pickle, os, re
 from optparse import OptionParser
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.MPI.MPI_map import MPI_unorderedmap
@@ -50,13 +53,13 @@ from LOTlib.Examples.NumberGame.GrammarInference.Model import *
 
 parser = OptionParser()
 
-parser.add_option("-p", "--pickle",
+parser.add_option("-P", "--pickle",
                   action="store_true", dest="pickle", default=False,
                   help="If there's a value here, pickle VectorSummary.")
-parser.add_option("-csv", "--csvfile",
+parser.add_option("-C", "--csvfile",
                   dest="csv_file", type="string", default="out/gh_100k",
                   help="Save csv's to this file.")
-parser.add_option("-ngh", "--ngh_file",
+parser.add_option("-H", "--ngh_file",
                   dest="ngh_file", type="string", default="out/ngh_100k.p",
                   help="Where's the file with the NumberGameHypotheses?")
 
@@ -70,10 +73,10 @@ parser.add_option("-d", "--data",
 parser.add_option("-i", "--iters",
                   dest="iters", type="int", default=1000000,
                   help="Number of samples to run per chain")
-parser.add_option("-sk", "--skip",
+parser.add_option("-s", "--skip",
                   dest="skip", type="int", default=1000,
                   help="Collect 1 gh sample every `skip` samples.")
-parser.add_option("-cap", "--cap",
+parser.add_option("-c", "--cap",
                   dest="cap", type="int", default=1000,
                   help="VectorSummary will collect this many GrammarHypothesis samples.")
 
@@ -100,8 +103,8 @@ parser.add_option("-q", "--quiet",
 # ============================================================================================================
 
 def run(grammar=lot_grammar, mixture_model=0, data=josh_data,
-        iters=10000, skip=10, cap=100, ngh='out/ngh_100k',
-        print_stuff='sgr', plot_type='',
+        iters=10000, skip=10, cap=100, print_stuff='sgr',
+        ngh='out/ngh_100k', hypotheses=None, domain=100, alpha=0.9,
         pickle_file='', csv_file=''):
     """
     Enumerate some NumberGameHypotheses, then use these to sample some GrammarHypotheses over `data`.
@@ -135,39 +138,48 @@ def run(grammar=lot_grammar, mixture_model=0, data=josh_data,
     if mixture_model:
         ParameterHypothesis = MixtureGrammarHypothesis
     else:
-        ParameterHypothesis = NumberGameHypothesis
+        ParameterHypothesis = NoConstGrammarHypothesis
 
     # --------------------------------------------------------------------------------------------------------
     # Load NumberGameHypotheses
 
-    f = open(ngh, "rb")
-    hypotheses = pickle.load(f)
-    for h in hypotheses:
-        h.grammar = grammar
-
-    # --------------------------------------------------------------------------------------------------------
-    # Print all GrammarRules in our Grammar, with corresponding value index
-
-    if print_stuff is 'r' in print_stuff:
-        print '='*100, '\nGrammarRules:'
-        rules = [r for sublist in grammar.rules.values() for r in sublist]
-        for i, r in enumerate(rules):
-            print i, '\t|  ', r
+    if hypotheses is None:
+        if 'enum' in ngh:
+            hypotheses = []
+            for fn in grammar.enumerate(d=int(re.sub('[a-z]', '', ngh))):
+                h = NumberGameHypothesis(grammar=grammar, domain=domain, alpha=alpha)
+                h.set_value(fn)
+                hypotheses.append(h)
+        else:
+            f = open(ngh, "rb")
+            hypotheses = pickle.load(f)
+            for h in hypotheses:
+                h.grammar = grammar
 
     # --------------------------------------------------------------------------------------------------------
     # Fill VectorSummary
 
+
+
+    grammar_h0 = ParameterHypothesis(grammar, hypotheses, propose_step=.1, propose_n=1)
+    mh_grammar_sampler = MHSampler(grammar_h0, data, iters)
+    mh_grammar_summary = VectorSummary(skip=skip, cap=cap)
+
+    # Print all GrammarRules in grammar with corresponding value index
+    if 'r' in print_stuff:
+        print '='*100, '\nGrammarRules:'
+        for idx in grammar_h0.propose_idxs:
+            print idx, '\t|  ', grammar_h0.rules[idx]
+
     if 's' in print_stuff:
         print '^*'*60, '\nGenerating GrammarHypothesis Samples\n', '^*'*60
 
-    grammar_h0 = ParameterHypothesis(grammar, hypotheses, propose_step=.1, propose_n=1)
-    mh_grammar_sampler = MHSampler(grammar_h0, data, n)
-    mh_grammar_summary = VectorSummary(skip=skip, cap=cap)
-
+    # Initialize csv file
     if csv_file:
         mh_grammar_summary.csv_initfiles(csv_file)
         mh_grammar_summary.csv_compare_model_human(csv_file+'_data_h0.csv', data, grammar_h0)
 
+    # Sample GrammarHypotheses!
     for i, gh in enumerate(mh_grammar_summary(mh_grammar_sampler)):
 
         # Save to csv every 200 samples from 0 to 10k, then every 1000
@@ -177,7 +189,7 @@ def run(grammar=lot_grammar, mixture_model=0, data=josh_data,
         # Print every N/20 samples
         if 's' in print_stuff:
             if i % (iters/20) is 0:
-                print ['%.3f' % v for v in [gh.value[idx] for idx in gh.propose_idxs]], '\n', i, '-'*100
+                print i, '-'*100, '\n', {idx:gh.value[idx] for idx in gh.propose_idxs}
                 print gh.prior, gh.likelihood, gh.posterior_score
 
     # Save summary & print top samples

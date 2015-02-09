@@ -74,9 +74,6 @@ parser.add_option("-n",
                   dest="N", type="int", default=1000,
                   help="Only keep top N samples per MPI run (if we're doing MPI), or total (if not MPI)")
 
-parser.add_option("-mcmc",
-                  action="store_true", dest="mcmc", default=True,
-                  help="Do we do MCMC?")
 parser.add_option("-mpi",
                   action="store_true", dest="mpi", default=True,
                   help="Do we use MPI? (only if MCMC)")
@@ -116,6 +113,8 @@ if __name__ == "__main__":
         grammar = independent_grammar
     elif options.grammar is 'lot':
         grammar = lot_grammar
+    else:
+        grammar = None
 
     # Add more data options . . .
     if options.data is 'josh':
@@ -126,37 +125,25 @@ if __name__ == "__main__":
     # --------------------------------------------------------------------------------------------------------
     # MCMC sampling
 
-    if options.mcmc:
+    # MPI
+    if options.mpi:
+        hypotheses = set()
+        hypo_sets = MPI_unorderedmap(mpirun, [[d] for d in data * options.chains])
+        for hypo_set in hypo_sets:
+            hypotheses = hypotheses.union(hypo_set)
 
-        # MPI
-        if options.mpi:
-            hypotheses = set()
-            hypo_sets = MPI_unorderedmap(mpirun, [[d] for d in data * options.chains])
-            for hypo_set in hypo_sets:
-                hypotheses = hypotheses.union(hypo_set)
-
-        # No MPI
-        else:
-            hypotheses = set()
-
-            for d in data * options.chains:
-                h0 = NumberGameHypothesis(grammar=grammar, domain=options.domain, alpha=options.alpha)
-                mh_sampler = MHSampler(h0, d, options.iters)
-
-                chain_hypos = TopN(N=options.N)
-                for h in lot_iter(mh_sampler):
-                    chain_hypos.add(h)
-                hypotheses = hypotheses.union(chain_hypos.get_all())
-
-    # --------------------------------------------------------------------------------------------------------
-    # Enumerate all hypotheses up to specified depth
-
+    # No MPI
     else:
-        hypotheses = []
-        for fn in grammar.enumerate(d=options.enum_depth):
-            h = NumberGameHypothesis(grammar=grammar, domain=options.domain, alpha=options.alpha)
-            h.set_value(fn)
-            hypotheses.append(h)
+        hypotheses = set()
+
+        for d in data * options.chains:
+            h0 = NumberGameHypothesis(grammar=grammar, domain=options.domain, alpha=options.alpha)
+            mh_sampler = MHSampler(h0, d, options.iters)
+
+            chain_hypos = TopN(N=options.N)
+            for h in lot_iter(mh_sampler):
+                chain_hypos.add(h)
+            hypotheses = hypotheses.union(chain_hypos.get_all())
 
     # --------------------------------------------------------------------------------------------------------
     # Save hypotheses

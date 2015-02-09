@@ -27,7 +27,7 @@ name <- args[2]         # filename, e.g. 'gh_lot100k'
 # ------------------------------------------------------------------------------------------------------------
 # Model correlation plots (MAP)
 
-f <- paste(name, "_correl_MAP", sep="")
+f <- paste(name, "_data_MAP", sep="")
 d <- read.csv(paste(f, ".csv", sep=""), header=T)
 
 m <- sort(unique(d$i), decreasing=TRUE)[3]
@@ -44,7 +44,7 @@ dev.off()
 # ------------------------------------------------------------------------------------------------------------
 # Model correlation plots (h0)
 
-f <- paste(name, "_correl_h0", sep="")
+f <- paste(name, "_data_h0", sep="")
 d <- read.csv(paste(f, ".csv", sep=""), header=T)
 postscript(paste(f, ".eps", sep=""), height=4, width=4)
 
@@ -59,15 +59,38 @@ dev.off()
 
 # ------------------------------------------------------------------------------------------------------------
 
+library(ggplot2)
 
 if (model=='mix') {
-    # No violin plot here!
+    f <- paste(name, "_values", sep="")
+    d <- read.csv(paste(f, ".csv", sep=""), header=T)
+    mth <- subset(d, to=="MATH")
+    smlr <- subset(d, to=="INTERVAL")
+    q <- mth / (smlr + mth)
+
+
+
+#    f <- paste(name, "_values", sep="")
+#    d <- read.csv(paste(f, ".csv", sep=""), header=T)
+#
+#    q <- subset(d, nt=="START")
+#    m <- sort(unique(d$i), decreasing=TRUE)[3]
+#    q <- subset(q, i>m/2)       # Second half of samples
+#    q <- subset(q, i<m)
+#    q$x <- paste(q$name, q$to)
+#
+#    plt <- ggplot(q, aes(x=x, y=p)) +
+#            geom_boxplot() +
+##            geom_violin(fill = "red", scale="width") +
+#            ylab("Probability") + xlab("PCFG Parameter") +
+#            theme(axis.text.x = element_text(angle = 90, hjust = 1))
+#    ggsave(paste(f, ".eps", sep=""), plt, heigh=4, width=7)
+
 } else if (model=='indep') {
     # --------------------------------------------------------------------------------------------------------
     # Independent probabilities model
     # --------------------------------------------------------------------------------------------------------
 
-    library(ggplot2)
     f <- paste(name, "_values", sep="")
     d <- read.csv(paste(f, ".csv", sep=""), header=T)
 
@@ -107,8 +130,6 @@ if (model=='mix') {
     # --------------------------------------------------------------------------------------------------------
     # LOT / compositional model
     # --------------------------------------------------------------------------------------------------------
-
-    library(ggplot2)
 
     f <- paste(name, "_values", sep="")
     d <- read.csv(paste(f, ".csv", sep=""), header=T)
