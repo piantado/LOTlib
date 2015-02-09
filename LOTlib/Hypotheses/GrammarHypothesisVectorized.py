@@ -52,7 +52,7 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
         rule_idxs = {str([r.name, r.nt, r.to]): i for i, r in enumerate(self.rules)}
 
         for j, h in enumerate(self.hypotheses):
-            grammar_rules = [fn.rule for fn in h.value.subnodes()[1:]]
+            grammar_rules = [fn.rule for fn in h.value.subnodes()]
             for rule in grammar_rules:
                 try:
                     self.C[j, rule_idxs[str([rule.name, rule.nt, rule.to])]] += 1
@@ -113,8 +113,11 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
             for m, o in enumerate(d.output.keys()):
                 # col `m` of boolean matrix `R[i]` weighted by `w`  -- TODO could this be logsumexp?
                 p = log((np.exp(w) * self.R[d][:, m]).sum())
+
+                # NOTE: with really small grammars sometimes we get p > 0
                 if p >= 0:
                     print 'P ERROR!'
+
                 k = d.output[o][0]          # num. yes responses
                 n = k + d.output[o][1]      # num. trials
                 bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
