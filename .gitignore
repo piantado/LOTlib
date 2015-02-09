@@ -16,3 +16,34 @@ header_generator.py
 
 # Built documentation
 doc/_build
+
+# Pickle files
+*.p
+
+# CSV files
+*.csv
+
+# mat files
+*.mat
+
+# ipynb files
+*.ipynb
+
+# images
+*.eps
+*.png
+*.pdf
+
+# profiles
+*.profile
+
+# out/old
+*/old/*
+*/out/*
+
+# zips
+*.zip
+
+# idea folder
+/.idea/*
+.idea/

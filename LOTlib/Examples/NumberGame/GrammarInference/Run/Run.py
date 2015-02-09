@@ -41,7 +41,7 @@ from optparse import OptionParser
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.MPI.MPI_map import MPI_unorderedmap
 from LOTlib.MCMCSummary.TopN import TopN
-from LOTlib.Examples.GrammarInference.Model import *
+from LOTlib.Examples.NumberGame.GrammarInference.Model import *
 
 
 # ============================================================================================================

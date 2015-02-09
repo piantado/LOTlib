@@ -3,7 +3,7 @@ Map output number (e.g. 8) to a number of yes/no's.  E.g. (10, 2) ~ (10 yes, 2 n
 
 """
 from LOTlib.DataAndObjects import FunctionData
-from Utilities import import_data_from_mat
+from LOTlib.Examples.NumberGame.Model import *
 
 
 """
@@ -324,11 +324,3 @@ toy_npow2p1 = [
                 20: (0, 12)}
 '''
 
-
-# ------------------------------------------------------------------------------------------------------------
-
-"""
-Import Josh data
-
-"""
-josh_data = import_data_from_mat()

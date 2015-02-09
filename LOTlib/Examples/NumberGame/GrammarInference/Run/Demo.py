@@ -1,4 +1,6 @@
 from Run import *
+from LOTlib.Grammar import Grammar
+from LOTlib.Miscellaneous import FunctionData
 
 # --------------------------------------------------------------------------------------------------------
 # Mixture model
