@@ -87,15 +87,51 @@ parser.add_option("-q", "--quiet",
                   action="store_true", dest="quiet", default=True,
                   help="Print nothing!")
 
-# TODO -- parallelize!
-# parser.add_option("-c", "--chains", dest="chains", type="int", default=1,
-#                   help="Number of chains to run on each data input")
-# parser.add_option("-n", dest="N", type="int", default=1000,
-#                   help="Only keep top N samples per MPI run (if we're doing MPI), or total (if not MPI)")
-# parser.add_option("-mpi", action="store_true", dest="mpi", default=True,
-#                   help="Do we use MPI?")
+parser.add_option("--mpi", action="store_true", dest="mpi", default=False,
+                  help="Do we use MPI?")
+parser.add_option("-c", "--chains", dest="chains", type="int", default=1,
+                  help="Number of chains to run on each data input")
+
 
 (options, args) = parser.parse_args()
+
+
+# ============================================================================================================
+# MPI method
+
+# TODO: make it so csv file adds _(n+1) to the end of whatever file name we're using
+# TODO: should this be inside run()?
+def mpirun(d):
+    """
+    Generate NumberGameHypotheses using MPI.
+
+    """
+    grammar_h0 = ParameterHypothesis(grammar, hypotheses, propose_step=.1, propose_n=1)
+    mh_grammar_sampler = MHSampler(grammar_h0, data, options.iters)
+    mh_grammar_summary = VectorSummary(skip=options.skip, cap=options.cap)
+
+    # Print all GrammarRules in grammar with corresponding value index
+    if 'r' in print_stuff:
+        print '='*100, '\nGrammarRules:'
+        for idx in grammar_h0.propose_idxs:
+            print idx, '\t|  ', grammar_h0.rules[idx]
+
+    if 's' in print_stuff:
+        print '^*'*60, '\nGenerating GrammarHypothesis Samples\n', '^*'*60
+
+    # Initialize csv file
+    csv_file = options.csv_file
+    if csv_file:
+        mh_grammar_summary.csv_initfiles(csv_file)
+        mh_grammar_summary.csv_compare_model_human(csv_file+'_data_h0.csv', data, grammar_h0)
+
+    # Sample GrammarHypotheses!
+    for gh in mh_grammar_summary(mh_grammar_sampler):
+        if csv_file:
+            mh_grammar_summary.csv_appendfiles(csv_file, data)
+
+    if pickle_file:
+        mh_grammar_summary.pickle_summary(filename=pickle_file)
 
 
 # ============================================================================================================
@@ -159,44 +195,51 @@ def run(grammar=lot_grammar, mixture_model=0, data=josh_data,
     # --------------------------------------------------------------------------------------------------------
     # Fill VectorSummary
 
+    # MPI
+    if options.mpi:
+        hypotheses = set()
+        hypo_sets = MPI_unorderedmap(mpirun, [[d] for d in data * options.chains])
+        for hypo_set in hypo_sets:
+            hypotheses = hypotheses.union(hypo_set)
 
+    # No MPI
+    else:
+        grammar_h0 = ParameterHypothesis(grammar, hypotheses, propose_step=.1, propose_n=1)
+        mh_grammar_sampler = MHSampler(grammar_h0, data, iters)
+        mh_grammar_summary = VectorSummary(skip=skip, cap=cap)
 
-    grammar_h0 = ParameterHypothesis(grammar, hypotheses, propose_step=.1, propose_n=1)
-    mh_grammar_sampler = MHSampler(grammar_h0, data, iters)
-    mh_grammar_summary = VectorSummary(skip=skip, cap=cap)
+        # Print all GrammarRules in grammar with corresponding value index
+        if 'r' in print_stuff:
+            print '='*100, '\nGrammarRules:'
+            for idx in grammar_h0.propose_idxs:
+                print idx, '\t|  ', grammar_h0.rules[idx]
 
-    # Print all GrammarRules in grammar with corresponding value index
-    if 'r' in print_stuff:
-        print '='*100, '\nGrammarRules:'
-        for idx in grammar_h0.propose_idxs:
-            print idx, '\t|  ', grammar_h0.rules[idx]
-
-    if 's' in print_stuff:
-        print '^*'*60, '\nGenerating GrammarHypothesis Samples\n', '^*'*60
-
-    # Initialize csv file
-    if csv_file:
-        mh_grammar_summary.csv_initfiles(csv_file)
-        mh_grammar_summary.csv_compare_model_human(csv_file+'_data_h0.csv', data, grammar_h0)
-
-    # Sample GrammarHypotheses!
-    for i, gh in enumerate(mh_grammar_summary(mh_grammar_sampler)):
-
-        # Save to csv every 200 samples from 0 to 10k, then every 1000
-        if csv_file:
-            mh_grammar_summary.csv_appendfiles(csv_file, data)
-
-        # Print every N/20 samples
         if 's' in print_stuff:
-            if i % (iters/20) is 0:
-                print i, '-'*100, '\n', {idx:gh.value[idx] for idx in gh.propose_idxs}
-                print gh.prior, gh.likelihood, gh.posterior_score
+            print '^*'*60, '\nGenerating GrammarHypothesis Samples\n', '^*'*60
 
-    # Save summary & print top samples
-    if pickle_file:
-        mh_grammar_summary.pickle_summary(filename=pickle_file)
-    if 'g' in print_stuff:
-        mh_grammar_summary.print_top_samples()
+        # Initialize csv file
+        if csv_file:
+            mh_grammar_summary.csv_initfiles(csv_file)
+            mh_grammar_summary.csv_compare_model_human(csv_file+'_data_h0.csv', data, grammar_h0)
+
+        # Sample GrammarHypotheses!
+        for i, gh in enumerate(mh_grammar_summary(mh_grammar_sampler)):
+
+            # Save to csv every 200 samples from 0 to 10k, then every 1000
+            if csv_file:
+                mh_grammar_summary.csv_appendfiles(csv_file, data)
+
+            # Print every N/20 samples
+            if 's' in print_stuff:
+                if i % (iters/20) is 0:
+                    print i, '-'*100, '\n', {idx:gh.value[idx] for idx in gh.propose_idxs}
+                    print gh.prior, gh.likelihood, gh.posterior_score
+
+        # Save summary & print top samples
+        if pickle_file:
+            mh_grammar_summary.pickle_summary(filename=pickle_file)
+        if 'g' in print_stuff:
+            mh_grammar_summary.print_top_samples()
 
 
 # ============================================================================================================
