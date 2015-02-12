@@ -1,8 +1,8 @@
-
 from random import randint
-from LOTlib.Miscellaneous import Infinity
+
 from MHShared import MH_acceptance
-from MultipleChainMCMC import MultipleChainMCMC
+from LOTlib.Inference.Samplers import MultipleChainMCMC
+
 
 class ParallelTemperingSampler(MultipleChainMCMC):
     """

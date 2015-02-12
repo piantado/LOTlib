@@ -1,6 +1,7 @@
-
-from ParallelTempering import ParallelTemperingSampler
 from scipy import interpolate
+
+from LOTlib.Inference.Samplers.ParallelTempering import ParallelTemperingSampler
+
 
 class AdaptiveParallelTemperingSampler(ParallelTemperingSampler):
     """

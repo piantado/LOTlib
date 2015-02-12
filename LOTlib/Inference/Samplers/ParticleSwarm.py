@@ -1,9 +1,11 @@
-from numpy import median
-from numpy.random import normal, randint
-from MultipleChainMCMC import MultipleChainMCMC
-from LOTlib import lot_iter
-from LOTlib.Miscellaneous import logsumexp, q, Infinity, logplusexp
 from copy import copy
+
+from numpy import median
+from numpy.random import randint
+
+from LOTlib.Inference.Samplers import MultipleChainMCMC
+from LOTlib import lot_iter
+from LOTlib.Miscellaneous import Infinity, logplusexp
 
 
 class ParticleSwarm(MultipleChainMCMC):
@@ -81,7 +83,7 @@ class ParticleSwarmPriorResample(ParticleSwarm):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~			
 if __name__ == "__main__":
-    from LOTlib.Examples.Number.Global import generate_data, grammar, make_h0
+    from LOTlib.Examples.Number.Global import generate_data, make_h0
 
     data = generate_data(300)
 

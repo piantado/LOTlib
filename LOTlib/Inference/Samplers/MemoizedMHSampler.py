@@ -1,7 +1,8 @@
-
-from LOTlib.Miscellaneous import q, Infinity
-from MetropolisHastings import MHSampler
 from cachetools import LRUCache
+
+from LOTlib.Miscellaneous import Infinity
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
+
 
 class MemoizedMHSampler(MHSampler):
     """
@@ -25,7 +26,7 @@ class MemoizedMHSampler(MHSampler):
 
 if __name__ == "__main__":
 
-    from LOTlib.Examples.Number.Global import generate_data, NumberExpression, grammar, get_knower_pattern
+    from LOTlib.Examples.Number.Global import generate_data, NumberExpression, grammar
 
     data = generate_data(100)
     h0 = NumberExpression(grammar)

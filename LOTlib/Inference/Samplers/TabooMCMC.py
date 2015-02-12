@@ -7,8 +7,10 @@
               if they don't exist
 """
 
-from MetropolisHastings import MHSampler
 from collections import Counter
+
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
+
 
 class TabooMCMC(MHSampler):
     """

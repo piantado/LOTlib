@@ -7,16 +7,13 @@
     within each partition.  
 
 """
-from LOTlib import lot_iter
-from LOTlib.Miscellaneous import Infinity, infrange
 from copy import copy
 
-
-from MultipleChainMCMC import MultipleChainMCMC
-
-from LOTlib.Subtrees import trim_leaves
-from LOTlib.Miscellaneous import None2Empty
+from LOTlib import lot_iter
+from LOTlib.Miscellaneous import Infinity, infrange
+from LOTlib.Inference.Samplers import MultipleChainMCMC
 from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
+
 
 class BreakException(Exception):
     """

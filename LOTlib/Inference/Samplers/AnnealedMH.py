@@ -99,7 +99,7 @@ class InverseLogSchedule(AnnealingSchedule):
 ## An annealed MH sampler
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from LOTlib.Inference.MetropolisHastings import MHSampler
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
 class AnnealedMHSampler(MHSampler):
     def __init__(self, h0, data, prior_schedule=None, likelihood_schedule=None, **kwargs):

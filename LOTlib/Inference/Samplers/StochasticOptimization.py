@@ -7,13 +7,7 @@
         NOTE: Wow, doesn't work at all!
 """
 
-from random import random
-from math import log, exp, isnan
-
-import LOTlib
-from LOTlib.Miscellaneous import *
-from LOTlib.FiniteBestSet import FiniteBestSet
-from MetropolisHastings import mh_sample
+from LOTlib.Inference.Samplers.MetropolisHastings import mh_sample
 from MHShared import *
 
 def datawise_optimize(current_sample, data, steps=1000000, inner_steps=10, data_weight=1.0, ll_temperature=1.0, **kwargs):

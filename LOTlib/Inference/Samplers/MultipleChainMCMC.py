@@ -7,10 +7,12 @@
     Also, steps is the *total* number of steps, not the number of steps for each chain
     This is subclassed by several other inference techniques
 """
-from LOTlib.Miscellaneous import Infinity
-from MetropolisHastings import MHSampler
-from Sampler import Sampler
 from copy import copy
+
+from LOTlib.Miscellaneous import Infinity
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
+from Sampler import Sampler
+
 
 class MultipleChainMCMC(Sampler):
     
