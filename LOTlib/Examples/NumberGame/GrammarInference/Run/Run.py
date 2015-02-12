@@ -33,8 +33,15 @@ Example
 -------
 # Independent model
 $ python Run.py -q -P -C out/gh_100k -H enum7 --domain=100 --alpha=0.9 -g independent_grammar -d josh_data -i 100000 -s 100 -c 1000
+
 # LOT model
 $ python Run.py -q -P -C out/gh_100k -H out/ngh_100k.p -g lot_grammar -d josh_data -i 100000 -s 100 -c 1000
+
+Notes
+-----
+* MPI won't work right now
+    - fix mpirun
+    - make so csv file adds _# to end of filename
 
 
 """
@@ -47,53 +54,7 @@ from LOTlib.MCMCSummary.TopN import TopN
 from LOTlib.Examples.NumberGame.GrammarInference.Model import *
 
 
-# ============================================================================================================
-# Parsing command-line options
-# ============================================================================================================
 
-parser = OptionParser()
-
-parser.add_option("-P", "--pickle",
-                  action="store_true", dest="pickle", default=False,
-                  help="If there's a value here, pickle VectorSummary.")
-parser.add_option("-C", "--csvfile",
-                  dest="csv_file", type="string", default="out/gh_100k",
-                  help="Save csv's to this file.")
-parser.add_option("-H", "--ngh_file",
-                  dest="ngh_file", type="string", default="out/ngh_100k.p",
-                  help="Where's the file with the NumberGameHypotheses?")
-
-parser.add_option("-g", "--grammar",
-                  dest="grammar", type="string", default="lot_grammar",
-                  help="Which grammar do we use? [mix_grammar | independent_grammar | lot_grammar]")
-parser.add_option("-d", "--data",
-                  dest="data", type="string", default="josh_data",
-                  help="Which data do we use? [josh_data | ??]")
-
-parser.add_option("-i", "--iters",
-                  dest="iters", type="int", default=1000000,
-                  help="Number of samples to run per chain")
-parser.add_option("-s", "--skip",
-                  dest="skip", type="int", default=1000,
-                  help="Collect 1 gh sample every `skip` samples.")
-parser.add_option("-c", "--cap",
-                  dest="cap", type="int", default=1000,
-                  help="VectorSummary will collect this many GrammarHypothesis samples.")
-
-parser.add_option("-v", "--verbose",
-                  action="store_true", dest="verbose", default=True,
-                  help="Print everything!")
-parser.add_option("-q", "--quiet",
-                  action="store_true", dest="quiet", default=True,
-                  help="Print nothing!")
-
-parser.add_option("--mpi", action="store_true", dest="mpi", default=False,
-                  help="Do we use MPI?")
-parser.add_option("-c", "--chains", dest="chains", type="int", default=1,
-                  help="Number of chains to run on each data input")
-
-
-(options, args) = parser.parse_args()
 
 
 # ============================================================================================================
@@ -141,6 +102,7 @@ def mpirun(d):
 def run(grammar=lot_grammar, mixture_model=0, data=josh_data,
         iters=10000, skip=10, cap=100, print_stuff='sgr',
         ngh='out/ngh_100k', hypotheses=None, domain=100, alpha=0.9,
+        mpi=False, chains=5,
         pickle_file='', csv_file=''):
     """
     Enumerate some NumberGameHypotheses, then use these to sample some GrammarHypotheses over `data`.
@@ -196,9 +158,9 @@ def run(grammar=lot_grammar, mixture_model=0, data=josh_data,
     # Fill VectorSummary
 
     # MPI
-    if options.mpi:
+    if mpi:
         hypotheses = set()
-        hypo_sets = MPI_unorderedmap(mpirun, [[d] for d in data * options.chains])
+        hypo_sets = MPI_unorderedmap(mpirun, [[d] for d in (data * chains)])
         for hypo_set in hypo_sets:
             hypotheses = hypotheses.union(hypo_set)
 
@@ -247,6 +209,51 @@ def run(grammar=lot_grammar, mixture_model=0, data=josh_data,
 # ============================================================================================================
 
 if __name__ == "__main__":
+    parser = OptionParser()
+
+    parser.add_option("-P", "--pickle",
+                      action="store_true", dest="pickle", default=False,
+                      help="If there's a value here, pickle VectorSummary.")
+    parser.add_option("-C", "--csvfile",
+                      dest="csv_file", type="string", default="out/gh_100k",
+                      help="Save csv's to this file.")
+    parser.add_option("-H", "--ngh_file",
+                      dest="ngh_file", type="string", default="out/ngh_100k.p",
+                      help="Where's the file with the NumberGameHypotheses?")
+
+    parser.add_option("-g", "--grammar",
+                      dest="grammar", type="string", default="lot_grammar",
+                      help="Which grammar do we use? [mix_grammar | independent_grammar | lot_grammar]")
+    parser.add_option("-d", "--data",
+                      dest="data", type="string", default="josh_data",
+                      help="Which data do we use? [josh_data | ??]")
+
+    parser.add_option("-i", "--iters",
+                      dest="iters", type="int", default=1000000,
+                      help="Number of samples to run per chain")
+    parser.add_option("-s", "--skip",
+                      dest="skip", type="int", default=1000,
+                      help="Collect 1 gh sample every `skip` samples.")
+    parser.add_option("-c", "--cap",
+                      dest="cap", type="int", default=1000,
+                      help="VectorSummary will collect this many GrammarHypothesis samples.")
+
+    parser.add_option("-v", "--verbose",
+                      action="store_true", dest="verbose", default=True,
+                      help="Print everything!")
+    parser.add_option("-q", "--quiet",
+                      action="store_true", dest="quiet", default=True,
+                      help="Print nothing!")
+
+    parser.add_option("--mpi", action="store_true", dest="mpi", default=False,
+                      help="Do we use MPI?")
+    parser.add_option("--chains", dest="chains", type="int", default=1,
+                      help="Number of chains to run on each data input")
+
+    (options, args) = parser.parse_args()
+
+    # --------------------------------------------------------------------------------------------------------
+
     path = os.getcwd()
 
     if options.pickle:
@@ -260,6 +267,8 @@ if __name__ == "__main__":
         grammar = independent_grammar
     elif options.grammar is 'lot_grammar':
         grammar = lot_grammar
+    else:
+        grammar = independent_grammar
 
     if options.data is 'josh_data':
         data = josh_data
@@ -278,8 +287,11 @@ if __name__ == "__main__":
     else:
         print_stuff = 's'
 
+    # --------------------------------------------------------------------------------------------------------
+
     run(grammar=grammar, mixture_model=mix, data=data,
         iters=options.iters, skip=options.skip, cap=options.cap,
         ngh=options.ngh_file,
         print_stuff=print_stuff,
-        pickle_file=pickle_file, csv_file=path+options.csv_file)
+        pickle_file=pickle_file, csv_file=path+options.csv_file,
+        mpi=options.mpi, chains=options.chains)
