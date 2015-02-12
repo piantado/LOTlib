@@ -5,7 +5,6 @@ follows the standards in https://docs.python.org/2/library/unittest.html
 
 import unittest
 
-from LOTlib.Inference.MetropolisHastings import *
 class MetropolisHastingsTest(unittest.TestCase):
 
     # initialization that happens before each test is carried out

@@ -10,8 +10,7 @@ Note:
 
 """
 from LOTlib import lot_iter
-from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-from LOTlib.Inference.MetropolisHastings import MHSampler
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from Model import *
 
 #=============================================================================================================

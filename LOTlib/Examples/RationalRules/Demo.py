@@ -8,9 +8,7 @@ Paper:
     Griffiths (2008). Cognitive Science. 32:1, 108-154. http://www.mit.edu/~ndg/papers/RRfinal3.pdf
 
 """
-from LOTlib.Hypotheses.RationalRulesLOTHypothesis import RationalRulesLOTHypothesis
-from LOTlib.Inference.MetropolisHastings import MHSampler
-from LOTlib import lot_iter
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from Model import *
 
 

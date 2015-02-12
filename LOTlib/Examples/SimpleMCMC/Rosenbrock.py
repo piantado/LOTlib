@@ -4,11 +4,11 @@ Just playing around with vector-valued hypotheses. This is a simple sampler for 
 the exp(-RosenbrockFunction)
 
 """
+import numpy
+
 from LOTlib import lot_iter
 from LOTlib.Hypotheses.VectorHypothesis import VectorHypothesis
-from LOTlib.Inference.MetropolisHastings import mh_sample
-from LOTlib.Miscellaneous import *
-import numpy
+from LOTlib.Inference.Samplers.MetropolisHastings import mh_sample
 
 
 class RosenbrockSampler(VectorHypothesis):

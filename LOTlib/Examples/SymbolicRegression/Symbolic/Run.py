@@ -5,7 +5,7 @@ A simple symbolic regression demo
 """
 from LOTlib import lot_iter
 from LOTlib.Hypotheses.GaussianLOTHypothesis import GaussianLOTHypothesis
-from LOTlib.Inference.MetropolisHastings import MHSampler
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib.Miscellaneous import qq
 from LOTlib.Examples.SymbolicRegression.Grammar import grammar
 from Data import generate_data

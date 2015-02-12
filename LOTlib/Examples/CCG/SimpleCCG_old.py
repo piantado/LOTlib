@@ -20,7 +20,7 @@ def run(llt=1.0):
     h0 = CCGLexicon(make_hypothesis, words=all_words, alpha=0.9, palpha=0.9, likelihood_temperature=llt)
 
     fbs = FiniteBestSet(N=10)
-    from LOTlib.Inference.MetropolisHastings import mh_sample
+    from LOTlib.Inference.Samplers.MetropolisHastings import mh_sample
     for h in lot_iter(mh_sample(h0, data, SAMPLES)):
         fbs.add(h, h.posterior_score)
 

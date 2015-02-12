@@ -9,11 +9,10 @@ See also: Jeffreys, W. H., and Berger, J. O. (1992), "Ockham's Razor and Bayesia
 """
 from LOTlib.Hypotheses.GaussianLOTHypothesis import GaussianLOTHypothesis
 from LOTlib.FiniteBestSet import FiniteBestSet
-from LOTlib.Inference.MetropolisHastings import MHSampler
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib.Miscellaneous import qq
 from Data import data
 from Grammar import grammar
-from Utilities import make_h0
 
 
 def run(*args):

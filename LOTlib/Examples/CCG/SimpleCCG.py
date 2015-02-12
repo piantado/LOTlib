@@ -7,7 +7,7 @@ This just uses brute force parsing.
 TODO: Learn that MAN is JOHN or BILL
 
 """
-from LOTlib.Inference.MetropolisHastings import MHSampler
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from Model import *
 
 

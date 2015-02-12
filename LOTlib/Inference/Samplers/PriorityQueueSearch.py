@@ -7,8 +7,7 @@ The "priority" of a tree will be its log probability MINUS a penalty for how man
 
 """
 from LOTlib.PriorityQueue import PriorityQueue, QueueItem
-
-from LOTlib.Examples.Number.Model.Utilities import make_h0, generate_data
+from LOTlib.Examples.Number.Model import generate_data, make_h0
 
 initial_N = 100 # how many to generate?
 nsamples  = 100

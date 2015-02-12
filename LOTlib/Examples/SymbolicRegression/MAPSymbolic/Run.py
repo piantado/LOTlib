@@ -5,14 +5,15 @@ Symbolic regression that fits parameters using a MAP estimate of the continuous 
 We put a simple bayesian prior on these constants, and use it to compute MAPs.
 
 """
-import numpy
 from math import sin
+
+import numpy
+
 from LOTlib import lot_iter
 from LOTlib.Miscellaneous import qq
 from Grammar import grammar
 from Hypothesis import MAPSymbolicRegressionHypothesis
 from Data import generate_data
-
 
 
 STEPS = 500000
@@ -31,7 +32,7 @@ def run():
     h0 = MAPSymbolicRegressionHypothesis(grammar, args=['x']+CONSTANT_NAMES)
     h0.CONSTANT_VALUES = numpy.zeros(NCONSTANTS) ## TODO: Move this to an itializer
 
-    from LOTlib.Inference.MetropolisHastings import MHSampler
+    from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
     for h in lot_iter(MHSampler(h0, data, STEPS, skip=SKIP, trace=False)):
         print h.posterior_score, h.likelihood, h.prior, h.CONSTANT_VALUES, qq(h)
 

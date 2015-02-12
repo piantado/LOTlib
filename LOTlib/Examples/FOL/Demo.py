@@ -24,7 +24,7 @@ from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from LOTlib.DataAndObjects import FunctionData, Obj # for nicely managing data
-from LOTlib.Inference.MetropolisHastings import MHSampler # for running MCMC
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler # for running MCMC
 
 # Make up some data -- here just one set containing {red, red, green} colors
 data = [ FunctionData(input=[ {Obj(color='red'), Obj(color='red'), Obj(color='green')} ], output=True) ]

@@ -10,10 +10,10 @@ to show the best subtrees to define for minimizing KL between the prior and post
 
 """
 import pickle
+
 from LOTlib import lot_iter
-from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.FiniteBestSet import FiniteBestSet
-from LOTlib.Inference.MetropolisHastings import MHSampler
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from Model import *
 
 

@@ -1,5 +1,5 @@
 
-from LOTlib.Inference.MetropolisHastings import MHSampler
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib.Examples.RationalRules.Model import *
 from Hypothesis import *
 
@@ -16,8 +16,6 @@ def run():
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Run the MH
-
-    from LOTlib.Inference.MetropolisHastings import mh_sample
 
     # Run the vanilla sampler. Without steps, it will run infinitely
     # this prints out posterior (posterior_score), prior, likelihood,

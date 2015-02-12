@@ -11,14 +11,17 @@ $time mpiexec -hostfile /home/piantado/Libraries/LOTlib/hosts.mpich2 -n 36 pytho
               --top=50 --chains=25 --large=1000 --dmin=0 --dmax=300 --dstep=10 --mpi --out=/path/to/file.pkl
 
 """
-import numpy
 import sys
+
+import numpy
+
 import LOTlib
 from LOTlib import lot_iter
-from LOTlib.Inference.MetropolisHastings import MHSampler
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib.Miscellaneous import q, display_option_summary, qq
 from LOTlib.MPI.MPI_map import MPI_unorderedmap, is_master_process
 from LOTlib.Examples.Number.Model import *
+
 
 ## Parse command line options:
 from optparse import OptionParser

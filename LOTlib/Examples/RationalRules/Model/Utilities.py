@@ -1,7 +1,7 @@
 
 from LOTlib.Hypotheses.RationalRulesLOTHypothesis import RationalRulesLOTHypothesis
 from Data import data
-from Grammar import grammar, DNF
+from Grammar import DNF
 
 
 def make_h0(value=None):
@@ -10,6 +10,6 @@ def make_h0(value=None):
 
 if __name__ == "__main__":
     
-    from LOTlib.Inference.MetropolisHastings import MHSampler
+    from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
     for h in MHSampler(make_h0(), data):
         print h

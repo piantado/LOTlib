@@ -34,13 +34,13 @@ $ python Demo.py -f out/ngh_lot100k.p -do 100 -a 0.9 -g lot_grammar -d josh_data
 
 """
 
-
 from optparse import OptionParser
-from LOTlib.Examples.NumberGame.Model import *
-from LOTlib.Inference.MetropolisHastings import MHSampler
+
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib.MPI.MPI_map import MPI_unorderedmap
 from LOTlib.MCMCSummary.TopN import TopN
 from LOTlib.Examples.NumberGame.GrammarInference.Model import *
+
 
 
 # ============================================================================================================

@@ -5,8 +5,7 @@ These have a special interpretation function that compiles differently than stra
 
 """
 from LOTlib import lot_iter
-from LOTlib.Inference.MetropolisHastings import MHSampler
-from LOTlib.Miscellaneous import qq
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from Model import *
 
 if __name__ == "__main__":

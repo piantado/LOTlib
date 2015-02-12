@@ -21,7 +21,7 @@ from Grammar import grammar
 def run():
     from LOTlib import lot_iter
     from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
-    from LOTlib.Inference.MetropolisHastings import MHSampler
+    from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
     # mp = MixtureProposal([RegenerationProposal(grammar), InsertDeleteProposal(grammar)] )
     mp = RegenerationProposal(grammar)

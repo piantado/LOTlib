@@ -7,8 +7,8 @@
         NOTE: Wow, doesn't work at all!
 """
 
-from LOTlib.Inference.Samplers.MetropolisHastings import mh_sample
-from MHShared import *
+from MetropolisHastings import mh_sample
+from LOTlib.Inference.MHShared import *
 
 def datawise_optimize(current_sample, data, steps=1000000, inner_steps=10, data_weight=1.0, ll_temperature=1.0, **kwargs):
     """

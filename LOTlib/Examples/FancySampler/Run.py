@@ -12,8 +12,9 @@ from LOTlib.Examples.Number.Model import grammar, make_h0, generate_data
 data = generate_data(300)
 
 
-from LOTlib.Inference.ParallelTempering import ParallelTemperingSampler
-from LOTlib.Inference.PartitionMCMC import PartitionMCMC
+from LOTlib.Inference.Samplers.ParallelTempering import ParallelTemperingSampler
+from LOTlib.Inference.Samplers import PartitionMCMC
+
 class MySampler(PartitionMCMC):
     """
     We make a PartitionMCMC that uses a ParallelTemperingSampler inside of it. This will make a ParallelTemperingSampler

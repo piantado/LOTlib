@@ -9,7 +9,7 @@
 
 from collections import Counter
 
-from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
+from MetropolisHastings import MHSampler
 
 
 class TabooMCMC(MHSampler):

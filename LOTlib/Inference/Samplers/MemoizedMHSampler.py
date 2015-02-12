@@ -1,7 +1,7 @@
 from cachetools import LRUCache
 
 from LOTlib.Miscellaneous import Infinity
-from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
+from MetropolisHastings import MHSampler
 
 
 class MemoizedMHSampler(MHSampler):

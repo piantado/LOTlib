@@ -3,14 +3,16 @@
         Simple evaluation of number schemes -- read LOTlib.Performance.Evaluation to see what the output is
 """
 
-import LOTlib
 import os
 import re
 from itertools import product
+from optparse import OptionParser
+
+import LOTlib
 from LOTlib.Performance.Evaluation import load_model
 from LOTlib.MPI.MPI_map import MPI_map, get_rank
 
-from optparse import OptionParser
+
 parser = OptionParser()
 parser.add_option("--out", dest="OUT", type="string", help="Output prefix", default="output-InfereceSchemes")
 parser.add_option("--samples", dest="SAMPLES", type="int", default=100000, help="Number of samples to run")
@@ -24,13 +26,11 @@ options, _ = parser.parse_args()
 
 # These get defined for each process
 from LOTlib.Performance.Evaluation import evaluate_sampler
-from LOTlib.Inference.EnumerationInference import EnumerationInference
-from LOTlib.Inference.ParallelTempering import ParallelTemperingSampler
-from LOTlib.Inference.MetropolisHastings import MHSampler
-from LOTlib.Inference.TabooMCMC import TabooMCMC
-from LOTlib.Inference.ParticleSwarm import ParticleSwarm, ParticleSwarmPriorResample
-from LOTlib.Inference.MultipleChainMCMC import MultipleChainMCMC
-from LOTlib.Inference.PartitionMCMC import PartitionMCMC
+from LOTlib.Inference.Samplers.ParallelTempering import ParallelTemperingSampler
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
+from LOTlib.Inference.Samplers.ParticleSwarm import ParticleSwarmPriorResample
+from LOTlib.Inference.Samplers import MultipleChainMCMC, ParticleSwarm, TabooMCMC, EnumerationInference
+from LOTlib.Inference.Samplers.PartitionMCMC import PartitionMCMC
 
 def run_one(iteration, model, sampler_type):
     if LOTlib.SIG_INTERRUPTED: # do this so we don't create (big) hypotheses

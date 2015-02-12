@@ -1,6 +1,6 @@
 from random import randint
 
-from MHShared import MH_acceptance
+from LOTlib.Inference.MHShared import MH_acceptance
 from LOTlib.Inference.Samplers import MultipleChainMCMC
 
 

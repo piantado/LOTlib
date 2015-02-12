@@ -1,11 +1,13 @@
-from LOTProposal import LOTProposal
-from LOTlib.Miscellaneous import sample1, lambdaOne, dropfirst
 from random import random
 from math import log
 from collections import defaultdict
+
+from LOTProposal import LOTProposal
+from LOTlib.Miscellaneous import sample1, lambdaOne, dropfirst
 from LOTlib.GrammarRule import *
 from LOTlib.Inference.Proposals import ProposalFailedException
 from LOTlib.FunctionNode import NodeSamplingException
+
 
 def lp_sample_equal_to(n, x, resampleProbability=lambdaOne):
     """
@@ -218,7 +220,7 @@ if __name__ == "__main__":
             
         """
         # Run MCMC -- more informative about f-b errors    
-        from LOTlib.Inference.MetropolisHastings import MHSampler
+        from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
         from LOTlib.Inference.Proposals.MixtureProposal import MixtureProposal          
         from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal

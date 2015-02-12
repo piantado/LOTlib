@@ -158,7 +158,7 @@ if __name__ == "__main__":
 
     from LOTlib.Examples.Magnetism.Simple.Run import grammar, make_h0, data
 
-    from LOTlib.Inference.MetropolisHastings import MHSampler
+    from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
     
     idp = InsertDeleteProposal(grammar)
      

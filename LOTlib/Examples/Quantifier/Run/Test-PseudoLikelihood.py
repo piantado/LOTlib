@@ -9,7 +9,7 @@ That the truth values of X are not enough to determine meaning if the subset pro
 """
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-from LOTlib.Inference.MetropolisHastings import mh_sample
+from LOTlib.Inference.Samplers.MetropolisHastings import mh_sample
 from LOTlib.Examples.Quantifier.Model import *
 
 ALPHA = 0.9
