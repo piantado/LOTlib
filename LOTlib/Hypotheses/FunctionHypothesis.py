@@ -29,8 +29,13 @@ class FunctionHypothesis(Hypothesis):
                 *args* - the arguments to the function
         """
         self.args = args # must come first since below calls value2function
-        Hypothesis.__init__(self, value, **kwargs) # this initializes prior and likleihood variables, so keep it here!
-        self.set_value(value,f)
+
+        # this initializes prior and likleihood variables, so keep it here!
+        # However, don't give it value, since then it calls set_value with no f argument!
+        Hypothesis.__init__(self, None, **kwargs)
+
+        # And set our value
+        self.set_value(value, f=f)
 
     def __str__(self):
         """
@@ -72,7 +77,7 @@ class FunctionHypothesis(Hypothesis):
                 Another option: send f if speed is necessary
         """
 
-        Hypothesis.set_value(self,value)
+        Hypothesis.set_value(self, value)
 
         if f is not None:
             self.fvalue = f
