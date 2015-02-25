@@ -336,6 +336,8 @@ def logsumexp(v):
     """
     if len(v) == 0:
         return -Infinity
+    elif max(v) == Infinity: # needed!
+        return Infinity
     elif max(v) > -Infinity:
         return logsumexp_base(v)
     else:
@@ -419,6 +421,10 @@ def EV(fn, *args):
     vals = [fn(*args) for _ in range(100)]
     return np.average(vals)
 
+from itertools import imap
+def argmax(lst):
+    return max([(x,i) for i,x in enumerate(lst)])[1]
+
 # ------------------------------------------------------------------------------------------------------------
 # Sampling functions
 # ------------------------------------------------------------------------------------------------------------
@@ -447,6 +453,8 @@ def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, 
     Takes unnormalized probabilities and returns a list of the log probability and the object returnlist
     makes the return always a list (even if N=1); otherwise it is a list for N>1 only
 
+    TODO: This can sometimes not return if there are tons of really tiny probs...
+
     Note:
         This now can take probs as a function, which is then mapped!
 
@@ -469,9 +477,16 @@ def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, 
 
     # Now normalize and run
     if Z is None:
-        if log: Z = logsumexp(myprobs)
-        else: Z = sum(myprobs)
-    #print log, myprobs, Z
+        if log:
+            Z = logsumexp(myprobs)
+            assert Z > -Infinity
+        else:
+            Z = sum(myprobs)
+            assert Z > 0
+
+
+    # print len(myprobs), Z
+    # print log, myprobs, Z
     out = []
 
     for n in range(N):
@@ -480,7 +495,7 @@ def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, 
             # Set r based on log domain  or  probability domain.
             r = r - exp(myprobs[i] - Z) if log else r - (myprobs[i]/Z)
 
-            # print r, myprobs
+            #print r, myprobs
             if r <= 0:
                 if return_probability:
                     lp = 0
@@ -489,7 +504,7 @@ def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, 
                     else:
                         lp = math.log(myprobs[i]) - math.log(Z)
 
-                    out.append([objs[i],lp])
+                    out.append([objs[i], lp])
                     break
                 else:
                     out.append(objs[i])
@@ -512,6 +527,10 @@ def lambdaNone(*x): return None
 def lambdaTrue(*x): return True
 def lambdaFalse(*x): return False
 def lambdaNAN(*x): return float("nan")
+def lambdaException(*x):
+    raise Exception()
+def lambdaAssertFalse(*x):
+    assert False
 
 # ------------------------------------------------------------------------------------------------------------
 # Sorting utilities

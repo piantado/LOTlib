@@ -76,7 +76,7 @@ class LOTHypothesis(FunctionHypothesis):
             print "TypeError in function call: ", e, str(self), "  ;  ", type(self)
             raise TypeError
         except NameError as e:
-            print "NameError in function call: ", e, str(self)
+            print "NameError in function call: ", e, " ; ", str(self)
             raise NameError
 
     def type(self):
@@ -98,10 +98,10 @@ class LOTHypothesis(FunctionHypothesis):
                 print "# ", e
                 return lambda *args: raise_exception(EvaluationException)
 
-    def __copy__(self, copy_value=True):
+    def __copy__(self, value=None):
         """Make a deepcopy of everything except grammar (which is the, presumably, static grammar)."""
         # Since this is inherited, call the constructor on everything, copying what should be copied
-        thecopy = type(self)(self.grammar, value=copy.copy(self.value) if copy_value else self.value,
+        thecopy = type(self)(self.grammar, value=copy.copy(self.value) if value is not None else value,
                              f=self.f, proposal_function=self.proposal_function)
 
         # And then then copy the rest

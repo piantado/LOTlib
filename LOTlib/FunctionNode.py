@@ -52,7 +52,7 @@ class FunctionNode(object):
     args : doc?
         Arguments of the function
     generation_probability : float
-        Unnormalized generation probability.
+        The log probability of having generated this Node
     rule : doc?
         The rule that was used in generating the FunctionNode
     bv : doc?
@@ -307,7 +307,7 @@ class FunctionNode(object):
 
         """
         assert self.rule is not None
-        for t in self.iterate_subnodes(grammar, self, do_bv=True):
+        for t in self.iterate_subnodes(grammar, self):
             Z = log(sum([x.p for x in grammar.rules[t.returntype]]))
             t.generation_probability = log(t.rule.p) - Z
 
@@ -340,6 +340,16 @@ class FunctionNode(object):
             # TODO: In python 3, use yeild from
             for n in filter(isFunctionNode, self.args):
                 yield n
+
+    def argStrings(self):
+        """
+        Yields strings below (e.g. non-FunctionNodes), handling None
+        """
+        if self.args is not None:
+            for n in self.args:
+                if isinstance(n, str):
+                    yield n
+
 
     def argTypes(self):
         # A list of the strings or returntypes of by args
@@ -608,6 +618,17 @@ class FunctionNode(object):
 
         return ret
 
+    def is_complete_tree(self, grammar):
+        """
+        Check if this tree has any nonterminals in args, according to the grammar
+        """
+        for fn in self:
+            for a in fn.argStrings():
+                if grammar.is_nonterminal(a):
+                    return False
+
+        return True
+
     def uniquify_bv(self, remap=None):
         """
         Go through and make each of my uuids on BVUseFunctionNodes unique
@@ -630,7 +651,7 @@ class FunctionNode(object):
         for a in self.argFunctionNodes():
             a.uniquify_bv(remap)
 
-    def iterate_subnodes(self, grammar, t=None, d=0, predicate=lambdaTrue, do_bv=True, yield_depth=False):
+    def iterate_subnodes(self, grammar, t=None, d=0, predicate=lambdaTrue, yield_depth=False):
         """Iterate through all subnodes of node *t*, while updating the added rules (bound variables)
         so that at each subnode, the grammar is accurate to what it was.
 
@@ -638,27 +659,12 @@ class FunctionNode(object):
         ---------
         grammar : LOTlib.Grammar
             This is the grammar we're iterating through
-        t : doc?
-            doc?
+        t : FunctionNode
+            The tree we will iterate over
         yield_depth : bool
             If True, we return (node, depth) instead of node.
         predicate : function
             Filter only the nodes that match this function (i.e. eval (function(fn) == True) on each fn).
-        do_bv : bool
-            If False, we don't do bound variables (useful for things like counting nodes,
-          instead of having to update the grammar).
-        yield_depth : bool
-            doc?
-
-        Note
-        ----
-        if you DON'T iterate all the way through, you end up acculmulating bv rules so NEVER stop this
-        iteration in the middle!
-
-        TODO
-        ----
-        Make this more elegant -- use BVCM
-
         """
         if not t:
             t = self
@@ -670,7 +676,7 @@ class FunctionNode(object):
         with BVRuleContextManager(grammar, t, recurse_up=False):
             for a in t.argFunctionNodes():
                 # Pass up anything from below
-                for g in self.iterate_subnodes(grammar, a, d=d+1, do_bv=do_bv,
+                for g in self.iterate_subnodes(grammar, a, d=d+1,
                                                yield_depth=yield_depth, predicate=predicate):
                     yield g
 

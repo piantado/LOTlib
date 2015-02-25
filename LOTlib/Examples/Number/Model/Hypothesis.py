@@ -45,9 +45,7 @@ class NumberExpression(RecursiveLOTHypothesis):
         """Computes the likelihood of data.
 
             TODO: Make sure this precisely matches the number paper.
-
         """
-
         response = self(*datum.input)
         if response == 'undef' or response == None:
             return log(1.0/10.0) # if undefined, just sample from a base distribution

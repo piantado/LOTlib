@@ -39,6 +39,12 @@ class Grammar:
     def nrules(self):
         return sum([len(self.rules[nt]) for nt in self.rules.keys()])
 
+    def get_rules(self, nt):
+        """
+        The possible rules for any nonterminal
+        """
+        return self.rules[nt]
+
     def is_nonterminal(self, x):
         """A nonterminal is just something that is a key for self.rules"""
         # if x is a string  &&  if x is a key
@@ -92,6 +98,7 @@ class Grammar:
         """ 
         return not any([self.is_nonterminal(a) for a in None2Empty(r.to)])  
 
+
     # --------------------------------------------------------------------------------------------------------
     # Generation
     # --------------------------------------------------------------------------------------------------------
@@ -103,12 +110,12 @@ class Grammar:
             x (FunctionNode): What we start from -- can be None and then we use Grammar.start.
 
         """
-        # print "# Calling grammar.generate", d, type(x), x
+        # print "# Calling Grammar.generate", type(x), x
 
         # Decide what to start from based on the default if start is not specified
         if x is None:
             x = self.start
-            assert self.start in self.rules, \
+            assert self.start in self.nonterminals(), \
                 "The default start symbol %s is not a defined nonterminal" % self.start
 
         # Dispatch different kinds of generation
@@ -119,7 +126,11 @@ class Grammar:
         elif self.is_nonterminal(x):
 
             # sample a grammar rule
-            r, gp = weighted_sample(self.rules[x], probs=lambda x: x.p, return_probability=True, log=False)
+            rules = self.get_rules(x)
+            assert len(rules) > 0
+
+            # sample the rule
+            r, gp = weighted_sample(rules, probs=lambda x: x.p, return_probability=True, log=False)
 
             # Make a stub for this functionNode 
             fn = r.make_FunctionNodeStub(self, gp, None) 

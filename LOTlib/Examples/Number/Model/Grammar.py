@@ -7,7 +7,9 @@ from LOTlib.Miscellaneous import q
 # The priors here are somewhat hierarchical by type in generation, tuned to be a little more efficient
 # (but the actual RR prior does not care about these probabilities)
 
-grammar = Grammar(start='WORD')
+grammar = Grammar(start='START')
+
+grammar.add_rule('START', '', ['WORD'], 1.0)
 
 grammar.add_rule('BOOL', 'and_',    ['BOOL', 'BOOL'], 1./3.)
 grammar.add_rule('BOOL', 'or_',     ['BOOL', 'BOOL'], 1./3.)

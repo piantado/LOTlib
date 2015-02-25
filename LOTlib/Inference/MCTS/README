@@ -1,12 +1,10 @@
 Monte Carlo Tree Search (MCTS)
 ==============================
 
-This implements a version of MCTS where the possible expansions at each node of the tree are treated like multi-arm bandits (conditioned on the entire tree above). The goal is to adequately balance exploration and exploitation. The default code performs a Bayesian estimate of the expected payoff, which mixes together a prior with the record of previous rewards. 
+This implements a version of MCTS where the possible expansions at each node of the tree are treated like multi-arm bandits (conditioned on the entire tree above). The goal is to adequately balance exploration and exploitation. The default code performs an estimate of the expected payoff. 
 
-LOTHypothesisState uses a few techniques to estimate the "reward" (log posterior probability) from each choice. First, its constructor LOTHypothesisState.make will figure out the average prior probability below each tree. It uses this to estimate the full prior of a partial tree (under the assumption of log-additivity).
-
-The search is often very sensitive to the search parameters C and V, and these likely will have to be tuned to each problem. 
-        In particular, because the prior is a little off, setting C too low will exploit the bad states, often very tall and useless trees. 
-        If C is too high, it will sample flatly, not exploiting well. 
+Subclasses are included that:
+	- Make the summary statistic (xbar) for a state the max posterior found so far (MaxScoreState)
+	- Use expected likelihood rather than expected posterior (LikelihoodLOTHypothesisState)
 
 All code is highly experimental and is the object of ongoing development.

@@ -1,6 +1,6 @@
 import LOTlib
-from math import log, sqrt
-from LOTlib.Miscellaneous import Infinity, argmax
+from math import log, sqrt, exp
+from LOTlib.Miscellaneous import Infinity, argmax, logsumexp
 
 class StatePruneException(Exception):
     """
@@ -16,28 +16,21 @@ class State(object):
     If this is an end state, expand_children should yeild an empty list
     """
 
-    def __init__(self, value, parent=None, C=1.0, V=10.0):
+    def __init__(self, value, parent=None, C=1.0):
         """
 
-        :param value:
-        :param parent:
+        :param value: The value in this node
+        :param parent: Who our parent is. None is root
         :param C: Exploration constant. This scales the UTC search counts relative to the expected posterior. Higher explores more.
-        :param V: pseudocounts on the prior
-        :return:
         """
 
         self.value = value # what object do I store?
         self.parent = parent # who was my prior state?
         self.nsteps = 0 # How many simulations have I done from here?
-        self.sumscore = 0.0 # What was the sum of scores of my children? (with nsteps, used to get expected score)
+        self.summarystat = 0.0 # A summary statistic for get_expected_score
         self.children = None # each of the states I can get to from here. Initially None until expand_children() is called
         self.is_complete = False # If complete, we have -inf weight
-        self.stored_prior = None # Store the prior, for use in computing the expected scores
-        self.C = C
-        self.V = V
-
-    def __repr__(self):
-        return "<STATE: %s>" % str(self.value)
+        self.C=C
 
     def make_children(self):
         """
@@ -45,7 +38,7 @@ class State(object):
         """
         raise NotImplementedError
 
-    def get_score(self):
+    def score_terminal_state(self):
         """
         Return the score from this state, if you can. Else None
         """
@@ -58,45 +51,42 @@ class State(object):
         """
         raise NotImplementedError
 
-    def get_expected_score(self):
-        """ A Bayesian estimate of *my* expected score, using sumscore and nsteps. V pesudocounts of the prior. """
+
+    def __repr__(self):
+        return "<STATE: %s>" % str(self.value)
+
+    def get_xbar(self):
+        """ The score I expect given my summarystat and nsteps. """
 
         if self.is_complete:
             return -Infinity
+        elif self.nsteps == 0:
+            return None # This should get over-written by Infinity compute_weights
         else:
+            return float(self.summarystat)/float(self.nsteps)
 
-            # We'll compute a cross-entropy for the prior, getting it right only p proportion of the time
-            a = self.value.ALPHA
-            p = 0.9 * a
+    def update_score(self, score):
+        """ Take a sample from one of my children and update my score. My children call this """
+        self.summarystat += score
+        self.nsteps   += 1
 
-            u0 = self.stored_prior + len(self.data)*( p*log(a)  + (1.-p)*log(1.-a))# prior plus best likelihood
-            n = self.nsteps
-            if n == 0:
-                return u0
-            else:
-                xbar = float(self.sumscore)/float(n)
-                return ( self.V*u0 + n*xbar) / (self.V+n)
-
-    def get_weights(self):
+    def compute_weights(self):
         """
-        The weights of all kids below, giving the probability of expanding each child.
-        This currently uses UCT.
-
-        NOTE: This must be computed for kids (rather than self) because it requires the total number of steps
-
+        The default UCT weighting scheme
         """
-        assert self.children is not None
 
-        N = sum([x.nsteps for x in self.children])+1
-        return map(lambda x: x.get_expected_score() + self.C * sqrt(2.0 * log(N)/float(x.nsteps+1)), self.children)
+        N = sum([c.nsteps for c in self.children])
+
+        return [c.get_xbar() + self.C * sqrt(2.0 * log(N)/float(c.nsteps+1)) if c.nsteps > 0 else Infinity for c in self.children ]
+
 
     def show_graph(self, maxdepth=2, depth=0):
         """ Show the current state graph up to maxdepth """
         if self.children is not None:
             if maxdepth > depth:
-                weights = self.get_weights()
+                weights = self.compute_weights()
                 for c, w in zip(self.children, weights):
-                    print "\t"*(depth+1), w, c.get_expected_score(), c.nsteps, c
+                    print "#", "\t"*(depth+1), w, c.get_xbar(), c.nsteps, c
                     c.show_graph(maxdepth=maxdepth, depth=depth+1)
 
     def __iter__(self, break_SIG_INTERRUPTED=True):
@@ -118,16 +108,16 @@ class State(object):
         # print "# next call on: ", self.nsteps, self
 
         if self.is_terminal_state():
-            score = self.get_score()
 
-            ## And propagate up the tree
-            curparent = self
-            while curparent != None:
-                assert isinstance(curparent, type(self))
-                curparent.sumscore += score
-                curparent.nsteps   += 1
+            score = self.score_terminal_state()
 
-                curparent = curparent.parent
+            ## And propagate up the tree. But don't do this for -inf scores, which can occur (for instance) when
+            ## we propose something zero prior. The reason is that this reigns havoc on the average scores
+            if score > -Infinity:
+                curparent = self
+                while curparent != None:
+                    curparent.update_score(score)
+                    curparent = curparent.parent
 
             # and make sure we don't expand this again, since its a complete tree
             self.complete()
@@ -140,19 +130,18 @@ class State(object):
             try: # Catch StatePruneExceptions, where we just return None
 
                 if self.children is None:
-                    self.children = list(self.make_children())
+                    self.children = list(self.make_children()) # This may raise StatePruneException if the children are too deep, for instance
                 assert len(self.children) > 0, "*** Zero length children in %s" % self
 
-                weights = self.get_weights()
+                weights = self.compute_weights()
 
                 if max(weights) == -Infinity: # we are all done with the kids
                     raise StatePruneException
                 else:
-                    # and expand below
                     return self.children[argmax(weights)].next(depth=depth+1)
 
             except StatePruneException:
-                self.complete() # don't return here
+                self.complete() # don't return anything here
 
                 return None
 

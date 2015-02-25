@@ -76,8 +76,10 @@ class MHSampler(Sampler):
         """
         Returns the proportion of proposals that have been accepted
         """
-        return float(self.acceptance_count) / float(self.proposal_count)
-
+        if self.proposal_count > 0:
+            return float(self.acceptance_count) / float(self.proposal_count)
+        else:
+            return float("nan")
 
     def internal_sample(self, h):
         """

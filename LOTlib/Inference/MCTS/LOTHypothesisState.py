@@ -3,28 +3,29 @@
 To implement Monte Carlo Tree Search, we'll define a new kind of FunctionNode that stores the weights for each rule
 that could be applied to each of its args
 """
-from math import log
+from math import log, exp, sqrt
 from copy import copy
 
-from LOTlib.Miscellaneous import Infinity, lambdaAssertFalse
+from collections import defaultdict
+
+from LOTlib.Miscellaneous import Infinity, lambdaAssertFalse, logsumexp
 from LOTlib.BVRuleContextManager import BVRuleContextManager
 from LOTlib.FunctionNode import FunctionNode
-from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-from LOTlib.Grammar import MissingNonterminalException
-from LOTlib.Hypotheses.Hypothesis import Hypothesis
 
 from State import State, StatePruneException
+from MaxScoreState import MaxScoreState
 
 class LoopsBreakException(Exception):
     """ Get us out of that goddamn loop """
     pass
 
-class LOTHypothesisState(State):
+
+class LOTHypothesisState(MaxScoreState):
     """
     A wrapper of LOTHypothese with partial values.
 
     When we make this normally, we use __init__. But when we make the first one (as in most code where this is used)
-    we must use "make" in order to add children for each expansion of grammar.start.
+    we must use "make" in orderqq to add children for each expansion of grammar.start.
 
     NOTE: This computes the prior on states by penalizing holes, since they must be filled
     """
@@ -36,20 +37,12 @@ class LOTHypothesisState(State):
 
         ## For each nonterminal, find out how much (in the prior) we pay for a hole that size
         hole_penalty = dict()
-        for x in grammar.nonterminals():
-            sm, m = 0.0, 0
-            for _ in xrange(100): # sample to compute the expected prior
-                try:
-                    h = make_h0(value=grammar.generate(x), f=lambdaAssertFalse) # be sure not to compile
-                    p = h.compute_prior()
-                    if p > -Infinity:
-                        sm += p
-                        m += 1
-                except MissingNonterminalException:
-                    pass
-
-            if m > 0:
-                hole_penalty[x] = float(sm)/float(m)
+        dct = defaultdict(list) # make a lit of the log_probabilities below
+        for _ in xrange(1000): # generate this many trees
+            t = grammar.generate()
+            for fn in t:
+                dct[fn.returntype].append(fn.log_probability())
+        hole_penalty = { nt : sum(dct[nt]) / len(dct[nt]) for nt in dct }
 
         # and return the node
         return cls(make_h0(value=FunctionNode(None, '', '', [grammar.start])), data, grammar, hole_penalty=hole_penalty, parent=None, **args) # the top state
@@ -64,15 +57,50 @@ class LOTHypothesisState(State):
         self.data = data
         self.grammar = grammar
         self.hole_penalty = hole_penalty
+        assert self.hole_penalty is not None # Need this!
 
-       # For each hole in the tree, we fill in stored_prior with an estimate of its expected influence on the prior
-        if isinstance(value, Hypothesis):
-            self.stored_prior = self.value.compute_prior()
+    def compute_weights(self):
+        """
+        Here we compute weights defaultly and then add an extra penalty for unfilled holes to decide which to use next.
+        Returning a tuple lets these weights get sorted by each successive element.
 
-            for fn in self.value.value:
-                for a in fn.argStrings():
-                    if grammar.is_nonterminal(a):
-                         self.stored_prior += self.hole_penalty.get(a, -1.0) # the default here is for when, sometimes, we have NT that only occur after BV. This is for them.
+        This also exponentiates and re-normalizes the posterior among children, keeping it within [0,1]
+        """
+
+        # Here what we call x_bar is really the mean log posterior. So we convert it out of that.
+        es = [c.get_xbar() if c.nsteps > 0 else Infinity for c in self.children]
+
+        Z = logsumexp(es) ## renormalize, for converting to logprob
+
+        # We need to preserve -inf here as well as +inf since these mean something special
+        # -inf means we should never ever visit; +inf means we can't not visit
+        es = [ exp(x-Z) if abs(x) < Infinity else x for x in es]
+
+        N = sum([c.nsteps for c in self.children])
+
+        # the weights we return
+        weights = [None] * len(self.children)
+
+        for i, c in enumerate(self.children):
+
+            v = 0.0 # the adjustment
+            if es[i] == Infinity: # so break the ties.
+                # This must prevent us from wandering off to infinity. To do that, we impose a penalty for each nonterminal
+                for fn in c.value.value:
+                    for a in fn.argStrings():
+                        if self.grammar.is_nonterminal(a):
+                            v += self.hole_penalty.get(a, -1.0) # pay this much for this hole. -1 is for those weird nonterminals that need bv introduced
+
+            weights[i] = (es[i] + self.C * sqrt(2.0 * log(N)/float(c.nsteps+1)) if c.nsteps > 0 else Infinity, v)
+
+        return weights
+
+
+    def score_terminal_state(self):
+        """ Get the score here """
+        # We must make this compile the function since it is told not to compile in newh within self.make_children
+        self.value.fvalue = self.value.compile_function() # make it actually compile!
+        return sum(self.value.compute_posterior(self.data))
 
     def is_terminal_state(self):
         return self.value.value.is_complete_tree(self.grammar)
@@ -82,13 +110,13 @@ class LOTHypothesisState(State):
 
         root = self.value.value
 
-        if root.count_nodes() > self.value.maxnodes:
+        if root.count_nodes() >= self.value.maxnodes:
             raise StatePruneException
 
         # Now make the copy
         newfn = copy(root)
 
-        ## find the first unfilled Node: the argi'th argument of fn
+        ## find the first unfilled Node: the argi'th argument of fn in our new copy
         try:
             fn, argi = None, None # the index of the fn. This will be used to find it in the copy
             for j, x in enumerate(newfn):
@@ -115,16 +143,10 @@ class LOTHypothesisState(State):
                 newh.set_value(copy(newfn), f=lambdaAssertFalse) # Need to copy so different r give different fn; don't use set_value or it compiles
 
                 # and make it into a State
-                s = type(self)(newh, data=self.data, grammar=self.grammar, hole_penalty=self.hole_penalty, parent=self, C=self.C, V=self.V)
+                s = type(self)(newh, data=self.data, grammar=self.grammar, hole_penalty=self.hole_penalty, parent=self)
                 children.append(s)
 
         return children
-
-    def get_score(self):
-        self.value.fvalue = self.value.compile_function() # make it actually compile!
-        return sum(self.value.compute_posterior(self.data))
-
-
 
 
 
