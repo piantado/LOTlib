@@ -1,1 +1,2 @@
-__author__ = 'Eric Bigelow'
+
+from Model import *

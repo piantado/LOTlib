@@ -9,18 +9,20 @@ Each GrammarHypothesis stands for a model of hyperparameters - a 'parameter hypo
 set of domain hypotheses.
 
 
-Methods:
-    __init__
-    propose
-    compute_prior
-    compute_likelihood
-    rule_distribution
-    set_value
+Methods
+-------
+__init__
+propose
+compute_prior
+compute_likelihood
+rule_distribution
+set_value
 
-    get_rules
+get_rules
 
-Note:
-    Parts of this are currently designed just to work with NumberGameHypothesis... these should be expanded.
+Note
+----
+Parts of this are currently designed just to work with NumberGameHypothesis... these should be expanded.
 
 """
 import copy
@@ -38,12 +40,18 @@ class GrammarHypothesis(VectorHypothesis):
 
     Inherits from VectorHypothesis, though I haven't figured out yet whe this really means...
 
-    Attributes:
-        grammar (LOTlib.Grammar): The grammar.
-        hypotheses (LOTlib.Hypothesis): List of hypotheses, generated beforehand.
-        rules (list): List of all rules in the grammar.
-        value (list): Vector of numbers corresponding to the items in `rules`.
-        proposal (ndarray): Proposal matrix of size |propose_idxs| x |propose_idxs|.
+    Attributes
+    ----------
+    grammar :  Grammar
+        The grammar.
+    hypotheses : list<Hypothesis>
+        List of hypotheses, generated beforehand.
+    rules : list<GrammarRule>
+        List of all rules in the grammar.
+    value : np.ndarray
+        Vector of numbers corresponding to the items in `rules`.
+    proposal : np.ndarray
+        Proposal matrix of size |propose_idxs| x |propose_idxs|.
 
     """
     def __init__(self, grammar, hypotheses, rules=None, load=None, value=None, proposal=None,
@@ -74,7 +82,8 @@ class GrammarHypothesis(VectorHypothesis):
 
         New value is sampled from a normal centered @ old values, w/ proposal as covariance (inverse?)
 
-        Note:
+        Note
+        ----
           * `self.propose_step` is used to determine how far to step with proposals.
 
         """
@@ -150,11 +159,17 @@ class GrammarHypothesis(VectorHypothesis):
 
         This is taken as a weighted sum over all hypotheses, sum_h { p(h | X) } .
 
-        Args:
-            data(list): List of FunctionData objects.
+        Args
+        ----
+        data : list
+            List of FunctionData objects.
+        update_post : bool
+            Do we update `self.likelihood` and `self.posterior`?
 
-        Returns:
-            float: Likelihood summed over all outputs, summed over all hypotheses & weighted for each
+        Returns
+        -------
+        float:
+            Likelihood summed over all outputs, summed over all hypotheses & weighted for each
             hypothesis by posterior score p(h|X).
 
         """
@@ -256,11 +271,13 @@ class GrammarHypothesis(VectorHypothesis):
     def get_rules(self, rule_name=False, rule_nt=False, rule_to=False):
         """Get all GrammarRules associated with this rule name, 'nt' type, and/or 'to' types.
 
-        Note:
-            rule_name is a string, rule_nt is a string, rule_to is a string, EVEN THOUGH rule.to is a list.
+        Note
+        ----
+        rule_name is a string, rule_nt is a string, rule_to is a string, though rule.to is a list.
 
-        Returns:
-            Pair of lists [idxs, rules]: idxs is a list of rules indexes, rules is a list of GrammarRules
+        Returns
+        ------
+        idxs is a list of rules indexes, rules is a list of GrammarRules
 
         """
         rules = [(i, r) for i, r in enumerate(self.rules) if r.nt is not 'IGNORE']
@@ -274,7 +291,8 @@ class GrammarHypothesis(VectorHypothesis):
             rules = [(i, r) for i, r in rules if rule_to in r.to]
 
         # Zip rules into separate `idxs` & `rules` lists
-        return zip(*rules) if len(rules) > 0 else [(), ()]
+        idxs, rules = zip(*rules) if len(rules) > 0 else [(), ()]
+        return idxs, rules
 
     def get_propose_idxs(self):
         """

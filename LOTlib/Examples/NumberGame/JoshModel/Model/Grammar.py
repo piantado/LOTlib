@@ -61,6 +61,7 @@ from LOTlib.Grammar import Grammar
 # Math rules & interval rules are the 2 probabilities mixed in this model.
 #
 #
+
 mix_grammar = Grammar()
 mix_grammar.add_rule('START', '', ['INTERVAL'], 1.)
 mix_grammar.add_rule('START', '', ['MATH'], 1.)
@@ -69,8 +70,8 @@ mix_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'DOMAIN_RANGE'], 1.)
 mix_grammar.add_rule('DOMAIN_RANGE', 'range_set_', ['1', '100'], 1.)
 mix_grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='X', bv_p=1.)
 
-# ------------------------------------------------------------------------------------------------------------
 # Math rules (30-40 of these)
+# ---------------------------
 
 # Odd numbers
 mix_grammar.add_rule('EXPR', 'plus_', ['ODD', str(1)], 1.)
@@ -102,8 +103,8 @@ for i in range(2, 11):
 for i in range(0, 10):
     mix_grammar.add_rule('EXPR', 'ends_in_', ['X', str(i)], 1.)
 
-# ------------------------------------------------------------------------------------------------------------
 # Interval Rules (there will be ~5050 of these)
+# ---------------------------------------------
 
 mix_grammar.add_rule('INTERVAL', 'range_set_', ['CONST', 'CONST'], 1.)
 for i in range(1, 101):
@@ -111,7 +112,7 @@ for i in range(1, 101):
 
 
 # ============================================================================================================
-# Individual-Priors Grammar
+# independent-Priors Grammar
 # =========================
 #
 # This has the same rules as the mixture model above, except each rule has an individual probability.
@@ -120,39 +121,41 @@ for i in range(1, 101):
 #  * However, we also will have like 5000 rules to choose from now . . .
 #
 #
-individual_grammar = Grammar()
 
-# ------------------------------------------------------------------------------------------------------------
+independent_grammar = Grammar()
+
+
 # Math rules
+# ----------
 
-individual_grammar.add_rule('START', '', ['INTERVAL'], 1.)
-individual_grammar.add_rule('START', '', ['MATH'], 1.)
-individual_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'DOMAIN_RANGE'], 1.)
-individual_grammar.add_rule('DOMAIN_RANGE', 'range_set_', ['1', '100'], 1.)
-individual_grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='X', bv_p=1.)
+independent_grammar.add_rule('START', '', ['INTERVAL'], 1.)
+independent_grammar.add_rule('START', '', ['MATH'], 1.)
+independent_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'DOMAIN_RANGE'], 1.)
+independent_grammar.add_rule('DOMAIN_RANGE', 'range_set_', ['1', '100'], 1.)
+independent_grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='X', bv_p=1.)
 
-individual_grammar.add_rule('EXPR', 'plus_', ['ODD', str(1)], 1.)
-individual_grammar.add_rule('ODD', 'times_', ['X', str(2)], 1.)
-individual_grammar.add_rule('EXPR', 'isprime_', ['X'], 1.)
-individual_grammar.add_rule('EXPR', 'ipowf_', ['X', str(2)], 1.)
-individual_grammar.add_rule('EXPR', 'ipowf_', ['X', str(3)], 1.)
+independent_grammar.add_rule('EXPR', 'plus_', ['ODD', str(1)], 1.)
+independent_grammar.add_rule('ODD', 'times_', ['X', str(2)], 1.)
+independent_grammar.add_rule('EXPR', 'isprime_', ['X'], 1.)
+independent_grammar.add_rule('EXPR', 'ipowf_', ['X', str(2)], 1.)
+independent_grammar.add_rule('EXPR', 'ipowf_', ['X', str(3)], 1.)
 register_primitive(lambda x: x if x in (2, 4, 8, 16, 64) else 0, name='pow2n_d32_')
-individual_grammar.add_rule('EXPR', 'pow2n_d32_', ['X'], 1.)
+independent_grammar.add_rule('EXPR', 'pow2n_d32_', ['X'], 1.)
 register_primitive(lambda x: x if x in (2, 4, 8, 16, 32, 37, 64) else 0, name='pow2n_u37_')
-individual_grammar.add_rule('EXPR', 'pow2n_u37_', ['X'], 1.)
+independent_grammar.add_rule('EXPR', 'pow2n_u37_', ['X'], 1.)
 for i in range(2, 13):
-    individual_grammar.add_rule('EXPR', 'times_', ['X', str(i)], 1.)
+    independent_grammar.add_rule('EXPR', 'times_', ['X', str(i)], 1.)
 for i in range(2, 11):
-    individual_grammar.add_rule('EXPR', 'ipowf_', [str(i), 'X'], 1.)
+    independent_grammar.add_rule('EXPR', 'ipowf_', [str(i), 'X'], 1.)
 for i in range(0, 10):
-    individual_grammar.add_rule('EXPR', 'ends_in_', ['X', str(i)], 1.)
+    independent_grammar.add_rule('EXPR', 'ends_in_', ['X', str(i)], 1.)
 
-# ------------------------------------------------------------------------------------------------------------
 # Interval Rules
+# --------------
 
-individual_grammar.add_rule('INTERVAL', 'range_set_', ['CONST', 'CONST'], 1.)
+independent_grammar.add_rule('INTERVAL', 'range_set_', ['CONST', 'CONST'], 1.)
 for i in range(1, 101):
-    individual_grammar.add_rule('CONST', '', [str(i)], 1.)
+    independent_grammar.add_rule('CONST', '', [str(i)], 1.)
 
 
 # ============================================================================================================
@@ -171,12 +174,13 @@ for i in range(1, 101):
 #   hypotheses that will break things
 #
 #
+
 lot_grammar = Grammar()
 lot_grammar.add_rule('START', '', ['INTERVAL'], 1.)
 lot_grammar.add_rule('START', '', ['MATH'], 1.)
 
-# ------------------------------------------------------------------------------------------------------------
 # Math rules
+# ----------
 
 lot_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'RANGE'], 1.)
 lot_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'FULL_RANGE'], 1.)
@@ -184,8 +188,8 @@ lot_grammar.add_rule('FULL_RANGE', 'range_set_', ['1', '100'], 1.)
 lot_grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='EXPR', bv_p=2.)
 
 lot_grammar.add_rule('EXPR', 'isprime_', ['EXPR'], 1.)
-lot_grammar.add_rule('EXPR', 'ipowf_', ['EXPR', 'EXPR'], 1.)        # NOTE: there is no distinction
-                                                                    # here between   2^n  &  n^2  !!!
+# NOTE: there is no distinction here between   2^n  &  n^2  !!!
+lot_grammar.add_rule('EXPR', 'ipowf_', ['EXPR', 'EXPR'], 1.)
 lot_grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 1.)
 lot_grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1.)
 lot_grammar.add_rule('EXPR', 'ends_in_', ['EXPR', 'EXPR'], 1.)
@@ -194,8 +198,8 @@ lot_grammar.add_rule('EXPR', '', ['OPCONST'], 20.)
 for i in range(1, 11):
     lot_grammar.add_rule('OPCONST', '', [str(i)], 2.)
 
-# ------------------------------------------------------------------------------------------------------------
 # Interval rules
+# --------------
 
 lot_grammar.add_rule('INTERVAL', '', ['RANGE'], 1.)
 lot_grammar.add_rule('RANGE', 'range_set_', ['CONST', 'CONST'], 1.)
