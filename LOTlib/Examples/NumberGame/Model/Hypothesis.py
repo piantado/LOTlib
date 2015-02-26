@@ -1,6 +1,6 @@
 
 from math import log
-from LOTlib.FunctionNode import FunctionNode
+from LOTlib.FunctionNode import FunctionNode, BVUseFunctionNode
 from LOTlib.Evaluation.EvaluationException import TooBigException
 from LOTlib.Hypotheses.GrammarHypothesisVectorized import GrammarHypothesisVectorized
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis, Infinity
@@ -34,10 +34,11 @@ class NumberGameHypothesis(LOTHypothesis):
             # Compute prior with either RR or not.
             self.prior = self.value.log_probability() / self.prior_temperature
 
-        # Don't use this tree if we have 2 constants as children in some subnode
+        # Don't use this tree if we have 2 constants as children in some subnode OR 2 BV's
         for fn in self.value.subnodes()[1:]:
             if all([arg.name == '' and len(arg.args)==1 and isinstance(arg.args[0], FunctionNode)
-                                   and arg.args[0].returntype=='OPCONST' for arg in fn.argFunctionNodes()]):
+                                   and arg.args[0].returntype=='OPCONST' for arg in fn.argFunctionNodes()]) \
+                    or all([isinstance(arg, BVUseFunctionNode) for arg in fn.argFunctionNodes()]):
                 self.prior = -Infinity
                 break
 

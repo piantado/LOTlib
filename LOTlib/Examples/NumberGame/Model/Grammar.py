@@ -176,18 +176,18 @@ for i in range(1, 101):
 #
 
 lot_grammar = Grammar()
-lot_grammar.add_rule('START', '', ['INTERVAL'], 1.)
+#### lot_grammar.add_rule('START', '', ['INTERVAL'], 1.)
 lot_grammar.add_rule('START', '', ['MATH'], 1.)
 
 # Math rules
 # ----------
 
-lot_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'RANGE'], 1.)
+#### lot_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'RANGE'], 1.)
 lot_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'FULL_RANGE'], 1.)
 lot_grammar.add_rule('FULL_RANGE', 'range_set_', ['1', '100'], 1.)
 lot_grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='EXPR', bv_p=2.)
 
-lot_grammar.add_rule('EXPR', 'isprime_', ['EXPR'], 1.)
+#### lot_grammar.add_rule('EXPR', 'isprime_', ['EXPR'], 1.)
 # NOTE: there is no distinction here between   2^n  &  n^2  !!!
 lot_grammar.add_rule('EXPR', 'ipowf_', ['EXPR', 'EXPR'], 1.)
 lot_grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 1.)
@@ -206,12 +206,6 @@ lot_grammar.add_rule('RANGE', 'range_set_', ['CONST', 'CONST'], 1.)
 for i in range(1, 101):
     lot_grammar.add_rule('CONST', '', [str(i)], 1.)
 
-
-# TRY: range 'START' & range 'END'
-# TRY: keep 'CONST' or something like it, but tell GrammarHypothesis to ignore this?  ==> 'IGNORE' nt
-#
-# TRY: another thing to do would be playing with greater values in propose_n... with 5000 rules,
-#      we need to propose to more than 1 value at a time
 
 # bayesian data analysis  +  probabilistic, structured LOT model
 # fitting priors in LOT models... what's new is we're doing a BDA that can recover plausible priors for LOT
