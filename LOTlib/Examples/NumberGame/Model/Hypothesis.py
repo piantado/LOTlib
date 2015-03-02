@@ -36,9 +36,14 @@ class NumberGameHypothesis(LOTHypothesis):
 
         # Don't use this tree if we have 2 constants as children in some subnode OR 2 BV's
         for fn in self.value.subnodes()[1:]:
-            if all([arg.name == '' and len(arg.args)==1 and isinstance(arg.args[0], FunctionNode)
-                                   and arg.args[0].returntype=='OPCONST' for arg in fn.argFunctionNodes()]) \
-                    or all([isinstance(arg, BVUseFunctionNode) for arg in fn.argFunctionNodes()]):
+            args = [i for i in fn.argFunctionNodes()]
+            # TODO: 0 prior for double OPCONST wasn't working - it assigned 0 prior to other things, e.g. [y1 ends-in 5]
+            # if all([arg.name == '' and len(arg.args)>1 and isinstance(arg.args[0], FunctionNode)
+            #         and arg.args[0].returntype=='OPCONST' for arg in fn.argFunctionNodes()]) \
+            #         or (all([isinstance(arg, BVUseFunctionNode) for arg in fn.argFunctionNodes()]) and len(args) > 1):
+            if (all([(arg.returntype=='OPCONST') for arg in args])
+                    or all([isinstance(arg, BVUseFunctionNode) for arg in fn.argFunctionNodes()])) \
+                    and len(args) > 1:
                 self.prior = -Infinity
                 break
 

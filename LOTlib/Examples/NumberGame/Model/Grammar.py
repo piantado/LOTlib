@@ -187,12 +187,12 @@ lot_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'FULL_RANGE'], 1.)
 lot_grammar.add_rule('FULL_RANGE', 'range_set_', ['1', '100'], 1.)
 lot_grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='EXPR', bv_p=2.)
 
-#### lot_grammar.add_rule('EXPR', 'isprime_', ['EXPR'], 1.)
+lot_grammar.add_rule('EXPR', 'isprime_', ['EXPR'], 1.)
 # NOTE: there is no distinction here between   2^n  &  n^2  !!!
-lot_grammar.add_rule('EXPR', 'ipowf_', ['EXPR', 'EXPR'], 1.)
+lot_grammar.add_rule('EXPR', 'ipowf_', ['EXPR', 'EXPR'], .3)
 lot_grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 1.)
 lot_grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1.)
-lot_grammar.add_rule('EXPR', 'ends_in_', ['EXPR', 'EXPR'], 1.)
+# lot_grammar.add_rule('EXPR', 'ends_in_', ['EXPR', 'EXPR'], 1.)
 
 lot_grammar.add_rule('EXPR', '', ['OPCONST'], 20.)
 for i in range(1, 11):
