@@ -13,7 +13,7 @@ class LOTProposal(object):
         # A wrapper that calls propose_tree (defined in subclasses) on our tree value
         # so this manages making LOTHypotheses (or the relevant subclass), and proposal subclasses
         # can just manage trees
-        p = h.__copy__(copy_value=False) ## Don't copy the value -- we get this from propose_tree
+        p = h.__copy__(value=h.value) ## Don't copy the value -- we get this from propose_tree
 
         while True: # keep trying to propose
             try:

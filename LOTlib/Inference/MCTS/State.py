@@ -101,9 +101,10 @@ class State(object):
 
         return wrapped_iter()
 
-    def next(self, depth=0):
+    def next(self, depth=0, return_state=False):
         """
-        Give the next state we'll yield.
+        Give the value of the next state we'll yeild
+        (or the state, if return_state)
         """
         # print "# next call on: ", self.nsteps, self
 
@@ -123,7 +124,10 @@ class State(object):
             self.complete()
 
             # And we're done
-            return self.value
+            if return_state:
+                return self
+            else:
+                return self.value
 
         else: # It's a non-terminal, so expand the children
 
@@ -138,7 +142,7 @@ class State(object):
                 if max(weights) == -Infinity: # we are all done with the kids
                     raise StatePruneException
                 else:
-                    return self.children[argmax(weights)].next(depth=depth+1)
+                    return self.children[argmax(weights)].next(depth=depth+1, return_state=return_state)
 
             except StatePruneException:
                 self.complete() # don't return anything here

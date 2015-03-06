@@ -22,7 +22,7 @@ from LOTlib.Examples.Number.Model import *
 
 ## Parse command line options:
 from optparse import OptionParser
-from LOTlib.Visualization.MCMCSummary import TopN
+from LOTlib.MCMCSummary.TopN import TopN
 
 parser = OptionParser()
 parser.add_option("--out",

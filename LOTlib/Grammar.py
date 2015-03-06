@@ -127,7 +127,7 @@ class Grammar:
 
             # sample a grammar rule
             rules = self.get_rules(x)
-            assert len(rules) > 0
+            assert len(rules) > 0, "*** No rules in x=%s"%x
 
             # sample the rule
             r, gp = weighted_sample(rules, probs=lambda x: x.p, return_probability=True, log=False)

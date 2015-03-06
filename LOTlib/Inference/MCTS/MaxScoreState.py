@@ -1,4 +1,5 @@
 from State import State
+from LOTlib.Miscellaneous import Infinity
 
 class MaxScoreState(State):
     """

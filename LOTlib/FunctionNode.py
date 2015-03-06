@@ -426,9 +426,9 @@ class FunctionNode(object):
             yield ptr
             ptr = ptr.parent
 
-    def count_nodes(self):
+    def count_nodes(self, **kwargs):
         """Returns the subnode count."""
-        return self.count_subnodes()
+        return self.count_subnodes(**kwargs)
 
     def count_subnodes(self, predicate=lambdaTrue):
         """Returns the subnode count."""
