@@ -10,7 +10,7 @@ Paper:
 """
 from LOTlib.Hypotheses.RationalRulesLOTHypothesis import RationalRulesLOTHypothesis
 from LOTlib.Inference.MetropolisHastings import MHSampler
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from Model import *
 
 
@@ -31,7 +31,7 @@ def run_mh():
     # is defined in LOTlib.Hypotheses and wraps LOTHypothesis with the rational rules prior
     h0 = RationalRulesLOTHypothesis(grammar=DNF, rrAlpha=1.0)
 
-    for h in lot_iter(MHSampler(h0, data, 10000, skip=100)):
+    for h in break_ctrlc(MHSampler(h0, data, 10000, skip=100)):
         print h.posterior_score, h.prior, h.value.log_probability(), h.likelihood, q(h)
 
 

@@ -5,14 +5,14 @@
 """
 from LOTlib.Miscellaneous import UniquifyFunction
 from LOTlib.FunctionNode import isFunctionNode
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from copy import copy
 
 def generate_trees(grammar, start='START', N=1000):
     """
             Yield a bunch of unique trees, produced from the grammar
     """
-    for _ in lot_iter(xrange(N)):
+    for _ in break_ctrlc(xrange(N)):
         yield grammar.generate(start)
 
 
@@ -21,7 +21,7 @@ def generate_unique_trees(grammar, start='START', N=1000):
     """
             Yield a bunch of unique trees, produced from the grammar
     """
-    for _ in lot_iter(xrange(N)):
+    for _ in break_ctrlc(xrange(N)):
         t = grammar.generate(start)
         yield t
 

@@ -109,7 +109,7 @@ class ParallelTemperingSampler(MultipleChainMCMC):
 
 if __name__ == "__main__":
 
-    from LOTlib import lot_iter
+    from LOTlib import break_ctrlc
     from LOTlib.Miscellaneous import Infinity
     from LOTlib.Examples.Number2015.Model import generate_data, make_h0
     data = generate_data(1000)
@@ -123,7 +123,7 @@ if __name__ == "__main__":
                                        whichtemperature='acceptance_temperature',
                                        temperatures=[1.0, 2., 3., 5., 10., 20.])
 
-    for h in lot_iter(tn(z(sampler))):
+    for h in break_ctrlc(tn(z(sampler))):
         # print h.posterior_score, h
         pass
 

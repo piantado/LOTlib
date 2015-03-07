@@ -5,7 +5,7 @@ from collections import Counter
 from math import exp
 from scipy.stats import chisquare
 
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from LOTlib.Miscellaneous import logsumexp
 from LOTlib.FunctionNode import FunctionNode, BVUseFunctionNode, BVAddFunctionNode
 
@@ -72,15 +72,15 @@ class InfiniteTreeTester(unittest.TestCase):
     def evaluate_sampler(self, sampler):
 
         cnt = Counter()
-        for h in lot_iter(sampler):
+        for h in break_ctrlc(sampler):
             cnt[h.value] += 1
 
         ## TODO: When the MCMC methods get cleaned up for how many samples they return, we will assert that we got the right number here
         # assert sum(cnt.values()) == NSAMPLES # Just make sure we aren't using a sampler that returns fewer samples! I'm looking at you, ParallelTempering
 
-        Z = logsumexp([t.log_probability() for t in self.trees]) # renormalize to the trees in self.trees
+        Z = logsumexp([self.grammar.log_probability(t) for t in self.trees]) # renormalize to the trees in self.trees
         obsc = [cnt[t] for t in self.trees]
-        expc = [exp(t.log_probability()-Z)*sum(obsc) for t in self.trees]
+        expc = [exp( self.grammar.log_probability(t))*sum(obsc) for t in self.trees]
         csq, pv = chisquare(obsc, expc)
         assert abs(sum(obsc) - sum(expc)) < 0.01
 
@@ -99,12 +99,12 @@ class InfiniteTreeTester(unittest.TestCase):
         Plot the sampler, for cases with many zeros where chisquared won't work well
         """
         cnt = Counter()
-        for h in lot_iter(sampler):
+        for h in break_ctrlc(sampler):
             cnt[h.value] += 1
 
-        Z = logsumexp([t.log_probability() for t in self.trees]) # renormalize to the trees in self.trees
+        Z = logsumexp([ self.grammar.log_probability(t) for t in self.trees]) # renormalize to the trees in self.trees
         obsc = [cnt[t] for t in self.trees]
-        expc = [exp(t.log_probability()-Z)*sum(obsc) for t in self.trees]
+        expc = [exp(self.grammar.log_probability(t)-Z)*sum(obsc) for t in self.trees]
 
         for t, c, s in zip(self.trees, obsc, expc):
             print c, "\t", s, "\t", t
@@ -120,9 +120,6 @@ class InfiniteTreeTester(unittest.TestCase):
         plt.scatter(log(range(len(trees))), obsc, color="blue", marker="x", alpha=1.)
         plt.savefig(opath)
         plt.clf()
-
-
-
 
 
 class FiniteTreeTester(InfiniteTreeTester):
@@ -154,4 +151,4 @@ class FiniteTreeTester(InfiniteTreeTester):
         self.assertTrue(len(ee) == 1) # only one thing can be equal -- no multiple derivations are possible in our grammar
 
         # and they have the same log probability
-        self.assertAlmostEquals(t.log_probability(), ee[0].log_probability())
+        self.assertAlmostEquals(self.grammar.log_probability(t), self.grammar.log_probability(ee[0]) )

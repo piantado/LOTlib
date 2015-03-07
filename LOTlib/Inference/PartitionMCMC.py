@@ -7,7 +7,7 @@
     within each partition.  
 
 """
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from LOTlib.Miscellaneous import Infinity, infrange
 from copy import copy
 
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     #from LOTlib.Examples.RationalRules.Shared import grammar, data, make_h0
 
     pmc = PartitionMCMC(grammar, make_h0, data, max_N=10, skip=0)
-    for h in lot_iter(pmc):
+    for h in break_ctrlc(pmc):
         print h.posterior_score, pmc.current_partition(), "\t", h
 
     

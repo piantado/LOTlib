@@ -1,6 +1,6 @@
 
 import pickle
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from LOTlib.Utilities.FiniteBestSet import FiniteBestSet
 from LOTlib.Miscellaneous import logsumexp
 import Grammar as G, Hypothesis
@@ -18,7 +18,7 @@ def make_h0(grammar=G.grammar, **kwargs):
 
 def save_hypotheses(sampler, filename='numbergame_hypotheses.p'):
     hypotheses = set()
-    for h in lot_iter(sampler):
+    for h in break_ctrlc(sampler):
         hypotheses.add(h)
 
     f = open(filename, "wb")

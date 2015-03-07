@@ -8,7 +8,7 @@ Note:
     hypothesis.
 
 """
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Miscellaneous import q, qq
 from LOTlib.Examples.Number.Model import *
@@ -42,7 +42,7 @@ allhyp = TopN(N=1000)
 
 mh_sampler = MHSampler(h0, data, STEPS, skip=SKIP)
 
-for h in lot_iter(mh_sampler):
+for h in break_ctrlc(mh_sampler):
     if TRACE:
         print q(get_knower_pattern(h)), h.posterior_score, h.compute_prior(), h.compute_likelihood(data), qq(h)
 

@@ -23,7 +23,7 @@ class EnumerationInference(object):
 
 if __name__ == "__main__":
     
-    from LOTlib import lot_iter
+    from LOTlib import break_ctrlc
 
     #from LOTlib.Examples.Number.Shared import grammar, make_h0, generate_data
     #data = generate_data(100)
@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
     #from LOTlib.Examples.RationalRules.Shared import grammar, data, make_h0
 
-    for h in lot_iter(EnumerationInference(grammar, make_h0, data)):
+    for h in break_ctrlc(EnumerationInference(grammar, make_h0, data)):
         print h.posterior_score, h
     
                 

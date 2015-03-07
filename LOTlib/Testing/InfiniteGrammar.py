@@ -20,7 +20,7 @@ grammar.add_rule('LF', 'lambda', ['A'], 0.11, bv_p=0.07, bv_type='A', bv_args=['
 ## NOTE: DOES NTO HANDLE THE CASE WITH TWO A->APPLY, L->LAMBDAS
 
 if __name__ == "__main__":
-    from LOTlib import lot_iter
+    from LOTlib import break_ctrlc
 
-    for t in lot_iter(grammar.enumerate()):
+    for t in break_ctrlc(grammar.enumerate()):
         print t

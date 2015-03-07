@@ -8,7 +8,7 @@ TODO: Learn that MAN is JOHN or BILL
 
 """
 
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from LOTlib.FiniteBestSet import FiniteBestSet
 from Model import *
 
@@ -21,7 +21,7 @@ def run(llt=1.0):
 
     fbs = FiniteBestSet(N=10)
     from LOTlib.Inference.MetropolisHastings import mh_sample
-    for h in lot_iter(mh_sample(h0, data, SAMPLES)):
+    for h in break_ctrlc(mh_sample(h0, data, SAMPLES)):
         fbs.add(h, h.posterior_score)
 
     return fbs
@@ -61,13 +61,13 @@ if __name__ == "__main__":
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     #h0 = CCGLexicon(make_hypothesis, words=all_words, alpha=0.9, palpha=0.9, likelihood_temperature=0.01)
-    #for i, h in lot_iter(enumerate(mh_sample(h0, data, 400000000, skip=0, debug=False))):
+    #for i, h in break_ctrlc(enumerate(mh_sample(h0, data, 400000000, skip=0, debug=False))):
         #print h.posterior_score, h.prior, h.likelihood, qq(re.sub(r"\n", ";", str(h)))
 
     #from LOTlib.Inference.IncreaseTemperatureMH import increase_temperature_mh_sample
 
     #h0 = CCGLexicon(make_hypothesis, words=all_words, alpha=0.9, palpha=0.9, likelihood_temperature=0.01)
-    #for i, h in lot_iter(enumerate(increase_temperature_mh_sample(h0, data, 400000000, skip=0, increase_amount=1.50))):
+    #for i, h in break_ctrlc(enumerate(increase_temperature_mh_sample(h0, data, 400000000, skip=0, increase_amount=1.50))):
     #    print h.posterior_score, h.prior, h.likelihood, qq(re.sub(r"\n", ";", str(h)))
 
 
@@ -76,7 +76,7 @@ if __name__ == "__main__":
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #fbs = FiniteBestSet(N=100)
     #h0 = CCGLexicon(make_hypothesis, words=all_words, alpha=0.9, palpha=0.9, likelihood_temperature=0.051)
-    #for i, h in lot_iter(enumerate(mh_sample(h0, data, 400000000, skip=0, debug=False))):
+    #for i, h in break_ctrlc(enumerate(mh_sample(h0, data, 400000000, skip=0, debug=False))):
         #fbs.add(h, h.posterior_score)
 
         #if i%100==0:

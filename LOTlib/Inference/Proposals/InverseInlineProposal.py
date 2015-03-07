@@ -132,11 +132,11 @@ class InverseInlineProposal(LOTProposal):
             argval = copy(argval) # necessary since the argval in the tree gets overwritten
             below = copy(n) # necessary since n gets setto the new apply rule  
             
-            # now make the function nodes. The generation_probabilities will be reset later, as will the parents for applyfn and bvfn
-            n.setto(ar.make_FunctionNodeStub(self.grammar, 0.0, None)) # n's parent is preserved
+            # now make the function nodes.
+            n.setto(ar.make_FunctionNodeStub(self.grammar, None)) # n's parent is preserved
 
-            lambdafn = lr.make_FunctionNodeStub(self.grammar, 0.0, n) ## this must be n, not applyfn, since n will eventually be setto applyfn
-            bvfn = lambdafn.added_rule.make_FunctionNodeStub(self.grammar, 0.0, None) # this takes the place of argval everywhere below
+            lambdafn = lr.make_FunctionNodeStub(self.grammar, n) ## this must be n, not applyfn, since n will eventually be setto applyfn
+            bvfn = lambdafn.added_rule.make_FunctionNodeStub(self.grammar,  None) # this takes the place of argval everywhere below
             below.replace_subnodes(lambda x:x==argval, bvfn) # substitute below the lambda            
             lambdafn.args[0] = below
             
@@ -174,6 +174,7 @@ class InverseInlineProposal(LOTProposal):
             # figure out which rule we are supposed to use
             possible_rules = [r for r in self.grammar.rules[n.returntype] if r.name==n.name and tuple(r.to) == tuple(n.argTypes()) ]
             assert len(possible_rules) == 1 # for now?
+
             n.rule = possible_rules[0]
 
             ir = self.insertable_rules[n.returntype] # for the backward probability
@@ -186,8 +187,6 @@ class InverseInlineProposal(LOTProposal):
             assert len(ir)>0
             b = (log(self.can_abstract_at(newn)) - log(new_nZ)) + argvalp + (-log(len(ir)))
         
-        ## and fix the generation probabilites, because otherwise they are ruined by all the mangling above
-        newt.recompute_generation_probabilities(self.grammar)
         assert newt.check_parent_refs() # Can comment out -- here for debugging
         
         return [newt, f-b]
@@ -195,7 +194,7 @@ class InverseInlineProposal(LOTProposal):
             
     
 if __name__ == "__main__":
-        from LOTlib import lot_iter
+        from LOTlib import break_ctrlc
         #from LOTlib.Examples.Magnetism.SimpleMagnetism import data, grammar,  make_h0  DOES NOT WORK FOR BV ARGS
         from LOTlib.Examples.Number.Model.Utilities import grammar, make_h0, generate_data, get_knower_pattern
         
@@ -209,7 +208,6 @@ if __name__ == "__main__":
         for _ in xrange(200):    
             t = grammar.generate()
             print ">>", t
-            #assert t.check_generation_probabilities(grammar)
             #assert t.check_parent_refs()
             
             for _ in xrange(10):
@@ -225,7 +223,7 @@ if __name__ == "__main__":
                 
         h = make_h0(proposal_function=MixtureProposal([InverseInlineProposal(grammar), RegenerationProposal(grammar)] ))
         data = generate_data(100)
-        for h in lot_iter(MHSampler(h, data)):
+        for h in break_ctrlc(MHSampler(h, data)):
             print h.posterior_score, h.prior, h.likelihood, get_knower_pattern(h), h
         
             

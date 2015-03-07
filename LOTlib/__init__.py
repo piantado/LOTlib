@@ -25,13 +25,13 @@ def signal_handler(signal, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 
-def lot_iter(g, multi_break=False):
+def break_ctrlc(g, multi_break=False):
     """Easy way to ctrl-C out of a loop.
 
     Lets you wrap a generater, rather than have to write "if LOTlib.SIG_INTERRUPTED..."
 
     """
-    import LOTlib # WOW, this is weird scoping, but it doesn't work if you treat this as a local variable (you can't from LOTlib import lot_iter)
+    import LOTlib # WOW, this is weird scoping, but it doesn't work if you treat this as a local variable (you can't from LOTlib import break_ctrlc)
 
     for x in g:
         #global SIG_INTERRUPTED

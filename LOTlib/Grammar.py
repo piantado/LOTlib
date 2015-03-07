@@ -6,13 +6,11 @@ from copy import copy
 from collections import defaultdict
 import itertools
 
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from LOTlib.Miscellaneous import *
 from LOTlib.GrammarRule import GrammarRule, BVAddGrammarRule
-from LOTlib.Hypotheses.Hypothesis import Hypothesis
 from LOTlib.BVRuleContextManager import BVRuleContextManager
 from LOTlib.FunctionNode import FunctionNode
-
 
 class Grammar:
     """
@@ -64,6 +62,24 @@ class Grammar:
     def nonterminals(self):
         """Returns all non-terminals."""
         return self.rules.keys()
+
+    def log_probability(self, t):
+        """
+        Returns the log probability of t, recomputing everything (as we do now)
+
+        This is overall about half as fast, but it means we don't have to store generation_probability
+        """
+        assert isinstance(t, FunctionNode)
+
+        z  = log(sum([ r.p for r in self.get_rules(t.returntype) ]))
+        lp = log(t.rule.p) - z
+
+        with BVRuleContextManager(self, t):
+            for a in t.argFunctionNodes():
+                lp += self.log_probability(a)
+
+        return lp
+
 
     def add_rule(self, nt, name, to, p, bv_type=None, bv_args=None, bv_prefix='y', bv_p=None):
         """Adds a rule and returns the added rule.
@@ -130,10 +146,10 @@ class Grammar:
             assert len(rules) > 0, "*** No rules in x=%s"%x
 
             # sample the rule
-            r, gp = weighted_sample(rules, probs=lambda x: x.p, return_probability=True, log=False)
+            r = weighted_sample(rules, probs=lambda x: x.p, log=False)
 
             # Make a stub for this functionNode 
-            fn = r.make_FunctionNodeStub(self, gp, None) 
+            fn = r.make_FunctionNodeStub(self, None)
 
             # Define a new context that is the grammar with the rule added
             # Then, when we exit, it's still right.
@@ -193,13 +209,12 @@ class Grammar:
             yield nt
             raise StopIteration
 
-        Z = log(sum([r.p for r in self.rules[nt]]))
         if d == 0:
             if leaves:
                 # Note: can NOT use filter here, or else it doesn't include added rules
                 for r in self.rules[nt]:
                     if self.is_terminal_rule(r):
-                        yield r.make_FunctionNodeStub(self, (log(r.p) - Z), None)
+                        yield r.make_FunctionNodeStub(self, None)
             else:
                 # If not leaves, we just put the nonterminal type in the leaves
                 yield nt
@@ -212,7 +227,7 @@ class Grammar:
                     continue
 
 
-                fn = r.make_FunctionNodeStub(self, (log(r.p) - Z), None)
+                fn = r.make_FunctionNodeStub(self, None)
 
                 # The possible depths for the i'th child
                 # Here we just ensure that nonterminals vary up to d, and otherwise

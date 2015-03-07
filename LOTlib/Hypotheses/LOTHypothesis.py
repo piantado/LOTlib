@@ -149,16 +149,12 @@ class LOTHypothesis(FunctionHypothesis):
         if vectorized:
             return self.compute_prior_vectorized()
 
-        # Re-compute the FunctionNode `self.value` generation probabilities
-        if recompute and not vectorized:
-            self.value.recompute_generation_probabilities(self.grammar)
-
         # Compute this hypothesis prior
         if self.value.count_subnodes() > self.maxnodes:
             self.prior = -Infinity
         else:
             # Compute prior with either RR or not.
-            self.prior = self.value.log_probability() / self.prior_temperature
+            self.prior = self.grammar.log_probability(self.value) / self.prior_temperature
 
         self.update_posterior()
         return self.prior

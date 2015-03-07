@@ -3,7 +3,7 @@ class to test Proposals.py
 follows the standards in https://docs.python.org/2/library/unittest.html
 """
 
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 import unittest
 
 from LOTlib.Inference.Proposals import *

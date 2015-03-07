@@ -7,7 +7,7 @@ In the future, we should see how we could invent predicates from nothing in orde
 TODO: RE-WRITE TO USE UTTERANCEDATA
 
 """
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from LOTlib.DataAndObjects import FunctionData
 from LOTlib.FunctionNode import cleanFunctionNodeString
 from LOTlib.Inference.MetropolisHastings import MHSampler
@@ -21,7 +21,7 @@ if __name__ == "__main__":
         data.append(FunctionData(input=['odd',  x], output=(x % 2 == 1)))
     # print data
 
-    for h in lot_iter(MHSampler(make_h0(), data, skip=100)):
+    for h in break_ctrlc(MHSampler(make_h0(), data, skip=100)):
         print cleanFunctionNodeString(h)
         print h.posterior_score, h.prior, h.likelihood
 

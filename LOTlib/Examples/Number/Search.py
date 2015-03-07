@@ -14,7 +14,7 @@ $time mpiexec -hostfile /home/piantado/Libraries/LOTlib/hosts.mpich2 -n 36 pytho
 import numpy
 import sys
 import LOTlib
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Miscellaneous import q, display_option_summary, qq
 from LOTlib.MPI.MPI_map import MPI_unorderedmap, is_master_process
@@ -85,7 +85,7 @@ def run(data_size):
 
     hyps = TopN(N=options.TOP_COUNT)
     
-    hyps.add(lot_iter(MHSampler(h0, data, options.STEPS, trace=False)))
+    hyps.add(break_ctrlc(MHSampler(h0, data, options.STEPS, trace=False)))
 
     return hyps
 

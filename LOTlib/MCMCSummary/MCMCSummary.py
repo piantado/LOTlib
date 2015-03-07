@@ -1,6 +1,6 @@
 
 import pickle
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 
 
 class MCMCSummary:
@@ -19,7 +19,7 @@ class MCMCSummary:
         >> summary = InferenceSummary(skip=1000, cap=100)
 
         # Can be used either as an independent object...
-        >> for h in lot_iter(mh_sampler):
+        >> for h in break_ctrlc(mh_sampler):
         >>     summary.add(h)
 
         # Or as a generator...
@@ -42,7 +42,7 @@ class MCMCSummary:
         """
         if hasattr(generator, 'data'):
             self.data = generator.data
-        for sample in lot_iter(generator):
+        for sample in break_ctrlc(generator):
             self.add(sample)
             yield sample
 

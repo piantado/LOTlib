@@ -51,8 +51,6 @@ class FunctionNode(object):
         The name of the function.
     args : doc?
         Arguments of the function
-    generation_probability : float
-        The log probability of having generated this Node
     rule : doc?
         The rule that was used in generating the FunctionNode
     bv : doc?
@@ -63,10 +61,9 @@ class FunctionNode(object):
     * If a node has [ None ] as args, it is treated as a thunk
 
     """
-    NoCopy = {'self', 'parent', 'returntype', 'name', 'generation_probability', 'rule', 'args', 'parent'}
+    NoCopy = {'self', 'parent', 'returntype', 'name', 'rule', 'args', 'parent'}
 
-    def __init__(self, parent, returntype, name, args,
-                 generation_probability=0.0, rule=None, a_args=None):
+    def __init__(self, parent, returntype, name, args, rule=None, a_args=None):
         self.__dict__.update(locals())
         self.added_rule = None
         
@@ -103,9 +100,7 @@ class FunctionNode(object):
         The rule is NOT deeply copied (regardless of shallow)
 
         """
-        fn = FunctionNode(self.parent, self.returntype, self.name, None,
-                          generation_probability=self.generation_probability,
-                          rule=self.rule)
+        fn = FunctionNode(self.parent, self.returntype, self.name, None, rule=self.rule)
 
         # And then then copy the rest -- needed for if we add info to FunctionNodes, like a resample_p
         for k in set(self.__dict__.keys()).difference(FunctionNode.NoCopy): # None of these!
@@ -153,26 +148,6 @@ class FunctionNode(object):
                 return False
             
         return True
-    
-    def check_generation_probabilities(self, grammar):
-        """Check this node's generation probabilities.
-
-        Note
-        ----
-        The can only be called on root -- no bvs allowed unless they are introduced, or else
-        grammar.recompute_generation_probabilities will not work right.
-
-        """
-        # and check the generation probabilities -- that these are set correctly
-        gps  = [t.generation_probability for t in self]
-        self.recompute_generation_probabilities(grammar) # re-check these
-        gps2 = [t.generation_probability for t in self]
-        for a,b,n in zip(gps, gps2, self.subnodes()):
-            if abs(a-b) > 0.0001:
-                print "# Wrong generation probabilities %s %s for %s" % (a, b, n)
-                return False
-            
-        return True
 
     def as_list(self, d=0, bv_names=None):
         """Returns a list representation of the FunctionNode with function/self.name as the first element.
@@ -217,8 +192,7 @@ class FunctionNode(object):
     def fullprint(self, d=0, show_rule=False):
         """A handy printer for debugging"""
         tabstr = "  .  " * d
-        print tabstr, self.returntype, self.name, \
-            "\t", self.generation_probability, "\t", self.added_rule,
+        print tabstr, self.returntype, self.name, "\t", self.added_rule,
 
         if show_rule:
            print "\t\t", self.rule
@@ -299,26 +273,7 @@ class FunctionNode(object):
 
     def log_probability(self):
         """Compute the log probability of a tree."""
-        return self.generation_probability + sum([x.log_probability() for x in self.argFunctionNodes()])
-
-    def recompute_generation_probabilities(self, grammar):
-        """
-        Re-compute all the generation_probabilities.
-
-        """
-        assert self.rule is not None
-        for t in self.iterate_subnodes(grammar, self):
-            Z = log(sum([x.p for x in grammar.rules[t.returntype]]))
-            t.generation_probability = log(t.rule.p) - Z
-
-    def compute_generation_probability(self, grammar):
-        """
-        Compute the generation probability for this node's root (not considering children).
-
-        """
-        assert self.rule is not None, "FunctionNode cannot calculate prob. when rule is None!"
-        Z = log(sum([x.p for x in grammar.rules[self.returntype]]))
-        return log(self.rule.p) - Z
+        assert False, "*** New change: You must compute log_probability from a grammar. "
 
     def subnodes(self):
         """Return all subnodes -- no iterator. Useful for modifying (doc?)
@@ -689,10 +644,8 @@ class BVAddFunctionNode(FunctionNode):
     """
     (doc?)
     """
-    def __init__(self, parent, returntype, name, args,
-                 generation_probability=0.0, rule=None, a_args=None, added_rule=None):
-        FunctionNode.__init__(self, parent, returntype, name, args,
-                              generation_probability, rule, a_args)
+    def __init__(self, parent, returntype, name, args, rule=None, a_args=None, added_rule=None):
+        FunctionNode.__init__(self, parent, returntype, name, args, rule, a_args)
         self.added_rule = added_rule
 
     def __copy__(self, shallow=False):
@@ -708,7 +661,6 @@ class BVAddFunctionNode(FunctionNode):
 
         """
         fn = BVAddFunctionNode(self.parent, self.returntype, self.name, None,
-            generation_probability=self.generation_probability,
             rule=self.rule, a_args=self.a_args, added_rule=copy(self.added_rule))
 
         if (not shallow) and self.args is not None:
@@ -759,10 +711,8 @@ class BVUseFunctionNode(FunctionNode):
     """
     (doc?)
     """
-    def __init__(self, parent, returntype, name, args,
-                 generation_probability=0.0, rule=None, a_args=None, bv_prefix=None):
-        FunctionNode.__init__(self, parent, returntype, name, args,
-                              generation_probability, rule, a_args)
+    def __init__(self, parent, returntype, name, args, rule=None, a_args=None, bv_prefix=None):
+        FunctionNode.__init__(self, parent, returntype, name, args, rule, a_args)
         self.bv_prefix = bv_prefix
 
     def as_list(self, d=0, bv_names=None):
@@ -796,7 +746,6 @@ class BVUseFunctionNode(FunctionNode):
 
         """
         fn = BVUseFunctionNode(self.parent, self.returntype, self.name, None,
-                               generation_probability=self.generation_probability,
                                rule=self.rule, a_args=self.a_args,
                                bv_prefix=self.bv_prefix)
         

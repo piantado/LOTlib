@@ -1,4 +1,9 @@
+        - NOTE: Changed log_probability to only be run from grammar. FunctionNodes now no longer store generation_probability. This will require changes to use grammar.log_probability(t) instead of t.log_probability()
+        - Changed lot_iter to break_ctrlc
+        
+Mar 6 2015
         - added abstract Sampler class to make samplers compositional. Now you can make a PartitionMCMC of a ParallelTempering, for instance
+        - Added experiment Monte Carlo Tree Search in Inference.MCTS. Includes a  bunch of minor changes to make this work better. 
 Feb 1 2015
         - On failure of a proposal type, proposers now raise ProposalFailedException, rather than returning [newt,0.0]
         - Changes to FunctionNode.__eq__ that now make it take into account "invisible" nodes (FunctionNodes that have a name of '')

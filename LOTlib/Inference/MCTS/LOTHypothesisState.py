@@ -154,14 +154,14 @@ class LOTHypothesisState(MaxScoreState):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if __name__ == "__main__":
 
-    from LOTlib import lot_iter
+    from LOTlib import break_ctrlc
 
     from LOTlib.Examples.Magnetism.Simple import grammar, make_h0, data
     # USE:  C=50.0, V=1.0
 
     s = LOTHypothesisState.make(lambda **args: make_h0( maxnodes=100, **args), data, grammar, C=50.0, V=1.0)
 
-    for x in lot_iter(s):
+    for x in break_ctrlc(s):
         print x.posterior_score, x.prior, x.likelihood, x
 
     print "<><><><><><><><><><><><><><><><><><><><>"

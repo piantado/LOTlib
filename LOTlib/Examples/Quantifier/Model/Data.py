@@ -11,7 +11,7 @@ Attributes defined here:
 """
 from random import randint
 from cachetools import lru_cache
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from LOTlib.DataAndObjects import *
 from LOTlib.Evaluation.Primitives.SetTheory import *
 from LOTlib.Evaluation.Primitives.Semantics import *
@@ -145,7 +145,7 @@ def generate_data(data_size):
     all_words = target.all_words()
     data = []
 
-    for i in lot_iter(xrange(data_size)):
+    for i in break_ctrlc(xrange(data_size)):
         # a context is a set of men, pirates, and everything. functions are applied to this to get truth values
         context = sample_context()
         word = target.sample_utterance(all_words, context)

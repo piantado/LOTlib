@@ -2,7 +2,7 @@
 Find N best number game hypotheses.
 
 """
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Inference.PriorSample import prior_sample

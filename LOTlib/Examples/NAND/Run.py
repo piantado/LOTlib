@@ -10,7 +10,7 @@ to show the best subtrees to define for minimizing KL between the prior and post
 
 """
 import pickle
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.FiniteBestSet import FiniteBestSet
 from LOTlib.Inference.MetropolisHastings import MHSampler
@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
         # Now run some MCMC
         fs = FiniteBestSet(N=BEST_N, key="posterior_score")
-        fs.add(lot_iter(MHSampler(h0, data, steps=NSTEPS, trace=False)))
+        fs.add(break_ctrlc(MHSampler(h0, data, steps=NSTEPS, trace=False)))
 
         all_hypotheses.merge(fs)
 

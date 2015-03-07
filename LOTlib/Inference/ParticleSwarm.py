@@ -1,7 +1,7 @@
 from numpy import median
 from numpy.random import normal, randint
 from MultipleChainMCMC import MultipleChainMCMC
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from LOTlib.Miscellaneous import logsumexp, q, Infinity, logplusexp
 from copy import copy
 
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     data = generate_data(300)
 
     ps = ParticleSwarm(make_h0, data)
-    for h in lot_iter(ps):
+    for h in break_ctrlc(ps):
         print h.posterior_score, h
 
         if len(ps.seen) > 0:

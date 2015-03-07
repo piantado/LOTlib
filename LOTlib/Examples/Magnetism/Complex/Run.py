@@ -19,7 +19,7 @@ from Grammar import *
 # Run mcmc
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def run():
-    from LOTlib import lot_iter
+    from LOTlib import break_ctrlc
     from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
     #mp = MixtureProposal([RegenerationProposal(grammar), InsertDeleteProposal(grammar)] )
     mp = RegenerationProposal(grammar)
@@ -28,7 +28,7 @@ def run():
     h0 = LOTHypothesis(grammar, args=['x', 'y'], ALPHA=0.999, proposal_function=mp) # alpha here trades off with the amount of data. Currently assuming no noise, but that's not necessary
 
     from LOTlib.Inference.MetropolisHastings import MHSampler
-    for h in lot_iter(MHSampler(h0, data, skip=100)):
+    for h in break_ctrlc(MHSampler(h0, data, skip=100)):
         print h.posterior_score, h.likelihood, h.prior, cleanFunctionNodeString(h)
         #print map( lambda d: h(*d.input), data)
         #print "\n"
