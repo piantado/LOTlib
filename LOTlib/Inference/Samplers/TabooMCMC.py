@@ -1,10 +1,12 @@
 """
-        The more times we visit a hypothesis, the more we decrease its prior
+The more times we visit a hypothesis, the more we decrease its prior
 
-        TODO: Try version where penalty decreases with time!
-        TODO: This currently only extends LOTHypotheses, since we have to handle casting
-              inside of h0 to WrapperClass. HOWEVER, we could make WrapperClass just dispatch the right methods
-              if they don't exist
+TODO
+----
+* Try version where penalty decreases with time!
+* This currently only extends LOTHypotheses, since we have to handle casting inside of h0 to WrapperClass.
+  ... HOWEVER, we could make WrapperClass just dispatch the right methods if they don't exist
+
 """
 
 from collections import Counter
@@ -14,33 +16,42 @@ from MetropolisHastings import MHSampler
 
 class TabooMCMC(MHSampler):
     """
-            An MCMC sampler that penalizes for visits to a hypothesis
-            NOTE: rEquires storing of all hypotheses visited.
-    """
-    def __init__(self, h0, data, penalty=1.0, **kwargs ):
-        MHSampler.__init__(self, h0, data, **kwargs)
-        self.penalty=penalty
+    An MCMC sampler that penalizes `self.posterior`
 
+    Attributes
+    ----------
+    seen : Counter
+        Keep track of all the samples we've drawn; this is a dictionary.
+    penalty : float
+        How much do we penalize for each sample?
+
+    Note
+    ----
+    Requires storing of all hypotheses visited.
+
+    """
+    def __init__(self, h0, data, penalty=1.0, **kwargs):
+        MHSampler.__init__(self, h0, data, **kwargs)
+        self.penalty = penalty
         self.seen = Counter()
 
     def internal_sample(self, h):
-        """
-                Keep track of how many samples we've drawn for h
-        """
         self.seen[h] += 1
 
     def compute_posterior(self, h, data):
         """
-                Wrap the posterior with a penalty for how often we've seen h. Computes the penalty on the prior
+        Compute prior & likelihood for `h`, penalizing prior by how many samples have been generated so far.
+
         """
         mypenalty = self.seen[h] * self.penalty
-        np, nl = MHSampler.compute_posterior(self, h, data)
-        return np+mypenalty, nl
+        np, nl = h.compute_posterior(data)
+        np = np + mypenalty
+        return np, nl
 
 
 if __name__ == "__main__":
 
-    from LOTlib.Examples.Number.Model.Utilities import generate_data, NumberExpression, grammar, get_knower_pattern
+    from LOTlib.Examples.Number.Model import *
     from LOTlib.Miscellaneous import q
 
     data = generate_data(500)
