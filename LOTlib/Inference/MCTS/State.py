@@ -51,7 +51,6 @@ class State(object):
         """
         raise NotImplementedError
 
-
     def __repr__(self):
         return "<STATE: %s>" % str(self.value)
 

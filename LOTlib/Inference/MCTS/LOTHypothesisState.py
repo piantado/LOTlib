@@ -11,6 +11,7 @@ from collections import defaultdict
 from LOTlib.Miscellaneous import Infinity, lambdaAssertFalse, logsumexp
 from LOTlib.BVRuleContextManager import BVRuleContextManager
 from LOTlib.FunctionNode import FunctionNode
+from LOTlib.GrammarRule import GrammarRule
 
 from State import State, StatePruneException
 from MaxScoreState import MaxScoreState
@@ -41,11 +42,14 @@ class LOTHypothesisState(MaxScoreState):
         for _ in xrange(1000): # generate this many trees
             t = grammar.generate()
             for fn in t:
-                dct[fn.returntype].append(fn.log_probability())
+                dct[fn.returntype].append(grammar.log_probability(fn))
         hole_penalty = { nt : sum(dct[nt]) / len(dct[nt]) for nt in dct }
 
-        # and return the node
-        return cls(make_h0(value=FunctionNode(None, '', '', [grammar.start])), data, grammar, hole_penalty=hole_penalty, parent=None, **args) # the top state
+        #We must modify the grammar to include one more nonterminal here
+        mynt = "<hsmake>"
+        myr = GrammarRule(mynt, '', [grammar.start], p=1.0)
+        grammar.rules[mynt].append(myr)
+        return cls(make_h0(value=FunctionNode(None, mynt,  '', [grammar.start], rule=myr)), data, grammar, hole_penalty=hole_penalty, parent=None, **args) # the top state
 
     def __init__(self, value, data, grammar, hole_penalty=None, **kwargs):
         """
@@ -98,6 +102,8 @@ class LOTHypothesisState(MaxScoreState):
 
     def score_terminal_state(self):
         """ Get the score here """
+        # print "SCORING", self
+        
         # We must make this compile the function since it is told not to compile in newh within self.make_children
         self.value.fvalue = self.value.compile_function() # make it actually compile!
         return sum(self.value.compute_posterior(self.data))
@@ -136,7 +142,7 @@ class LOTHypothesisState(MaxScoreState):
             lZ = log(sum([r.p for r in rules]))
 
             for r in rules:
-                fn.args[argi] = r.make_FunctionNodeStub(self.grammar, log(r.p)-lZ, fn)
+                fn.args[argi] = r.make_FunctionNodeStub(self.grammar, fn)
 
                 # copy the type in self.value
                 newh = self.value.__copy__(value=None)

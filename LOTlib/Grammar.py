@@ -70,6 +70,7 @@ class Grammar:
         This is overall about half as fast, but it means we don't have to store generation_probability
         """
         assert isinstance(t, FunctionNode)
+        # print type(t), t.returntype, t
 
         z  = log(sum([ r.p for r in self.get_rules(t.returntype) ]))
         lp = log(t.rule.p) - z
