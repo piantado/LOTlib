@@ -103,7 +103,7 @@ class LOTHypothesisState(MaxScoreState):
     def score_terminal_state(self):
         """ Get the score here """
         # print "SCORING", self
-        
+
         # We must make this compile the function since it is told not to compile in newh within self.make_children
         self.value.fvalue = self.value.compile_function() # make it actually compile!
         return sum(self.value.compute_posterior(self.data))
