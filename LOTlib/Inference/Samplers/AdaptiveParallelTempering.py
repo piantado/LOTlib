@@ -65,7 +65,7 @@ class AdaptiveParallelTemperingSampler(ParallelTemperingSampler):
 
 if __name__ == "__main__":
 
-    from LOTlib import lot_iter
+    from LOTlib import break_ctrlc
     from LOTlib.Examples.Number2015.Model import generate_data, make_h0
     data = generate_data(300)
 
@@ -80,7 +80,7 @@ if __name__ == "__main__":
                                                yield_only_t0=False, whichtemperature='acceptance_temperature', \
                                                temperatures=logrange(1.0, 10.0, 10))
 
-    for h in lot_iter(tn(z(sampler))):
+    for h in break_ctrlc(tn(z(sampler))):
         # print sampler.chain_idx, h.posterior_score, h
         pass
 

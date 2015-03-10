@@ -6,7 +6,7 @@ the exp(-RosenbrockFunction)
 """
 import numpy
 
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from LOTlib.Hypotheses.VectorHypothesis import VectorHypothesis
 from LOTlib.Inference.Samplers.MetropolisHastings import mh_sample
 
@@ -44,5 +44,5 @@ if __name__ == "__main__":
     N = 1
     initial_hyp = RosenbrockSampler()
 
-    for x in lot_iter(mh_sample(initial_hyp, [], 1000000, skip=100, trace=False)):
+    for x in break_ctrlc(mh_sample(initial_hyp, [], 1000000, skip=100, trace=False)):
         print x, x.posterior_score

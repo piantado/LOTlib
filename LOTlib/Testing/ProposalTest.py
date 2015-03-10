@@ -10,6 +10,7 @@ from math import exp
 from scipy.stats import chisquare
 
 from TreeTesters import FiniteTreeTester # defines check_tree and setUp
+from LOTlib.Inference.Proposals import ProposalFailedException
 
 NSAMPLES = 1000
 
@@ -33,16 +34,16 @@ class ProposalTest(FiniteTreeTester):
 
             ## check that the proposals are what they should be -- rp.lp_propose is correct!
             obsc = [cnt[t] for t in self.trees]
-            expc = [exp(t.log_probability())*sum(obsc) for t in self.trees]
+            expc = [exp(self.grammar.log_probability(t))*sum(obsc) for t in self.trees]
             csq, pv = chisquare([cnt[t] for t in self.trees],
                                 [exp(rp.lp_propose(tree, x))*NSAMPLES for x in self.trees])
 
             # Look at some
-            print ">>>>>>>>>>>", tree
-            for p in self.trees:
-                print "||||||||||", p
-                v = rp.lp_propose(tree,p)
-                print "V=",v
+            # print ">>>>>>>>>>>", tree
+            # for p in self.trees:
+            #     print "||||||||||", p
+            #     v = rp.lp_propose(tree,p)
+            #     print "V=",v
 
             for c, e, tt in zip([cnt[t] for t in self.trees],
                                [exp(rp.lp_propose(tree, x))*NSAMPLES for x in self.trees],
@@ -57,8 +58,11 @@ class ProposalTest(FiniteTreeTester):
 
         for tree in self.trees:
             for _ in xrange(100):
-                p, fb = rp.propose_tree(tree)
-                self.check_tree(p)
+                try:
+                    p, fb = rp.propose_tree(tree)
+                    self.check_tree(p)
+                except ProposalFailedException:
+                    pass
 
 if __name__ == '__main__':
 

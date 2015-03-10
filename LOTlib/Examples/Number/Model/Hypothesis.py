@@ -35,7 +35,7 @@ class NumberExpression(RecursiveLOTHypothesis):
             else:
                 recursion_penalty = LG_1MGAMMA
 
-            self.prior = (recursion_penalty + self.value.log_probability()) / self.prior_temperature
+            self.prior = (recursion_penalty + self.grammar.log_probability(self.value)) / self.prior_temperature
 
         self.update_posterior()
 
@@ -45,9 +45,7 @@ class NumberExpression(RecursiveLOTHypothesis):
         """Computes the likelihood of data.
 
             TODO: Make sure this precisely matches the number paper.
-
         """
-
         response = self(*datum.input)
         if response == 'undef' or response == None:
             return log(1.0/10.0) # if undefined, just sample from a base distribution

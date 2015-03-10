@@ -55,7 +55,7 @@
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 
-<span class="kn">from</span> <span class="nn">LOTlib</span> <span class="kn">import</span> <span class="n">lot_iter</span>
+<span class="kn">from</span> <span class="nn">LOTlib</span> <span class="kn">import</span> <span class="n">break_ctrlc</span>
 <span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">LOTlib.GrammarRule</span> <span class="kn">import</span> <span class="n">GrammarRule</span><span class="p">,</span> <span class="n">BVAddGrammarRule</span>
 <span class="kn">from</span> <span class="nn">LOTlib.Hypotheses.Hypothesis</span> <span class="kn">import</span> <span class="n">Hypothesis</span>
@@ -420,14 +420,14 @@
 <span class="sd">    grammar.add_rule(&#39;B&#39;, &#39;bf&#39;, [&#39;A&#39;, &#39;B&#39;], 1.0)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c">#for t in lot_iter(grammar.enumerate_at_depth(6, leaves=</span>
+    <span class="c">#for t in break_ctrlc(grammar.enumerate_at_depth(6, leaves=</span>
     <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">lot_iter</span><span class="p">(</span><span class="n">grammar</span><span class="o">.</span><span class="n">enumerate</span><span class="p">()):</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">break_ctrlc</span><span class="p">(</span><span class="n">grammar</span><span class="o">.</span><span class="n">enumerate</span><span class="p">()):</span>
         <span class="k">print</span> <span class="n">t</span><span class="o">.</span><span class="n">depth</span><span class="p">(),</span> <span class="n">t</span>
         <span class="k">assert</span> <span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span>
         <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
 
-    <span class="c">#for t in lot_iter(grammar.enumerate(leaves=False)):</span>
+    <span class="c">#for t in break_ctrlc(grammar.enumerate(leaves=False)):</span>
     <span class="c">#    print t.depth(), t</span>
     <span class="c">#    #assert t not in seen</span>
 

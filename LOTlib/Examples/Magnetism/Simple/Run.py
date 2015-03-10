@@ -16,10 +16,11 @@ from LOTlib.FunctionNode import cleanFunctionNodeString
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from Data import data
 from Grammar import grammar
+from Utilities import make_h0
 
 
 def run():
-    from LOTlib import lot_iter
+    from LOTlib import break_ctrlc
     from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
     from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
@@ -27,9 +28,9 @@ def run():
     mp = RegenerationProposal(grammar)
 
     # alpha here trades off with the amount of data. Currently assuming no noise, but that's not necessary
-    h0 = LOTHypothesis(grammar, args=['x', 'y'], ALPHA=0.999, proposal_function=mp)
+    h0 =  make_h0(proposal_function=mp) #LOTHypothesis(grammar, args=['x', 'y'], ALPHA=0.999, proposal_function=mp)
 
-    for h in lot_iter(MHSampler(h0, data, 4000000, skip=100)):
+    for h in break_ctrlc(MHSampler(h0, data, 4000000, skip=100)):
         print h.posterior_score, h.likelihood, h.prior,  cleanFunctionNodeString(h)
         print map( lambda d: h(*d.input), data)
 

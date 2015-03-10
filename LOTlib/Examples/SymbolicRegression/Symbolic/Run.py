@@ -3,7 +3,7 @@
 A simple symbolic regression demo
 
 """
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from LOTlib.Hypotheses.GaussianLOTHypothesis import GaussianLOTHypothesis
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib.Miscellaneous import qq
@@ -24,5 +24,5 @@ if __name__ == "__main__":
     # starting hypothesis -- here this generates at random
     h0 = GaussianLOTHypothesis(grammar)
 
-    for h in lot_iter(MHSampler(h0, data, STEPS, skip=SKIP)):
+    for h in break_ctrlc(MHSampler(h0, data, STEPS, skip=SKIP)):
         print h.posterior_score, qq(h)

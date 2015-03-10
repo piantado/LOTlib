@@ -1,0 +1,10 @@
+Monte Carlo Tree Search (MCTS)
+==============================
+
+This implements a version of MCTS where the possible expansions at each node of the tree are treated like multi-arm bandits (conditioned on the entire tree above). The goal is to adequately balance exploration and exploitation. The default code performs an estimate of the expected payoff. 
+
+Subclasses are included that:
+	- Make the summary statistic (xbar) for a state the max posterior found so far (MaxScoreState)
+	- Use expected likelihood rather than expected posterior (LikelihoodLOTHypothesisState)
+
+All code is highly experimental and is the object of ongoing development.

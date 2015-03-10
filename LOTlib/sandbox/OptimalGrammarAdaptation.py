@@ -19,7 +19,7 @@ import scipy
 import scipy.optimize
 
 import LOTlib
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from LOTlib.Miscellaneous import *
 from numpy import log, exp, sqrt, sum
 
@@ -57,7 +57,7 @@ def print_subtree_adaptations(hypotheses, posteriors, subtrees, relative_KL=True
         KL0s = [ 1.0 for P in Ps ] # pretend everything just had KL of 1, so we score relatively
 
     ## Now process each, starting with the most simple
-    for t in lot_iter(sorted(subtrees, key=lambda t: t.log_probability(), reverse=True)):
+    for t in break_ctrlc(sorted(subtrees, key=lambda t: t.log_probability(), reverse=True)):
 
         # Get some stats on t:
         tlp = t.log_probability()

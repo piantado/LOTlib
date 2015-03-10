@@ -57,7 +57,7 @@
 <span class="sd">    within each partition.  </span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">LOTlib</span> <span class="kn">import</span> <span class="n">lot_iter</span>
+<span class="kn">from</span> <span class="nn">LOTlib</span> <span class="kn">import</span> <span class="n">break_ctrlc</span>
 <span class="kn">from</span> <span class="nn">LOTlib.Miscellaneous</span> <span class="kn">import</span> <span class="n">Infinity</span><span class="p">,</span> <span class="n">infrange</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
 
@@ -135,7 +135,7 @@
     <span class="c">#from LOTlib.Examples.RationalRules.Shared import grammar, data, make_h0</span>
     
     <span class="c">#PartitionMCMC(grammar, make_h0, data, 2, skip=0)</span>
-    <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">lot_iter</span><span class="p">(</span><span class="n">PartitionMCMC</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">make_h0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">max_N</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">break_ctrlc</span><span class="p">(</span><span class="n">PartitionMCMC</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">make_h0</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">max_N</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">)):</span>
         <span class="k">print</span> <span class="n">h</span><span class="o">.</span><span class="n">posterior_score</span><span class="p">,</span> <span class="n">h</span>
 
     

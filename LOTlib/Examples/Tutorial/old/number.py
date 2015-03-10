@@ -1,4 +1,4 @@
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 
 from LOTlib.Grammar import Grammar
 from LOTlib.Hypotheses.LOTHypothesis import *

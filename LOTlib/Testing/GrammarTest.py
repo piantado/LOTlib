@@ -13,7 +13,7 @@ class GrammarTest(FiniteTreeTester):
         """
         Let's just make sure that our prior sums to 1.0 (finite case)
         """
-        self.assertAlmostEquals(sum([exp(t.log_probability()) for t in self.trees]), 1.0)
+        self.assertAlmostEquals(sum([exp( self.grammar.log_probability(t)) for t in self.trees]), 1.0)
 
     def test_enumerate_at_depth(self):
         for d in xrange(6):

@@ -9,7 +9,6 @@ import LOTlib
 from LOTlib.Evaluation import Primitives
 from LOTlib.Miscellaneous import *
 
-
 class Hypothesis(object):
     """A hypothesis bundles together a value (hypothesis value) with a bunch of remembered states,
     like posterior_score, prior, likelihood.
@@ -124,12 +123,6 @@ class Hypothesis(object):
         self.posterior_score = self.prior + self.likelihood
 
     # ========================================================================================================
-    #  optional implementation --  if you do gibbs sampling you need:
-    def enumerative_proposer(self):
-        """Note: This method must be implemented when performing Gibbs sampling"""
-        pass
-
-    # ========================================================================================================
     #  These are just handy:
     def __str__(self):
         return str(self.value)
@@ -143,7 +136,7 @@ class Hypothesis(object):
         return cmp(self.value, x)
 
     # this is for heapq algorithm in FiniteSample, which uses <= instead of cmp
-    # since python implements a "min heap" we can compar elog probs
+    # since python implements a "min heap" we can compare log probs
     def __le__(self, x):
         return self.posterior_score <= x.posterior_score
     def __eq__(self, other):

@@ -9,10 +9,13 @@
 """
 from copy import copy
 
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from LOTlib.Miscellaneous import Infinity, infrange
-from LOTlib.Inference.Samplers import MultipleChainMCMC
+from LOTlib.Subtrees import trim_leaves
+from LOTlib.Miscellaneous import None2Empty, lambdaNone
 from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
+
+from MultipleChainMCMC import MultipleChainMCMC
 
 
 class BreakException(Exception):
@@ -20,6 +23,11 @@ class BreakException(Exception):
     Break out of multiple loops
     """
     pass
+
+# Now we need to define a class to wrap in resample_p so it gets used here.
+class MyProposal(RegenerationProposal):
+    def propose_tree(self, t):
+        return RegenerationProposal.propose_tree(self, t, resampleProbability=lambda x: getattr(x,'resample_p', 1.0))
 
 class PartitionMCMC(MultipleChainMCMC):
     """
@@ -78,12 +86,8 @@ class PartitionMCMC(MultipleChainMCMC):
         print "# Initialized %s partitions" % len(partitions)
 
         # initialize each chain
-        MultipleChainMCMC.__init__(self, lambda: None, data, steps=steps, nchains=len(partitions), **kwargs)
+        MultipleChainMCMC.__init__(self, lambdaNone, data, steps=steps, nchains=len(partitions), **kwargs)
 
-        # Now we need to define a class to wrap in resample_p
-        class MyProposal(RegenerationProposal):
-            def propose_tree(self, t):
-                return RegenerationProposal.propose_tree(self, t, resampleProbability=lambda x: getattr(x,'resample_p', 1.0))
 
         # And set each to the partition
         for c, p in zip(self.chains, partitions):
@@ -109,7 +113,7 @@ if __name__ == "__main__":
     #from LOTlib.Examples.RationalRules.Shared import grammar, data, make_h0
 
     pmc = PartitionMCMC(grammar, make_h0, data, max_N=10, skip=0)
-    for h in lot_iter(pmc):
+    for h in break_ctrlc(pmc):
         print h.posterior_score, pmc.current_partition(), "\t", h
 
     

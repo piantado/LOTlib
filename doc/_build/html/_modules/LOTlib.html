@@ -76,14 +76,14 @@
 <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">signal_handler</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">lot_iter</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">multi_break</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-<div class="viewcode-block" id="lot_iter"><a class="viewcode-back" href="../LOTlib.html#LOTlib.lot_iter">[docs]</a>    <span class="sd">&quot;&quot;&quot;Easy way to ctrl-C out of a loop.</span>
+<span class="k">def</span> <span class="nf">break_ctrlc</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">multi_break</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="break_ctrlc"><a class="viewcode-back" href="../LOTlib.html#LOTlib.break_ctrlc">[docs]</a>    <span class="sd">&quot;&quot;&quot;Easy way to ctrl-C out of a loop.</span>
 
 <span class="sd">    Lets you wrap a generater, rather than have to write &quot;if LOTlib.SIG_INTERRUPTED...&quot;</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="kn">import</span> <span class="nn">LOTlib</span> <span class="c"># WOW, this is weird scoping, but it doesn&#39;t work if you treat this as a local variable (you can&#39;t from LOTlib import lot_iter)</span>
+    <span class="kn">import</span> <span class="nn">LOTlib</span> <span class="c"># WOW, this is weird scoping, but it doesn&#39;t work if you treat this as a local variable (you can&#39;t from LOTlib import break_ctrlc)</span>
 
     <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">g</span><span class="p">:</span>
         <span class="c">#global SIG_INTERRUPTED</span>

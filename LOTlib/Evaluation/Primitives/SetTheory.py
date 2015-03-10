@@ -6,7 +6,15 @@ from math import isnan, isinf
 # Set-theoretic primitives
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 @primitive
-def set_(*args): return set(args)
+def set_(*args):
+    """
+    NOTE: This makes a set from args, but it has the property that when called with a string, it doesn't break
+    the string into chars. So set('abc') = {'a', 'b', 'c'}, but set_('abc') = {'abc'}
+    """
+    out = set()
+    for a in args:
+        out.add(a)
+    return out
 
 @primitive
 def set_add_(x,s):

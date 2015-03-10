@@ -76,7 +76,7 @@ class LOTHypothesis(FunctionHypothesis):
             print "TypeError in function call: ", e, str(self), "  ;  ", type(self)
             raise TypeError
         except NameError as e:
-            print "NameError in function call: ", e, str(self)
+            print "NameError in function call: ", e, " ; ", str(self)
             raise NameError
 
     def type(self):
@@ -98,10 +98,10 @@ class LOTHypothesis(FunctionHypothesis):
                 print "# ", e
                 return lambda *args: raise_exception(EvaluationException)
 
-    def __copy__(self, copy_value=True):
+    def __copy__(self, value=None):
         """Make a deepcopy of everything except grammar (which is the, presumably, static grammar)."""
         # Since this is inherited, call the constructor on everything, copying what should be copied
-        thecopy = type(self)(self.grammar, value=copy.copy(self.value) if copy_value else self.value,
+        thecopy = type(self)(self.grammar, value=copy.copy(self.value) if value is not None else value,
                              f=self.f, proposal_function=self.proposal_function)
 
         # And then then copy the rest
@@ -149,16 +149,12 @@ class LOTHypothesis(FunctionHypothesis):
         if vectorized:
             return self.compute_prior_vectorized()
 
-        # Re-compute the FunctionNode `self.value` generation probabilities
-        if recompute and not vectorized:
-            self.value.recompute_generation_probabilities(self.grammar)
-
         # Compute this hypothesis prior
         if self.value.count_subnodes() > self.maxnodes:
             self.prior = -Infinity
         else:
             # Compute prior with either RR or not.
-            self.prior = self.value.log_probability() / self.prior_temperature
+            self.prior = self.grammar.log_probability(self.value) / self.prior_temperature
 
         self.update_posterior()
         return self.prior

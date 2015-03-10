@@ -7,7 +7,7 @@ import unittest
 from LOTlib.FunctionNode import *
 from LOTlib.Grammar import *
 from Grammars import FunctionNodeGrammar
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
         
 
 
@@ -27,7 +27,7 @@ class FunctionNodeTest(unittest.TestCase):
 
     def test_eq(self):
         counter = 0
-        for i in lot_iter(xrange(10000)):
+        for i in break_ctrlc(xrange(10000)):
             x = self.G.generate()
             y = self.G.generate()
 
@@ -42,7 +42,7 @@ class FunctionNodeTest(unittest.TestCase):
         """
             Test the setting of parents and rules
         """
-        for _ in lot_iter(xrange(1000)):
+        for _ in break_ctrlc(xrange(1000)):
             x = self.G.generate()
             self.assertTrue(x.check_parent_refs())
             
@@ -50,7 +50,7 @@ class FunctionNodeTest(unittest.TestCase):
         """
             Test the generation probabilities
         """
-        for _ in lot_iter(xrange(1000)):
+        for _ in break_ctrlc(xrange(1000)):
             x = self.G.generate()
             self.assertTrue(x.check_generation_probabilities(self.G))
     
@@ -70,7 +70,7 @@ class FunctionNodeTest(unittest.TestCase):
         """
             Test the operation of setting a function node to another. 
         """
-        for _ in lot_iter(xrange(1000)):
+        for _ in break_ctrlc(xrange(1000)):
             x = self.G.generate()
             x0 = copy(x)
             y = self.G.generate()
@@ -88,7 +88,7 @@ class FunctionNodeTest(unittest.TestCase):
         """
             Test how substitution works
         """
-        for _ in lot_iter(xrange(1000)):
+        for _ in break_ctrlc(xrange(1000)):
             x = self.G.generate()
             y, _ = x.sample_subnode()
             oldy = copy(y)

@@ -6,7 +6,7 @@
             python Run.py  | grep "next_(WORD)"
         to just examine one partition
 """
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 
 from LOTlib.Examples.Number.Model import grammar, make_h0, generate_data
 data = generate_data(300)
@@ -28,7 +28,7 @@ class MySampler(PartitionMCMC):
 
 
 pmc = MySampler(grammar, make_h0, data, max_N=10, skip=0) # Initializer is just as for PartitionMCMC
-for h in lot_iter(pmc):
+for h in break_ctrlc(pmc):
     cps = pmc.chains[pmc.chain_idx] # the current partition sampler
 
     # Show the partition and the acceptance temperature

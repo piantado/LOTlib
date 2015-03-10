@@ -12,7 +12,7 @@ from collections import defaultdict
 from time import time
 from numpy import mean, diff
 
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from LOTlib.Miscellaneous import logsumexp, r3, r5
 
 
@@ -62,7 +62,7 @@ def evaluate_sampler(my_sampler, print_every=1000, out_hypotheses=sys.stdout, ou
     visited_at = defaultdict(list)
 
     startt = time()
-    for n, s in lot_iter(enumerate(my_sampler)): # each sample should have an .posterior_score defined
+    for n, s in break_ctrlc(enumerate(my_sampler)): # each sample should have an .posterior_score defined
         if trace: print "#", n, s
 
         visited_at[s].append(n)

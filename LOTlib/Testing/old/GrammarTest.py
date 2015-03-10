@@ -8,7 +8,7 @@ import unittest
 
 from LOTlib.Grammar import *
 from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 import math
 from collections import defaultdict
 from scipy.stats import chisquare
@@ -31,7 +31,7 @@ class GrammarTest(unittest.TestCase):
         rp = RegenerationProposal(self.G)
         numTests = 100
         # Sample 1000 trees from the grammar, and run a chi-squared test for each of them
-        for i in lot_iter(range(numTests)):
+        for i in break_ctrlc(range(numTests)):
             # keep track of expected and actual counts
             # expected_counts = defaultdict(int) # a dictionary whose keys are trees and values are the expected number of times we should be proposing to this tree
             actual_counts = defaultdict(int) # same as expected_counts, but stores the actual number of times we proposed to a given tree

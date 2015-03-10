@@ -16,8 +16,8 @@ import sys
 import numpy
 
 import LOTlib
-from LOTlib import lot_iter
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
+from LOTlib import break_ctrlc
 from LOTlib.Miscellaneous import q, display_option_summary, qq
 from LOTlib.MPI.MPI_map import MPI_unorderedmap, is_master_process
 from LOTlib.Examples.Number.Model import *
@@ -25,7 +25,7 @@ from LOTlib.Examples.Number.Model import *
 
 ## Parse command line options:
 from optparse import OptionParser
-from LOTlib.Visualization.MCMCSummary import TopN
+from LOTlib.MCMCSummary.TopN import TopN
 
 parser = OptionParser()
 parser.add_option("--out",
@@ -88,7 +88,7 @@ def run(data_size):
 
     hyps = TopN(N=options.TOP_COUNT)
     
-    hyps.add(lot_iter(MHSampler(h0, data, options.STEPS, trace=False)))
+    hyps.add(break_ctrlc(MHSampler(h0, data, options.STEPS, trace=False)))
 
     return hyps
 

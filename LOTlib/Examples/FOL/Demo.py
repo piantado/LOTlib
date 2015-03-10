@@ -3,7 +3,7 @@
 An example of inference over first-order logical expressions.
 Here, we take sets of objects and generate quantified descriptions
 """
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
 from Model import *
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
@@ -34,5 +34,5 @@ h0 = LOTHypothesis(grammar, args=['S'])
 
 if __name__ == "__main__":
         
-    for h in lot_iter(MHSampler(h0, data, steps=4000)): # run sampler
+    for h in break_ctrlc(MHSampler(h0, data, steps=4000)): # run sampler
         print h.likelihood, h.prior, h.posterior_score, h

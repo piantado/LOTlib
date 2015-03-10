@@ -96,7 +96,7 @@ def mpirun(d):
     mh_sampler = MHSampler(h0, d.input, options.iters)
     hypotheses = TopN(N=options.N)
 
-    for h in lot_iter(mh_sampler):
+    for h in break_ctrlc(mh_sampler):
         hypotheses.add(h)
     return [h for h in hypotheses.get_all()]
 
@@ -141,9 +141,10 @@ if __name__ == "__main__":
             mh_sampler = MHSampler(h0, d, options.iters)
 
             chain_hypos = TopN(N=options.N)
-            for h in lot_iter(mh_sampler):
+            for h in break_ctrlc(mh_sampler):
                 chain_hypos.add(h)
             hypotheses = hypotheses.union(chain_hypos.get_all())
+
 
     # --------------------------------------------------------------------------------------------------------
     # Save hypotheses

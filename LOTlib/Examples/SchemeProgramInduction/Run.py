@@ -9,8 +9,9 @@ Note:
     much of a gradient to climb on cons, cdr, car
 
 """
-from LOTlib import lot_iter
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
+from LOTlib import break_ctrlc
+from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from Model import *
 
 #=============================================================================================================
@@ -22,7 +23,7 @@ ALPHA = 0.9
 def run():
     """ Standard run function."""
     h0 = SchemeFunction(grammar, ALPHA=ALPHA)
-    for x in lot_iter(MHSampler(h0, data, STEPS)):
+    for x in break_ctrlc(MHSampler(h0, data, STEPS)):
 
         print x.posterior_score, x
         for di in data:
@@ -48,7 +49,7 @@ def scheme_generate():
     """
     ## Generate some and print out unique ones
     seen = set()
-    for i in lot_iter(xrange(10000)):
+    for i in break_ctrlc(xrange(10000)):
         x = grammar.generate('START')
 
         if x not in seen:

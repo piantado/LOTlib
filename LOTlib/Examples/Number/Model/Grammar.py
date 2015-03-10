@@ -7,7 +7,9 @@ from LOTlib.Miscellaneous import q
 # The priors here are somewhat hierarchical by type in generation, tuned to be a little more efficient
 # (but the actual RR prior does not care about these probabilities)
 
-grammar = Grammar(start='WORD')
+grammar = Grammar(start='START')
+
+grammar.add_rule('START', '', ['WORD'], 1.0)
 
 grammar.add_rule('BOOL', 'and_',    ['BOOL', 'BOOL'], 1./3.)
 grammar.add_rule('BOOL', 'or_',     ['BOOL', 'BOOL'], 1./3.)
@@ -18,7 +20,8 @@ grammar.add_rule('BOOL', 'False',   None, 1.0/2.)
 
 # note that this can take basically any types for return values
 grammar.add_rule('WORD', 'if_',    ['BOOL', 'WORD', 'WORD'], 0.5)
-grammar.add_rule('WORD', 'if_',    ['BOOL', 'WORD', q('undef')], 0.5)
+grammar.add_rule('WORD', q('undef'), None, 0.5)
+# grammar.add_rule('WORD', 'if_',    ['BOOL', 'WORD', q('undef')], 0.5)
 # grammar.add_rule('WORD', 'ifU_',    ['BOOL', 'WORD'], 0.5)  # if returning undef if condition not met
 
 grammar.add_rule('BOOL', 'cardinality1_',    ['SET'], 1.0)

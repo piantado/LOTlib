@@ -8,12 +8,11 @@ Note:
     hypothesis.
 
 """
-from LOTlib.Visualization.MCMCSummary import TopN
-
-from LOTlib import lot_iter
+from LOTlib import break_ctrlc
+from LOTlib.Examples.Number.Model import *
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib.Miscellaneous import q, qq
-from LOTlib.Examples.Number.Model import *
+from LOTlib.Visualization.MCMCSummary import TopN
 
 
 LARGE_DATA_SIZE = 10000 # this is what we compute the average LL on
@@ -44,7 +43,7 @@ allhyp = TopN(N=1000)
 
 mh_sampler = MHSampler(h0, data, STEPS, skip=SKIP)
 
-for h in lot_iter(mh_sampler):
+for h in break_ctrlc(mh_sampler):
     if TRACE:
         print q(get_knower_pattern(h)), h.posterior_score, h.compute_prior(), h.compute_likelihood(data), qq(h)
 

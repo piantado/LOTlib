@@ -62,10 +62,9 @@ class InsertDeleteProposal(LOTProposal):
             
             # sample a rule and compute its probability (not under the predicate)            
             r = sample1(replicating_rules)
-            gp = log(r.p) - log(sum([x.p for x in self.grammar.rules[ni.returntype]])) # this is the probability overall in the grammar, not my prob of sampling
-            
+
             # the functionNode we are building
-            fn = r.make_FunctionNodeStub(self, gp, ni.parent) 
+            fn = r.make_FunctionNodeStub(self, ni.parent)
             
             # figure out which arg will be the existing ni
             replicatingindices = filter( lambda i: fn.args[i] == ni.returntype, xrange(len(fn.args)))
@@ -75,11 +74,7 @@ class InsertDeleteProposal(LOTProposal):
             
             ## Now expand the other args, with the right rules in the grammar
             with BVRuleContextManager(self.grammar, fn, recurse_up=True):
-                
-                # fix the fact that ni's generation probabilities may be wrong
-                # TODO: MAY NOT BE NEEDED?
-                ni.recompute_generation_probabilities(self.grammar)
-                
+
                 # and generate the args below
                 for i,a in enumerate(fn.args):
                     if i != replace_i:
@@ -91,7 +86,7 @@ class InsertDeleteProposal(LOTProposal):
             ni.setto(fn)
                         
             # what is the prob mass of the new stuff?
-            new_lp_below =  sum([fn.args[i].log_probability() if (i!=replace_i and isFunctionNode(fn.args[i])) else 0. for i in xrange(len(fn.args))])
+            new_lp_below =  sum([ self.grammar.log_probability(fn.args[i]) if (i!=replace_i and isFunctionNode(fn.args[i])) else 0. for i in xrange(len(fn.args))])
             # What is the new normalizer?
             newZ = newt.sample_node_normalizer(isNotBVAddFunctionNode)
             assert newZ > 0
@@ -129,16 +124,12 @@ class InsertDeleteProposal(LOTProposal):
             before_same_children = sum([x==ni.args[samplei] for x in ni.args ]) # how many are the same after?
 
             # the lp of everything we'd have to create going backwards
-            old_lp_below = sum([ni.args[i].log_probability() if (i!=samplei and isFunctionNode(ni.args[i])) else 0. for i in xrange(len(ni.args))])
+            old_lp_below = sum([ self.grammar.log_probability(ni.args[i]) if (i!=samplei and isFunctionNode(ni.args[i])) else 0. for i in xrange(len(ni.args))])
 
             # and replace it
             ni.args[samplei].parent = ni.parent # update this first ;; TODO: IS THIS NECSESARY?
             ni.setto( ni.args[samplei] ) 
-            
-            # fix the generation probs
-            # TODO: Is this necessary? probably not w/o bound variables
-            ni.recompute_generation_probabilities(self.grammar)
-            
+
             # And compute f/b probs
             newZ = newt.sample_node_normalizer(resampleProbability=isNotBVAddFunctionNode)
             # To go forward, choose the node, and then from all equivalent children
@@ -150,7 +141,7 @@ class InsertDeleteProposal(LOTProposal):
     
 if __name__ == "__main__":
 
-    from LOTlib import lot_iter
+    from LOTlib import break_ctrlc
     #from LOTlib.Examples.Number.Shared import grammar, make_h0, generate_data
     #data = generate_data(300)
 
@@ -164,7 +155,7 @@ if __name__ == "__main__":
      
     #data = generate_data(100)
     h = make_h0(proposal_function=idp) 
-    for h in lot_iter(MHSampler(h, data, 100000)):
+    for h in break_ctrlc(MHSampler(h, data, 100000)):
         print h.posterior_score, h
         
     """

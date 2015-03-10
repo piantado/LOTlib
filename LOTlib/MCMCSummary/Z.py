@@ -9,7 +9,7 @@ class Z(SampleFilter):
     This will take a generator and store the logsumexp of all posterior_scores, perhaps counting only unique ones
 
     z = Z()
-    for x in lot_iter(z(sampler)):
+    for x in break_ctrlc(z(sampler)):
         print x
 
     print z

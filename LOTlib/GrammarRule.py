@@ -62,10 +62,9 @@ class GrammarRule(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def make_FunctionNodeStub(self, grammar, gp, parent):
+    def make_FunctionNodeStub(self, grammar, parent):
         # NOTE: It is VERY important to copy to, or else we end up wtih garbage
-        return FunctionNode(parent, returntype=self.nt, name=self.name, args=copy(self.to),
-                            generation_probability=gp, rule=self)
+        return FunctionNode(parent, returntype=self.nt, name=self.name, args=copy(self.to), rule=self)
 
 
 class BVAddGrammarRule(GrammarRule):
@@ -121,15 +120,13 @@ class BVAddGrammarRule(GrammarRule):
         return BVUseGrammarRule(self.bv_type, self.bv_args,
                                 p=bvp, bv_prefix=self.bv_prefix)
    
-    def make_FunctionNodeStub(self, grammar, gp, parent):
+    def make_FunctionNodeStub(self, grammar, parent):
         """Return a FunctionNode with none of the arguments realized. That's a "stub"
 
         Arguments
         ---------
         d : int
             the current depth
-        gp : float
-            the generation probability
         parent : ?
 
         Note
@@ -140,7 +137,7 @@ class BVAddGrammarRule(GrammarRule):
 
         """
         return BVAddFunctionNode(parent, returntype=self.nt, name=self.name, args=copy(self.to),
-                                 generation_probability=gp, added_rule=self.make_bv_rule(grammar), rule=self)
+                                 added_rule=self.make_bv_rule(grammar), rule=self)
 
 
 class BVUseGrammarRule(GrammarRule):
@@ -154,7 +151,7 @@ class BVUseGrammarRule(GrammarRule):
     def __init__(self, nt, to, p=1.0, bv_prefix=None):
         GrammarRule.__init__(self, nt, 'bv__'+uuid4().hex, to, p, bv_prefix)
 
-    def make_FunctionNodeStub(self, grammar, gp, parent):
+    def make_FunctionNodeStub(self, grammar, parent):
         # NOTE: It is VERY important to copy to, or else we end up wtih garbage
         return BVUseFunctionNode(parent, returntype=self.nt, name=self.name, args=copy(self.to),
-                                 generation_probability=gp, rule=self)
+                                 rule=self)

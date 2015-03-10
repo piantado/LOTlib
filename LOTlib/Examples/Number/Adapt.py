@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
     ## Generate a set of subtrees
     subtrees = set()
-    for h in LOTlib.lot_iter(hypotheses):
+    for h in LOTlib.break_ctrlc(hypotheses):
         for x in h.value: # for each subtree
             for i in xrange(N_SUBTREES_PER_NODE):  #take subtree_multiplier random partial subtrees
                 subtrees.add(   x.random_partial_subtree(p=SUBTREE_P)   )
