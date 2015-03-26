@@ -172,6 +172,10 @@ class GrammarHypothesis(VectorHypothesis):
             Likelihood summed over all outputs, summed over all hypotheses & weighted for each
             hypothesis by posterior score p(h|X).
 
+        Note
+        ----
+            This function is only designed to work with NumberGameHypothesis!
+
         """
         self.update()
         hypotheses = self.hypotheses
