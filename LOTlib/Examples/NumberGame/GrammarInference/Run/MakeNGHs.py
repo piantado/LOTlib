@@ -63,7 +63,7 @@ parser.add_option("-g", "--grammar",
                   help="Which grammar do we use? [mix_grammar | independent_grammar | lot_grammar]")
 parser.add_option("-d", "--data",
                   dest="data", type="string", default="josh_data",
-                  help="Which data do we use? [josh_data | ??]")
+                  help="Which data do we use? [josh_data | filename.p]")
 parser.add_option("-i", "--iters",
                   dest="iters", type="int", default=100000,
                   help="Number of samples to run per chain")
@@ -117,10 +117,10 @@ if __name__ == "__main__":
         grammar = None
 
     # Add more data options . . .
-    if options.data is 'josh':
-        data = josh_data
+    if options.data is 'josh_data':
+        data = import_josh_data()
     else:
-        data = josh_data
+        data = import_pd_data(options.data)
 
     # --------------------------------------------------------------------------------------------------------
     # MCMC sampling

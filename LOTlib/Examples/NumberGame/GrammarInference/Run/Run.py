@@ -46,16 +46,13 @@ Notes
 
 """
 
+import os
 import re
 from optparse import OptionParser
 
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib.MPI.MPI_map import MPI_unorderedmap
 from LOTlib.Examples.NumberGame.GrammarInference.Model import *
-
-
-
-
 
 
 # ============================================================================================================
@@ -68,7 +65,8 @@ def mpirun(d):
     Generate NumberGameHypotheses using MPI.
 
     """
-    grammar_h0 = ParameterHypothesis(grammar, hypotheses, propose_step=.1, propose_n=1)
+    hypotheses = 'X'
+    grammar_h0 = NoConstGrammarHypothesis(grammar, hypotheses, propose_step=.1, propose_n=1)
     mh_grammar_sampler = MHSampler(grammar_h0, data, options.iters)
     mh_grammar_summary = VectorSummary(skip=options.skip, cap=options.cap)
 
@@ -100,10 +98,10 @@ def mpirun(d):
 # The `run` script
 # ============================================================================================================
 
-def run(grammar=lot_grammar, mixture_model=0, data=josh_data,
+def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
         iters=10000, skip=10, cap=100, print_stuff='sgr',
         ngh='out/ngh_100k', hypotheses=None, domain=100, alpha=0.9,
-        mpi=False, chains=5,
+        mpi=False, chains=1,
         pickle_file='', csv_file=''):
     """
     Enumerate some NumberGameHypotheses, then use these to sample some GrammarHypotheses over `data`.
@@ -183,7 +181,7 @@ def run(grammar=lot_grammar, mixture_model=0, data=josh_data,
         # Initialize csv file
         if csv_file:
             mh_grammar_summary.csv_initfiles(csv_file)
-            mh_grammar_summary.csv_compare_model_human(csv_file+'_data_h0.csv', data, grammar_h0)
+            mh_grammar_summary.csv_compare_model_human(csv_file+'_summary.csv', data, grammar_h0)
 
         # Sample GrammarHypotheses!
         for i, gh in enumerate(mh_grammar_summary(mh_grammar_sampler)):
@@ -227,7 +225,7 @@ if __name__ == "__main__":
                       help="Which grammar do we use? [mix_grammar | independent_grammar | lot_grammar]")
     parser.add_option("-d", "--data",
                       dest="data", type="string", default="josh_data",
-                      help="Which data do we use? [josh_data | ??]")
+                      help="Which data do we use? [josh_data | filename.p]")
 
     parser.add_option("-i", "--iters",
                       dest="iters", type="int", default=1000000,
@@ -272,9 +270,9 @@ if __name__ == "__main__":
         grammar = independent_grammar
 
     if options.data is 'josh_data':
-        data = josh_data
+        data = import_josh_data()
     else:
-        data = josh_data
+        data = import_pd_data(options.data)
 
     if options.grammar is 'mix_grammar':
         mix = 1

@@ -1,31 +1,15 @@
 
+"""
+- script to separate held out & training data
+- update command line arg so we can save held-out data to a file, then reload same file in MakeNGHs, Run
 
-# TODO script to separate held out & training data
-# TODO update command line arg so we can save held-out data to a file, then reload same file in MakeNGHs, Run
-
-
-
+"""
 
 
 import csv
+from collections import defaultdict
 from optparse import OptionParser
 from LOTlib.DataAndObjects import FunctionData
-
-
-# ============================================================================================================
-# Parsing command-line options
-
-parser = OptionParser()
-
-parser.add_option("-r", "--ratio",
-                  dest="ratio", type="float", default="0.7",
-                  help="Ratio of training : held-out data.")
-
-parser.add_option("-f", "--filename",
-                  dest="filename", type="string", default="MyData",
-                  help="File name to save to (no extension).")
-
-
 
 
 """
@@ -40,12 +24,13 @@ For each row:
 
 """
 
+
 def csvToFunctionData(filename):
     with open(filename, mode='rb') as f:
         reader = csv.reader(f)
         rows = [row for row in reader]
-        ins = defaultdict()
-        outs = defaultdict()
+        ins = defaultdict(list())
+        outs = defaultdict(list())
 
         # Fill `ins` and `outs` dictionaries
         for row in rows:
@@ -91,3 +76,16 @@ def splitData(filename, ratio=0.7):
     with open(filename+'_hold.csv', mode='wb') as fname:
         functionDataToCSV(fname, data[idx:])
 
+
+if __name__ == "__main__":
+    parser = OptionParser()
+
+    parser.add_option("-r", "--ratio",
+                      dest="ratio", type="float", default="0.7",
+                      help="Ratio of training : held-out data.")
+
+    parser.add_option("-f", "--filename",
+                      dest="filename", type="string", default="MyData",
+                      help="File name to save to (no extension).")
+
+    (options, args) = parser.parse_args()
