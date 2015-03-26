@@ -4,11 +4,11 @@ A simple demo of inference with GrammarHypothesis, VectorSummary, NumberGameHypo
 
 Command-line Args
 -----------------
--p --pickle
-    If there's a value here, pickle VectorSummary.
--csv --csvfile
-    Save csv's to this file.
--ngh --ngh_file
+-P --pickle
+    If true, pickle VectorSummary.
+-C --csv
+    Save csv's to this file (no .csv!!!)
+-f --ngh
     Where's the file with the NumberGameHypotheses?
 
 -g --grammar
@@ -18,9 +18,9 @@ Command-line Args
 
 -i --iters
     Number of samples to run per chain
--sk --skip
+-s --skip
     Collect 1 gh sample every `skip` samples.
--cap --cap
+-c --cap
     VectorSummary will collect this many GrammarHypothesis samples.
 
 -v --verbose
@@ -28,6 +28,10 @@ Command-line Args
 -q --quiet
     Print nothing!
 
+--mpi
+    Do we do MPI? (currently not implemented)
+--chains
+    TODO
 
 Example
 -------
@@ -113,7 +117,7 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
     mixture_model : bool
         Are we using the MixtureGrammarHypothesis
     data : list
-        List of FunctionNodes to use as input/output data.
+        List of FunctionData to use as input/output data.
     ngh : str
         Where is the file we save/load our ngh's to/from?
     iters : int
@@ -141,12 +145,14 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
     # Load NumberGameHypotheses
 
     if hypotheses is None:
+        # In case we want to enumerate hypotheses instead of loading from file
         if 'enum' in ngh:
             hypotheses = []
             for fn in grammar.enumerate(d=int(re.sub('[a-z]', '', ngh))):
                 h = NumberGameHypothesis(grammar=grammar, domain=domain, alpha=alpha)
                 h.set_value(fn)
                 hypotheses.append(h)
+        # Load NumberGameHypotheses
         else:
             f = open(ngh, "rb")
             hypotheses = pickle.load(f)
@@ -159,7 +165,7 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
     # MPI
     if mpi:
         hypotheses = set()
-        hypo_sets = MPI_unorderedmap(mpirun, [[d] for d in (data * chains)])
+        hypo_sets = MPI_unorderedmap(mpirun, data)
         for hypo_set in hypo_sets:
             hypotheses = hypotheses.union(hypo_set)
 
@@ -213,10 +219,10 @@ if __name__ == "__main__":
     parser.add_option("-P", "--pickle",
                       action="store_true", dest="pickle", default=False,
                       help="If there's a value here, pickle VectorSummary.")
-    parser.add_option("-C", "--csvfile",
+    parser.add_option("-C", "--csv",
                       dest="csv_file", type="string", default="out/gh_100k",
                       help="Save csv's to this file.")
-    parser.add_option("-H", "--ngh_file",
+    parser.add_option("-f", "--ngh",
                       dest="ngh_file", type="string", default="out/ngh_100k.p",
                       help="Where's the file with the NumberGameHypotheses?")
 
@@ -224,8 +230,8 @@ if __name__ == "__main__":
                       dest="grammar", type="string", default="lot_grammar",
                       help="Which grammar do we use? [mix_grammar | independent_grammar | lot_grammar]")
     parser.add_option("-d", "--data",
-                      dest="data", type="string", default="josh_data",
-                      help="Which data do we use? [josh_data | filename.p]")
+                      dest="data", type="string", default="josh",
+                      help="Which data do we use? [josh | filename.p]")
 
     parser.add_option("-i", "--iters",
                       dest="iters", type="int", default=1000000,
@@ -253,28 +259,28 @@ if __name__ == "__main__":
 
     # --------------------------------------------------------------------------------------------------------
 
-    path = os.getcwd()
+    path = os.getcwd() + '/'
 
     if options.pickle:
         pickle_file = path + options.csv_file + '.p'
     else:
         pickle_file = ''
 
-    if options.grammar is 'mix_grammar':
+    if options.grammar == 'mix':
         grammar = mix_grammar
-    elif options.grammar is 'independent_grammar':
+    elif options.grammar == 'indep':
         grammar = independent_grammar
-    elif options.grammar is 'lot_grammar':
+    elif options.grammar == 'lot':
         grammar = lot_grammar
     else:
         grammar = independent_grammar
 
-    if options.data is 'josh_data':
+    if options.data == 'josh':
         data = import_josh_data()
     else:
-        data = import_pd_data(options.data)
+        data = import_pd_data(path + options.data)
 
-    if options.grammar is 'mix_grammar':
+    if options.grammar == 'mix':
         mix = 1
     else:
         mix = 0

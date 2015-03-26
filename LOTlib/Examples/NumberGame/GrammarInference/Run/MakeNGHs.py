@@ -5,15 +5,15 @@ Command line args
 -----------------
 -f --fname
     File name to save to (must be .p)
--do --domain
+-o --domain
     Domain for NumberGameHypothesis
 -a --alpha
     Alpha, the noise parameter
 
 -g --grammar
-    Which grammar do we use? [mix_grammar | independent_grammar | lot_grammar]
+    Which grammar do we use? [mix | indep | lot]
 -d --data
-    Domain for NumberGameHypothesis
+    Location of data file
 -i --iters
     Number of samples to run
 -c --chains
@@ -21,16 +21,14 @@ Command line args
 -n
     Only keep top N samples per MPI run (if we're doing MPI), or total (if not MPI)
 
--mcmc
-    Do we do MCMC? [1 | 0]
--mpi
+--mpi
     Do we use MPI? (only if MCMC) [1 | 0]
--enum
+--enum
     How deep to enumerate hypotheses? (only if not MCMC)
 
 Example
 -------
-$ python Demo.py -f out/ngh_lot100k.p -do 100 -a 0.9 -g lot_grammar -d josh_data -i 100000 -c 10 -n 1000 -mcmc -mpi
+$ python Demo.py -f out/ngh_lot100k.p -o 100 -a 0.9 -g lot_grammar -d josh -i 100000 -c 10 -n 1000 -mcmc -mpi
 
 """
 
@@ -51,7 +49,7 @@ parser = OptionParser()
 parser.add_option("-f", "--filename",
                   dest="filename", type="string", default="ngh_default.p",
                   help="File name to save to (must be .p)")
-parser.add_option("-do", "--domain",
+parser.add_option("-o", "--domain",
                   dest="domain", type="int", default=100,
                   help="Domain for NumberGameHypothesis")
 parser.add_option("-a", "--alpha",
@@ -62,22 +60,22 @@ parser.add_option("-g", "--grammar",
                   dest="grammar", type="string", default="mpi-run.pkl",
                   help="Which grammar do we use? [mix_grammar | independent_grammar | lot_grammar]")
 parser.add_option("-d", "--data",
-                  dest="data", type="string", default="josh_data",
-                  help="Which data do we use? [josh_data | filename.p]")
+                  dest="data", type="string", default="josh",
+                  help="Which data do we use? [josh | filename.p]")
 parser.add_option("-i", "--iters",
                   dest="iters", type="int", default=100000,
                   help="Number of samples to run per chain")
 parser.add_option("-c", "--chains",
-                  dest="chains", type="int", default=1000,
+                  dest="chains", type="int", default=1,
                   help="Number of chains to run on each data input")
 parser.add_option("-n",
                   dest="N", type="int", default=1000,
                   help="Only keep top N samples per MPI run (if we're doing MPI), or total (if not MPI)")
 
-parser.add_option("-mpi",
-                  action="store_true", dest="mpi", default=True,
+parser.add_option("--mpi",
+                  action="store_true", dest="mpi", default=False,
                   help="Do we use MPI? (only if MCMC)")
-parser.add_option("-enum",
+parser.add_option("--enum",
                   action="store_true", dest="enum_depth", default=False,
                   help="How deep to enumerate hypotheses? (only if not MCMC)")
 
@@ -107,20 +105,22 @@ def mpirun(d):
 
 if __name__ == "__main__":
 
-    if options.grammar is 'mix':
+    if options.grammar == 'mix':
         grammar = mix_grammar
-    elif options.grammar is 'indep':
+    elif options.grammar == 'indep':
         grammar = independent_grammar
-    elif options.grammar is 'lot':
+    elif options.grammar == 'lot':
         grammar = lot_grammar
     else:
         grammar = None
 
     # Add more data options . . .
-    if options.data is 'josh_data':
+    if options.data == 'josh_data':
         data = import_josh_data()
     else:
-        data = import_pd_data(options.data)
+        import os
+        path = os.getcwd() + '/'
+        data = import_pd_data(path + options.data)
 
     # --------------------------------------------------------------------------------------------------------
     # MCMC sampling
@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
         for d in data * options.chains:
             h0 = NumberGameHypothesis(grammar=grammar, domain=options.domain, alpha=options.alpha)
-            mh_sampler = MHSampler(h0, d, options.iters)
+            mh_sampler = MHSampler(h0, [d], options.iters)
 
             chain_hypos = TopN(N=options.N)
             for h in break_ctrlc(mh_sampler):

@@ -13,8 +13,8 @@ class NumberGameHypothesis(LOTHypothesis):
     Hypotheses evaluate to a subset of integers in [1, domain].
 
     """
-    def __init__(self, grammar, alpha=0.9, domain=100, **kwargs):
-        LOTHypothesis.__init__(self, grammar, args=[], **kwargs)
+    def __init__(self, grammar, value=None, alpha=0.9, domain=100, **kwargs):
+        LOTHypothesis.__init__(self, grammar, value=value, args=[], **kwargs)
         self.alpha = alpha
         self.domain = domain
         self.value_set = None
@@ -25,14 +25,14 @@ class NumberGameHypothesis(LOTHypothesis):
         """
         # Re-compute the FunctionNode `self.value` generation probabilities
         if recompute:
-            self.value.recompute_generation_probabilities(self.grammar)
+            self.grammar.log_probability(self.value)
 
         # Compute this hypothesis prior
         if self.value.count_subnodes() > self.maxnodes:
             self.prior = -Infinity
         else:
             # Compute prior with either RR or not.
-            self.prior = self.value.log_probability() / self.prior_temperature
+            self.prior = self.grammar.log_probability(self.value) / self.prior_temperature
 
         # Don't use this tree if we have 2 constants as children in some subnode OR 2 BV's
         for fn in self.value.subnodes()[1:]:
@@ -109,7 +109,7 @@ class NumberGameHypothesis(LOTHypothesis):
         self.value_set = None
         return LOTHypothesis.compile_function(self)
 
-    def __copy__(self, copy_value=False):
-        return NumberGameHypothesis(self.grammar, alpha=self.alpha, domain=self.domain)
+    def __copy__(self, value=None):
+        return NumberGameHypothesis(self.grammar, value=value, alpha=self.alpha, domain=self.domain)
 
 
