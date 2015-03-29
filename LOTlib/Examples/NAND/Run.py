@@ -13,7 +13,7 @@ import pickle
 from LOTlib import break_ctrlc
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.FiniteBestSet import FiniteBestSet
-from LOTlib.Inference.MetropolisHastings import MHSampler
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from Model import *
 
 

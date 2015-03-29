@@ -10,6 +10,7 @@ from LOTlib.Performance.Evaluation import load_model
 from LOTlib.MPI.MPI_map import MPI_map, get_rank
 from LOTlib.Miscellaneous import q
 
+
 parser = OptionParser()
 parser.add_option("--out", dest="OUT", type="string", help="Output prefix", default="output-Proposals")
 parser.add_option("--samples", dest="SAMPLES", type="int", default=100000, help="Number of samples to run")
@@ -25,7 +26,7 @@ options, _ = parser.parse_args()
 
 # These get defined for each process
 from LOTlib.Performance.Evaluation         import evaluate_sampler
-from LOTlib.Inference.MultipleChainMCMC    import MultipleChainMCMC
+from LOTlib.Inference.Samplers import MultipleChainMCMC
 from LOTlib.Inference.Proposals.MixtureProposal      import MixtureProposal
 from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
 from LOTlib.Inference.Proposals.InsertDeleteProposal import InsertDeleteProposal

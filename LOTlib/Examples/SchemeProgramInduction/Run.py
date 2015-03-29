@@ -9,9 +9,9 @@ Note:
     much of a gradient to climb on cons, cdr, car
 
 """
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib import break_ctrlc
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-from LOTlib.Inference.MetropolisHastings import MHSampler
 from Model import *
 
 #=============================================================================================================

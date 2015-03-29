@@ -53,7 +53,8 @@ def ends_in_(n, d):
 def isprime_(n):
     """Is `n` a prime number?"""
     if n > 1000:
-        raise OverflowError
+        # raise OverflowError
+        return 0
 
     try:
         for a in xrange(2, int(n**0.5)+1):

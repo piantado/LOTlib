@@ -22,7 +22,7 @@ from Utilities import make_h0
 def run():
     from LOTlib import break_ctrlc
     from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
-    from LOTlib.Inference.MetropolisHastings import MHSampler
+    from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
     # mp = MixtureProposal([RegenerationProposal(grammar), InsertDeleteProposal(grammar)] )
     mp = RegenerationProposal(grammar)

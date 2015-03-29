@@ -9,10 +9,11 @@ Note:
 
 """
 from LOTlib import break_ctrlc
-from LOTlib.Inference.MetropolisHastings import MHSampler
-from LOTlib.Miscellaneous import q, qq
 from LOTlib.Examples.Number.Model import *
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
+from LOTlib.Miscellaneous import q, qq
 from LOTlib.Visualization.MCMCSummary import TopN
+
 
 LARGE_DATA_SIZE = 10000 # this is what we compute the average LL on
 DATA_SIZE = 300

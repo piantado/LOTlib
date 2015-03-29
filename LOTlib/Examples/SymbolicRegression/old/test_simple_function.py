@@ -6,15 +6,12 @@
 
 from bvPCFG import *
 from BasicPrimitives import *
-from MetropolisHastings import *
+from LOTlib.Inference.Samplers.MetropolisHastings import *
 from Likelihoods import *
 from FiniteSample import *
 from Miscellaneous import *
 from Lexicon import *
 from Objects import *
-from Hypothesis import *
-
-from random import randint
 
 G = PCFG()
 G.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1.0)

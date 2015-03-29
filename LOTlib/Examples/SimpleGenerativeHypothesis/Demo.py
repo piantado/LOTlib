@@ -7,8 +7,8 @@
  the likelihood of the data. Very very simple.
 
 """
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib import break_ctrlc
-from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Hypotheses.SimpleGenerativeHypothesis import SimpleGenerativeHypothesis
 from Model import *
 

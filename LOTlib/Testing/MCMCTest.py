@@ -2,7 +2,7 @@
     Simple testing for MCMC methods
 """
 
-from TreeTesters import FiniteTreeTester, InfiniteTreeTester
+from TreeTesters import InfiniteTreeTester
 
 
 NSAMPLES = 10000
@@ -41,7 +41,7 @@ class MCMCProposalTest(InfiniteTreeTester):
         from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
         p = RegenerationProposal(self.grammar)
 
-        from LOTlib.Inference.MetropolisHastings import MHSampler
+        from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
         sampler = MHSampler(self.make_h0(proposal_function=p), [], steps=NSAMPLES, skip=SKIP)
 
@@ -60,7 +60,7 @@ class MCMCProposalTest(InfiniteTreeTester):
         p = MixtureProposal([RegenerationProposal(self.grammar),
                              InsertDeleteProposal(self.grammar)])
 
-        from LOTlib.Inference.MetropolisHastings import MHSampler
+        from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
         # Here we plot them, since chisq won't work well with many zeros
         # TODO: Implement a better statistical test
@@ -78,7 +78,7 @@ class MCMCProposalTest(InfiniteTreeTester):
         p = MixtureProposal([RegenerationProposal(self.grammar),
                              InverseInlineProposal(self.grammar)])
 
-        from LOTlib.Inference.MetropolisHastings import MHSampler
+        from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
         # Here we plot them, since chisq won't work well with many zeros
         # TODO: Implement a better statistical test

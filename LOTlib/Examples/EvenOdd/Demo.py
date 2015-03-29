@@ -10,7 +10,7 @@ TODO: RE-WRITE TO USE UTTERANCEDATA
 from LOTlib import break_ctrlc
 from LOTlib.DataAndObjects import FunctionData
 from LOTlib.FunctionNode import cleanFunctionNodeString
-from LOTlib.Inference.MetropolisHastings import MHSampler
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from Model import *
 
 if __name__ == "__main__":

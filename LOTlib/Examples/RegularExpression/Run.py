@@ -4,8 +4,8 @@ Define a new kind of LOTHypothesis, that gives regex strings.
 These have a special interpretation function that compiles differently than straight python eval.
 
 """
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib import break_ctrlc
-from LOTlib.Inference.MetropolisHastings import MHSampler
 from LOTlib.Miscellaneous import qq
 from Model import *
 
