@@ -12,51 +12,6 @@ class SubtreeCopyProposal(LOTProposal):
             Pick a node and copy it somewhere else
     """
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     def propose_tree(self, t, resampleProbability=lambdaOne):
         """
             Propose to a tree, returning the new tree and the prob. of sampling it.
@@ -66,10 +21,39 @@ class SubtreeCopyProposal(LOTProposal):
 
         try:
             # sample a subnode
-            n, lp = newt.sample_subnode(resampleProbability=resampleProbability)
+            n1, lp1 = newt.sample_subnode(resampleProbability=resampleProbability)
+
+            # Now sample something of this type to replace
+            n2, lp2 = newt.sample_subnode(resampleProbability=lambda t: (t.returntype == n1.returntype)*resampleProbability(t) )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         except NodeSamplingException:
             # If we've been given resampleProbability that can't sample
             raise ProposalFailedException
+
+
+
+
+
+
+
+
+
 
         # In the context of the parent, resample n according to the grammar
         # We recurse_up in order to add all the parent's rules

@@ -416,8 +416,8 @@ class FunctionNode(object):
         r = random() * Z # now select a random number (giving a random node)
 
         for t in self:
-            trp = resampleProbability(t)
-            r -= 1.0 * trp
+            trp = float(resampleProbability(t))
+            r -= trp
             if r <= 0:
                 return [t, log(trp) - log(Z)]
 

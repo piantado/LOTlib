@@ -97,6 +97,7 @@ class MHSampler(Sampler):
 
                 self.proposal, fb = self.proposer(self.current_sample)
 
+                # print self.proposal
                 assert self.proposal is not self.current_sample, "*** Proposal cannot be the same as the current sample!"
                 assert self.proposal.value is not self.current_sample.value, "*** Proposal cannot be the same as the current sample!"
 
@@ -110,8 +111,8 @@ class MHSampler(Sampler):
                 cur = (self.current_sample.prior/self.prior_temperature +
                        self.current_sample.likelihood/self.likelihood_temperature)
                 
-                #print "# Current:", cur_s
-                #print "# Proposal:", self.proposal
+                # print "# Current:", self.current_sample
+                # print "# Proposal:", self.proposal
                 
                 if MH_acceptance(cur, prop, fb, acceptance_temperature=self.acceptance_temperature):
                     self.current_sample = self.proposal
