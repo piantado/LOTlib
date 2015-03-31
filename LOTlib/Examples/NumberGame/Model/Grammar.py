@@ -176,13 +176,13 @@ for i in range(1, 101):
 #
 
 lot_grammar = Grammar()
-#### lot_grammar.add_rule('START', '', ['INTERVAL'], 1.)
+lot_grammar.add_rule('START', '', ['INTERVAL'], 1.)
 lot_grammar.add_rule('START', '', ['MATH'], 1.)
 
 # Math rules
 # ----------
 
-#### lot_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'RANGE'], 1.)
+lot_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'RANGE'], 1.)
 lot_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'FULL_RANGE'], 1.)
 lot_grammar.add_rule('FULL_RANGE', 'range_set_', ['1', '100'], 1.)
 lot_grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='EXPR', bv_p=2.)
@@ -192,19 +192,23 @@ lot_grammar.add_rule('EXPR', 'isprime_', ['EXPR'], 1.)
 lot_grammar.add_rule('EXPR', 'ipowf_', ['EXPR', 'EXPR'], .3)
 lot_grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 1.)
 lot_grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1.)
-# lot_grammar.add_rule('EXPR', 'ends_in_', ['EXPR', 'EXPR'], 1.)
+lot_grammar.add_rule('EXPR', 'ends_in_', ['EXPR', 'EXPR'], 1.)
 
 lot_grammar.add_rule('EXPR', '', ['OPCONST'], 20.)
 for i in range(1, 11):
-    lot_grammar.add_rule('OPCONST', '', [str(i)], 2.)
+    lot_grammar.add_rule('OPCONST', '', [str(i)], 3.)
+for i in [11, 12, 13, 14, 15]:
+    lot_grammar.add_rule('OPCONST', '', [str(i)], 1.)
 
 # Interval rules
 # --------------
-
 lot_grammar.add_rule('INTERVAL', '', ['RANGE'], 1.)
 lot_grammar.add_rule('RANGE', 'range_set_', ['CONST', 'CONST'], 1.)
 for i in range(1, 101):
-    lot_grammar.add_rule('CONST', '', [str(i)], 1.)
+    if i in [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
+        lot_grammar.add_rule('CONST', '', [str(i)], 10.)
+    else:
+        lot_grammar.add_rule('CONST', '', [str(i)], 1.)
 
 
 # bayesian data analysis  +  probabilistic, structured LOT model
