@@ -151,6 +151,7 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
             for fn in grammar.enumerate(d=int(re.sub('[a-z]', '', ngh))):
                 h = NumberGameHypothesis(grammar=grammar, domain=domain, alpha=alpha)
                 h.set_value(fn)
+                h.compute_prior()
                 hypotheses.append(h)
         # Load NumberGameHypotheses
         else:
