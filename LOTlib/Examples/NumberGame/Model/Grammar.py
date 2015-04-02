@@ -120,16 +120,16 @@ for i in range(1, 101):
 #  * With GrammarHypothesis, we can sample much more intricate models than the mixture model.
 #  * However, we also will have like 5000 rules to choose from now . . .
 #
-#
 
 independent_grammar = Grammar()
 
+# Mixture params
+# --------------
+independent_grammar.add_rule('START', '', ['INTERVAL'], 1.)
+independent_grammar.add_rule('START', '', ['MATH'], 1.)
 
 # Math rules
 # ----------
-
-independent_grammar.add_rule('START', '', ['INTERVAL'], 1.)
-independent_grammar.add_rule('START', '', ['MATH'], 1.)
 independent_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'DOMAIN_RANGE'], 1.)
 independent_grammar.add_rule('DOMAIN_RANGE', 'range_set_', ['1', '100'], 1.)
 independent_grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='X', bv_p=1.)
@@ -152,7 +152,6 @@ for i in range(0, 10):
 
 # Interval Rules
 # --------------
-
 independent_grammar.add_rule('INTERVAL', 'range_set_', ['CONST', 'CONST'], 1.)
 for i in range(1, 101):
     independent_grammar.add_rule('CONST', '', [str(i)], 1.)
