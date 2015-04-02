@@ -41,11 +41,14 @@ class NumberGameHypothesis(LOTHypothesis):
             # if all([arg.name == '' and len(arg.args)>1 and isinstance(arg.args[0], FunctionNode)
             #         and arg.args[0].returntype=='OPCONST' for arg in fn.argFunctionNodes()]) \
             #         or (all([isinstance(arg, BVUseFunctionNode) for arg in fn.argFunctionNodes()]) and len(args) > 1):
-            if (all([(arg.returntype=='OPCONST') for arg in args])
-                    or all([isinstance(arg, BVUseFunctionNode) for arg in fn.argFunctionNodes()])) \
-                    and len(args) > 1:
+
+            if (all([(arg.returntype=='OPCONST') for arg in args])                                                      # reject if all OPCONST children
+                    or all([isinstance(arg, BVUseFunctionNode) for arg in fn.argFunctionNodes()])) and len(args) > 1:   # OR if 2 BV children
                 self.prior = -Infinity
                 break
+
+        if len(self()) == 0:
+            self.prior = -Infinity
 
         self.update_posterior()
         return self.prior
@@ -96,11 +99,12 @@ class NumberGameHypothesis(LOTHypothesis):
             except TooBigException:
                 value_set = set()
 
-            # Restrict our concept to being within our domain
             if isinstance(value_set, set):
-                value_set = [x for x in value_set if x <= self.domain]
+                # Restrict our concept to being within our domain
+                value_set = [x for x in value_set if (1 <= x <= self.domain)]
             else:
-                value_set = set()   # Sometimes self() returns None
+                # Sometimes self() returns None
+                value_set = set()
             self.value_set = value_set
 
         return self.value_set
