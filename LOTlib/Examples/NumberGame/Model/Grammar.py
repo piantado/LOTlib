@@ -175,12 +175,17 @@ for i in range(1, 101):
 #
 
 lot_grammar = Grammar()
-lot_grammar.add_rule('START', '', ['INTERVAL'], 1.)
-lot_grammar.add_rule('START', '', ['MATH'], 1.)
+lot_grammar.add_rule('START', '', ['SET'], 1.)
+
+lot_grammar.add_rule('SET', 'setdifference_', ['SET', 'SET'], 1.)
+lot_grammar.add_rule('SET', 'intersection_', ['SET', 'SET'], 1.)
+lot_grammar.add_rule('SET', 'union_', ['SET', 'SET'], 1.)
+
+lot_grammar.add_rule('SET', '', ['INTERVAL'], 1.)
+lot_grammar.add_rule('SET', '', ['MATH'], 1.)
 
 # Math rules
 # ----------
-
 lot_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'RANGE'], 1.)
 lot_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'FULL_RANGE'], 1.)
 lot_grammar.add_rule('FULL_RANGE', 'range_set_', ['1', '100'], 1.)
