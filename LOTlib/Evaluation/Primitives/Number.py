@@ -62,7 +62,7 @@ def contains_digit_(n, d):
 @primitive
 def isprime_(n):
     """Is `n` a prime number?"""
-    if n > 1000:
+    if n > 1000 or str(n) == 'nan':
         # raise OverflowError
         return 0
 
@@ -71,7 +71,6 @@ def isprime_(n):
             if n % a == 0:
                 return 0
     except (ValueError, MemoryError):
-        print 'N = ', n
         raise OverflowError
 
     return n
