@@ -144,11 +144,13 @@ independent_grammar.add_rule('EXPR', 'pow2n_d32_', ['X'], 1.)
 register_primitive(lambda x: x if x in (2, 4, 8, 16, 32, 37, 64) else 0, name='pow2n_u37_')
 independent_grammar.add_rule('EXPR', 'pow2n_u37_', ['X'], 1.)
 for i in range(2, 13):
-    independent_grammar.add_rule('EXPR', 'times_', ['X', str(i)], 1.)
+    if not i==10:
+        independent_grammar.add_rule('EXPR', 'times_', ['X', str(i)], 1.)
 for i in range(2, 11):
     independent_grammar.add_rule('EXPR', 'ipowf_', [str(i), 'X'], 1.)
 for i in range(0, 10):
     independent_grammar.add_rule('EXPR', 'ends_in_', ['X', str(i)], 1.)
+    independent_grammar.add_rule('EXPR', 'contains_digit_', ['X', str(i)], 1.)
 
 # Interval Rules
 # --------------
@@ -177,9 +179,9 @@ for i in range(1, 101):
 lot_grammar = Grammar()
 lot_grammar.add_rule('START', '', ['SET'], 1.)
 
-lot_grammar.add_rule('SET', 'setdifference_', ['SET', 'SET'], 1.)
-lot_grammar.add_rule('SET', 'intersection_', ['SET', 'SET'], 1.)
-lot_grammar.add_rule('SET', 'union_', ['SET', 'SET'], 1.)
+lot_grammar.add_rule('SET', 'setdifference_', ['SET', 'SET'], .1)
+lot_grammar.add_rule('SET', 'intersection_', ['SET', 'SET'], .1)
+lot_grammar.add_rule('SET', 'union_', ['SET', 'SET'], .1)
 
 lot_grammar.add_rule('SET', '', ['INTERVAL'], 1.)
 lot_grammar.add_rule('SET', '', ['MATH'], 1.)
@@ -197,6 +199,7 @@ lot_grammar.add_rule('EXPR', 'ipowf_', ['EXPR', 'EXPR'], .3)
 lot_grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 1.)
 lot_grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1.)
 lot_grammar.add_rule('EXPR', 'ends_in_', ['EXPR', 'EXPR'], 1.)
+lot_grammar.add_rule('EXPR', 'contains_digit_', ['EXPR', 'EXPR'], 1.)
 
 lot_grammar.add_rule('EXPR', '', ['OPCONST'], 20.)
 for i in range(1, 11):
