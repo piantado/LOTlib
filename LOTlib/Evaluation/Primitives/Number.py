@@ -52,7 +52,8 @@ def ends_in_(n, d):
 @primitive
 def contains_digit_(n, d):
     """Return `n` if it contains digit `d`, 0 otherwise. E.g. contains_digit_(86, 8) == 86"""
-
+    if str(n) == 'nan':
+        return 0
     if d in [int(i) for i in set(str(n))]:
         return n
     else:
