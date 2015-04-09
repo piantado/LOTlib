@@ -94,8 +94,20 @@ def mpirun(d):
     mh_sampler = MHSampler(h0, d.input, options.iters)
     hypotheses = TopN(N=options.N)
 
+    # This is a dict so we don't add duplicate hypotheses sets, e.g. h1() == [4],  h2() == [4]
+    h_sets = {}
+
     for h in break_ctrlc(mh_sampler):
-        hypotheses.add(h)
+        h_set = str(h())
+        if h_set in h_sets:
+            if h.prior > h_sets[h_set].prior:
+                hypotheses.remove(h_sets[h_set])
+                h_sets[h_set] = h
+                hypotheses.add(h)
+        else:
+            h_sets[h_set] = h
+            hypotheses.add(h)
+
     return [h for h in hypotheses.get_all()]
 
 
