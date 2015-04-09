@@ -58,7 +58,7 @@ from LOTlib.Examples.NumberGame.GrammarInference.Model import *
 
 mpi_number = 0
 
-def mpirun(fname, data, hypotheses, grammar, iters, skip, cap, pickle_bool):
+def mpirun(fname, data, hypotheses, grammar, iters, skip, cap, pickle_bool, csv_compare_model):
     """
     Generate NumberGameHypotheses using MPI.
 
@@ -76,11 +76,12 @@ def mpirun(fname, data, hypotheses, grammar, iters, skip, cap, pickle_bool):
 
     # Initialize csv's
     mh_grammar_summary.csv_initfiles(fname)
-    mh_grammar_summary.csv_compare_model_human(fname+'_data_h0.csv', data, grammar_h0)
+    if csv_compare_model:
+        mh_grammar_summary.csv_compare_model_human(fname+'_data_h0.csv', data, grammar_h0)
 
     # Sample GrammarHypotheses!
     for gh in mh_grammar_summary(mh_grammar_sampler):
-        mh_grammar_summary.csv_appendfiles(fname, data)
+        mh_grammar_summary.csv_appendfiles(fname, data, csv_compare_model)
 
     if pickle_bool:
         mh_grammar_summary.pickle_summary(filename=fname + '.p')
@@ -94,7 +95,7 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
         iters=10000, skip=10, cap=100, print_stuff='sgr',
         ngh='out/ngh_100k', hypotheses=None, domain=100, alpha=0.9,
         mpi=False, chains=1,
-        pickle_file='', csv_file=''):
+        pickle_file='', csv_file='', csv_compare_model=False):
     """
     Enumerate some NumberGameHypotheses, then use these to sample some GrammarHypotheses over `data`.
 
@@ -120,6 +121,8 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
         If we're pickling, this is the file name to save to.
     csv_file : str
         If saving to csv, this is the file name to save to (don't include .csv!).
+    csv_compare_model : bool
+        Do we save model comparison (regression) plots as we iterate? These take ~15 minutes to save.
 
     """
     # --------------------------------------------------------------------------------------------------------
@@ -154,7 +157,7 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
     # MPI
     if mpi:
         hypotheses = set()
-        mpi_func = lambda d: mpirun(csv_file, d, hypotheses, grammar, iters, skip, cap, bool(pickle_file))
+        mpi_func = lambda d: mpirun(csv_file, d, hypotheses, grammar, iters, skip, cap, bool(pickle_file), csv_compare_model)
         mpi_runs = MPI_unorderedmap(mpi_func, [data]*chains)
         for mpi_run in mpi_runs:
             pass
@@ -177,14 +180,15 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
         # Initialize csv file
         if csv_file:
             mh_grammar_summary.csv_initfiles(csv_file)
-            mh_grammar_summary.csv_compare_model_human(csv_file+'_summary.csv', data, grammar_h0)
+            if csv_compare_model:
+                mh_grammar_summary.csv_compare_model_human(csv_file+'_summary.csv', data, grammar_h0)
 
         # Sample GrammarHypotheses!
         for i, gh in enumerate(mh_grammar_summary(mh_grammar_sampler)):
 
             # Save to csv every 200 samples from 0 to 10k, then every 1000
             if csv_file:
-                mh_grammar_summary.csv_appendfiles(csv_file, data)
+                mh_grammar_summary.csv_appendfiles(csv_file, data, csv_compare_model)
 
             # Print every N/20 samples
             if 's' in print_stuff:
@@ -217,6 +221,8 @@ if __name__ == "__main__":
     parser.add_option("-f", "--ngh",
                       dest="ngh_file", type="string", default="out/ngh_100k.p",
                       help="Where's the file with the NumberGameHypotheses?")
+    parser.add_option("--csv-compare", action="store_true", dest="compare", default=False,
+                      help="Do we use save regresion plots as we go?")
 
     parser.add_option("-g", "--grammar",
                       dest="grammar", type="string", default="lot_grammar",
@@ -290,5 +296,5 @@ if __name__ == "__main__":
         iters=options.iters, skip=options.skip, cap=options.cap,
         ngh=options.ngh_file,
         print_stuff=print_stuff,
-        pickle_file=pickle_file, csv_file=path+options.csv_file,
+        pickle_file=pickle_file, csv_file=path+options.csv_file, csv_compare_model=options.compare,
         mpi=options.mpi, chains=options.chains)

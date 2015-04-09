@@ -267,7 +267,7 @@ class VectorSummary(MCMCSummary):
             writer = csv.writer(w)
             writer.writerow(['i', 'input', 'output', 'human p', 'model p'])
 
-    def csv_appendfiles(self, filename, data):
+    def csv_appendfiles(self, filename, data, compare_model=False):
         """
         Append Bayes data to `_bayes` file, values to `_values` file, and MAP hypothesis human
         correlation data to `_data_MAP` file.
@@ -285,6 +285,7 @@ class VectorSummary(MCMCSummary):
                 if self.sample_count:
                     writer.writerow([i, gh.prior, gh.likelihood, gh.posterior_score])
 
-        if (i % 30000) is 0:
+        if (i > 0) and ((i % (self.cap/5)) == 0):
             MAP_gh = sorted(self.samples, key=(lambda x: -x.posterior_score))[0]
-            self.csv_compare_model_human(filename+'_data_MAP.csv', data, MAP_gh)
+            if compare_model:
+                self.csv_compare_model_human(filename+'_data_MAP.csv', data, MAP_gh)
