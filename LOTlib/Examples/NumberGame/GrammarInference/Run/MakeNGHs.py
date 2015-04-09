@@ -92,7 +92,8 @@ def mpirun(d):
     """
     h0 = NumberGameHypothesis(grammar=grammar, domain=100, alpha=0.9)
     mh_sampler = MHSampler(h0, d.input, options.iters)
-    hypotheses = TopN(N=options.N)
+    # hypotheses = TopN(N=options.N)
+    hypotheses = set()
 
     # This is a dict so we don't add duplicate hypotheses sets, e.g. h1() == [4],  h2() == [4]
     h_sets = {}
@@ -108,7 +109,8 @@ def mpirun(d):
             h_sets[h_set] = h
             hypotheses.add(h)
 
-    return [h for h in hypotheses.get_all()]
+    top1000 = sorted(hypotheses, key=lambda h: h.posterior_score)
+    return top1000
 
 
 # ============================================================================================================
@@ -156,7 +158,6 @@ if __name__ == "__main__":
             for h in break_ctrlc(mh_sampler):
                 chain_hypos.add(h)
             hypotheses = hypotheses.union(chain_hypos.get_all())
-
 
     # --------------------------------------------------------------------------------------------------------
     # Save hypotheses
