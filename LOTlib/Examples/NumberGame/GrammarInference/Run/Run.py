@@ -29,9 +29,9 @@ Command-line Args
     Print nothing!
 
 --mpi
-    Do we do MPI? (currently not implemented)
+    Do we do MPI?
 --chains
-    TODO
+    How many individual chains to run in MPI?
 
 Example
 -------
@@ -40,12 +40,6 @@ $ python Run.py -q -P -C out/gh_100k -H enum7 --domain=100 --alpha=0.9 -g indepe
 
 # LOT model
 $ python Run.py -q -P -C out/gh_100k -H out/ngh_100k.p -g lot_grammar -d josh_data -i 100000 -s 100 -c 1000
-
-Notes
------
-* MPI won't work right now
-    - fix mpirun
-    - make so csv file adds _# to end of filename
 
 
 """
@@ -62,40 +56,34 @@ from LOTlib.Examples.NumberGame.GrammarInference.Model import *
 # ============================================================================================================
 # MPI method
 
-# TODO: make it so csv file adds _(n+1) to the end of whatever file name we're using
-# TODO: should this be inside run()?
-def mpirun(d):
+mpi_number = 0
+
+def mpirun(fname, data, hypotheses, grammar, iters, skip, cap, pickle_bool):
     """
     Generate NumberGameHypotheses using MPI.
 
     """
-    hypotheses = 'X'
+    # Assign this chain an mpi number
+    global mpi_number
+    this_n = mpi_number
+    mpi_number += 1
+    fname = fname + str(this_n)
+
+    # Initial GH
     grammar_h0 = NoConstGrammarHypothesis(grammar, hypotheses, propose_step=.1, propose_n=1)
-    mh_grammar_sampler = MHSampler(grammar_h0, data, options.iters)
-    mh_grammar_summary = VectorSummary(skip=options.skip, cap=options.cap)
+    mh_grammar_sampler = MHSampler(grammar_h0, data, iters)
+    mh_grammar_summary = VectorSummary(skip=skip, cap=cap)
 
-    # Print all GrammarRules in grammar with corresponding value index
-    if 'r' in print_stuff:
-        print '='*100, '\nGrammarRules:'
-        for idx in grammar_h0.propose_idxs:
-            print idx, '\t|  ', grammar_h0.rules[idx]
-
-    if 's' in print_stuff:
-        print '^*'*60, '\nGenerating GrammarHypothesis Samples\n', '^*'*60
-
-    # Initialize csv file
-    csv_file = options.csv_file
-    if csv_file:
-        mh_grammar_summary.csv_initfiles(csv_file)
-        mh_grammar_summary.csv_compare_model_human(csv_file+'_data_h0.csv', data, grammar_h0)
+    # Initialize csv's
+    mh_grammar_summary.csv_initfiles(fname)
+    mh_grammar_summary.csv_compare_model_human(fname+'_data_h0.csv', data, grammar_h0)
 
     # Sample GrammarHypotheses!
     for gh in mh_grammar_summary(mh_grammar_sampler):
-        if csv_file:
-            mh_grammar_summary.csv_appendfiles(csv_file, data)
+        mh_grammar_summary.csv_appendfiles(fname, data)
 
-    if pickle_file:
-        mh_grammar_summary.pickle_summary(filename=pickle_file)
+    if pickle_bool:
+        mh_grammar_summary.pickle_summary(filename=fname + '.p')
 
 
 # ============================================================================================================
@@ -166,9 +154,10 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
     # MPI
     if mpi:
         hypotheses = set()
-        hypo_sets = MPI_unorderedmap(mpirun, data)
-        for hypo_set in hypo_sets:
-            hypotheses = hypotheses.union(hypo_set)
+        mpi_func = lambda d: mpirun(csv_file, d, hypotheses, grammar, iters, skip, cap, bool(pickle_file))
+        mpi_runs = MPI_unorderedmap(mpi_func, [data]*chains)
+        for mpi_run in mpi_runs:
+            pass
 
     # No MPI
     else:

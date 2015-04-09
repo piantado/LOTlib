@@ -3,8 +3,8 @@
 #
 # C = get rule counts for each grammar rule, for each hypothesis    |hypotheses| x |rules|
 # for each FunctionData:
-# Li = for FuncData i, for ea hypothesis, get likelihood of ea. input in concept   |hypotheses| x 1
-# Ri = for FuncData i, for ea hypothesis, is each output in the concept (1/0)  |hypotheses| x |output|
+# Li = for FuncData i, for ea hypothesis, get likelihood of i.input in concept   |hypotheses| x 1
+# Ri = for FuncData i, for ea hypothesis, is each i.output in the concept (1/0)  |hypotheses| x |output|
 
 
 # compute_likelihood
