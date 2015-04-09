@@ -70,21 +70,21 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
         """
         self.H = [h() for h in self.hypotheses]
 
-    def init_L(self, d):
+    def init_L(self, d, d_key):
         """
         Initialize `self.L` dictionary.
 
         """
-        self.L[d] = np.array([h.compute_likelihood(d.input) for h in self.hypotheses])  # For ea. hypo.
+        self.L[d_key] = np.array([h.compute_likelihood(d.input) for h in self.hypotheses])  # For ea. hypo.
 
-    def init_R(self, d):
+    def init_R(self, d, d_key):
         """
         Initialize `self.R` dictionary.
 
         """
-        self.R[d] = np.zeros((len(self.hypotheses), len(d.output.keys())))
+        self.R[d_key] = np.zeros((len(self.hypotheses), len(d.output.keys())))
         for m, o in enumerate(d.output.keys()):
-            self.R[d][:, m] = [int(o in h_concept) for h_concept in self.H]  # For ea. hypo.
+            self.R[d_key][:, m] = [int(o in h_concept) for h_concept in self.H]  # For ea. hypo.
 
     def compute_likelihood(self, data, update_post=True, **kwargs):
         """
@@ -92,11 +92,11 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
 
         """
         # Initialize unfilled values for L[data] & R[data]
-        for d in data:
-            if d not in self.L:
-                self.init_L(d)
-            if d not in self.R:
-                self.init_R(d)
+        for d_key, d in enumerate(data):
+            if d_key not in self.L:
+                self.init_L(d, d_key)
+            if d_key not in self.R:
+                self.init_R(d, d_key)
 
         # The following must be computed for this specific GrammarHypothesis
         # ------------------------------------------------------------------
@@ -104,15 +104,15 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
         P = np.dot(self.C, x)               # prior for each hypothesis
         likelihood = 0.0
 
-        for d in data:
-            posteriors = self.L[d] + P
+        for d_key, d in enumerate(data):
+            posteriors = self.L[d_key] + P
             Z = logsumexp(posteriors)
             w = posteriors - Z              # weights for each hypothesis
 
             # Compute likelihood of producing same output (yes/no) as data
             for m, o in enumerate(d.output.keys()):
                 # col `m` of boolean matrix `R[i]` weighted by `w`  -- TODO could this be logsumexp?
-                p = log((np.exp(w) * self.R[d][:, m]).sum())
+                p = log((np.exp(w) * self.R[d_key][:, m]).sum())
 
                 # NOTE: with really small grammars sometimes we get p > 0
                 if p >= 0:
