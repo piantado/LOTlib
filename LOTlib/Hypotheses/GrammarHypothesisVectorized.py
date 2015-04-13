@@ -91,13 +91,6 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
         Compute the likelihood of producing human data, given:  H (self.hypotheses)  &  x (self.value)
 
         """
-        # Initialize unfilled values for L[data] & R[data]
-        for d_key, d in enumerate(data):
-            if d_key not in self.L:
-                self.init_L(d, d_key)
-            if d_key not in self.R:
-                self.init_R(d, d_key)
-
         # The following must be computed for this specific GrammarHypothesis
         # ------------------------------------------------------------------
         x = self.normalized_value()         # vector of rule probabilites
@@ -105,13 +98,19 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
         likelihood = 0.0
 
         for d_key, d in enumerate(data):
+            # Initialize unfilled values for L[data] & R[data]
+            if d_key not in self.L:
+                self.init_L(d, d_key)
+            if d_key not in self.R:
+                self.init_R(d, d_key)
+
             posteriors = self.L[d_key] + P
             Z = logsumexp(posteriors)
             w = posteriors - Z              # weights for each hypothesis
 
             # Compute likelihood of producing same output (yes/no) as data
             for m, o in enumerate(d.output.keys()):
-                # col `m` of boolean matrix `R[i]` weighted by `w`  -- TODO could this be logsumexp?
+                # col `m` of boolean matrix `R[i]` weighted by `w`
                 p = log((np.exp(w) * self.R[d_key][:, m]).sum())
 
                 # NOTE: with really small grammars sometimes we get p > 0
