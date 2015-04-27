@@ -276,16 +276,14 @@ class VectorSummary(MCMCSummary):
         i = self.count
         gh = self.samples[-1]
 
-        if (i < 10000 and i % 100 is 0) or (i % 1000 is 0):
-            with open(filename+'_values.csv', 'a') as w:
-                writer = csv.writer(w)
-                writer.writerows([[i, r.nt, r.name, str(r.to), gh.value[j]] for j,r in enumerate(gh.rules)])
-            with open(filename+'_bayes.csv', 'a') as w:
-                writer = csv.writer(w)
-                if self.sample_count:
-                    writer.writerow([i, gh.prior, gh.likelihood, gh.posterior_score])
+        with open(filename+'_values.csv', 'a') as w:
+            writer = csv.writer(w)
+            writer.writerows([[i, r.nt, r.name, str(r.to), gh.value[j]] for j,r in enumerate(gh.rules)])
+        with open(filename+'_bayes.csv', 'a') as w:
+            writer = csv.writer(w)
+            if self.sample_count:
+                writer.writerow([i, gh.prior, gh.likelihood, gh.posterior_score])
 
-        if (i > 0) and ((i % (self.cap/5)) == 0):
+        if compare_model:
             MAP_gh = sorted(self.samples, key=(lambda x: -x.posterior_score))[0]
-            if compare_model:
-                self.csv_compare_model_human(filename+'_data_MAP.csv', data, MAP_gh)
+            self.csv_compare_model_human(filename+'_data_MAP.csv', data, MAP_gh)
