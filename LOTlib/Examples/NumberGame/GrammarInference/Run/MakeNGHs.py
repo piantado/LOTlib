@@ -12,8 +12,11 @@ Command line args
 
 -g --grammar
     Which grammar do we use? [mix | indep | lot]
+--grammar-scale
+    Do we use a gamma to semi-randomly init grammar rule probs?
 -d --data
     Location of data file
+
 -i --iters
     Number of samples to run
 -c --chains
@@ -59,9 +62,14 @@ parser.add_option("-a", "--alpha",
 parser.add_option("-g", "--grammar",
                   dest="grammar", type="string", default="mpi-run.pkl",
                   help="Which grammar do we use? [mix_grammar | independent_grammar | lot_grammar]")
+parser.add_option("--grammar-scale",
+                  dest="grammar_scale", type="int", default=0,
+                  help="If >0, use a gamma dist. for each rule in the grammar w/ specified scale & " +
+                       "shape equal to initial rule prob.")
 parser.add_option("-d", "--data",
                   dest="data", type="string", default="josh",
                   help="Which data do we use? [josh | filename.p]")
+
 parser.add_option("-i", "--iters",
                   dest="iters", type="int", default=100000,
                   help="Number of samples to run per chain")
@@ -90,7 +98,11 @@ def mpirun(d):
     Generate NumberGameHypotheses using MPI.
 
     """
-    h0 = NumberGameHypothesis(grammar=grammar, domain=100, alpha=0.9)
+    if options.grammar_scale:
+        grammar_ = grammar_gamma(grammar, options.grammar_scale)
+    else:
+        grammar_ = grammar
+    h0 = NumberGameHypothesis(grammar=grammar_, domain=100, alpha=0.9)
     mh_sampler = MHSampler(h0, d.input, options.iters)
     # hypotheses = TopN(N=options.N)
     hypotheses = set()
@@ -109,7 +121,7 @@ def mpirun(d):
             h_sets[h_set] = h
             hypotheses.add(h)
 
-    top1000 = sorted(hypotheses, key=lambda h: h.posterior_score)
+    top1000 = sorted(hypotheses, key=lambda h: -h.posterior_score)[0:1000]
     return top1000
 
 
@@ -126,7 +138,7 @@ if __name__ == "__main__":
     elif options.grammar == 'lot':
         grammar = lot_grammar
     else:
-        grammar = None
+        grammar = independent_grammar
 
     # Add more data options . . .
     if options.data == 'josh_data':
@@ -149,6 +161,9 @@ if __name__ == "__main__":
     # No MPI
     else:
         hypotheses = set()
+
+        if options.grammar_scale:
+            grammar = grammar_gamma(grammar, options.grammar_scale)
 
         for d in data * options.chains:
             h0 = NumberGameHypothesis(grammar=grammar, domain=options.domain, alpha=options.alpha)

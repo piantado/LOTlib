@@ -213,18 +213,25 @@ lot_grammar.add_rule('INTERVAL', '', ['RANGE'], 1.)
 lot_grammar.add_rule('RANGE', 'range_set_', ['CONST', 'CONST'], 1.)
 for i in range(1, 101):
     if i in [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
-        lot_grammar.add_rule('CONST', '', [str(i)], 10.)
+        lot_grammar.add_rule('CONST', '', [str(i)], 5.)
     else:
         lot_grammar.add_rule('CONST', '', [str(i)], 1.)
 
 
-# bayesian data analysis  +  probabilistic, structured LOT model
-# fitting priors in LOT models... what's new is we're doing a BDA that can recover plausible priors for LOT
-#  models
 
-# theres other work in psychophysics that tries to recover / infer priors (things like 'what are your
-# priors on direction of motion' or what are your priors on speed?') draws on classic structured AI
-# approaches, combined with cool data analysis that can pull out the priors
-# ==> from here, you can do cool things with these structured models to suppose whats really happening
+import copy
+import numpy as np
+
+def grammar_gamma(grammar, scale=1.0):
+    grammar = copy.copy(grammar)
+    for r in grammar.rules:
+        r.p = np.random.gamma(r.p, scale)
+    return grammar
+
+
+
+
+
+
 
 

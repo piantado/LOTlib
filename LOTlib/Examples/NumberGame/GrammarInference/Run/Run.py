@@ -10,9 +10,13 @@ Command-line Args
     Save csv's to this file (no .csv!!!)
 -f --ngh
     Where's the file with the NumberGameHypotheses?
+--csv-compare
+    Do we save the regression plots, and if so, how many?
 
 -g --grammar
     Which grammar do we use? [mix_grammar | independent_grammar | lot_grammar]
+--grammar-scale
+    Do we use a gamma to semi-randomly init grammar rule probs?
 -d --data
     Which data do we use? [josh_data | ??]
 
@@ -67,7 +71,7 @@ def mpirun(fname, data, hypotheses, grammar, iters, skip, cap, pickle_bool, csv_
     global mpi_number
     this_n = mpi_number
     mpi_number += 1
-    fname = fname + str(this_n)
+    fname += str(this_n)
 
     # Initial GH
     grammar_h0 = NoConstGrammarHypothesis(grammar, hypotheses, propose_step=.1, propose_n=1)
@@ -81,7 +85,8 @@ def mpirun(fname, data, hypotheses, grammar, iters, skip, cap, pickle_bool, csv_
 
     # Sample GrammarHypotheses!
     for gh in mh_grammar_summary(mh_grammar_sampler):
-        mh_grammar_summary.csv_appendfiles(fname, data, csv_compare_model)
+        if (i < 10000 and i % 100 is 0) or (i % 1000 is 0):
+            mh_grammar_summary.csv_appendfiles(fname, data, csv_compare_model)
 
     if pickle_bool:
         mh_grammar_summary.pickle_summary(filename=fname + '.p')
@@ -121,7 +126,7 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
         If we're pickling, this is the file name to save to.
     csv_file : str
         If saving to csv, this is the file name to save to (don't include .csv!).
-    csv_compare_model : bool
+    csv_compare_model : int
         Do we save model comparison (regression) plots as we iterate? These take ~15 minutes to save.
 
     """
@@ -188,7 +193,11 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
 
             # Save to csv every 200 samples from 0 to 10k, then every 1000
             if csv_file:
-                mh_grammar_summary.csv_appendfiles(csv_file, data, csv_compare_model)
+                if (i < 10000 and i % 200 == 0) or (i % 1000 == 0):
+                    if csv_compare_model and (i % (iters / csv_compare_model) == 0):
+                        mh_grammar_summary.csv_appendfiles(csv_file, data, True)
+                    else:
+                        mh_grammar_summary.csv_appendfiles(csv_file, data, False)
 
             # Print every N/20 samples
             if 's' in print_stuff:
@@ -221,12 +230,17 @@ if __name__ == "__main__":
     parser.add_option("-f", "--ngh",
                       dest="ngh_file", type="string", default="out/ngh_100k.p",
                       help="Where's the file with the NumberGameHypotheses?")
-    parser.add_option("--csv-compare", action="store_true", dest="compare", default=False,
-                      help="Do we use save regresion plots as we go?")
+    parser.add_option("--csv-compare",
+                      dest="compare", type="int", default=0,
+                      help="Do we use save regresion plots as we go? (if so, how many?")
 
     parser.add_option("-g", "--grammar",
                       dest="grammar", type="string", default="lot_grammar",
                       help="Which grammar do we use? [mix_grammar | independent_grammar | lot_grammar]")
+    parser.add_option("--grammar-scale",
+                      dest="grammar_scale", type="int", default=0,
+                      help="If >0, use a gamma dist. for each rule in the grammar w/ specified scale & " +
+                           "shape equal to initial rule prob.")
     parser.add_option("-d", "--data",
                       dest="data", type="string", default="josh",
                       help="Which data do we use? [josh | filename.p]")
@@ -272,6 +286,9 @@ if __name__ == "__main__":
         grammar = lot_grammar
     else:
         grammar = independent_grammar
+
+    if options.grammar_scale:
+        grammar = grammar_gamma(grammar, options.grammar_scale)
 
     if options.data == 'josh':
         data = import_josh_data()
