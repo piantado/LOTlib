@@ -293,9 +293,10 @@ if __name__ == "__main__":
     if options.data == 'josh':
         data = import_josh_data()
     elif '.p' in options.data:
-        data = pickle.load(options.data)
+        f = open(path + options.data)
+        data = pickle.load(f)
     else:
-        data = import_pd_data(path + options.data)
+        data = import_pd_data(path + options.data + '.p')
 
     if options.grammar == 'mix':
         mix = 1
