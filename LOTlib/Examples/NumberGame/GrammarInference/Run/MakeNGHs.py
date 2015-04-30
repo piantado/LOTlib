@@ -146,7 +146,8 @@ if __name__ == "__main__":
     elif '.p' in options.data:
         import os
         path = os.getcwd() + '/'
-        data = pickle.load(path + options.data)
+        f = open(path + options.data)
+        data = pickle.load(f)
     else:
         import os
         path = os.getcwd() + '/'
