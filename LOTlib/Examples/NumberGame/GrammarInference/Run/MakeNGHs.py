@@ -143,6 +143,8 @@ if __name__ == "__main__":
     # Add more data options . . .
     if options.data == 'josh_data':
         data = import_josh_data()
+    elif '.p' in options.data:
+        data = pickle.load(options.data)
     else:
         import os
         path = os.getcwd() + '/'

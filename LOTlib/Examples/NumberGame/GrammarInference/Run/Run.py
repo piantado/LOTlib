@@ -292,6 +292,8 @@ if __name__ == "__main__":
 
     if options.data == 'josh':
         data = import_josh_data()
+    elif '.p' in options.data:
+        data = pickle.load(options.data)
     else:
         data = import_pd_data(path + options.data)
 
