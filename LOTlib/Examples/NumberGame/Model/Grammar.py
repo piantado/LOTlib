@@ -224,7 +224,8 @@ import numpy as np
 
 def grammar_gamma(grammar, scale=1.0):
     grammar = copy.copy(grammar)
-    for r in grammar.rules:
+    rules = [r for r in [r for sublist in grammar.rules.values() for r in sublist] if not (r.nt == 'CONST')]
+    for r in rules:
         r.p = np.random.gamma(r.p, scale)
     return grammar
 
