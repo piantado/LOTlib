@@ -144,11 +144,13 @@ if __name__ == "__main__":
     if options.data == 'josh_data':
         data = import_josh_data()
     elif '.p' in options.data:
-        data = pickle.load(options.data)
+        import os
+        path = os.getcwd() + '/'
+        data = pickle.load(path + options.data)
     else:
         import os
         path = os.getcwd() + '/'
-        data = import_pd_data(path + options.data)
+        data = import_pd_data(path + options.data + '.p')
 
     # --------------------------------------------------------------------------------------------------------
     # MCMC sampling
