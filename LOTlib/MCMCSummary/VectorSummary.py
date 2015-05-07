@@ -183,15 +183,14 @@ class VectorSummary(MCMCSummary):
     #                 p_model = sum([math.exp(w) if o in h() else 0 for h, w in zip(hypotheses, weights)])
     #                 writer.writerow
 
-
-    def pickle_MAPsample(self, filename):
+    def pickle_cursample(self, filename):
         with open(filename, 'a') as f:
             gh = self.samples[-1]
             pickle.dump(gh, f)
 
-    def pickle_cursample(self, filename):
+    def pickle_MAPsample(self, filename):
         with open(filename, 'a') as f:
-            gh = self.get_top_samples(1)
+            gh = self.get_top_samples(1)[0]
             pickle.dump(gh, f)
 
     def csv_initfiles(self, filename):
