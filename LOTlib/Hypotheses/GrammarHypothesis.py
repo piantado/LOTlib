@@ -369,9 +369,8 @@ class GrammarHypothesis(VectorHypothesis):
         if not os.path.isfile(self.ngh_file):
             self.save_hypotheses(self.ngh_file)
 
-        from copy import copy
-        d = copy(self.__dict__)
-        d['hypotheses'] = []
+        d = self.__dict__.copy()
+        del d['hypotheses']
         return d
 
     def __setstate__(self, state):
