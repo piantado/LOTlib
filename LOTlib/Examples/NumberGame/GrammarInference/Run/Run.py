@@ -59,7 +59,7 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
         iters=10000, skip=10, cap=100, print_stuff='sgr',
         ngh='out/ngh_100k', hypotheses=None, domain=100, alpha=0.9,
         save_file='',
-        csv_save, pickle_summary=False, pickle_gh=0):
+        pickle_summary=False, pickle_gh=0):
     """
     Enumerate some NumberGameHypotheses, then use these to sample some GrammarHypotheses over `data`.
 
