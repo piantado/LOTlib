@@ -370,8 +370,8 @@ class GrammarHypothesis(VectorHypothesis):
             self.save_hypotheses(self.ngh_file)
 
         self.hypotheses = []
-        return self.ngh_file
+        return self
 
-    def __setstate__(self, fname):
-        self.load_hypotheses(fname)
+    def __setstate__(self, s):
+        self = s
 
