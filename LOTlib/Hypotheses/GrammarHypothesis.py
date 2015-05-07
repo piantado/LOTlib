@@ -363,17 +363,24 @@ class GrammarHypothesis(VectorHypothesis):
             f = open(filename, "wb")
             pickle.dump(self.hypotheses, f)
 
-    def __getstate__(self):
-        """We refer to a filename so that when we pickle, we don't save all our domain hypotheses."""
-        import os.path
-        if not os.path.isfile(self.ngh_file):
-            self.save_hypotheses(self.ngh_file)
-
-        d = self.__dict__.copy()
-        del d['hypotheses']
-        return d
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-        self.load_hypotheses(self.ngh_file)
+    # def __getstate__(self):
+    #     """We refer to a filename so that when we pickle, we don't save all our domain hypotheses."""
+    #     import os.path
+    #     if not os.path.isfile(self.ngh_file):
+    #         self.save_hypotheses(self.ngh_file)
+    #
+    #     d = self.__dict__.copy()
+    #     del d['hypotheses']
+    #
+    #     from sys import getsizeof
+    #     print '%'*100, '  SAVING PICKLE'
+    #     for k in d:
+    #         print k, getsizeof(d[k])
+    #         print '%'*100
+    #
+    #     return d
+    #
+    # def __setstate__(self, state):
+    #     self.__dict__.update(state)
+    #     self.load_hypotheses(self.ngh_file)
 
