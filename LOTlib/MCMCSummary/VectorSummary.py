@@ -199,10 +199,10 @@ class VectorSummary(MCMCSummary):
         Create new csv files for filename_values, filename_bayes, filename_data_MAP, filename_data_h0.
 
         """
-        with open(filename+'_values.csv', 'wb') as w:
+        with open(filename+'_values.csv', 'a') as w:
             writer = csv.writer(w)
             writer.writerow(['i', 'nt', 'name', 'to', 'p'])
-        with open(filename+'_bayes.csv', 'wb') as w:
+        with open(filename+'_bayes.csv', 'a') as w:
             writer = csv.writer(w)
             writer.writerow(['i', 'Prior', 'Likelihood', 'Posterior Score'])
 
