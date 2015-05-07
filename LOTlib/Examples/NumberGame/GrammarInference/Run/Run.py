@@ -144,9 +144,9 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
             mh_grammar_summary.csv_appendfiles(save_file, data)
 
         # Save to N samples, where N=pickle_gh
-        # if i and (i % pickle_gh):
-        #     mh_grammar_summary.pickle_MAPsample(save_file+'_map_'+str(i/pickle_gh)+'.p')
-        #     mh_grammar_summary.pickle_cursample(save_file+'_cur_'+str(i/pickle_gh)+'.p')
+        if i and (i % pickle_gh):
+            mh_grammar_summary.pickle_MAPsample(save_file+'_map_'+str(i/pickle_gh)+'.p')
+            mh_grammar_summary.pickle_cursample(save_file+'_cur_'+str(i/pickle_gh)+'.p')
 
         # Print every N/20 samples
         if 's' in print_stuff:
