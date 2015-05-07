@@ -285,6 +285,15 @@ class FunctionNode(object):
         """
         return [g for g in self]
 
+    def nargs(self):
+        """
+        :return: the number of arguments, or -1 if our self.args is None
+        """
+        if self.args is None:
+            return -1
+        else:
+            return len(self.args)
+
     def argFunctionNodes(self):
         """Yield FunctionNode immediately below.
 
@@ -439,7 +448,7 @@ class FunctionNode(object):
 
         """
         if self.name == '':
-            assert len(self.args) == 1, "**** Nameless calls must have exactly 1 arg"
+            assert self.nargs() == 1, "**** Nameless calls must have exactly 1 arg"
             return self.args[0].type()
         if not (isinstance(self, BVAddFunctionNode) and self.added_rule is not None):
             return self.returntype
@@ -469,13 +478,13 @@ class FunctionNode(object):
         functions whose name is in symmetric_ops.
 
         """
-        if self.args is None or len(self.args) == 0:
+        if self.nargs() < 1: # None or zero args
             return True
 
         if self.name in symmetric_ops:
             # Then we must check children
             if self.args is not None:
-                for i in xrange(len(self.args)-1):
+                for i in xrange(self.nargs()-1):
                     if self.args[i].name > self.args[i+1].name:
                         return False
 
@@ -503,7 +512,7 @@ class FunctionNode(object):
         if isFunctionNode(y):
             if (y.returntype != self.returntype) or \
                (y.name != self.name) or \
-               (len(y.args) != len(self.args)):
+               (y.nargs() != self.nargs()):
                 return False
             if y.args is None:
                 return self.args is None

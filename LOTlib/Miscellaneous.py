@@ -10,6 +10,8 @@ import math
 from math import exp, log, pi
 from random import random, sample
 import re
+import os
+import inspect
 import sys
 import types    # For checking if something is a function: isinstance(f, types.FunctionType)
 try: import numpy as np
@@ -25,7 +27,6 @@ TAU = 6.28318530718     # fuck pi
 # For R-friendly
 T = True
 F = False
-
 
 # ------------------------------------------------------------------------------------------------------------
 

@@ -66,6 +66,11 @@ def count_identical_nonterminals(t,x):
            sum([tt==t for tt in x.all_leaves()])
 
 def count_subtree_matches(t, x):
+    """
+    :param t: the thing we want to find
+    :param x: what we look in
+    :return:
+    """
     return sum(map(lambda tt: tt.partial_subtree_root_match(t), x))
 
 
