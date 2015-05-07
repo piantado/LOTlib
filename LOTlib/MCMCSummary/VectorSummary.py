@@ -186,12 +186,12 @@ class VectorSummary(MCMCSummary):
     def pickle_cursample(self, filename):
         with open(filename, 'a') as f:
             gh = self.samples[-1]
-            pickle.dump(gh, f)
+            pickle.dump(gh.value, f)
 
     def pickle_MAPsample(self, filename):
         with open(filename, 'a') as f:
             gh = self.get_top_samples(1)[0]
-            pickle.dump(gh, f)
+            pickle.dump(gh.value, f)
 
     def csv_initfiles(self, filename):
         """
