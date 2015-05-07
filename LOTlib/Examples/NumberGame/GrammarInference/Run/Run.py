@@ -4,14 +4,15 @@ A simple demo of inference with GrammarHypothesis, VectorSummary, NumberGameHypo
 
 Command-line Args
 -----------------
+
+--pickle-summary
+    If true, pickle VectorSummary
 -P --pickle
-    If true, pickle VectorSummary.
--C --csv
-    Save csv's to this file (no .csv!!!)
+    Pickle MAP & current sample  GH every n steps.
+-S --save-file
+    Save csv's and pickles to this file (no extension)
 -f --ngh
     Where's the file with the NumberGameHypotheses?
---csv-compare
-    Do we save the regression plots, and if so, how many?
 
 -g --grammar
     Which grammar do we use? [mix_grammar | independent_grammar | lot_grammar]
@@ -32,11 +33,6 @@ Command-line Args
 -q --quiet
     Print nothing!
 
---mpi
-    Do we do MPI?
---chains
-    How many individual chains to run in MPI?
-
 Example
 -------
 # Independent model
@@ -53,44 +49,7 @@ import re
 from optparse import OptionParser
 
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
-from LOTlib.MPI.MPI_map import MPI_unorderedmap
 from LOTlib.Examples.NumberGame.GrammarInference.Model import *
-
-
-# ============================================================================================================
-# MPI method
-
-mpi_number = 0
-
-def mpirun(fname, data, hypotheses, grammar, iters, skip, cap, pickle_bool, csv_compare_model):
-    """
-    Generate NumberGameHypotheses using MPI.
-
-    """
-    # Assign this chain an mpi number
-    global mpi_number
-    this_n = mpi_number
-    mpi_number += 1
-    fname += str(this_n)
-
-    # Initial GH
-    grammar_h0 = NoConstGrammarHypothesis(grammar, hypotheses, propose_step=.1, propose_n=1)
-    mh_grammar_sampler = MHSampler(grammar_h0, data, iters)
-    mh_grammar_summary = VectorSummary(skip=skip, cap=cap)
-
-    # Initialize csv's
-    mh_grammar_summary.csv_initfiles(fname)
-    if csv_compare_model:
-        mh_grammar_summary.csv_compare_model_human(fname+'_data_h0.csv', data, grammar_h0)
-
-    # Sample GrammarHypotheses!
-    for gh in mh_grammar_summary(mh_grammar_sampler):
-        if (i < 10000 and i % 100 is 0) or (i % 1000 is 0):
-            mh_grammar_summary.csv_appendfiles(fname, data, csv_compare_model)
-
-    if pickle_bool:
-        mh_grammar_summary.pickle_summary(filename=fname + '.p')
-
 
 # ============================================================================================================
 # The `run` script
@@ -99,8 +58,8 @@ def mpirun(fname, data, hypotheses, grammar, iters, skip, cap, pickle_bool, csv_
 def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
         iters=10000, skip=10, cap=100, print_stuff='sgr',
         ngh='out/ngh_100k', hypotheses=None, domain=100, alpha=0.9,
-        mpi=False, chains=1,
-        pickle_file='', csv_file='', csv_compare_model=False):
+        save_file='',
+        pickle_summary=False, pickle_gh=0):
     """
     Enumerate some NumberGameHypotheses, then use these to sample some GrammarHypotheses over `data`.
 
@@ -122,12 +81,12 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
         VectorSummary will collect this many GrammarHypothesis samples.
     print_stuff : str
         What do we print? ['s' | 'g' | 'r']
-    pickle_file : str
-        If we're pickling, this is the file name to save to.
-    csv_file : str
-        If saving to csv, this is the file name to save to (don't include .csv!).
-    csv_compare_model : int
-        Do we save model comparison (regression) plots as we iterate? These take ~15 minutes to save.
+    save_file : str
+        If we're pickling or saving csvs, this is the file name to save to.
+    # csv_file : str
+    #     If saving to csv, this is the file name to save to (don't include .csv!).
+    # csv_compare_model : int
+    #     Do we save model comparison (regression) plots as we iterate? These take ~15 minutes to save.
 
     """
     # --------------------------------------------------------------------------------------------------------
@@ -159,14 +118,6 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
     # --------------------------------------------------------------------------------------------------------
     # Fill VectorSummary
 
-    # MPI
-    if mpi:
-        hypotheses = set()
-        mpi_func = lambda d: mpirun(csv_file, d, hypotheses, grammar, iters, skip, cap, bool(pickle_file), csv_compare_model)
-        mpi_runs = MPI_unorderedmap(mpi_func, [data]*chains)
-        for mpi_run in mpi_runs:
-            pass
-
     # No MPI
     else:
         grammar_h0 = ParameterHypothesis(grammar, hypotheses, propose_step=.1, propose_n=1)
@@ -182,34 +133,24 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
         if 's' in print_stuff:
             print '^*'*60, '\nGenerating GrammarHypothesis Samples\n', '^*'*60
 
-        # Initialize csv file
-        if csv_file:
-            mh_grammar_summary.csv_initfiles(csv_file)
-            if csv_compare_model:
-                mh_grammar_summary.csv_compare_model_human(csv_file+'_summary.csv', data, grammar_h0)
-
         # Sample GrammarHypotheses!
         for i, gh in enumerate(mh_grammar_summary(mh_grammar_sampler)):
 
-            # Save to csv every 200 samples from 0 to 10k, then every 1000
-            if csv_file:
-                if (i < 10000 and i % 200 == 0) or (i % 1000 == 0):
-                    if csv_compare_model and (i % (iters / csv_compare_model) == 0):
-                        mh_grammar_summary.csv_appendfiles(csv_file, data, True)
-                    else:
-                        mh_grammar_summary.csv_appendfiles(csv_file, data, False)
+            # Save to N samples, where N=pickle_gh
+            if i and (i % pickle_gh):
+                mh_grammar_summary.pickle_MAPsample(save_file+'_map_'+str(i/pickle_gh)+'.p')
+                mh_grammar_summary.pickle_cursample(save_file+'_cur_'+str(i/pickle_gh)+'.p')
 
             # Print every N/20 samples
             if 's' in print_stuff:
                 if i % (iters/20) is 0:
-                    for idx in gh.propose_idxs:
-                        print idx, '\t|  ', gh.rules[idx], ' --> ', gh.value[idx]
+                    for idx in gh.propose_idxs:  print idx, '\t|  ', gh.rules[idx], ' --> ', gh.value[idx]
                     # print i, '-'*100, '\n', {idx:gh.value[idx] for idx in gh.propose_idxs}
                     print gh.prior, gh.likelihood, gh.posterior_score
 
         # Save summary & print top samples
-        if pickle_file:
-            mh_grammar_summary.pickle_summary(filename=pickle_file)
+        if pickle_summary:
+            mh_grammar_summary.pickle_summary(filename=save_file+'_summary.p')
         if 'g' in print_stuff:
             mh_grammar_summary.print_top_samples()
 
@@ -221,18 +162,21 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
 if __name__ == "__main__":
     parser = OptionParser()
 
+    parser.add_option("--pickle-summary",
+                      action="store_true", dest="picklesummary", default=False,
+                      help="If true, pickle VectorSummary.")
     parser.add_option("-P", "--pickle",
-                      action="store_true", dest="pickle", default=False,
-                      help="If there's a value here, pickle VectorSummary.")
-    parser.add_option("-C", "--csv",
-                      dest="csv_file", type="string", default="out/gh_100k",
+                      type="int", dest="pickle", default=0,
+                      help="Pickle MAP & current sample  GH every n steps.")
+    parser.add_option("-S", "--save-file",
+                      dest="save_file", type="string", default="out/gh_100k",
                       help="Save csv's to this file.")
     parser.add_option("-f", "--ngh",
                       dest="ngh_file", type="string", default="out/ngh_100k.p",
                       help="Where's the file with the NumberGameHypotheses?")
-    parser.add_option("--csv-compare",
-                      dest="compare", type="int", default=0,
-                      help="Do we use save regresion plots as we go? (if so, how many?")
+    # parser.add_option("--csv-compare",
+    #                   dest="compare", type="int", default=0,
+    #                   help="Do we use save regresion plots as we go? (if so, how many?")
 
     parser.add_option("-g", "--grammar",
                       dest="grammar", type="string", default="lot_grammar",
@@ -262,21 +206,11 @@ if __name__ == "__main__":
                       action="store_true", dest="quiet", default=True,
                       help="Print nothing!")
 
-    parser.add_option("--mpi", action="store_true", dest="mpi", default=False,
-                      help="Do we use MPI?")
-    parser.add_option("--chains", dest="chains", type="int", default=1,
-                      help="Number of chains to run on each data input")
-
     (options, args) = parser.parse_args()
 
     # --------------------------------------------------------------------------------------------------------
 
     path = os.getcwd() + '/'
-
-    if options.pickle:
-        pickle_file = path + options.csv_file + '.p'
-    else:
-        pickle_file = ''
 
     if options.grammar == 'mix':
         grammar = mix_grammar
@@ -316,5 +250,5 @@ if __name__ == "__main__":
         iters=options.iters, skip=options.skip, cap=options.cap,
         ngh=options.ngh_file,
         print_stuff=print_stuff,
-        pickle_file=pickle_file, csv_file=path+options.csv_file, csv_compare_model=options.compare,
-        mpi=options.mpi, chains=options.chains)
+        save_file=path+options.save_file,
+        pickle_summary=options.picklesummary, pickle_gh=options.pickle)
