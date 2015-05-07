@@ -63,19 +63,19 @@ class MCMCSummary:
     # --------------------------------------------------------------------------------------------------------
     # Top samples in `self.samples`
 
-    def get_top_samples(self, n=10, s_idxs=None, key=(lambda x: x.posterior_score)):
+    def get_top_samples(self, n=10, s_idx=None, key=(lambda x: x.posterior_score)):
         """Get the top `n` GrammarHypothesis samples in `self.samples`, sorted by specified key.
 
         Args:
             n (int): Get the top `n` samples.
-            idx (int): We only consider samples 1 through this one. E.g. if idx = 2, we only consider the
+            s_idx (int): We only consider samples 1 through this one. E.g. if idx = 2, we only consider the
               first 3 samples.
             key (function): Lambda function, this tells us how to sort our samples to get the top `n`.
 
         """
-        if s_idxs is None:        # Consider only the samples with indexes specified by `idxs`
-            s_idxs = range(0, self.sample_count)
-        samples = [self.samples[i] for i in s_idxs]
+        if s_idx is None:        # Consider only the samples with indexes specified by `idxs`
+            s_idx = range(0, self.sample_count)
+        samples = [self.samples[i] for i in s_idx]
         sorted_samples = sorted(samples, key=key)
         sorted_samples.reverse()
         return sorted_samples[-n:]
@@ -112,9 +112,9 @@ class MCMCSummary:
         if gh_key is 'recent':      # Most recent sample
             gh = self.samples[idx]
         if gh_key is 'MLE':         # Most likely GH
-            gh = self.get_top_samples(n=1, s_idxs=sample_idxs, key=(lambda x: x.likelihood))[0]
+            gh = self.get_top_samples(n=1, s_idx=sample_idxs, key=(lambda x: x.likelihood))[0]
         if gh_key is 'MAP':         # Max Post. GH  (should prob be very close to MLE
-            gh = self.get_top_samples(n=1, s_idxs=sample_idxs, key=(lambda x: x.posterior_score))[0]
+            gh = self.get_top_samples(n=1, s_idx=sample_idxs, key=(lambda x: x.posterior_score))[0]
         if gh_key is 'mean':        # Mean GH (this should create a new one... right?
             mean_value = self.mean_value(sample_idxs)
             gh = self.samples[-1].__copy__()
