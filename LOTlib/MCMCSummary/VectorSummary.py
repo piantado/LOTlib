@@ -185,12 +185,12 @@ class VectorSummary(MCMCSummary):
 
 
     def pickle_MAPsample(self, filename):
-        with open(filename) as f:
+        with open(filename, 'wb') as f:
             gh = self.samples[-1]
             pickle.dump(gh, file)
 
     def pickle_cursample(self, filename):
-        with open(filename) as f:
+        with open(filename, 'wb') as f:
             gh = self.get_top_samples(1)
             pickle.dump(gh, file)
 
