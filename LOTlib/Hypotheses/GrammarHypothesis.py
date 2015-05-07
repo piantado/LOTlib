@@ -367,7 +367,7 @@ class GrammarHypothesis(VectorHypothesis):
         """We refer to a filename so that when we pickle, we don't save all our domain hypotheses."""
         import os.path
         if not os.path.isfile(self.ngh_file):
-            self.save_hypotheses('default_ngh.p')
+            self.save_hypotheses(self.ngh_file)
 
         self.hypotheses = []
         return self.ngh_file
