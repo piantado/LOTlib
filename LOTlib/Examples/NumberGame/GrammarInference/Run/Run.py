@@ -59,7 +59,7 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
         iters=10000, skip=10, cap=100, print_stuff='sgr',
         ngh='out/ngh_100k', hypotheses=None, domain=100, alpha=0.9,
         save_file='',
-        pickle_summary=False, pickle_gh=0):
+        csv_save, pickle_summary=False, pickle_gh=0):
     """
     Enumerate some NumberGameHypotheses, then use these to sample some GrammarHypotheses over `data`.
 
@@ -133,8 +133,15 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
         if 's' in print_stuff:
             print '^*'*60, '\nGenerating GrammarHypothesis Samples\n', '^*'*60
 
+        # Initialize csv file
+        if save_file:
+            mh_grammar_summary.csv_initfiles(save_file)
+
         # Sample GrammarHypotheses!
         for i, gh in enumerate(mh_grammar_summary(mh_grammar_sampler)):
+
+            if save_file and ((i < 10000 and i % 200 == 0) or (i % 1000 == 0)):
+                mh_grammar_summary.csv_appendfiles(save_file, data)
 
             # Save to N samples, where N=pickle_gh
             if i and (i % pickle_gh):
