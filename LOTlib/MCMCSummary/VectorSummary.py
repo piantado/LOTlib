@@ -185,14 +185,14 @@ class VectorSummary(MCMCSummary):
 
 
     def pickle_MAPsample(self, filename):
-        with open(filename, 'wb') as f:
+        with open(filename, 'a') as f:
             gh = self.samples[-1]
-            pickle.dump(gh, file)
+            pickle.dump(gh, f)
 
     def pickle_cursample(self, filename):
-        with open(filename, 'wb') as f:
+        with open(filename, 'a') as f:
             gh = self.get_top_samples(1)
-            pickle.dump(gh, file)
+            pickle.dump(gh, f)
 
     def csv_initfiles(self, filename):
         """
