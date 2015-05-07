@@ -118,48 +118,47 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
     # --------------------------------------------------------------------------------------------------------
     # Fill VectorSummary
 
-    # No MPI
-    else:
-        grammar_h0 = ParameterHypothesis(grammar, hypotheses, propose_step=.1, propose_n=1)
-        mh_grammar_sampler = MHSampler(grammar_h0, data, iters)
-        mh_grammar_summary = VectorSummary(skip=skip, cap=cap)
 
-        # Print all GrammarRules in grammar with corresponding value index
-        if 'r' in print_stuff:
-            print '='*100, '\nGrammarRules:'
-            for idx in grammar_h0.propose_idxs:
-                print idx, '\t|  ', grammar_h0.rules[idx]
+    grammar_h0 = ParameterHypothesis(grammar, hypotheses, propose_step=.1, propose_n=1)
+    mh_grammar_sampler = MHSampler(grammar_h0, data, iters)
+    mh_grammar_summary = VectorSummary(skip=skip, cap=cap)
 
+    # Print all GrammarRules in grammar with corresponding value index
+    if 'r' in print_stuff:
+        print '='*100, '\nGrammarRules:'
+        for idx in grammar_h0.propose_idxs:
+            print idx, '\t|  ', grammar_h0.rules[idx]
+
+    if 's' in print_stuff:
+        print '^*'*60, '\nGenerating GrammarHypothesis Samples\n', '^*'*60
+
+    # Initialize csv file
+    if save_file:
+        mh_grammar_summary.csv_initfiles(save_file)
+
+    # Sample GrammarHypotheses!
+    for i, gh in enumerate(mh_grammar_summary(mh_grammar_sampler)):
+
+        if save_file and ((i < 10000 and i % 200 == 0) or (i % 1000 == 0)):
+            mh_grammar_summary.csv_appendfiles(save_file, data)
+
+        # Save to N samples, where N=pickle_gh
+        if i and (i % pickle_gh):
+            mh_grammar_summary.pickle_MAPsample(save_file+'_map_'+str(i/pickle_gh)+'.p')
+            mh_grammar_summary.pickle_cursample(save_file+'_cur_'+str(i/pickle_gh)+'.p')
+
+        # Print every N/20 samples
         if 's' in print_stuff:
-            print '^*'*60, '\nGenerating GrammarHypothesis Samples\n', '^*'*60
+            if i % (iters/20) is 0:
+                for idx in gh.propose_idxs:  print idx, '\t|  ', gh.rules[idx], ' --> ', gh.value[idx]
+                # print i, '-'*100, '\n', {idx:gh.value[idx] for idx in gh.propose_idxs}
+                print gh.prior, gh.likelihood, gh.posterior_score
 
-        # Initialize csv file
-        if save_file:
-            mh_grammar_summary.csv_initfiles(save_file)
-
-        # Sample GrammarHypotheses!
-        for i, gh in enumerate(mh_grammar_summary(mh_grammar_sampler)):
-
-            if save_file and ((i < 10000 and i % 200 == 0) or (i % 1000 == 0)):
-                mh_grammar_summary.csv_appendfiles(save_file, data)
-
-            # Save to N samples, where N=pickle_gh
-            if i and (i % pickle_gh):
-                mh_grammar_summary.pickle_MAPsample(save_file+'_map_'+str(i/pickle_gh)+'.p')
-                mh_grammar_summary.pickle_cursample(save_file+'_cur_'+str(i/pickle_gh)+'.p')
-
-            # Print every N/20 samples
-            if 's' in print_stuff:
-                if i % (iters/20) is 0:
-                    for idx in gh.propose_idxs:  print idx, '\t|  ', gh.rules[idx], ' --> ', gh.value[idx]
-                    # print i, '-'*100, '\n', {idx:gh.value[idx] for idx in gh.propose_idxs}
-                    print gh.prior, gh.likelihood, gh.posterior_score
-
-        # Save summary & print top samples
-        if pickle_summary:
-            mh_grammar_summary.pickle_summary(filename=save_file+'_summary.p')
-        if 'g' in print_stuff:
-            mh_grammar_summary.print_top_samples()
+    # Save summary & print top samples
+    if pickle_summary:
+        mh_grammar_summary.pickle_summary(filename=save_file+'_summary.p')
+    if 'g' in print_stuff:
+        mh_grammar_summary.print_top_samples()
 
 
 # ============================================================================================================
