@@ -54,11 +54,15 @@ class GrammarHypothesis(VectorHypothesis):
         Proposal matrix of size |propose_idxs| x |propose_idxs|.
 
     """
-    def __init__(self, grammar, hypotheses, rules=None, load=None, value=None, proposal=None,
+    def __init__(self, grammar, hypotheses, rules=None, load=None, ngh_file='default_ngh.p', value=None, proposal=None,
                  prior_shape=2., prior_scale=1., propose_n=1, propose_step=.1,
                  **kwargs):
         self.grammar = grammar
-        self.hypotheses = self.load_hypotheses(load) if load else hypotheses
+        if load:
+            self.hypotheses = self.load_hypotheses(load)
+        else:
+            self.hypotheses = hypotheses
+            self.ngh_file = ngh_file
         self.rules = [r for sublist in grammar.rules.values() for r in sublist]
         if value is None:
             value = [rule.p for rule in self.rules]
@@ -101,7 +105,7 @@ class GrammarHypothesis(VectorHypothesis):
     def __copy__(self):
         """Copy of this GrammarHypothesis; `self.grammar` & `self.hypothesis` don't deep copy."""
         return type(self)(
-            self.grammar, self.hypotheses,
+            self.grammar, self.hypotheses, ngh_file=self.ngh_file,
             value=copy.copy(self.value), proposal=copy.copy(self.proposal),
             prior_shape=self.prior_shape, prior_scale=self.prior_scale,
             propose_n=self.propose_n, propose_step=self.propose_step
@@ -203,9 +207,8 @@ class GrammarHypothesis(VectorHypothesis):
     # --------------------------------------------------------------------------------------------------------
     # p (y in C | H)  where H is our hypothesis space
     #
-    # Note:
-    #   This is NOT the same as `self.compute_likelihood` - that is a generative model, this is determining
-    #   whether input would be part of our domain hypothesis concept(s).
+    # Returns:
+    #   A dict of probabilities, values store the probability associated with generating each key.
     #
 
     def in_concept_mle(self, domain):
@@ -350,6 +353,7 @@ class GrammarHypothesis(VectorHypothesis):
 
     def load_hypotheses(self, filename=None):
         if filename:
+            self.ngh_file = filename
             f = open(filename, "rb")
             self.hypotheses = pickle.load(f)
             return self.hypotheses
@@ -358,4 +362,14 @@ class GrammarHypothesis(VectorHypothesis):
         if filename:
             f = open(filename, "wb")
             pickle.dump(self.hypotheses, f)
+
+    def __getstate__(self):
+        """We refer to a filename so that when we pickle, we don't save all our domain hypotheses."""
+        self.hypotheses = []
+        if self.ngh_file == 'default_ngh.p':
+            self.save_hypotheses('default_ngh.p')
+        return self.ngh_file
+
+    def __setstate__(self, fname):
+        self.load_hypotheses(fname)
 
