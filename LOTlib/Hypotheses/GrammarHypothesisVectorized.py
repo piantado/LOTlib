@@ -1,3 +1,19 @@
+"""
+Vectorized GrammarHypothesis class.
+
+This assumes:
+    - domain hypothesis (e.g. NumberGameHypothesis) evaluates to a set
+    - `data` is a list of FunctionData objects
+    - input of FunctionData can be applied to hypothesis.compute_likelihood (for domain-level hypothesis)
+    - output of FunctionData is a dictionary where each value is a pair (y, n),  where y is the number of
+    positive and n is the number of negative responses for the given output key, conditioned on the input.
+
+To use this for a different format, change init_R & compute_likelihood.
+
+"""
+
+
+
 # same for all GrammarHypotheses
 # ------------------------------
 #
@@ -168,27 +184,3 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
         # Set probability for each rule corresponding to value index
         for i in range(0, self.n):
             self.rules[i].p = self.value[i]
-
-    # def __getstate__(self):
-    #     """We refer to a filename so that when we pickle, we don't save all our domain hypotheses."""
-    #     import os.path
-    #     if not os.path.isfile(self.ngh_file):
-    #         self.save_hypotheses(self.ngh_file)
-    #
-    #     d = self.__dict__.copy()
-    #     del d['hypotheses']
-    #     del d['H']
-    #     # del d['L']
-    #     # del d['R']
-    #
-    #     from sys import getsizeof
-    #     print '%'*100, '  SAVING PICKLE'
-    #     for k in d:
-    #         print k, getsizeof(d[k])
-    #         print '%'*100
-    #
-    #     return d
-    #
-    # def __setstate__(self, state):
-    #     self.__dict__.update(state)
-    #     self.load_hypotheses(self.ngh_file)
