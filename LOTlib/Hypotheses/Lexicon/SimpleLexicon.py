@@ -19,13 +19,15 @@ class SimpleLexicon(Hypothesis):
         the true utteranecs
     """
 
-    def __init__(self, make_hypothesis, words=(), propose_p=0.25, **kwargs):
+    def __init__(self, make_hypothesis, words=(), propose_p=0.25, value=None, **kwargs):
         """
             hypothesis - a function to generate hypotheses
             words -- words to initially add (sampling from the prior)
             propose_p -- the probability of proposing to each word
         """
-        Hypothesis.__init__(self, value=dict(), **kwargs)
+
+
+        Hypothesis.__init__(self, value=dict() if value is None else value, **kwargs)
         self.__dict__.update(locals())
 
         assert isroutine(make_hypothesis) # check that we can call
@@ -96,6 +98,8 @@ class SimpleLexicon(Hypothesis):
     def all_words(self):
         return self.value.keys()
 
+    def count_nodes(self):
+        return sum([v.count_nodes() for v in self.value.values()])
 
     def force_function(self, w, f):
         """

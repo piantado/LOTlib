@@ -16,8 +16,7 @@ class BVRuleContextManager(object):
                 
     def __str__(self):
         return "<Managing context for %s>"%str(self.fn)
-    
-    
+
     def __enter__(self):
         if self.fn is None: # skip these
             return
