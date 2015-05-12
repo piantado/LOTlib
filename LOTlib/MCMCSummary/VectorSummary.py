@@ -1,7 +1,6 @@
 import csv, math
 import numpy as np
 import pickle
-from LOTlib.Miscellaneous import logsumexp
 from MCMCSummary import MCMCSummary
 
 
@@ -39,6 +38,48 @@ class VectorSummary(MCMCSummary):
         gh.set_value(value)
         gh.update_posterior()
         return gh
+
+    # --------------------------------------------------------------------------------------------------------
+    # Saving methods
+
+    def pickle_cursample(self, filename):
+        with open(filename, 'a') as f:
+            gh = self.samples[-1]
+            pickle.dump(gh.value, f)
+
+    def pickle_MAPsample(self, filename):
+        with open(filename, 'a') as f:
+            gh = self.get_top_samples(1)[0]
+            pickle.dump(gh.value, f)
+
+    def csv_initfiles(self, filename):
+        """
+        Create new csv files for filename_values, filename_bayes, filename_data_MAP, filename_data_h0.
+
+        """
+        with open(filename+'_values.csv', 'a') as w:
+            writer = csv.writer(w)
+            writer.writerow(['i', 'nt', 'name', 'to', 'p'])
+        with open(filename+'_bayes.csv', 'a') as w:
+            writer = csv.writer(w)
+            writer.writerow(['i', 'Prior', 'Likelihood', 'Posterior Score'])
+
+    def csv_appendfiles(self, filename, data):
+        """
+        Append Bayes data to `_bayes` file, values to `_values` file, and MAP hypothesis human
+        correlation data to `_data_MAP` file.
+
+        """
+        i = self.count
+        gh = self.samples[-1]
+
+        with open(filename+'_values.csv', 'a') as w:
+            writer = csv.writer(w)
+            writer.writerows([[i, r.nt, r.name, str(r.to), gh.value[j]] for j,r in enumerate(gh.rules)])
+        with open(filename+'_bayes.csv', 'a') as w:
+            writer = csv.writer(w)
+            if self.sample_count:
+                writer.writerow([i, gh.prior, gh.likelihood, gh.posterior_score])
 
     # --------------------------------------------------------------------------------------------------------
     # Plotting methods
@@ -157,68 +198,4 @@ class VectorSummary(MCMCSummary):
         ax.plot(mcmc_values)
         plt.show()
 
-
-    # ============================================================================================================
-    # Interim saving methods
-
-    # def csv_compare_model_human(self, filename, data, gh):
-    #     i = self.count
-    #
-    #     gh.update()
-    #     for h in gh.hypotheses:
-    #         h.compute_prior(recompute=True)
-    #         h.update_posterior()
-    #
-    #     with open(filename, 'a') as f:
-    #         writer = csv.writer(f)
-    #         hypotheses = gh.hypotheses
-    #         for d in data:
-    #             posteriors = [sum(h.compute_posterior(d.input)) for h in hypotheses]
-    #             Z = logsumexp(posteriors)
-    #             weights = [(post-Z) for post in posteriors]
-    #
-    #             for o in d.output.keys():
-    #                 # Probability for yes on output `o` is sum of posteriors for hypos that contain `o`
-    #                 p_human = float(d.output[o][0]) / float(d.output[o][0] + d.output[o][1])
-    #                 p_model = sum([math.exp(w) if o in h() else 0 for h, w in zip(hypotheses, weights)])
-    #                 writer.writerow
-
-    def pickle_cursample(self, filename):
-        with open(filename, 'a') as f:
-            gh = self.samples[-1]
-            pickle.dump(gh.value, f)
-
-    def pickle_MAPsample(self, filename):
-        with open(filename, 'a') as f:
-            gh = self.get_top_samples(1)[0]
-            pickle.dump(gh.value, f)
-
-    def csv_initfiles(self, filename):
-        """
-        Create new csv files for filename_values, filename_bayes, filename_data_MAP, filename_data_h0.
-
-        """
-        with open(filename+'_values.csv', 'a') as w:
-            writer = csv.writer(w)
-            writer.writerow(['i', 'nt', 'name', 'to', 'p'])
-        with open(filename+'_bayes.csv', 'a') as w:
-            writer = csv.writer(w)
-            writer.writerow(['i', 'Prior', 'Likelihood', 'Posterior Score'])
-
-    def csv_appendfiles(self, filename, data):
-        """
-        Append Bayes data to `_bayes` file, values to `_values` file, and MAP hypothesis human
-        correlation data to `_data_MAP` file.
-
-        """
-        i = self.count
-        gh = self.samples[-1]
-
-        with open(filename+'_values.csv', 'a') as w:
-            writer = csv.writer(w)
-            writer.writerows([[i, r.nt, r.name, str(r.to), gh.value[j]] for j,r in enumerate(gh.rules)])
-        with open(filename+'_bayes.csv', 'a') as w:
-            writer = csv.writer(w)
-            if self.sample_count:
-                writer.writerow([i, gh.prior, gh.likelihood, gh.posterior_score])
 
