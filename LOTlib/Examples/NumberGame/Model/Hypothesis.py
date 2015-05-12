@@ -2,7 +2,6 @@
 from math import log
 from LOTlib.FunctionNode import FunctionNode, BVUseFunctionNode
 from LOTlib.Evaluation.EvaluationException import TooBigException
-from LOTlib.Hypotheses.GrammarHypothesisVectorized import GrammarHypothesisVectorized
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis, Infinity
 
 
@@ -19,13 +18,12 @@ class NumberGameHypothesis(LOTHypothesis):
         self.domain = domain
         self.value_set = None
 
-    def compute_prior(self, recompute=False, vectorized=False):
+    def compute_prior(self):
         """Compute the log of the prior probability.
 
         """
         # Re-compute the FunctionNode `self.value` generation probabilities
-        if recompute:
-            self.grammar.log_probability(self.value)
+        self.grammar.log_probability(self.value)
 
         # Compute this hypothesis prior
         if self.value.count_subnodes() > self.maxnodes:
