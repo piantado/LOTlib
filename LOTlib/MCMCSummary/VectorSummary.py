@@ -54,13 +54,19 @@ class VectorSummary(MCMCSummary):
 
     def csv_initfiles(self, filename):
         """
-        Create new csv files for filename_values, filename_bayes, filename_data_MAP, filename_data_h0.
+        Initialize new csv files.
 
         """
-        with open(filename+'_values.csv', 'a') as w:
+        with open(filename+'_values_recent.csv', 'a') as w:
             writer = csv.writer(w)
             writer.writerow(['i', 'nt', 'name', 'to', 'p'])
-        with open(filename+'_bayes.csv', 'a') as w:
+        with open(filename+'_bayes_recent.csv', 'a') as w:
+            writer = csv.writer(w)
+            writer.writerow(['i', 'Prior', 'Likelihood', 'Posterior Score'])
+        with open(filename+'_values_map.csv', 'a') as w:
+            writer = csv.writer(w)
+            writer.writerow(['i', 'nt', 'name', 'to', 'p'])
+        with open(filename+'_bayes_map.csv', 'a') as w:
             writer = csv.writer(w)
             writer.writerow(['i', 'Prior', 'Likelihood', 'Posterior Score'])
 
@@ -71,15 +77,23 @@ class VectorSummary(MCMCSummary):
 
         """
         i = self.count
-        gh = self.samples[-1]
+        gh_recent = self.samples[-1]
+        gh_map = self.get_top_samples(1)[0]
 
-        with open(filename+'_values.csv', 'a') as w:
+        with open(filename+'_values_recent.csv', 'a') as w:
             writer = csv.writer(w)
-            writer.writerows([[i, r.nt, r.name, str(r.to), gh.value[j]] for j,r in enumerate(gh.rules)])
-        with open(filename+'_bayes.csv', 'a') as w:
+            writer.writerows([[i, r.nt, r.name, str(r.to), gh_recent.value[j]] for j,r in enumerate(gh_recent.rules)])
+        with open(filename+'_bayes_recent.csv', 'a') as w:
             writer = csv.writer(w)
             if self.sample_count:
-                writer.writerow([i, gh.prior, gh.likelihood, gh.posterior_score])
+                writer.writerow([i, gh_recent.prior, gh_recent.likelihood, gh_recent.posterior_score])
+        with open(filename+'_values_map.csv', 'a') as w:
+            writer = csv.writer(w)
+            writer.writerows([[i, r.nt, r.name, str(r.to), gh_map.value[j]] for j,r in enumerate(gh_map.rules)])
+        with open(filename+'_bayes_map.csv', 'a') as w:
+            writer = csv.writer(w)
+            if self.sample_count:
+                writer.writerow([i, gh_map.prior, gh_map.likelihood, gh_map.posterior_score])
 
     # --------------------------------------------------------------------------------------------------------
     # Plotting methods
