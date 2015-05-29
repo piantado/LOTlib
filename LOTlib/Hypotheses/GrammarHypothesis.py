@@ -22,7 +22,14 @@ get_rules
 
 Note
 ----
-Parts of this are currently designed just to work with NumberGameHypothesis... these should be expanded.
+This assumes:
+    - domain hypothesis (e.g. NumberGameHypothesis) evaluates to a set
+    - `data` is a list of FunctionData objects
+    - input of FunctionData can be applied to hypothesis.compute_likelihood (for domain-level hypothesis)
+    - output of FunctionData is a dictionary where each value is a pair (y, n),  where y is the number of
+    positive and n is the number of negative responses for the given output key, conditioned on the input.
+
+To use this for a different format, just change compute_likelihood.
 
 """
 import copy
@@ -32,7 +39,7 @@ import pickle
 import numpy as np
 from scipy.stats import gamma
 from LOTlib.Hypotheses.VectorHypothesis import VectorHypothesis
-from LOTlib.Miscellaneous import logplusexp, logsumexp, log1mexp, gammaln, Infinity
+from LOTlib.Miscellaneous import logsumexp, log1mexp, gammaln, Infinity
 
 
 class GrammarHypothesis(VectorHypothesis):
@@ -43,22 +50,33 @@ class GrammarHypothesis(VectorHypothesis):
     Attributes
     ----------
     grammar :  Grammar
-        The grammar.
+        the grammar
     hypotheses : list<Hypothesis>
-        List of hypotheses, generated beforehand.
+        list of hypotheses, generated beforehand
     rules : list<GrammarRule>
-        List of all rules in the grammar.
+        list of all rules in the grammar
     value : np.ndarray
-        Vector of numbers corresponding to the items in `rules`.
+        vector of numbers corresponding to the items in `rules`
     proposal : np.ndarray
-        Proposal matrix of size |propose_idxs| x |propose_idxs|.
+        proposal matrix of size:  |propose_idxs| x |propose_idxs|
+    prior_shape : float
+        shape used in compute_prior
+    prior_scale : float
+        shape used in compute_prior
+    propose_n : int
+    propose_step : float
+    propose_idxs : list<int>
+
 
     """
     def __init__(self, grammar, hypotheses, rules=None, load=None, value=None, proposal=None,
                  prior_shape=2., prior_scale=1., propose_n=1, propose_step=.1,
                  **kwargs):
         self.grammar = grammar
-        self.hypotheses = self.load_hypotheses(load) if load else hypotheses
+        if load:
+            self.hypotheses = self.load_hypotheses(load)
+        else:
+            self.hypotheses = hypotheses
         self.rules = [r for sublist in grammar.rules.values() for r in sublist]
         if value is None:
             value = [rule.p for rule in self.rules]
@@ -129,7 +147,7 @@ class GrammarHypothesis(VectorHypothesis):
 
         # Recompute prior for each hypothesis, given new grammar probs
         for h in self.hypotheses:
-            h.compute_prior(recompute=True, vectorized=False)
+            h.compute_prior()
             h.update_posterior()
 
     # --------------------------------------------------------------------------------------------------------
@@ -137,7 +155,7 @@ class GrammarHypothesis(VectorHypothesis):
 
     def compute_prior(self):
         """
-        Compute priors, according only to values that are proposed to.
+        Compute priors, according only to values that are proposed to. Priors computed according to gamma dist.
 
         """
         shape = self.prior_shape
@@ -172,6 +190,10 @@ class GrammarHypothesis(VectorHypothesis):
             Likelihood summed over all outputs, summed over all hypotheses & weighted for each
             hypothesis by posterior score p(h|X).
 
+        Note
+        ----
+            This function is only designed to work with NumberGameHypothesis!
+
         """
         self.update()
         hypotheses = self.hypotheses
@@ -195,75 +217,6 @@ class GrammarHypothesis(VectorHypothesis):
             self.likelihood = likelihood
             self.update_posterior()
         return likelihood
-
-    # --------------------------------------------------------------------------------------------------------
-    # p (y in C | H)  where H is our hypothesis space
-    #
-    # Note:
-    #   This is NOT the same as `self.compute_likelihood` - that is a generative model, this is determining
-    #   whether input would be part of our domain hypothesis concept(s).
-    #
-
-    def in_concept_mle(self, domain):
-        """
-        p(y in C | h_mle)   where h_mle is the max likelihood hypothesis
-
-        """
-        h_mle = self.get_top_hypotheses(n=1, key=(lambda x: x.likelihood))[0]
-        C = h_mle()
-        likelihoods = {}
-        for y in domain:
-            if y in C:
-                likelihoods[y] = 1.
-            else:
-                likelihoods[y] = (h_mle.alpha - 1)
-        return likelihoods
-
-    def in_concept_map(self, domain):
-        """
-        p(y in C | h_map)   where h_map is the max a posteriori hypothesis
-
-        """
-        h_map = self.get_top_hypotheses(n=1, key=(lambda x: x.posterior_score))[0]
-        C = h_map()
-        likelihoods = {}
-        for y in domain:
-            if y in C:
-                likelihoods[y] = 1.
-            else:
-                likelihoods[y] = (h_map.alpha - 1)
-        return likelihoods
-
-    # TODO is this right ?????????????
-    def in_concept_avg(self, domain):
-        """
-        p(y in C | `self.hypotheses`)
-
-        for each hypothesis h, if y in C_h, accumulated w_h where w is the weight of a hypothesis,
-        determined by the hypothesis's posterior score p(h | y)
-
-        ==> This is the weighted bayesian model averaging described in (Murphy, 2007)
-
-        """
-        self.update()
-        probs_in_c = {}
-
-        for y in domain:
-            prob_in_c = 0
-            Z = logsumexp([h.posterior_score for h in self.hypotheses])
-
-            # for h in self.hypotheses:
-            #     h.set_value(h.value)
-            # print self.hypotheses[0].prior, self.hypotheses[3].prior, self.hypotheses[5].prior
-
-            for h in self.hypotheses:
-                C = h()
-                w = h.posterior_score - Z
-                if y in C:
-                    prob_in_c += exp(w)
-            probs_in_c[y] = prob_in_c
-
-        return probs_in_c
 
     # --------------------------------------------------------------------------------------------------------
     # GrammarRule methods

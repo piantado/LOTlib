@@ -132,7 +132,7 @@ class LOTHypothesis(FunctionHypothesis):
                    + (1.0-self.ALPHA) / 2.0)
 
     # --------------------------------------------------------------------------------------------------------
-    # Compute prior (includes vectorized verion)
+    # Compute prior
 
     def compute_prior(self):
         """Compute the log of the prior probability.

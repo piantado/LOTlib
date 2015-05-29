@@ -120,16 +120,16 @@ for i in range(1, 101):
 #  * With GrammarHypothesis, we can sample much more intricate models than the mixture model.
 #  * However, we also will have like 5000 rules to choose from now . . .
 #
-#
 
 independent_grammar = Grammar()
 
+# Mixture params
+# --------------
+independent_grammar.add_rule('START', '', ['INTERVAL'], 1.)
+independent_grammar.add_rule('START', '', ['MATH'], 1.)
 
 # Math rules
 # ----------
-
-independent_grammar.add_rule('START', '', ['INTERVAL'], 1.)
-independent_grammar.add_rule('START', '', ['MATH'], 1.)
 independent_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'DOMAIN_RANGE'], 1.)
 independent_grammar.add_rule('DOMAIN_RANGE', 'range_set_', ['1', '100'], 1.)
 independent_grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='X', bv_p=1.)
@@ -144,15 +144,16 @@ independent_grammar.add_rule('EXPR', 'pow2n_d32_', ['X'], 1.)
 register_primitive(lambda x: x if x in (2, 4, 8, 16, 32, 37, 64) else 0, name='pow2n_u37_')
 independent_grammar.add_rule('EXPR', 'pow2n_u37_', ['X'], 1.)
 for i in range(2, 13):
-    independent_grammar.add_rule('EXPR', 'times_', ['X', str(i)], 1.)
+    if not i==10:
+        independent_grammar.add_rule('EXPR', 'times_', ['X', str(i)], 1.)
 for i in range(2, 11):
     independent_grammar.add_rule('EXPR', 'ipowf_', [str(i), 'X'], 1.)
 for i in range(0, 10):
     independent_grammar.add_rule('EXPR', 'ends_in_', ['X', str(i)], 1.)
+    independent_grammar.add_rule('EXPR', 'contains_digit_', ['X', str(i)], 1.)
 
 # Interval Rules
 # --------------
-
 independent_grammar.add_rule('INTERVAL', 'range_set_', ['CONST', 'CONST'], 1.)
 for i in range(1, 101):
     independent_grammar.add_rule('CONST', '', [str(i)], 1.)
@@ -176,13 +177,18 @@ for i in range(1, 101):
 #
 
 lot_grammar = Grammar()
-#### lot_grammar.add_rule('START', '', ['INTERVAL'], 1.)
-lot_grammar.add_rule('START', '', ['MATH'], 1.)
+lot_grammar.add_rule('START', '', ['SET'], 1.)
+
+lot_grammar.add_rule('SET', 'setdifference_', ['SET', 'SET'], .1)
+lot_grammar.add_rule('SET', 'intersection_', ['SET', 'SET'], .1)
+lot_grammar.add_rule('SET', 'union_', ['SET', 'SET'], .1)
+
+lot_grammar.add_rule('SET', '', ['INTERVAL'], 1.)
+lot_grammar.add_rule('SET', '', ['MATH'], 1.)
 
 # Math rules
 # ----------
-
-#### lot_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'RANGE'], 1.)
+lot_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'RANGE'], 1.)
 lot_grammar.add_rule('MATH', 'mapset_', ['FUNC', 'FULL_RANGE'], 1.)
 lot_grammar.add_rule('FULL_RANGE', 'range_set_', ['1', '100'], 1.)
 lot_grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='EXPR', bv_p=2.)
@@ -192,28 +198,41 @@ lot_grammar.add_rule('EXPR', 'isprime_', ['EXPR'], 1.)
 lot_grammar.add_rule('EXPR', 'ipowf_', ['EXPR', 'EXPR'], .3)
 lot_grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 1.)
 lot_grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1.)
-# lot_grammar.add_rule('EXPR', 'ends_in_', ['EXPR', 'EXPR'], 1.)
+lot_grammar.add_rule('EXPR', 'ends_in_', ['EXPR', 'EXPR'], 1.)
+lot_grammar.add_rule('EXPR', 'contains_digit_', ['EXPR', 'EXPR'], 1.)
 
 lot_grammar.add_rule('EXPR', '', ['OPCONST'], 20.)
 for i in range(1, 11):
-    lot_grammar.add_rule('OPCONST', '', [str(i)], 2.)
+    lot_grammar.add_rule('OPCONST', '', [str(i)], 3.)
+for i in [11, 12, 13, 14, 15]:
+    lot_grammar.add_rule('OPCONST', '', [str(i)], 1.)
 
 # Interval rules
 # --------------
-
 lot_grammar.add_rule('INTERVAL', '', ['RANGE'], 1.)
 lot_grammar.add_rule('RANGE', 'range_set_', ['CONST', 'CONST'], 1.)
 for i in range(1, 101):
-    lot_grammar.add_rule('CONST', '', [str(i)], 1.)
+    if i in [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
+        lot_grammar.add_rule('CONST', '', [str(i)], 5.)
+    else:
+        lot_grammar.add_rule('CONST', '', [str(i)], 1.)
 
 
-# bayesian data analysis  +  probabilistic, structured LOT model
-# fitting priors in LOT models... what's new is we're doing a BDA that can recover plausible priors for LOT
-#  models
 
-# theres other work in psychophysics that tries to recover / infer priors (things like 'what are your
-# priors on direction of motion' or what are your priors on speed?') draws on classic structured AI
-# approaches, combined with cool data analysis that can pull out the priors
-# ==> from here, you can do cool things with these structured models to suppose whats really happening
+import copy
+import numpy as np
+
+def grammar_gamma(grammar, scale=1.0):
+    grammar = copy.copy(grammar)
+    rules = [r for r in [r for sublist in grammar.rules.values() for r in sublist] if not (r.nt == 'CONST')]
+    for r in rules:
+        r.p = np.random.gamma(r.p, scale)
+    return grammar
+
+
+
+
+
+
 
 

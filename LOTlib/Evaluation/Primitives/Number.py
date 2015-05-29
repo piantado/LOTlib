@@ -42,7 +42,7 @@ def ifU_(C,X):
 
 @primitive
 def ends_in_(n, d):
-    """Return `n` if it ends with digit `d`, 0 otherwise. E.g. ends_in_(427, 7) == 1"""
+    """Return `n` if it ends with digit `d`, 0 otherwise. E.g. ends_in_(427, 7) == 427"""
 
     if (n % 10) == d:
         return n
@@ -50,9 +50,19 @@ def ends_in_(n, d):
         return 0
 
 @primitive
+def contains_digit_(n, d):
+    """Return `n` if it contains digit `d`, 0 otherwise. E.g. contains_digit_(86, 8) == 86"""
+    if str(n) == 'nan':
+        return 0
+    if d in [int(i) for i in set(str(n))]:
+        return n
+    else:
+        return 0
+
+@primitive
 def isprime_(n):
     """Is `n` a prime number?"""
-    if n > 1000:
+    if n > 1000 or str(n) == 'nan':
         # raise OverflowError
         return 0
 
