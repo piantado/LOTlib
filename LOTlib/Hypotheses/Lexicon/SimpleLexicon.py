@@ -8,8 +8,9 @@
 from copy import copy
 from inspect import isroutine
 
-from LOTlib.Miscellaneous import flip, Infinity, qq, weighted_sample
+from LOTlib.Miscellaneous import flip, Infinity, qq, weighted_sample, attrmem
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
+
 
 class SimpleLexicon(Hypothesis):
     """
@@ -21,26 +22,26 @@ class SimpleLexicon(Hypothesis):
 
     def __init__(self, make_hypothesis, words=(), propose_p=0.25, value=None, **kwargs):
         """
-            hypothesis - a function to generate hypotheses
+            make_hypothesis -- a function to make each individual word meaning. None will leave it empty (for copying)
             words -- words to initially add (sampling from the prior)
             propose_p -- the probability of proposing to each word
         """
 
-
         Hypothesis.__init__(self, value=dict() if value is None else value, **kwargs)
-        self.__dict__.update(locals())
+        assert isinstance(self.value, dict)
 
-        assert isroutine(make_hypothesis) # check that we can call
+        self.propose_p = propose_p
 
         # update with the supplied words, each generating from the grammar
-        for w in words:
-            self.set_word(w, v=None)
+        if make_hypothesis is not None:
+            for w in words:
+                self.set_word(w, v=make_hypothesis())
 
     def __copy__(self):
         """ Copy a.valueicon. We don't re-create the fucntions since that's unnecessary and slow"""
-        new = type(self)(self.make_hypothesis, words=copy(self.words))
+        new = type(self)(None, words=())
         for w in self.value.keys():
-            new.value[w] = copy(self.value[w])
+            new.set_word(w, copy(self.value[w]))
 
         # And copy everything else
         for k in self.__dict__.keys():
@@ -53,9 +54,10 @@ class SimpleLexicon(Hypothesis):
         """
         Copy but leave values pointing to old values
         """
-        new = type(self)(self.make_hypothesis) # create the right class, but don't give words or else it tries to initialize them
+        new = type(self)(
+            self.make_hypothesis)  # create the right class, but don't give words or else it tries to initialize them
         for w in self.value.keys():
-            new.set_word(w, self.value[w])  # set to this, shallowly, since these will get proposed to
+            new.set_word(w, self.get_word(w))  # set to this, shallowly, since these will get proposed to
 
         # And copy everything else
         for k in self.__dict__.keys():
@@ -68,10 +70,13 @@ class SimpleLexicon(Hypothesis):
         """
             This defaultly puts a \0 at the end so that we can sort -z if we want (e.g. if we print out a posterior first)
         """
-        return '\n'.join([ "%-15s: %s"% (qq(w), str(v)) for w,v in sorted(self.value.iteritems())]) + '\0'
+        return '\n'+'\n'.join(["%-15s: %s" % (qq(w), str(v)) for w, v in sorted(self.value.iteritems())]) + '\0'
 
-    def __hash__(self): return hash(str(self))
-    def __eq__(self, other):   return (str(self)==str(other)) # simple but there are probably better ways
+    def __hash__(self):
+        return hash(str(self))
+
+    def __eq__(self, other):
+        return (str(self) == str(other))  # simple but there are probably better ways
 
     def __call__(self, word, *args):
         """
@@ -80,20 +85,17 @@ class SimpleLexicon(Hypothesis):
         return self.value[word](*args)
 
     # this sets the word and automatically compute its function
-    def set_word(self, w, v=None):
+    def set_word(self, w, v):
         """
             This sets word w to value v. v can be either None, a FunctionNode or a  Hypothesis, and
-            in either case it is copied here. When it is a Hypothesis, the value is extracted. If it is
-            None, we generate from the grammar
+            in either case it is copied here.
         """
-
-        # Conver to standard expressiosn
-        if v is None:
-            v = self.make_hypothesis()
-
         assert isinstance(v, Hypothesis)
 
         self.value[w] = v
+
+    def get_word(self, w):
+        return self.value[w]
 
     def all_words(self):
         return self.value.keys()
@@ -107,7 +109,7 @@ class SimpleLexicon(Hypothesis):
         """
         self.value[w].force_function(f)
 
-    ###################################################################################
+    # ##################################################################################
     ## MH stuff
     ###################################################################################
 
@@ -117,10 +119,10 @@ class SimpleLexicon(Hypothesis):
         :return:
         """
 
-        new = copy(self) ## Now we just copy the whole thing
+        new = copy(self)  ## Now we just copy the whole thing
 
         # Propose one for sure
-        w = weighted_sample(self.value.keys()) # the word to change
+        w = weighted_sample(self.value.keys())  # the word to change
         p, fb = self.value[w].propose()
         new.set_word(w, p)
 
@@ -132,11 +134,10 @@ class SimpleLexicon(Hypothesis):
 
         return new, fb
 
-
+    @attrmem('prior')
     def compute_prior(self):
-        self.prior = sum([x.compute_prior() for x in self.value.values()]) / self.prior_temperature
-        self.posterior_score = self.prior + self.likelihood
-        return self.prior
+        return sum([x.compute_prior() for x in self.value.values()]) / self.prior_temperature
+
 
 
 
