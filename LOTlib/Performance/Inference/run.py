@@ -9,9 +9,9 @@ from itertools import product
 from optparse import OptionParser
 
 import LOTlib
-from LOTlib.Performance.Evaluation import load_model
 from LOTlib.MPI.MPI_map import MPI_map, get_rank
-
+from LOTlib.Examples.ExampleLoader import load_example
+from LOTlib.Performance.EvaluateSampler import evaluate_sampler
 
 parser = OptionParser()
 parser.add_option("--out", dest="OUT", type="string", help="Output prefix", default="output-InfereceSchemes")
@@ -22,21 +22,27 @@ parser.add_option("--models", dest="MODELS", type="str", default='SymbolicRegres
 options, _ = parser.parse_args()
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-# These get defined for each process
-from LOTlib.Performance.Evaluation import evaluate_sampler
+# Define all of the samplers
 from LOTlib.Inference.Samplers.ParallelTempering import ParallelTemperingSampler
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib.Inference.Samplers.ParticleSwarm import ParticleSwarmPriorResample
-from LOTlib.Inference.Samplers import MultipleChainMCMC, ParticleSwarm, TabooMCMC, EnumerationInference
+from LOTlib.Inference.Samplers.MultipleChainMCMC import MultipleChainMCMC
+from LOTlib.Inference.Samplers.ParticleSwarm import ParticleSwarm
+from LOTlib.Inference.Samplers.TabooMCMC import TabooMCMC
+from LOTlib.Inference.Samplers.EnumerationInference import EnumerationInference
 from LOTlib.Inference.Samplers.PartitionMCMC import PartitionMCMC
 
 def run_one(iteration, model, sampler_type):
-    if LOTlib.SIG_INTERRUPTED: # do this so we don't create (big) hypotheses
+    """
+    Run one iteration of a sampling method
+    """
+
+    if LOTlib.SIG_INTERRUPTED: # Exit early
         return
 
-    data, make_h0 = load_model(model)
+    make_h0, make_data = load_example(model)
+
+    data = make_data()
     h0 = make_h0()
     grammar = h0.grammar
 
@@ -72,27 +78,26 @@ def run_one(iteration, model, sampler_type):
     with open("output/out-aggregate.%s" % get_rank(), 'a') as out_aggregate:
         with open(os.devnull,'w')  as out_hypotheses:
             # Run evaluate on it, printing to the right locations
-            evaluate_sampler(sampler, trace=False, prefix="\t".join(map(str, [model, iteration, sampler_type])),  out_hypotheses=out_hypotheses, out_aggregate=out_aggregate, print_every=options.PRINTEVERY)
+            evaluate_sampler(sampler, trace=False, prefix="\t".join(map(str, [model, iteration, sampler_type])),
+                             out_hypotheses=out_hypotheses, out_aggregate=out_aggregate, print_every=options.PRINTEVERY)
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Create all parameters
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# For each process, create the lsit of parameter
-params = [list(g) for g in product(range(options.REPETITONS),\
-                                    re.split(r',', options.MODELS),
-                                    ['multiple_chains_A', 'multiple_chains_B', 'multiple_chains_C',
-                                     'taboo_A', 'taboo_B', 'taboo_C', 'taboo_D',
-                                     'particle_swarm_A', 'particle_swarm_B', 'particle_swarm_C',
-                                     'particle_swarm_prior_sample_A', 'particle_swarm_prior_sample_B', 'particle_swarm_prior_sample_C',
-                                     'mh_sample_A', 'mh_sample_B', 'mh_sample_C', 'mh_sample_D', 'mh_sample_E',
-                                     'parallel_tempering_A', 'parallel_tempering_B', 'parallel_tempering_C',
-                                     'partitionMCMC_A', 'partitionMCMC_B', 'partitionMCMC_C',
-                                     'enumeration_A'])]
+if __name__ == "__main__":
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Actually run
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Create all parameters
 
-MPI_map(run_one, params, random_order=False)
+    # For each process, create the lsit of parameter
+    params = [list(g) for g in product(range(options.REPETITONS),\
+                                        re.split(r',', options.MODELS),
+                                        ['multiple_chains_A', 'multiple_chains_B', 'multiple_chains_C',
+                                         'taboo_A', 'taboo_B', 'taboo_C', 'taboo_D',
+                                         'particle_swarm_A', 'particle_swarm_B', 'particle_swarm_C',
+                                         'particle_swarm_prior_sample_A', 'particle_swarm_prior_sample_B', 'particle_swarm_prior_sample_C',
+                                         'mh_sample_A', 'mh_sample_B', 'mh_sample_C', 'mh_sample_D', 'mh_sample_E',
+                                         # 'parallel_tempering_A', 'parallel_tempering_B', 'parallel_tempering_C',
+                                         'partitionMCMC_A', 'partitionMCMC_B', 'partitionMCMC_C',
+                                         'enumeration_A'])]
+
+    # Actually run
+    MPI_map(run_one, params, random_order=False)
 
