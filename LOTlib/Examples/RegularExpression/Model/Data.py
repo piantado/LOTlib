@@ -15,3 +15,6 @@ data = [
     FunctionData(input=['aaca'], output=True),
     FunctionData(input=['a'],    output=True)
 ]
+
+def make_data():
+    return data

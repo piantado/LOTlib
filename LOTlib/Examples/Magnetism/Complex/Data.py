@@ -15,3 +15,6 @@ for a,b in itertools.product(objects, objects):
     myoutput = (a[0] != b[0]) and (a[0] != 'x') and (b[0] != 'x')
 
     data.append( FunctionData(input=myinput, output=myoutput) )
+
+def make_data():
+    return data

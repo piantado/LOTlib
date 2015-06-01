@@ -135,8 +135,10 @@ class MHSampler(Sampler):
                 assert self.proposal is not self.current_sample, "*** Proposal cannot be the same as the current sample!"
                 assert self.proposal.value is not self.current_sample.value, "*** Proposal cannot be the same as the current sample!"
 
-                # either compute this, or use the memoized version
-                np, nl = self.compute_posterior(self.proposal, self.data)
+                # Call myself so memoized subclasses can override
+                self.compute_posterior(self.proposal, self.data)
+
+                np, nl = self.proposal.prior, self.proposal.likelihood
 
                 # Note: It is important that we re-compute from the temperature since these may be altered
                 #    externally from ParallelTempering and others

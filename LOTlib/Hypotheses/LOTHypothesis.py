@@ -7,7 +7,7 @@ from LOTlib.Evaluation.Eval import evaluate_expression
 from LOTlib.Evaluation.EvaluationException import TooBigException, EvaluationException
 from LOTlib.Hypotheses.FunctionHypothesis import FunctionHypothesis
 from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
-from LOTlib.Miscellaneous import Infinity, lambdaNone, raise_exception
+from LOTlib.Miscellaneous import Infinity, lambdaNone, raise_exception, attrmem
 from LOTlib.GrammarRule import BVUseGrammarRule
 
 
@@ -134,16 +134,14 @@ class LOTHypothesis(FunctionHypothesis):
     # --------------------------------------------------------------------------------------------------------
     # Compute prior
 
+    @attrmem('prior')
     def compute_prior(self):
         """Compute the log of the prior probability.
 
         """
         # Compute this hypothesis prior
         if self.value.count_subnodes() > self.maxnodes:
-            self.prior = -Infinity
+            return -Infinity
         else:
             # Compute prior with either RR or not.
-            self.prior = self.grammar.log_probability(self.value) / self.prior_temperature
-
-        self.update_posterior()
-        return self.prior
+            return self.grammar.log_probability(self.value) / self.prior_temperature

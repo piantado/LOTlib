@@ -3,7 +3,6 @@ from cachetools import LRUCache
 from LOTlib.Miscellaneous import Infinity
 from MetropolisHastings import MHSampler
 
-
 class MemoizedMHSampler(MHSampler):
     """
         Same as MHSampler, but the values of compute_posterior are cached via LRUCache
@@ -17,7 +16,7 @@ class MemoizedMHSampler(MHSampler):
     def compute_posterior(self, h, data):
         if h in self.mem:
             ret = self.mem[h]
-            h.posterior_score = sum(ret) # set this because it may not be set
+            h.posterior_score = ret # set this because it may not be set
             return ret
         else:
             ret = MHSampler.compute_posterior(self, h, data)

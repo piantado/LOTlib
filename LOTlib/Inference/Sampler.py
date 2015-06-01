@@ -49,8 +49,5 @@ class Sampler(object):
     def compute_posterior(self, h, data):
         """
         A wrapper for hypothesis.compute_posterior(data) that can be overwritten in fancy subclassses.
-
-        Should return [np,nl], the prior and likelihood
-
         """
         return h.compute_posterior(data)

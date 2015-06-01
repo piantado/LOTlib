@@ -1,169 +1,176 @@
+May 31 2015
+    - Changed compute_posterior to now return the posterior, not p and l. 
+    - created a decorator @Hypothesis.attrmem to use instead of setting self.prior etc by hand
+    - LOTlib NO LONGER guarantees that calls to compute_prior or compute_likelihood will set posterior_score. Too much baggage. Use compute_posterior or update_posterior explicitly
+    - Moved LOTlib/Examples/Tutorial to LOTlib/Tutorial
+    - Standardized model running and inference so that everything uses the same form. See
+    Examples/Readme.md    
 Mar 10 2015
-	- NOTE: Changed log_probability to only be run from grammar. FunctionNodes now no longer store generation_probability. This will require changes to use grammar.log_probability(t) instead of t.log_probability()
+    - NOTE: Changed log_probability to only be run from grammar. FunctionNodes now no longer store generation_probability. This will require changes to use grammar.log_probability(t) instead of t.log_probability()
     - Changed lot_iter to break_ctrlc    
 Mar 6 2015
-        - added abstract Sampler class to make samplers compositional. Now you can make a PartitionMCMC of a ParallelTempering, for instance
-        - Added experiment Monte Carlo Tree Search in Inference.MCTS. Includes a  bunch of minor changes to make this work better. 
+    - added abstract Sampler class to make samplers compositional. Now you can make a PartitionMCMC of a ParallelTempering, for instance
+    - Added experiment Monte Carlo Tree Search in Inference.MCTS. Includes a  bunch of minor changes to make this work better. 
 Feb 1 2015
-        - On failure of a proposal type, proposers now raise ProposalFailedException, rather than returning [newt,0.0]
-        - Changes to FunctionNode.__eq__ that now make it take into account "invisible" nodes (FunctionNodes that have a name of '')
-        - Reorganization of performance testing
+    - On failure of a proposal type, proposers now raise ProposalFailedException, rather than returning [newt,0.0]
+    - Changes to FunctionNode.__eq__ that now make it take into account "invisible" nodes (FunctionNodes that have a name of '')
+    - Reorganization of performance testing
 Jan 7 2015
-	- Changed @LOTlib_primitive to @primitive
-Dec 28 2014        
-        - Removed resample_p -- now you must specify a custom function in FunctionNode (resampleProbability). Removed in GrammarRule too. 
-	- Changed impossible proposals to raise a ProposalFailedException
-	- fixed copying twice in LOTProposal
-        - @LOT_primitive now adds to eval, no need to call register_primitive; moved LOTlib.Primitives.Primitives to LOTlib.Evaluation.Eval
-        - Moved Number primitives to Examples.Number.Model.Primitives
-        - Removed listifnot from MPI. Now MPI_map and MPI_unorderedmap *must* be given an iterable of lists
+    - Changed @LOTlib_primitive to @primitive
+Dec 28 2014    
+    - Removed resample_p -- now you must specify a custom function in FunctionNode (resampleProbability). Removed in GrammarRule too. 
+    - Changed impossible proposals to raise a ProposalFailedException
+    - fixed copying twice in LOTProposal
+    - @LOT_primitive now adds to eval, no need to call register_primitive; moved LOTlib.Primitives.Primitives to LOTlib.Evaluation.Eval
+    - Moved Number primitives to Examples.Number.Model.Primitives
+    - Removed listifnot from MPI. Now MPI_map and MPI_unorderedmap *must* be given an iterable of lists
 Dec 18 2014
-        - Updates to testing framework -- some MCMC tests, proposal, grammar. Old version is in Testing/old
-        - moved lp_regenerate_propose_to_grammar to RegenerationProposal
+    - Updates to testing framework -- some MCMC tests, proposal, grammar. Old version is in Testing/old
+    - moved lp_regenerate_propose_to_grammar to RegenerationProposal
 Dec 12 2014
-        - Removed mh_sample (use MHSampler instead)
-        - moved FunctionNode->String functions to Visualization.Stringification, as well as FunctionNode->Dot
-        - Moved FiniteBestSet to LOTlib.Utilities
-        - created MCMCSummary
+    - Removed mh_sample (use MHSampler instead)
+    - moved FunctionNode->String functions to Visualization.Stringification, as well as FunctionNode->Dot
+    - Moved FiniteBestSet to LOTlib.Utilities
+    - created MCMCSummary
 Nov 19 2014:
-        - RecursiveLexicon added to enable mutual recursion. 
-        - SimpleLexicon now no longer copies *all* values on proposal--new proposed one may point to old values
+    - RecursiveLexicon added to enable mutual recursion. 
+    - SimpleLexicon now no longer copies *all* values on proposal--new proposed one may point to old values
 Nov 17 2014:
-        - Recursion defaultly removed from LOTHypothesis. Now, recursive calls must use RecursiveLOTHypothesis. (This saves all LOTHypotheses from having to wrap in a Y combinator)
-        - Added Annealing and Schedule classes
-        - Re-organization of Number
+    - Recursion defaultly removed from LOTHypothesis. Now, recursive calls must use RecursiveLOTHypothesis. (This saves all LOTHypotheses from having to wrap in a Y combinator)
+    - Added Annealing and Schedule classes
+    - Re-organization of Number
 Nov 13 2014:
-        - fixes to inverse-inline proposal
-        - value2function(value) now is compile_function(), and assumes that the value has been set
-        - Updates to organization of Examples
-        - More examples brought up to date
-        - FunctionHypothesis.__call__ now does no error handling--exceptions must be handled by subclasses
-        - Fixed NameErrors to be useful!
+    - fixes to inverse-inline proposal
+    - value2function(value) now is compile_function(), and assumes that the value has been set
+    - Updates to organization of Examples
+    - More examples brought up to date
+    - FunctionHypothesis.__call__ now does no error handling--exceptions must be handled by subclasses
+    - Fixed NameErrors to be useful!
 Oct 31 2014:
-        - Integration of SimpleMPI with LOTlib (now LOTlib.MPI). SimpleMPI will no longer be updated. 
+    - Integration of SimpleMPI with LOTlib (now LOTlib.MPI). SimpleMPI will no longer be updated. 
 Sep 24 2014:
-        - Major revision to Grammar.enumeration (no longer called increment_tree)
-        - Changed string output to include the "implicit" lambda on LOTHypotheses
+    - Major revision to Grammar.enumeration (no longer called increment_tree)
+    - Changed string output to include the "implicit" lambda on LOTHypotheses
 Aug 31 2014:
-        - Fixed setto to update parents correctly
-        - Changed "replace_subnodes" to use a predicate rather than equality, since equality is a bit of a hazard with new bound variables
-        - Fixed FunctionNode copy to correctly manage parents
-        - fixed lambda thunk print error
-        - update InverseInline proposal, but not thoroughly checked
+    - Fixed setto to update parents correctly
+    - Changed "replace_subnodes" to use a predicate rather than equality, since equality is a bit of a hazard with new bound variables
+    - Fixed FunctionNode copy to correctly manage parents
+    - fixed lambda thunk print error
+    - update InverseInline proposal, but not thoroughly checked
 Aug 29 2014:
-	- Removed isapply, islambda, isbv, etc. The lambdas and bvs can be checked by checking the type of the FunctionNode or GrammarRule
-	- changed BVRuleContextManager to take a functionNode as its first argument, not a rule. It defautly looks at the .added_rule attribute of the FunctionNode
-	- Added parent references to FunctionNodes. This simplified some code in resampling proposals (and allowed them to use BVContextManager)
-	- Move subnode sampling from grammar to FunctionNode
-	- These changes got rid of the need to do crazy "for ... in" notation for sampling nodes. Now it works via BVContextManger as in RegenerationProposal
-	- InsertDeleteProposal is now defaultly NOT a mixture of insertdelete and RegenerationProposal
-	- FunctionNdoes now store a pointer to the rule that made them. This is required to allow them to recompute their probabilities under a grammar
-	- Cleaned up some code in Grammar	
-	- Primitives moved to inside Evaluation
-	- Proposals moved inside Inference
-	- Move tests into Testing, and removed some extras
-	- fixed problem in "if_" print order
-	- Updated Number Shared code
+    - Removed isapply, islambda, isbv, etc. The lambdas and bvs can be checked by checking the type of the FunctionNode or GrammarRule
+    - changed BVRuleContextManager to take a functionNode as its first argument, not a rule. It defautly looks at the .added_rule attribute of the FunctionNode
+    - Added parent references to FunctionNodes. This simplified some code in resampling proposals (and allowed them to use BVContextManager)
+    - Move subnode sampling from grammar to FunctionNode
+    - These changes got rid of the need to do crazy "for ... in" notation for sampling nodes. Now it works via BVContextManger as in RegenerationProposal
+    - InsertDeleteProposal is now defaultly NOT a mixture of insertdelete and RegenerationProposal
+    - FunctionNdoes now store a pointer to the rule that made them. This is required to allow them to recompute their probabilities under a grammar
+    - Cleaned up some code in Grammar    
+    - Primitives moved to inside Evaluation
+    - Proposals moved inside Inference
+    - Move tests into Testing, and removed some extras
+    - fixed problem in "if_" print order
+    - Updated Number Shared code
 Aug 22 2014:
-	- Fixed bug in enumeration with new bound variable setup; make bound variables increment in depth order 
+    - Fixed bug in enumeration with new bound variable setup; make bound variables increment in depth order 
 Aug 19 2014:
-	- FunctionNode bound variables are now stored with uuids *internally* rather than a string plus the depth. We use the string+Depth view when casting a FunctionNode to a string.
-	- pystring was moved out of FunctionNode to make it a little more elegant
-	- FunctionNode.__eq__ the fancy version is now not as necessary (since all bv_names are unique, and that's handled by pystring), so that has been removed. We still could check uniqueness wrt bv_prefix. 
+    - FunctionNode bound variables are now stored with uuids *internally* rather than a string plus the depth. We use the string+Depth view when casting a FunctionNode to a string.
+    - pystring was moved out of FunctionNode to make it a little more elegant
+    - FunctionNode.__eq__ the fancy version is now not as necessary (since all bv_names are unique, and that's handled by pystring), so that has been removed. We still could check uniqueness wrt bv_prefix. 
 
 Aug 16 2014:
-	- Refactoring of GrammarRule and creation of a BVRuleContextManager to allow easier management of added bound variables. Changes in grammar to use "with" instead of adding and subtracting rules
-	- Change to FunctionNode for nicer printing via %s
-	- Refactoring of FunctionNode to store the *rule* added, rather than the bv_name, bv_type, etc. Now use FunctionNode.added_rule to get hte bv characteristsics
-	- Removed Grammar.add_bv_rule and Grammar.remove_rule
-	- Added BV to increment_tree with fancy new "with" statements
-	- GrammarRule now will return a FunctionNode "stub" that hasn't expanded the args yet. This is used in generation. 
-	- Some early edits for applylambda. Not clear if that will be feasible to add. 
+    - Refactoring of GrammarRule and creation of a BVRuleContextManager to allow easier management of added bound variables. Changes in grammar to use "with" instead of adding and subtracting rules
+    - Change to FunctionNode for nicer printing via %s
+    - Refactoring of FunctionNode to store the *rule* added, rather than the bv_name, bv_type, etc. Now use FunctionNode.added_rule to get hte bv characteristsics
+    - Removed Grammar.add_bv_rule and Grammar.remove_rule
+    - Added BV to increment_tree with fancy new "with" statements
+    - GrammarRule now will return a FunctionNode "stub" that hasn't expanded the args yet. This is used in generation. 
+    - Some early edits for applylambda. Not clear if that will be feasible to add. 
 
 July 31 2014
-	- Refactored Proposals to have separate classes. 
+    - Refactored Proposals to have separate classes. 
 July 20 2014
-	- Refactored Inference.* to use classes rather than functions. This way, samplers can save states, be resumed, etc. 
+    - Refactored Inference.* to use classes rather than functions. This way, samplers can save states, be resumed, etc. 
 June 20 2014
-	- Created Evaluation to implement different virtual machines for evaluating FunctionNodes. The most basic if Eval, whcih calls python eval. 
-	- Refactored BasicPrimitives to LOTlib.Primitives; added ability to add new primitives
+    - Created Evaluation to implement different virtual machines for evaluating FunctionNodes. The most basic if Eval, whcih calls python eval. 
+    - Refactored BasicPrimitives to LOTlib.Primitives; added ability to add new primitives
 June 15 2014
-	- Deleted Memoization
-	- Added CombinatoryLogic
-	- Modified Parsing
-	- Fixed Grammar to delete rules in case an exception gets raised during generation
-	- Grammar.BV_P is now the default, but these can be set for individual rules via bv_p in add_rule
-	- renamed ll_temperature -> likelihood_temperature in MetropolisHastings, to match with prior
-	
+    - Deleted Memoization
+    - Added CombinatoryLogic
+    - Modified Parsing
+    - Fixed Grammar to delete rules in case an exception gets raised during generation
+    - Grammar.BV_P is now the default, but these can be set for individual rules via bv_p in add_rule
+    - renamed ll_temperature -> likelihood_temperature in MetropolisHastings, to match with prior
+    
 May 17 2014:
-	- Removed Serialization -- reverted to old pickling scheme for FunctionHypothesis because otherwise MPI doesn't work well
-	- Added simple CCG-ish example
-	- Updated SymbolicRegression to use new compute_single_likelihood
-	- Moved RationalRules code and helper functions out of Grammar and into RationalRulesLOTHypothesis
-	- Fixed prior,likelihood temperature passing in hypothesis initialization
-	- fixed number demo to work with compute_single_likelihood
-	- fixed MAPSymbolicRegressionHypothesis
+    - Removed Serialization -- reverted to old pickling scheme for FunctionHypothesis because otherwise MPI doesn't work well
+    - Added simple CCG-ish example
+    - Updated SymbolicRegression to use new compute_single_likelihood
+    - Moved RationalRules code and helper functions out of Grammar and into RationalRulesLOTHypothesis
+    - Fixed prior,likelihood temperature passing in hypothesis initialization
+    - fixed number demo to work with compute_single_likelihood
+    - fixed MAPSymbolicRegressionHypothesis
 May 13 2014:
-	- Changed LOTHypothesis.compute_single_likelihood to require a FunctionData
-	- Altered how functions are passed to LOTHypothesis and FunctionHypothesis -- compute_single_likelihood now takes a single argument, a FunctionData
-	- Fixed RationalRules examples to use new Hypotheses.RationalRulesLOTHypothesis
-	
+    - Changed LOTHypothesis.compute_single_likelihood to require a FunctionData
+    - Altered how functions are passed to LOTHypothesis and FunctionHypothesis -- compute_single_likelihood now takes a single argument, a FunctionData
+    - Fixed RationalRules examples to use new Hypotheses.RationalRulesLOTHypothesis
+    
 May 12 2014:
-	- Added support for types (in the semantic/functional sense), that play nicely with nested lambdas
-	- Major refactoring of Lexicon, into SimpleLexicon, WeightedLexicon, and Examples/Quantifier/GriceanWeightedLexicon
-	- Changed SimpleLexicon to hold Hypotheses for each word, instead of FunctionNodes
-	- Addition of a Testing folder
-	- Added example on regular expression inference, demonstrating how to add a new type of "eval"
-	- Moved vectorized quantifier stuff to a new subfolder, that will have to be brought up to date eventually
-	- Changed serialization to allow for serialization of arbitrary things, with lambdas, etc. This uses the "cloud" library instead of pickle
-	
+    - Added support for types (in the semantic/functional sense), that play nicely with nested lambdas
+    - Major refactoring of Lexicon, into SimpleLexicon, WeightedLexicon, and Examples/Quantifier/GriceanWeightedLexicon
+    - Changed SimpleLexicon to hold Hypotheses for each word, instead of FunctionNodes
+    - Addition of a Testing folder
+    - Added example on regular expression inference, demonstrating how to add a new type of "eval"
+    - Moved vectorized quantifier stuff to a new subfolder, that will have to be brought up to date eventually
+    - Changed serialization to allow for serialization of arbitrary things, with lambdas, etc. This uses the "cloud" library instead of pickle
+    
 May 1 2014:
-	- Major change: is_terminal now only checks that the descendants are NOT functionNodes
-	- Added lot_iter, which takes a generator and wraps it so that ctrl-c will break 
-	- Added magnetism example
-	
+    - Major change: is_terminal now only checks that the descendants are NOT functionNodes
+    - Added lot_iter, which takes a generator and wraps it so that ctrl-c will break 
+    - Added magnetism example
+    
 Jan 28 2014:
-	- Many changes to naming:
-		lp now posterior_score
-		v (function argument in hypothesses) now value
-		tweaks to weighted_sample, to remove old style usage
-		chanes to p/lp in GrammarRule
-		
+    - Many changes to naming:
+    lp now posterior_score
+    v (function argument in hypothesses) now value
+    tweaks to weighted_sample, to remove old style usage
+    chanes to p/lp in GrammarRule
+    
 Dec 14 2013:
-	- Major revision breaking backward compatibility -- changes to FunctionNode syntax in PCFGs so it makes more sense. Non-function terminals have None as args; function terminals have []
-	- Also changed "PCFG" to "Grammar" since it's not technically a pcfg
-	- Changed bv so that they now have a name and a type (if the type is set to [], they are function calls, else they can expand their type below)
-	- In doing this, the grammar was changed so that each nonterminal can add at most *one* bound variable (no longer a list). This lets lambda be higher order (but typed)
-	- Changed to semantic version numbering, and advanced to version 0.0.1
+    - Major revision breaking backward compatibility -- changes to FunctionNode syntax in PCFGs so it makes more sense. Non-function terminals have None as args; function terminals have []
+    - Also changed "PCFG" to "Grammar" since it's not technically a pcfg
+    - Changed bv so that they now have a name and a type (if the type is set to [], they are function calls, else they can expand their type below)
+    - In doing this, the grammar was changed so that each nonterminal can add at most *one* bound variable (no longer a list). This lets lambda be higher order (but typed)
+    - Changed to semantic version numbering, and advanced to version 0.0.1
 Dec 12, 2013:
-	- Changed the .copy() methods to all use the python standard __copy__. This now correctly is handled throughout inheritance
-	- Fixed README.md
-	- Removed memoization -- not used anymore (but should be added back in eventually)
-	- Removed a bunch of old files
+    - Changed the .copy() methods to all use the python standard __copy__. This now correctly is handled throughout inheritance
+    - Fixed README.md
+    - Removed memoization -- not used anymore (but should be added back in eventually)
+    - Removed a bunch of old files
 Dec 10, 2013:
-	- Changed GaussianLOTHypothesis to require ll_sd in FunctionData, not as an argument to the hypothesis.
+    - Changed GaussianLOTHypothesis to require ll_sd in FunctionData, not as an argument to the hypothesis.
 Dec 9 2013:
-	- Removed crazy function call notation () in bound variables. Now if you want that, you need to call apply (as before)
-	- Cleaned up FiniteBestSet a little -- added FiniteBestSet.add and kinder merge
-	- Cleaned up Number Search to play nicer with new MPI_map
+    - Removed crazy function call notation () in bound variables. Now if you want that, you need to call apply (as before)
+    - Cleaned up FiniteBestSet a little -- added FiniteBestSet.add and kinder merge
+    - Cleaned up Number Search to play nicer with new MPI_map
 Dec 2 2013:
-	- Added RR example
+    - Added RR example
 Sep 23, 2013:
-	- Removed parallel MPI functions to a separate library, SimpleMPI. This keeps the core LOTlib code separate, and allows easy use of mapping in other applications
+    - Removed parallel MPI functions to a separate library, SimpleMPI. This keeps the core LOTlib code separate, and allows easy use of mapping in other applications
 
 July 28, 2013
-	- added NAND Compression example
-	- Made FunctionNode.depth() return an int
-	- added all_binary_vectors to Miscellaneous
-	
+    - added NAND Compression example
+    - Made FunctionNode.depth() return an int
+    - added all_binary_vectors to Miscellaneous
+    
 April 23, 2013
-	- Got rid of the annoying MPI warning for too many calls to MPI_Finalize()
-	- Progress bar tweaks
-	- made BasicPrimitives.ancestors O(N) instead of O(N^2)
-	
+    - Got rid of the annoying MPI warning for too many calls to MPI_Finalize()
+    - Progress bar tweaks
+    - made BasicPrimitives.ancestors O(N) instead of O(N^2)
+    
 April 22, 2013
-	- Changed "StandardExpression" to "LOTHypothesis"
-	- Made FunctionNodes have a default iterator of subnodes, and removed FunctionNode.all_subnodes()
-	- Changed "temperature" in MCMC to apply *only* to the LL, not the prior. This helps keep our PCFGs defined even for higher temperature
-	- Created a friendly changelog
-	
+    - Changed "StandardExpression" to "LOTHypothesis"
+    - Made FunctionNodes have a default iterator of subnodes, and removed FunctionNode.all_subnodes()
+    - Changed "temperature" in MCMC to apply *only* to the LL, not the prior. This helps keep our PCFGs defined even for higher temperature
+    - Created a friendly changelog
+    

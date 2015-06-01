@@ -3,6 +3,8 @@
 # Define the grammar
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+TERMINAL_WEIGHT = 5.0
+
 from LOTlib.Grammar import Grammar
 
 grammar = Grammar()
@@ -21,6 +23,6 @@ grammar.add_rule('EXPR', 'sin_', ['EXPR'], 1.0)
 grammar.add_rule('EXPR', 'cos_', ['EXPR'], 1.0)
 grammar.add_rule('EXPR', 'tan_', ['EXPR'], 1.0)
 
-grammar.add_rule('EXPR', 'x', None, 5.0) # these terminals should have None for their function type; the literals
+grammar.add_rule('EXPR', 'x', None, TERMINAL_WEIGHT) # these terminals should have None for their function type; the literals
 
-grammar.add_rule('EXPR', '1.0', None, 5.0)
+grammar.add_rule('EXPR', '1.0', None, TERMINAL_WEIGHT)

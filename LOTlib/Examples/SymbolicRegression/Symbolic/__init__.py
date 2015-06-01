@@ -1,2 +1,2 @@
 
-from Data import generate_data
+from Model import *

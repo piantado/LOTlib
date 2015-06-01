@@ -20,7 +20,7 @@ class SimpleLexicon(Hypothesis):
         the true utteranecs
     """
 
-    def __init__(self, make_hypothesis, words=(), propose_p=0.25, value=None, **kwargs):
+    def __init__(self, make_hypothesis, words=None, propose_p=0.25, value=None, **kwargs):
         """
             make_hypothesis -- a function to make each individual word meaning. None will leave it empty (for copying)
             words -- words to initially add (sampling from the prior)
@@ -33,15 +33,15 @@ class SimpleLexicon(Hypothesis):
         self.propose_p = propose_p
 
         # update with the supplied words, each generating from the grammar
-        if make_hypothesis is not None:
+        if make_hypothesis is not None and words is not None:
             for w in words:
                 self.set_word(w, v=make_hypothesis())
 
     def __copy__(self):
         """ Copy a.valueicon. We don't re-create the fucntions since that's unnecessary and slow"""
-        new = type(self)(None, words=())
-        for w in self.value.keys():
-            new.set_word(w, copy(self.value[w]))
+        new = type(self)(None)
+        for w in self.all_words():
+            new.set_word(w, copy(self.get_word(w)))
 
         # And copy everything else
         for k in self.__dict__.keys():

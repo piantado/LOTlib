@@ -7,8 +7,7 @@ OBJECTS              = ['JOHN', 'MARY', 'SUSAN', 'BILL']
 SEMANTIC_1PREDICATES = ['SMILED', 'LAUGHED', 'MAN', 'WOMAN']
 SEMANTIC_2PREDICATES = ['SAW', 'LOVED']
 
-
-
+## Define the grammar
 grammar = Grammar()
 
 grammar.add_rule('START', '', ['FUNCTION'], 2.0)

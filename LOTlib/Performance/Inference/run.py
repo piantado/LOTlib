@@ -32,17 +32,23 @@ from LOTlib.Inference.Samplers.TabooMCMC import TabooMCMC
 from LOTlib.Inference.Samplers.EnumerationInference import EnumerationInference
 from LOTlib.Inference.Samplers.PartitionMCMC import PartitionMCMC
 
+
 def run_one(iteration, model, sampler_type):
     """
     Run one iteration of a sampling method
     """
 
-    if LOTlib.SIG_INTERRUPTED: # Exit early
-        return
+    if LOTlib.SIG_INTERRUPTED: return
 
-    make_h0, make_data = load_example(model)
+    # Try to split the model by : to handle amounts of data
+    if re.search(r":", model):
+        m, d = re.split(r":", model)
+        make_h0, make_data = load_example(m)
+        data = make_data(int(d))
+    else:
+        make_h0, make_data = load_example(model)
+        data = make_data()
 
-    data = make_data()
     h0 = make_h0()
     grammar = h0.grammar
 
@@ -75,6 +81,9 @@ def run_one(iteration, model, sampler_type):
     elif sampler_type == 'enumeration_A':           sampler = EnumerationInference(grammar, make_h0, data, steps=options.SAMPLES)
     else: assert False, "Bad sampler type: %s" % sampler_type
 
+    # Call the function from EvaluateSampler to actually output the file
+    # run(model, sampler, prefix="\t".join(map(str, [model, iteration, sampler_type])), print_every=options.PRINT_EVERY)
+
     with open("output/out-aggregate.%s" % get_rank(), 'a') as out_aggregate:
         with open(os.devnull,'w')  as out_hypotheses:
             # Run evaluate on it, printing to the right locations
@@ -84,9 +93,7 @@ def run_one(iteration, model, sampler_type):
 
 if __name__ == "__main__":
 
-    # Create all parameters
-
-    # For each process, create the lsit of parameter
+    # For each process, create the list of parameters
     params = [list(g) for g in product(range(options.REPETITONS),\
                                         re.split(r',', options.MODELS),
                                         ['multiple_chains_A', 'multiple_chains_B', 'multiple_chains_C',
@@ -94,7 +101,7 @@ if __name__ == "__main__":
                                          'particle_swarm_A', 'particle_swarm_B', 'particle_swarm_C',
                                          'particle_swarm_prior_sample_A', 'particle_swarm_prior_sample_B', 'particle_swarm_prior_sample_C',
                                          'mh_sample_A', 'mh_sample_B', 'mh_sample_C', 'mh_sample_D', 'mh_sample_E',
-                                         # 'parallel_tempering_A', 'parallel_tempering_B', 'parallel_tempering_C',
+                                         'parallel_tempering_A', 'parallel_tempering_B', 'parallel_tempering_C',
                                          'partitionMCMC_A', 'partitionMCMC_B', 'partitionMCMC_C',
                                          'enumeration_A'])]
 

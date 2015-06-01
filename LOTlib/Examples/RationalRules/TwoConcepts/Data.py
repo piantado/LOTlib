@@ -15,3 +15,6 @@ data = [
     FunctionData(['B', Obj(shape='triangle', color='blue')], True),
     FunctionData(['B', Obj(shape='triangle', color='red')],  True)
 ] * 10  # number of data points exactly like these
+
+def make_data():
+    return data

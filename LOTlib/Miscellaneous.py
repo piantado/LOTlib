@@ -547,4 +547,31 @@ def scramble_sort(lst, keyfunction):
     
     return map(lambda x: x[2], sorted(keys))
 
+# ------------------------------------------------------------------------------------------------------------
+# Memoization
+# ------------------------------------------------------------------------------------------------------------
 
+
+def attrmem(aname):
+    """
+    Memoize a class function, saving the return value to X in @attrmem(X)
+
+    :param f: a function to memoize
+    :return: the memoized function
+
+    Example:
+        @attrmem('prior')
+        def compute_prior(self, ...):
+            ...
+    will save every output of compute_prior to self.prior
+    """
+    def wrap1(f):
+
+        def wrap2(self, *args, **kwargs):
+            v = f(self, *args, **kwargs)
+            setattr(self, aname, v)
+            return v
+
+        return wrap2
+
+    return wrap1

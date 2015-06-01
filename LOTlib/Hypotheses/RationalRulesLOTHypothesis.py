@@ -3,7 +3,7 @@ from copy import copy
 import numpy
 
 from LOTHypothesis import LOTHypothesis
-from LOTlib.Miscellaneous import Infinity, beta
+from LOTlib.Miscellaneous import Infinity, beta, attrmem
 from LOTlib.FunctionNode import FunctionNode
 from collections import defaultdict
 
@@ -53,6 +53,8 @@ class RationalRulesLOTHypothesis(LOTHypothesis):
             Implement a Rational Rules (Goodman et al 2008)-style grammar over Boolean expressions.
 
     """
+    NoCopy = ['self', 'grammar', 'value', 'proposal_function', 'f']
+
     def __init__(self, grammar, value=None, rrAlpha=1.0, *args, **kwargs):
         """
                 Everything is passed to LOTHypothesis
@@ -62,31 +64,27 @@ class RationalRulesLOTHypothesis(LOTHypothesis):
         LOTHypothesis.__init__(self, grammar, value=value, *args, **kwargs)
 
 
-    def __copy__(self, copy_value=True):
+    def __copy__(self, value=None):
         """
                 Return a copy of myself.
         """
 
         # Since this is inherited, call the constructor on everything, copying what should be copied
-        thecopy = type(self)(self.grammar, rrAlpha=self.rrAlpha, value=copy(self.value) if copy_value else self.value,)
+        thecopy = type(self)(self.grammar, rrAlpha=self.rrAlpha, value=copy(self.value) if value is not None else value)
 
         # And then then copy the rest
-        for k in self.__dict__.keys():
-            if k not in ['self', 'grammar', 'value', 'proposal_function', 'f']:
+        for k in set(self.__dict__.keys()).difference(RationalRulesLOTHypothesis.NoCopy):
                 thecopy.__dict__[k] = copy(self.__dict__[k])
 
         return thecopy
 
+    @attrmem('prior')
     def compute_prior(self):
         """
 
         """
         if self.value.count_subnodes() > self.maxnodes:
-            self.prior = -Infinity
+            return-Infinity
         else:
             # compute the prior with either RR or not.
-            self.prior = RR_prior(self.grammar, self.value, alpha=self.rrAlpha) / self.prior_temperature
-
-        self.posterior_score = self.prior + self.likelihood
-
-        return self.prior
+            return RR_prior(self.grammar, self.value, alpha=self.rrAlpha) / self.prior_temperature

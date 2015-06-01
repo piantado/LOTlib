@@ -43,10 +43,7 @@ class TabooMCMC(MHSampler):
         Compute prior & likelihood for `h`, penalizing prior by how many samples have been generated so far.
 
         """
-        mypenalty = self.seen[h] * self.penalty
-        np, nl = h.compute_posterior(data)
-        np = np + mypenalty
-        return np, nl
+        return self.seen[h] * self.penalty + h.compute_posterior(data)
 
 
 if __name__ == "__main__":

@@ -11,3 +11,6 @@ data = [
     FunctionData( [Obj(shape='triangle', color='blue')], False),
     FunctionData( [Obj(shape='triangle', color='red')], False),
  ]
+
+def make_data():
+    return data

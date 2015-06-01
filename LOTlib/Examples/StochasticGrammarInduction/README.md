@@ -1,0 +1,1 @@
+This is an example to demonstrate the use of a SimpleGenerativeHypothesis doing an extremelys simple version of grammar induction. The hypotheses here are programs that stochastically generate strings.
