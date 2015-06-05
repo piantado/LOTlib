@@ -5,11 +5,11 @@ library(stringr)
 library(gridExtra) # needed for "unit"
 
 d <- NULL
-for(f in list.files("output", pattern="out-agg*", full.names=TRUE)) {
+for(f in list.files("output", pattern="agg*", full.names=TRUE)) {
         d <- rbind(d, read.table(f))
 }
 
-names(d)[1:7] <- c("model", "iteration", "nchains", "temperature", "steps", "time", "Z")
+names(d)[1:7] <- c("model", "iteration", "temperature", "steps", "time", "Z")
 
 
 d$temperature <- as.factor(d$temperature)
@@ -17,9 +17,9 @@ d$nchains <- as.factor(d$nchains)
 p <- ggplot(d, aes(x=steps, y=Z, color=temperature)) + 
 	stat_summary(fun.y=mean, geom="line", size=1) +
 	opts(legend.key.size=unit(3,"lines")) +
-	facet_wrap(model ~ nchains, scales="free") 
+	facet_wrap(~ model, scales="free") 
 
-ggsave("tempchain.pdf", width=16, height=12)
+ggsave("temperatures.pdf", width=16, height=12)
 # p
 
 

@@ -5,7 +5,7 @@ library(stringr)
 library(gridExtra) # needed for "unit"
 
 d <- NULL
-for(f in list.files("output", pattern="out-agg*", full.names=TRUE)) {
+for(f in list.files("output", pattern="agg*", full.names=TRUE)) {
         d <- rbind(d, read.table(f))
 }
 names(d)[1:6] <- c("model", "iteration", "parameter", "steps", "time", "Z")

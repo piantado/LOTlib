@@ -77,7 +77,6 @@ Aug 19 2014:
     - FunctionNode bound variables are now stored with uuids *internally* rather than a string plus the depth. We use the string+Depth view when casting a FunctionNode to a string.
     - pystring was moved out of FunctionNode to make it a little more elegant
     - FunctionNode.__eq__ the fancy version is now not as necessary (since all bv_names are unique, and that's handled by pystring), so that has been removed. We still could check uniqueness wrt bv_prefix. 
-
 Aug 16 2014:
     - Refactoring of GrammarRule and creation of a BVRuleContextManager to allow easier management of added bound variables. Changes in grammar to use "with" instead of adding and subtracting rules
     - Change to FunctionNode for nicer printing via %s
@@ -86,7 +85,6 @@ Aug 16 2014:
     - Added BV to increment_tree with fancy new "with" statements
     - GrammarRule now will return a FunctionNode "stub" that hasn't expanded the args yet. This is used in generation. 
     - Some early edits for applylambda. Not clear if that will be feasible to add. 
-
 July 31 2014
     - Refactored Proposals to have separate classes. 
 July 20 2014
@@ -101,7 +99,6 @@ June 15 2014
     - Fixed Grammar to delete rules in case an exception gets raised during generation
     - Grammar.BV_P is now the default, but these can be set for individual rules via bv_p in add_rule
     - renamed ll_temperature -> likelihood_temperature in MetropolisHastings, to match with prior
-    
 May 17 2014:
     - Removed Serialization -- reverted to old pickling scheme for FunctionHypothesis because otherwise MPI doesn't work well
     - Added simple CCG-ish example
@@ -114,7 +111,6 @@ May 13 2014:
     - Changed LOTHypothesis.compute_single_likelihood to require a FunctionData
     - Altered how functions are passed to LOTHypothesis and FunctionHypothesis -- compute_single_likelihood now takes a single argument, a FunctionData
     - Fixed RationalRules examples to use new Hypotheses.RationalRulesLOTHypothesis
-    
 May 12 2014:
     - Added support for types (in the semantic/functional sense), that play nicely with nested lambdas
     - Major refactoring of Lexicon, into SimpleLexicon, WeightedLexicon, and Examples/Quantifier/GriceanWeightedLexicon
@@ -123,19 +119,16 @@ May 12 2014:
     - Added example on regular expression inference, demonstrating how to add a new type of "eval"
     - Moved vectorized quantifier stuff to a new subfolder, that will have to be brought up to date eventually
     - Changed serialization to allow for serialization of arbitrary things, with lambdas, etc. This uses the "cloud" library instead of pickle
-    
 May 1 2014:
     - Major change: is_terminal now only checks that the descendants are NOT functionNodes
     - Added lot_iter, which takes a generator and wraps it so that ctrl-c will break 
     - Added magnetism example
-    
 Jan 28 2014:
     - Many changes to naming:
     lp now posterior_score
     v (function argument in hypothesses) now value
     tweaks to weighted_sample, to remove old style usage
     chanes to p/lp in GrammarRule
-    
 Dec 14 2013:
     - Major revision breaking backward compatibility -- changes to FunctionNode syntax in PCFGs so it makes more sense. Non-function terminals have None as args; function terminals have []
     - Also changed "PCFG" to "Grammar" since it's not technically a pcfg
@@ -157,17 +150,14 @@ Dec 2 2013:
     - Added RR example
 Sep 23, 2013:
     - Removed parallel MPI functions to a separate library, SimpleMPI. This keeps the core LOTlib code separate, and allows easy use of mapping in other applications
-
 July 28, 2013
     - added NAND Compression example
     - Made FunctionNode.depth() return an int
     - added all_binary_vectors to Miscellaneous
-    
 April 23, 2013
     - Got rid of the annoying MPI warning for too many calls to MPI_Finalize()
     - Progress bar tweaks
-    - made BasicPrimitives.ancestors O(N) instead of O(N^2)
-    
+    - made BasicPrimitives.ancestors O(N) instead of O(N^2)  
 April 22, 2013
     - Changed "StandardExpression" to "LOTHypothesis"
     - Made FunctionNodes have a default iterator of subnodes, and removed FunctionNode.all_subnodes()

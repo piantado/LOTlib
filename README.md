@@ -42,20 +42,22 @@ And you should be ready to use the library via:
 	
 	import LOTlib
 	
-EXAMPLES
---------
+EXAMPLES and TUTORIAL
+---------------------
 
 A good starting place is the FOL folder, which contains a simple example to generate first-order logical expressions. These have simple boolean functions as well as lambda expressions. 
 
-The best reference for learning how to create/modify grammars is Examples.FunctionNodeDemo. It contains all of the syntax for various parts of grammars. 
+The best reference for learning how to create/modify grammars is Tutorial/FunctionNodeDemo. It contains all of the syntax for various parts of grammars, including how to use primitives and lambdas. 
 
-More examples are provided in the "Examples" folder. These include simple symbolic regression, the recursive number learning model, a quantifier learning model. The "tests" folder may also be useful, as this runs some simple models to check for, e.g., correct sampling and inference. The Number demo has syntax for a number of different sampling and inference schemes included in LOTlib.
+More examples are provided in the "Examples" folder. These include: simple symbolic regression, the recursive number learning model, a quantifier learning model. The "tests" folder may also be useful, as this runs some simple models to check for, e.g., correct sampling and inference. The Number demo has syntax for a number of different sampling and inference schemes included in LOTlib.
+
+
 
 
 Contributors
 ------------
 
-Major contributors to this project include Hassler Thurston, Samay Kapadia, Matt Overlan, and Eric Bigelow. 
+Major contributors to this project include Eric Bigelow, Hassler Thurston, Samay Kapadia, and Matt Overlan. 
 
 Citation:
 ---------

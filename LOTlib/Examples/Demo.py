@@ -15,7 +15,7 @@ from LOTlib import break_ctrlc
 
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
-def standard_sample(make_hypothesis, make_data, skip=9, show=True, N=1000000, save_top='top.pkl', alsoprint='None', **kwargs):
+def standard_sample(make_hypothesis, make_data, skip=9, show=True, N=100, save_top='top.pkl', alsoprint='None', **kwargs):
     """
         Just a simplified interface for sampling, allowing printing (showing), returning the top, and saving.
         This is used by many examples, and is meant to easily allow running with a variety of parameters.

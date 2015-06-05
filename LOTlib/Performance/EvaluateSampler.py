@@ -9,21 +9,12 @@ import re
 from collections import defaultdict
 from time import time
 from numpy import mean, diff
+from math import log
 
 from LOTlib import break_ctrlc
 from LOTlib.Miscellaneous import logsumexp, r3, r5
 
-def mydisplay(lst,n=10):
-    # A nice display of the first n, guaranteeing that there will be n
-    ret = map(r3, lst[:n])
-
-    # Make it the right length, in case its too short
-    while len(ret) < n:
-        ret.append("NA")
-
-    return ret
-
-def evaluate_sampler(my_sampler, print_every=1000, out_hypotheses=sys.stdout, out_aggregate=sys.stdout, trace=False, prefix=""):
+def evaluate_sampler(my_sampler, print_every=1000, out_aggregate=sys.stdout, trace=False, pthreshold=0.999, prefix=""):
     """
             Print the stats for a single sampler run
 
@@ -48,9 +39,22 @@ def evaluate_sampler(my_sampler, print_every=1000, out_hypotheses=sys.stdout, ou
             ll   =  sorted([x.likelihood for x in visited_at.keys()], reverse=True)
             Z = logsumexp(post) # just compute total probability mass found -- the main measure
 
-            out_aggregate.write('\t'.join(map(str, [prefix, n, r3(time()-startt), r5(Z), len(post)]+mydisplay(post))) + '\n')
+            # determine how many you need to get pthreshold of the posterior mass
+            J=0
+            while J < len(post):
+                if logsumexp(post[J:]) < Z + log(1.0-pthreshold):
+                    break
+                J += 1
+
+            out_aggregate.write('\t'.join(map(str, [prefix, n, r3(time()-startt), r5(Z), r5(post[0]), J, len(post)] )) + '\n')
             out_aggregate.flush()
 
+    return
+
+
+
+"""
+OLD Code for analyzing visits to hypotheses. May be incorporated lated
     # Now once we're done, output the hypothesis stats
     for k,v in visited_at.items():
 
@@ -59,5 +63,4 @@ def evaluate_sampler(my_sampler, print_every=1000, out_hypotheses=sys.stdout, ou
 
         out_hypotheses.write('\t'.join(map(str, [prefix, k.posterior_score, k.prior, k.likelihood, len(v), min(v), max(v), mean_diff, sum(diff(v)==0) ])) +'\n') # number of rejects from this
         out_hypotheses.flush()
-
-    return 0.0
+"""
