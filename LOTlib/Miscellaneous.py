@@ -413,14 +413,13 @@ def log1mexp(a):
     else:             return log(-expm1(a))
 
 
-def EV(fn, *args):
+def EV(fn, n_samples, *args):
     """
         Estimates (via sampling) the expected value of a function that returns
         a numerical value. Pass any args to specified function as additional args
         ex: EV(random.randint, 2, 5)
     """
-    vals = [fn(*args) for _ in range(100)]
-    return np.average(vals)
+    return np.average([fn(*args) for _ in range(n_samples)])
 
 from itertools import imap
 def argmax(lst):

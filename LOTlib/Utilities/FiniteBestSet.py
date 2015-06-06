@@ -99,12 +99,15 @@ class FiniteBestSet(object):
                 heapq.heappush(self.Q, QueueItem(x, self.max_multiplier*p))
                 self.unique_set.add(x) # add to the set
 
-                # if we have too many elements
-                if len(self) > self.N:
-                    rr = heapq.heappop(self.Q)
+                self.trim()
 
-                    if rr.x in self.unique_set:
-                        self.unique_set.remove(rr.x) # clean out the removed from the set
+    # remove all excess elements
+    def trim(self):
+        while len(self) > self.N:
+            rr = heapq.heappop(self.Q)
+
+            if rr.x in self.unique_set:
+                self.unique_set.remove(rr.x) # clean out the removed from the set
 
     def get_all(self, **kwargs):
         """ Return all elements (arbitrary order). Does NOT return a copy. This uses kwargs so that we can call one 'sorted' """
