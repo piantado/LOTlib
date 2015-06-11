@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""
-
-    TODO:
-        - Make the.valueicon be indexable like an array/dict, rather than having to say h.value[...] say h[..]
-"""
 from copy import copy
 from inspect import isroutine
 
@@ -27,18 +22,22 @@ class SimpleLexicon(Hypothesis):
             propose_p -- the probability of proposing to each word
         """
 
-        Hypothesis.__init__(self, value=dict() if value is None else value, **kwargs)
-        assert isinstance(self.value, dict)
+        if value is None:
+            value = dict()
+        else:
+            assert isinstance(self.value, dict)
+
+        Hypothesis.__init__(self, value=value, **kwargs)
 
         self.propose_p = propose_p
 
         # update with the supplied words, each generating from the grammar
         if make_hypothesis is not None and words is not None:
             for w in words:
-                self.set_word(w, v=make_hypothesis())
+                self.set_word(w, make_hypothesis())
 
     def __copy__(self):
-        """ Copy a.valueicon. We don't re-create the fucntions since that's unnecessary and slow"""
+        """ Copy our values. We will copy all the functions defaultly for simplicity """
         new = type(self)(None)
         for w in self.all_words():
             new.set_word(w, copy(self.get_word(w)))
@@ -115,21 +114,16 @@ class SimpleLexicon(Hypothesis):
 
     def propose(self):
         """
-        Default proposal to a lexicon -- now at least one, plus some coin flips
-        :return:
+        Propose to the lexicon by flipping a coin for each word and proposing to it.
         """
 
         new = copy(self)  ## Now we just copy the whole thing
+        fb = 0.0
 
-        # Propose one for sure
-        w = weighted_sample(self.value.keys())  # the word to change
-        p, fb = self.value[w].propose()
-        new.set_word(w, p)
-
-        for x in self.all_words():
-            if w != x and flip(self.propose_p):
-                xp, xfb = self.value[x].propose()
-                new.set_word(x, xp)
+        for w in self.all_words():
+            if flip(self.propose_p):
+                xp, xfb = self.get_word(w).propose()
+                new.set_word(w, xp)
                 fb += xfb
 
         return new, fb
