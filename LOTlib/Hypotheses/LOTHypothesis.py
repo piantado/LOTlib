@@ -3,7 +3,7 @@ import copy
 from math import log
 import numpy as np
 from LOTlib.DataAndObjects import FunctionData
-from LOTlib.Evaluation.Eval import evaluate_expression
+# from LOTlib.Evaluation.Eval import evaluate_expression
 from LOTlib.Evaluation.EvaluationException import TooBigException, EvaluationException
 from LOTlib.Hypotheses.FunctionHypothesis import FunctionHypothesis
 from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
@@ -73,10 +73,10 @@ class LOTHypothesis(FunctionHypothesis):
         try:
             return FunctionHypothesis.__call__(self, *args)
         except TypeError as e:
-            print "TypeError in function call: ", e, str(self), "  ;  ", type(self)
+            print "TypeError in function call: ", e, str(self), "  ;  ", type(self), args
             raise TypeError
         except NameError as e:
-            print "NameError in function call: ", e, " ; ", str(self)
+            print "NameError in function call: ", e, " ; ", str(self), args
             raise NameError
 
     def type(self):
@@ -92,7 +92,7 @@ class LOTHypothesis(FunctionHypothesis):
             return lambda *args: raise_exception(TooBigException)
         else:
             try:
-                return evaluate_expression(str(self))
+                return eval(str(self)) # evaluate_expression(str(self))
             except Exception as e:
                 print "# Warning: failed to execute evaluate_expression on " + str(self)
                 print "# ", e
@@ -101,7 +101,7 @@ class LOTHypothesis(FunctionHypothesis):
     def __copy__(self, value=None):
         """Make a deepcopy of everything except grammar (which is the, presumably, static grammar)."""
         # Since this is inherited, call the constructor on everything, copying what should be copied
-        thecopy = type(self)(self.grammar, value=copy.copy(self.value) if value is not None else value,
+        thecopy = type(self)(self.grammar, value=copy.copy(self.value) if value is None else value,
                              f=self.f, proposal_function=self.proposal_function)
 
         # And then then copy the rest
