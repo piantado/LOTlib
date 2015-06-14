@@ -210,13 +210,12 @@ def MPI_unorderedmap(f, generator):
 
 # Let's make a new kind, where we spawn up to the length in order to process, each time we see an MPI_map
 #http://mpi4py.scipy.org/docs/usrman/tutorial.html
-def MPI_map(f, args, random_order=True, outfile=None, mpi_done=False, yieldfrom=False, progress_bar=True):
+def MPI_map(f, args, outfile=None, mpi_done=False, yieldfrom=False, progress_bar=True):
     """
         Execute, in parallel, a function on each argument, and return the list [x1, f(x1)], [x2, f(x2)].
 
         f -- the function. Must be defined using "def" (not lambda) or else the slaves can't see it
         args -- a list of arguments to apply f to
-        random_order - should we evaluate in a randomized order (in order to keep progress bar honest)
         outfile - should reuslts be printed nicely in parallel to outfile?
         mpi_done - if True, we tell all subprocesses to die. This is handy if you only have one MPI_map, and
         therefore don't need the processes again
@@ -240,9 +239,6 @@ def MPI_map(f, args, random_order=True, outfile=None, mpi_done=False, yieldfrom=
 
     #if not yieldfrom:
     ret = [None]*arglen # the return values
-
-    # Randomize the order (useful for timing)
-    if random_order: random.shuffle(ind)
 
     # Now only the master process survives:
     try:

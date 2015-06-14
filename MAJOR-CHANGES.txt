@@ -1,3 +1,4 @@
+June 14 2015
     - Changed Lexicon default proposal to sampling each word with a fixed prob. 
     - Got rid of evaluate_expression -- now just directly use eval
     - Substantially simplified __copy__ so that it really only needs to happen in Hypothesis. Initializers should allow no args. 
@@ -7,6 +8,8 @@
     - Extracted a few different likelihood methods to Hypotheses.Likelihoods. 
     - Changed SimpleGenerativeHypothesis to StochasticFunctionLikelihood. 
     - Updated version to 0.4.0
+    - Made Search defaultly work with all the Example models
+    - Change MPI_map to NOT defaultly randomize the order. The can be done in the calling context. 
 May 31 2015
     - Changed compute_posterior to now return the posterior, not p and l. 
     - created a decorator @Hypothesis.attrmem to use instead of setting self.prior etc by hand
