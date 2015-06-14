@@ -19,5 +19,5 @@ def make_data(N=20, f=TargetConcepts[0]):
     data = []
     for _ in xrange(N):
         o = sample_one(all_objects)
-        data.append(FunctionData(input=[o], output=f(o)))
+        data.append(FunctionData(input=[o], output=f(o), alpha=0.90))
     return data

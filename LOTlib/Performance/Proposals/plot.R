@@ -8,7 +8,7 @@ d <- NULL
 for(f in list.files("output", pattern="agg*", full.names=TRUE)) {
         d <- rbind(d, read.table(f))
 }
-names(d)[1:6] <- c("model", "iteration", "parameter", "steps", "time", "Z")
+names(d) <- c("model", "iteration", "parameter", "steps", "time", "Z", "map", "aprx", "N")
 
 # recode to two factors: strength 2/10/1 and code 
 d$strength <- ifelse(grepl("2", d$parameter), "2", 

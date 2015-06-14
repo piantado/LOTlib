@@ -66,7 +66,7 @@ This software may be cited as:
 
 	@misc{piantadosi2014lotlib,
 	author={Steven T. Piantadosi},
-	title={ LOTlib: Learning and Inference in the Language of Thought},
+	title={{LOTlib: Learning and Inference in the Language of Thought}},
 	year={2014},
 	howpublished={available from https://github.com/piantado/LOTlib}
 	}

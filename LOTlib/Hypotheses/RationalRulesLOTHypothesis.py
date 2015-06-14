@@ -1,6 +1,6 @@
-from copy import copy
 
 import numpy
+from math import log
 
 from LOTHypothesis import LOTHypothesis
 from LOTlib.Miscellaneous import Infinity, beta, attrmem
@@ -47,36 +47,21 @@ def RR_prior(grammar, t, alpha=1.0):
     return lp
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-class RationalRulesLOTHypothesis(LOTHypothesis):
+from LOTlib.Hypotheses.Likelihoods.BinaryLikelihood import BinaryLikelihood
+
+class RationalRulesLOTHypothesis(BinaryLikelihood, LOTHypothesis):
     """
             A FunctionHypothesis built from a grammar.
             Implement a Rational Rules (Goodman et al 2008)-style grammar over Boolean expressions.
 
     """
-    NoCopy = ['self', 'grammar', 'value', 'proposal_function', 'f']
-
-    def __init__(self, grammar, value=None, rrAlpha=1.0, *args, **kwargs):
+    def __init__(self, grammar=None, value=None, rrAlpha=1.0, *args, **kwargs):
         """
                 Everything is passed to LOTHypothesis
         """
         self.rrAlpha = rrAlpha
 
         LOTHypothesis.__init__(self, grammar, value=value, *args, **kwargs)
-
-
-    def __copy__(self, value=None):
-        """
-                Return a copy of myself.
-        """
-
-        # Since this is inherited, call the constructor on everything, copying what should be copied
-        thecopy = type(self)(self.grammar, rrAlpha=self.rrAlpha, value=copy(self.value) if value is not None else value)
-
-        # And then then copy the rest
-        for k in set(self.__dict__.keys()).difference(RationalRulesLOTHypothesis.NoCopy):
-                thecopy.__dict__[k] = copy(self.__dict__[k])
-
-        return thecopy
 
     @attrmem('prior')
     def compute_prior(self):
@@ -88,3 +73,4 @@ class RationalRulesLOTHypothesis(LOTHypothesis):
         else:
             # compute the prior with either RR or not.
             return RR_prior(self.grammar, self.value, alpha=self.rrAlpha) / self.prior_temperature
+

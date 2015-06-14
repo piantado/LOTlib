@@ -77,20 +77,6 @@ def register_primitive(function, name=None):
 
     sys.modules['__builtin__'].__dict__[name] = function
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~~~ Evaluation of expressions
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-def evaluate_expression(e):
-    """
-    Evaluate the expression, wrapping in an error in case it can't be evaled
-    """
-    assert isinstance(e, str)
-    try:
-        return eval(e)
-    except Exception as ex:
-        print "*** Error in evaluate_expression:", ex
-        raise ex
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~ We must import all of these to ensure that they execute and call LOTlib_primitive

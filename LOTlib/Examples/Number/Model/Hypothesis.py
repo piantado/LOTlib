@@ -22,8 +22,8 @@ def make_hypothesis(**kwargs):
 
 class NumberExpression(RecursiveLOTHypothesis):
     
-    def __init__(self, grammar, value=None, f=None, proposal_function=None, args=['x'], **kwargs):
-        RecursiveLOTHypothesis.__init__(self, grammar, value=value, proposal_function=proposal_function, args=['x'], **kwargs)
+    def __init__(self, grammar=None, value=None, f=None, args=['x'], **kwargs):
+        RecursiveLOTHypothesis.__init__(self, grammar, value=value, args=['x'], **kwargs)
 
     def __call__(self, *args):
         try:

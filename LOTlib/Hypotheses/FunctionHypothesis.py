@@ -4,13 +4,7 @@
         This can also be called like a function, as in fh(data)!
 """
 
-
-
 from Hypothesis import Hypothesis
-
-from LOTlib.Evaluation.Eval import evaluate_expression
-from LOTlib.Evaluation.EvaluationException import EvaluationException
-from LOTlib.Miscellaneous import lambdaNone
 from copy import copy
 
 class FunctionHypothesis(Hypothesis):
@@ -43,14 +37,9 @@ class FunctionHypothesis(Hypothesis):
         """
         return 'lambda %s: %s' % (','.join(self.args), str(self.value))
 
-    def __copy__(self):
-        """ Create a copy, only deeply of f value """
-        return FunctionHypothesis(value=copy(self.value), f=self.fvalue, args=self.args)
 
     def __call__(self, *vals):
-        """
-                Make this callable just like a function (as in: myFunction(data)). Yay python!
-        """
+
         # The below assertions are useful but VERY slow
         #assert not any([isinstance(x, FunctionData) for x in vals]), "*** Probably you mean to pass FunctionData.input instead of FunctionData?"
         #assert callable(self.fvalue)
@@ -66,10 +55,6 @@ class FunctionHypothesis(Hypothesis):
         """
         raise NotImplementedError
 
-    def reset_function(self):
-        """ re-construct the function from the value -- useful after pickling """
-        self.set_value(self.value)
-
 
     def set_value(self, value, f=None):
         """
@@ -84,7 +69,7 @@ class FunctionHypothesis(Hypothesis):
         elif value is None:
             self.fvalue = None
         else:
-            self.fvalue = self.compile_function() # now that the value is set
+            self.fvalue =  self.compile_function() # now that the value is set
 
     def force_function(self, f):
         """
@@ -92,8 +77,7 @@ class FunctionHypothesis(Hypothesis):
         :param f: - a python function (object)
         :return:
         """
-        self.value = "<FORCED_FUNCTION>"
-        self.fvalue = f
+        self.set_value( "<FORCED_FUNCTION>", f=f)
 
     def compute_single_likelihood(self, datum):
         """
@@ -101,7 +85,6 @@ class FunctionHypothesis(Hypothesis):
                 This should NOT implement the temperature (that is handled by compute_likelihood)
         """
         raise NotImplementedError
-
 
     # ~~~~~~~~~
     # Make this thing pickleable

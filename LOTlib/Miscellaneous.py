@@ -330,6 +330,12 @@ except ImportError:
             m = max(v)
             return m+log(sum(map( lambda x: exp(x-m), v)))
 
+def nicelog(x):
+    if x > 0.:
+        return log(x)
+    else:
+        return -Infinity
+
 def logsumexp(v):
     """
             logsumexp - our own version wraps the version defined about (logsumexp_base)

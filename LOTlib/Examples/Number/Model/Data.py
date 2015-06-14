@@ -34,7 +34,7 @@ def make_data(data_size=300):
         else:                r = weighted_sample( WORDS )
 
         # and append the sampled utterance
-        data.append(FunctionData(input=[s], output=r))  # convert to "FunctionData" and store
+        data.append(FunctionData(input=[s], output=r, alpha=ALPHA))  # convert to "FunctionData" and store
     return data
 
 

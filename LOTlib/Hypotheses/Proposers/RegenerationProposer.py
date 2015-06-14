@@ -1,5 +1,5 @@
-from LOTProposal import LOTProposal
-from LOTlib.Inference.Proposals import ProposalFailedException
+from LOTProposer import LOTProposer
+from LOTlib.Hypotheses.Proposers import ProposalFailedException
 from LOTlib.FunctionNode import NodeSamplingException
 from LOTlib.Miscellaneous import lambdaOne, Infinity, logplusexp, dropfirst
 from LOTlib.FunctionNode import FunctionNode
@@ -7,7 +7,7 @@ from copy import copy
 from math import log
 from LOTlib.BVRuleContextManager import BVRuleContextManager
 
-class RegenerationProposal(LOTProposal):
+class RegenerationProposer(LOTProposer):
     """
             Propose to a tree by sampling a node at random and regenerating
     """

@@ -10,7 +10,7 @@ import LOTlib
 import pickle
 from LOTlib.FunctionNode import cleanFunctionNodeString
 from LOTlib.MCMCSummary.TopN import TopN
-from LOTlib.Miscellaneous import qq
+from LOTlib.Miscellaneous import qq, display_option_summary
 from LOTlib import break_ctrlc
 
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
@@ -66,6 +66,8 @@ if __name__ == "__main__":
                       help="A function of a hypothesis we can also print at the start of a line to see things we "
                            "want. E.g. --alsoprint='lambda h: h.get_knower_pattern()' ")
     (options, args) = parser.parse_args()
+
+    display_option_summary(options)
 
     # ========================================================================================================
     # Load the model specified on the command line

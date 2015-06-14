@@ -1,10 +1,11 @@
 from LOTlib.FunctionNode import isFunctionNode
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+from LOTlib.Hypotheses.Likelihoods.BinaryLikelihood import BinaryLikelihood
 from LOTlib.Evaluation.EvaluationException import EvaluationException
 from Grammar import grammar
 import re
 
-class RegexHypothesis(LOTHypothesis):
+class RegexHypothesis(BinaryLikelihood, LOTHypothesis):
     """Define a special hypothesis for regular expressions.
 
     This requires overwritting compile_function to use our custom interpretation model on trees -- not just
@@ -14,8 +15,8 @@ class RegexHypothesis(LOTHypothesis):
         This doesn't require any basic_primitives -- the grammar node names are used by to_regex too
 
     """
-    def __init__(self, ALPHA=0.99, **kwargs):
-        LOTHypothesis.__init__(self, grammar, ALPHA=0.999, **kwargs)
+    def __init__(self, **kwargs):
+        LOTHypothesis.__init__(self, grammar, **kwargs)
 
     def compile_function(self):
         regex = to_regex(self.value)

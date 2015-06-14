@@ -1,14 +1,5 @@
-"""
-**Hypothesis** -- superclass for hypotheses in Bayesian inference.
-
-A Hypothesis mainly supports .compute_prior() and .compute_likelihood(data), which are called by sampling
-  and search algorithms.
-
-"""
-import LOTlib
-from LOTlib.Evaluation import Primitives
-from LOTlib.Miscellaneous import *
-
+from LOTlib.Miscellaneous import Infinity, attrmem
+from copy import copy, deepcopy
 
 class Hypothesis(object):
     """A hypothesis bundles together a value (hypothesis value) with a bunch of remembered states,
@@ -30,24 +21,35 @@ class Hypothesis(object):
     def __init__(self, value=None, prior_temperature=1.0, likelihood_temperature=1.0, **kwargs):
         self.__dict__.update(kwargs)
 
-        self.set_value(value)       # to zero out prior, likelhood, posterior_score
+        self.set_value(value)
+
+        # zero out prior, likelhood, posterior_score
         self.prior, self.likelihood, self.posterior_score = [-Infinity, -Infinity, -Infinity]
         self.prior_temperature = prior_temperature
         self.likelihood_temperature = likelihood_temperature
         self.stored_likelihood = None
 
-        # keep track of some calls (Global variable)
-        global POSTERIOR_CALL_COUNTER
-        POSTERIOR_CALL_COUNTER = 0
 
     def set_value(self, value):
         """Sets the (self.)value of this hypothesis to value."""
         self.value = value
 
-    def __copy__(self):
-        """Returns a copy of the Hypothesis object by calling copy() on self.value."""
-        return Hypothesis(value=self.value.copy(), prior_temperature=self.prior_temperature,
-                          likelihood_temperature=self.likelihood_temperature)
+    def __copy__(self, value=None):
+        """Returns a copy of the Hypothesis. Allows you to pass in value to set to that instead of a copy."""
+
+        thecopy = type(self)() # Empty initializer
+
+        # copy over all the relevant attributes and things.
+        # Note objects like Grammar are not copied
+        thecopy.__dict__.update(self.__dict__)
+
+        # and then we need to explicitly *deepcopy* the value (in case its a dict or tree, or whatever)
+        if value is None:
+            value = deepcopy(self.value)
+
+        thecopy.set_value(value)
+
+        return thecopy
 
     # ========================================================================================================
     #  All instances of this must implement these:
@@ -103,13 +105,9 @@ class Hypothesis(object):
     @attrmem('posterior_score')
     def compute_posterior(self, d, **kwargs):
         """Computes the posterior score by computing the prior and likelihood scores.
-                
         Defaultly if the prior is -inf, we don't compute the likelihood (and "pretend" it's -Infinity).
-
         This saves us from computing likelihoods on hypotheses that we know are bad.
-
         """
-        Primitives.LOCAL_PRIMITIVE_OPS = 0  # Reset this
 
         p = self.compute_prior()
         
@@ -135,7 +133,7 @@ class Hypothesis(object):
     def __hash__(self):
         return hash(self.value)
     def __cmp__(self, x):
-        return cmp(self.value, x)
+        return cmp(self.value, x.value)
 
     # this is for heapq algorithm in FiniteSample, which uses <= instead of cmp
     # since python implements a "min heap" we can compare log probs

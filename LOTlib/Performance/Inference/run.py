@@ -30,7 +30,7 @@ from LOTlib.Inference.Samplers.MultipleChainMCMC import MultipleChainMCMC
 from LOTlib.Inference.Samplers.ParticleSwarm import ParticleSwarm
 from LOTlib.Inference.Samplers.TabooMCMC import TabooMCMC
 from LOTlib.Inference.EnumerationInference import EnumerationInference
-from LOTlib.Inference.Samplers.PartitionMCMC import PartitionMCMC
+# from LOTlib.Inference.Samplers.PartitionMCMC import PartitionMCMC
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def run_one(iteration, model, model2data, sampler_type):
@@ -76,9 +76,9 @@ def run_one(iteration, model, model2data, sampler_type):
     elif sampler_type == 'taboo_C':                 sampler = TabooMCMC(h0, data, steps=options.SAMPLES, skip=0, penalty= 0.100)
     elif sampler_type == 'taboo_D':                 sampler = TabooMCMC(h0, data, steps=options.SAMPLES, skip=0, penalty= 1.000)
     elif sampler_type == 'taboo_E':                 sampler = TabooMCMC(h0, data, steps=options.SAMPLES, skip=0, penalty=10.000)
-    elif sampler_type == 'partitionMCMC_A':         sampler = PartitionMCMC(grammar, make_hypothesis, data, 10, steps=options.SAMPLES)
-    elif sampler_type == 'partitionMCMC_B':         sampler = PartitionMCMC(grammar, make_hypothesis, data, 100, steps=options.SAMPLES)
-    elif sampler_type == 'partitionMCMC_C':         sampler = PartitionMCMC(grammar, make_hypothesis, data, 1000, steps=options.SAMPLES)
+    # elif sampler_type == 'partitionMCMC_A':         sampler = PartitionMCMC(grammar, make_hypothesis, data, 10, steps=options.SAMPLES)
+    # elif sampler_type == 'partitionMCMC_B':         sampler = PartitionMCMC(grammar, make_hypothesis, data, 100, steps=options.SAMPLES)
+    # elif sampler_type == 'partitionMCMC_C':         sampler = PartitionMCMC(grammar, make_hypothesis, data, 1000, steps=options.SAMPLES)
     elif sampler_type == 'enumeration_A':           sampler = EnumerationInference(grammar, make_hypothesis, data, steps=options.SAMPLES)
     else: assert False, "Bad sampler type: %s" % sampler_type
 

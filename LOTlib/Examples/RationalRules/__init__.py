@@ -1,4 +1,4 @@
 
 from Model import *
 
-import MemoryDecay, TwoConcepts, Demo
+import MemoryDecay, TwoConcepts

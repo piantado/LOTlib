@@ -1,21 +1,12 @@
-import LOTlib
-from LOTlib.Hypotheses.Hypothesis import Hypothesis
 import numpy
 
-class DecayedLikelihoodHypothesis(Hypothesis):
+class PowerLawDecayed(object):
     """
             This implements a likelihood decay such that more recent data
             is weighted more strongly, via the parameter ll_decay
 
             By default, we store the likelihoods for each data point (as we may fit ll_decay)
-
-            TODO: MAKE THIS WORK AGAIN! THIS HAS BEEN UPDATED AFTER EXTRACTING FROM HYPOTHESIS CLASS
     """
-
-    def __init__(self, value=None, ll_decay=0.0, **kwargs):
-        Hypothesis.__init__(self, value=value, **kwargs)
-        self.ll_decay = ll_decay # store this
-        self.stored_likelihood = None
 
 
     def likelihood_decay_function(self, i, N, decay):
@@ -28,9 +19,9 @@ class DecayedLikelihoodHypothesis(Hypothesis):
         return (N-i+1)**(-decay)
 
 
-    def get_culmulative_likelihoods(self, shift_right=True):
+    def get_cumulative_likelihoods(self, shift_right=True):
         """
-        Compute the culmulative likelihoods on the stored data
+        Compute the cumulative likelihoods on the stored data
         This gives the likelihood on the first data point, the first two, first three, etc, appropriately decayed
         using the 'pointwise' likelihoods stored in self.stored_likelihood.
         NOTE: This is O(N^2) (for power law decays; for geometric it could be linear)
@@ -54,21 +45,22 @@ class DecayedLikelihoodHypothesis(Hypothesis):
         return numpy.array(out)
 
 
-    def get_culmulative_posteriors(self, shift_right=False):
+    def get_cumulative_posteriors(self, shift_right=False):
         """
-        returns the posterior with the i'th stored CULMULATIVE likelihood, using the assumed decay
+        returns the posterior with the i'th stored cumuLATIVE likelihood, using the assumed decay
         """
-        return self.get_culmulative_likelihoods(shift_right=shift_right) + self.prior
+        return self.get_cumulative_likelihoods(shift_right=shift_right) + self.prior
 
 
     def compute_likelihood(self, data):
         """
-                This is overwritten, writes to stored_likelihood, and then calls get_culmulative_likelihoods
+                This is overwritten, writes to stored_likelihood, and then calls get_cumulative_likelihoods
         """
-        self.stored_likelihood = map( self.compute_single_likelihood, data)
-        culm_lls = self.get_culmulative_likelihoods()
+        self.stored_likelihood = [self.compute_single_likelihood(datum) for datum in data]
+        
+        cumu_lls = self.get_cumulative_likelihoods()
 
-        self.likelihood = culm_lls[-1]/self.likelihood_temperature
+        self.likelihood = cumu_lls[-1]/self.likelihood_temperature
 
         self.posterior_score = self.prior + self.likelihood
 

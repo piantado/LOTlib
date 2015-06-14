@@ -9,11 +9,9 @@ for(f in list.files("output", pattern="agg*", full.names=TRUE)) {
         d <- rbind(d, read.table(f))
 }
 
-names(d)[1:7] <- c("model", "iteration", "temperature", "steps", "time", "Z")
-
+names(d) <- c("model", "iteration", "temperature", "steps", "time", "Z", "map", "aprx", "N")
 
 d$temperature <- as.factor(d$temperature)
-d$nchains <- as.factor(d$nchains)
 p <- ggplot(d, aes(x=steps, y=Z, color=temperature)) + 
 	stat_summary(fun.y=mean, geom="line", size=1) +
 	opts(legend.key.size=unit(3,"lines")) +

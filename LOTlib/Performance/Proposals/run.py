@@ -11,12 +11,9 @@ from LOTlib.MPI.MPI_map import MPI_map, get_rank
 from LOTlib.Miscellaneous import q
 from LOTlib.Examples.ExampleLoader import load_example
 from LOTlib.Performance.EvaluateSampler import evaluate_sampler
-\
-from LOTlib.Inference.Samplers.MultipleChainMCMC      import MultipleChainMCMC
-from LOTlib.Inference.Proposals.MixtureProposal       import MixtureProposal
-from LOTlib.Inference.Proposals.RegenerationProposal  import RegenerationProposal
-from LOTlib.Inference.Proposals.InsertDeleteProposal  import InsertDeleteProposal
-from LOTlib.Inference.Proposals.InverseInlineProposal import InverseInlineProposal
+
+from LOTlib.Inference.Samplers.MultipleChainMCMC import MultipleChainMCMC
+from LOTlib.Hypotheses.Proposers.MixtureProposer import MixtureProposer
 
 parser = OptionParser()
 parser.add_option("--out", dest="OUT", type="string", help="Output prefix", default="output")
@@ -32,7 +29,6 @@ def run_one(iteration, model, model2data, probs):
     if LOTlib.SIG_INTERRUPTED: # do this so we don't create (big) hypotheses
         return
 
-
     # Take model and load the function to create hypotheses
     # Data is passed in to be constant across runs
     if re.search(r":", model):
@@ -42,15 +38,17 @@ def run_one(iteration, model, model2data, probs):
         make_hypothesis, _ = load_example(model)
 
     htmp = make_hypothesis() # just use this to get the grammar
-    grammar = htmp.grammar
 
-    m = MixtureProposal([RegenerationProposal(grammar), InsertDeleteProposal(grammar), InverseInlineProposal(grammar)], probs=probs)
+    # Make a new class to wrap our mixture in
+    class WrappedClass(MixtureProposer, type(htmp)):
+        pass
 
     # define a wrapper to set this proposal
-    def wrapped_make_hypothesis():
-        h0 = make_hypothesis(proposal_function=m)
-        # h0.set_proposal_function(m)
-        return h0
+    def wrapped_make_hypothesis(**kwargs):
+        h = WrappedClass(**kwargs)
+        print ">>", htmp, model,  h, kwargs
+        h.set_proposal_probabilities(probs)
+        return h
 
     sampler = MultipleChainMCMC(wrapped_make_hypothesis,  model2data[model], steps=options.SAMPLES, nchains=options.CHAINS)
 
@@ -62,7 +60,6 @@ def run_one(iteration, model, model2data, probs):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if __name__ == "__main__":
-
 
     # Parse the models from the input
     models = re.split(r',', options.MODELS)

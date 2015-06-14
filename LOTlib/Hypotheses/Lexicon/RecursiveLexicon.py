@@ -14,9 +14,9 @@ class RecursiveLexicon(SimpleLexicon):
     See Examples.EvenOdd
 
     """
-    def __init__(self, make_hypothesis, recursive_depth_bound=10, *args, **kwargs):
+    def __init__(self, recursive_depth_bound=10, *args, **kwargs):
         self.recursive_depth_bound = recursive_depth_bound
-        SimpleLexicon.__init__(self, make_hypothesis, *args, **kwargs)
+        SimpleLexicon.__init__(self, *args, **kwargs)
 
     def __call__(self, word, *args):
         """
@@ -32,5 +32,5 @@ class RecursiveLexicon(SimpleLexicon):
         self.recursive_call_depth += 1
         if self.recursive_call_depth > self.recursive_depth_bound:
             raise RecursionDepthException
-
+        # print ">>>", self.value[word]
         return self.value[word](self.recursive_call, *args)

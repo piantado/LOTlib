@@ -1,3 +1,12 @@
+    - Changed Lexicon default proposal to sampling each word with a fixed prob. 
+    - Got rid of evaluate_expression -- now just directly use eval
+    - Substantially simplified __copy__ so that it really only needs to happen in Hypothesis. Initializers should allow no args. 
+    - Change Lexicon -- now it no longer takes a list of words and a hypothesis construction function. Both should be done externally. 
+    - Changed the proposal_function method so now proposals should be done via inheritance. The old proposal schemes are around in case its useful but will be removed in the future. 
+    - Alpha was moved to be inside of each FunctionData element rather than in a hypothesis. It is a property of data, not hypotheses. 
+    - Extracted a few different likelihood methods to Hypotheses.Likelihoods. 
+    - Changed SimpleGenerativeHypothesis to StochasticFunctionLikelihood. 
+    - Updated version to 0.4.0
 May 31 2015
     - Changed compute_posterior to now return the posterior, not p and l. 
     - created a decorator @Hypothesis.attrmem to use instead of setting self.prior etc by hand
