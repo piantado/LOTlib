@@ -1,10 +1,10 @@
 from LOTlib.Evaluation.Eval import * # Necessary for compile_function eval below
 from LOTlib.Evaluation.EvaluationException import TooBigException, EvaluationException
 from LOTlib.Hypotheses.FunctionHypothesis import FunctionHypothesis
-from LOTlib.Hypotheses.Proposers.Regeneration import Regeneration
+from LOTlib.Hypotheses.Proposers.RegenerationProposer import RegenerationProposer
 from LOTlib.Miscellaneous import Infinity, raise_exception, attrmem
 
-class LOTHypothesis(FunctionHypothesis, Regeneration):
+class LOTHypothesis(FunctionHypothesis, RegenerationProposer):
     """A FunctionHypothesis built from a grammar.
 
     Arguments
