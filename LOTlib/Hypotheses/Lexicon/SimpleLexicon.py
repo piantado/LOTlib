@@ -1,7 +1,7 @@
 from copy import copy
 from LOTlib.Miscellaneous import flip, qq, attrmem
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
-
+from LOTlib.Hypotheses.FunctionHypothesis import FunctionHypothesis
 
 class SimpleLexicon(Hypothesis):
     """
@@ -65,6 +65,11 @@ class SimpleLexicon(Hypothesis):
         """
             Allow force_function
         """
+
+        # If this does not exist, make a function hypothesis from scratch with nothing in it.
+        if w not in self.value:
+            self.value[w] = FunctionHypothesis(value=None, args=None)
+        
         self.value[w].force_function(f)
 
     # ##################################################################################
