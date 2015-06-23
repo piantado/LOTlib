@@ -46,7 +46,7 @@ if __name__ == "__main__":
     from optparse import OptionParser
     parser = OptionParser()
     parser.add_option("--out", dest="OUT_PATH", type="string", default="mpi-run.pkl", help="Output file (a pickle of FiniteBestSet)")
-    parser.add_option("--steps", dest="STEPS", type="int", default=200000, help="Number of samples to run")
+    parser.add_option("--steps", dest="STEPS", type="int", default=100000, help="Number of samples to run")
     parser.add_option("--top", dest="TOP_COUNT", type="int", default=100, help="Top number of hypotheses to store")
     parser.add_option("--chains", dest="CHAINS", type="int", default=1, help="Number of chains to run (new data set for each chain)")
     parser.add_option("--data", dest="DATA", type="int",default=1, help="Amount of data")
@@ -55,7 +55,12 @@ if __name__ == "__main__":
     parser.add_option("--dstep", dest="DATA_STEP", type="int", default=0, help="Step size for varying data")
     parser.add_option("--evaldata", dest="EVAL_DATA", type="int", default=1000, help="If specified, we'll print everything evaled on this amount.")
     parser.add_option("--model", dest="MODEL", type="string", default="Number", help="Which model do we run? (e.g. 'Number', 'Magnetism.Simple', etc.")
+    parser.add_option("--alsoprint", dest="ALSO_PRINT", type="string", default="None",
+                      help="A function of a hypothesis we can also print at the start of a line to see things we "
+                           "want. E.g. --alsoprint='lambda h: h.get_knower_pattern()' ")
     (options, args) = parser.parse_args()
+
+    alsoprint = eval(options.ALSO_PRINT)
 
     if options.DATA == -1:
         data_amounts = range(options.DATA_MIN, options.DATA_MAX, options.DATA_STEP)
@@ -99,7 +104,10 @@ if __name__ == "__main__":
 
                 if eval_data is not None:
                     h.compute_posterior(eval_data) # evaluate on the big data
-                    print h.prior, h.likelihood / options.EVAL_DATA, qq(cleanFunctionNodeString(h))
+                    print h.prior, h.likelihood / options.EVAL_DATA, \
+                            alsoprint(h) if alsoprint is not None else '',\
+                            qq(cleanFunctionNodeString(h))
+
 
     import pickle
     with open(options.OUT_PATH, 'w') as f:
