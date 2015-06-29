@@ -4,12 +4,13 @@ Just playing around with vector-valued hypotheses. This is a simple sampler for 
 the exp(-RosenbrockFunction)
 
 """
+
 import numpy
 
 from LOTlib import break_ctrlc
+from LOTlib.Miscellaneous import attrmem
 from LOTlib.Hypotheses.VectorHypothesis import VectorHypothesis
-from LOTlib.Inference.Samplers.MetropolisHastings import mh_sample
-
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
 class RosenbrockSampler(VectorHypothesis):
 
@@ -22,16 +23,14 @@ class RosenbrockSampler(VectorHypothesis):
     MCMC plays nicest if we have defined prior and likelihood, and just don't touch compute_posterior.
 
     """
+    @attrmem('likelihood') # this makes sure the return values is memoized in self.likelihood
     def compute_likelihood(self, data, **kwargs):
-        self.likelihood = 0.0
-        self.posterior_score = self.prior + self.likelihood
-        return self.likelihood
+        return 0.0 # just fixed to zero
 
+    @attrmem('prior') # this makes sure the return values is memoized in self.prior
     def compute_prior(self):
         x,y = self.value
-        self.prior = -((1.0-x)**2.0 + 100.0*(y-x**2.0)**2.0)
-        self.posterior_score = self.prior + self.likelihood
-        return self.prior
+        return  -((1.0-x)**2.0 + 100.0*(y-x**2.0)**2.0)
 
     def propose(self):
         ## NOTE: Does not copy proposal
@@ -41,8 +40,7 @@ class RosenbrockSampler(VectorHypothesis):
 
 if __name__ == "__main__":
 
-    N = 1
     initial_hyp = RosenbrockSampler()
 
-    for x in break_ctrlc(mh_sample(initial_hyp, [], 1000000, skip=100, trace=False)):
+    for x in break_ctrlc(MHSampler(initial_hyp, [], 1000000, skip=100, trace=False)):
         print x, x.posterior_score

@@ -1,19 +1,23 @@
 from LOTlib.FunctionNode import isFunctionNode
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+from LOTlib.Hypotheses.Likelihoods.BinaryLikelihood import BinaryLikelihood
 from LOTlib.Evaluation.EvaluationException import EvaluationException
+from Grammar import grammar
 import re
 
-
-class RegexHypothesis(LOTHypothesis):
+class RegexHypothesis(BinaryLikelihood, LOTHypothesis):
     """Define a special hypothesis for regular expressions.
 
-    This requires overwritting value2function to use our custom interpretation model on trees -- not just
+    This requires overwritting compile_function to use our custom interpretation model on trees -- not just
     simple eval.
 
     Note:
         This doesn't require any basic_primitives -- the grammar node names are used by to_regex too
 
     """
+    def __init__(self, **kwargs):
+        LOTHypothesis.__init__(self, grammar, **kwargs)
+
     def compile_function(self):
         regex = to_regex(self.value)
         c = re.compile(regex)
@@ -44,3 +48,12 @@ def to_regex(fn):
     elif fn.name == '':            return to_regex(fn.args[0])
     else:
         assert False, fn
+
+
+def make_hypothesis(**kwargs):
+    """Define a new kind of LOTHypothesis, that gives regex strings.
+
+    These have a special interpretation function that compiles differently than straight python eval.
+    """
+    return RegexHypothesis(**kwargs)
+

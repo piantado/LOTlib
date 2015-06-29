@@ -1,9 +1,9 @@
-from copy import copy
 
 import numpy
+from math import log
 
 from LOTHypothesis import LOTHypothesis
-from LOTlib.Miscellaneous import Infinity, beta
+from LOTlib.Miscellaneous import Infinity, beta, attrmem
 from LOTlib.FunctionNode import FunctionNode
 from collections import defaultdict
 
@@ -47,13 +47,15 @@ def RR_prior(grammar, t, alpha=1.0):
     return lp
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-class RationalRulesLOTHypothesis(LOTHypothesis):
+from LOTlib.Hypotheses.Likelihoods.BinaryLikelihood import BinaryLikelihood
+
+class RationalRulesLOTHypothesis(BinaryLikelihood, LOTHypothesis):
     """
             A FunctionHypothesis built from a grammar.
             Implement a Rational Rules (Goodman et al 2008)-style grammar over Boolean expressions.
 
     """
-    def __init__(self, grammar, value=None, rrAlpha=1.0, *args, **kwargs):
+    def __init__(self, grammar=None, value=None, rrAlpha=1.0, *args, **kwargs):
         """
                 Everything is passed to LOTHypothesis
         """
@@ -61,32 +63,14 @@ class RationalRulesLOTHypothesis(LOTHypothesis):
 
         LOTHypothesis.__init__(self, grammar, value=value, *args, **kwargs)
 
-
-    def __copy__(self, copy_value=True):
-        """
-                Return a copy of myself.
-        """
-
-        # Since this is inherited, call the constructor on everything, copying what should be copied
-        thecopy = type(self)(self.grammar, rrAlpha=self.rrAlpha, value=copy(self.value) if copy_value else self.value,)
-
-        # And then then copy the rest
-        for k in self.__dict__.keys():
-            if k not in ['self', 'grammar', 'value', 'proposal_function', 'f']:
-                thecopy.__dict__[k] = copy(self.__dict__[k])
-
-        return thecopy
-
+    @attrmem('prior')
     def compute_prior(self):
         """
 
         """
         if self.value.count_subnodes() > self.maxnodes:
-            self.prior = -Infinity
+            return-Infinity
         else:
             # compute the prior with either RR or not.
-            self.prior = RR_prior(self.grammar, self.value, alpha=self.rrAlpha) / self.prior_temperature
+            return RR_prior(self.grammar, self.value, alpha=self.rrAlpha) / self.prior_temperature
 
-        self.posterior_score = self.prior + self.likelihood
-
-        return self.prior

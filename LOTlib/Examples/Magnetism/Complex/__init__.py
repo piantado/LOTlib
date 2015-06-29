@@ -1,5 +1,4 @@
 
-from Data import data
-from Grammar import grammar
-from Run import run
-import Data, Grammar, Run
+from Data import make_data
+from Hypothesis import make_hypothesis
+

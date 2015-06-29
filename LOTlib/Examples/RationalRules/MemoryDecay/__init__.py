@@ -1,4 +1,4 @@
 
-from Run import run
-from Hypothesis import MyHypothesis
-import Run, Hypothesis
+from Data import make_data
+from Hypothesis import make_hypothesis
+

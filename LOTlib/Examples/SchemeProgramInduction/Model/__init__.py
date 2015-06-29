@@ -1,5 +1,4 @@
 
-from Data import data
-from Grammar import grammar
-from Hypothesis import SchemeFunction
-import Data, Grammar, Hypothesis
+from Hypothesis import make_hypothesis
+from Data import make_data
+

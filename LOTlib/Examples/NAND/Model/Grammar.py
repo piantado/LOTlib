@@ -1,27 +1,9 @@
 
 from LOTlib.Grammar import Grammar
 from LOTlib.Miscellaneous import q
-from LOTlib.Evaluation.Primitives.Logic import *
-from LOTlib.Evaluation.Primitives.Features import *
-
 
 SHAPES = ['square', 'triangle', 'rectangle']
 COLORS = ['blue', 'red', 'green']
-
-# ------------------------------------------------------------------
-# Some concepts to try to learn
-# ------------------------------------------------------------------
-
-TARGET_CONCEPTS = [lambda x: and_(is_shape_(x,'square'), is_color_(x,'blue')),
-            lambda x: or_(is_shape_(x,'triangle'), is_color_(x,'green')),
-            lambda x: or_(is_shape_(x,'square'), is_color_(x,'red')),
-            lambda x: and_(not_(is_shape_(x,'rectangle')), is_color_(x,'red')),
-            lambda x: and_(not_(is_shape_(x,'square')), not_(is_color_(x,'blue'))),
-            lambda x: and_(is_shape_(x,'rectangle'), is_color_(x,'green')),
-            lambda x: or_(not_(is_shape_(x,'triangle')), is_color_(x,'red')) ]
-
-
-
 
 # ------------------------------------------------------------------
 # Set up the grammar
@@ -39,5 +21,8 @@ grammar.add_rule('BOOL', 'nand_', ['True', 'BOOL'], 1.0/3.)
 grammar.add_rule('BOOL', 'nand_', ['False', 'BOOL'], 1.0/3.)
 
 # And finally, add the primitives
-for s in SHAPES: grammar.add_rule('BOOL', 'is_shape_', ['x', q(s)], FEATURE_WEIGHT)
-for c in COLORS: grammar.add_rule('BOOL', 'is_color_', ['x', q(c)], FEATURE_WEIGHT)
+for s in SHAPES:
+    grammar.add_rule('BOOL', 'is_shape_', ['x', q(s)], FEATURE_WEIGHT)
+
+for c in COLORS:
+    grammar.add_rule('BOOL', 'is_color_', ['x', q(c)], FEATURE_WEIGHT)

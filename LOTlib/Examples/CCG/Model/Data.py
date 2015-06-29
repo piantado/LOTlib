@@ -1,5 +1,4 @@
-from LOTlib.DataAndObjects import UtteranceData
-from Hypothesis import Context
+from LOTlib.DataAndObjects import UtteranceData, Context
 from Grammar import OBJECTS
 from Utilities import str2sen
 
@@ -62,7 +61,7 @@ data = [
                   possible_utterances=possible_utterances)
 ]
 
-# Just treat each possible utterance as
+# For simplicity here, just treat each possible utterance as
 for di in data:
     possible_utterances.append( di.utterance )
 
@@ -71,5 +70,5 @@ all_words = set()
 for di in data:
     for w in di.utterance: all_words.add(w)
 
-possible_utterances.append( str2sen('mary smiled'))
-all_words.add('mary')
+def make_data():
+    return data

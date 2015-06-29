@@ -13,7 +13,6 @@ from LOTlib.Miscellaneous import Infinity
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib.Inference.Sampler import Sampler
 
-
 class MultipleChainMCMC(Sampler):
     
     def __init__(self, make_h0, data, steps=Infinity, nchains=10, make_sampler=None, **kwargs):
@@ -70,12 +69,11 @@ class MultipleChainMCMC(Sampler):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if __name__ == "__main__":
+    from LOTlib import break_ctrlc
+    from LOTlib.Examples.ExampleLoader import load_example
 
-    from LOTlib.Examples.Number import generate_data, NumberExpression, grammar
-    data = generate_data(300)
+    make_hypothesis, make_data = load_example('Number')
+    data = make_data(300)
 
-    make_h0 = lambda : NumberExpression(grammar)
-
-    sampler = MultipleChainMCMC(make_h0, data, steps=2000, nchains=100)
-    for h in sampler:
+    for h in break_ctrlc(MultipleChainMCMC(make_hypothesis, data, steps=2000, nchains=10)):
         print h.posterior_score, h

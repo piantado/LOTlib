@@ -1,6 +1,9 @@
 
+from LOTlib import break_ctrlc
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
-from LOTlib.Examples.RationalRules.Model import *
+from LOTlib.Examples.RationalRules.Model.Grammar import grammar
+from LOTlib.Examples.RationalRules.Model.Data import data
+from LOTlib.Miscellaneous import q
 from Hypothesis import *
 
 def run():
@@ -19,7 +22,7 @@ def run():
 
     # Run the vanilla sampler. Without steps, it will run infinitely
     # this prints out posterior (posterior_score), prior, likelihood,
-    for h in break_ctrlc(MHSampler(h0, Data.data, 10000, skip=100)):
+    for h in break_ctrlc(MHSampler(h0, data, 10000, skip=100)):
         print h.posterior_score, h.prior, h.likelihood, q(h)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

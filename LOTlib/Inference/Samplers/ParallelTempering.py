@@ -1,7 +1,8 @@
 from random import randint
 
+from LOTlib.Miscellaneous import Infinity
 from LOTlib.Inference.MHShared import MH_acceptance
-from LOTlib.Inference.Samplers import MultipleChainMCMC
+from LOTlib.Inference.Samplers.MultipleChainMCMC import MultipleChainMCMC
 
 
 class ParallelTemperingSampler(MultipleChainMCMC):
@@ -9,7 +10,6 @@ class ParallelTemperingSampler(MultipleChainMCMC):
     Parallel tempering.
 
     This now includes lots of stats on up-vs-down for tuning the temperatures.
-
     """
 
     def __init__(self, make_h0, data, steps=Infinity, temperatures=[1.0, 1.05, 1.15, 1.2], \
@@ -111,15 +111,18 @@ if __name__ == "__main__":
 
     from LOTlib import break_ctrlc
     from LOTlib.Miscellaneous import Infinity
-    from LOTlib.Examples.Number2015.Model import generate_data, make_h0
-    data = generate_data(1000)
+    from LOTlib.Examples.ExampleLoader import load_example
+
+    make_hypothesis, make_data = load_example('Number')
+
+    data = make_data(1000)
 
     from LOTlib.MCMCSummary.Z import Z
     from LOTlib.MCMCSummary.TopN import TopN
     z = Z(unique=True)
     tn = TopN(N=10)
 
-    sampler = ParallelTemperingSampler(make_h0, data, steps=100000,
+    sampler = ParallelTemperingSampler(make_hypothesis, data, steps=100000,
                                        whichtemperature='acceptance_temperature',
                                        temperatures=[1.0, 2., 3., 5., 10., 20.])
 

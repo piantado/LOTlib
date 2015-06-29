@@ -17,8 +17,8 @@ class WeightedLexicon(SimpleLexicon):
             within each set proportional to weightfunction(utterance, context).
     """
 
-    def __init__(self,  make_hypothesis, words=(), alpha=0.90, palpha=0.90, **kwargs):
-        SimpleLexicon.__init__(self, make_hypothesis, words=words, **kwargs)
+    def __init__(self,  make_hypothesis, alpha=0.90, palpha=0.90, **kwargs):
+        SimpleLexicon.__init__(self, make_hypothesis, **kwargs)
         self.alpha=alpha
         self.palpha=palpha
 
@@ -30,9 +30,9 @@ class WeightedLexicon(SimpleLexicon):
 
     def __copy__(self):
         """ Copy a.valueicon. We don't re-create the fucntions since that's unnecessary and slow"""
-        new = type(self)(self.make_hypothesis, words=self.words, alpha=self.alpha, palpha=self.palpha)
-        for w in self.value.keys():
-            new.value[w] = copy(self.value[w])
+        new = type(self)(None, words=None, alpha=self.alpha, palpha=self.palpha)
+        for w in self.all_words():
+            new.set_word(w, copy(self.get_word(w)))
 
         # And copy everything else
         for k in self.__dict__.keys():

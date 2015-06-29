@@ -8,25 +8,27 @@ import pickle
 from LOTlib.Miscellaneous import Infinity
 from LOTlib.Subtrees import *
 from Model import *
-
-
-NDATA = 100
-N_SUBTREES_PER_NODE = 50
-SUBTREE_P = 0.5 # when we generate a partial subtree, how likely are we to take each kid?
+from TargetConcepts import TargetConcepts
+from Model.Grammar import grammar
 
 if __name__ == "__main__":
+
+    NDATA = 10
+    N_SUBTREES_PER_NODE = 50
+    SUBTREE_P = 0.5 # when we generate a partial subtree, how likely are we to take each kid?
+
     # Make the data(s)
-    datas = [generate_data(NDATA, f) for f in TARGET_CONCEPTS]
+    datas = [make_data(NDATA, f) for f in TargetConcepts]
 
     # Load hypotheses from previous run
     hypotheses = pickle.load(open("hypotheses.pkl", 'r')).get_all()
     print "# Loaded hypotheses ", len(hypotheses)
 
     # Clean out ones with 0 probability, or else KL computation in print_subtree_adaptations goes to hell
-    hypotheses = filter(lambda h: sum(h.compute_posterior(datas[0])) > -Infinity,  hypotheses)
+    hypotheses = filter(lambda h: h.compute_posterior(datas[0]) > -Infinity,  hypotheses)
 
     ## And evaluate each hypothesis on each data point
-    posteriors = map( lambda d: [ sum(h.compute_posterior(d)) for h in hypotheses], datas)
+    posteriors = map( lambda d: [ h.compute_posterior(d) for h in hypotheses], datas)
     print "# Rescored hypotheses!"
 
     ## Generate a set of subtrees
@@ -41,6 +43,6 @@ if __name__ == "__main__":
     #for h,p in zip(hypotheses, posteriors[1]):
         #print p, h
 
-    from LOTlib.sandbox.OptimalGrammarAdaptation import print_subtree_adaptations
     ## And call from OptimalGrammarAdaptation
-    print_subtree_adaptations(hypotheses, posteriors, subtrees)
+    from LOTlib.sandbox.OptimalGrammarAdaptation import print_subtree_adaptations
+    print_subtree_adaptations(grammar, hypotheses, posteriors, subtrees)

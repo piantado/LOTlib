@@ -49,9 +49,9 @@ def list2FunctionNode(l, style="atis"):
         elif style is 'atis':
             rec = lambda x: list2FunctionNode(x, style=style) # a wrapper to my recursive self
             if l[0] == 'lambda':
-                fn = BVAddFunctionNode(None, 'FUNCTION', 'lambda', [rec(l[3])], generation_probability=0.0, bv_type=l[1], bv_args=None ) # TOOD: HMM WHAT IS THE BV?
+                fn = BVAddFunctionNode(None, 'FUNCTION', 'lambda', [rec(l[3])], bv_type=l[1], bv_args=None ) # TOOD: HMM WHAT IS THE BV?
             else:
-                fn = FunctionNode(None, l[0], l[0], map(rec, l[1:]), generation_probability=0.0)
+                fn = FunctionNode(None, l[0], l[0], map(rec, l[1:]))
         elif style is 'scheme':
             raise NotImplementedError
 

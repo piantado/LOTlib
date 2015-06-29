@@ -1,5 +1,4 @@
 
-from Data import *
-from Grammar import *
-from Hypothesis import *
-from Utilities import *
+from Data import make_data
+from Hypothesis import make_hypothesis
+

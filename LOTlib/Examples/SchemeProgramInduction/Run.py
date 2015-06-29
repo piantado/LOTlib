@@ -12,17 +12,21 @@ Note:
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib import break_ctrlc
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+
 from Model import *
+from Model.Grammar import grammar
+from Model.Data import make_data
 
 #=============================================================================================================
 
 STEPS = 1000000
 ALPHA = 0.9
 
-
 def run():
-    """ Standard run function."""
-    h0 = SchemeFunction(grammar, ALPHA=ALPHA)
+
+    h0 = make_hypothesis()
+    data = make_data()
+
     for x in break_ctrlc(MHSampler(h0, data, STEPS)):
 
         print x.posterior_score, x

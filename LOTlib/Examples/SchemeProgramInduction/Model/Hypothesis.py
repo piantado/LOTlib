@@ -1,12 +1,15 @@
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from math import log
 
+from Grammar import grammar
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # A class for scheme hypotheses that just computes the input/output pairs with the appropriate probability
+
 class SchemeFunction(LOTHypothesis):
 
     # Prior, proposals, __init__ are all inherited from LOTHypothesis
-    def __init__(self, grammar, ALPHA=0.9, **kwargs):
+    def __init__(self, ALPHA=0.9, **kwargs):
         LOTHypothesis.__init__(self, grammar, **kwargs)
         self.ALPHA = ALPHA
 
@@ -20,3 +23,6 @@ class SchemeFunction(LOTHypothesis):
             return log(self.ALPHA)
         else:
             return log(1.0-self.ALPHA)
+
+def make_hypothesis():
+    return SchemeFunction()

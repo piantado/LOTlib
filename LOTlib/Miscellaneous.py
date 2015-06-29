@@ -10,7 +10,10 @@ import math
 from math import exp, log, pi
 from random import random, sample
 import re
+import os
+import inspect
 import sys
+import getpass
 import types    # For checking if something is a function: isinstance(f, types.FunctionType)
 try: import numpy as np
 except ImportError: import numpypy as np
@@ -25,7 +28,6 @@ TAU = 6.28318530718     # fuck pi
 # For R-friendly
 T = True
 F = False
-
 
 # ------------------------------------------------------------------------------------------------------------
 
@@ -159,13 +161,15 @@ def display_option_summary(obj):
     import os
 
     print "#"*90
-    try: print "# Username: ", os.getlogin()
+    try: print "# Username: ", getpass.getuser()
     except OSError: pass
 
     try: print "# Date: ", strftime("%Y %b %d (%a) %H:%M:%S", localtime(time()) )
     except OSError: pass
 
-    try: print "# Uname: ", os.uname()
+    try:
+        if sys.platform == 'win32': print "# Uname: Unavailable"
+        else: print "# Uname: ", os.uname()
     except OSError: pass
 
     try: print "# Pid: ", os.getpid()
@@ -329,6 +333,12 @@ except ImportError:
             m = max(v)
             return m+log(sum(map( lambda x: exp(x-m), v)))
 
+def nicelog(x):
+    if x > 0.:
+        return log(x)
+    else:
+        return -Infinity
+
 def logsumexp(v):
     """
             logsumexp - our own version wraps the version defined about (logsumexp_base)
@@ -412,14 +422,13 @@ def log1mexp(a):
     else:             return log(-expm1(a))
 
 
-def EV(fn, *args):
+def EV(fn, n_samples, *args):
     """
         Estimates (via sampling) the expected value of a function that returns
         a numerical value. Pass any args to specified function as additional args
         ex: EV(random.randint, 2, 5)
     """
-    vals = [fn(*args) for _ in range(100)]
-    return np.average(vals)
+    return np.average([fn(*args) for _ in range(n_samples)])
 
 from itertools import imap
 def argmax(lst):
@@ -546,4 +555,31 @@ def scramble_sort(lst, keyfunction):
     
     return map(lambda x: x[2], sorted(keys))
 
+# ------------------------------------------------------------------------------------------------------------
+# Memoization
+# ------------------------------------------------------------------------------------------------------------
 
+
+def attrmem(aname):
+    """
+    Memoize a class function, saving the return value to X in @attrmem(X)
+
+    :param f: a function to memoize
+    :return: the memoized function
+
+    Example:
+        @attrmem('prior')
+        def compute_prior(self, ...):
+            ...
+    will save every output of compute_prior to self.prior
+    """
+    def wrap1(f):
+
+        def wrap2(self, *args, **kwargs):
+            v = f(self, *args, **kwargs)
+            setattr(self, aname, v)
+            return v
+
+        return wrap2
+
+    return wrap1

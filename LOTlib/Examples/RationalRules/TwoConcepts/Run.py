@@ -4,10 +4,12 @@ Rational rules over two concepts at the same time.
 Another way to do this would be to use a Lexicon and write a custom likelihood method
 
 """
+from LOTlib import break_ctrlc
 from LOTlib.Examples.RationalRules.Model import *
 from LOTlib.Hypotheses.RationalRulesLOTHypothesis import RationalRulesLOTHypothesis
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
-from LOTlib.Examples.RationalRules.Model import grammar, q
+from LOTlib.Examples.RationalRules.Model.Grammar import grammar
+from LOTlib.Miscellaneous import q
 from Data import data
 
 

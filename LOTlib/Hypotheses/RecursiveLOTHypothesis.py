@@ -1,5 +1,5 @@
 
-from LOTHypothesis import LOTHypothesis, raise_exception, evaluate_expression
+from LOTHypothesis import LOTHypothesis, raise_exception
 from LOTlib.Evaluation.EvaluationException import RecursionDepthException, TooBigException, EvaluationException
 
 class RecursiveLOTHypothesis(LOTHypothesis):
@@ -9,10 +9,9 @@ class RecursiveLOTHypothesis(LOTHypothesis):
     Here, RecursiveLOTHypothesis.__call__ does essentially the same thing as LOTHypothesis.__call__, but it binds
     the symbol "recurse" to RecursiveLOTHypothesis.recursive_call so that recursion is processed internally.
 
-    For a Demo, see LOTlib.Examples.Number
+    This bind is done in compile_function, NOT in __call__
 
-    NOTE: Pre Nov2014, this was computed with some fanciness in evaluate_expression that automatically appended the Y combinator.
-          This change was made to simplify and speed things up.
+    For a Demo, see LOTlib.Examples.Number
     """
 
     def __init__(self, grammar, recurse='recurse_', recurse_bound=25, args=['x'], **kwargs):
@@ -25,44 +24,31 @@ class RecursiveLOTHypothesis(LOTHypothesis):
         self.recursive_depth_bound = recurse_bound # how deep can we recurse?
         self.recursive_call_depth = 0 # how far down have we recursed?
 
-        # automatically put 'recurse' onto kwargs['args']
-        assert recurse not in args # not already specified
+        # automatically put 'recurse' onto args
+        assert len(args) == 0 or (args[0] is not recurse) # not already specified
         args = [recurse] + args
 
         LOTHypothesis.__init__(self, grammar, args=args, **kwargs)
 
     def recursive_call(self, *args):
         """
-        This gets called internally on recursive calls. It keeps track of the depth to allow us to escape
+        This gets called internally on recursive calls. It keeps track of the depth and throws an error if you go too deep
         """
+
         self.recursive_call_depth += 1
+
         if self.recursive_call_depth > self.recursive_depth_bound:
             raise RecursionDepthException
 
-        return LOTHypothesis.__call__(self, *args)
+        # Call with sending myself as the recursive call
+        return LOTHypothesis.__call__(self, self.recursive_call, *args)
 
     def __call__(self, *args):
         """
         The main calling function. Resets recursive_call_depth and then calls
         """
         self.recursive_call_depth = 0
-        return LOTHypothesis.__call__(self, *args)
 
+        # call with passing self.recursive_Call as the recursive call
+        return LOTHypothesis.__call__(self, self.recursive_call, *args)
 
-    def compile_function(self):
-        """
-        Called in set_value to make a function. Here, we defaultly wrap in recursive_call as our argument to "recurse"
-        so that recursive_call gets called by the symbol self.recurse
-        """
-        """Called in set_value to compile into a function."""
-        if self.value.count_nodes() > self.maxnodes:
-            return (lambda *args: raise_exception(TooBigException))
-        else:
-            try:
-                # Here, we evaluate it, and then defaultly pass recursive_call as the first "recurse"
-                f = evaluate_expression(str(self))
-                return lambda *args: f(self.recursive_call, *args)
-            except Exception as e:
-                print "# Warning: failed to execute evaluate_expression on " + str(self)
-                print "# ", e
-                return (lambda *args: raise_exception(EvaluationException) )

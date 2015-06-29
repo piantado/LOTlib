@@ -63,3 +63,4 @@ class TopN(MCMCSummary, SampleFilter):
             self.fbs.merge(y)
         else:
             raise NotImplementedError
+

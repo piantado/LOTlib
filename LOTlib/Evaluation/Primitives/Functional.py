@@ -73,14 +73,18 @@ def cdr_(x):
     try:    return x[1:]
     except IndexError: return []
 
-rest_  = cdr_
+@primitive
+def rest_(x):
+    return cdr_(x)
 
 @primitive
 def car_(x):
     try:    return x[0]
     except IndexError: return []
 
-first_ = car_
+@primitive
+def first_(x):
+    return car_(x)
 
 @primitive
 def filter_(f,x):

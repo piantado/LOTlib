@@ -6,7 +6,17 @@ from LOTlib.DataAndObjects import UtteranceData
 from LOTlib.Examples.CCG.Model.Utilities import can_compose
 from LOTlib.DataAndObjects import Context
 
+from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
+from Grammar import grammar
+from Data import all_words ## NOT ideal here, but just an example
+
+# How we make a hypothesis inside the lexicon
+def make_inner_hypothesis():
+    return LOTHypothesis(grammar, args=['C'])
+
+def make_hypothesis():
+    return CCGLexicon(make_inner_hypothesis, words=all_words, alpha=0.9, palpha=0.9, likelihood_temperature=1.0)
 
 class CCGLexicon(WeightedLexicon):
     """A version for doing CCG, which parses in the likelihood."""

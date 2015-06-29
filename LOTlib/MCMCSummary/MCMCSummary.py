@@ -3,7 +3,7 @@ import pickle
 from LOTlib import break_ctrlc
 
 
-class MCMCSummary:
+class MCMCSummary(object):
     """Superclass for collecting, computing, and displaying summary statistics from model runs.
 
     Arguments:
