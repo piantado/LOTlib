@@ -39,7 +39,7 @@ import pickle
 import numpy as np
 from scipy.stats import gamma
 from LOTlib.Hypotheses.VectorHypothesis import VectorHypothesis
-from LOTlib.Miscellaneous import logsumexp, log1mexp, gammaln, Infinity
+from LOTlib.Miscellaneous import logsumexp, log1mexp, gammaln, Infinity, attrmem
 
 
 class GrammarHypothesis(VectorHypothesis):
@@ -153,6 +153,7 @@ class GrammarHypothesis(VectorHypothesis):
     # --------------------------------------------------------------------------------------------------------
     # Bayesian inference with GrammarHypothesis
 
+    @attrmem('prior')
     def compute_prior(self):
         """
         Compute priors, according only to values that are proposed to. Priors computed according to gamma dist.
@@ -168,7 +169,6 @@ class GrammarHypothesis(VectorHypothesis):
             prior = -Infinity
         else:
             prior = sum([r for r in rule_priors])
-        self.prior = prior
         self.update_posterior()
         return prior
 
