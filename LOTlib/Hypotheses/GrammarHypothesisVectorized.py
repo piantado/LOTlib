@@ -123,13 +123,14 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
             posteriors = self.L[d_index] + P
             Z = logsumexp(posteriors)
             w = np.exp(posteriors - Z)              # weights for each hypothesis
-            r = self.R[d_index]
+            r = np.transpose(self.R[d_index])
+            w_times_R = w * r
             
             # Compute likelihood of producing same output (yes/no) as data
             for m, o in enumerate(d.output.keys()):
                 # col `m` of boolean matrix `R[i]` weighted by `w`
-                w_times_R = w * r[:, m]
-                exp_p = w_times_R.sum()
+                r_m = w_times_R[m, :]
+                exp_p = r_m.sum()
                 p = log(exp_p)
                 ## p = log((np.exp(w) * self.R[d_index][:, m]).sum())
 
@@ -141,7 +142,8 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
                 k = yes             # num. yes responses
                 n = yes + no        # num. trials
                 bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
-                likelihood += bc + (k*p) + (n-k)*log1mexp(p)            # likelihood we got human output
+                l1mp = log1mexp(p)
+                likelihood += bc + (k*p) + (n-k)*l1mp                   # likelihood we got human output
 
         if update_post:
             self.likelihood = likelihood
