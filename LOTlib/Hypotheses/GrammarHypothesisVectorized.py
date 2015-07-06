@@ -86,21 +86,21 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
         """
         self.H = [h() for h in self.hypotheses]
 
-    def init_L(self, d, d_key):
+    def init_L(self, d, d_index):
         """
         Initialize `self.L` dictionary.
 
         """
-        self.L[d_key] = np.array([h.compute_likelihood(d.input) for h in self.hypotheses])  # For ea. hypo.
+        self.L[d_index] = np.array([h.compute_likelihood(d.input) for h in self.hypotheses])  # For ea. hypo.
 
-    def init_R(self, d, d_key):
+    def init_R(self, d, d_index):
         """
         Initialize `self.R` dictionary.
 
         """
-        self.R[d_key] = np.zeros((len(self.hypotheses), len(d.output.keys())))
+        self.R[d_index] = np.zeros((len(self.hypotheses), len(d.output.keys())))
         for m, o in enumerate(d.output.keys()):
-            self.R[d_key][:, m] = [int(o in h_concept) for h_concept in self.H]  # For ea. hypo.
+            self.R[d_index][:, m] = [int(o in h_concept) for h_concept in self.H]  # For ea. hypo.
 
     def compute_likelihood(self, data, update_post=True, **kwargs):
         """
@@ -113,28 +113,33 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
         P = np.dot(self.C, x)               # prior for each hypothesis
         likelihood = 0.0
 
-        for d_key, d in enumerate(data):
+        for d_index, d in enumerate(data):
             # Initialize unfilled values for L[data] & R[data]
-            if d_key not in self.L:
-                self.init_L(d, d_key)
-            if d_key not in self.R:
-                self.init_R(d, d_key)
+            if d_index not in self.L:
+                self.init_L(d, d_index)
+            if d_index not in self.R:
+                self.init_R(d, d_index)
 
-            posteriors = self.L[d_key] + P
+            posteriors = self.L[d_index] + P
             Z = logsumexp(posteriors)
-            w = posteriors - Z              # weights for each hypothesis
-
+            w = np.exp(posteriors - Z)              # weights for each hypothesis
+            r = self.R[d_index]
+            
             # Compute likelihood of producing same output (yes/no) as data
             for m, o in enumerate(d.output.keys()):
                 # col `m` of boolean matrix `R[i]` weighted by `w`
-                p = log((np.exp(w) * self.R[d_key][:, m]).sum())
+                w_times_R = w * r[:, m]
+                exp_p = w_times_R.sum()
+                p = log(exp_p)
+                ## p = log((np.exp(w) * self.R[d_index][:, m]).sum())
 
                 # NOTE: with really small grammars sometimes we get p > 0
                 if p >= 0:
                     print 'P ERROR!'
 
-                k = d.output[o][0]          # num. yes responses
-                n = k + d.output[o][1]      # num. trials
+                yes, no = d.output[o]
+                k = yes             # num. yes responses
+                n = yes + no        # num. trials
                 bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
                 likelihood += bc + (k*p) + (n-k)*log1mexp(p)            # likelihood we got human output
 
