@@ -39,6 +39,7 @@ To use this for a different format, change init_R & compute_likelihood.
 import copy
 from math import exp, log
 import numpy as np
+from numba import jit
 from NumbaUtils import *
 from LOTlib.GrammarRule import BVUseGrammarRule
 from LOTlib.Hypotheses.GrammarHypothesis import GrammarHypothesis
@@ -103,8 +104,7 @@ class GrammarHypothesisOptimized(GrammarHypothesis):
         for m, o in enumerate(d.output.keys()):
             self.R[d_key][:, m] = [int(o in h_concept) for h_concept in self.H]  # For ea. hypo.
 
-
-
+    @jit
     def compute_likelihood(self, data, update_post=True, **kwargs):
         """
         Compute the likelihood of producing human data, given:  H (self.hypotheses)  &  x (self.value)
