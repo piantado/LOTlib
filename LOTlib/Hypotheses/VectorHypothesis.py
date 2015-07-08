@@ -1,30 +1,44 @@
 import copy
-import numpy
+import random
+import numpy as np
 from Hypothesis import Hypothesis
 
 
 class VectorHypothesis(Hypothesis):
     """Store n-dimensional vectors (defaultly with Gaussian proposals)."""
 
-    def __init__(self, value=None, n=1, proposal=None):
-        if proposal is None:
-            proposal = numpy.eye(n)
-        if value is None:
-            value = numpy.random.multivariate_normal(numpy.array([0.0]*n), proposal)
-        Hypothesis.__init__(self, value=value)
+    def __init__(self, value=None, n=1, proposal=None, propose_scale=1.0, propose_n=1):
         self.n = n
+        self.propose_n = propose_n
+        if value is None:
+            value = np.random.multivariate_normal(np.array([0.0]*n), proposal)
+        if proposal is None:
+            proposal = np.eye(n) * propose_scale
+        propose_mask = self.get_propose_mask()
+        proposal = proposal * propose_mask
         self.proposal = proposal
+        Hypothesis.__init__(self, value=value)
         self.__dict__.update(locals())
 
     def propose(self):
         """new value is sampled from a normal centered @ old values, w/ proposal as covariance (inverse?)"""
-        newv = numpy.random.multivariate_normal(self.value, self.proposal)
-        return type(self)(value=newv, n=self.n, proposal=self.proposal), 0.0
+        step = np.random.multivariate_normal(self.value, self.proposal)
 
-    def conditional_distribution(self, data, value_index, vals=numpy.arange(0, 2, .2)):
+        new_value = copy.copy(self.value)
+        for i in random.sample(self.proposal.nonzero()[0], self.propose_n):
+            new_value[i] = step[i]
+
+        c = self.__copy__(new_value)
+        return c, 0.0
+
+    def get_propose_mask(self):
+        """Default propose mask method."""
+        return [True] * self.n
+
+    def conditional_distribution(self, data, value_index, vals=np.arange(0, 2, .2)):
         """Compute posterior values for this grammar, varying specified value over a specified set.
 
-        Args:
+        Args
             data(list): List of datums.
             rule_name(string): Index of the value we're varying probabilities over.
             vals(list): List of float values.  E.g. [0,.2,.4, ..., 2.]
@@ -40,8 +54,8 @@ class VectorHypothesis(Hypothesis):
             value = copy.copy(self.value)
             value[value_index] = p
             self.set_value(value)
-            p, l = self.compute_posterior(data, updateflag=False)
-            dist.append([p, l, p+l])
+            posterior = self.compute_posterior(data, updateflag=False)
+            dist.append([self.prior, self.likelihood, posterior])
 
         self.set_value(old_value)
         return vals, dist
