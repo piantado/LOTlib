@@ -64,13 +64,12 @@ class GrammarHypothesis(VectorHypothesis):
     prior_scale : float
         shape used in compute_prior
     propose_n : int
-    propose_step : float
-    propose_idxs : list<int>
+    propose_scale : float
 
 
     """
     def __init__(self, grammar, hypotheses, rules=None, load=None, value=None, proposal=None,
-                 prior_shape=2., prior_scale=1., propose_n=1, propose_step=.1,
+                 prior_shape=2., prior_scale=1., propose_n=1, propose_scale=.1,
                  **kwargs):
         self.grammar = grammar
         if load:
@@ -80,50 +79,27 @@ class GrammarHypothesis(VectorHypothesis):
         self.rules = [r for sublist in grammar.rules.values() for r in sublist]
         if value is None:
             value = [rule.p for rule in self.rules]
-        self.n = len(value)
-        self.propose_idxs = self.get_propose_idxs()
-        if proposal is None:
-            proposal = np.eye(len(self.propose_idxs))
-        VectorHypothesis.__init__(self, value=value, n=self.n, proposal=proposal)
+        n = len(value)
+        VectorHypothesis.__init__(self, value=value, n=self.n, proposal=proposal, propose_scale=propose_scale,
+                                  propose_n=propose_n)
         self.prior_shape = prior_shape
         self.prior_scale = prior_scale
         self.propose_n = propose_n
-        self.propose_step = propose_step
+        self.propose_scale = propose_scale
         # self.compute_prior()
         self.update()
 
     # --------------------------------------------------------------------------------------------------------
     # MCMC-Related methods
 
-    def propose(self):
-        """Propose a new GrammarHypothesis; used to propose new samples with methods like MH.
-
-        New value is sampled from a normal centered @ old values, w/ proposal as covariance (inverse?)
-
-        Note
-        ----
-          * `self.propose_step` is used to determine how far to step with proposals.
-
-        """
-        step = np.random.multivariate_normal([0.]*len(self.propose_idxs), self.proposal) * self.propose_step
-        new_value = copy.copy(self.value)
-
-        # randomly choose `self.propose_n` of our proposable indexes
-        for i in random.sample(self.propose_idxs, self.propose_n):
-            new_value[i] += step[self.propose_idxs.index(i)]
-
-        c = self.__copy__()
-        c.set_value(new_value)
-        return c, 0.0
-
-    def __copy__(self):
-        """Copy of this GrammarHypothesis; `self.grammar` & `self.hypothesis` don't deep copy."""
-        return type(self)(
-            self.grammar, self.hypotheses,
-            value=copy.copy(self.value), proposal=copy.copy(self.proposal),
-            prior_shape=self.prior_shape, prior_scale=self.prior_scale,
-            propose_n=self.propose_n, propose_step=self.propose_step
-        )
+    def __copy__(self, value=None):
+        """Copy this GH; shallow copies of value & proposal so we don't have sampling issues."""
+        if value is None:
+            value = copy.copy(self.value)
+        proposal = copy.copy(self.proposal)
+        c = VectorHypothesis.__copy__(value)
+        c.proposal = proposal
+        return c
 
     def set_value(self, value):
         """Set value and grammar rules for this hypothesis."""
@@ -161,7 +137,9 @@ class GrammarHypothesis(VectorHypothesis):
         """
         shape = self.prior_shape
         scale = self.prior_scale
-        propose_values = [self.value[i] for i in self.get_propose_idxs()]
+        propose_idxs = [i for i, x in enumerate(self.get_propose_mask()) if x]
+
+        propose_values = [self.value[i] for i in propose_idxs]
         rule_priors = [gamma.logpdf(v, shape, scale=scale) for v in propose_values]
 
         # If there are any negative values in our vector, prior is 0
@@ -250,22 +228,22 @@ class GrammarHypothesis(VectorHypothesis):
         idxs, rules = zip(*rules) if len(rules) > 0 else [(), ()]
         return idxs, rules
 
-    def get_propose_idxs(self):
-        """
-        Get indexes to propose to => only rules with siblings.
-
-        """
-        proposal_indexes = range(self.n)
-        nonterminals = self.grammar.nonterminals()
-        for nt in nonterminals:
+    def get_propose_mask(self):
+        """Only propose to rules with other rules with same NT."""
+        propose_mask = [True] * self.n
+        for i, nt in enumerate(self.grammar.nonterminals()):
             idxs, r = self.get_rules(rule_nt=nt)
             if len(idxs) == 1:
-                proposal_indexes.remove(idxs[0])
-        return proposal_indexes
+                propose_mask[i] = False
+        return propose_mask
 
     def rule_distribution(self, data, rule_name, vals=np.arange(0, 2, .1)):
         """
         Compute posterior values for this grammar, varying specified rule over a set of values.
+
+        Note
+        ----
+        This is not currently used...
 
         """
         idxs, rules = self.get_rules(rule_name=rule_name)
