@@ -94,6 +94,6 @@ if __name__ == "__main__":
                                   (10., 1., 10.)
                                 ]))
 
-    MPI_map(run_one, params, random_order=False)
+    MPI_map(run_one, params)
 
 

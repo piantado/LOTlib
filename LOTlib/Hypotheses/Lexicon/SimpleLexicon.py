@@ -69,7 +69,7 @@ class SimpleLexicon(Hypothesis):
         # If this does not exist, make a function hypothesis from scratch with nothing in it.
         if w not in self.value:
             self.value[w] = FunctionHypothesis(value=None, args=None)
-        
+
         self.value[w].force_function(f)
 
     # ##################################################################################

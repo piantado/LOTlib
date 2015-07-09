@@ -651,7 +651,9 @@ class FunctionNode(object):
 
 class BVAddFunctionNode(FunctionNode):
     """
-    (doc?)
+    A type of FunctionNode that adds a bound variable, namely a lambda.
+
+    This should almost never need to be called, as it is defaultly handled by LOTlib.Grammar
     """
     def __init__(self, parent, returntype, name, args, rule=None, a_args=None, added_rule=None):
         FunctionNode.__init__(self, parent, returntype, name, args, rule, a_args)
@@ -718,7 +720,7 @@ class BVAddFunctionNode(FunctionNode):
 
 class BVUseFunctionNode(FunctionNode):
     """
-    (doc?)
+    A FunctionNode that uses a bound variable. As in, the use of "x" in lambda x: x+1
     """
     def __init__(self, parent, returntype, name, args, rule=None, a_args=None, bv_prefix=None):
         FunctionNode.__init__(self, parent, returntype, name, args, rule, a_args)

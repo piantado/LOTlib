@@ -2,6 +2,8 @@
 
     This likelihood is for stochastic functions. To compute the likelihood, we must simulate forwards a bunch of times.
     (Previously, this was a hypothesis type, SimpleGenerativeHypothesis)
+
+    NOTE: A very subtle error can occur if exceptions (like TooBigException) are caught in __call__, then ll_counts may never get set.
 """
 
 from LOTlib.Miscellaneous import attrmem, nicelog

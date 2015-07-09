@@ -1,3 +1,5 @@
+	- Recompiled documentation. Now lives in LOTlib/Documentation. 
+	- Version updated to 0.4.1
 June 14 2015
     - Changed Lexicon default proposal to sampling each word with a fixed prob. 
     - Got rid of evaluate_expression -- now just directly use eval

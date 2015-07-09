@@ -66,5 +66,5 @@ if __name__ == "__main__":
                                        models, [model2data],
                                        [1, 2, 5, 10, 50, 100, 1000] )]
 
-    MPI_map(run_one, params, random_order=False)
+    MPI_map(run_one, params)
 

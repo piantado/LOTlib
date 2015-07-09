@@ -24,8 +24,8 @@ SimpleBoolean_noTF.add_rule('BOOL', '', ['PREDICATE'], DEFAULT_FEATURE_WEIGHT)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 SimpleBoolean = Grammar()
-SimpleBoolean.add_rule('START', 'False', None, DEFAULT_FEATURE_WEIGHT)
-SimpleBoolean.add_rule('START', 'True', None, DEFAULT_FEATURE_WEIGHT)
+SimpleBoolean.add_rule('START', 'False', None, 1.0)
+SimpleBoolean.add_rule('START', 'True', None, 1.0)
 SimpleBoolean.add_rule('START', '', ['BOOL'], 1.0)
 
 SimpleBoolean.add_rule('BOOL', 'and_', ['BOOL', 'BOOL'], 1.0)

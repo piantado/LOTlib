@@ -14,15 +14,7 @@ from LOTlib.FunctionNode import FunctionNode
 
 class Grammar:
     """
-    A PCFG-ish class that can handle special types of rules:
-        - Rules that introduce bound variables
-        - Rules that sample from a continuous distribution
-        - Variable resampling probabilities among the rules
-
-    Note:
-        * In general, grammars should NOT allow rules of the same name and type signature.
-        * This class fixes a bunch of problems that were in earlier versions, such as (doc?)
-
+    A PCFG-ish class that can handle rules that introduce bound variables
     """
     def __init__(self, BV_P=10.0, start='START'):
         self.__dict__.update(locals())
@@ -35,6 +27,8 @@ class Grammar:
         return '\n'.join([str(r) for r in itertools.chain(*[self.rules[nt] for nt in self.rules.keys()])])
 
     def nrules(self):
+        """ Total number of rules
+        """
         return sum([len(self.rules[nt]) for nt in self.rules.keys()])
 
     def get_rules(self, nt):
@@ -121,10 +115,10 @@ class Grammar:
     # --------------------------------------------------------------------------------------------------------
 
     def generate(self, x=None):
-        """Generate from the PCFG -- default is to start from x - either a nonterminal or a FunctionNode
+        """Generate from the grammar
 
         Arguments:
-            x (FunctionNode): What we start from -- can be None and then we use Grammar.start.
+            x (string): What we start from -- can be None and then we use Grammar.start.
 
         """
         # print "# Calling Grammar.generate", type(x), x
@@ -301,4 +295,12 @@ class Grammar:
 
         openset.remove(x)
         return current_d[x]
+
+    def renormalize(self):
+        """ go through each rule in each nonterminal, and renormalize the probabilities """
+
+        for nt in self.nonterminals():
+            z = sum([r.p for r in self.get_rules(nt)])
+            for r in self.get_rules(nt):
+                r.p = r.p / z
 
