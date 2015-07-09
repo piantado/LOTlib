@@ -64,7 +64,16 @@ class Grammar:
         This is overall about half as fast, but it means we don't have to store generation_probability
         """
         assert isinstance(t, FunctionNode)
-        # print type(t), t.returntype, t
+
+        """
+        This next assert is really important: it is possible to pickle LOTHypotheses or FunctionNodes
+         but not the grammar. When you then re-load them with a *new* grammar, you can call log_probability
+         and could get an answer that is incorrect.
+
+         The right thing to do is pickle the grammar as well, and re-load it (e.g. don't make a new grammar object
+         in another script
+        """
+        assert t.rule in self.get_rules(t.returntype), "*** Rule not in grammar! (Did you pickle a FunctionNode without pickling its grammar? Both must be pickled since FunctionNodes store rules)"
 
         z  = log(sum([ r.p for r in self.get_rules(t.returntype) ]))
         lp = log(t.rule.p) - z
