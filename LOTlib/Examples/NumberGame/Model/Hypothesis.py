@@ -3,6 +3,7 @@ from math import log
 from LOTlib.FunctionNode import FunctionNode, BVUseFunctionNode
 from LOTlib.Evaluation.EvaluationException import TooBigException
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis, Infinity
+from LOTlib.Miscellaneous import attrmem
 
 
 class NumberGameHypothesis(LOTHypothesis):
@@ -18,6 +19,7 @@ class NumberGameHypothesis(LOTHypothesis):
         self.domain = domain
         self.value_set = None
 
+    @attrmem('prior')
     def compute_prior(self):
         """Compute the log of the prior probability.
 
@@ -27,10 +29,10 @@ class NumberGameHypothesis(LOTHypothesis):
 
         # Compute this hypothesis prior
         if self.value.count_subnodes() > self.maxnodes:
-            self.prior = -Infinity
+            prior = -Infinity
         else:
             # Compute prior with either RR or not.
-            self.prior = self.grammar.log_probability(self.value) / self.prior_temperature
+            prior = self.grammar.log_probability(self.value) / self.prior_temperature
 
         # Don't use this tree if we have 2 constants as children in some subnode OR 2 BV's
         for fn in self.value.subnodes()[1:]:
@@ -42,14 +44,14 @@ class NumberGameHypothesis(LOTHypothesis):
 
             if (all([(arg.returntype=='OPCONST') for arg in args])                                                      # reject if all OPCONST children
                     or all([isinstance(arg, BVUseFunctionNode) for arg in fn.argFunctionNodes()])) and len(args) > 1:   # OR if 2 BV children
-                self.prior = -Infinity
+                prior = -Infinity
                 break
 
         if len(self()) == 0:
-            self.prior = -Infinity
+            prior = -Infinity
 
         self.update_posterior()
-        return self.prior
+        return prior
 
     def compute_likelihood(self, data, update_post=True, **kwargs):
         """Likelihood of specified data being produced by this hypothesis.

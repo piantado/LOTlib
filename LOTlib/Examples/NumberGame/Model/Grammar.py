@@ -102,6 +102,7 @@ for i in range(2, 11):
 # Ends in [0,9]
 for i in range(0, 10):
     mix_grammar.add_rule('EXPR', 'ends_in_', ['X', str(i)], 1.)
+    mix_grammar.add_rule('EXPR', 'contains_digit_', ['X', str(i)], 1.)
 
 # Interval Rules (there will be ~5050 of these)
 # ---------------------------------------------

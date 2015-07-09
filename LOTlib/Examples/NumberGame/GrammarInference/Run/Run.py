@@ -58,7 +58,7 @@ from LOTlib.Examples.NumberGame.GrammarInference.Model import *
 def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
         iters=10000, skip=10, cap=100, print_stuff='sgr',
         ngh='out/ngh_100k', hypotheses=None, domain=100, alpha=0.9,
-        save_file='',
+        save_file='', csv_freq=500,
         pickle_summary=False, pickle_gh=0):
     """
     Enumerate some NumberGameHypotheses, then use these to sample some GrammarHypotheses over `data`.
@@ -140,11 +140,11 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
     # Sample GrammarHypotheses!
     for i, gh in enumerate(mh_grammar_summary(mh_grammar_sampler)):
 
-        if save_file and ((i < 10000 and i % 100 == 0) or (i % 500 == 0)):
+        if save_file and csv_freq and (i % csv_freq == 0):
             mh_grammar_summary.csv_appendfiles(save_file, data)
 
         # Save to N samples, where N=pickle_gh
-        if pickle_gh and (i % pickle_gh):
+        if pickle_gh and (i % pickle_gh == 0):
             mh_grammar_summary.pickle_MAPsample(save_file+'_map_'+str(i/pickle_gh)+'.p')
             mh_grammar_summary.pickle_cursample(save_file+'_cur_'+str(i/pickle_gh)+'.p')
 
@@ -181,9 +181,9 @@ if __name__ == "__main__":
     parser.add_option("-f", "--ngh",
                       dest="ngh_file", type="string", default="out/ngh_100k.p",
                       help="Where's the file with the NumberGameHypotheses?")
-    # parser.add_option("--csv-compare",
-    #                   dest="compare", type="int", default=0,
-    #                   help="Do we use save regresion plots as we go? (if so, how many?")
+    parser.add_option("--csv-freq",
+                      dest="csv_freq", type="int", default=500,
+                      help="How often do we save csv files?")
 
     parser.add_option("-g", "--grammar",
                       dest="grammar", type="string", default="lot_grammar",
@@ -257,5 +257,5 @@ if __name__ == "__main__":
         iters=options.iters, skip=options.skip, cap=options.cap,
         ngh=options.ngh_file,
         print_stuff=print_stuff,
-        save_file=path+options.save_file,
+        save_file=path+options.save_file, csv_freq=options.csv_freq,
         pickle_summary=options.picklesummary, pickle_gh=options.pickle)

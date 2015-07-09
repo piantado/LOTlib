@@ -1,7 +1,12 @@
 
 """
-- script to separate held out & training data
-- update command line arg so we can save held-out data to a file, then reload same file in MakeNGHs, Run
+Includes 3 functions
+--------------------
+1. csvToFunctionData  -> convert data in CSV file (where each row includes a 1/0 rating, 
+                            and info about that rating), return as list of FunctionData's
+2. functionDataToCSV  -> convert FunctionData (stored in array) to CSV, save as file
+
+3. splitData          -> randomize data & take some portion of it as training / held out data
 
 """
 
@@ -76,16 +81,3 @@ def splitData(filename, ratio=0.7):
     with open(filename+'_hold.csv', mode='wb') as fname:
         functionDataToCSV(fname, data[idx:])
 
-
-if __name__ == "__main__":
-    parser = OptionParser()
-
-    parser.add_option("-r", "--ratio",
-                      dest="ratio", type="float", default="0.7",
-                      help="Ratio of training : held-out data.")
-
-    parser.add_option("-f", "--filename",
-                      dest="filename", type="string", default="MyData",
-                      help="File name to save to (no extension).")
-
-    (options, args) = parser.parse_args()

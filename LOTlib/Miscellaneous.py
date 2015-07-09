@@ -13,6 +13,7 @@ import re
 import os
 import inspect
 import sys
+import getpass
 import types    # For checking if something is a function: isinstance(f, types.FunctionType)
 try: import numpy as np
 except ImportError: import numpypy as np
@@ -160,13 +161,15 @@ def display_option_summary(obj):
     import os
 
     print "#"*90
-    try: print "# Username: ", os.getlogin()
+    try: print "# Username: ", getpass.getuser()
     except OSError: pass
 
     try: print "# Date: ", strftime("%Y %b %d (%a) %H:%M:%S", localtime(time()) )
     except OSError: pass
 
-    try: print "# Uname: ", os.uname()
+    try:
+        if sys.platform == 'win32': print "# Uname: Unavailable"
+        else: print "# Uname: ", os.uname()
     except OSError: pass
 
     try: print "# Pid: ", os.getpid()

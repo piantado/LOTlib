@@ -39,7 +39,7 @@ import pickle
 import numpy as np
 from scipy.stats import gamma
 from LOTlib.Hypotheses.VectorHypothesis import VectorHypothesis
-from LOTlib.Miscellaneous import logsumexp, log1mexp, gammaln, Infinity
+from LOTlib.Miscellaneous import logsumexp, log1mexp, gammaln, Infinity, attrmem
 
 
 class GrammarHypothesis(VectorHypothesis):
@@ -153,6 +153,7 @@ class GrammarHypothesis(VectorHypothesis):
     # --------------------------------------------------------------------------------------------------------
     # Bayesian inference with GrammarHypothesis
 
+    @attrmem('prior')
     def compute_prior(self):
         """
         Compute priors, according only to values that are proposed to. Priors computed according to gamma dist.
@@ -168,7 +169,6 @@ class GrammarHypothesis(VectorHypothesis):
             prior = -Infinity
         else:
             prior = sum([r for r in rule_priors])
-        self.prior = prior
         self.update_posterior()
         return prior
 
@@ -241,7 +241,10 @@ class GrammarHypothesis(VectorHypothesis):
         if rule_nt is not False:
             rules = [(i, r) for i, r in rules if r.nt == rule_nt]
         if rule_to is not False:
-            rules = [(i, r) for i, r in rules if rule_to in r.to]
+            if isinstance(rule_to, list):
+                rules = [(i, r) for i, r in rules if all([rto in r.to for rto in rule_to])]
+            else:
+                rules = [(i, r) for i, r in rules if rule_to in r.to]
 
         # Zip rules into separate `idxs` & `rules` lists
         idxs, rules = zip(*rules) if len(rules) > 0 else [(), ()]
@@ -301,10 +304,101 @@ class GrammarHypothesis(VectorHypothesis):
         if filename:
             f = open(filename, "rb")
             self.hypotheses = pickle.load(f)
+            for h in self.hypotheses:
+                h.grammar = self.grammar
             return self.hypotheses
 
     def save_hypotheses(self, filename=None):
         if filename:
             f = open(filename, "wb")
             pickle.dump(self.hypotheses, f)
+
+    # --------------------------------------------------------------------------------------------------------
+
+    def csv_load(self, csv_file, map=True):
+        """Load from CSV of values.
+
+        Args
+        ----
+        csv_file : str
+            where is the csv file we're loading values from?
+        hypo_file : str
+            where is the pickle file we're loading domain hypotheses from?
+
+
+
+        Note
+        ----
+        - This assumes csv file is in the format: i,nt,name,to,p
+        - There are
+
+        """
+        import csv
+
+        # Get index
+        max_idx = 1
+        if map:
+            with open(csv_file, 'rb') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    if row['i'] > max_idx:
+                        max_idx = row['i']
+        print 'CSV row (max_idx): ', str(max_idx)
+
+        with open(csv_file, 'rb') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row['i'] == max_idx:
+                    i, r = self.get_rules(rule_name=row['name'], rule_nt=row['nt'], rule_to=eval(row['to']))
+                    if len(r) == 1:
+                        print 'Updating: ', r
+                        print 'New p: ', row['p']
+                        value = self.value
+                        value[i[0]] = float(row['p'])
+                        self.set_value(value)
+                    else:
+                        print 'ERROR in csv_load call to get_rules.'
+                        print 'rule_name= ', row['name'], '\trule_nt= ', row['nt'], '\trule_to= ', row['to']
+                        print 'rules: ', r
+
+    def csv_compare_model_human(self, data, filename):
+        """
+        Save csv stuff for making the regression plot.
+
+        Format is list of input/outputs, with human & model probabilities for each.
+
+        Note
+        ----
+        This is specific to NumberGameHypothesis (because of 'o in h()')
+
+        """
+        import math
+        import csv
+
+        self.update()
+        for h in self.hypotheses:
+            h.compute_prior()
+            h.update_posterior()
+
+        with open(filename, 'a') as f:
+            writer = csv.writer(f)
+            hypotheses = self.hypotheses
+            writer.writerow(['input', 'output', 'human p', 'model p'])
+            i = 0
+
+            for d in data:
+                posteriors = [sum(h.compute_posterior(d.input)) for h in hypotheses]
+                Z = logsumexp(posteriors)
+                weights = [(post-Z) for post in posteriors]
+                print i, '\t|\t', d.input
+                i += 1
+
+                for o in d.output.keys():
+                    # Probability for yes on output `o` is sum of posteriors for hypos that contain `o`
+                    p_human = float(d.output[o][0]) / float(d.output[o][0] + d.output[o][1])
+                    p_model = sum([math.exp(w) if o in h() else 0 for h, w in zip(hypotheses, weights)])
+                    writer.writerow([d.input, o, p_human, p_model])
+
+
+
 
