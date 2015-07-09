@@ -120,7 +120,7 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
     # Fill VectorSummary
 
 
-    grammar_h0 = ParameterHypothesis(grammar, hypotheses, ngh_file=ngh, propose_step=.1, propose_n=1)
+    grammar_h0 = ParameterHypothesis(grammar, hypotheses, ngh_file=ngh, propose_scale=.1, propose_n=1)
     mh_grammar_sampler = MHSampler(grammar_h0, data, iters)
     mh_grammar_summary = VectorSummary(skip=skip, cap=cap)
 

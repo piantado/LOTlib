@@ -45,67 +45,16 @@ from LOTlib.GrammarRule import BVUseGrammarRule
 from LOTlib.Hypotheses.GrammarHypothesis import GrammarHypothesis
 from LOTlib.Miscellaneous import gammaln
 
-
+@jit
 class GrammarHypothesisOptimized(GrammarHypothesis):
 
-    def __init__(self, grammar, hypotheses, H=None, C=None, L=None, R=None, **kwargs):
-        GrammarHypothesis.__init__(self, grammar, hypotheses, **kwargs)
-        if H is None:
-            self.init_H()
-        else:
-            self.H = H
-        if H is None:
-            self.init_C()
-        else:
-            self.C = C
-        self.L = L if L else {}
-        self.R = R if R else {}
-
-    def init_C(self):
-        """
-        Initialize our rule count vector `self.C`.
-
-        """
-        self.C = np.zeros((len(self.hypotheses), len(self.rules)))
-        rule_idxs = {str([r.name, r.nt, r.to]): i for i, r in enumerate(self.rules)}
-
-        for j, h in enumerate(self.hypotheses):
-            grammar_rules = [fn.rule for fn in h.value.subnodes()]
-            for rule in grammar_rules:
-                try:
-                    self.C[j, rule_idxs[str([rule.name, rule.nt, rule.to])]] += 1
-                except Exception as e:
-                    if isinstance(rule, BVUseGrammarRule):
-                        pass
-                    else:
-                        print str(h)
-                        raise e
-
-    def init_H(self):
-        """
-        Initialize hypothesis concept list `self.H`.
-
-        """
-        self.H = [h() for h in self.hypotheses]
-
-    def init_L(self, d, d_key):
-        """
-        Initialize `self.L` dictionary.
-
-        """
-        self.L[d_key] = np.array([h.compute_likelihood(d.input) for h in self.hypotheses])  # For ea. hypo.
-
-    def init_R(self, d, d_key):
-        """
-        Initialize `self.R` dictionary.
-
-        """
-        self.R[d_key] = np.zeros((len(self.hypotheses), len(d.output.keys())))
-        for m, o in enumerate(d.output.keys()):
-            self.R[d_key][:, m] = [int(o in h_concept) for h_concept in self.H]  # For ea. hypo.
-
-    @jit
+    @float_()
     def compute_likelihood(self, data, update_post=True, **kwargs):
+        data_list
+        return self.likelihood_optimized(data_list, update_post)
+
+    @float_()
+    def likelihood_optimized(self, data, update_post=True):
         """
         Compute the likelihood of producing human data, given:  H (self.hypotheses)  &  x (self.value)
 
@@ -178,7 +127,7 @@ class GrammarHypothesisOptimized(GrammarHypothesis):
             H=self.H, C=self.C, L=self.L, R=self.R,
             value=copy.copy(self.value), proposal=self.proposal,
             prior_shape=self.prior_shape, prior_scale=self.prior_scale,
-            propose_n=self.propose_n, propose_step=self.propose_step
+            propose_n=self.propose_n, propose_scale=self.propose_scale
         )
 
     def update(self):

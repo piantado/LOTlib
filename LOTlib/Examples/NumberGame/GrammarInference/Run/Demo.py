@@ -72,7 +72,7 @@ if __name__ == "__main__":
     mixture_ratios = [None]*8
     for i,d in enumerate((BDA_data_similarity_1, BDA_data_similarity_2, BDA_data_similarity_3, BDA_data_similarity_4,
                           BDA_data_rule_1, BDA_data_rule_2, BDA_data_rule_3, BDA_data_rule_4)):
-        grammar_h0 = MixtureGrammarHypothesis(mix_grammar, hypotheses, propose_step=.1, propose_n=1)
+        grammar_h0 = MixtureGrammarHypothesis(mix_grammar, hypotheses, propose_scale=.1, propose_n=1)
         mh_grammar_sampler = MHSampler(grammar_h0, d, grammar_n)
         mh_grammar_summary = VectorSummary(skip=skip, cap=cap)
 

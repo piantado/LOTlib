@@ -80,27 +80,18 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
                         raise e
 
     def init_H(self):
-        """
-        Initialize hypothesis concept list `self.H`.
-
-        """
+        """Initialize hypothesis concept list `self.H`."""
         self.H = [h() for h in self.hypotheses]
 
     def init_L(self, d, d_index):
-        """
-        Initialize `self.L` dictionary.
-
-        """
-        self.L[d_index] = np.array([h.compute_likelihood(d.input) for h in self.hypotheses])  # For ea. hypo.
+        """Initialize `self.L` dictionary."""
+        self.L[d_index] = np.array([h.compute_likelihood(d.input) for h in self.hypotheses])
 
     def init_R(self, d, d_index):
-        """
-        Initialize `self.R` dictionary.
-
-        """
+        """Initialize `self.R` dictionary."""
         self.R[d_index] = np.zeros((len(self.hypotheses), len(d.output.keys())))
         for m, o in enumerate(d.output.keys()):
-            self.R[d_index][:, m] = [int(o in h_concept) for h_concept in self.H]  # For ea. hypo.
+            self.R[d_index][:, m] = [int(o in h_concept) for h_concept in self.H]
 
     def compute_likelihood(self, data, update_post=True, **kwargs):
         """
@@ -139,6 +130,8 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
                     print 'P ERROR!'
 
                 yes, no = d.output[o]
+                yes = d.responses[o]['yes']
+                no = d.responses[o]['no']
                 k = yes             # num. yes responses
                 n = yes + no        # num. trials
                 bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
@@ -174,20 +167,8 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
 
         return np.log(normalized)
 
-    def __copy__(self):
-        return type(self)(
-            self.grammar, self.hypotheses,
-            H=self.H, C=self.C, L=self.L, R=self.R,
-            value=copy.copy(self.value), proposal=self.proposal,
-            prior_shape=self.prior_shape, prior_scale=self.prior_scale,
-            propose_n=self.propose_n, propose_step=self.propose_step
-        )
-
     def update(self):
-        """
-        Update `self.rules` relative to `self.value`.
-
-        """
+        """Update `self.rules` relative to `self.value`."""
         # Set probability for each rule corresponding to value index
         for i in range(0, self.n):
             self.rules[i].p = self.value[i]
