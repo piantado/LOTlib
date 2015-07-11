@@ -10,7 +10,7 @@ from math import exp
 from scipy.stats import chisquare
 
 from TreeTesters import FiniteTreeTester # defines check_tree and setUp
-from LOTlib.Inference.Proposals import ProposalFailedException
+from LOTlib.Hypotheses.Proposers import ProposalFailedException
 
 NSAMPLES = 1000
 
@@ -20,8 +20,8 @@ class ProposalTest(FiniteTreeTester):
     """
 
     def test_RegenerationProposal(self):
-        from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
-        rp = RegenerationProposal(self.grammar)
+        from LOTlib.Hypotheses.Proposers.RegenerationProposer import RegenerationProposer
+        rp = RegenerationProposer(grammar=self.grammar)
 
         for tree in self.trees:
             cnt = Counter()
@@ -45,16 +45,16 @@ class ProposalTest(FiniteTreeTester):
             #     v = rp.lp_propose(tree,p)
             #     print "V=",v
 
-            for c, e, tt in zip([cnt[t] for t in self.trees],
-                               [exp(rp.lp_propose(tree, x))*NSAMPLES for x in self.trees],
-                               self.trees):
-                print c, e, tt, rp.lp_propose(tree,tt)
+            # for c, e, tt in zip([cnt[t] for t in self.trees],
+            #                    [exp(rp.lp_propose(tree, x))*NSAMPLES for x in self.trees],
+            #                    self.trees):
+            #     print c, e, tt, rp.lp_propose(tree,tt)
 
             self.assertGreater(pv, 0.001, msg="Sampler failed chi squared!")
 
     def test_InsertDeleteProposal(self):
-        from LOTlib.Inference.Proposals.InsertDeleteProposal import InsertDeleteProposal
-        rp = InsertDeleteProposal(self.grammar)
+        from LOTlib.Hypotheses.Proposers.InsertDeleteProposer import InsertDeleteProposer
+        rp = InsertDeleteProposer(grammar=self.grammar)
 
         for tree in self.trees:
             for _ in xrange(100):
