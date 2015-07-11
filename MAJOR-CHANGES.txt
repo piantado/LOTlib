@@ -1,5 +1,8 @@
-	- Recompiled documentation. Now lives in LOTlib/Documentation. 
-	- Version updated to 0.4.1
+July 11 2015
+    - Removed storage of generating rule from FunctionNode in order to allow save FunctionNodes to be loaded and have prior computed on a new grammar. - Now uses FunctionNode.get_rule_signature() and GrammarRule.get_rule_signature()
+	- Changed BVContextManager to not store a list of added rules
+	- Documentaiton lives in LOTlib/Documentation. (Needs to be recompiled)
+	- Version updated to 0.5.1	
 June 14 2015
     - Changed Lexicon default proposal to sampling each word with a fixed prob. 
     - Got rid of evaluate_expression -- now just directly use eval

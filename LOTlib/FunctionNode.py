@@ -611,7 +611,7 @@ class FunctionNode(object):
         for a in self.argFunctionNodes():
             a.uniquify_bv(remap)
 
-    def iterate_subnodes(self, grammar, t=None, d=0, predicate=lambdaTrue, yield_depth=False):
+    def iterate_subnodes(self, grammar, t=None, d=0, predicate=lambdaTrue, yield_depth=False, recurse_up=False):
         """Iterate through all subnodes of node *t*, while updating the added rules (bound variables)
         so that at each subnode, the grammar is accurate to what it was.
 
@@ -625,6 +625,8 @@ class FunctionNode(object):
             If True, we return (node, depth) instead of node.
         predicate : function
             Filter only the nodes that match this function (i.e. eval (function(fn) == True) on each fn).
+        recurse_up : bool
+            Do we recurse all the way up and add all above nodes too?
         """
         if not t:
             t = self
@@ -633,11 +635,11 @@ class FunctionNode(object):
 
         # Define a new context that is the grammar with the rule added.
         # Then, when we exit, it's still right.
-        with BVRuleContextManager(grammar, t, recurse_up=False):
+        with BVRuleContextManager(grammar, t, recurse_up=recurse_up):
             for a in t.argFunctionNodes():
                 # Pass up anything from below
-                for g in self.iterate_subnodes(grammar, a, d=d+1,
-                                               yield_depth=yield_depth, predicate=predicate):
+                for g in self.iterate_subnodes(grammar, a, d=d+1, yield_depth=yield_depth,
+                                               predicate=predicate, recurse_up=False): # we never have to recurse up
                     yield g
 
 

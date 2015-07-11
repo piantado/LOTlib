@@ -57,12 +57,13 @@ class Grammar:
         """Returns all non-terminals."""
         return self.rules.keys()
 
-    # def get_my_rule(self, r):
-    #     """
-    #     A FunctionNode stores a rule for what generated it. But when we pickle or use MPI, these rule objects
-    #     may no longer point to the right place.
-    #
-    #     """
+    def get_matching_rule(self, t):
+        """
+        Get the rule matching t's signature. Note: We could probably speed this up with a hash table if need be.
+        """
+        for r in self.get_rules(t.returntype):
+            if r.get_rule_signature() == t.get_rule_signature():
+                return r
 
     def log_probability(self, t):
         """
@@ -72,21 +73,22 @@ class Grammar:
         """
         assert isinstance(t, FunctionNode)
 
-        z  = log(sum([ r.p for r in self.get_rules(t.returntype) ]))
+        z = log(sum([ r.p for r in self.get_rules(t.returntype) ]))
 
-        # Find the one that matches
+        # Find the one that matches. While it may seem like we should store this, that is hard to make work
+        # with multiple grammar objects across loading/saving, because the objects will change. This way,
+        # we always look it up.
         lp = -Infinity
-        for r in self.get_rules(t.returntype):
-            if r.get_rule_signature() == t.get_rule_signature():
-                lp = log(r.p) - z
-                break
+        r = self.get_matching_rule(t)
+        assert r is not None, "Failed to find matching rule at %s %s" % (t, r)
+
+        lp = log(r.p) - z
 
         with BVRuleContextManager(self, t):
             for a in t.argFunctionNodes():
                 lp += self.log_probability(a)
 
         return lp
-
 
     def add_rule(self, nt, name, to, p, bv_type=None, bv_args=None, bv_prefix='y', bv_p=None):
         """Adds a rule and returns the added rule.
