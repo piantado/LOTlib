@@ -62,9 +62,18 @@ class GrammarRule(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    def get_rule_signature(self):
+        """ Return a unique identifier for this rule. This must match up with FunctionNode.get_rule_signature """
+        sig = [self.nt, self.name]
+        if self.to is not None:
+            sig.extend(self.to)
+        return tuple(sig)
+
     def make_FunctionNodeStub(self, grammar, parent):
-        # NOTE: It is VERY important to copy to, or else we end up wtih garbage
-        return FunctionNode(parent, returntype=self.nt, name=self.name, args=copy(self.to), rule=self)
+        # NOTE: It is VERY important to copy to, or else we end up with big problems!
+        fn = FunctionNode(parent, returntype=self.nt, name=self.name, args=copy(self.to))
+        assert fn.get_rule_signature() == self.get_rule_signature() # potentially not needed
+        return fn
 
 
 class BVAddGrammarRule(GrammarRule):
@@ -133,11 +142,12 @@ class BVAddGrammarRule(GrammarRule):
         ----
         * The None's in the next line need to get set elsewhere, since they will depend on the depth and
         other rules
-        * It is VERY important to copy to, or else we end up wtih garbage
+        * It is VERY important to copy to, or else we end up with garbage
 
         """
-        return BVAddFunctionNode(parent, returntype=self.nt, name=self.name, args=copy(self.to),
-                                 added_rule=self.make_bv_rule(grammar), rule=self)
+        fn = BVAddFunctionNode(parent, returntype=self.nt, name=self.name, args=copy(self.to), added_rule=self.make_bv_rule(grammar))
+        assert fn.get_rule_signature() == self.get_rule_signature() # potentially not needed
+        return fn
 
 
 class BVUseGrammarRule(GrammarRule):
@@ -152,6 +162,6 @@ class BVUseGrammarRule(GrammarRule):
         GrammarRule.__init__(self, nt, 'bv__'+uuid4().hex, to, p, bv_prefix)
 
     def make_FunctionNodeStub(self, grammar, parent):
-        # NOTE: It is VERY important to copy to, or else we end up wtih garbage
-        return BVUseFunctionNode(parent, returntype=self.nt, name=self.name, args=copy(self.to),
-                                 rule=self)
+        fn = BVUseFunctionNode(parent, returntype=self.nt, name=self.name, args=copy(self.to))
+        assert fn.get_rule_signature() == self.get_rule_signature() # potentially not needed
+        return fn
