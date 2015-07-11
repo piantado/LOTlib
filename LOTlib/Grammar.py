@@ -57,6 +57,13 @@ class Grammar:
         """Returns all non-terminals."""
         return self.rules.keys()
 
+    # def get_my_rule(self, r):
+    #     """
+    #     A FunctionNode stores a rule for what generated it. But when we pickle or use MPI, these rule objects
+    #     may no longer point to the right place.
+    #
+    #     """
+
     def log_probability(self, t):
         """
         Returns the log probability of t, recomputing everything (as we do now)
@@ -65,18 +72,14 @@ class Grammar:
         """
         assert isinstance(t, FunctionNode)
 
-        """
-        This next assert is really important: it is possible to pickle LOTHypotheses or FunctionNodes
-         but not the grammar. When you then re-load them with a *new* grammar, you can call log_probability
-         and could get an answer that is incorrect.
-
-         The right thing to do is pickle the grammar as well, and re-load it (e.g. don't make a new grammar object
-         in another script
-        """
-        assert t.rule in self.get_rules(t.returntype), "*** Rule not in grammar! (Did you pickle a FunctionNode without pickling its grammar? Both must be pickled since FunctionNodes store rules)"
-
         z  = log(sum([ r.p for r in self.get_rules(t.returntype) ]))
-        lp = log(t.rule.p) - z
+
+        # Find the one that matches
+        lp = -Infinity
+        for r in self.get_rules(t.returntype):
+            if r.get_rule_signature() == t.get_rule_signature():
+                lp = log(r.p) - z
+                break
 
         with BVRuleContextManager(self, t):
             for a in t.argFunctionNodes():
