@@ -53,7 +53,7 @@ class GrammarRule(object):
 
     def __eq__(self, other):
         """Equality is determined through "is" so that we can remove a rule from lists via list.remove()."""
-        return self is other
+        return self.get_rule_signature() == other.get_rule_signature()
 
     def short_str(self):
         """Print string in format: 'NT -> [TO]'."""
