@@ -12,7 +12,7 @@ class BVRuleContextManager(object):
             This actually could go in FunctionNode, *except* that it needs to know the grammar, which FunctionNodes do not
         """
         self.__dict__.update(locals())
-        self.added_rule = None
+        self.added_rules = [] # all of the rules we added
                 
     def __str__(self):
         return "<Managing context for %s>"%str(self.fn)
@@ -21,25 +21,26 @@ class BVRuleContextManager(object):
         if self.fn is None: # skip these
             return
         
-        assert self.added_rule is None, "Error, __enter__ called twice on BVRuleContextManager"
+        assert len(self.added_rules) == 0, "Error, __enter__ called twice on BVRuleContextManager"
         
         for x in self.fn.up_to(to=None) if self.recurse_up else [self.fn]:
             if x.added_rule is not None:
                 #print "# Adding rule ", x.added_rule
                 r = x.added_rule
-                self.added_rule = r
+                self.added_rules.append(r)
                 self.grammar.rules[r.nt].append(r)
                         
     def __exit__(self, t, value, traceback):
         
-        if self.fn is None or self.added_rule is None: # skip these
+        if self.fn is None: # skip these
             return
         
         #print "# Removing rule", r
-        self.grammar.rules[self.added_rule.nt].remove(self.added_rule)
+        for r in self.added_rules:
+            self.grammar.rules[r.nt].remove(r)
             
         # reset
-        self.added_rule = None
+        self.added_rules = []
         
         return False #re-raise exceptions
         
