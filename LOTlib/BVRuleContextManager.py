@@ -12,7 +12,7 @@ class BVRuleContextManager(object):
             This actually could go in FunctionNode, *except* that it needs to know the grammar, which FunctionNodes do not
         """
         self.__dict__.update(locals())
-        self.added_rules = [] # all of the rules we added
+        self.added_rules = [] # all of the rules we added -- may be more than one from recurse_up=True
                 
     def __str__(self):
         return "<Managing context for %s>"%str(self.fn)
