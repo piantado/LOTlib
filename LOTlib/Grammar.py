@@ -61,9 +61,11 @@ class Grammar:
         """
         Get the rule matching t's signature. Note: We could probably speed this up with a hash table if need be.
         """
-        for r in self.get_rules(t.returntype):
-            if r.get_rule_signature() == t.get_rule_signature():
-                return r
+        rules = self.get_rules(t.returntype)
+        matching_rules = [r for r in rules if (r.get_rule_signature() == t.get_rule_signature())]
+        assert len(matching_rules) == 1, \
+            "Grammar Error: " + str(len(matching_rules)) + " matching rules for this FunctionNode!"
+        return matching_rules[0]
 
     def log_probability(self, t):
         """
