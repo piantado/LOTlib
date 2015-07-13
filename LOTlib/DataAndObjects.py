@@ -32,6 +32,36 @@ class FunctionData:
         return '<' + ','.join(map(str, self.input)) + " -> " + str(self.output) + '>'
 
 
+class HumanData:
+    """Human data class.
+
+    Attributes:
+        data(FunctionData): this is the input data given as examples
+        queries(list): list of targets queried on given the input data
+        response(list): responses corresponding to each query in `queries`
+     
+    """
+    def __init__(self, data, queries, responses, **kwargs):
+        assert isinstance(data, FunctionData), "HumanData.data must be FunctionData!"
+        assert len(queries) == len(responses), "Queries and responses must be same length!"
+        self.data = data
+        self.queries = queries
+        self.responses = responses
+        self.__dict__.update(kwargs)
+
+    def add_query(self, query, response):
+        self.queries.append(query)
+        self.responses.append(response)
+
+    def get_response(self, query):
+        i = self.queries.index(query)
+        return self.responses[i]
+
+    def set_response(self, query, response):
+        i = self.queries.index(query)
+        self.responses[i] = response
+
+
 # ------------------------------------------------------------------------------------------------------------
 
 class UtteranceData:
