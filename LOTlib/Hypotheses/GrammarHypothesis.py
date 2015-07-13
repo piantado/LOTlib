@@ -178,16 +178,18 @@ class GrammarHypothesis(VectorHypothesis):
         likelihood = 0.0
 
         for d in data:
-            posteriors = [sum(h.compute_posterior(d.input)) for h in hypotheses]
+            posteriors = [sum(h.compute_posterior(d.data)) for h in hypotheses]
             Z = logsumexp(posteriors)
-            weights = [(post-Z) for post in posteriors]
+            weights = [(post - Z) for post in posteriors]
 
-            for o in d.output.keys():
+            for q, r in d.get_queries():
                 # probability for yes on output `o` is sum of posteriors for hypos that contain `o`
-                p = logsumexp([w if o in h() else -Infinity for h, w in zip(hypotheses, weights)])
+                p = logsumexp([w if q in h() else -Infinity for h, w in zip(hypotheses, weights)])
                 p = -1e-10 if p >= 0 else p
-                k = d.output[o][0]         # num. yes responses
-                n = k + d.output[o][1]     # num. trials
+
+                yes, no = r
+                k = yes             # num. yes responses
+                n = yes + no        # num. trials
                 bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
                 likelihood += bc + (k*p) + (n-k)*log1mexp(p)            # likelihood we got human output
 
@@ -365,17 +367,17 @@ class GrammarHypothesis(VectorHypothesis):
             i = 0
 
             for d in data:
-                posteriors = [sum(h.compute_posterior(d.input)) for h in hypotheses]
+                posteriors = [sum(h.compute_posterior(d.data)) for h in hypotheses]
                 Z = logsumexp(posteriors)
                 weights = [(post-Z) for post in posteriors]
                 print i, '\t|\t', d.input
                 i += 1
 
-                for o in d.output.keys():
+                for q, r in d.get_queries():
                     # Probability for yes on output `o` is sum of posteriors for hypos that contain `o`
-                    p_human = float(d.output[o][0]) / float(d.output[o][0] + d.output[o][1])
-                    p_model = sum([math.exp(w) if o in h() else 0 for h, w in zip(hypotheses, weights)])
-                    writer.writerow([d.input, o, p_human, p_model])
+                    p_human = float(r[0]) / float(r[0] + r[1])
+                    p_model = sum([math.exp(w) if q in h() else 0 for h, w in zip(hypotheses, weights)])
+                    writer.writerow([d.data, q, p_human, p_model])
 
 
 

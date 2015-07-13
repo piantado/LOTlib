@@ -3,10 +3,10 @@ Vectorized GrammarHypothesis class.
 
 This assumes:
     - domain hypothesis (e.g. NumberGameHypothesis) evaluates to a set
-    - `data` is a list of FunctionData objects
-    - input of FunctionData can be applied to hypothesis.compute_likelihood (for domain-level hypothesis)
-    - output of FunctionData is a dictionary where each value is a pair (y, n),  where y is the number of
-    positive and n is the number of negative responses for the given output key, conditioned on the input.
+    - `data` is a list of HumanData objects
+    - HumanData.data can be applied to hypothesis.compute_likelihood (for domain-level hypothesis)
+    - HumanData.responses is a list of (y, n) pairs,  where y is the number of positive and n is the number
+      of negative responses for the given output key, conditioned on the input
 
 To use this for a different format, change init_R & compute_likelihood.
 
@@ -68,7 +68,7 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
         rule_idxs = {str([r.name, r.nt, r.to]): i for i, r in enumerate(self.rules)}
 
         for j, h in enumerate(self.hypotheses):
-            grammar_rules = [fn.rule for fn in h.value.subnodes()]
+            grammar_rules = [self.grammar.get_matching_rule(fn) for fn in h.value.subnodes()]
             for rule in grammar_rules:
                 try:
                     self.C[j, rule_idxs[str([rule.name, rule.nt, rule.to])]] += 1
@@ -85,13 +85,14 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
 
     def init_L(self, d, d_index):
         """Initialize `self.L` dictionary."""
-        self.L[d_index] = np.array([h.compute_likelihood(d.input) for h in self.hypotheses])
+        self.L[d_index] = np.array([h.compute_likelihood(d.data) for h in self.hypotheses])
 
     def init_R(self, d, d_index):
         """Initialize `self.R` dictionary."""
-        self.R[d_index] = np.zeros((len(self.hypotheses), len(d.output.keys())))
-        for m, o in enumerate(d.output.keys()):
-            self.R[d_index][:, m] = [int(o in h_concept) for h_concept in self.H]
+        self.R[d_index] = np.zeros((len(self.hypotheses), d.q_n))
+
+        for q, r, m in d.get_queries():
+            self.R[d_index][:, m] = [int(q in h_concept) for h_concept in self.H]
 
     def compute_likelihood(self, data, update_post=True, **kwargs):
         """
@@ -114,14 +115,14 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
             posteriors = self.L[d_index] + P
             Z = logsumexp(posteriors)
             w = np.exp(posteriors - Z)              # weights for each hypothesis
-            r = np.transpose(self.R[d_index])
-            w_times_R = w * r
+            r_i = np.transpose(self.R[d_index])
+            w_times_R = w * r_i
             
             # Compute likelihood of producing same output (yes/no) as data
-            for m, o in enumerate(d.output.keys()):
+            for q, r, m in d.get_queries():
                 # col `m` of boolean matrix `R[i]` weighted by `w`
-                r_m = w_times_R[m, :]
-                exp_p = r_m.sum()
+                query_col = w_times_R[m, :]
+                exp_p = query_col.sum()
                 p = log(exp_p)
                 ## p = log((np.exp(w) * self.R[d_index][:, m]).sum())
 
@@ -129,9 +130,7 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
                 if p >= 0:
                     print 'P ERROR!'
 
-                yes, no = d.output[o]
-                yes = d.responses[o]['yes']
-                no = d.responses[o]['no']
+                yes, no = r
                 k = yes             # num. yes responses
                 n = yes + no        # num. trials
                 bc = gammaln(n+1) - (gammaln(k+1) + gammaln(n-k+1))     # binomial coefficient
