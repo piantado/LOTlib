@@ -39,7 +39,7 @@ class HumanData:
         data(FunctionData): this is the input data given as examples
         queries(list): list of targets queried on given the input data
         response(list): responses corresponding to each query in `queries`
-     
+
     """
     def __init__(self, data, queries, responses, **kwargs):
         assert isinstance(data, FunctionData), "HumanData.data must be FunctionData!"
@@ -47,11 +47,17 @@ class HumanData:
         self.data = data
         self.queries = queries
         self.responses = responses
+        self.q_n = len(queries)
         self.__dict__.update(kwargs)
+
+    def get_queries(self):
+        """Return zipped list ((query0, response0, index_0), (query1, response1, index_1), ..."""
+        return zip(self.queries, self.responses, range(self.q_n))
 
     def add_query(self, query, response):
         self.queries.append(query)
         self.responses.append(response)
+        self.q_n += 1
 
     def get_response(self, query):
         i = self.queries.index(query)
