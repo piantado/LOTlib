@@ -32,10 +32,13 @@ def standard_sample(make_hypothesis, make_data, skip=9, show=True, N=100, save_t
 
     f = eval(alsoprint)
 
-    for i, h in enumerate(break_ctrlc(MHSampler(h0, data, **kwargs))):
+    sampler = MHSampler(h0, data, **kwargs)
+
+    for i, h in enumerate(break_ctrlc(sampler)):
         best_hypotheses.add(h)
 
         if show and i%(skip+1) == 0:
+
             print i, \
                 h.posterior_score, \
                 h.prior, \
@@ -60,8 +63,10 @@ if __name__ == "__main__":
 
     from optparse import OptionParser
     parser = OptionParser()
+
     parser.add_option("--model", dest="MODEL", type="string", default="Number",
                       help="Which model do we run? (e.g. 'Number', 'Magnetism.Simple', etc.")
+    parser.add_option("--skip", dest="SKIP", type="int", default=0, help="Skip this many steps between samples")
     parser.add_option("--alsoprint", dest="ALSO_PRINT", type="string", default="None",
                       help="A function of a hypothesis we can also print at the start of a line to see things we "
                            "want. E.g. --alsoprint='lambda h: h.get_knower_pattern()' ")
@@ -82,5 +87,5 @@ if __name__ == "__main__":
     # ========================================================================================================
 
     # This is just a wrapper that nicely prints information
-    standard_sample(make_hypothesis, make_data, alsoprint=options.ALSO_PRINT)
+    standard_sample(make_hypothesis, make_data, alsoprint=options.ALSO_PRINT, skip=options.SKIP)
 

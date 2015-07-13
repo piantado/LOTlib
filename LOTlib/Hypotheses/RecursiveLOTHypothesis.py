@@ -25,7 +25,7 @@ class RecursiveLOTHypothesis(LOTHypothesis):
         self.recursive_call_depth = 0 # how far down have we recursed?
 
         # automatically put 'recurse' onto args
-        assert len(args) == 0 or (args[0] is not recurse) # not already specified
+        assert recurse not in args # not already specified
         args = [recurse] + args
 
         LOTHypothesis.__init__(self, grammar, args=args, **kwargs)

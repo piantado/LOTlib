@@ -1,16 +1,11 @@
 # -*- coding: utf-8 -*-
-"""
-A function node (fn): a tree part representing a function and its arguments.
 
-Also used for PCFG rules, where the arguments are nonterminal symbols.
-
-"""
 import re
 from copy import copy, deepcopy
 from math import log
 from random import random
 from LOTlib.BVRuleContextManager import BVRuleContextManager
-from LOTlib.Miscellaneous import lambdaTrue, lambdaOne, Infinity
+from LOTlib.Miscellaneous import lambdaTrue, lambdaOne
 
 
 # ------------------------------------------------------------------------------------------------------------
@@ -51,19 +46,20 @@ class FunctionNode(object):
         The name of the function.
     args : doc?
         Arguments of the function
-    rule : doc?
-        The rule that was used in generating the FunctionNode
     bv : doc?
         Stores the actual *rule* that was added (so that we can re-add it when we loop through the tree).
 
     Note
     ----
     * If a node has [ None ] as args, it is treated as a thunk
+    * Each FunctionNode used to store the rule that generated it. This caused problems when loading a FunctionNode from
+      a pickle file and trying to compute its probability under a new grammar. Now, matching to rules is done on the fly
+      using get_rule_signature()
 
     """
-    NoCopy = {'self', 'parent', 'returntype', 'name', 'rule', 'args', 'parent'}
+    NoCopy = {'self', 'parent', 'returntype', 'name', 'args', 'parent'}
 
-    def __init__(self, parent, returntype, name, args, rule=None, a_args=None):
+    def __init__(self, parent, returntype, name, args):
         self.__dict__.update(locals())
         self.added_rule = None
         
@@ -87,6 +83,15 @@ class FunctionNode(object):
             a.parent = self
         self.parent = old_parent
 
+    def get_rule_signature(self):
+        """ The rule signature is used to pair up FunctionNodes with GrammarRules in computing log probability
+            So it needs to be synced to GrammarRule.get_rule_signature and provide a unique identifier
+        """
+        sig = [self.returntype, self.name]
+        if self.args is not None:
+            sig.extend([a.returntype if isFunctionNode(a) else a for a in self.args])
+        return tuple(sig)
+
     def __copy__(self, shallow=False):
         """Copy a function node.
 
@@ -100,7 +105,7 @@ class FunctionNode(object):
         The rule is NOT deeply copied (regardless of shallow)
 
         """
-        fn = FunctionNode(self.parent, self.returntype, self.name, None, rule=self.rule)
+        fn = FunctionNode(self.parent, self.returntype, self.name, None)
 
         # And then then copy the rest -- needed for if we add info to FunctionNodes, like a resample_p
         for k in set(self.__dict__.keys()).difference(FunctionNode.NoCopy): # None of these!
@@ -189,21 +194,16 @@ class FunctionNode(object):
             # Don't use + to concatenate strings.
             return '{} {}'.format(str(self.name), ','.join(map(str, self.args)))
 
-    def fullprint(self, d=0, show_rule=False):
+    def fullprint(self, d=0):
         """A handy printer for debugging"""
         tabstr = "  .  " * d
-        print tabstr, self.returntype, self.name, "\t", self.added_rule,
-
-        if show_rule:
-           print "\t\t", self.rule
-        else:
-            print
+        print tabstr, self.returntype, self.name, "\t", self.added_rule
 
 
         if self.args is not None:
             for a in self.args:
                 if isFunctionNode(a):
-                    a.fullprint(d+1, show_rule=show_rule)
+                    a.fullprint(d+1)
                 else:
                     print tabstr, a
 
@@ -276,11 +276,7 @@ class FunctionNode(object):
         assert False, "*** New change: You must compute log_probability from a grammar. "
 
     def subnodes(self):
-        """Return all subnodes -- no iterator. Useful for modifying (doc?)
-
-        Note
-        ----
-        If you want iterate using the grammar, use iterate_subnodes
+        """Return all subnodes -- no iterator
 
         """
         return [g for g in self]
@@ -615,7 +611,7 @@ class FunctionNode(object):
         for a in self.argFunctionNodes():
             a.uniquify_bv(remap)
 
-    def iterate_subnodes(self, grammar, t=None, d=0, predicate=lambdaTrue, yield_depth=False):
+    def iterate_subnodes(self, grammar, t=None, d=0, predicate=lambdaTrue, yield_depth=False, recurse_up=False):
         """Iterate through all subnodes of node *t*, while updating the added rules (bound variables)
         so that at each subnode, the grammar is accurate to what it was.
 
@@ -629,6 +625,8 @@ class FunctionNode(object):
             If True, we return (node, depth) instead of node.
         predicate : function
             Filter only the nodes that match this function (i.e. eval (function(fn) == True) on each fn).
+        recurse_up : bool
+            Do we recurse all the way up and add all above nodes too?
         """
         if not t:
             t = self
@@ -637,11 +635,11 @@ class FunctionNode(object):
 
         # Define a new context that is the grammar with the rule added.
         # Then, when we exit, it's still right.
-        with BVRuleContextManager(grammar, t, recurse_up=False):
+        with BVRuleContextManager(grammar, t, recurse_up=recurse_up):
             for a in t.argFunctionNodes():
                 # Pass up anything from below
-                for g in self.iterate_subnodes(grammar, a, d=d+1,
-                                               yield_depth=yield_depth, predicate=predicate):
+                for g in self.iterate_subnodes(grammar, a, d=d+1, yield_depth=yield_depth,
+                                               predicate=predicate, recurse_up=False): # we never have to recurse up
                     yield g
 
 
@@ -651,11 +649,21 @@ class FunctionNode(object):
 
 class BVAddFunctionNode(FunctionNode):
     """
-    (doc?)
+    A type of FunctionNode that adds a bound variable, namely a lambda.
+
+    This should almost never need to be called, as it is defaultly handled by LOTlib.Grammar
     """
-    def __init__(self, parent, returntype, name, args, rule=None, a_args=None, added_rule=None):
-        FunctionNode.__init__(self, parent, returntype, name, args, rule, a_args)
+    def __init__(self, parent, returntype, name, args,  added_rule=None):
+        FunctionNode.__init__(self, parent, returntype, name, args)
         self.added_rule = added_rule
+
+    def uses_bv(self):
+        """ Is my rule used below? """
+        for a in self.argFunctionNodes():
+            for n in a:
+                if n.name == self.added_rule.name:
+                    return True
+        return False
 
     def __copy__(self, shallow=False):
         """Copy a function node.
@@ -670,7 +678,7 @@ class BVAddFunctionNode(FunctionNode):
 
         """
         fn = BVAddFunctionNode(self.parent, self.returntype, self.name, None,
-            rule=self.rule, a_args=self.a_args, added_rule=copy(self.added_rule))
+            added_rule=copy(self.added_rule)) ## TODO: We should not need to copy added_rule
 
         if (not shallow) and self.args is not None:
             fn.args = map(copy, self.args)
@@ -718,10 +726,10 @@ class BVAddFunctionNode(FunctionNode):
 
 class BVUseFunctionNode(FunctionNode):
     """
-    (doc?)
+    A FunctionNode that uses a bound variable. As in, the use of "x" in lambda x: x+1
     """
-    def __init__(self, parent, returntype, name, args, rule=None, a_args=None, bv_prefix=None):
-        FunctionNode.__init__(self, parent, returntype, name, args, rule, a_args)
+    def __init__(self, parent, returntype, name, args, bv_prefix=None):
+        FunctionNode.__init__(self, parent, returntype, name, args)
         self.bv_prefix = bv_prefix
 
     def as_list(self, d=0, bv_names=None):
@@ -754,9 +762,7 @@ class BVUseFunctionNode(FunctionNode):
             shallow: if True, this does not copy the children (self.to points to the same as what we return)
 
         """
-        fn = BVUseFunctionNode(self.parent, self.returntype, self.name, None,
-                               rule=self.rule, a_args=self.a_args,
-                               bv_prefix=self.bv_prefix)
+        fn = BVUseFunctionNode(self.parent, self.returntype, self.name, None, bv_prefix=self.bv_prefix)
         
         if (not shallow) and self.args is not None:
             fn.args = map(copy, self.args)

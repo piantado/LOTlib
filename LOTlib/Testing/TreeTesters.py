@@ -35,11 +35,15 @@ class InfiniteTreeTester(unittest.TestCase):
         self.assertTrue(t.returntype == self.grammar.start)
 
         # correct argument types for each subnode
-        for ti in t:
+        for ti in t.iterate_subnodes(self.grammar):
+            r = self.grammar.get_matching_rule(ti) # find the rule that generated this
+            print ti, r
+            self.assertTrue(r is not None) # Better have been one!
+
             if ti.args is None:
-                self.assertTrue( ti.rule.to is None)
+                self.assertTrue( r.to is None)
             else:
-                for ri, ai in zip(ti.rule.to, ti.args):
+                for ri, ai in zip(r.to, ti.args):
                     if isinstance(ai, FunctionNode):
                         self.assertTrue(ai.returntype == ri)
                         # and check parent refs
@@ -54,10 +58,12 @@ class InfiniteTreeTester(unittest.TestCase):
             if re.match(r'bv_', ti.name):
                 self.assertTrue(isinstance(ti, BVUseFunctionNode))
 
+                r = self.grammar.get_matching_rule(ti)
+
                 # NOTE: We cannot use "in" here since that uses rule "is", but we've created
                 # a new thing that is equivalent to the rule. So instead, we check the bv name
-                self.assertTrue(ti.rule.name in [r.name for r in self.grammar.rules[ti.returntype]])
-                added_rules.append(ti.rule)
+                self.assertTrue(r.name in [r.name for r in self.grammar.rules[ti.returntype]])
+                added_rules.append(r)
 
             if re.match(r'lambda', ti.name):
                 self.assertTrue(isinstance(ti, BVAddFunctionNode))

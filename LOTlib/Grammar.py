@@ -14,15 +14,7 @@ from LOTlib.FunctionNode import FunctionNode
 
 class Grammar:
     """
-    A PCFG-ish class that can handle special types of rules:
-        - Rules that introduce bound variables
-        - Rules that sample from a continuous distribution
-        - Variable resampling probabilities among the rules
-
-    Note:
-        * In general, grammars should NOT allow rules of the same name and type signature.
-        * This class fixes a bunch of problems that were in earlier versions, such as (doc?)
-
+    A PCFG-ish class that can handle rules that introduce bound variables
     """
     def __init__(self, BV_P=10.0, start='START'):
         self.__dict__.update(locals())
@@ -35,6 +27,8 @@ class Grammar:
         return '\n'.join([str(r) for r in itertools.chain(*[self.rules[nt] for nt in self.rules.keys()])])
 
     def nrules(self):
+        """ Total number of rules
+        """
         return sum([len(self.rules[nt]) for nt in self.rules.keys()])
 
     def get_rules(self, nt):
@@ -63,6 +57,14 @@ class Grammar:
         """Returns all non-terminals."""
         return self.rules.keys()
 
+    def get_matching_rule(self, t):
+        """
+        Get the rule matching t's signature. Note: We could probably speed this up with a hash table if need be.
+        """
+        for r in self.get_rules(t.returntype):
+            if r.get_rule_signature() == t.get_rule_signature():
+                return r
+
     def log_probability(self, t):
         """
         Returns the log probability of t, recomputing everything (as we do now)
@@ -70,17 +72,23 @@ class Grammar:
         This is overall about half as fast, but it means we don't have to store generation_probability
         """
         assert isinstance(t, FunctionNode)
-        # print type(t), t.returntype, t
 
-        z  = log(sum([ r.p for r in self.get_rules(t.returntype) ]))
-        lp = log(t.rule.p) - z
+        z = log(sum([ r.p for r in self.get_rules(t.returntype) ]))
+
+        # Find the one that matches. While it may seem like we should store this, that is hard to make work
+        # with multiple grammar objects across loading/saving, because the objects will change. This way,
+        # we always look it up.
+        lp = -Infinity
+        r = self.get_matching_rule(t)
+        assert r is not None, "Failed to find matching rule at %s %s" % (t, r)
+
+        lp = log(r.p) - z
 
         with BVRuleContextManager(self, t):
             for a in t.argFunctionNodes():
                 lp += self.log_probability(a)
 
         return lp
-
 
     def add_rule(self, nt, name, to, p, bv_type=None, bv_args=None, bv_prefix='y', bv_p=None):
         """Adds a rule and returns the added rule.
@@ -121,10 +129,10 @@ class Grammar:
     # --------------------------------------------------------------------------------------------------------
 
     def generate(self, x=None):
-        """Generate from the PCFG -- default is to start from x - either a nonterminal or a FunctionNode
+        """Generate from the grammar
 
         Arguments:
-            x (FunctionNode): What we start from -- can be None and then we use Grammar.start.
+            x (string): What we start from -- can be None and then we use Grammar.start.
 
         """
         # print "# Calling Grammar.generate", type(x), x
@@ -301,4 +309,12 @@ class Grammar:
 
         openset.remove(x)
         return current_d[x]
+
+    def renormalize(self):
+        """ go through each rule in each nonterminal, and renormalize the probabilities """
+
+        for nt in self.nonterminals():
+            z = sum([r.p for r in self.get_rules(nt)])
+            for r in self.get_rules(nt):
+                r.p = r.p / z
 

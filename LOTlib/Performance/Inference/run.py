@@ -121,5 +121,5 @@ if __name__ == "__main__":
                                          'enumeration_A'])]
 
     # Actually run
-    MPI_map(run_one, params, random_order=False)
+    MPI_map(run_one, params)
 

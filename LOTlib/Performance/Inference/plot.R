@@ -14,7 +14,7 @@ d$method <- gsub("_[A-Z]$", "", d$method.param, perl=TRUE)
 d$parameter <- as.factor(str_sub(d$method.param, -1, -1))
 
 p <- ggplot(d, aes(x=steps, y=Z, color=method, linetype=parameter)) + 
-	stat_summary(fun.y=mean, geom="line", size=2) +
+	stat_summary(fun.y=mean, geom="line", size=1) +
 	opts(legend.key.size=unit(3,"lines")) +
 	facet_wrap( ~ model, scales="free")
 
