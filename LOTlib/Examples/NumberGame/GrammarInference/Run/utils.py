@@ -14,7 +14,7 @@ Includes 3 functions
 import csv
 from collections import defaultdict
 from optparse import OptionParser
-from LOTlib.DataAndObjects import FunctionData
+from LOTlib.DataAndObjects import FunctionData, HumanData
 
 
 """
@@ -64,6 +64,24 @@ def functionDataToCSV(filename, data):
             for k in d.output.keys():
                 o = d.output[k]
                 writer.writerow([idx, 'out', k, o[0], o[1]])
+
+
+def functionDataToHumanData(data):
+    """Convert list of FunctionData objects to HumanData's."""
+    hdata = []
+
+    for d in data:
+        queries = []
+        responses = []
+        for q in d.output:
+            queries.append(q)
+            responses.append(d.output[q])
+
+        d.output = []
+        hd = HumanData(d, queries, responses)
+        hdata.append(hd)
+
+    return hdata
 
 
 def splitData(filename, ratio=0.7):
