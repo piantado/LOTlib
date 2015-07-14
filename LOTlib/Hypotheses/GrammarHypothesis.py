@@ -80,7 +80,7 @@ class GrammarHypothesis(VectorHypothesis):
         if value is None:
             value = [rule.p for rule in self.rules]
         n = len(value)
-        VectorHypothesis.__init__(self, value=value, n=self.n, proposal=proposal, propose_scale=propose_scale,
+        VectorHypothesis.__init__(self, value=value, n=n, proposal=proposal, propose_scale=propose_scale,
                                   propose_n=propose_n)
         self.prior_shape = prior_shape
         self.prior_scale = prior_scale
