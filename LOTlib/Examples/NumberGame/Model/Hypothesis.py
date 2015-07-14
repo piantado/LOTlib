@@ -15,15 +15,14 @@ class NumberGameHypothesis(LOTHypothesis):
     """
     def __init__(self, grammar, value=None, alpha=0.9, domain=100, **kwargs):
         LOTHypothesis.__init__(self, grammar, value=value, args=[], **kwargs)
+        self.grammar = grammar
         self.alpha = alpha
         self.domain = domain
         self.value_set = None
 
     @attrmem('prior')
     def compute_prior(self):
-        """Compute the log of the prior probability.
-
-        """
+        """Compute the log of the prior probability."""
         # Re-compute the FunctionNode `self.value` generation probabilities
         self.grammar.log_probability(self.value)
 
@@ -58,6 +57,10 @@ class NumberGameHypothesis(LOTHypothesis):
 
         If datum item not in set, it still has (1 - alpha) likelihood of being generated.
 
+        Args:
+            data (FunctionData): this is the data; we only use data.input
+            update_post (bool): boolean -- do we update posterior?
+
         """
         try:
             s = self()      # Set of numbers corresponding to this hypothesis
@@ -72,7 +75,7 @@ class NumberGameHypothesis(LOTHypothesis):
             else:
                 return log(error_p)
 
-        likelihoods = [compute_single_likelihood(d) for d in data]
+        likelihoods = [compute_single_likelihood(d) for d in data.input]
         likelihood = sum(likelihoods) / self.likelihood_temperature
         if update_post:
             self.likelihood = likelihood
