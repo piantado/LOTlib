@@ -11,7 +11,7 @@ class VectorHypothesis(Hypothesis):
         self.n = n
         self.propose_n = propose_n
         if value is None:
-            value = np.random.multivariate_normal(np.array([0.0]*n), proposal)
+            value = np.random.multivariate_normal(np.array([0.0] * n), proposal)
         if proposal is None:
             proposal = np.eye(n) * propose_scale
         propose_mask = self.get_propose_mask()
@@ -21,7 +21,7 @@ class VectorHypothesis(Hypothesis):
         self.__dict__.update(locals())
 
     def propose(self):
-        """new value is sampled from a normal centered @ old values, w/ proposal as covariance (inverse?)"""
+        """New value is sampled from a normal centered @ old values, w/ proposal as covariance."""
         step = np.random.multivariate_normal(self.value, self.proposal)
 
         new_value = copy.copy(self.value)
@@ -34,6 +34,22 @@ class VectorHypothesis(Hypothesis):
     def get_propose_mask(self):
         """Default propose mask method."""
         return [True] * self.n
+
+    def get_propose_idxs(self):
+        return [i for i, m in enumerate(self.get_propose_mask()) if m]
+
+    def compute_gradient(self, data, grad_step=.1):
+        partials = np.zeros(self.n)
+        posterior = self.compute_posterior(data)
+
+        for i in range(self.n):
+            new_value = copy.copy(self.value)
+            new_value[i] += grad_step
+            c = self.__copy__(new_value)
+            posterior_i = c.compute_posterior(data)
+            partials[i] = (np.exp(posterior) - np.exp(posterior_i)) / grad_step
+
+        return partials
 
     def conditional_distribution(self, data, value_index, vals=np.arange(0, 2, .2)):
         """Compute posterior values for this grammar, varying specified value over a specified set.
