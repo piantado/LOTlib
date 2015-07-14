@@ -68,7 +68,7 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
         rule_idxs = {str([r.name, r.nt, r.to]): i for i, r in enumerate(self.rules)}
 
         for j, h in enumerate(self.hypotheses):
-            grammar_rules = [self.grammar.get_matching_rule(fn) for fn in h.value.subnodes()]
+            grammar_rules = [self.grammar.get_matching_rule(fn) for fn in h.value.iterate_subnodes(self.grammar)]
             for rule in grammar_rules:
                 try:
                     self.C[j, rule_idxs[str([rule.name, rule.nt, rule.to])]] += 1
