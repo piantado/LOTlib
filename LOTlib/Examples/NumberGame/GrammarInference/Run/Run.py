@@ -119,7 +119,6 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
     # --------------------------------------------------------------------------------------------------------
     # Fill VectorSummary
 
-
     grammar_h0 = ParameterHypothesis(grammar, hypotheses, ngh_file=ngh, propose_scale=.1, propose_n=1)
     mh_grammar_sampler = MHSampler(grammar_h0, data, iters)
     mh_grammar_summary = VectorSummary(skip=skip, cap=cap)
@@ -127,7 +126,7 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
     # Print all GrammarRules in grammar with corresponding value index
     if 'r' in print_stuff:
         print '='*100, '\nGrammarRules:'
-        for idx in grammar_h0.propose_idxs:
+        for idx in grammar_h0.get_propose_idxs():
             print idx, '\t|  ', grammar_h0.rules[idx]
 
     if 's' in print_stuff:
@@ -151,8 +150,8 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
         # Print every N/20 samples
         if 's' in print_stuff:
             if i % (iters/20) is 0:
-                for idx in gh.propose_idxs:  print idx, '\t|  ', gh.rules[idx], ' --> ', gh.value[idx]
-                # print i, '-'*100, '\n', {idx:gh.value[idx] for idx in gh.propose_idxs}
+                for idx in gh.get_propose_idxs():  print idx, '\t|  ', gh.rules[idx], ' --> ', gh.value[idx]
+                # print i, '-'*100, '\n', {idx:gh.value[idx] for idx in gh.get_propose_idxs()}
                 print gh.prior, gh.likelihood, gh.posterior_score
 
     # Save summary & print top samples
