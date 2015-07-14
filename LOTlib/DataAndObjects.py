@@ -68,8 +68,8 @@ class HumanData:
         self.responses[i] = response
 
     def __repr__(self):
-        querystrings = '\n'.join(map(lambda q,r: str(q)+' => '+str(r), zip(self.queries, self.responses)))
-        return '[ data :  ' + str(self.data) + '\n  queries :\n' + querystrings + ' ]'
+        querystrings = '\n\t'.join(map(lambda (q,r): str(q)+' => '+str(r), zip(self.queries, self.responses)))
+        return '[ data :  ' + str(self.data) + '\n  queries :\n\t' + querystrings + ' ]'
 
 
 
