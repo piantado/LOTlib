@@ -156,13 +156,14 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
 
     for i in range(iters):
         partials = grammar_h0.compute_gradient(data)
-        new_value = grammar_h0.value + partials
+        new_value = grammar_h0.value + (partials * 10)
         grammar_h0.set_value(new_value)
 
-        if i % (iters/100) is 0:
-            for idx in grammar_h0.get_propose_idxs():  print idx, '\t|  ', grammar_h0.rules[idx], ' --> ', grammar_h0.value[idx]
-            # print i, '-'*100, '\n', {idx:gh.value[idx] for idx in gh.get_propose_idxs()}
-            print grammar_h0.prior, grammar_h0.likelihood, grammar_h0.posterior_score
+        print '&'*110, ' GRADIENT'
+        print partials
+        print '&'*110
+        for idx in grammar_h0.get_propose_idxs():  print idx, '\t|  ', grammar_h0.rules[idx], ' --> ', grammar_h0.value[idx]
+        print grammar_h0.prior, grammar_h0.likelihood, grammar_h0.posterior_score
 
     # # Save summary & print top samples
     # if pickle_summary:
