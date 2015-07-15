@@ -47,7 +47,7 @@ class VectorHypothesis(Hypothesis):
             new_value[i] += grad_step
             c = self.__copy__(new_value)
             posterior_i = c.compute_posterior(data)
-            partials[i] = (np.exp(posterior) - np.exp(posterior_i)) / grad_step
+            partials[i] = (np.exp(posterior_i) - np.exp(posterior)) / grad_step
 
         return partials
 
