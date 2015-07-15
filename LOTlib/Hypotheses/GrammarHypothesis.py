@@ -92,6 +92,17 @@ class GrammarHypothesis(VectorHypothesis):
     # --------------------------------------------------------------------------------------------------------
     # MCMC-Related methods
 
+    def __copy__(self, value=None):
+        """Copy this GH; shallow copies of value & proposal so we don't have sampling issues."""
+        if value is None:
+            value = copy.copy(self.value)
+        proposal = copy.copy(self.proposal)
+        c = type(self)(self.grammar, self.hypotheses)
+        c.__dict__.update(self.__dict__)
+        c.proposal = proposal
+        c.set_value(value)
+        return c
+
     def set_value(self, value):
         """Set value and grammar rules for this hypothesis."""
         assert len(value) == len(self.rules), "ERROR: Invalid value vector!!!"
