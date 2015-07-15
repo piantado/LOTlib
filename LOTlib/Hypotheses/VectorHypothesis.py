@@ -76,3 +76,14 @@ class VectorHypothesis(Hypothesis):
         self.set_value(old_value)
         return vals, dist
 
+    def __copy__(self, value=None):
+        """Copy this GH; shallow copies of value & proposal so we don't have sampling issues."""
+        if value is None:
+            value = copy.copy(self.value)
+        proposal = copy.copy(self.proposal)
+        c = type(self)()
+        c.__dict__.update(self.__dict__)
+        c.proposal = proposal
+        c.set_value(value)
+        return c
+
