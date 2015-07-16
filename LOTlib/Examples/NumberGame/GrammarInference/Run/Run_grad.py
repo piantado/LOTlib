@@ -159,9 +159,9 @@ def run(grammar=lot_grammar, mixture_model=0, data=toy_exp_3,
         new_value = grammar_h0.value + (partials * 10)
         grammar_h0.set_value(new_value)
 
-        print '&'*110, ' GRADIENT'
-        print partials
-        print '&'*110
+        # print '&'*110, ' GRADIENT'
+        # print partials
+        # print '&'*110
         for idx in grammar_h0.get_propose_idxs():  print idx, '\t|  ', grammar_h0.rules[idx], ' --> ', grammar_h0.value[idx]
         print grammar_h0.prior, grammar_h0.likelihood, grammar_h0.posterior_score
 
