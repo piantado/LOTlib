@@ -85,15 +85,17 @@ class InsertDeleteProposer(LOTProposer):
 
             ni.setto(fn)
 
-            # what is the prob mass of the new stuff?
-            new_lp_below =  sum([ self.grammar.log_probability(fn.args[i]) if (i!=replace_i and isFunctionNode(fn.args[i])) else 0. for i in xrange(len(fn.args))])
-            # What is the new normalizer?
-            newZ = newt.sample_node_normalizer(isNotBVAddFunctionNode)
-            assert newZ > 0
-            # To sample forward: choose the node ni, choose the replicating rule, choose which "to" to expand (we could have put it on any of the replicating rules that are identical), and genreate the rest of the tree
-            f = lp + (-log(len(replicating_rules))) + (log(after_same_children)-log(len(replicatingindices))) + new_lp_below
-            # To go backwards, choose the inserted rule, and any of the identical children, out of all replicators
-            b = (log(1.0*isNotBVAddFunctionNode(fn)) - log(newZ)) + (log(after_same_children) - log(len(fn.args)))
+            with BVRuleContextManager(self.grammar, fn, recurse_up=True):
+                
+                # what is the prob mass of the new stuff?
+                new_lp_below =  sum([ self.grammar.log_probability(fn.args[i]) if (i!=replace_i and isFunctionNode(fn.args[i])) else 0. for i in xrange(len(fn.args))])
+                # What is the new normalizer?
+                newZ = newt.sample_node_normalizer(isNotBVAddFunctionNode)
+                assert newZ > 0
+                # To sample forward: choose the node ni, choose the replicating rule, choose which "to" to expand (we could have put it on any of the replicating rules that are identical), and genreate the rest of the tree
+                f = lp + (-log(len(replicating_rules))) + (log(after_same_children)-log(len(replicatingindices))) + new_lp_below
+                # To go backwards, choose the inserted rule, and any of the identical children, out of all replicators
+                b = (log(1.0*isNotBVAddFunctionNode(fn)) - log(newZ)) + (log(after_same_children) - log(len(fn.args)))
 
         else: # A delete move!
 
@@ -119,23 +121,26 @@ class InsertDeleteProposer(LOTProposer):
 
             samplei = sample1(replicating_kid_indices) # who to promote; NOTE: not done via any weighting
 
-            # Now we must count the multiple ways we could go forward or back
-            # Here, we could have sampled any of them equivalent to ni.args[i]
-            before_same_children = sum([x==ni.args[samplei] for x in ni.args ]) # how many are the same after?
+            # We need to be in the right grammar state to evaluate log_probability
+            with BVRuleContextManager(self.grammar, ni.args[samplei], recurse_up=True):
 
-            # the lp of everything we'd have to create going backwards
-            old_lp_below = sum([ self.grammar.log_probability(ni.args[i]) if (i!=samplei and isFunctionNode(ni.args[i])) else 0. for i in xrange(len(ni.args))])
+                # Now we must count the multiple ways we could go forward or back
+                # Here, we could have sampled any of them equivalent to ni.args[i]
+                before_same_children = sum([x==ni.args[samplei] for x in ni.args ]) # how many are the same after?
 
-            # and replace it
-            ni.args[samplei].parent = ni.parent # update this first ;; TODO: IS THIS NECSESARY?
-            ni.setto( ni.args[samplei] )
+                # the lp of everything we'd have to create going backwards
+                old_lp_below = sum([ self.grammar.log_probability(ni.args[i]) if (i!=samplei and isFunctionNode(ni.args[i])) else 0. for i in xrange(len(ni.args))])
 
-            # And compute f/b probs
-            newZ = newt.sample_node_normalizer(resampleProbability=isNotBVAddFunctionNode)
-            # To go forward, choose the node, and then from all equivalent children
-            f = lp + (log(before_same_children) - log(nrk))
-            # To go back, choose the node, choose the replicating rule, choose where to put it, and generate the rest of the tree
-            b = (log(1.0*isNotBVAddFunctionNode(ni)) - log(newZ))  + -log(len(replicating_rules)) + (log(before_same_children) - log(nrk)) + old_lp_below
+                # and replace it
+                ni.args[samplei].parent = ni.parent # update this first ;; TODO: IS THIS NECSESARY?
+                ni.setto( ni.args[samplei] )
+
+                # And compute f/b probs
+                newZ = newt.sample_node_normalizer(resampleProbability=isNotBVAddFunctionNode)
+                # To go forward, choose the node, and then from all equivalent children
+                f = lp + (log(before_same_children) - log(nrk))
+                # To go back, choose the node, choose the replicating rule, choose where to put it, and generate the rest of the tree
+                b = (log(1.0*isNotBVAddFunctionNode(ni)) - log(newZ))  + -log(len(replicating_rules)) + (log(before_same_children) - log(nrk)) + old_lp_below
 
         return [newt, f-b]
 
