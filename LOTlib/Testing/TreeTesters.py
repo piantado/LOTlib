@@ -37,7 +37,7 @@ class InfiniteTreeTester(unittest.TestCase):
         # correct argument types for each subnode
         for ti in t.iterate_subnodes(self.grammar):
             r = self.grammar.get_matching_rule(ti) # find the rule that generated this
-            print ti, r
+            # print ti, r
             self.assertTrue(r is not None) # Better have been one!
 
             if ti.args is None:
