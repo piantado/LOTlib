@@ -1,7 +1,7 @@
 library(ggplot2)
 library(plyr)
 
-d <- read.table("G://programs and files//Python//Lib//site-packages//LOTlib//LOTlib//Examples//FormalLanguageTheory//out//regular_finite_vs_infinite//out_False_0718_014626")
+d <- read.table("G://programs and files//Python//Lib//site-packages//LOTlib//LOTlib//Examples//FormalLanguageTheory//out//regular_finite_vs_infinite_2//out__0722_224739")
 names(d) <- c("data.size", "posterior.probability", "posterior.score", "prior", "likelihood", "number.of.generated.strings", "h", "precision", "recall")
 
 
@@ -31,10 +31,21 @@ d2$h <- as.factor(as.character(d2$h)) # we have to re-set this factor so it does
 plt <- ggplot(d2, aes(x=data.size, y=posterior.probability, color=h)) +  geom_line()
 
 
-# plot precision and recall
-plt <- ggplot(d2, aes(x=data.size, y=precision, color=h)) +  geom_line()
 
-# plot recall and recall
-plt <- ggplot(d2, aes(x=data.size, y=recall, color=h)) +  geom_line()
+d <- read.table("G://programs and files//Python//Lib//site-packages//LOTlib//LOTlib//Examples//FormalLanguageTheory//out//regular_finite_vs_infinite_2//out__finite")
+names(d) <- c("data.size", "posterior.probability", "posterior.score", "prior", "likelihood", "number.of.generated.strings", "h", "precision", "recall")
 
+# d$precision <- (d$precision > 0.7) & (d$recall > 0.1)
+d$precision <- (d$precision + d$recall) > 1.3
+
+s <- ddply(d, "data.size", function(dd){
+
+    ddply(dd, "precision", function(ddd){
+          data.frame(score=sum(ddd$posterior.probability))
+    })
+})
+
+plt <- ggplot(s, aes(x=data.size, y=score, color=precision, group=precision)) + geom_line()
+
+plt
 

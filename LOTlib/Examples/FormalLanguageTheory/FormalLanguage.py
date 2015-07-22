@@ -1,3 +1,7 @@
+from LOTlib.Hypotheses.Likelihoods.StochasticFunctionLikelihood import StochasticFunctionLikelihood
+from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis
+from LOTlib.Evaluation.EvaluationException import RecursionDepthException
+
 class FormalLanguage(object):
     """
     Set up a class for formal languages, so we can compute things like accuracy, precision, etc.
@@ -22,10 +26,12 @@ class FormalLanguage(object):
         """
         pass
 
-    def estimate_precision_and_recall(self, h):
-
-        output = set(self.sample_data(1000)[0].output.keys())
-        h_out = set([h() for _ in xrange(1000)])
+    def estimate_precision_and_recall(self, h, data):
+        """
+        the precision and recall of h given a data set, it should be usually large
+        """
+        output = set(data[0].output.keys())
+        h_out = set([h() for _ in xrange(int(sum(data[0].output.values())))])
 
         base = len(h_out)
         cnt = 0.0
@@ -44,3 +50,14 @@ class FormalLanguage(object):
     def estimate_KL_divergence(self, h):
         """ Estimate the KL divergence between me and h """
         pass
+
+
+class FormalLanguageHypothesis(StochasticFunctionLikelihood, RecursiveLOTHypothesis):
+    def __init__(self, grammar=None, **kwargs):
+        RecursiveLOTHypothesis.__init__(self, grammar, args=[], prior_temperature=1.0, recurse_bound=25, maxnodes=100, **kwargs)
+
+    def __call__(self, *args):
+        try:
+            return RecursiveLOTHypothesis.__call__(self, *args)
+        except RecursionDepthException:  # catch recursion and too big
+            return None
