@@ -9,9 +9,11 @@ __author__ = 'Eric Bigelow'
 stan_code = """
 data {
     int<lower=1> h;                     // # of domain hypotheses
-    int<lower=1> r;                     // # of rules
+    int<lower=1> p;                     // # of rules proposed to
+    int<lower=1> r;                     // # of rules in total
     int<lower=0> d;                     // # of data points
     int<lower=0> q;                     // max # of queries for a given datum
+    int<lower=0, upper=1> P[r];         // proposal mask
     int<lower=0> C[h,r]                 // rule counts for each hypothesis
     real<upper=0> L[h,d];               // likelihood of data.input
     int<lower=0,upper=1> R[h,d,q];      // is each data.query in each hypothesis  (1/0)
@@ -20,17 +22,32 @@ data {
 
 
 parameters {
-    real<lower=0> x[r];                 // normalized vector of rule probabilities
+    real<lower=0> x_propose[p];                 // normalized vector of rule probabilities
+}
+
+transformed parameters {
+    real<lower=0> x_full[r];
+    int j;
+
+    j = 0;
+    for i in (1:r) {
+        if (P[i] > 0) {
+            x_full[i] = x_propose[j];
+            j = j + 1;
+        } else {
+            x_full[i] = 0;
+        }
+    }
 }
 
 
 model {
 
     // Prior
-    increment_log_prob(gamma_log(lambda,alpha,beta));        // what are these args???
+    increment_log_prob(gamma_log(1,2,3));        // TODO: what are these args???
 
     // Likelihood model
-    priors = C * x;                      // prior for each hypothesis
+    priors = C * x_full;                    // prior for each hypothesis
 
     for i in (1:d) {
 
@@ -42,6 +59,7 @@ model {
             k = D[i,j,0];                   // num. yes responses
             n = D[i,j,0] + D[i,j,1];        // num. trials
 
+            // If we have human responses for this query
             if ((n + k) > 0) {
                 R_ij = w .* R[:, i, j];            // col `m` of boolean matrix `R[i]` weighted by `w`
                 p = log(sum(R_ij));             // logsum of binary values for yes/no
@@ -60,28 +78,43 @@ model {
 # 2. Python code setting up variables and stuff
 # =============================================
 
-from LOTlib.DataAndObjects import HumanData
-from LOTlib.Hypotheses.GrammarHypothesisVectorized import GrammarHypothesisVectorized
+from LOTlib.Examples.NumberGame.GrammarInference.Model import *
 import numpy as np
+import os, pickle
 
-data = [HumanData(1), HumanData(2), HumanData(3)]       # TODO
-gh = GrammarHypothesisVectorized(args=[])               # TODO
+# Set up data
+path = os.getcwd() + '/'
+f = open(path + 'human_data.p')
+data = pickle.load(f)
+
+# Set up GrammarHypothesis
+ngh_file = path + 'out/ngh_lot300k1.p'
+gh = NoConstGrammarHypothesis(lot_grammar, [], load=ngh_file)
+
+# Initialize stuff
 gh.init_C()
 all_queries = set.union( *[set(d.queries) for d in data] )
 
+
 # int<lower=1> h;                     // # of domain hypotheses
-# int<lower=1> r;                     // # of rules
+# int<lower=1> p;                     // # of rules proposed to
+# int<lower=1> r;                     // # of rules in total
 # int<lower=0> d;                     // # of data points
 # int<lower=0> q;                     // max # of queries for a given datum
+
+# int<lower=0, upper=1> P[r];         // proposal mask
 # int<lower=0> C[h,r]                 // rule counts for each hypothesis
 # real<upper=0> L[h,d];               // likelihood of data.input
 # int<lower=0,upper=1> R[h,d,q];      // is each data.query in each hypothesis  (1/0)
 # int<lower=0> D[d,q,2]               // human response for each data.query  (# yes, # no)
 
-q = len(all_queries)
 h = len(gh.hypotheses)
+p = len(gh.get_propose_idxs())
 r = gh.n
 d = len(data)
+q = len(all_queries)
+
+P = [int(i) for i in gh.get_propose_mask()]
 C = gh.C
 L = np.zeros((r, d))
 R = np.zeros((r, d, q))
@@ -115,6 +148,9 @@ stan_data = {
     'L': L,
     'R': R
 }
+
+f2 = open('stan_data.p')
+pickle.dump(stan_data, f2)
 
 fit = pystan.stan(model_code=stan_code, data=stan_data,
                   iter=1000, chains=4)
