@@ -31,20 +31,6 @@ class Regularlanguage(FormalLanguage):
         else:
             return False
 
-    def sample_data_as_FuncData(self, n, max_length=50, avg=True):
-        """
-        finite: limits the max_length of data
-        avg: sample for multiple times and average to reduce noise, note the cnt can have fraction
-        """
-        if avg:
-            cnt = Counter(self.sample_data(n*512, max_length=max_length))
-            n = float(512)
-            for key in cnt.keys():
-                cnt[key] /= n
-            return [FunctionData(input=[], output=cnt)]
-
-        return [FunctionData(input=[], output=Counter(self.sample_data(n, max_length=max_length)))]
-
 
 def make_hypothesis():
     register_primitive(flatten2str)

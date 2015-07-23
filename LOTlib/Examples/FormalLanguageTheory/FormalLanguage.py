@@ -1,8 +1,11 @@
 import numpy as np
+from collections import Counter
+from LOTlib.DataAndObjects import FunctionData
 from LOTlib.Miscellaneous import logsumexp
 from LOTlib.Hypotheses.Likelihoods.StochasticFunctionLikelihood import StochasticFunctionLikelihood
 from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis
 from LOTlib.Evaluation.EvaluationException import RecursionDepthException
+
 
 class FormalLanguage(object):
     """
@@ -32,6 +35,20 @@ class FormalLanguage(object):
         probs = map(self.string_log_probability, all_strings)
 
         return self.weighted_sample(n, all_strings, probs)
+
+    def sample_data_as_FuncData(self, n, max_length=50, avg=True):
+        """
+        finite: limits the max_length of data
+        avg: sample for multiple times and average to reduce noise, note the cnt can have fraction
+        """
+        if avg:
+            cnt = Counter(self.sample_data(n*512, max_length=max_length))
+            n = float(512)
+            for key in cnt.keys():
+                cnt[key] /= n
+            return [FunctionData(input=[], output=cnt)]
+
+        return [FunctionData(input=[], output=Counter(self.sample_data(n, max_length=max_length)))]
 
     def weighted_sample(self, n, strings, probs):
         length = len(probs)

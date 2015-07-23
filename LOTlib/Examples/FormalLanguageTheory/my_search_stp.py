@@ -16,6 +16,7 @@ from LOTlib.MPI.MPI_map import MPI_map
 from LOTlib.Examples.FormalLanguageTheory.RegularLanguage import Regularlanguage
 from LOTlib.Examples.FormalLanguageTheory.AnBn import AnBn
 from LOTlib.Examples.FormalLanguageTheory.AnB2n import AnB2n
+from LOTlib.Examples.FormalLanguageTheory.Dyck import Dyck
 
 register_primitive(flatten2str)
 
@@ -38,13 +39,15 @@ def load_language(code):
     exec ('from %s import make_hypothesis' % {
         0: 'Regularlanguage',
         1: 'AnBn',
-        2: 'AnB2n'
+        2: 'AnB2n',
+        3: 'Dyck'
     }[code])
 
     return {
         0: Regularlanguage(),
         1: AnBn(),
-        2: AnB2n()
+        2: AnB2n(),
+        3: Dyck()
     }[code], make_hypothesis
 
 
