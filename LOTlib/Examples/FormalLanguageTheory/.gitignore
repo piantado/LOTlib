@@ -40,9 +40,7 @@ doc/_build
 # out/old
 */old/*
 */out/*
-LOTlib/Examples/NumberGame/GrammarInference/Run/out/*
 LOTlib/Examples/FormalLanguageTheory/out/*
-
 
 # zips
 *.zip
