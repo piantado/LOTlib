@@ -16,6 +16,7 @@ class FormalLanguage(object):
 
     def string_log_probability(self, s):
         """ What is the prior of s under my assumed language? """
+        return -len(s)
 
     def is_valid_string(self, s):
         """ Returns True if s is a valid string in this language """

@@ -1,0 +1,50 @@
+# Mac
+.DS_Store
+
+# Python output files
+*.pyc
+
+# testing and header generators
+test_generator.py
+header_generator.py
+
+# Notes
+*.note
+
+# KDE
+*.directory
+
+# Built documentation
+doc/_build
+
+# Pickle files
+*.p
+
+# CSV files
+*.csv
+
+# mat files
+*.mat
+
+# ipynb files
+*.ipynb
+
+# images
+*.eps
+*.png
+*.pdf
+
+# profiles
+*.profile
+
+# out/old
+*/old/*
+*/out/*
+LOTlib/Examples/FormalLanguageTheory/out/*
+
+# zips
+*.zip
+
+# idea folder
+/.idea/*
+.idea/

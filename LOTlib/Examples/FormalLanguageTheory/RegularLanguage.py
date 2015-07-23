@@ -80,7 +80,7 @@ class Regularlanguage(FormalLanguage):
         return [FunctionData(input=[], output=output)]
 
     def string_log_probability(self, s):
-        return self.max_length - len(s)
+        return (self.max_length - len(s))/float(len(self.atom))
 
 def make_hypothesis():
     register_primitive(flatten2str)
