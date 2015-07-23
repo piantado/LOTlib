@@ -16,7 +16,6 @@ from LOTlib.MPI.MPI_map import MPI_map
 from LOTlib.Examples.FormalLanguageTheory.RegularLanguage import Regularlanguage
 from LOTlib.Examples.FormalLanguageTheory.AnBn import AnBn
 from LOTlib.Examples.FormalLanguageTheory.AnB2n import AnB2n
-from RegularLanguage import make_hypothesis
 
 register_primitive(flatten2str)
 
@@ -36,11 +35,17 @@ def run(mk_hypothesis, lang, size, finite):
 
 
 def load_language(code):
+    exec ('from %s import make_hypothesis' % {
+        0: 'Regularlanguage',
+        1: 'AnBn',
+        2: 'AnB2n'
+    }[code])
+
     return {
         0: Regularlanguage(),
         1: AnBn(),
         2: AnB2n()
-    }[code]
+    }[code], make_hypothesis
 
 
 if __name__ == "__main__":
@@ -64,7 +69,7 @@ if __name__ == "__main__":
 
     # you need to run 12 machine on that
     DATA_RANGE = np.arange(1, 64, 6)
-    language = load_language(options.LANG)
+    language, make_hypothesis = load_language(options.LANG)
     args = list(itertools.product([make_hypothesis], [language], DATA_RANGE, [options.FINITE]))
     # run on MPI
     results = MPI_map(run, args)
