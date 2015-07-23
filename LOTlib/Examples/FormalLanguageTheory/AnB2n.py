@@ -7,37 +7,36 @@ from LOTlib.Grammar import Grammar
 from LOTlib.Miscellaneous import q, flatten2str
 
 
-class AnBn(FormalLanguage):
+class AnB2n(FormalLanguage):
 
-    def __init__(self, A='a', B='b'):
+    def __init__(self, A='a', B='bb'):
         """
         don't use char like | and ) currently
         """
-        assert len(A) == 1 and len(B) == 1, 'max_length should be divisible by len(A)+len(B)'
+        assert len(A) == 1 and len(B) == 2, 'len(A) should be 1 and len(B) should be 2'
 
         FormalLanguage.__init__(self)
 
         self.A = A
         self.B = B
 
-    def all_strings(self, max_length=50):
+    def all_strings(self, max_length=54):
 
-        assert max_length % 2 == 0, 'length should be even'
+        assert max_length % 3 == 0, 'length should be divisible by 3'
 
-        for i in xrange(1, max_length/2+1):
+        for i in xrange(1, max_length/3+1):
             yield self.A * i + self.B * i
 
     def is_valid_string(self, s):
-        re_atom = r'%s' % '(' + self.A + '*' + ')' + '(' + self.B + '*' + ')'
-
+        re_atom = r'%s' % '(' + self.A + '*' + ')' + '(' + self.B + '*' + ')' + '$'
         m = re.match(re_atom, s)
         if m:
             am, bm = m.groups()
-            return len(am) == len(bm)
+            return len(am) * 2 == len(bm)
         else:
             return False
 
-    def sample_data_as_FuncData(self, n, max_length=50, avg=True):
+    def sample_data_as_FuncData(self, n, max_length=54, avg=True):
         """
         finite: limits the max_length of data
         avg: sample for multiple times and average to reduce noise, note the cnt can have fraction
@@ -52,7 +51,7 @@ class AnBn(FormalLanguage):
         return [FunctionData(input=[], output=Counter(self.sample_data(n, max_length=max_length)))]
 
     def string_log_probability(self, s):
-        return -len(s)/2
+        return -len(s)/3
 
 
 def make_hypothesis():
@@ -80,15 +79,15 @@ def make_hypothesis():
 
 # just for testing
 if __name__ == '__main__':
-    language = AnBn()
+    language = AnB2n()
 
-    for e in language.all_strings(max_length=20):
+    for e in language.all_strings(max_length=30):
         print e
 
-    print language.sample_data_as_FuncData(128, max_length=20)
+    print language.sample_data_as_FuncData(128, max_length=30)
 
     print language.is_valid_string('aaa')
-    print language.is_valid_string('ab')
     print language.is_valid_string('abb')
-    print language.is_valid_string('aaab')
-    print language.is_valid_string('aabb')
+    print language.is_valid_string('abbb')
+    print language.is_valid_string('aaabb')
+    print language.is_valid_string('aabbbb')

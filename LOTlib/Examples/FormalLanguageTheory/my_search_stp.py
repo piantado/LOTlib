@@ -14,6 +14,8 @@ from LOTlib.Evaluation.Eval import register_primitive
 from LOTlib.Miscellaneous import flatten2str, logsumexp, qq
 from LOTlib.MPI.MPI_map import MPI_map
 from LOTlib.Examples.FormalLanguageTheory.RegularLanguage import Regularlanguage
+from LOTlib.Examples.FormalLanguageTheory.AnBn import AnBn
+from LOTlib.Examples.FormalLanguageTheory.AnB2n import AnB2n
 from RegularLanguage import make_hypothesis
 
 register_primitive(flatten2str)
@@ -33,6 +35,14 @@ def run(mk_hypothesis, lang, size, finite):
                            show=False, save_top=None)
 
 
+def load_language(code):
+    return {
+        0: Regularlanguage(),
+        1: AnBn(),
+        2: AnB2n()
+    }[code]
+
+
 if __name__ == "__main__":
     suffix = time.strftime('_%m%d_%H%M%S', time.localtime())
 
@@ -41,8 +51,9 @@ if __name__ == "__main__":
     # ========================================================================================================
     fff = sys.stdout.flush
     parser = OptionParser()
+    parser.add_option("--language", dest="LANG", type="int", default=0, help="code of a language")
     parser.add_option("--steps", dest="STEPS", type="int", default=10000, help="Number of samples to run")
-    parser.add_option("--top", dest="TOP_COUNT", type="int", default=30, help="Top number of hypotheses to store")
+    parser.add_option("--top", dest="TOP_COUNT", type="int", default=20, help="Top number of hypotheses to store")
     parser.add_option("--finite", dest="FINITE", type="int", default=10, help="specify the max_length to make language finite")
     (options, args) = parser.parse_args()
 
@@ -53,7 +64,7 @@ if __name__ == "__main__":
 
     # you need to run 12 machine on that
     DATA_RANGE = np.arange(1, 64, 6)
-    language = Regularlanguage()
+    language = load_language(options.LANG)
     args = list(itertools.product([make_hypothesis], [language], DATA_RANGE, [options.FINITE]))
     # run on MPI
     results = MPI_map(run, args)
