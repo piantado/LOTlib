@@ -27,7 +27,7 @@ def run(mk_hypothesis, lang, size, finite):
         return set()
 
     return standard_sample(mk_hypothesis,
-                           lambda: lang.sample_data(size, finite=finite),
+                           lambda: lang.sample_data_as_FuncData(size, max_length=finite),
                            N=options.TOP_COUNT,
                            steps=options.STEPS,
                            show=False, save_top=None)
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     dump(hypotheses, open('hypotheses'+suffix, 'w'))
 
     # get precision and recall for h
-    pr_data = language.sample_data(1024, finite=options.FINITE)
+    pr_data = language.sample_data_as_FuncData(1024, max_length=options.FINITE)
     p = []
     r = []
     print 'compute precision and recall..'
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     for data_size in DATA_RANGE:
         print 'get stats from size : ', data_size
 
-        evaluation_data = language.sample_data(data_size, finite=options.FINITE)
+        evaluation_data = language.sample_data_as_FuncData(data_size, max_length=options.FINITE)
 
         # Now update everyone's posterior
         for h in hypotheses:
