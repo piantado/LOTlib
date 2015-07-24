@@ -14,7 +14,9 @@ from LOTlib.Evaluation.Eval import register_primitive
 from LOTlib.Miscellaneous import flatten2str, logsumexp, qq
 from LOTlib.MPI.MPI_map import MPI_map
 from LOTlib.Examples.FormalLanguageTheory.RegularLanguage import Regularlanguage
-from RegularLanguage import make_hypothesis
+from LOTlib.Examples.FormalLanguageTheory.AnBn import AnBn
+from LOTlib.Examples.FormalLanguageTheory.AnB2n import AnB2n
+from LOTlib.Examples.FormalLanguageTheory.Dyck import Dyck
 
 register_primitive(flatten2str)
 
@@ -27,10 +29,26 @@ def run(mk_hypothesis, lang, size, finite):
         return set()
 
     return standard_sample(mk_hypothesis,
-                           lambda: lang.sample_data(size, finite=finite),
+                           lambda: lang.sample_data_as_FuncData(size, max_length=finite),
                            N=options.TOP_COUNT,
                            steps=options.STEPS,
                            show=False, save_top=None)
+
+
+def load_language(code):
+    exec ('from %s import make_hypothesis' % {
+        0: 'Regularlanguage',
+        1: 'AnBn',
+        2: 'AnB2n',
+        3: 'Dyck'
+    }[code])
+
+    return {
+        0: Regularlanguage(),
+        1: AnBn(),
+        2: AnB2n(),
+        3: Dyck()
+    }[code], make_hypothesis
 
 
 if __name__ == "__main__":
@@ -41,8 +59,9 @@ if __name__ == "__main__":
     # ========================================================================================================
     fff = sys.stdout.flush
     parser = OptionParser()
+    parser.add_option("--language", dest="LANG", type="int", default=0, help="code of a language")
     parser.add_option("--steps", dest="STEPS", type="int", default=10000, help="Number of samples to run")
-    parser.add_option("--top", dest="TOP_COUNT", type="int", default=30, help="Top number of hypotheses to store")
+    parser.add_option("--top", dest="TOP_COUNT", type="int", default=20, help="Top number of hypotheses to store")
     parser.add_option("--finite", dest="FINITE", type="int", default=10, help="specify the max_length to make language finite")
     (options, args) = parser.parse_args()
 
@@ -53,7 +72,7 @@ if __name__ == "__main__":
 
     # you need to run 12 machine on that
     DATA_RANGE = np.arange(1, 64, 6)
-    language = Regularlanguage()
+    language, make_hypothesis = load_language(options.LANG)
     args = list(itertools.product([make_hypothesis], [language], DATA_RANGE, [options.FINITE]))
     # run on MPI
     results = MPI_map(run, args)
@@ -69,7 +88,7 @@ if __name__ == "__main__":
     dump(hypotheses, open('hypotheses'+suffix, 'w'))
 
     # get precision and recall for h
-    pr_data = language.sample_data(1024, finite=options.FINITE)
+    pr_data = language.sample_data_as_FuncData(1024, max_length=options.FINITE)
     p = []
     r = []
     print 'compute precision and recall..'
@@ -82,7 +101,7 @@ if __name__ == "__main__":
     for data_size in DATA_RANGE:
         print 'get stats from size : ', data_size
 
-        evaluation_data = language.sample_data(data_size, finite=options.FINITE)
+        evaluation_data = language.sample_data_as_FuncData(data_size, max_length=options.FINITE)
 
         # Now update everyone's posterior
         for h in hypotheses:

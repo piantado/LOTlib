@@ -42,13 +42,18 @@ class VectorHypothesis(Hypothesis):
         partials = np.zeros(self.n)
         posterior = self.compute_posterior(data)
 
+        print '&'*110, ' GRADIENT'
+        print 'POST: ', posterior
+
         for i in range(self.n):
             new_value = copy.copy(self.value)
             new_value[i] += grad_step
             c = self.__copy__(new_value)
             posterior_i = c.compute_posterior(data)
-            partials[i] = (np.exp(posterior) - np.exp(posterior_i)) / grad_step
-
+            partials[i] = (np.exp(posterior_i) - np.exp(posterior)) / grad_step
+            print 'POST_I: ', posterior_i
+        
+        print '&'*110
         return partials
 
     def conditional_distribution(self, data, value_index, vals=np.arange(0, 2, .2)):
