@@ -29,10 +29,10 @@ all_queries = set.union( *[set(d.queries) for d in data] )
 # int<lower=0> q;                     // max # of queries for a given datum
 
 # int<lower=0, upper=1> P[r];         // proposal mask
-# int<lower=0> C[h,r]                 // rule counts for each hypothesis
+# int<lower=0> C[h,r];                // rule counts for each hypothesis
 # real<upper=0> L[h,d];               // likelihood of data.input
 # int<lower=0,upper=1> R[h,d,q];      // is each data.query in each hypothesis  (1/0)
-# int<lower=0> D[d,q,2]               // human response for each data.query  (# yes, # no)
+# int<lower=0> D[d,q,2];              // human response for each data.query  (# yes, # no)
 
 h = len(gh.hypotheses)
 p = len(gh.get_propose_idxs())
@@ -43,7 +43,7 @@ q = len(all_queries)
 P = [int(i) for i in gh.get_propose_mask()]
 C = gh.C
 L = np.zeros((h, d))
-R = np.zeros((r, d, q))
+R = np.zeros((h, d, q))
 D = np.zeros((d, q, 2))
 
 # Convert L, R, D to matrix format
