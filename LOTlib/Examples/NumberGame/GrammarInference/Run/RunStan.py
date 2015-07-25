@@ -24,6 +24,14 @@ parameters {
 
 
 model {
+    real priors[h];
+    real posteriors[h];
+    real Z;
+    real w[h];
+    int k;
+    int n;
+    real pr;
+    real bc;
 
     // Prior
     increment_log_prob(gamma_log(1,2,3));        // TODO: what are these args???
@@ -42,12 +50,10 @@ model {
             n = D[i,j,0] + D[i,j,1];        // num. trials
 
             // If we have human responses for this query
-            if ((n + k) > 0) {
-                R_ij = w .* R[:, i, j];            // col `m` of boolean matrix `R[i]` weighted by `w`
-                p = log(sum(R_ij));             // logsum of binary values for yes/no
-
+            if (n > 0) {
+                pr = log(sum(w .* R[:, i, j]));                         // logsum of binary values for yes/no
                 bc = tgamma(n+1) - (tgamma(k+1) + tgamma(n-k+1));       // binomial coefficient
-                increment_log_prob(bc + (k*p) + (n-k)*log1m_exp(p));    // likelihood we got human output
+                increment_log_prob(bc + (k*pr) + (n-k)*log1m_exp(pr));  // likelihood we got human output
             }
         }
     }
