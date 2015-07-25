@@ -52,6 +52,17 @@ def Ystar(*l):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 @primitive
+def fold_(f, initial, lst):
+    if len(lst) == 0:
+        return initial
+    else:
+        return f( lst[0], fold_(f, initial, lst[1:]))
+
+@primitive
+def reverse_(lst):
+    return lst[::-1]
+
+@primitive
 def lambda_(f,args):
     f.args = args
     return f
