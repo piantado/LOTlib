@@ -40,6 +40,9 @@ class GrammarRule(object):
     def __init__(self, nt, name, to, p=1.0, bv_prefix=None):
         p = float(p)
         self.__dict__.update(locals())
+
+        assert to is None or isinstance(to, list) or isinstance(to, tuple), "*** 'to' in a GrammarRule must be a list!"
+
         for a in None2Empty(to):
             assert isinstance(a,str)
         if name == '':
