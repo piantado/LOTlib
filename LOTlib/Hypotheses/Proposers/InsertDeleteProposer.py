@@ -86,7 +86,7 @@ class InsertDeleteProposer(LOTProposer):
             ni.setto(fn)
 
             with BVRuleContextManager(self.grammar, fn, recurse_up=True):
-                
+
                 # what is the prob mass of the new stuff?
                 new_lp_below =  sum([ self.grammar.log_probability(fn.args[i]) if (i!=replace_i and isFunctionNode(fn.args[i])) else 0. for i in xrange(len(fn.args))])
                 # What is the new normalizer?

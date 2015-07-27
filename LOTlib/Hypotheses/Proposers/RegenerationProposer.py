@@ -47,6 +47,10 @@ class RegenerationProposer(LOTProposer):
 
                 NOTE: This does NOT take into account insert/delete
                 NOTE: Not so simple because we must count multiple paths
+
+
+                NOTE: This is currently not correct because it will mess up with bound variables, which now have
+                unique names. Also it seems to add too many rules to the grammar, probably via recurse_up
         """
         RP = -Infinity
 
@@ -57,8 +61,8 @@ class RegenerationProposer(LOTProposer):
                 xZ = x.sample_node_normalizer(resampleProbability=resampleProbability)
 
             # Well we could select x's root to go to Y, but we must recompute y under the current grammar
-            with BVRuleContextManager(self.grammar, y, recurse_up=True):
-                RP = logplusexp(RP, log(1.0*resampleProbability(x)) - log(xZ) + self.grammar.log_probability(copy(y)))
+            with BVRuleContextManager(self.grammar, x, recurse_up=True):
+                RP = logplusexp(RP, log(1.0*resampleProbability(x)) - log(xZ) + self.grammar.log_probability(y))
 
             if x.name == y.name and x.args is not None and y.args is not None and len(x.args) == len(y.args):
 
@@ -76,7 +80,7 @@ class RegenerationProposer(LOTProposer):
 
                 elif mismatch_count == 1: # we could propose to x, or x.args[mismatch_index], but nothing else (nothing else will fix the mismatch)
 
-                    with BVRuleContextManager(self.grammar, x, recurse_up=True): # recurse, but keep track of bv
+                    with BVRuleContextManager(self.grammar, x, recurse_up=False): # recurse, but keep track of bv
                         RP = logplusexp(RP, self.lp_propose(x.args[mismatch_index], y.args[mismatch_index], resampleProbability=resampleProbability, xZ=xZ))
 
                 else: # identical trees -- we could propose to any, so that's just the tree probability below convolved with the resample p
@@ -84,6 +88,6 @@ class RegenerationProposer(LOTProposer):
                     for xi in x.iterate_subnodes(self.grammar, recurse_up=True):
                         if xi is not x: # but we already counted ourself (NOTE: Must be "is", not ==)
                             # Here we use grammar.log_probability since the grammar may have changed with bv
-                            RP = logplusexp(RP, log(resampleProbability(xi)*1.0) - log(xZ) + self.grammar.log_probability(copy(xi)))
+                            RP = logplusexp(RP, log(resampleProbability(xi)*1.0) - log(xZ) + self.grammar.log_probability(xi))
 
         return RP
