@@ -2,7 +2,6 @@
 
 """
 Use optimal adaptation code to adapt show possible adpatations to the Number grammar.
-
 """
 
 import pickle
@@ -18,7 +17,7 @@ SUBTREE_P = 1.0
 if __name__ == "__main__":
 
     ## Set up how much data we want
-    datas = map(Data.generate_data, xrange(0, 400, 10))
+    datas = map(make_data, xrange(0, 400, 10))
     print "# Generated data!"
 
     #hypotheses = set([ NumberExpression(G) for i in xrange(10)])

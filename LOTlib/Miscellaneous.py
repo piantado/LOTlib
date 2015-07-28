@@ -583,3 +583,4 @@ def attrmem(aname):
         return wrap2
 
     return wrap1
+

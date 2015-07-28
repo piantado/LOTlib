@@ -12,7 +12,7 @@ LARGE_DATA_SIZE = 1000
 if __name__ == "__main__":
 
     #now evaluate on different amounts of data too:
-    huge_data = generate_data(LARGE_DATA_SIZE)
+    huge_data = make_data(LARGE_DATA_SIZE)
     print "# Generated data!"
 
     allfs = pickle.load(open("mpi-run.pkl")) # for now, use data from the run on February 10
@@ -26,4 +26,4 @@ if __name__ == "__main__":
     # show the *average* ll for each hypothesis
     for h in H:
         if h.prior > float("-inf"):
-            print h.prior, h.likelihood/float(LARGE_DATA_SIZE), q(get_knower_pattern(h)),  q(h)
+            print h.prior, h.likelihood/float(LARGE_DATA_SIZE), q(h.get_knower_pattern()),  q(h)
