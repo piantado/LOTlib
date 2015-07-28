@@ -1,7 +1,5 @@
 import re
-from collections import Counter
 from LOTlib.Examples.FormalLanguageTheory.FormalLanguage import FormalLanguage, FormalLanguageHypothesis
-from LOTlib.DataAndObjects import FunctionData
 from LOTlib.Evaluation.Eval import register_primitive
 from LOTlib.Grammar import Grammar
 from LOTlib.Miscellaneous import q, flatten2str

@@ -1,4 +1,3 @@
-import re
 from collections import Counter
 from LOTlib.Examples.FormalLanguageTheory.FormalLanguage import FormalLanguage, FormalLanguageHypothesis
 from LOTlib.Evaluation.Eval import register_primitive
