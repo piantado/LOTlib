@@ -14,6 +14,7 @@ from LOTlib.Hypotheses.Proposers.InsertDeleteProposer import InsertDeletePropose
 
 from Grammar import grammar
 
+
 class InnerHypothesis(StochasticFunctionLikelihood, RecursiveLOTHypothesis, RegenerationProposer, InsertDeleteProposer):
     """
     The type of each function F.
@@ -32,7 +33,6 @@ class InnerHypothesis(StochasticFunctionLikelihood, RecursiveLOTHypothesis, Rege
             return RegenerationProposer.propose(self)
         else:
             return InsertDeleteProposer.propose(self)
-
 
 
 class FactorizedDataHypothesis(SimpleLexicon):
@@ -87,8 +87,6 @@ class FactorizedDataHypothesis(SimpleLexicon):
         raise NotImplementedError
 
 
-
-
 from LOTlib.Miscellaneous import logsumexp
 from Levenshtein import distance
 from math import log
@@ -116,8 +114,6 @@ class AnBnCnHypothesis(StochasticFunctionLikelihood, FactorizedDataHypothesis):
         for k in datum.output.keys():
             ll += datum.output[k] * logsumexp([ log(llcounts[r])-log(lo) - 100.0 * distance(r, k)  for r in llcounts.keys() ])
         return ll
-
-
 
 
 def make_hypothesis(**kwargs):
