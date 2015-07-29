@@ -21,12 +21,12 @@ def get_rule_counts(grammar, t):
         if type(x) != FunctionNode:
             raise NotImplementedError("Rational rules not implemented for bound variables")
         
-        counts[x.rule] += 1
+        counts[x.get_rule_signature()] += 1
 
     # and convert into a list of vectors (with the right zero counts)
     out = []
     for nt in grammar.rules.keys():
-        v = numpy.array([ counts.get(r,0) for r in grammar.rules[nt] ])
+        v = numpy.array([ counts.get(r.get_rule_signature(),0) for r in grammar.rules[nt] ])
         out.append(v)
     return out
 
