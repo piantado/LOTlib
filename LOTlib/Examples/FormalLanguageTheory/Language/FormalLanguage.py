@@ -2,9 +2,6 @@ import numpy as np
 from collections import Counter
 from LOTlib.DataAndObjects import FunctionData
 from LOTlib.Miscellaneous import logsumexp
-from LOTlib.Hypotheses.Likelihoods.StochasticFunctionLikelihood import StochasticFunctionLikelihood
-from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis
-from LOTlib.Evaluation.EvaluationException import RecursionDepthException
 
 
 class FormalLanguage(object):
@@ -103,14 +100,3 @@ class FormalLanguage(object):
         #     p = 0
         #     if e in h_out: p = h_out[e] / float(n)
         #         expect +=
-
-
-class FormalLanguageHypothesis(StochasticFunctionLikelihood, RecursiveLOTHypothesis):
-    def __init__(self, grammar=None, **kwargs):
-        RecursiveLOTHypothesis.__init__(self, grammar, args=[], recurse_bound=25, maxnodes=100, **kwargs)
-
-    def __call__(self, *args):
-        try:
-            return RecursiveLOTHypothesis.__call__(self, *args)
-        except RecursionDepthException:  # catch recursion and too big
-            return None

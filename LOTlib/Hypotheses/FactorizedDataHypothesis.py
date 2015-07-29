@@ -13,8 +13,6 @@ from LOTlib.Hypotheses.Proposers.RegenerationProposer import RegenerationPropose
 from LOTlib.Hypotheses.Proposers.InsertDeleteProposer import InsertDeleteProposer
 from LOTlib.Evaluation.EvaluationException import TooBigException
 
-from Grammar import grammar
-
 
 class InnerHypothesis(StochasticFunctionLikelihood, RecursiveLOTHypothesis, RegenerationProposer, InsertDeleteProposer):
     """
