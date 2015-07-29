@@ -51,10 +51,12 @@ D = np.zeros((d, q, 2))
 for d_idx, datum in enumerate(data):
 
     for h_idx, hypothesis in enumerate(gh.hypotheses):
-        L[h_idx, d_idx] = hypothesis.compute_likelihood(datum.data)
+        # L[h_idx, d_idx] = hypothesis.compute_likelihood(datum.data)
+        L[d_idx][h_idx] = hypothesis.compute_likelihood(datum.data)
 
         for query, response, q_idx in datum.get_queries():
-            R[h_idx, d_idx, q_idx] = int(query in hypothesis())
+            # R[h_idx, d_idx, q_idx] = int(query in hypothesis())
+            R[q_idx][d_idx][h_idx] = int(query in hypothesis())
 
     for query, response, q_idx in datum.get_queries():
         D[d_idx, q_idx, 0] = response[0]
