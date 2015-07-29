@@ -37,22 +37,21 @@ model {
     increment_log_prob(gamma_log(1,2,3));   // TODO: what are these args???
 
     // Likelihood model
-    priors = C * x;                         // prior for each hypothesis
+    priors -> C * x;                         // prior for each hypothesis
 
-    for i in (1:d) {
+    for (i in 1:d) {
+        posteriors -> L[i] + priors;
+        Z -> log_sum_exp(posteriors);
+        w -> exp(posteriors - Z);            // weights for each hypothesis
 
-        posteriors = L[:,i] + priors;
-        Z = log_sum_exp(posteriors);
-        w = exp(posteriors - Z);            // weights for each hypothesis
-
-        for j in (1:q) {
-            k = D[i,j,0];                   // num. yes responses
-            n = D[i,j,0] + D[i,j,1];        // num. trials
+        for (j in 1:q) {
+            k -> D[i,j,0];                   // num. yes responses
+            n -> D[i,j,0] + D[i,j,1];        // num. trials
 
             // If we have human responses for this query
             if (n > 0) {
-                pr = log(sum(w .* R[:, i, j]));                         // logsum of binary values for yes/no
-                bc = tgamma(n+1) - (tgamma(k+1) + tgamma(n-k+1));       // binomial coefficient
+                pr -> log(sum(w .* R[i, j]));                         // logsum of binary values for yes/no
+                bc -> tgamma(n+1) - (tgamma(k+1) + tgamma(n-k+1));       // binomial coefficient
                 increment_log_prob(bc + (k*pr) + (n-k)*log1m_exp(pr));  // likelihood we got human output
             }
         }
