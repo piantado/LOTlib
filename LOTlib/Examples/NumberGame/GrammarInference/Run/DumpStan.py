@@ -44,7 +44,7 @@ C = gh.C
 # L = np.zeros((h, d))
 L = [np.zeros((h))] * d
 # R = np.zeros((h, d, q))
-R = [[np.zeros((h))] * d] * q
+R = [[np.zeros((h))] * q] * d
 D = np.zeros((d, q, 2))
 
 # Convert L, R, D to matrix format
