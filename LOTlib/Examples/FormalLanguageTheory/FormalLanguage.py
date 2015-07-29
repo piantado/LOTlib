@@ -94,9 +94,15 @@ class FormalLanguage(object):
 
         return precision, recall
 
-    def estimate_KL_divergence(self, h):
+    def estimate_KL_divergence(self, h, n=1024, max_length=50):
         """ Estimate the KL divergence between me and h """
-        pass
+
+        # h_out = Counter([h() for _ in xrange(n)])
+        # expect = 0
+        # for e in self.all_strings(max_length=max_length):
+        #     p = 0
+        #     if e in h_out: p = h_out[e] / float(n)
+        #         expect +=
 
 
 class FormalLanguageHypothesis(StochasticFunctionLikelihood, RecursiveLOTHypothesis):

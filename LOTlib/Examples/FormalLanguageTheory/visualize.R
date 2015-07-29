@@ -32,11 +32,11 @@ plt <- ggplot(d2, aes(x=data.size, y=posterior.probability, color=h)) +  geom_li
 
 
 
-d <- read.table("G://programs and files//Python//Lib//site-packages//LOTlib//LOTlib//Examples//FormalLanguageTheory//out//anb2n//out_inf")
+d <- read.table("G://programs and files//Python//Lib//site-packages//LOTlib//LOTlib//Examples//FormalLanguageTheory//out//dyck//out_inf")
 names(d) <- c("data.size", "posterior.probability", "posterior.score", "prior", "likelihood", "number.of.generated.strings", "h", "precision", "recall")
 
 # d$precision <- (d$precision > 0.7) & (d$recall > 0.1)
-d$precision <- (d$precision + d$recall) > 1.63
+d$precision <- (d$precision + d$recall) > 0.8
 
 s <- ddply(d, "data.size", function(dd){
 
