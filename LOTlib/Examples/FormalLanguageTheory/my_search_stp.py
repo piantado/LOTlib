@@ -17,6 +17,8 @@ from LOTlib.Examples.FormalLanguageTheory.RegularLanguage import Regularlanguage
 from LOTlib.Examples.FormalLanguageTheory.AnBn import AnBn
 from LOTlib.Examples.FormalLanguageTheory.AnB2n import AnB2n
 from LOTlib.Examples.FormalLanguageTheory.Dyck import Dyck
+from LOTlib.Examples.FormalLanguageTheory.AnCstarBn import AnCstarBn
+from LOTlib.Examples.FormalLanguageTheory.AnBnCn import AnBnCn
 
 register_primitive(flatten2str)
 
@@ -40,20 +42,22 @@ def load_language(code):
         0: 'Regularlanguage',
         1: 'AnBn',
         2: 'AnB2n',
-        3: 'Dyck'
+        3: 'Dyck',
+        4: 'AnCstarBn',
+        5: 'AnBnCn'
     }[code])
 
     return {
         0: Regularlanguage(),
         1: AnBn(),
         2: AnB2n(),
-        3: Dyck()
+        3: Dyck(),
+        4: AnCstarBn(),
+        5: AnBnCn()
     }[code], make_hypothesis
 
 
 if __name__ == "__main__":
-    suffix = time.strftime('_%m%d_%H%M%S', time.localtime())
-
     # ========================================================================================================
     # Process command line arguments /
     # ========================================================================================================
@@ -63,7 +67,10 @@ if __name__ == "__main__":
     parser.add_option("--steps", dest="STEPS", type="int", default=10000, help="Number of samples to run")
     parser.add_option("--top", dest="TOP_COUNT", type="int", default=20, help="Top number of hypotheses to store")
     parser.add_option("--finite", dest="FINITE", type="int", default=10, help="specify the max_length to make language finite")
+    parser.add_option("--name", dest="NAME", type="string", default='', help="name of file")
     (options, args) = parser.parse_args()
+
+    suffix = time.strftime('_' + options.NAME + '_%m%d_%H%M%S', time.localtime())
 
     # set the output codec -- needed to display lambda to stdout
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
@@ -110,7 +117,7 @@ if __name__ == "__main__":
         # compute the normalizing constant. This is the log of the sum of the probabilities
         Z = logsumexp([h.posterior_score for h in hypotheses])
 
-        f = open('out_' + suffix, 'a')
+        f = open('out' + suffix, 'a')
         cnt = 0
         for h in hypotheses:
             #compute the number of different strings we generate

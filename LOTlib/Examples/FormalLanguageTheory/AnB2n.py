@@ -26,7 +26,7 @@ class AnB2n(FormalLanguage):
             yield self.A * i + self.B * i
 
     def is_valid_string(self, s):
-        re_atom = r'%s' % '(' + self.A + '*' + ')' + '(' + self.B + '*' + ')' + '$'
+        re_atom = r'({}*)({}*)$'.format(self.A, self.B)
         m = re.match(re_atom, s)
         if m:
             am, bm = m.groups()
@@ -40,8 +40,6 @@ class AnB2n(FormalLanguage):
 
 def make_hypothesis():
     register_primitive(flatten2str)
-
-    # TODO not be able to learn a^n b^n. Should modify
 
     TERMINAL_WEIGHT = 2.
     grammar = Grammar()

@@ -21,7 +21,7 @@ class Regularlanguage(FormalLanguage):
 
     def is_valid_string(self, s, max_length=50):
 
-        re_atom = r'%s' % ('(' + self.atom + ')' + '*')
+        re_atom = r'{}*'.format(self.atom)
 
         if re.match(re_atom, s):
             return len(s) <= max_length

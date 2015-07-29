@@ -2,6 +2,7 @@
 from LOTlib.DataAndObjects import FunctionData
 
 def make_data(n=64):
+    n = float(n)
     return [FunctionData(input=(), output={'abc': n,
                                            'aabbcc': n/2,
                                            'aaabbbccc': n/4,

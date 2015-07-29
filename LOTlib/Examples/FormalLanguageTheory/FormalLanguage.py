@@ -107,7 +107,7 @@ class FormalLanguage(object):
 
 class FormalLanguageHypothesis(StochasticFunctionLikelihood, RecursiveLOTHypothesis):
     def __init__(self, grammar=None, **kwargs):
-        RecursiveLOTHypothesis.__init__(self, grammar, args=[], prior_temperature=1.0, recurse_bound=25, maxnodes=100, **kwargs)
+        RecursiveLOTHypothesis.__init__(self, grammar, args=[], recurse_bound=25, maxnodes=100, **kwargs)
 
     def __call__(self, *args):
         try:

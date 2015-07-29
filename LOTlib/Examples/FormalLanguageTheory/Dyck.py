@@ -6,7 +6,9 @@ from LOTlib.Miscellaneous import q, flatten2str
 
 
 class Dyck(FormalLanguage):
-
+    """
+    This one is very hard to learn, please run it with at least 1e5 MCMC steps
+    """
     def __init__(self, A='(', B=')'):
         assert len(A) == 1 and len(B) == 1, 'len(A) should be 1 and len(B) should be 1'
 
@@ -69,8 +71,6 @@ class Dyck(FormalLanguage):
 
 def make_hypothesis():
     register_primitive(flatten2str)
-
-    # TODO not be able to learn a^n b^n. Should modify
 
     TERMINAL_WEIGHT = 2.
     grammar = Grammar()
