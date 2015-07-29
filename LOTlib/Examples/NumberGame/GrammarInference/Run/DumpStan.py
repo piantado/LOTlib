@@ -56,7 +56,7 @@ for d_idx, datum in enumerate(data):
 
         for query, response, q_idx in datum.get_queries():
             # R[h_idx, d_idx, q_idx] = int(query in hypothesis())
-            R[q_idx][d_idx][h_idx] = int(query in hypothesis())
+            R[d_idx][q_idx][h_idx] = int(query in hypothesis())
 
     for query, response, q_idx in datum.get_queries():
         D[d_idx, q_idx, 0] = response[0]
@@ -72,6 +72,6 @@ stan_data = {
     'R': R
 }
 
-f2 = open('stan_data.p')
+f2 = open('stan_data.p', 'w')
 pickle.dump(stan_data, f2)
 
