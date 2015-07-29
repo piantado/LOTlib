@@ -11,30 +11,30 @@ data {
     int<lower=1> r;                     // # of rules in total
     int<lower=0> d;                     // # of data points
     int<lower=0> q;                     // max # of queries for a given datum
-    int<lower=0> C[h,r];                // rule counts for each hypothesis
-    real<upper=0> L[h,d];               // log likelihood of data.input
-    int<lower=0,upper=1> R[h,d,q];      // is each data.query in each hypothesis  (1/0)
+    matrix<lower=0>[h,r] C;             // rule counts for each hypothesis
+    vector<upper=0>[h] L[d];            // log likelihood of data.input
+    vector<lower=0,upper=1>[h] R[d,q];  // is each data.query in each hypothesis  (1/0)
     int<lower=0> D[d,q,2];              // human response for each data.query  (# yes, # no)
 }
 
 
 parameters {
-    real<lower=0> x[r];                 // normalized vector of rule probabilities
+    vector<lower=0>[r] x;               // normalized vector of rule probabilities
 }
 
 
 model {
-    real priors[h];
-    real posteriors[h];
+    vector[h] priors;
+    vector[h] posteriors;
+    vector[h] w;
     real Z;
-    real w[h];
     int k;
     int n;
     real pr;
     real bc;
 
     // Prior
-    increment_log_prob(gamma_log(1,2,3));        // TODO: what are these args???
+    increment_log_prob(gamma_log(1,2,3));   // TODO: what are these args???
 
     // Likelihood model
     priors = C * x;                         // prior for each hypothesis
