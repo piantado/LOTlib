@@ -1,4 +1,5 @@
 import numpy
+from LOTlib.Miscellaneous import attrmem
 
 class PowerLawDecayed(object):
     """
@@ -51,7 +52,7 @@ class PowerLawDecayed(object):
         """
         return self.get_cumulative_likelihoods(shift_right=shift_right) + self.prior
 
-
+    @attrmem('likelihood')
     def compute_likelihood(self, data):
         """
                 This is overwritten, writes to stored_likelihood, and then calls get_cumulative_likelihoods
