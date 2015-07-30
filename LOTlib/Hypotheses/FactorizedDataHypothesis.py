@@ -11,8 +11,7 @@ from LOTlib.Hypotheses.Likelihoods.StochasticFunctionLikelihood import Stochasti
 from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis, RecursionDepthException
 from LOTlib.Hypotheses.Proposers.RegenerationProposer import RegenerationProposer
 from LOTlib.Hypotheses.Proposers.InsertDeleteProposer import InsertDeleteProposer
-
-from Grammar import grammar
+from LOTlib.Evaluation.EvaluationException import TooBigException
 
 
 class InnerHypothesis(StochasticFunctionLikelihood, RecursiveLOTHypothesis, RegenerationProposer, InsertDeleteProposer):
@@ -26,7 +25,7 @@ class InnerHypothesis(StochasticFunctionLikelihood, RecursiveLOTHypothesis, Rege
         try:
             return RecursiveLOTHypothesis.__call__(self, *args)
         except RecursionDepthException:
-            return 'X'
+            return ''
 
     def propose(self):
         if random.random() < 0.5:
@@ -77,44 +76,14 @@ class FactorizedDataHypothesis(SimpleLexicon):
         theargs = []
 
         for w in xrange(self.N):
-            v = self.get_word(w)(*theargs) # call with all prior args
-            theargs.append(v)
+            try:
+                v = self.get_word(w)(*theargs) # call with all prior args
+                theargs.append(v)
+            except TooBigException:
+                theargs.append('')
             # print "V=", v, theargs
 
         return v # return the last one
 
     def make_hypothesis(self, **kwargs):
         raise NotImplementedError
-
-
-from LOTlib.Miscellaneous import logsumexp
-from Levenshtein import distance
-from math import log
-class AnBnCnHypothesis(StochasticFunctionLikelihood, FactorizedDataHypothesis):
-    """
-    A particular instantiation of FactorizedDataHypothesis, with a likelihood function based on
-    levenshtein distance (with small noise rate -- corresponding to -100*distance)
-    """
-
-    def make_hypothesis(self, **kwargs):
-        return InnerHypothesis(**kwargs)
-
-    def compute_single_likelihood(self, datum):
-        """
-            Compute the likelihood with a Levenshtein noise model
-        """
-
-        assert isinstance(datum.output, dict), "Data supplied must be a dict (function outputs to counts)"
-
-        llcounts = self.make_ll_counts(datum.input)
-
-        lo = sum(llcounts.values())
-
-        ll = 0.0 # We are going to compute a pseudo-likelihood, counting close strings as being close
-        for k in datum.output.keys():
-            ll += datum.output[k] * logsumexp([ log(llcounts[r])-log(lo) - 100.0 * distance(r, k)  for r in llcounts.keys() ])
-        return ll
-
-
-def make_hypothesis(**kwargs):
-    return AnBnCnHypothesis(grammar=grammar, **kwargs)
