@@ -2,9 +2,6 @@ import numpy as np
 from collections import Counter
 from LOTlib.DataAndObjects import FunctionData
 from LOTlib.Miscellaneous import logsumexp
-from LOTlib.Hypotheses.Likelihoods.StochasticFunctionLikelihood import StochasticFunctionLikelihood
-from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis
-from LOTlib.Evaluation.EvaluationException import RecursionDepthException
 
 
 class FormalLanguage(object):
@@ -94,17 +91,12 @@ class FormalLanguage(object):
 
         return precision, recall
 
-    def estimate_KL_divergence(self, h):
+    def estimate_KL_divergence(self, h, n=1024, max_length=50):
         """ Estimate the KL divergence between me and h """
-        pass
 
-
-class FormalLanguageHypothesis(StochasticFunctionLikelihood, RecursiveLOTHypothesis):
-    def __init__(self, grammar=None, **kwargs):
-        RecursiveLOTHypothesis.__init__(self, grammar, args=[], prior_temperature=1.0, recurse_bound=25, maxnodes=100, **kwargs)
-
-    def __call__(self, *args):
-        try:
-            return RecursiveLOTHypothesis.__call__(self, *args)
-        except RecursionDepthException:  # catch recursion and too big
-            return None
+        # h_out = Counter([h() for _ in xrange(n)])
+        # expect = 0
+        # for e in self.all_strings(max_length=max_length):
+        #     p = 0
+        #     if e in h_out: p = h_out[e] / float(n)
+        #         expect +=
