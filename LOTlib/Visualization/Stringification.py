@@ -2,6 +2,8 @@
     Functions for mappings FunctionNodes to strings
 """
 from LOTlib.FunctionNode import isFunctionNode, BVUseFunctionNode, BVAddFunctionNode
+import re
+percent_s_regex = re.compile(r"%s")
 
 def schemestring(x, d=0, bv_names=None):
     """Outputs a scheme string in (lambda (x) (+ x 3)) format.
@@ -86,8 +88,7 @@ def fullstring(x, d=0, bv_names=None):
 
 
 
-import re
-percent_s_regex = re.compile(r"%s")
+
 def pystring(x, d=0, bv_names=None):
     """Output a string that can be evaluated by python; gives bound variables names based on their depth.
 
@@ -118,10 +119,6 @@ def pystring(x, d=0, bv_names=None):
             assert x.args is not None and len(x.args)==2, "Apply requires exactly 2 arguments"
             #print ">>>>", self.args
             return '( %s )( %s )' % tuple(map(lambda a: pystring(a, d=d, bv_names=bv_names), x.args))
-        elif x.name == "or_sc_": # short-circuit or
-            return "(%s)" % ' or '.join(map(lambda a: pystring(a, d=d, bv_names=bv_names), x.args))
-        elif x.name == "and_sc_": # short-circuit and
-            return "(%s)" % ' and '.join(map(lambda a: pystring(a, d=d, bv_names=bv_names), x.args))
         elif x.name == 'lambda':
             # On a lambda, we must add the introduced bv, and then remove it again afterwards
 
@@ -184,4 +181,5 @@ def lambdastring(fn, d=0, bv_names=None):
         return bv_names[fn.name]
     else:
         assert fn.args is None
+        assert not percent_s_regex(fn.name), "*** String formatting not yet supported for lambdastring"
         return str(fn.name)
