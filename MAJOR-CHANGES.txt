@@ -1,3 +1,6 @@
+July 31 2015
+    - Changed formatting of examples, etc -- now just a single file for most examples.
+    - Added format functionality so that a name can be of the form "f(%s)", where %s is the arguments. This allows for arbitrary syntax (not just function composition)
 July 11 2015
     - Removed storage of generating rule from FunctionNode in order to allow save FunctionNodes to be loaded and have prior computed on a new grammar. - Now uses FunctionNode.get_rule_signature() and GrammarRule.get_rule_signature()
 	- Changed BVContextManager to not store a list of added rules
