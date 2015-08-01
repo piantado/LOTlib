@@ -86,8 +86,8 @@ def fullstring(x, d=0, bv_names=None):
 
 
 
-
-
+import re
+percent_s_regex = re.compile(r"%s")
 def pystring(x, d=0, bv_names=None):
     """Output a string that can be evaluated by python; gives bound variables names based on their depth.
 
@@ -140,6 +140,8 @@ def pystring(x, d=0, bv_names=None):
                     x.fullprint()
 
             return ret
+        elif percent_s_regex.search(x.name): # If we match the python string substitution character %s, then format
+            return x.name % tuple(map(lambda a: pystring(a, d=d+1, bv_names=bv_names), x.args))
         else:
 
             name = x.name
