@@ -1,1 +1,3 @@
-__author__ = '缘'
+# -*- coding: utf-8 -*-
+
+author__ = '缘'

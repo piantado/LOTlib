@@ -40,8 +40,8 @@ class MyHypothesis(BinaryLikelihood, LOTHypothesis):
     def __init__(self, grammar=grammar, **kwargs):
         LOTHypothesis.__init__(self, grammar=grammar, args=['S'], **kwargs)
 
-def make_hypothesis():
-    return MyHypothesis()
+def make_hypothesis(**kwargs):
+    return MyHypothesis(**kwargs)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Data

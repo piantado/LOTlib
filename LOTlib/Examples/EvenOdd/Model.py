@@ -11,11 +11,11 @@ from LOTlib.Miscellaneous import q
 grammar = Grammar()
 grammar.add_rule('START', '', ['BOOL'], 1.)
 
-grammar.add_rule('BOOL', 'equals_', ['NUMBER', 'NUMBER'], 1.)
-grammar.add_rule('BOOL', 'not_', ['BOOL'], 1.)
+grammar.add_rule('BOOL', '(%s == %s)', ['NUMBER', 'NUMBER'], 1.)
+grammar.add_rule('BOOL', '(not %s)', ['BOOL'], 1.)
 
-grammar.add_rule('BOOL', 'and_sc_', ['BOOL', 'BOOL'], 1.)
-grammar.add_rule('BOOL', 'or_sc_',  ['BOOL', 'BOOL'], 1.)  # use the short_circuit form
+grammar.add_rule('BOOL', '(%s and %s)', ['BOOL', 'BOOL'], 1.)
+grammar.add_rule('BOOL', '(%s or %s)',  ['BOOL', 'BOOL'], 1.)  # use the short_circuit form
 
 grammar.add_rule('NUMBER', 'x', None, 1.)
 grammar.add_rule('NUMBER', '1', None, 1.)

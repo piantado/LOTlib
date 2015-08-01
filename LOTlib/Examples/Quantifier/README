@@ -1,4 +1,6 @@
 
+
+
 This file contains code for learning a system of quantifiers. There are two basic approaches:
 	
 	- In Gibbs, we enumerate a "small" space of single word meanings and do gibbs over their assignments into a
@@ -13,9 +15,6 @@ This file contains code for learning a system of quantifiers. There are two basi
 
 NOTE: For MPI, we must go through the right directory that is mounted on each computer (e.g.
 /home/piantado/Desktop/mit instead of /home/piantado/mit/)
-
-TODO:
-	This is not finished yet ...
 
 
 Missing Import List:
