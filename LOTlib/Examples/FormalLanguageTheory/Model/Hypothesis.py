@@ -11,7 +11,7 @@ from Grammar import get_Grammar
 
 class FormalLanguageHypothesis(StochasticFunctionLikelihood, RecursiveLOTHypothesis):
     def __init__(self, grammar=None, **kwargs):
-        RecursiveLOTHypothesis.__init__(self, grammar, args=[], recurse_bound=25, maxnodes=100, **kwargs)
+        RecursiveLOTHypothesis.__init__(self, grammar, args=[], recurse_bound=20, maxnodes=100, **kwargs)
 
     def __call__(self, *args):
         try:
