@@ -17,7 +17,7 @@ def get_Grammar(s):
     grammar.add_rule('LIST', 'car_', ['LIST'], 0.253)
     grammar.add_rule('LIST', '\'\'', None, 0.091)
 
-    if s != 'AnBnCn':
+    if s != 'AnBnCn' and s != 'SimpleEnglish':
         grammar.add_rule('LIST', 'recurse_', [], .260)
 
     if s != 'SimpleEnglish':
@@ -25,10 +25,10 @@ def get_Grammar(s):
         grammar.add_rule('ATOM', q('b'), None, .33)
         grammar.add_rule('ATOM', q('c'), None, .33)
     else:
-        grammar.add_rule('ATOM', q('D'), None, .33)
-        grammar.add_rule('ATOM', q('A'), None, .33)
-        grammar.add_rule('ATOM', q('N'), None, .33)
-        grammar.add_rule('ATOM', q('P'), None, .33)
-        grammar.add_rule('ATOM', q('V'), None, .33)
+        grammar.add_rule('ATOM', q('D'), None, .156)
+        grammar.add_rule('ATOM', q('A'), None, .186)
+        grammar.add_rule('ATOM', q('N'), None, .183)
+        grammar.add_rule('ATOM', q('P'), None, .312)
+        grammar.add_rule('ATOM', q('V'), None, .164)
 
     return grammar

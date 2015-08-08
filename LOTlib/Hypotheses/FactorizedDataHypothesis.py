@@ -46,7 +46,7 @@ class FactorizedDataHypothesis(SimpleLexicon):
 
         This requires self.make_hypothesis to be defined and take a grammar argument.
     """
-    def __init__(self, N=3, grammar=None, argument_type='LIST', variable_weight=2.0, value=None, **kwargs):
+    def __init__(self, N=4, grammar=None, argument_type='LIST', variable_weight=2.0, value=None, **kwargs):
 
         SimpleLexicon.__init__(self, value=value)
 

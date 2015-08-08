@@ -27,7 +27,7 @@ class AnBnCnHypothesis(StochasticFunctionLikelihood, FactorizedDataHypothesis):
     """
 
     def __init__(self, **kwargs):
-        FactorizedDataHypothesis.__init__(self, N=4, recurse_bound=25, maxnodes=125, **kwargs)
+        FactorizedDataHypothesis.__init__(self, recurse_bound=25, maxnodes=125, **kwargs)
 
     def make_hypothesis(self, **kwargs):
         return InnerHypothesis(**kwargs)
@@ -49,8 +49,16 @@ class AnBnCnHypothesis(StochasticFunctionLikelihood, FactorizedDataHypothesis):
         return ll
 
 
+class SimpleEnglishHypothesis(AnBnCnHypothesis):
+
+    def __init__(self, **kwargs):
+        AnBnCnHypothesis.__init__(self, N=6, **kwargs)
+
+
 def make_hypothesis(s, **kwargs):
     if s == 'AnBnCn':
         return AnBnCnHypothesis(grammar=get_Grammar(s), **kwargs)
+    elif s == 'SimpleEnglish':
+        return SimpleEnglishHypothesis(grammar=get_Grammar(s), **kwargs)
     else:
         return FormalLanguageHypothesis(grammar=get_Grammar(s), **kwargs)
