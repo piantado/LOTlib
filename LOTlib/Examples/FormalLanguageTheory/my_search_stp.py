@@ -53,7 +53,7 @@ if __name__ == "__main__":
         display_option_summary(options); fff()
 
     # you need to run 20 machine on that
-    DATA_RANGE = np.arange(10, 400, 20)
+    DATA_RANGE = np.arange(10, 400, 21)
 
     language = instance(options.LANG)
     args = list(itertools.product([make_hypothesis], [language], DATA_RANGE, [options.FINITE]))

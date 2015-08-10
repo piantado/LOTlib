@@ -8,7 +8,7 @@ class AnBn(FormalLanguage):
         """
         don't use char like | and ) currently
         """
-        assert len(A) == 1 and len(B) == 1, 'max_length should be divisible by len(A)+len(B)'
+        assert len(A) == 1 and len(B) == 1, 'atom length should be one'
 
         FormalLanguage.__init__(self)
 

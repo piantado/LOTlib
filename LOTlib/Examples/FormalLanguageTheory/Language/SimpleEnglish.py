@@ -10,7 +10,7 @@ class SimpleEnglish(FormalLanguage):
         NP -> P
         VP -> V
         VP -> V NP
-        VP -> V that S
+        VP -> V T S
     You may want to limit the max_length <= 8, or it can be VERY slow.
     """
     def __init__(self,  D='D', A='A', N='N', P='P', V='V'):
@@ -41,7 +41,7 @@ class SimpleEnglish(FormalLanguage):
         self.grammar.add_rule('P', '*P', None, 1.0)
         self.grammar.add_rule('V', '*V', None, 1.0)
 
-        self.str_sets = [0, set()]
+        self.str_sets = {}
 
     def fn_str(self, fn):
         s = str(fn)
@@ -63,6 +63,7 @@ class SimpleEnglish(FormalLanguage):
                 e_len = len(e)
                 if e_len <= max_length:
                     flag = True
+                    self.str_sets[e] = i
                     yield e
             i += 1
 
@@ -73,6 +74,12 @@ class SimpleEnglish(FormalLanguage):
                 return True
         return False
 
+    # let's try this str_prob
+    def string_log_probability(self, s):
+        if s not in self.str_sets:
+            self.all_strings(max_length=len(s))
+        return - self.str_sets[s]
+
 
 # just for testing
 if __name__ == '__main__':
@@ -81,13 +88,13 @@ if __name__ == '__main__':
     # for e in language.all_strings(1):
     #     print e
 
-    for e in language.all_strings(max_length=8):
-        print e
+    # for e in language.all_strings(max_length=8):
+    #     print e
 
-    print language.sample_data_as_FuncData(128, max_length=5)
+    print language.sample_data_as_FuncData(300, max_length=5)
 
-    print language.is_valid_string('PV')
-    print language.is_valid_string('DAANV')
-    print language.is_valid_string('PVTPV')
-    print language.is_valid_string('PVDN')
-    print language.is_valid_string('DNVDDN')
+    # print language.is_valid_string('PV')
+    # print language.is_valid_string('DAANV')
+    # print language.is_valid_string('PVTPV')
+    # print language.is_valid_string('PVDN')
+    # print language.is_valid_string('DNVDDN')

@@ -8,7 +8,7 @@ class AnCstarBn(FormalLanguage):
         """
         don't use char like | and ) currently
         """
-        assert len(A) == 1 and len(B) == 1 and len(C) == 1, 'len of A, B and C should be 1'
+        assert len(A) == 1 and len(B) == 1 and len(C) == 1, 'atom length should be one'
 
         FormalLanguage.__init__(self)
 

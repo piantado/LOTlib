@@ -7,7 +7,7 @@ class Dyck(FormalLanguage):
     This one is very hard to learn, please run it with at least 1e5 MCMC steps
     """
     def __init__(self, A='a', B='b'):
-        assert len(A) == 1 and len(B) == 1, 'len(A) should be 1 and len(B) should be 1'
+        assert len(A) == 1 and len(B) == 1, 'atom length should be one'
 
         FormalLanguage.__init__(self)
 
