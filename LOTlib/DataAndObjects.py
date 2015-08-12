@@ -10,20 +10,18 @@ from copy import deepcopy
 
 from LOTlib.Miscellaneous import weighted_sample, qq
 
+# ------------------------------------------------------------------------------------------------------------
 
 class Data:
    def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
-
-
 
 # ------------------------------------------------------------------------------------------------------------
 
 class FunctionData:
     """
     This is a nicely wrapped kind of data--if we give it to a FunctionHypothesis, it knows to extract the
-    "input" (NOT the output) and run those on FunctionHypothesis.value(*input) so when you have functional
-    hypotheses, this is a convenient form of data
+    "input" and run those on FunctionHypothesis.value(*input)
 
     """
     def __init__(self, input, output, **kwargs):

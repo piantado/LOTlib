@@ -25,8 +25,6 @@ def isNotBVAddFunctionNode(x):
 
 class InsertDeleteProposer(LOTProposer):
     """
-            This class is a mixture of standard rejection proposals, and insert/delete proposals
-
             TODO: Allow variable insert-vs-delete probabilities (must be tracked in forward/back)
 
             NOTE: Without these moves, you will often generate a useful part of a function in, say, an AND, and
@@ -44,7 +42,6 @@ class InsertDeleteProposer(LOTProposer):
     def propose_tree(self, t):
 
         newt = copy(t)
-        fb = 0.0 # the forward/backward prob we return
 
         if random() < 0.5: # So we insert
 

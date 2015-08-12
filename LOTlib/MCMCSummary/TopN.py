@@ -2,7 +2,7 @@ import collections
 
 from LOTlib.Miscellaneous import logsumexp, qq
 from MCMCSummary import MCMCSummary
-from LOTlib.Utilities.FiniteBestSet import FiniteBestSet
+from LOTlib.FiniteBestSet import FiniteBestSet
 
 from SampleFilter import SampleFilter
 
