@@ -4,13 +4,15 @@ from LOTlib.Miscellaneous import logsumexp, qq
 from MCMCSummary import MCMCSummary
 from LOTlib.FiniteBestSet import FiniteBestSet
 
-from SampleFilter import SampleFilter
+from SampleStream import SampleStream
 
-class TopN(MCMCSummary, SampleFilter):
+class TopN(SampleStream):
     """
-    This "summary" uses a FiniteBestSet to store the top N
+    This  uses a FiniteBestSet to store the top N hypotheses found.
 
-    It replaces where we previously used a FiniteBestSet
+    NOTE: __iter__ here iterates over what this contains. This means that we can't use it in
+    a for h in TopN(MHSampler(...)) setup. But why would you want to?
+
     """
 
     def __init__(self, N=1000, key='posterior_score', thin=1):
