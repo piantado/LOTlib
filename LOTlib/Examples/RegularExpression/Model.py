@@ -67,23 +67,6 @@ class RegexHypothesis(BinaryLikelihood, LOTHypothesis):
         except EvaluationException:
             return None
 
-# def to_regex(fn):
-#     """Map a tree to a regular expression.
-#
-#     Custom mapping from a function node to a regular expression string (like, e.g. "(ab)*(c|d)" )
-#     """
-#     assert isFunctionNode(fn)
-#
-#     if fn.name == 'star_':         return '(%s)*'% to_regex(fn.args[0])
-#     elif fn.name == 'plus_':       return '(%s)+'% to_regex(fn.args[0])
-#     elif fn.name == 'question_':   return '(%s)?'% to_regex(fn.args[0])
-#     elif fn.name == 'or_':         return '(%s|%s)'% tuple(map(to_regex, fn.args))
-#     elif fn.name == 'str_append_': return '%s%s'% (fn.args[0], to_regex(fn.args[1]))
-#     elif fn.name == 'terminal_':   return '%s'%fn.args[0]
-#     elif fn.name == '':            return to_regex(fn.args[0])
-#     else:
-#         assert False, fn
-
 
 def make_hypothesis(**kwargs):
     """Define a new kind of LOTHypothesis, that gives regex strings.
@@ -98,12 +81,9 @@ def make_hypothesis(**kwargs):
 
 if __name__ == "__main__":
 
-    from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
+    from LOTlib.Inference.Samplers.StandardSample import standard_sample
     from LOTlib import break_ctrlc
     from LOTlib.Miscellaneous import qq
 
-    h0 = make_hypothesis()
-    data = make_data()
-
-    for h in break_ctrlc(MHSampler(h0, data, steps=10000)):
+    for h in break_ctrlc(standard_sample(make_hypothesis, make_data, steps=10000)):
         print h.posterior_score, h.prior, h.likelihood, qq(h)

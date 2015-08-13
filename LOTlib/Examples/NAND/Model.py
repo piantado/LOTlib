@@ -70,6 +70,6 @@ def make_hypothesis(**kwargs):
 
 if __name__ == "__main__":
 
-    from LOTlib.Examples.Demo import standard_sample
+    from LOTlib.Inference.Samplers.StandardSample import standard_sample
 
     standard_sample(make_hypothesis, make_data, save_top=False)

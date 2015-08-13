@@ -18,7 +18,7 @@ from LOTlib.Miscellaneous import q, display_option_summary, qq
 from LOTlib.FunctionNode import cleanFunctionNodeString
 from LOTlib.MPI.MPI_map import MPI_unorderedmap, is_master_process
 
-from Demo import standard_sample
+from LOTlib.Inference.Samplers.StandardSample import standard_sample
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # the main sampling function to run
