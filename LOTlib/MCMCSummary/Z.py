@@ -2,9 +2,9 @@
 from LOTlib.Miscellaneous import Infinity, logplusexp
 from math import isnan
 
-from SampleFilter import SampleFilter
+from SampleStream import SampleStream
 
-class Z(SampleFilter):
+class Z(SampleStream):
     """
     This will take a generator and store the logsumexp of all posterior_scores, perhaps counting only unique ones
 
@@ -15,12 +15,13 @@ class Z(SampleFilter):
     print z
     """
 
-    def __init__(self, key='posterior_score', unique=False):
-        self.Z = -Infinity
-        self.key = key
-        self.unique = unique
+    def __init__(self, generator=None, key='posterior_score'):
+        self.__dict__.update(locals())
 
-        self.set = set()
+        self.Z = -Infinity
+
+        SampleStream.__init__(self, generator)
+
 
     def add(self, x):
         if (not self.unique) or x not in self.set:
