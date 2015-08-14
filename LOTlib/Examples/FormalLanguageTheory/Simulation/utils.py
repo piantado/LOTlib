@@ -1,6 +1,6 @@
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib.MCMCSummary.TopN import TopN
-from LOTlib.Miscellaneous import Infinity
+from LOTlib.Miscellaneous import Infinity, logsumexp
 from optparse import OptionParser
 
 
@@ -18,7 +18,35 @@ def show_info(s):
     print '#'*90
 
 
-def probe_MHsampler(h, get_data, options, size=64, data=None, init_size=None, iters_per_stage=None, sampler=None, ret_sampler=False):
+def to_file(rec, name):
+    f = open(name, 'a')
+    for e in rec:
+        print >> f, e[0], e[1], e[2]
+    f.close()
+
+
+def estimate_precision_and_recall(h, data):
+        """
+        the precision and recall of h given a data set, it should be usually large
+        """
+        output = set(data[0].output.keys())
+        h_out = set([h() for _ in xrange(int(sum(data[0].output.values())))])
+
+        base = len(h_out)
+        cnt = 0.0
+        for v in h_out:
+            if v in output: cnt += 1
+        precision = cnt / base
+
+        base = len(output)
+        cnt = 0.0
+        for v in output:
+            if v in h_out: cnt += 1
+        recall = cnt / base
+
+        return precision, recall
+
+def probe_MHsampler(h, get_data, options, name, size=64, data=None, init_size=None, iters_per_stage=None, sampler=None, ret_sampler=False):
 
     evaluation_data = get_data(size, max_length=options.FINITE)
 
@@ -34,7 +62,6 @@ def probe_MHsampler(h, get_data, options, size=64, data=None, init_size=None, it
     best_hypotheses = TopN(N=options.TOP_COUNT)
 
     iter = 0
-    rec = []
 
     for h in sampler:
         if iter == options.STEPS: break
@@ -43,11 +70,16 @@ def probe_MHsampler(h, get_data, options, size=64, data=None, init_size=None, it
         best_hypotheses.add(h)
 
         if iter % options.PROBE == 0:
-            score_sum = 0
             for h in best_hypotheses:
-                s = h.compute_posterior(evaluation_data)
-                if s != -Infinity: score_sum += s
-            rec.append([iter, score_sum])
+                h.compute_posterior(evaluation_data)
+
+            pr_data = get_data(1024, max_length=options.FINITE)
+            score = 0
+            for h in best_hypotheses:
+                precision, recall = estimate_precision_and_recall(h, pr_data)
+                score += precision + recall
+
+            to_file([[iter, logsumexp([h.posterior_score for h in best_hypotheses]), score]], name)
 
         if init_size is not None and iter % iters_per_stage == 0:
             init_size += 2
@@ -56,6 +88,4 @@ def probe_MHsampler(h, get_data, options, size=64, data=None, init_size=None, it
         iter += 1
 
     if ret_sampler:
-        return rec, sampler
-    else:
-        return rec
+        return sampler

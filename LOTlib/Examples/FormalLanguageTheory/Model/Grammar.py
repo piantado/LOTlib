@@ -22,8 +22,15 @@ def get_Grammar(s):
 
     if s != 'SimpleEnglish':
         grammar.add_rule('ATOM', q('a'), None, .33)
-        grammar.add_rule('ATOM', q('b'), None, .33)
-        grammar.add_rule('ATOM', q('c'), None, .33)
+        if s != 'An':
+            grammar.add_rule('ATOM', q('b'), None, .33)
+            if s != 'AnBn' or s != 'AnB2n' or s != 'Dyck':
+                grammar.add_rule('ATOM', q('c'), None, .33)
+                if s!= 'LongDependency':
+                    grammar.add_rule('ATOM', q('d'), None, .33)
+                    grammar.add_rule('ATOM', q('e'), None, .33)
+                    grammar.add_rule('ATOM', q('f'), None, .33)
+                    grammar.add_rule('ATOM', q('g'), None, .33)
     else:
         grammar.add_rule('ATOM', q('D'), None, .156)
         grammar.add_rule('ATOM', q('A'), None, .186)

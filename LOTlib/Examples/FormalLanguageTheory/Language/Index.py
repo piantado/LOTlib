@@ -5,6 +5,7 @@ from LOTlib.Examples.FormalLanguageTheory.Language.AnCstarBn import AnCstarBn
 from LOTlib.Examples.FormalLanguageTheory.Language.AnBnCn import AnBnCn
 from LOTlib.Examples.FormalLanguageTheory.Language.Dyck import Dyck
 from LOTlib.Examples.FormalLanguageTheory.Language.SimpleEnglish import SimpleEnglish
+from LOTlib.Examples.FormalLanguageTheory.Language.LongDependency import LongDependency
 
 
 def instance(s):
@@ -16,7 +17,8 @@ def instance(s):
             'Dyck': Dyck(),
             'AnCstarBn': AnCstarBn(),
             'AnBnCn': AnBnCn(),
-            'SimpleEnglish': SimpleEnglish()
+            'SimpleEnglish': SimpleEnglish(),
+            'LongDependency': LongDependency()
         }[s]
     except:
         raise ValueError
