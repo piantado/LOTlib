@@ -146,9 +146,11 @@ class MHSampler(Sampler):
                         nl/self.likelihood_temperature)
                 cur = (self.current_sample.prior/self.prior_temperature +
                        self.current_sample.likelihood/self.likelihood_temperature)
-                
-                # print "# Current:", self.current_sample
-                # print "# Proposal:", self.proposal
+
+                if self.trace:
+                    print "# Current: ", self.current_sample
+                    print "# Proposal:", self.proposal
+                    print ""
                 
                 if MH_acceptance(cur, prop, fb, acceptance_temperature=self.acceptance_temperature):
                     self.current_sample = self.proposal
@@ -159,9 +161,6 @@ class MHSampler(Sampler):
 
                 self.internal_sample(self.current_sample)
                 self.proposal_count += 1
-
-            if self.trace:
-                print self.current_sample.posterior_score, self.current_sample.likelihood, self.current_sample.prior, qq(self.current_sample)
 
             self.samples_yielded += 1
             return self.current_sample
