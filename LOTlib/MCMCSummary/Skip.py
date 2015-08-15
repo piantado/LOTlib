@@ -1,23 +1,14 @@
 from SampleStream import SampleStream
 
 class Skip(SampleStream):
-    """
-    Thin our samples
-    """
+    def __init__(self, n=10):
+        SampleStream.__init__(self)
+        self.n = n
+        self.cnt = 0
 
-    def __init__(self, generator=None, skip=10):
-        self.__dict__.update(locals())
-
-        self.skip_idx = 0
-
-        SampleStream.__init__(self, generator=generator)
-
-    def update(self, generator):
-        for x in generator:
-            self.skip_idx += 1
-
-            if self.skip_idx % self.skip == 0:
-                yield x
-
-    def add(self, x):
-        pass # Do nothing!
+    def process_(self, x):
+        self.cnt += 1
+        if self.cnt % self.n == 0:
+            return x
+        else:
+            return None

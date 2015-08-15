@@ -20,6 +20,12 @@ class TopN(SampleStream):
         self.fbs = FiniteBestSet(N=N, key=key)
         self.count = 0
 
+        self.actions = []  # to keep it as a functioning SampleStream
+
+    def process_(self, x):
+        self.add(x)
+        return x
+
     def add(self, h):
 
         self.count += 1
