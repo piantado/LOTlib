@@ -1,6 +1,5 @@
 from SampleStream import SampleStream
 import matplotlib.pyplot as plt
-
 class PosteriorTrace(SampleStream):
     """
     A class for plotting/showing a posterior summary trace plot.
@@ -16,14 +15,16 @@ class PosteriorTrace(SampleStream):
 
         SampleStream.__init__(self, generator)
 
-    def add(self, h):
+    def process_(self, h):
         self.posteriors.append(  getattr(h, 'posterior_score') )
         self.priors.append(      getattr(h, 'prior') )
         self.likelihoods.append( getattr(h, 'likelihood') )
 
         n = len(self.posteriors)
-        if n>0 and n % self.plot_every == 0 :
+        if n>0 and self.plot_every is not None and n % self.plot_every == 0:
             self.plot()
+
+        return h
 
     def plot(self):
 
@@ -45,3 +46,7 @@ class PosteriorTrace(SampleStream):
         if self.window:
             plt.show(block=self.block) # Apparently block is experimental
 
+    def __exit__(self, t, value, traceback):
+        self.plot()
+
+        return SampleStream.__exit__(self, t, value, traceback)
