@@ -58,12 +58,13 @@ class LongDependency(FormalLanguage):
             if v == output: cnt += 1
         precision = cnt / base
 
-        return precision, 1.0
+        return precision, precision
 
     def ht(self, s):
         """
         get head and tail of s
         """
+        if s is None or len(s) < 2: return None
         return s[0] + s[-1]
 
     def t2s(self, t):

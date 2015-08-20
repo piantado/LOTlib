@@ -4,26 +4,31 @@ from LOTlib.Miscellaneous import flatten2str
 from LOTlib.Examples.FormalLanguageTheory.Model.Hypothesis import make_hypothesis
 from LOTlib.Examples.FormalLanguageTheory.Language.An import An
 import time
-from pickle import dump
+from mpi4py import MPI
 
 register_primitive(flatten2str)
 
 if __name__ == '__main__':
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+
     # ========================================================================================================
-    # Process command line arguments /
+    # Process command line arguments
     # ========================================================================================================
     (options, args) = parser.parse_args()
 
     suffix = time.strftime('_' + options.NAME + '_%m%d_%H%M%S', time.localtime())
-    # ========================================================================================================
-    # Process command line arguments /
-    # ========================================================================================================
+    prefix = '../out/simulations/transfer/'
 
+    # ========================================================================================================
+    # Running
+    # ========================================================================================================
     language = An()
 
     show_info('running normal input case..')
-    sampler = probe_MHsampler(make_hypothesis('An'), language.sample_data_as_FuncData, options, 'without_prior_out' + suffix, ret_sampler=True)
+    sampler = probe_MHsampler(make_hypothesis('An', terminals=['b']), language, options, prefix + 'without_prior_out_' + str(rank) + suffix, ret_sampler=True)
 
     show_info('running with input using different letter case..')
+    CASE += 1
     language = An(atom='b')
-    probe_MHsampler(make_hypothesis('An'), language.sample_data_as_FuncData, options, 'with_prior_out' + suffix, sampler=sampler)
+    probe_MHsampler(make_hypothesis('An', terminals=['b']), language, options, prefix + 'with_prior_out_' + str(rank) + suffix, sampler=sampler)

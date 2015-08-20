@@ -4,7 +4,7 @@ from LOTlib.Miscellaneous import flatten2str
 from LOTlib.Examples.FormalLanguageTheory.Model.Hypothesis import make_hypothesis
 from LOTlib.Examples.FormalLanguageTheory.Language.LongDependency import LongDependency
 import time
-from pickle import dump
+from mpi4py import MPI
 
 register_primitive(flatten2str)
 
@@ -13,24 +13,36 @@ In this case, we investigate the effect of different observed data distributions
 """
 
 if __name__ == '__main__':
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+
     # ========================================================================================================
-    # Process command line arguments /
+    # Process command line arguments
     # ========================================================================================================
     (options, args) = parser.parse_args()
 
     suffix = time.strftime('_' + options.NAME + '_%m%d_%H%M%S', time.localtime())
+    prefix = '../out/simulations/nonadjacent/'
 
     # ========================================================================================================
-    # Process command line arguments /
+    # Running
     # ========================================================================================================
+    # case 1
+    show_info('running predictable input case..')
+    language = LongDependency(C=['c'])
+    probe_MHsampler(make_hypothesis('LongDependency', terminals=['c', 'd', 'e', 'f']), language, options, prefix + 'c_long_' + str(rank) + suffix)
 
-    language = LongDependency()
+    show_info('running predictable input case..')
+    CASE += 1
+    language = LongDependency(C=['c', 'd', 'e', 'f'])
+    probe_MHsampler(make_hypothesis('LongDependency', terminals=['c', 'd', 'e', 'f']), language, options, prefix + 'cdef_' + str(rank) + suffix)
 
-    # show_info('running skewed input case..')
-    # rec = probe_MHsampler(make_hypothesis('AnBn'), language.sample_data_as_FuncData, options)
-    # dump(rec, open('staged_out' + suffix, 'a'))
-    #
-    #
-    # show_info('running normal input case..')
-    # rec1 = probe_MHsampler(make_hypothesis('AnBn'), language.sample_data_as_FuncData, options)
-    # dump(rec1, open('normal_out' + suffix, 'a'))
+    # --------------------------------------------------------------------------------------------------------
+    # case 2
+    show_info('running predictable input case..')
+    options.FINITE = 4
+    CASE += 1
+    language = LongDependency(C=['c', 'd', 'e', 'f'])
+    probe_MHsampler(make_hypothesis('LongDependency', terminals=['c', 'd', 'e', 'f']), language, options, prefix + 'c_short_' + str(rank) + suffix)
+
+

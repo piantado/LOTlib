@@ -38,7 +38,7 @@ if __name__ == "__main__":
     # ========================================================================================================
     fff = sys.stdout.flush
     parser = OptionParser()
-    parser.add_option("--language", dest="LANG", type="string", default=0, help="name of a language")
+    parser.add_option("--language", dest="LANG", type="string", default='An', help="name of a language")
     parser.add_option("--steps", dest="STEPS", type="int", default=10000, help="Number of samples to run")
     parser.add_option("--top", dest="TOP_COUNT", type="int", default=20, help="Top number of hypotheses to store")
     parser.add_option("--finite", dest="FINITE", type="int", default=10, help="specify the max_length to make language finite")
@@ -52,8 +52,8 @@ if __name__ == "__main__":
     if is_master_process():
         display_option_summary(options); fff()
 
-    # you need to run 20 machine on that
-    DATA_RANGE = np.arange(10, 400, 21)
+    # you need to run 5 machine on that
+    DATA_RANGE = np.arange(20, 50, 10)
 
     language = instance(options.LANG)
     args = list(itertools.product([make_hypothesis], [language], DATA_RANGE, [options.FINITE]))

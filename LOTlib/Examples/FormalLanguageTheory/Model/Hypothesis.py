@@ -56,9 +56,13 @@ class SimpleEnglishHypothesis(AnBnCnHypothesis):
 
 
 def make_hypothesis(s, **kwargs):
-    if s == 'AnBnCn':
-        return AnBnCnHypothesis(grammar=get_Grammar(s), **kwargs)
-    elif s == 'SimpleEnglish':
-        return SimpleEnglishHypothesis(grammar=get_Grammar(s), **kwargs)
+    if 'terminals' in kwargs:
+        t = kwargs.pop('terminals')
     else:
-        return FormalLanguageHypothesis(grammar=get_Grammar(s), **kwargs)
+        t = None
+    if s == 'AnBnCn':
+        return AnBnCnHypothesis(grammar=get_Grammar(s, terminals=t), **kwargs)
+    elif s == 'SimpleEnglish':
+        return SimpleEnglishHypothesis(grammar=get_Grammar(s, terminals=t), **kwargs)
+    else:
+        return FormalLanguageHypothesis(grammar=get_Grammar(s, terminals=t), **kwargs)
