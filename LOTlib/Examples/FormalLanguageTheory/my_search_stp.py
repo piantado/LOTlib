@@ -43,6 +43,7 @@ if __name__ == "__main__":
     parser.add_option("--top", dest="TOP_COUNT", type="int", default=20, help="Top number of hypotheses to store")
     parser.add_option("--finite", dest="FINITE", type="int", default=10, help="specify the max_length to make language finite")
     parser.add_option("--name", dest="NAME", type="string", default='', help="name of file")
+    parser.add_option("--N", dest="N", type="int", default=3, help="number of inner hypotheses")
     (options, args) = parser.parse_args()
 
     suffix = time.strftime('_' + options.NAME + '_%m%d_%H%M%S', time.localtime())

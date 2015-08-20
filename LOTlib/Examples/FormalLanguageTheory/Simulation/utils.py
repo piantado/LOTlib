@@ -3,6 +3,8 @@ from LOTlib.MCMCSummary.TopN import TopN
 from LOTlib.Miscellaneous import logsumexp
 from optparse import OptionParser
 import numpy as np
+from collections import Counter
+from LOTlib.DataAndObjects import FunctionData
 
 parser = OptionParser()
 parser.add_option("--steps", dest="STEPS", type="int", default=10000, help="Number of samples to run")
@@ -10,7 +12,8 @@ parser.add_option("--finite", dest="FINITE", type="int", default=20, help="speci
 parser.add_option("--probe", dest="PROBE", type="int", default=50, help="after how many steps do we check the socre")
 parser.add_option("--top", dest="TOP_COUNT", type="int", default=20, help="Top number of hypotheses to store")
 parser.add_option("--name", dest="NAME", type="string", default='', help="name of file")
-
+parser.add_option("--N", dest="N", type="int", default=3, help="number of inner hypotheses")
+parser.add_option("--language", dest="LANG", type="string", default='An', help="name of a language")
 CASE = 1
 
 
@@ -108,3 +111,11 @@ def probe(best_hypotheses, evaluation_data, pr_data, estimate_precision_and_reca
     score_sum *= 2
     rec.sort(key=lambda x: x[0], reverse=True)
     return Z, score_sum, best*2, s, rec
+
+
+def uniform_data(size, max_length=None):
+    cnt = Counter()
+    num = size * 2 / max_length
+    for i in xrange(1, max_length/2+1):
+        cnt['a'*i+'b'*i] = num
+    return [FunctionData(input=[], output=cnt)]

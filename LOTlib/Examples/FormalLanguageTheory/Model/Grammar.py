@@ -49,7 +49,7 @@ def get_Grammar(s, terminals=None):
     grammar.add_rule('LIST', 'cdr_', ['LIST'], 1.)
     grammar.add_rule('LIST', 'car_', ['LIST'], 1.)
     grammar.add_rule('LIST', '\'\'', None, 2)
-    grammar.add_rule('LIST', 'recurse_', [], 1.)
+    # grammar.add_rule('LIST', 'recurse_', [], 1.)
     grammar.add_rule('ATOM', q('a'), None, 2)
     grammar.add_rule('ATOM', q('b'), None, 2)
 
