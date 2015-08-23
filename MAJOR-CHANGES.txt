@@ -1,3 +1,5 @@
+	- Added stream processing functions to MCMCSummary. SampleStream now allows a convenient notation for processing streams of samples. 
+	- Moved standard_sample to Inference.Samplers.StandardSample
 July 31 2015
     - Changed formatting of examples, etc -- now just a single file for most examples.
     - Added format functionality so that a name can be of the form "f(%s)", where %s is the arguments. This allows for arbitrary syntax (not just function composition)

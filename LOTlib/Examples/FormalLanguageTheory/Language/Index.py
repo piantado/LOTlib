@@ -11,14 +11,14 @@ from LOTlib.Examples.FormalLanguageTheory.Language.LongDependency import LongDep
 def instance(s):
     try:
         return {
-            'An': An(),
-            'AnBn': AnBn(),
-            'AnB2n': AnB2n(),
-            'Dyck': Dyck(),
-            'AnCstarBn': AnCstarBn(),
-            'AnBnCn': AnBnCn(),
+            #'An': An(),
+            #'AnBn': AnBn(),
+            #'AnB2n': AnB2n(),
+            #'Dyck': Dyck(),
+            #'AnCstarBn': AnCstarBn(),
+            #'AnBnCn': AnBnCn(),
             'SimpleEnglish': SimpleEnglish(),
-            'LongDependency': LongDependency()
+            #'LongDependency': LongDependency()
         }[s]
     except:
         raise ValueError

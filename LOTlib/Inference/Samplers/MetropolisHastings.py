@@ -148,8 +148,8 @@ class MHSampler(Sampler):
                        self.current_sample.likelihood/self.likelihood_temperature)
 
                 if self.trace:
-                    print "# Current: ", self.current_sample
-                    print "# Proposal:", self.proposal
+                    print "# Current: ", round(cur,3), self.current_sample
+                    print "# Proposal:", round(prop,3), self.proposal
                     print ""
                 
                 if MH_acceptance(cur, prop, fb, acceptance_temperature=self.acceptance_temperature):

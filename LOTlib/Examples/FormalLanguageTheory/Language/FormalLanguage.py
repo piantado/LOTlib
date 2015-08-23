@@ -1,37 +1,42 @@
 import numpy as np
 from collections import Counter
 from LOTlib.DataAndObjects import FunctionData
-from LOTlib.Miscellaneous import logsumexp
+from LOTlib.Miscellaneous import logsumexp, Infinity, weighted_sample
 
 
 class FormalLanguage(object):
     """
-    Set up a class for formal languages, so we can compute things like accuracy, precision, etc.
+    Set up a super-class for formal languages, so we can compute things like accuracy, precision, etc.
     """
 
     def __init__(self):
-        pass
 
-    def all_strings(self, max_length=50):
+        # Populate our set
+        self.str_sets = []
+        for s in self.all_strings():
+            self.str_sets.append(s)
+
+    def all_strings(self, max_length=10):
         """ Return all strings up to length maxlength """
-        pass
+
+        raise NotImplementedError
 
     def string_log_probability(self, s):
         """ the log prob of generating s in this language"""
-        return -len(s)
+        if s in self.str_sets:
+            return -len(s)
+        else:
+            return -Infinity
 
     def is_valid_string(self, s):
         """ Returns True if s is a valid string in this language """
-        pass
+        return s in self.str_sets
 
     def sample_data(self, n, max_length):
         """
         Return a dictionary of {string:count}  that is a sample from this language
         """
-        all_strings = list(self.all_strings(max_length=max_length))
-        probs = map(self.string_log_probability, all_strings)
-
-        return self.weighted_sample(n, all_strings, probs)
+        return weighted_sample(self.str_sets, N=n, probs=self.string_log_probability, log=True)
 
     def sample_data_as_FuncData(self, n, max_length=50, avg=True):
         """
@@ -46,29 +51,6 @@ class FormalLanguage(object):
             return [FunctionData(input=[], output=cnt)]
 
         return [FunctionData(input=[], output=Counter(self.sample_data(n, max_length=max_length)))]
-
-    def weighted_sample(self, n, strings, probs):
-        length = len(probs)
-        prob_sum = logsumexp(probs)
-        cumu_prob = np.zeros(length, dtype=np.float64)
-
-        mass = 0
-        for i in xrange(length):
-            mass += np.exp(probs[i] - prob_sum)
-            cumu_prob[i] = mass
-
-        output = []
-
-        for _ in xrange(n):
-
-            rand = np.random.rand()
-
-            for i in xrange(length):
-                if rand < cumu_prob[i]:
-                    output.append(strings[i])
-                    break
-
-        return output
 
     def estimate_precision_and_recall(self, h, data):
         """

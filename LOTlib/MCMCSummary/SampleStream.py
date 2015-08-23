@@ -73,7 +73,7 @@ if __name__ == "__main__":
     from LOTlib import break_ctrlc
     from LOTlib.Examples.Number.Model import make_hypothesis, make_data
     from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
-    from __init__ import *
+    from LOTlib.MCMCSummary import *
 
     sampler = break_ctrlc(MHSampler(make_hypothesis(), make_data()))
 

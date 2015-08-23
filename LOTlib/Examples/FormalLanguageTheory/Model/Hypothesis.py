@@ -6,8 +6,6 @@ from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis
 from LOTlib.Evaluation.EvaluationException import RecursionDepthException
 from LOTlib.Hypotheses.FactorizedDataHypothesis import FactorizedDataHypothesis
 from LOTlib.Hypotheses.FactorizedDataHypothesis import InnerHypothesis
-from Grammar import get_Grammar
-
 
 class FormalLanguageHypothesis(StochasticFunctionLikelihood, RecursiveLOTHypothesis):
     def __init__(self, grammar=None, **kwargs):
@@ -54,7 +52,9 @@ class SimpleEnglishHypothesis(AnBnCnHypothesis):
     def __init__(self, **kwargs):
         AnBnCnHypothesis.__init__(self, N=6, **kwargs)
 
-
+from Model.Grammar import ab_grammar, eng_grammar # passed in as kwargs
 def make_hypothesis(s, **kwargs):
-    t = kwargs.pop('terminals') if 'terminals' in kwargs else None
-    return AnBnCnHypothesis(grammar=get_Grammar(s, terminals=t), **kwargs)
+    if s == 'SimpleEnglish':
+        return AnBnCnHypothesis(grammar=eng_grammar, **kwargs)
+    else:
+        return AnBnCnHypothesis(grammar=ab_grammar, **kwargs)
