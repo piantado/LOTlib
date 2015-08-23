@@ -4,30 +4,31 @@ from LOTlib.Miscellaneous import flatten2str
 from LOTlib.Examples.FormalLanguageTheory.Model.Hypothesis import make_hypothesis
 from LOTlib.Examples.FormalLanguageTheory.Language.An import An
 import time
-from pickle import dump
+from mpi4py import MPI
 
 register_primitive(flatten2str)
 
 if __name__ == '__main__':
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+
     # ========================================================================================================
-    # Process command line arguments /
+    # Process command line arguments
     # ========================================================================================================
     (options, args) = parser.parse_args()
 
     suffix = time.strftime('_' + options.NAME + '_%m%d_%H%M%S', time.localtime())
+    prefix = '../out/simulations/transfer/'
 
     # ========================================================================================================
-    # Process command line arguments /
+    # Running
     # ========================================================================================================
-
     language = An()
 
     show_info('running normal input case..')
-    rec, sampler = probe_MHsampler(make_hypothesis('An'), language.sample_data_as_FuncData, options, ret_sampler=True)
-    dump(rec, open('staged_out' + suffix, 'a'))
-
+    sampler = probe_MHsampler(make_hypothesis('An', terminals=['b']), language, options, prefix + 'without_prior_out_' + str(rank) + suffix, ret_sampler=True)
 
     show_info('running with input using different letter case..')
+    CASE += 1
     language = An(atom='b')
-    rec1 = probe_MHsampler(make_hypothesis('An'), language.sample_data_as_FuncData, options, sampler=sampler)
-    dump(rec1, open('normal_out' + suffix, 'a'))
+    probe_MHsampler(make_hypothesis('An', terminals=['b']), language, options, prefix + 'with_prior_out_' + str(rank) + suffix, sampler=sampler)

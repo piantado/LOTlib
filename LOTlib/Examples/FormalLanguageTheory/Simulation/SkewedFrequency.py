@@ -4,7 +4,7 @@ from LOTlib.Miscellaneous import flatten2str
 from LOTlib.Examples.FormalLanguageTheory.Model.Hypothesis import make_hypothesis
 from LOTlib.Examples.FormalLanguageTheory.Language.AnBn import AnBn
 import time
-from pickle import dump
+from mpi4py import MPI
 
 from LOTlib.DataAndObjects import FunctionData
 from collections import Counter
@@ -16,30 +16,30 @@ In this case, we investigate the effect of different observed data distributions
 """
 
 if __name__ == '__main__':
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+
     # ========================================================================================================
-    # Process command line arguments /
+    # Process command line arguments
     # ========================================================================================================
     (options, args) = parser.parse_args()
 
     suffix = time.strftime('_' + options.NAME + '_%m%d_%H%M%S', time.localtime())
+    prefix = '../out/simulations/skewed/'
 
     # ========================================================================================================
-    # Process command line arguments /
+    # Running
     # ========================================================================================================
-
     language = AnBn()
 
     show_info('running skewed input case..')
-    rec = probe_MHsampler(make_hypothesis('AnBn'), language.sample_data_as_FuncData, options)
-    dump(rec, open('staged_out' + suffix, 'a'))
-
+    rec = probe_MHsampler(make_hypothesis('AnBn'), language, options, prefix + 'skewed_out_' + str(rank) + suffix)
 
     show_info('running normal input case..')
-
+    CASE += 1
     cnt = Counter()
     num = 64.0 * 2 / options.FINITE
     for i in xrange(1, options.FINITE/2+1):
         cnt['a'*i+'b'*i] = num
 
-    rec1 = probe_MHsampler(make_hypothesis('AnBn'), language.sample_data_as_FuncData, options, data=[FunctionData(input=[], output=cnt)])
-    dump(rec1, open('normal_out' + suffix, 'a'))
+    rec1 = probe_MHsampler(make_hypothesis('AnBn'), language, options, prefix + 'normal_out' + str(rank) + suffix, data=[FunctionData(input=[], output=cnt)])

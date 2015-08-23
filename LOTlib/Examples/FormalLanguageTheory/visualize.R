@@ -20,9 +20,10 @@ plt
 ## Now let's make a plot of hypotheses vs amount of data
 ###################################################################
 
+d$posterior.score <- d$posterior.score / d$data.size
 # first toss hypotheses with very low probability so there are not too many
 
-keepers <- unique(subset(d, posterior.probability > 0.95)$h) # keep any hypothesis that gets above 1% posterior prob
+keepers <- unique(subset(d, posterior.probability > 0.05)$h) # keep any hypothesis that gets above 1% posterior prob
 d2 <- subset(d, is.element(h, keepers))
 
 d2$h <- as.factor(as.character(d2$h)) # we have to re-set this factor so it doesn't remember all the hyps we removed
@@ -31,8 +32,7 @@ d2$h <- as.factor(as.character(d2$h)) # we have to re-set this factor so it does
 plt <- ggplot(d2, aes(x=data.size, y=posterior.probability, color=h)) +  geom_line()
 
 
-
-d <- read.table("G://programs and files//Python//Lib//site-packages//LOTlib//LOTlib//Examples//FormalLanguageTheory//out//anbncn//ooo")
+d <- read.table("G://programs and files//Python//Lib//site-packages//LOTlib//LOTlib//Examples//FormalLanguageTheory//out__0819_183013")
 names(d) <- c("data.size", "posterior.probability", "posterior.score", "prior", "likelihood", "number.of.generated.strings", "h", "precision", "recall")
 
 # d$precision <- (d$precision > 0.7) & (d$recall > 0.1)
@@ -49,3 +49,8 @@ plt <- ggplot(s, aes(x=data.size, y=score, color=precision, group=precision)) + 
 
 plt
 
+
+d <- read.table("G://programs and files//Python//Lib//site-packages//LOTlib//LOTlib//Examples//FormalLanguageTheory//out//SimpleEnglish//out_5_20w_t")
+names(d) <- c("n", "steps", "posterior.score", "precision_recall")
+
+plt <- ggplot(d, aes(x=steps, y=precision_recall, group=n, color=n)) +  geom_line()
