@@ -7,11 +7,10 @@ import time
 import numpy as np
 import LOTlib
 from LOTlib.Miscellaneous import display_option_summary
-from LOTlib.MPI.MPI_map import is_master_process
-from LOTlib.Examples.Demo import standard_sample
+from LOTlib.MPI.MPI_map import is_master_process, MPI_map
+from LOTlib.Inference.Samplers.StandardSample import standard_sample
 from LOTlib.Evaluation.Eval import register_primitive
 from LOTlib.Miscellaneous import flatten2str, logsumexp, qq
-from LOTlib.MPI.MPI_map import MPI_map
 from Model.Hypothesis import make_hypothesis
 from Language.Index import instance
 
@@ -45,6 +44,7 @@ if __name__ == "__main__":
     parser.add_option("--name", dest="NAME", type="string", default='', help="name of file")
     parser.add_option("--N", dest="N", type="int", default=3, help="number of inner hypotheses")
     (options, args) = parser.parse_args()
+
 
     suffix = time.strftime('_' + options.NAME + '_%m%d_%H%M%S', time.localtime())
 

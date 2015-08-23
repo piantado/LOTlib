@@ -1,5 +1,5 @@
 from SampleStream import SampleStream
-import matplotlib.pyplot as plt
+
 class PosteriorTrace(SampleStream):
     """
     A class for plotting/showing a posterior summary trace plot.
@@ -27,7 +27,7 @@ class PosteriorTrace(SampleStream):
         return h
 
     def plot(self):
-
+        import matplotlib.pyplot as plt
         plt.clf()
         plt.figure(2,figsize=(10,4))
         plt.subplot(1,2,1)
