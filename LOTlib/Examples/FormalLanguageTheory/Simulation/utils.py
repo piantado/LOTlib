@@ -5,6 +5,8 @@ from optparse import OptionParser
 import numpy as np
 from collections import Counter
 from LOTlib.DataAndObjects import FunctionData
+import LOTlib
+from LOTlib.Examples.Demo import standard_sample
 
 parser = OptionParser()
 parser.add_option("--steps", dest="STEPS", type="int", default=10000, help="Number of samples to run")
@@ -119,3 +121,17 @@ def uniform_data(size, max_length=None):
     for i in xrange(1, max_length/2+1):
         cnt['a'*i+'b'*i] = num
     return [FunctionData(input=[], output=cnt)]
+
+
+def run(mk_hypothesis, get_data, size, finite, options):
+    """
+    This out on the DATA_RANGE amounts of data and returns all hypotheses in top count
+    """
+    if LOTlib.SIG_INTERRUPTED:
+        return set()
+
+    return standard_sample(lambda: mk_hypothesis(options.LANG, N=options.N),
+                           lambda: get_data(size, max_length=finite),
+                           N=options.TOP_COUNT,
+                           steps=options.STEPS,
+                           show=False, save_top=None)

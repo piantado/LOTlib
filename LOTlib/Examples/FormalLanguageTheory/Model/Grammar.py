@@ -46,11 +46,15 @@ def get_Grammar(s, terminals=None):
     grammar.add_rule('BOOL', 'empty_', ['LIST'], 1.)
     grammar.add_rule('BOOL', 'flip_', [''], 1.)
     grammar.add_rule('LIST', 'cons_', ['ATOM', 'LIST'], 1.)
+    grammar.add_rule('LIST', 'cons_', ['LIST', 'LIST'], 1.)
     grammar.add_rule('LIST', 'cdr_', ['LIST'], 1.)
     grammar.add_rule('LIST', 'car_', ['LIST'], 1.)
     grammar.add_rule('LIST', '\'\'', None, 2)
-    # grammar.add_rule('LIST', 'recurse_', [], 1.)
     grammar.add_rule('ATOM', q('a'), None, 2)
     grammar.add_rule('ATOM', q('b'), None, 2)
+    # grammar.add_rule('ATOM', q('c'), None, 2)
+    # grammar.add_rule('ATOM', q('d'), None, 2)
+    # grammar.add_rule('ATOM', q('e'), None, 2)
+    # grammar.add_rule('ATOM', q('f'), None, 2)
 
     return grammar
