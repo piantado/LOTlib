@@ -1,0 +1,60 @@
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Data
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+from LOTlib.DataAndObjects import FunctionData, Obj
+
+def make_data(alpha=0.999):
+    return [FunctionData(input=[Obj(shape='square', color='red')], output=True, alpha=alpha),
+            FunctionData(input=[Obj(shape='square', color='blue')], output=False, alpha=alpha),
+            FunctionData(input=[Obj(shape='triangle', color='blue')], output=False, alpha=alpha),
+            FunctionData(input=[Obj(shape='triangle', color='red')], output=False, alpha=alpha)]
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Grammar
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+from LOTlib.DefaultGrammars import DNF
+from LOTlib.Miscellaneous import q
+
+# DNF defaultly includes the logical connectives so we need to add predicates to it.
+grammar = DNF
+
+# Two predicates for checking x's color and shape
+# Note: per style, functions in the LOT end in _
+grammar.add_rule('PREDICATE', 'is_color_', ['x', 'COLOR'], 1.0)
+grammar.add_rule('PREDICATE', 'is_shape_', ['x', 'SHAPE'], 1.0)
+
+# Some colors/shapes each (for this simple demo)
+# These are written in quotes so they can be evaled
+grammar.add_rule('COLOR', q('red'), None, 1.0)
+grammar.add_rule('COLOR', q('blue'), None, 1.0)
+grammar.add_rule('COLOR', q('green'), None, 1.0)
+grammar.add_rule('COLOR', q('mauve'), None, 1.0)
+
+grammar.add_rule('SHAPE', q('square'), None, 1.0)
+grammar.add_rule('SHAPE', q('circle'), None, 1.0)
+grammar.add_rule('SHAPE', q('triangle'), None, 1.0)
+grammar.add_rule('SHAPE', q('diamond'), None, 1.0)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Hypothesis
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+from LOTlib.Hypotheses.RationalRulesLOTHypothesis import RationalRulesLOTHypothesis
+
+def make_hypothesis(grammar=grammar, **kwargs):
+    return RationalRulesLOTHypothesis(grammar=grammar, rrAlpha=1.0, **kwargs)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Main
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+if __name__ == "__main__":
+
+    from LOTlib.Inference.Samplers.StandardSample import standard_sample
+
+    standard_sample(make_hypothesis, make_data, save_top=False)
+
