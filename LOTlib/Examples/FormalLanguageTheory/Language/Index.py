@@ -8,17 +8,17 @@ from LOTlib.Examples.FormalLanguageTheory.Language.SimpleEnglish import SimpleEn
 from LOTlib.Examples.FormalLanguageTheory.Language.LongDependency import LongDependency
 
 
-def instance(s):
+def instance(s, max_length):
     try:
-        return {
-            #'An': An(),
-            #'AnBn': AnBn(),
-            #'AnB2n': AnB2n(),
-            #'Dyck': Dyck(),
-            #'AnCstarBn': AnCstarBn(),
-            #'AnBnCn': AnBnCn(),
-            'SimpleEnglish': SimpleEnglish(),
-            #'LongDependency': LongDependency()
-        }[s]
+        return ({
+            'An': An,
+            'AnBn': AnBn,
+            'AnB2n': AnB2n,
+            'Dyck': Dyck,
+            'AnCstarBn': AnCstarBn,
+            'AnBnCn': AnBnCn,
+            'SimpleEnglish': SimpleEnglish,
+            'LongDependency': LongDependency
+        }[s])(max_length=max_length)
     except:
         raise ValueError

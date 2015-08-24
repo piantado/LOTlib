@@ -6,15 +6,15 @@ class Dyck(FormalLanguage):
     """
     This one is very hard to learn, please run it with at least 1e5 MCMC steps
     """
-    def __init__(self, A='a', B='b'):
+    def __init__(self, A='a', B='b', max_length=6):
         assert len(A) == 1 and len(B) == 1, 'atom length should be one'
-
-        FormalLanguage.__init__(self)
 
         self.A = A
         self.B = B
 
-    def all_strings(self, max_length=50):
+        FormalLanguage.__init__(self, max_length)
+
+    def all_strings(self, max_length):
         """
         we iterate over the space using dynamic programming, complexity is O(n^2*L^3), maybe some improvement?
         """
@@ -42,25 +42,6 @@ class Dyck(FormalLanguage):
         assert 0 <= p <= s_len
 
         return s[:p] + c + s[p:]
-
-    def is_valid_string(self, s):
-        sym_stack = []
-
-        for e in s:
-            if e == self.A:
-                sym_stack.append(e)
-            elif e == self.B:
-                if len(sym_stack) > 0:
-                    sym_stack.pop(-1)
-                else:
-                    return False
-            else:
-                return False
-
-        if len(sym_stack) > 0:
-            return False
-
-        return True
 
     def string_log_probability(self, s):
         return -len(s)/2

@@ -22,15 +22,15 @@ if __name__ == '__main__':
     # ========================================================================================================
     parser.add_option("--mode", dest="MODE", type="int", default=0, help="long or short")
     (options, args) = parser.parse_args()
-    options.FINITE = 5
+
     suffix = time.strftime('_' + options.NAME + '_%m%d_%H%M%S', time.localtime())
     prefix = '../out/simulations/nonadjacent/'
+    # prefix = '/home/lijm/WORK/yuan/lot/'
 
     # ========================================================================================================
     # Running
     # ========================================================================================================
-    language = LongDependency(C=['c', 'd', 'e', 'f'] if options.MODE else ['c', 'd'])
-    work_list = [make_hypothesis, language.sample_data_as_FuncData, 144, options.FINITE, options]
+    work_list = [make_hypothesis, 144, np.arange(2, 65, 5)[rank], options, None, ['c', 'd', 'e', 'f']]
 
     topn = run(*work_list)
-    dump(topn, open(prefix + ('long' if options.MODE else 'short') + sq(rank) + suffix, 'w'))
+    dump(topn, open(prefix + sq(rank) + suffix, 'w'))

@@ -53,10 +53,10 @@ if __name__ == '__main__':
     # ========================================================================================================
     # Running
     # ========================================================================================================
-    language = AnBn()
+    language = AnBn(max_length=options.FINITE)
 
-    work_list = slice_list([[make_hypothesis, uniform_data if options.UNI else language.sample_data_as_FuncData,
-                             12*(i+1), options.FINITE if options.MODE else 4*(1+i/4), options] for i in xrange(12)], size)
+    work_list = slice_list([[make_hypothesis, 12*(i+1), options.FINITE if options.MODE else 4*(1+i/4), options,
+                             uniform_data if options.UNI else None] for i in xrange(12)], size)
     for e in work_list[rank]:
         topn = run(*e)
         dump(topn, open(prefix + ('normal' + str(options.UNI) if options.MODE else 'staged') + sq(e[2]) + sq(e[3]) + suffix,'w'))
