@@ -9,6 +9,7 @@ from LOTlib.Hypotheses.FactorizedDataHypothesis import InnerHypothesis
 from LOTlib.Examples.FormalLanguageTheory.Model.Grammar import ab_grammar, eng_grammar # passed in as kwargs
 from LOTlib.Miscellaneous import q
 
+
 class FormalLanguageHypothesis(StochasticFunctionLikelihood, RecursiveLOTHypothesis):
     def __init__(self, grammar=None, **kwargs):
         RecursiveLOTHypothesis.__init__(self, grammar, args=[], recurse_bound=20, maxnodes=100, **kwargs)
@@ -27,7 +28,7 @@ class AnBnCnHypothesis(StochasticFunctionLikelihood, FactorizedDataHypothesis):
     """
 
     def __init__(self, **kwargs):
-        FactorizedDataHypothesis.__init__(self, recurse_bound=25, maxnodes=125, **kwargs)
+        FactorizedDataHypothesis.__init__(self, recurse_bound=5, maxnodes=125, **kwargs)
 
     def make_hypothesis(self, **kwargs):
         return InnerHypothesis(**kwargs)
@@ -61,7 +62,22 @@ def make_hypothesis(s, **kwargs):
 
     if 'terminals' in kwargs:
         terminals = kwargs.pop('terminals')
-        for e in terminals:
-            grammar.add_rule('ATOM', q(e), None, 2)
+        if terminals is not None:
+            for e in terminals:
+                grammar.add_rule('ATOM', q(e), None, 2)
 
     return AnBnCnHypothesis(grammar=grammar, **kwargs)
+
+# from LOTlib.Evaluation.Eval import register_primitive
+# from LOTlib.Miscellaneous import flatten2str
+# register_primitive(flatten2str)
+# import sys
+# sys.setrecursionlimit(1000)
+# h = make_hypothesis('SimpleEnglish', N=4)
+# for i in xrange(10):
+#     print q(h())
+
+# a = lambda: 'a'
+# b = lambda:
+# arg = [[]]
+

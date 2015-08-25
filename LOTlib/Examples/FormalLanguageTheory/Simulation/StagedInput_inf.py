@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     suffix = time.strftime('_' + str(rank) + '_' + options.NAME + '_%m%d_%H%M%S', time.localtime())
     prefix = '../out/simulations/staged/'
-
+    # prefix = '/home/lijm/WORK/yuan/lot/staged/'
     # ========================================================================================================
     # Running
     # ========================================================================================================
@@ -59,4 +59,4 @@ if __name__ == '__main__':
                              uniform_data if options.UNI else None] for i in xrange(12)], size)
     for e in work_list[rank]:
         topn = run(*e)
-        dump(topn, open(prefix + ('normal' + str(options.UNI) if options.MODE else 'staged') + sq(e[2]) + sq(e[3]) + suffix,'w'))
+        dump(topn, open(prefix + ('normal' + str(options.UNI) if options.MODE else 'staged') + sq(e[1]) + sq(e[2]) + suffix,'w'))

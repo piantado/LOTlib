@@ -132,7 +132,7 @@ def run(mk_hypothesis, size, finite, options, get_data=None, terminals=None):
         return set()
 
     return standard_sample(lambda: mk_hypothesis(options.LANG, N=options.N, terminals=terminals),
-                           lambda: instance(options.LANG, finite).sample_data_as_FuncData(size) if get_data is None else get_data(size),
+                           lambda: instance(options.LANG, finite).sample_data_as_FuncData(size) if get_data is None else get_data(size, max_length=options.FINITE),
                            N=options.TOP_COUNT,
                            steps=options.STEPS,
                            show=False, save_top=None)

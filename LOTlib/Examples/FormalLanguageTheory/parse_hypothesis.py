@@ -11,13 +11,27 @@ from os import listdir
 from LOTlib.Examples.FormalLanguageTheory.Language.AnBn import AnBn
 from LOTlib.Examples.FormalLanguageTheory.Language.LongDependency import LongDependency
 import time
+from LOTlib.DataAndObjects import FunctionData
 from LOTlib.Miscellaneous import logsumexp
 from LOTlib.Miscellaneous import Infinity
+from math import log
 import sys
+from mpi4py import MPI
+
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+size = comm.Get_size()
+
 suffix = time.strftime('_%m%d_%H%M%S', time.localtime())
 fff = sys.stdout.flush
 
+
 def load_hypo(_dir, keys):
+    """
+    1. read raw output file
+
+    run: serial
+    """
     rec = []
 
     for name in listdir(_dir):
@@ -26,257 +40,196 @@ def load_hypo(_dir, keys):
                 if e not in name: raise Exception
         except: continue
 
-        print name
+        print name; fff()
         rec.append([int(name.split('_')[1]), load(open(_dir+name))])
 
     return rec
 
+# ===========================================================================
+# staged & skewed
+# ===========================================================================
+def pos_seq(rec, infos):
+    """
+    1. evaluate posterior probability on different data sizes
 
-def get_wfs_seq(rec, eval_data):
-    _set = set()
+    run: serial
+    """
+    seq = []
+    seen = set()
+
     for e in rec:
         for h in e[1]:
-            if h in _set: continue
-            h.compute_posterior(eval_data)
-            _set.add(h)
-
-    return _set
-
-    # Z = logsumexp([h.posterior_score for h in _set])
-    # ab_post = logsumexp([h.posterior_score for h in _set if pr_dict[h] > 0.8])
-    # return np.exp(ab_post - Z)
-
-    # space = set()
-    # seq = []
-    # infos = [[12*(i+1), 4*(1+i/4)] for i in xrange(12)]
-    #
-    # for e in rec:
-    #     space.update(e[1])
-    #
-    # for i in xrange(12):
-    #     seq.append(probe(space, pr_dict, infos[i])[1])
-    #
-    # return seq
-
-
-def probe(best_hypotheses, pr_dict, data_info):
-    eval_data = language.sample_data_as_FuncData(data_info[0])
-    for h in best_hypotheses:
-        h.compute_posterior(eval_data)
-
-    Z = logsumexp([h.posterior_score for h in best_hypotheses])
-
-    score_sum = 0
-    best = 0
-    s = None
-    rec = []
-
-    for h in best_hypotheses:
-        precision, recall = pr_dict[h]
-        base = precision + recall
-
-        if base != 0:
-            p = np.exp(h.posterior_score - Z)
-            weighted_score = p * (precision * recall / base)
-            if weighted_score > best:
-                best = weighted_score
-                s = str(h)
-            score_sum += weighted_score
-
-            if p > 1e-2:
-                rec.append([p, 2 * precision * recall / base])
-
-    score_sum *= 2
-    rec.sort(key=lambda x: x[0], reverse=True)
-    return Z, score_sum, best*2, s, rec
-
-
-def get_axb_prob(rec, B, C):
-    language = LongDependency(B=B, C=C)
-    eval_data = language.sample_data_as_FuncData(144)
-    pr_data = language.sample_data_as_FuncData(1024)
-
-    precisions = {}
-    seen = set()
-    for _set in rec:
-        for h in _set[1]:
             if h in seen: continue
-            h.compute_posterior(eval_data)
-            # precisions[h] = language.estimate_precision_and_recall(h, pr_data)[0]
             seen.add(h)
 
-    Z = logsumexp([h.posterior_score for h in seen])
-
-    _set = []
-    for h in seen:
-        _set.append([str(h), np.exp(h.posterior_score - Z), Counter([h() for _ in xrange(256)])])
-    _set.sort(key=lambda x: x[1], reverse=True)
-
-    for i in xrange(5):
-        print _set[i][0]
-        print _set[i][1]
-        print _set[i][2]
-    print '*'*20
-    # axb_prob = -Infinity
-    # for h in seen:
-    #     if precisions[h] > 0.6: axb_prob = logsumexp([axb_prob, h.posterior_score])
-    #
-    # print np.exp(axb_prob - Z)
-
-
-def pos_seq(rec, infos):
-    seq = []
-    pr_dict = {}
-    language = AnBn(max_length=12)
-    for e in rec:
-        for h in e[1]:
-            precision, recall = language.estimate_precision_and_recall(h, pr_data)
-            pr_dict[h] = precision * recall / (precision + recall) if precision + recall != 0 else 0
-
     for e in infos:
-        print e; fff()
+        prob_dict = {}
         language = AnBn(max_length=e[1])
-        seq.append([get_wfs_seq(rec, language.sample_data_as_FuncData(e[0])), pr_dict])
+        eval_data = language.sample_data_as_FuncData(e[0])
+
+        for h in seen: prob_dict[h] = h.compute_posterior(eval_data)
+
+        seq.append(prob_dict)
+        print e, 'done'; fff()
+
+    print '='*50
     return seq
 
 
-def sep(seq, bound=0.5):
-    out = []
-    for e in seq:
-        Z = logsumexp([h.posterior_score for h in e[0][0]])
-        ab_post = logsumexp([h.posterior_score for h in e[0][0] if e[0][1][h] > bound])
-        out.append(np.exp(ab_post - Z))
-    print 'done'; fff()
-    return out
+def get_kl_seq():
+    """
+    1. read posterior sequences
+    2. compute KL-divergence between adjacent distribution
+    3. plot
 
-infos = [[i, 4*((i-1)/48+1)] for i in xrange(12, 145, 3)]
-rec = load_hypo('out/simulations/staged/', ['staged'])
-rec1 = load_hypo('out/simulations/staged/', ['normal0'])
-rec2 = load_hypo('out/simulations/staged/', ['normal1'])
-pr_data = AnBn(max_length=12).sample_data_as_FuncData(512)
+    run: serial
+    """
+    seq_set = load(open('seq0_0825_164647')) + load(open('seq1_0825_164647')) + load(open('seq2_0825_164647'))
+    kl_seq_set = []
 
-seq = pos_seq(rec, infos)
-seq1 = pos_seq(rec1, infos)
-seq2 = pos_seq(rec2, infos)
-dump([seq, seq1, seq2], open('seq'+suffix, 'w'))
+    for seq in seq_set:
+        kl_seq = []
 
+        # add posterior set that without observing any data
+        from copy import deepcopy
+        dict_0 = deepcopy(seq[0])
+        for h in dict_0:
+            dict_0[h] = h.compute_posterior([FunctionData(input=[], output=Counter())])
+        seq.insert(0, dict_0)
 
-# seq_set = load(open('seq_0824_112019'))
-#
-# f, axarr = plt.subplots(3, 3)
-# axarr[0, 0].plot(range(1, 13), sep(seq_set[0], 0.35))
-# axarr[0, 1].plot(range(1, 13), sep(seq_set[0], 0.36))
-# axarr[0, 2].plot(range(1, 13), sep(seq_set[0], 0.37))
-#
-# axarr[1, 0].plot(range(1, 13), sep(seq_set[0], 0.38))
-# axarr[1, 1].plot(range(1, 13), sep(seq_set[0], 0.39))
-# axarr[1, 2].plot(range(1, 13), sep(seq_set[0], 0.40))
-#
-# axarr[2, 0].plot(range(1, 13), sep(seq_set[0], 0.46))
-# axarr[2, 1].plot(range(1, 13), sep(seq_set[0], 0.47))
-# axarr[2, 2].plot(range(1, 13), sep(seq_set[0], 0.48))
+        # compute kl
+        for i in xrange(len(seq)-1):
+            current_dict = seq[i]
+            next_dict = seq[i+1]
+            current_Z = logsumexp([v for h, v in current_dict.iteritems()])
+            next_Z = logsumexp([v for h, v in next_dict.iteritems()])
 
-# staged, = plt.plot(range(1, 13), sep(seq_set[0]), label='staged')
-# normal, = plt.plot(range(1, 13), sep(seq_set[0]), label='normal')
-# uniform, = plt.plot(range(1, 13), sep(seq_set[0]), label='uniform')
+            kl = 0.0
+            for h, v in current_dict.iteritems():
+                p = np.exp(v - current_Z)
+                if p == 0: continue
+                kl += p * (v - next_dict[h] + next_Z - current_Z)
 
-# seq = get_wfs_seq(rec, eval_data, pr_data, language.estimate_precision_and_recall)
-# staged, = plt.plot(range(1, 13), seq, label='staged')
-#
-# rec = load_hypo('out/simulations/staged/inf/', ['normal'])
-# seq1 = get_wfs_seq(rec, eval_data, pr_data, language.estimate_precision_and_recall)
-# normal, = plt.plot(range(1, 13), seq1, label='normal')
+            kl_seq.append(log(kl))
+            print 'KL from %i to %i: ' % (i, i+1), kl; fff()
 
-# plt.legend(handles=[normal, staged, uniform])
-plt.ylabel('posterior')
-plt.xlabel('blocks')
-plt.show()
+        kl_seq_set.append(kl_seq)
+        print '='*50; fff()
 
-# rec = load_hypo('out/simulations/nonadjacent/', ['0'])
-# get_axb_prob(rec, 'b', ['c', 'd'])
+    staged, = plt.plot(range(12, 145, 2), kl_seq_set[0], label='staged')
+    normal, = plt.plot(range(12, 145, 2), kl_seq_set[1], label='normal')
+    uniform, = plt.plot(range(12, 145, 2), kl_seq_set[2], label='uniform')
 
-# get_axb_prob(rec, 'c', ['c', 'd'])
-# get_axb_prob(rec, 'd', ['c', 'd'])
-#
-# get_axb_prob(rec, 'b', ['c', 'd', 'e'])
-# get_axb_prob(rec, 'c', ['c', 'd', 'f'])
-# get_axb_prob(rec, 'd', ['c', 'd', 'e'])
-# get_axb_prob(rec, 'e', ['c', 'd', 'f'])
-#
-# get_axb_prob(rec, 'b', ['c', 'd', 'e', 'f'])
+    plt.legend(handles=[normal, staged, uniform])
+    plt.ylabel('KL-divergence')
+    plt.xlabel('data')
+    plt.show()
 
 
+def make_staged_seq():
+    """
+    1. read raw output
+    2. evaluate posterior probability on different data sizes
+    3. dump the sequence
+
+    run: mpiexec -n 3
+    """
+    infos = [[i, 4*((i-1)/48+1)] for i in xrange(12, 145, 2)]
+    work_list = [['staged'], ['normal0'], ['normal1']]
+    rec = load_hypo('out/simulations/staged/', work_list[rank])
+    seq = pos_seq(rec, infos)
+    dump([seq], open('seq'+str(rank)+suffix, 'w'))
 
 
-# h_set = []
-#
-# h_set.append(load(open('hypo_1__0819_204954')))
-# h_set.append(load(open('hypo_0__0819_204954')))
-# h_set.append(load(open('hypo_2__0819_204954')))
-# h_set.append(load(open('hypo_3__0819_204954')))
-# h_set.append(load(open('hypo_4__0819_204954')))
-#
-# h_set = load(open('hypotheses__0819_183013'))
-#
-# for e in h_set:
-#     for h in e:
-#         print Counter([h() for _ in xrange(1024)])
-#         print str(h)
+# ===========================================================================
+# nonadjacent
+# ===========================================================================
+def make_pos():
+    """
+    1. read raw output
+    2. compute precision & recall on nonadjacent and adjacent contents
+    3. evaluate posterior probability on different data sizes
+    4. dump the sequence
 
-# h_m = None
-# for h in h_set:
-#     if 'cons_(\'a\', cons_(\'a\', ( \'\' if empty_(cdr_(recurse_())) else cons_(\'b\', cons_(\'b\', \'\')) ))) if flip_() else' in str(h):
-#         h_m = h
-#         print Counter([h() for _ in xrange(1024)])
-#         print str(h)
-#
-# DATA_RANGE = np.arange(10, 400, 21)
-# language = SimpleEnglish()
-#
-#
-# for size in DATA_RANGE:
-#     evaluation_data = language.sample_data_as_FuncData(size, max_length=5)
-#     h_m.compute_posterior(evaluation_data)
-#     print size, h_m.posterior_score / size
+    run: serial
+    """
+    rec = load_hypo('out/simulations/nonadjacent/', ['0'])
+    pr_dict = {}
+    _set = set()
+    cnt_tmp = {}
+    for e in rec:
+        for h in e[1]:
+            if h in _set: continue
+            cnt = Counter([h() for _ in xrange(1024)])
+            cnt_tmp[h] = cnt
+            base = sum(cnt.values())
+            num = 0
+            for k, v in cnt.iteritems():
+                if k is None or len(k) < 2: continue
+                if k[0] == 'a' and k[-1] == 'b': num += v
+            pr_dict[h] = float(num) / base
+            _set.add(h)
 
+    space_seq = []
+    for i in xrange(2, 65, 2):
+        language = LongDependency(max_length=i)
+        eval_data= language.sample_data_as_FuncData(144)
+        prob_dict = {}
+        ada_dict = {}
 
-# def get_rec(name):
-#     f = open(name)
-#     rec = []
-#     iter = 0
-#     for line in f:
-#         if iter % 2 == 0:
-#             rec.append(float(line.split()[3]))
-#         iter += 1
-#     return rec
+        for h in _set:
+            prob_dict[h] = h.compute_posterior(eval_data)
+            p, r = language.estimate_precision_and_recall(h, cnt_tmp[h])
+            ada_dict[h] = p*r/(p+r) if p+r != 0 else 0
 
+        space_seq.append([prob_dict, ada_dict])
+        print i, 'done'; fff()
 
-# rec = get_rec('out/simulations/staged/normal_out_4__0820_002642')
-# normal, = plt.plot([i*200 for i in xrange(len(rec))], rec, label='normal4')
-
-# rec = get_rec('out/simulations/staged/normal_out_3__0820_002642')
-# normal1, = plt.plot([i*200 for i in xrange(len(rec))], rec, label='normal3')
-#
-# rec = get_rec('out/simulations/staged/normal_out_2__0820_002642')
-# normal2, = plt.plot([i*200 for i in xrange(len(rec))], rec, label='normal2')
-#
-# rec = get_rec('out/simulations/staged/normal_out_1__0820_002642')
-# normal3, = plt.plot([i*200 for i in xrange(len(rec))], rec, label='normal1')
+    dump(pr_dict, open('pr_dict', 'w'))
+    dump(space_seq, open('space_seq', 'w'))
 
 
-# rec = get_rec('out/simulations/staged/staged_out_4__0820_002642')
-# staged, = plt.plot([i*200 for i in xrange(len(rec))], rec, label='staged4')
-#
-# rec = get_rec('out/simulations/staged/staged_out_3__0820_002642')
-# staged1, = plt.plot([i*200 for i in xrange(len(rec))], rec, label='staged3')
-#
-# rec = get_rec('out/simulations/staged/staged_out_2__0820_002642')
-# staged2, = plt.plot([i*200 for i in xrange(len(rec))], rec, label='staged2')
-#
-# rec = get_rec('out/simulations/staged/staged_out_1__0820_002642')
-# staged3, = plt.plot([i*200 for i in xrange(len(rec))], rec, label='staged1')
+def dis_pos():
+    """
+    1. read posterior sequence
+    2. set bound for axb and x hypotheses
+    3. plot
 
-# plt.legend(handles=[normal, staged1])
-# plt.ylabel('weighted F-score')
-# plt.xlabel('MCMC steps')
-# plt.show()
+    run: serial
+    """
+    space_seq = load(open('space_seq'))
+    pr_dict = load(open('pr_dict'))
+
+    seq = []
+    seq1 = []
+    seq2 = []
+    for seen in space_seq:
+        Z = logsumexp([p for h, p in seen[0].iteritems()])
+
+        axb_prob = -Infinity
+        x_prob = -Infinity
+        for h, v in seen[0].iteritems():
+            if pr_dict[h] > 0.2: axb_prob = logsumexp([axb_prob, v])
+            if seen[1][h] > 0.2: x_prob = logsumexp([x_prob, v])
+
+        seq.append(np.exp(axb_prob - Z))
+        seq1.append(np.exp(x_prob - Z))
+        seq2.append(np.exp(axb_prob - Z) - np.exp(x_prob - Z))
+        print 'done'; fff()
+    f, axarr = plt.subplots(1, 3)
+    axarr[0].plot(range(2, 65, 1), seq)
+    axarr[1].plot(range(2, 65, 1), seq1)
+    axarr[2].plot(range(2, 65, 1), seq2)
+
+    # plt.legend(handles=[x])
+    plt.ylabel('posterior')
+    plt.xlabel('poo_size')
+    plt.show()
+
+
+if __name__ == '__main__':
+    # make_staged_seq()
+    get_kl_seq()
+
+    # make_pos()
+    # dis_pos()

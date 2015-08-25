@@ -1,5 +1,9 @@
 from LOTlib.Examples.FormalLanguageTheory.Language.FormalLanguage import FormalLanguage
 import itertools
+from collections import Counter
+from LOTlib.Miscellaneous import logsumexp
+from Levenshtein import distance
+from math import log
 
 
 class LongDependency(FormalLanguage):
@@ -28,18 +32,34 @@ class LongDependency(FormalLanguage):
 
     def estimate_precision_and_recall(self, h, data):
         """
-        Re-implement this function in order to investigate how our model learns the dependency, we only cares about the precision
+        Re-implementation: return how accurate the h is on predicting adjacent grammar
         """
-        output = self.A + self.B
-        h_out = [self.ht(h()) for _ in xrange(int(sum(data[0].output.values())))]
+        # TODO num of data is fixed
+        # TODO use data for convenience
+        num = 1024.0 / len(self.str_sets)
+        output_t = {}
+        for k in self.str_sets:
+            output_t[self.de_ht(k)] = num
 
-        base = len(h_out)
+        # h_out = Counter([h() for _ in xrange(1024)])
+        h_out = data
+        h_out_t = {}
+        for k, v in h_out.iteritems():
+            h_out_t[self.de_ht(k)] = v
+
+        base = sum(h_out_t.values())
         cnt = 0.0
-        for v in h_out:
-            if v == output: cnt += 1
+        for k, v in h_out_t.iteritems():
+            if k in output_t: cnt += v
         precision = cnt / base
 
-        return precision, precision
+        base = sum(output_t.values())
+        cnt = 0.0
+        for k, v in output_t.iteritems():
+            if k in h_out_t: cnt += v
+        recall = cnt / base
+
+        return precision, recall
 
     def ht(self, s):
         """
@@ -47,6 +67,13 @@ class LongDependency(FormalLanguage):
         """
         if s is None or len(s) < 2: return None
         return s[0] + s[-1]
+
+    def de_ht(self, s):
+        """
+        remove head and tail of s
+        """
+        if s is None or len(s) < 2: return ''
+        return s[1:-1]
 
     def t2s(self, t):
         s = ''
