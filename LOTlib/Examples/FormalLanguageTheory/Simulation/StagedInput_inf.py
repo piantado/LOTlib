@@ -7,8 +7,6 @@ import time
 from mpi4py import MPI
 import sys
 from pickle import dump
-import LOTlib
-from LOTlib.Examples.Demo import standard_sample
 
 fff = sys.stdout.flush
 comm = MPI.COMM_WORLD
@@ -16,20 +14,6 @@ rank = comm.Get_rank()
 size = comm.Get_size()
 
 register_primitive(flatten2str)
-
-
-def run(mk_hypothesis, get_data, size, finite):
-    """
-    This out on the DATA_RANGE amounts of data and returns all hypotheses in top count
-    """
-    if LOTlib.SIG_INTERRUPTED:
-        return set()
-
-    return standard_sample(lambda: mk_hypothesis(options.LANG, N=options.N),
-                           lambda: get_data(size, max_length=finite),
-                           N=options.TOP_COUNT,
-                           steps=options.STEPS,
-                           show=False, save_top=None)
 
 
 def slice_list(input, size):
@@ -65,14 +49,14 @@ if __name__ == '__main__':
 
     suffix = time.strftime('_' + str(rank) + '_' + options.NAME + '_%m%d_%H%M%S', time.localtime())
     prefix = '../out/simulations/staged/'
-
+    # prefix = '/home/lijm/WORK/yuan/lot/staged/'
     # ========================================================================================================
     # Running
     # ========================================================================================================
-    language = AnBn()
+    language = AnBn(max_length=options.FINITE)
 
-    work_list = slice_list([[make_hypothesis, uniform_data if options.UNI else language.sample_data_as_FuncData,
-                             12*(i+1), options.FINITE if options.MODE else 4*(1+i/4)] for i in xrange(12)], size)
+    work_list = slice_list([[make_hypothesis, 12*(i+1), options.FINITE if options.MODE else 4*(1+i/4), options,
+                             uniform_data if options.UNI else None] for i in xrange(12)], size)
     for e in work_list[rank]:
         topn = run(*e)
-        dump(topn, open(prefix + ('normal' + str(options.UNI) if options.MODE else 'staged') + sq(e[2]) + sq(e[3]) + suffix,'w'))
+        dump(topn, open(prefix + ('normal' + str(options.UNI) if options.MODE else 'staged') + sq(e[1]) + sq(e[2]) + suffix,'w'))

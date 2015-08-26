@@ -32,11 +32,11 @@ d2$h <- as.factor(as.character(d2$h)) # we have to re-set this factor so it does
 plt <- ggplot(d2, aes(x=data.size, y=posterior.probability, color=h)) +  geom_line()
 
 
-d <- read.table("G://programs and files//Python//Lib//site-packages//LOTlib//LOTlib//Examples//FormalLanguageTheory//out__0819_183013")
+d <- read.table("G://programs and files//Python//Lib//site-packages//LOTlib//LOTlib//Examples//FormalLanguageTheory//out//SimpleEnglish//out_8_10w_t")
 names(d) <- c("data.size", "posterior.probability", "posterior.score", "prior", "likelihood", "number.of.generated.strings", "h", "precision", "recall")
 
 # d$precision <- (d$precision > 0.7) & (d$recall > 0.1)
-d$precision <- (d$precision + d$recall) > 0.8
+d$precision <- (d$precision * d$recall) > 0.2972972 * (d$precision + d$recall)
 
 s <- ddply(d, "data.size", function(dd){
 
@@ -50,7 +50,7 @@ plt <- ggplot(s, aes(x=data.size, y=score, color=precision, group=precision)) + 
 plt
 
 
-d <- read.table("G://programs and files//Python//Lib//site-packages//LOTlib//LOTlib//Examples//FormalLanguageTheory//out//SimpleEnglish//out_5_20w_t")
-names(d) <- c("n", "steps", "posterior.score", "precision_recall")
+d <- read.table("G://programs and files//Python//Lib//site-packages//LOTlib//LOTlib//Examples//FormalLanguageTheory//out//SimpleEnglish//out_8_10w_t")
+names(d) <- c("data.size", "posterior.probability", "posterior.score", "prior", "likelihood", "number.of.generated.strings", "h", "precision", "recall")
 
 plt <- ggplot(d, aes(x=steps, y=precision_recall, group=n, color=n)) +  geom_line()

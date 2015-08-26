@@ -5,7 +5,7 @@ class SimpleEnglish(FormalLanguage):
     """
     A simple English language with a few kinds of recursion all at once
     """
-    def __init__(self, max_length=10):
+    def __init__(self, max_length=6):
         self.grammar = Grammar(start='S')
         self.grammar.add_rule('S', 'S', ['NP', 'VP'], 1.0)
         self.grammar.add_rule('NP', 'NP', ['d', 'AP', 'n'], 1.0)
@@ -16,9 +16,9 @@ class SimpleEnglish(FormalLanguage):
         self.grammar.add_rule('VP', 'VP', ['v', 'NP'], 1.0)
         self.grammar.add_rule('VP', 'VP', ['v', 't', 'S'], 1.0)
 
-        FormalLanguage.__init__(self) ## calls and stores all_strings
+        FormalLanguage.__init__(self, max_length)
 
-    def all_strings(self, max_length=10):
+    def all_strings(self, max_length):
         for x in self.grammar.enumerate(d=max_length):
             s = ''.join(x.all_leaves())
             if len(s) < max_length:
@@ -27,7 +27,7 @@ class SimpleEnglish(FormalLanguage):
 
 # just for testing
 if __name__ == '__main__':
-    language = SimpleEnglish()
+    language = SimpleEnglish(8)
 
     # for _ in xrange(100):
     #     x =  language.grammar.generate()
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     # for e in language.all_strings(max_length=8):
     #     print e
 
-    print language.sample_data_as_FuncData(300, max_length=5)
+    print language.sample_data_as_FuncData(300)
 
     # print language.is_valid_string('PV')
     # print language.is_valid_string('DAANV')
