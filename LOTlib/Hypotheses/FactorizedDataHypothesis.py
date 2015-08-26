@@ -74,7 +74,7 @@ class FactorizedDataHypothesis(SimpleLexicon):
     def __call__(self):
         # The call here must take no arguments. If this changes, alter x%si above
         theargs = []
-
+        v = ''
         for w in xrange(self.N):
             try:
                 v = self.get_word(w)(*theargs) # call with all prior args

@@ -27,13 +27,13 @@ class AnBn(FormalLanguage):
 if __name__ == '__main__':
     language = AnBn()
 
-    for e in language.all_strings(max_length=20):
-        print e
+    # for e in language.all_strings(max_length=20):
+    #     print e
 
-    print language.sample_data_as_FuncData(128)
+    print language.sample_data_as_FuncData(512)
 
-    print language.is_valid_string('aaa')
-    print language.is_valid_string('ab')
-    print language.is_valid_string('abb')
-    print language.is_valid_string('aaab')
-    print language.is_valid_string('aabb')
+    # print language.is_valid_string('aaa')
+    # print language.is_valid_string('ab')
+    # print language.is_valid_string('abb')
+    # print language.is_valid_string('aaab')
+    # print language.is_valid_string('aabb')

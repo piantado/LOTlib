@@ -84,10 +84,10 @@ class LongDependency(FormalLanguage):
 
 # just for testing
 if __name__ == '__main__':
-    language = LongDependency(pool_size=12)
+    language = LongDependency(max_length=4)
 
-    for e in language.all_strings(max_length=12):
-        print e
+    # for e in language.all_strings(max_length=12):
+    #     print e
 
     print language.sample_data_as_FuncData(128)
     # print language.is_valid_string('aaa')
