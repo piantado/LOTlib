@@ -87,3 +87,68 @@ class FactorizedDataHypothesis(SimpleLexicon):
 
     def make_hypothesis(self, **kwargs):
         raise NotImplementedError
+
+
+class FactorizedLambdaHypothesis(SimpleLexicon):
+    """
+        A modified version of FactorizedDataHypothesis, where we pass the lambda function of previous InnerHypothesis
+        as the parameter to next InnerHypothesis instead of the value of it.
+
+        We made it with two tricks: We construct and pass the lambda expression to next InnerHypothesis; We wrap the
+        expression inside the recurse_() function with a lambda function to make it callable for next level of recursion
+    """
+    def __init__(self, N=4, grammar=None, argument_type='LIST', variable_weight=2.0, value=None, **kwargs):
+
+        SimpleLexicon.__init__(self, value=value)
+
+        self.N = N
+        self.call_time = 0
+
+        if grammar is not None: # else we are in a copy initializer, and the rest will get copied
+            for w in xrange(N):
+                nthgrammar = deepcopy(grammar)
+
+                # Add all the bound variables
+                args = [  ]
+                for xi in xrange(w):  # no first argument
+                    argi = 'x%s'%xi
+
+                    # Add a rule for the variable
+                    nthgrammar.add_rule(argument_type, argi, [''], variable_weight)
+
+                    args.append(argi)
+
+                # and add a rule for the n-ary recursion
+                nthgrammar.add_rule('LIST', 'recurse_', ['FUNCTION']*(w), 1.)
+                # we wrap the content with lambda to make it callable for next recursion level
+                nthgrammar.add_rule('FUNCTION', 'lambda', ['LIST'], 1.)
+
+                self.set_word(w, self.make_hypothesis(grammar=nthgrammar, args=args))
+
+    def __call__(self):
+        # The call here must take no arguments. If this changes, alter x%si above
+        args_list = [[]]
+        v = lambda: ''
+        for w in xrange(self.N):
+            # pass the callable version of this hypothesis to next one
+            v = lambda: self.try_run(self.get_word, args_list)
+            if w != self.N-1: args_list.append(args_list[w]+[v])
+            # print "V=", v, theargs
+
+        return v() # return the last one
+
+    def make_hypothesis(self, **kwargs):
+        raise NotImplementedError
+
+    def try_run(self, f, arg):
+        ind = self.get_ind()
+        self.call_time += 1
+        try:
+            return f(ind)(*(arg[ind]))
+        except TooBigException:
+            return ''
+        except RuntimeError:
+            return ''
+
+    def get_ind(self):
+        return self.N - 1 - self.call_time % self.N

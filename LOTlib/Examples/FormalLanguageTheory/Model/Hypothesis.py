@@ -4,7 +4,7 @@ from math import log
 from LOTlib.Hypotheses.Likelihoods.StochasticFunctionLikelihood import StochasticFunctionLikelihood
 from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis
 from LOTlib.Evaluation.EvaluationException import RecursionDepthException
-from LOTlib.Hypotheses.FactorizedDataHypothesis import FactorizedDataHypothesis
+from LOTlib.Hypotheses.FactorizedDataHypothesis import FactorizedLambdaHypothesis, FactorizedDataHypothesis
 from LOTlib.Hypotheses.FactorizedDataHypothesis import InnerHypothesis
 from LOTlib.Examples.FormalLanguageTheory.Model.Grammar import ab_grammar, eng_grammar # passed in as kwargs
 from LOTlib.Miscellaneous import q
@@ -50,10 +50,25 @@ class AnBnCnHypothesis(StochasticFunctionLikelihood, FactorizedDataHypothesis):
         return ll
 
 
-class SimpleEnglishHypothesis(AnBnCnHypothesis):
+class SimpleEnglishHypothesis(StochasticFunctionLikelihood, FactorizedLambdaHypothesis):
 
     def __init__(self, **kwargs):
-        AnBnCnHypothesis.__init__(self, N=6, **kwargs)
+        FactorizedLambdaHypothesis.__init__(self, recurse_bound=20, maxnodes=125, **kwargs)
+
+    def make_hypothesis(self, **kwargs):
+        return InnerHypothesis(**kwargs)
+
+    def compute_single_likelihood(self, datum):
+        assert isinstance(datum.output, dict), "Data supplied must be a dict (function outputs to counts)"
+
+        llcounts = self.make_ll_counts(datum.input)
+
+        lo = sum(llcounts.values())
+
+        ll = 0.0 # We are going to compute a pseudo-likelihood, counting close strings as being close
+        for k in datum.output.keys():
+            ll += datum.output[k] * logsumexp([ log(llcounts[r])-log(lo) - 100.0 * distance(r, k) for r in llcounts.keys() ])
+        return ll
 
 
 def make_hypothesis(s, **kwargs):
@@ -66,7 +81,7 @@ def make_hypothesis(s, **kwargs):
             for e in terminals:
                 grammar.add_rule('ATOM', q(e), None, 2)
 
-    return AnBnCnHypothesis(grammar=grammar, **kwargs)
+    return AnBnCnHypothesis(grammar=grammar, **kwargs) if s != 'SimpleEnglish' else SimpleEnglishHypothesis(grammar=grammar, **kwargs)
 
 # from LOTlib.Evaluation.Eval import register_primitive
 # from LOTlib.Miscellaneous import flatten2str
@@ -74,8 +89,10 @@ def make_hypothesis(s, **kwargs):
 # import sys
 # sys.setrecursionlimit(1000)
 # h = make_hypothesis('SimpleEnglish', N=4)
-# for i in xrange(10):
-#     print q(h())
+# for i in xrange(1000):
+#     if i % 100 == 0: print i
+#     h_new, p = h.propose()
+#     h()
 
 # a = lambda: 'a'
 # b = lambda:

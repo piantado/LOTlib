@@ -158,6 +158,54 @@ def get_kl_seq():
     plt.show()
 
 
+def get_kl_seq2():
+    print 'loading..'; fff()
+    seq_set = [load(open('seq%i_0827_122936' % i)) for i in xrange(12)]
+    kl_seq_set = []
+
+    # print 'prior'
+    # from copy import deepcopy
+    # dict_0 = deepcopy(seq_set[0][0])
+    # for h in dict_0:
+    #     dict_0[h] = h.compute_posterior([FunctionData(input=[], output=Counter())])
+
+    for seq in seq_set:
+        # seq.insert(0, dict_0)
+        kl_seq = []
+
+        for i in xrange(len(seq)-1):
+            current_dict = seq[i]
+            next_dict = seq[i+1]
+            kl = compute_kl(current_dict, next_dict)
+            kl_seq.append(log(kl))
+            print 'KL from %i to %i: ' % (i, i+1), kl; fff()
+
+        kl_seq_set.append(kl_seq)
+        print '='*50; fff()
+
+    print 'avging'; fff()
+    avg_seq_set = []
+    for i in [4, 8, 12]:
+        sub = [kl_seq_set[j] for j in xrange(i-4, i)]
+        avg_seq_set.append([(a+b+c+d)/4 for a, b, c, d in zip(*sub)])
+
+    for avg_seq in avg_seq_set:
+        for i in xrange(1, len(avg_seq)):
+            avg_seq[i] = logsumexp([avg_seq[i], avg_seq[i-1]])
+
+    dump(kl_seq_set, open('kl_seq_set'+suffix, 'w'))
+    dump(avg_seq_set, open('avg_seq_set'+suffix, 'w'))
+
+    staged, = plt.plot(range(12, 145, 2), avg_seq_set[0], label='staged')
+    normal, = plt.plot(range(12, 145, 2), avg_seq_set[1], label='normal')
+    uniform, = plt.plot(range(12, 145, 2), avg_seq_set[2], label='uniform')
+
+    plt.legend(handles=[normal, staged, uniform])
+    plt.ylabel('KL-divergence')
+    plt.xlabel('data')
+    plt.show()
+
+
 def make_staged_seq():
     """
     1. read raw output
@@ -196,7 +244,10 @@ def make_staged_seq2():
             language = AnBn(max_length=e[1])
             eval_data = language.sample_data_as_FuncData(e[0])
 
-            for h in seen: prob_dict[h] = h.compute_posterior(eval_data)
+            for h in seen:
+                # TODO
+                h.likelihood_temperature = 2
+                prob_dict[h] = h.compute_posterior(eval_data)
 
             seq.append(prob_dict)
             print 'rank: ', rank, e, 'done'; fff()
@@ -210,7 +261,10 @@ def make_staged_seq2():
             language = AnBn(max_length=e[1])
             eval_data = language.sample_data_as_FuncData(e[0])
 
-            for h in seen: prob_dict[h] = h.compute_posterior(eval_data)
+            for h in seen:
+                # TODO
+                h.likelihood_temperature = 2
+                prob_dict[h] = h.compute_posterior(eval_data)
 
             seq.append(prob_dict)
             print 'rank: ', rank, e, 'done'; fff()
@@ -222,7 +276,10 @@ def make_staged_seq2():
             prob_dict = {}
             eval_data = uniform_data(e[0], e[1])
 
-            for h in seen: prob_dict[h] = h.compute_posterior(eval_data)
+            for h in seen:
+                # TODO
+                h.likelihood_temperature = 2
+                prob_dict[h] = h.compute_posterior(eval_data)
 
             seq.append(prob_dict)
             print 'rank: ', rank, e, 'done'; fff()
@@ -231,7 +288,7 @@ def make_staged_seq2():
     dict_0 = deepcopy(seq[0])
     for h in dict_0:
         dict_0[h] = h.compute_posterior([FunctionData(input=[], output=Counter())])
-
+    seq.insert(0, dict_0)
     dump(seq, open('seq'+str(rank)+suffix, 'w'))
 
 
@@ -354,9 +411,9 @@ def make_pos():
             pr_dict[h] = float(num) / base
             _set.add(h)
 
-    # work_list = (range(2, 65, 2), size)
-    work_list = [range(2, 65, 12) for _ in xrange(size)]
-    t_list = range(2, 14)
+    work_list = slice_list(range(2, 24, 1), size)
+    # work_list = [range(2, 65, 12) for _ in xrange(size)]
+    # t_list = range(14, 26)
     space_seq = []
     for i in work_list[rank]:
         language = LongDependency(max_length=i)
@@ -368,29 +425,29 @@ def make_pos():
 
         prob_dict = {}
         ada_dict = {}
-        test_list = []
+        # test_list = []
 
         for h in _set:
-            h.likelihood_temperature = t_list[rank]
+            h.likelihood_temperature = 20
             prob_dict[h] = h.compute_posterior(eval_data)
             p, r = language.estimate_precision_and_recall(h, cnt_tmp[h])
             ada_dict[h] = p*r/(p+r) if p+r != 0 else 0
 
-            test_list.append([h.posterior_score, ada_dict[h], pr_dict[h], cnt_tmp[h], str(h)])
+            # test_list.append([h.posterior_score, ada_dict[h], pr_dict[h], cnt_tmp[h], str(h)])
 
-        Z = logsumexp([h.posterior_score for h in _set])
-        test_list.sort(key=lambda x:x[0], reverse=True)
-        print rank, i, '='*50
-        for i_t in xrange(3):
-            print 'prob: ', np.exp(test_list[i_t][0] - Z), 'x_f-score',  test_list[i_t][1], 'axb_f-score',  test_list[i_t][2]
-            print test_list[i_t][3]
+        # Z = logsumexp([h.posterior_score for h in _set])
+        # test_list.sort(key=lambda x:x[0], reverse=True)
+        # print rank, i, '='*50
+        # for i_t in xrange(3):
+        #     print 'prob: ', np.exp(test_list[i_t][0] - Z), 'x_f-score',  test_list[i_t][1], 'axb_f-score',  test_list[i_t][2]
+        #     print test_list[i_t][3]
+        # fff()
+        # space_seq.append([prob_dict, ada_dict])
+        # dump(test_list, open('test_list_'+str(rank)+'_'+str(i)+suffix, 'w'))
+        print 'rank', rank, i, 'done'; fff()
 
-        space_seq.append([prob_dict, ada_dict])
-        dump(test_list, open('test_list_'+str(rank)+'_'+str(i)+suffix, 'w'))
-        # print i, 'done'; fff()
-
-    dump(pr_dict, open('pr_dict_'+str(rank), 'w'))
-    dump(space_seq, open('space_seq'+str(rank), 'w'))
+    dump(pr_dict, open('pr_dict_'+str(rank)+suffix, 'w'))
+    dump(space_seq, open('space_seq'+str(rank)+suffix, 'w'))
 
 
 def dis_pos():
@@ -432,10 +489,21 @@ def dis_pos():
     plt.show()
 
 
+def test_lis_disp(names):
+    ll = [load(open(name)) for name in names]
+    for li in ll:
+        print '='*50
+        Z = logsumexp([h[0] for h in li])
+        for i in xrange(3):
+                print 'p ', np.exp(li[i][0] -Z), 'x_f-score ', li[i][1], 'axb_f-score', li[i][2]
+                print li[i][4]
+
+
 if __name__ == '__main__':
     # make_staged_seq()
     # make_staged_seq2()
     # get_kl_seq()
+    # get_kl_seq2()
 
     make_pos()
     # dis_pos()
@@ -445,3 +513,17 @@ if __name__ == '__main__':
     # cProfile.runctx("test_sto()", globals(), locals(), "Profile.prof")
     # s = pstats.Stats("Profile.prof")
     # s.strip_dirs().sort_stats("time").print_stats()
+
+    # avg_seq_set = load(open('avg_seq_set_0826_203129'))
+    # for avg_seq in avg_seq_set:
+    #     for i in xrange(1, len(avg_seq)):
+    #         avg_seq[i] = logsumexp([avg_seq[i], avg_seq[i-1]])
+    #
+    # staged, = plt.plot(range(12, 145, 2), avg_seq_set[0], label='staged')
+    # normal, = plt.plot(range(12, 145, 2), avg_seq_set[1], label='normal')
+    # uniform, = plt.plot(range(12, 145, 2), avg_seq_set[2], label='uniform')
+    #
+    # plt.legend(handles=[normal, staged, uniform])
+    # plt.ylabel('KL-divergence')
+    # plt.xlabel('data')
+    # plt.show()

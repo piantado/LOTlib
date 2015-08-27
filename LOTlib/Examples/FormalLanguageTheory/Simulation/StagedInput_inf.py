@@ -36,6 +36,9 @@ def sq(i):
     return '_' + str(i)
 
 
+def no_data(a, max_length=None):
+    return [FunctionData(input=[], output=Counter())]
+
 if __name__ == '__main__':
     """
     run with script: mpiexec -n 12 python StagedInput_inf.py --steps=40000 --language=AnBn --finite=12 --N=1 --mode=0/1
@@ -48,15 +51,20 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     suffix = time.strftime('_' + str(rank) + '_' + options.NAME + '_%m%d_%H%M%S', time.localtime())
-    prefix = '../out/simulations/staged/'
-    # prefix = '/home/lijm/WORK/yuan/lot/staged/'
+    prefix = './'
+    # prefix = '../out/simulations/staged/'
+    # prefix = '/ho.me/lijm/WORK/yuan/lot/staged/'
     # ========================================================================================================
     # Running
     # ========================================================================================================
-    language = AnBn(max_length=options.FINITE)
+    # language = AnBn(max_length=options.FINITE)
+    #
+    # work_list = slice_list([[make_hypothesis, 12*(i+1), options.FINITE if options.MODE else 4*(1+i/4), options,
+    #                          uniform_data if options.UNI else None] for i in xrange(12)], size)
 
-    work_list = slice_list([[make_hypothesis, 12*(i+1), options.FINITE if options.MODE else 4*(1+i/4), options,
-                             uniform_data if options.UNI else None] for i in xrange(12)], size)
-    for e in work_list[rank]:
+    work_list = [[make_hypothesis, 12, options.FINITE, options, no_data]]
+
+    # for e in work_list[rank]:
+    for e in work_list:
         topn = run(*e)
         dump(topn, open(prefix + ('normal' + str(options.UNI) if options.MODE else 'staged') + sq(e[1]) + sq(e[2]) + suffix,'w'))

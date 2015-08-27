@@ -37,16 +37,20 @@ def run(mk_hypothesis, lang, size):
 
 
 def simple_mpi_map(run, args):
+    print 'rank: ', rank, 'running..'; fff()
     hypo_set = run(*(args[rank]))
+
 
     if rank == 0:
         _set = set()
         _set.update(hypo_set)
         for i in xrange(size - 1):
             _set.update(comm.recv(source=i+1))
+            print 'rank: ', rank, 'recv: ', i; fff()
         return _set
     else:
         comm.send(hypo_set, dest=0)
+        print 'rank: ', rank, 'send: ', 0; fff()
         sys.exit(0)
 
 if __name__ == "__main__":
@@ -91,7 +95,7 @@ if __name__ == "__main__":
     pr_data = language.sample_data_as_FuncData(1024)
     p = []
     r = []
-    print 'compute precision and recall..'
+    print 'compute precision and recall..'; fff()
     for h in hypotheses:
         precision, recall = language.estimate_precision_and_recall(h, pr_data)
         p.append(precision)
@@ -99,7 +103,7 @@ if __name__ == "__main__":
 
     # Now go through each hypothesis and print out some summary stats
     for data_size in DATA_RANGE:
-        print 'get stats from size : ', data_size
+        print 'get stats from size : ', data_size ; fff()
 
         evaluation_data = language.sample_data_as_FuncData(data_size)
 
