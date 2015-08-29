@@ -102,7 +102,6 @@ class FactorizedLambdaHypothesis(SimpleLexicon):
         SimpleLexicon.__init__(self, value=value)
 
         self.N = N
-        self.call_time = 0
 
         if grammar is not None: # else we are in a copy initializer, and the rest will get copied
             for w in xrange(N):
@@ -127,12 +126,13 @@ class FactorizedLambdaHypothesis(SimpleLexicon):
 
     def __call__(self):
         # The call here must take no arguments. If this changes, alter x%si above
-        args_list = [[]]
+        theargs = []
         v = lambda: ''
         for w in xrange(self.N):
             # pass the callable version of this hypothesis to next one
-            v = lambda: self.try_run(self.get_word, args_list)
-            if w != self.N-1: args_list.append(args_list[w]+[v])
+            f = self.get_word(w); arg = deepcopy(theargs)
+            v = lambda f=f, arg=arg: self.try_run(f, arg)
+            theargs.append(v)
             # print "V=", v, theargs
 
         return v() # return the last one
@@ -141,14 +141,7 @@ class FactorizedLambdaHypothesis(SimpleLexicon):
         raise NotImplementedError
 
     def try_run(self, f, arg):
-        ind = self.get_ind()
-        self.call_time += 1
         try:
-            return f(ind)(*(arg[ind]))
+            return f(*arg)
         except TooBigException:
             return ''
-        except RuntimeError:
-            return ''
-
-    def get_ind(self):
-        return self.N - 1 - self.call_time % self.N

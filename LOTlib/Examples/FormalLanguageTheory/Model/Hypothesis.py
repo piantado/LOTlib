@@ -53,7 +53,8 @@ class AnBnCnHypothesis(StochasticFunctionLikelihood, FactorizedDataHypothesis):
 class SimpleEnglishHypothesis(StochasticFunctionLikelihood, FactorizedLambdaHypothesis):
 
     def __init__(self, **kwargs):
-        FactorizedLambdaHypothesis.__init__(self, recurse_bound=20, maxnodes=125, **kwargs)
+        # TODO
+        FactorizedLambdaHypothesis.__init__(self, recurse_bound=5, maxnodes=125, **kwargs)
 
     def make_hypothesis(self, **kwargs):
         return InnerHypothesis(**kwargs)

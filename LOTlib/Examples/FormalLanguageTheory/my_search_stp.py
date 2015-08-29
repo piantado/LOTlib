@@ -7,7 +7,7 @@ import time
 import numpy as np
 import LOTlib
 from LOTlib.Miscellaneous import display_option_summary
-from LOTlib.MPI.MPI_map import is_master_process, MPI_map
+# from LOTlib.MPI.MPI_map import is_master_process, MPI_map
 from LOTlib.Inference.Samplers.StandardSample import standard_sample
 from LOTlib.Evaluation.Eval import register_primitive
 from LOTlib.Miscellaneous import flatten2str, logsumexp, qq
@@ -29,11 +29,11 @@ def run(mk_hypothesis, lang, size):
     if LOTlib.SIG_INTERRUPTED:
         return set()
 
-    return standard_sample(lambda: mk_hypothesis(options.LANG, N=options.N),
+    return standard_sample(lambda: mk_hypothesis(options.LANG, N=options.N, rank=rank),
                            lambda: lang.sample_data_as_FuncData(size),
                            N=options.TOP_COUNT,
                            steps=options.STEPS,
-                           show=False, save_top=None)
+                           show=True, skip=50, save_top=None)
 
 
 def simple_mpi_map(run, args):
@@ -73,10 +73,10 @@ if __name__ == "__main__":
 
     # set the output codec -- needed to display lambda to stdout
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
-    if is_master_process():
+    if rank == 0:
         display_option_summary(options); fff()
 
-    # you need to run 5 machine on that
+    # you need to run 12 machine on that
     DATA_RANGE = np.arange(20, 300, 24)
 
     language = instance(options.LANG, options.FINITE)

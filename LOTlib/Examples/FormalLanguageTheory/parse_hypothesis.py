@@ -18,6 +18,7 @@ from math import log
 import sys
 from mpi4py import MPI
 from Simulation.utils import uniform_data
+from optparse import OptionParser
 
 import pstats, cProfile
 
@@ -27,6 +28,16 @@ size = comm.Get_size()
 
 suffix = time.strftime('_%m%d_%H%M%S', time.localtime())
 fff = sys.stdout.flush
+
+parser = OptionParser()
+parser.add_option("--jump", dest="JUMP", type="int", default=2, help="")
+parser.add_option("--temp", dest="TEMP", type="int", default=2, help="")
+parser.add_option("--plot", dest="PLOT", type="string", default='yes', help="")
+parser.add_option("--file", dest="FILE", type="string", default='', help="")
+parser.add_option("--mode", dest="MODE", type="string", default='', help="")
+parser.add_option("--axb", dest="AXB", type="float", default=0.3, help="")
+parser.add_option("--x", dest="X", type="float", default=0.08, help="")
+(options, args) = parser.parse_args()
 
 def slice_list(input, size):
     input_size = len(input)
@@ -158,9 +169,9 @@ def get_kl_seq():
     plt.show()
 
 
-def get_kl_seq2():
+def get_kl_seq2(jump, is_plot, file_name):
     print 'loading..'; fff()
-    seq_set = [load(open('seq%i_0827_122936' % i)) for i in xrange(12)]
+    seq_set = [load(open('seq%i_' % i + file_name)) for i in xrange(12)]
     kl_seq_set = []
 
     # print 'prior'
@@ -196,14 +207,15 @@ def get_kl_seq2():
     dump(kl_seq_set, open('kl_seq_set'+suffix, 'w'))
     dump(avg_seq_set, open('avg_seq_set'+suffix, 'w'))
 
-    staged, = plt.plot(range(12, 145, 2), avg_seq_set[0], label='staged')
-    normal, = plt.plot(range(12, 145, 2), avg_seq_set[1], label='normal')
-    uniform, = plt.plot(range(12, 145, 2), avg_seq_set[2], label='uniform')
+    if is_plot == 'yes':
+        staged, = plt.plot(range(12, 145, jump), avg_seq_set[0], label='staged')
+        normal, = plt.plot(range(12, 145, jump), avg_seq_set[1], label='normal')
+        uniform, = plt.plot(range(12, 145, jump), avg_seq_set[2], label='uniform')
 
-    plt.legend(handles=[normal, staged, uniform])
-    plt.ylabel('KL-divergence')
-    plt.xlabel('data')
-    plt.show()
+        plt.legend(handles=[normal, staged, uniform])
+        plt.ylabel('KL-divergence')
+        plt.xlabel('data')
+        plt.show()
 
 
 def make_staged_seq():
@@ -222,7 +234,7 @@ def make_staged_seq():
     dump([seq], open('seq'+str(rank)+suffix, 'w'))
 
 
-def make_staged_seq2():
+def make_staged_seq2(jump, temp):
     """
     run: mpiexec -n 12
     """
@@ -237,7 +249,7 @@ def make_staged_seq2():
 
     if rank in work_list[0]:
         seq = []
-        infos = [[i, 4*((i-1)/48+1)] for i in xrange(12, 145, 2)]
+        infos = [[i, 4*((i-1)/48+1)] for i in xrange(12, 145, jump)]
 
         for e in infos:
             prob_dict = {}
@@ -245,8 +257,7 @@ def make_staged_seq2():
             eval_data = language.sample_data_as_FuncData(e[0])
 
             for h in seen:
-                # TODO
-                h.likelihood_temperature = 2
+                h.likelihood_temperature = max(temp - (e[0]-12)*(temp-1)/(100-12), 1)
                 prob_dict[h] = h.compute_posterior(eval_data)
 
             seq.append(prob_dict)
@@ -254,7 +265,7 @@ def make_staged_seq2():
 
     elif rank in work_list[1]:
         seq = []
-        infos = [[i, 12] for i in xrange(12, 145, 2)]
+        infos = [[i, 12] for i in xrange(12, 145, jump)]
 
         for e in infos:
             prob_dict = {}
@@ -262,8 +273,7 @@ def make_staged_seq2():
             eval_data = language.sample_data_as_FuncData(e[0])
 
             for h in seen:
-                # TODO
-                h.likelihood_temperature = 2
+                h.likelihood_temperature = max(temp - (e[0]-12)*(temp-1)/(100-12), 1)
                 prob_dict[h] = h.compute_posterior(eval_data)
 
             seq.append(prob_dict)
@@ -271,14 +281,13 @@ def make_staged_seq2():
 
     else:
         seq = []
-        infos = [[i, 12] for i in xrange(12, 145, 2)]
+        infos = [[i, 12] for i in xrange(12, 145, jump)]
         for e in infos:
             prob_dict = {}
             eval_data = uniform_data(e[0], e[1])
 
             for h in seen:
-                # TODO
-                h.likelihood_temperature = 2
+                h.likelihood_temperature = max(temp - (e[0]-12)*(temp-1)/(100-12), 1)
                 prob_dict[h] = h.compute_posterior(eval_data)
 
             seq.append(prob_dict)
@@ -381,14 +390,14 @@ def test_hypo_stat():
 # ===========================================================================
 # nonadjacent
 # ===========================================================================
-def make_pos():
+def make_pos(jump, temp):
     """
     1. read raw output
     2. compute precision & recall on nonadjacent and adjacent contents
     3. evaluate posterior probability on different data sizes
     4. dump the sequence
 
-    run: mpiexec -n 12
+    run: mpiexec -n 4
     """
 
     print 'loading..'; fff()
@@ -411,11 +420,9 @@ def make_pos():
             pr_dict[h] = float(num) / base
             _set.add(h)
 
-    work_list = slice_list(range(2, 24, 1), size)
-    # work_list = [range(2, 65, 12) for _ in xrange(size)]
-    # t_list = range(14, 26)
+    work_list = range(2, 24, jump)
     space_seq = []
-    for i in work_list[rank]:
+    for i in work_list:
         language = LongDependency(max_length=i)
 
         eval_data = {}
@@ -428,7 +435,7 @@ def make_pos():
         # test_list = []
 
         for h in _set:
-            h.likelihood_temperature = 20
+            h.likelihood_temperature = temp
             prob_dict[h] = h.compute_posterior(eval_data)
             p, r = language.estimate_precision_and_recall(h, cnt_tmp[h])
             ada_dict[h] = p*r/(p+r) if p+r != 0 else 0
@@ -442,15 +449,15 @@ def make_pos():
         #     print 'prob: ', np.exp(test_list[i_t][0] - Z), 'x_f-score',  test_list[i_t][1], 'axb_f-score',  test_list[i_t][2]
         #     print test_list[i_t][3]
         # fff()
-        # space_seq.append([prob_dict, ada_dict])
         # dump(test_list, open('test_list_'+str(rank)+'_'+str(i)+suffix, 'w'))
+
+        space_seq.append([prob_dict, ada_dict])
         print 'rank', rank, i, 'done'; fff()
 
-    dump(pr_dict, open('pr_dict_'+str(rank)+suffix, 'w'))
-    dump(space_seq, open('space_seq'+str(rank)+suffix, 'w'))
+    dump([space_seq, pr_dict], open('non_seq'+str(rank)+suffix, 'w'))
 
 
-def dis_pos():
+def dis_pos(jump, is_plot, file_name, axb_bound, x_bound):
     """
     1. read posterior sequence
     2. set bound for axb and x hypotheses
@@ -458,35 +465,71 @@ def dis_pos():
 
     run: serial
     """
-    space_seq = load(open('space_seq'))
-    pr_dict = load(open('pr_dict'))
+    # space_seq, pr_dict = load(open('non_seq%i_' % i + file_name))
+    print 'loading..'; fff()
+    _set = [load(open('non_seq%i_' % i + file_name)) for i in xrange(4)]
 
-    seq = []
-    seq1 = []
-    seq2 = []
-    for seen in space_seq:
-        Z = logsumexp([p for h, p in seen[0].iteritems()])
+    print 'avging..'; fff()
+    avg_space_seq, avg_pr_dict = _set.pop(0)
+    for space_seq, pr_dict in _set:
+        for i in xrange(len(space_seq)):
+            prob_dict, ada_dict = space_seq[i]
+            avg_prob_dict, avg_ada_dict = avg_space_seq[i]
+            for h in prob_dict:
+                avg_prob_dict[h] = logsumexp([avg_prob_dict[h], prob_dict[h]])
+                avg_ada_dict[h] += ada_dict[h]
+        for h in pr_dict:
+            avg_pr_dict[h] += pr_dict[h]
 
-        axb_prob = -Infinity
-        x_prob = -Infinity
+    for prob_dict, ada_dict in avg_space_seq:
+        for h in prob_dict:
+            prob_dict[h] -= 4
+            ada_dict[h] /= 4
+    for h in avg_pr_dict:
+        avg_pr_dict[h] /= 4
 
-        for h, v in seen[0].iteritems():
-            if pr_dict[h] > 0.2: axb_prob = logsumexp([axb_prob, v])
-            if seen[1][h] > 0.15: x_prob = logsumexp([x_prob, v])
+    for axb_bound in np.arange(0.1, 1, 0.1):
+        for x_bound in np.arange(0.02, 0.2, 0.02):
+            seq = []
+            seq1 = []
+            seq2 = []
+            for seen in avg_space_seq:
+                Z = logsumexp([p for h, p in seen[0].iteritems()])
 
-        seq.append(np.exp(axb_prob - Z))
-        seq1.append(np.exp(x_prob - Z))
-        seq2.append(np.exp(axb_prob - Z) - np.exp(x_prob - Z))
-        print 'done'; fff()
-    f, axarr = plt.subplots(1, 3)
-    axarr[0].plot(range(2, 65, 2), seq)
-    axarr[1].plot(range(2, 65, 2), seq1)
-    axarr[2].plot(range(2, 65, 2), seq2)
+                axb_prob = -Infinity
+                x_prob = -Infinity
 
-    # plt.legend(handles=[x])
-    plt.ylabel('posterior')
-    plt.xlabel('poo_size')
-    plt.show()
+                for h, v in seen[0].iteritems():
+                    if avg_pr_dict[h] > axb_bound: axb_prob = logsumexp([axb_prob, v])
+                    if seen[1][h] > x_bound: x_prob = logsumexp([x_prob, v])
+
+                seq.append(np.exp(axb_prob - Z))
+                seq1.append(np.exp(x_prob - Z))
+                seq2.append(np.exp(axb_prob - Z) - np.exp(x_prob - Z))
+                print 'done'; fff()
+
+            flag = True
+            for i in xrange(len(seq2) - 1):
+                if seq2[i] - seq2[i+1] > 1e-4:
+                    flag = False; break
+            if not flag: continue
+
+            print axb_bound, x_bound, '='*50
+            print 'axb_prob: ', seq
+            print 'x_prob: ', seq1
+            print 'difference_prob: ', seq2; fff()
+            dump([seq, seq1, seq2], open('nonadjacent_%.2f_%.2f' % (axb_bound, x_bound)+suffix, 'w'))
+
+            if is_plot == 'yes':
+                f, axarr = plt.subplots(1, 3)
+                axarr[0].plot(range(2, 65, jump), seq)
+                axarr[1].plot(range(2, 65, jump), seq1)
+                axarr[2].plot(range(2, 65, jump), seq2)
+
+                # plt.legend(handles=[x])
+                plt.ylabel('posterior')
+                plt.xlabel('poo_size')
+                plt.show()
 
 
 def test_lis_disp(names):
@@ -500,13 +543,15 @@ def test_lis_disp(names):
 
 
 if __name__ == '__main__':
-    # make_staged_seq()
-    # make_staged_seq2()
-    # get_kl_seq()
-    # get_kl_seq2()
 
-    make_pos()
-    # dis_pos()
+    if options.MODE == 'staged_mk':
+        make_staged_seq2(jump=options.JUMP, temp=options.TEMP)
+    elif options.MODE == 'staged_plt':
+        get_kl_seq2(jump=options.JUMP, is_plot=options.PLOT, file_name=options.FILE)
+    elif options.MODE == 'nonadjacent_mk':
+        make_pos(jump=options.JUMP, temp=options.TEMP)
+    elif options.MODE == 'nonadjacent_plt':
+        dis_pos(jump=options.JUMP, is_plot=options.PLOT, file_name=options.FILE, axb_bound=options.AXB, x_bound=options.X)
 
     # test_hypo_stat()
     #
@@ -514,14 +559,14 @@ if __name__ == '__main__':
     # s = pstats.Stats("Profile.prof")
     # s.strip_dirs().sort_stats("time").print_stats()
 
-    # avg_seq_set = load(open('avg_seq_set_0826_203129'))
+    # avg_seq_set = load(open('avg_seq_set_0829_053650'))
     # for avg_seq in avg_seq_set:
     #     for i in xrange(1, len(avg_seq)):
     #         avg_seq[i] = logsumexp([avg_seq[i], avg_seq[i-1]])
     #
-    # staged, = plt.plot(range(12, 145, 2), avg_seq_set[0], label='staged')
-    # normal, = plt.plot(range(12, 145, 2), avg_seq_set[1], label='normal')
-    # uniform, = plt.plot(range(12, 145, 2), avg_seq_set[2], label='uniform')
+    # staged, = plt.plot(range(12, 145, 30), avg_seq_set[0], label='staged')
+    # normal, = plt.plot(range(12, 145, 30), avg_seq_set[1], label='normal')
+    # uniform, = plt.plot(range(12, 145, 30), avg_seq_set[2], label='uniform')
     #
     # plt.legend(handles=[normal, staged, uniform])
     # plt.ylabel('KL-divergence')
