@@ -12,6 +12,8 @@ register_primitive(flatten2str)
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 
+def no_data(a, max_length=None):
+    return [FunctionData(input=[], output=Counter())]
 
 if __name__ == '__main__':
     """
@@ -24,13 +26,15 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     suffix = time.strftime('_' + options.NAME + '_%m%d_%H%M%S', time.localtime())
-    prefix = '../out/simulations/nonadjacent/'
+    prefix = './'
+    # prefix = '../out/simulations/nonadjacent/'
     # prefix = '/home/lijm/WORK/yuan/lot/'
 
     # ========================================================================================================
     # Running
     # ========================================================================================================
-    work_list = [make_hypothesis, 144, np.arange(2, 65, 5)[rank], options, None, ['c', 'd', 'e', 'f']]
+    # work_list = [make_hypothesis, 144, np.arange(2, 65, 5)[rank], options, None, ['c', 'd', 'e', 'f']]
+    work_list = [make_hypothesis, 144, 2, options, no_data, ['c', 'd', 'e', 'f']]
 
     topn = run(*work_list)
     dump(topn, open(prefix + sq(rank) + suffix, 'w'))

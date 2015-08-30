@@ -248,7 +248,16 @@ def flatten(expr):
 
     return tuple([x for x in flatten_(expr)])
 
+
 def flatten2str(expr, sep=' '):
+    # if expr is None: return ''
+    # else:
+    #     tmp = ''
+    #     expr = str(expr)
+    #     for e in expr:
+    #         if e == 'a' or e == 'b': tmp += e
+    #     return tmp
+
     try:
         if expr is None: return ''
         else:            return sep.join(flatten(expr))

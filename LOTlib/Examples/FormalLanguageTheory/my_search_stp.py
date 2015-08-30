@@ -7,7 +7,7 @@ import time
 import numpy as np
 import LOTlib
 from LOTlib.Miscellaneous import display_option_summary
-from LOTlib.MPI.MPI_map import is_master_process, MPI_map
+# from LOTlib.MPI.MPI_map import is_master_process, MPI_map
 from LOTlib.Inference.Samplers.StandardSample import standard_sample
 from LOTlib.Evaluation.Eval import register_primitive
 from LOTlib.Miscellaneous import flatten2str, logsumexp, qq
@@ -29,24 +29,28 @@ def run(mk_hypothesis, lang, size):
     if LOTlib.SIG_INTERRUPTED:
         return set()
 
-    return standard_sample(lambda: mk_hypothesis(options.LANG, N=options.N),
+    return standard_sample(lambda: mk_hypothesis(options.LANG, N=options.N, rank=rank),
                            lambda: lang.sample_data_as_FuncData(size),
                            N=options.TOP_COUNT,
                            steps=options.STEPS,
-                           show=False, save_top=None)
+                           show=True, skip=50, save_top=None)
 
 
 def simple_mpi_map(run, args):
+    print 'rank: ', rank, 'running..'; fff()
     hypo_set = run(*(args[rank]))
+
 
     if rank == 0:
         _set = set()
         _set.update(hypo_set)
         for i in xrange(size - 1):
             _set.update(comm.recv(source=i+1))
+            print 'rank: ', rank, 'recv: ', i; fff()
         return _set
     else:
         comm.send(hypo_set, dest=0)
+        print 'rank: ', rank, 'send: ', 0; fff()
         sys.exit(0)
 
 if __name__ == "__main__":
@@ -69,10 +73,10 @@ if __name__ == "__main__":
 
     # set the output codec -- needed to display lambda to stdout
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
-    if is_master_process():
+    if rank == 0:
         display_option_summary(options); fff()
 
-    # you need to run 5 machine on that
+    # you need to run 12 machine on that
     DATA_RANGE = np.arange(20, 300, 24)
 
     language = instance(options.LANG, options.FINITE)
@@ -91,7 +95,7 @@ if __name__ == "__main__":
     pr_data = language.sample_data_as_FuncData(1024)
     p = []
     r = []
-    print 'compute precision and recall..'
+    print 'compute precision and recall..'; fff()
     for h in hypotheses:
         precision, recall = language.estimate_precision_and_recall(h, pr_data)
         p.append(precision)
@@ -99,7 +103,7 @@ if __name__ == "__main__":
 
     # Now go through each hypothesis and print out some summary stats
     for data_size in DATA_RANGE:
-        print 'get stats from size : ', data_size
+        print 'get stats from size : ', data_size ; fff()
 
         evaluation_data = language.sample_data_as_FuncData(data_size)
 
