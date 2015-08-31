@@ -131,7 +131,7 @@ class BVAddGrammarRule(GrammarRule):
             bvp = grammar.BV_P
         return BVUseGrammarRule(self.bv_type, self.bv_args,
                                 p=bvp, bv_prefix=self.bv_prefix)
-   
+
     def make_FunctionNodeStub(self, grammar, parent):
         """Return a FunctionNode with none of the arguments realized. That's a "stub"
 
