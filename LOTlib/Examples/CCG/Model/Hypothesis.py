@@ -11,12 +11,13 @@ from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from Grammar import grammar
 from Data import all_words ## NOT ideal here, but just an example
 
-# How we make a hypothesis inside the lexicon
-def make_inner_hypothesis():
-    return LOTHypothesis(grammar, args=['C'])
-
 def make_hypothesis():
-    return CCGLexicon(make_inner_hypothesis, words=all_words, alpha=0.9, palpha=0.9, likelihood_temperature=1.0)
+
+    h = CCGLexicon(alpha=0.9, palpha=0.9, likelihood_temperature=1.0)
+    for w in all_words:
+        h.set_word(w, LOTHypothesis(grammar, args=['C']))
+
+    return h
 
 class CCGLexicon(WeightedLexicon):
     """A version for doing CCG, which parses in the likelihood."""

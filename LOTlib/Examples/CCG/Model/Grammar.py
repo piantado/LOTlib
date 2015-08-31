@@ -32,6 +32,10 @@ grammar.add_rule('BOOL', 'or_', ['BOOL', 'BOOL'], 1.0)
 grammar.add_rule('BOOL', 'not_', ['BOOL'], 1.0)
 
 # And for outermost functions
-grammar.add_rule('FUNCTION', 'lambda', ['START'], 1.0, bv_type='OBJECT')
-grammar.add_rule('FUNCTION', 'lambda', ['START'], 1.0, bv_type='BOOL', bv_args=['OBJECT'])
-grammar.add_rule('FUNCTION', 'lambda', ['START'], 1.0, bv_type='BOOL', bv_args=['OBJECT', 'OBJECT'])
+grammar.add_rule('FUNCTION', 'lambda', ['START1'], 1.0, bv_type='OBJECT')
+grammar.add_rule('FUNCTION', 'lambda', ['START2'], 1.0, bv_type='BOOL', bv_args=['OBJECT'])
+grammar.add_rule('FUNCTION', 'lambda', ['START3'], 1.0, bv_type='BOOL', bv_args=['OBJECT', 'OBJECT'])
+
+grammar.add_rule('START1', '', ['START'], 1.0)
+grammar.add_rule('START2', '', ['START'], 1.0)
+grammar.add_rule('START3', '', ['START'], 1.0)

@@ -70,5 +70,5 @@ all_words = set()
 for di in data:
     for w in di.utterance: all_words.add(w)
 
-def make_data():
+def make_data(*args, **kwargs):
     return data
