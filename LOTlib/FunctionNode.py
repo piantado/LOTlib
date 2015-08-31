@@ -457,8 +457,8 @@ class FunctionNode(object):
         else:
             # figure out what kind of lambda
             t = []
-            if self.added_rule is not None and self.added_rule.to is not None:
-                t = tuple( [self.added_rule.nt,] + copy(self.self.added_rule.to) )
+            if getattr(self, 'added_rule', None) is not None and self.added_rule.to is not None:
+                t = tuple( [self.added_rule.nt,] + copy(self.added_rule.to) )
             else:
                 t = self.added_rule.nt
 
