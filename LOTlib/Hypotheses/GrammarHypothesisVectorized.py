@@ -59,6 +59,19 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
         self.L = L if L else {}
         self.R = R if R else {}
 
+    def __copy__(self, value=None, **kwargs):
+        """Copy this GH; shallow copies of value & proposal so we don't have sampling issues."""
+
+        c = type(self)(self.grammar, self.hypotheses, H=self.H, C=self.C, L=self.L, R=self.R, **kwargs) # don't copy the cached matrices
+
+        if value is None:
+            value = copy(self.value)
+        c.set_value(value)
+
+        c.__dict__.update(self.__dict__)
+
+        return c
+
     def init_C(self):
         """
         Initialize our rule count vector `self.C`.
