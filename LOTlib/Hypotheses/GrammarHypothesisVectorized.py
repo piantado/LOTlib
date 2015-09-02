@@ -112,7 +112,7 @@ class GrammarHypothesisVectorized(GrammarHypothesis):
             if d_index not in self.R:
                 self.init_R(d, d_index)
 
-            posteriors = self.L[d_index] + P
+            posteriors = self.L[d_index] / self.likelihood_temperature + P / self.prior_temperature
             Z = logsumexp(posteriors)
             w = np.exp(posteriors - Z)              # weights for each hypothesis
             r_i = np.transpose(self.R[d_index])
