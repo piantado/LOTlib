@@ -97,7 +97,7 @@ class FactorizedLambdaHypothesis(SimpleLexicon):
         We made it with two tricks: We construct and pass the lambda expression to next InnerHypothesis; We wrap the
         expression inside the recurse_() function with a lambda function to make it callable for next level of recursion
     """
-    def __init__(self, N=4, grammar=None, argument_type='LIST', variable_weight=2.0, value=None, **kwargs):
+    def __init__(self, N=4, grammar=None, argument_type='FUNCTION', variable_weight=2.0, value=None, **kwargs):
 
         SimpleLexicon.__init__(self, value=value)
 
@@ -113,7 +113,7 @@ class FactorizedLambdaHypothesis(SimpleLexicon):
                     argi = 'x%s'%xi
 
                     # Add a rule for the variable
-                    nthgrammar.add_rule(argument_type, argi, [''], variable_weight)
+                    nthgrammar.add_rule(argument_type, argi, None, variable_weight)
 
                     args.append(argi)
 
@@ -121,6 +121,7 @@ class FactorizedLambdaHypothesis(SimpleLexicon):
                 nthgrammar.add_rule('LIST', 'recurse_', ['FUNCTION']*(w), 1.)
                 # we wrap the content with lambda to make it callable for next recursion level
                 nthgrammar.add_rule('FUNCTION', 'lambda', ['LIST'], 1.)
+                nthgrammar.add_rule('LIST', '(%s)()', ['FUNCTION'], 1.)
 
                 self.set_word(w, self.make_hypothesis(grammar=nthgrammar, args=args))
 

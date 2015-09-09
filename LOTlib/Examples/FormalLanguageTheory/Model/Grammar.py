@@ -16,9 +16,9 @@ base_grammar.add_rule('BOOL', 'flip_', [''], 1.)
 
 from copy import deepcopy
 
-ab_grammar = deepcopy(base_grammar)
-for x in 'ab':
-    ab_grammar.add_rule('ATOM', q(x), None, 2)
+a_grammar = deepcopy(base_grammar)
+for x in 'a':
+    a_grammar.add_rule('ATOM', q(x), None, 2)
 
 eng_grammar = deepcopy(base_grammar)
 for x in 'davtn':

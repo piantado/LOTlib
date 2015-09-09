@@ -9,17 +9,6 @@
 from LOTlib.Miscellaneous import attrmem, nicelog
 from collections import Counter
 
-# debug
-# from LOTlib.Examples.FormalLanguageTheory.parse_hypothesis import rank
-
-from mpi4py import MPI
-rank = MPI.COMM_WORLD.Get_rank()
-import os
-from pickle import dump
-import numpy as np
-
-total_num = 0
-
 class StochasticFunctionLikelihood(object):
 
     @attrmem('ll_counts')
@@ -34,25 +23,7 @@ class StochasticFunctionLikelihood(object):
 
         llcounts = Counter()
 
-        # f = open('../../Examples/FormalLanguageTheory/ppp_%i' % rank, 'a')
-        # if os.stat('../../Examples/FormalLanguageTheory/ppp_%i' % rank).st_size > 1e6:
-        #     f.close()
-        #     f = open('../../Examples/FormalLanguageTheory/ppp_%i' % rank, 'w')
-        save_path = '../../Examples/FormalLanguageTheory/gen/'
-
-        global total_num
-        if total_num > 1000:
-            for f in os.listdir(save_path): os.remove(save_path+f)
-            total_num = 0
-
-        dump(self, open(save_path + '%.8f_%i' % (np.random.rand(), rank), 'w'))
-        total_num += 1
-
-        # print >> f, str(self)
-        # f.close()
-        print str(self)
         for i in xrange(nsamples):
-            print i
             llcounts[self(*input)] += 1
 
         return llcounts

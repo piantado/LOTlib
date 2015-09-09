@@ -7,6 +7,8 @@ import time
 from mpi4py import MPI
 from StagedInput_inf import sq
 from pickle import dump
+import sys
+import codecs
 
 register_primitive(flatten2str)
 comm = MPI.COMM_WORLD
@@ -33,8 +35,9 @@ if __name__ == '__main__':
     # ========================================================================================================
     # Running
     # ========================================================================================================
-    # work_list = [make_hypothesis, 144, np.arange(2, 65, 5)[rank], options, None, ['c', 'd', 'e', 'f']]
-    work_list = [make_hypothesis, 144, 2, options, no_data, ['c', 'd', 'e', 'f']]
+    sys.stdout = codecs.getwriter('utf8')(sys.stdout)
+    work_list = [make_hypothesis, 144, np.arange(2, 12, 2)[rank], options, None, ['c', 'd', 'e', 'f', 'h', 'i', 'j', 'k']]
+    # work_list = [make_hypothesis, 144, 2, options, no_data, ['c', 'd', 'e', 'f']]
 
     topn = run(*work_list)
     dump(topn, open(prefix + sq(rank) + suffix, 'w'))

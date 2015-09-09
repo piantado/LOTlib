@@ -8,15 +8,14 @@ from math import log
 
 class LongDependency(FormalLanguage):
 
-    def __init__(self, A='a', B='b', max_length=5):
+    def __init__(self, max_length=5):
         """
         NOTE: we specify the size of pool from which we will draw our X in sampling strings instead of max_length
         """
-        assert len(A) == 1 and len(B) == 1, 'atom length should be one'
 
-        self.A = A
-        self.B = B
-        self.C = ['c', 'd', 'e', 'f']
+        self.A = ['a', 'c', 'e']
+        self.B = ['b', 'd', 'f']
+        self.C = ['h', 'i', 'j', 'k']
 
         FormalLanguage.__init__(self, max_length)
 
@@ -24,11 +23,12 @@ class LongDependency(FormalLanguage):
 
         assert max_length > 1, 'pool_size should be larger than 2'
 
-        num = 0
-        for e in list(itertools.product(*([self.C]*3))):
-            num += 1
-            if num > max_length: break
-            yield self.A + self.t2s(e) + self.B
+        for i in xrange(3):
+            num = 0
+            for e in list(itertools.product(*([self.C]*3))):
+                num += 1
+                if num > max_length: break
+                yield self.A[i] + self.t2s(e) + self.B[i]
 
     def estimate_precision_and_recall(self, h, data):
         """
@@ -84,9 +84,9 @@ class LongDependency(FormalLanguage):
 
 # just for testing
 if __name__ == '__main__':
-    language = LongDependency(max_length=4)
+    language = LongDependency(max_length=2)
 
-    # for e in language.all_strings(max_length=12):
+    # for e in language.all_strings(max_length=2):
     #     print e
 
     print language.sample_data_as_FuncData(128)

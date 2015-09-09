@@ -23,7 +23,7 @@ plt
 d$posterior.score <- d$posterior.score / d$data.size
 # first toss hypotheses with very low probability so there are not too many
 
-keepers <- unique(subset(d, posterior.probability > 0.05)$h) # keep any hypothesis that gets above 1% posterior prob
+keepers <- unique(subset(d, posterior.probability > 0.5)$h) # keep any hypothesis that gets above 1% posterior prob
 d2 <- subset(d, is.element(h, keepers))
 
 d2$h <- as.factor(as.character(d2$h)) # we have to re-set this factor so it doesn't remember all the hyps we removed
@@ -50,7 +50,7 @@ plt <- ggplot(s, aes(x=data.size, y=score, color=precision, group=precision)) + 
 plt
 
 
-d <- read.table("G://programs and files//Python//Lib//site-packages//LOTlib//LOTlib//Examples//FormalLanguageTheory//out//SimpleEnglish//out_8_10w_t")
+d <- read.table("G://programs and files//Python//Lib//site-packages//LOTlib//LOTlib//Examples//FormalLanguageTheory//out//SimpleEnglish//rr_w_t")
 names(d) <- c("data.size", "posterior.probability", "posterior.score", "prior", "likelihood", "number.of.generated.strings", "h", "precision", "recall")
 
 plt <- ggplot(d, aes(x=steps, y=precision_recall, group=n, color=n)) +  geom_line()
