@@ -74,6 +74,20 @@ def load_hypo(_dir, keys):
     return rec
 
 # ===========================================================================
+# prase SimpleEnglish
+# ===========================================================================
+def most_prob(suffix):
+    topn = load(open('out/SimpleEnglish/hypotheses__' + suffix))
+    Z = logsumexp([h.posterior_score for h in topn])
+    h_set = [h for h in topn]; h_set.sort(key=lambda x: x.posterior_score, reverse=True)
+    
+    for i in xrange(10):
+        print h_set[i]
+        print 'prob`: ', np.exp(h_set[i].posterior_score - Z)
+        print Counter([h_set[i]() for _ in xrange(512)])
+
+
+# ===========================================================================
 # staged & skewed
 # ===========================================================================
 def pos_seq(rec, infos):
@@ -171,7 +185,8 @@ def get_kl_seq():
 
 def get_kl_seq2(jump, is_plot, file_name):
     print 'loading..'; fff()
-    seq_set = [load(open('seq%i_' % i + file_name)) for i in xrange(12)]
+    # TODO
+    seq_set = [load(open('seq%i_' % i + file_name)) for i in xrange(3)]
     kl_seq_set = []
 
     # print 'prior'
@@ -180,42 +195,56 @@ def get_kl_seq2(jump, is_plot, file_name):
     # for h in dict_0:
     #     dict_0[h] = h.compute_posterior([FunctionData(input=[], output=Counter())])
 
+    # avg_seq_set = []
+    # for i in [4, 8, 12]:
+    #     for j in xrange(i-4, i):
+    #         sub = [seq_set[j] for j in xrange(i-4, i)]
+    #         avg_seq_set.append([(a+b+c+d)/4 for a, b, c, d in zip(*sub)])
+
     for seq in seq_set:
         # seq.insert(0, dict_0)
         kl_seq = []
+
+        kl_sum = 0
 
         for i in xrange(len(seq)-1):
             current_dict = seq[i]
             next_dict = seq[i+1]
             kl = compute_kl(current_dict, next_dict)
-            kl_seq.append(log(kl))
+            # kl_seq.append(log(kl))
             print 'KL from %i to %i: ' % (i, i+1), kl; fff()
+
+            f = open('tmp_out', 'a')
+            kl_sum += kl
+            print >> f, kl_sum
 
         kl_seq_set.append(kl_seq)
         print '='*50; fff()
+        f = open('tmp_out', 'a')
+        print >> f, '='*50
 
-    print 'avging'; fff()
-    avg_seq_set = []
-    for i in [4, 8, 12]:
-        sub = [kl_seq_set[j] for j in xrange(i-4, i)]
-        avg_seq_set.append([(a+b+c+d)/4 for a, b, c, d in zip(*sub)])
-
-    for avg_seq in avg_seq_set:
-        for i in xrange(1, len(avg_seq)):
-            avg_seq[i] = logsumexp([avg_seq[i], avg_seq[i-1]])
-
-    dump(kl_seq_set, open('kl_seq_set'+suffix, 'w'))
-    dump(avg_seq_set, open('avg_seq_set'+suffix, 'w'))
-
-    if is_plot == 'yes':
-        staged, = plt.plot(range(12, 145, jump), avg_seq_set[0], label='staged')
-        normal, = plt.plot(range(12, 145, jump), avg_seq_set[1], label='normal')
-        uniform, = plt.plot(range(12, 145, jump), avg_seq_set[2], label='uniform')
-
-        plt.legend(handles=[normal, staged, uniform])
-        plt.ylabel('KL-divergence')
-        plt.xlabel('data')
-        plt.show()
+    # print 'avging'; fff()
+    # avg_seq_set = []
+    # for i in [4, 8, 12]:
+    #     sub = [kl_seq_set[j] for j in xrange(i-4, i)]
+    #     avg_seq_set.append([(a+b+c+d)/4 for a, b, c, d in zip(*sub)])
+    #
+    # for avg_seq in avg_seq_set:
+    #     for i in xrange(1, len(avg_seq)):
+    #         avg_seq[i] = logsumexp([avg_seq[i], avg_seq[i-1]])
+    #
+    # dump(kl_seq_set, open('kl_seq_set'+suffix, 'w'))
+    # dump(avg_seq_set, open('avg_seq_set'+suffix, 'w'))
+    #
+    # if is_plot == 'yes':
+    #     staged, = plt.plot(range(12, 145, jump), avg_seq_set[0], label='staged')
+    #     normal, = plt.plot(range(12, 145, jump), avg_seq_set[1], label='normal')
+    #     uniform, = plt.plot(range(12, 145, jump), avg_seq_set[2], label='uniform')
+    #
+    #     plt.legend(handles=[normal, staged, uniform])
+    #     plt.ylabel('KL-divergence')
+    #     plt.xlabel('data')
+    #     plt.show()
 
 
 def make_staged_seq():
@@ -249,15 +278,16 @@ def make_staged_seq2(jump, temp):
 
     if rank in work_list[0]:
         seq = []
-        infos = [[i, 4*((i-1)/48+1)] for i in xrange(12, 145, jump)]
+        # infos = [[i, min(4*((i-1)/48+1), 12)] for i in xrange(12, 145, jump)]
+        infos = [[i, min(4*((int(i)-1)/48+1), 12)] for i in [10**e for e in np.arange(0, 2.5, 0.1)]]
 
         for e in infos:
             prob_dict = {}
-            language = AnBn(max_length=e[1])
+            language = AnBn(max_length=e[1]+(e[1]%2!=0))
             eval_data = language.sample_data_as_FuncData(e[0])
 
             for h in seen:
-                h.likelihood_temperature = max(temp - (e[0]-12)*(temp-1)/(100-12), 1)
+                h.likelihood_temperature = temp
                 prob_dict[h] = h.compute_posterior(eval_data)
 
             seq.append(prob_dict)
@@ -265,7 +295,8 @@ def make_staged_seq2(jump, temp):
 
     elif rank in work_list[1]:
         seq = []
-        infos = [[i, 12] for i in xrange(12, 145, jump)]
+        # infos = [[i, 12] for i in xrange(12, 145, jump)]
+        infos = [[i, 12] for i in [10**e for e in np.arange(0, 2.5, 0.1)]]
 
         for e in infos:
             prob_dict = {}
@@ -273,7 +304,7 @@ def make_staged_seq2(jump, temp):
             eval_data = language.sample_data_as_FuncData(e[0])
 
             for h in seen:
-                h.likelihood_temperature = max(temp - (e[0]-12)*(temp-1)/(100-12), 1)
+                h.likelihood_temperature = temp
                 prob_dict[h] = h.compute_posterior(eval_data)
 
             seq.append(prob_dict)
@@ -281,13 +312,14 @@ def make_staged_seq2(jump, temp):
 
     else:
         seq = []
-        infos = [[i, 12] for i in xrange(12, 145, jump)]
+        # infos = [[i, 12] for i in xrange(12, 145, jump)]
+        infos = [[i, 12] for i in [10**e for e in np.arange(0, 2.5, 0.1)]]
         for e in infos:
             prob_dict = {}
             eval_data = uniform_data(e[0], e[1])
 
             for h in seen:
-                h.likelihood_temperature = max(temp - (e[0]-12)*(temp-1)/(100-12), 1)
+                h.likelihood_temperature = temp
                 prob_dict[h] = h.compute_posterior(eval_data)
 
             seq.append(prob_dict)
@@ -410,7 +442,8 @@ def make_pos(jump, temp):
     for e in rec:
         for h in e[1]:
             if h in _set: continue
-            cnt = Counter([h() for _ in xrange(1024)])
+            cnt = Counter([h() for _ in xrange(256)])
+            # cnt = Counter([h() for _ in xrange(10)])
             cnt_tmp[h] = cnt
             base = sum(cnt.values())
             num = 0
@@ -427,34 +460,138 @@ def make_pos(jump, temp):
 
         eval_data = {}
         for e in language.str_sets:
-            eval_data[e] = 1024.0 / len(language.str_sets)
+            eval_data[e] = 144.0 / len(language.str_sets)
         eval_data = [FunctionData(input=[], output=eval_data)]
 
         prob_dict = {}
         ada_dict = {}
-        # test_list = []
+        test_list = []
 
         for h in _set:
             h.likelihood_temperature = temp
             prob_dict[h] = h.compute_posterior(eval_data)
             p, r = language.estimate_precision_and_recall(h, cnt_tmp[h])
-            ada_dict[h] = p*r/(p+r) if p+r != 0 else 0
+            ada_dict[h] = 2*p*r/(p+r) if p+r != 0 else 0
 
-            # test_list.append([h.posterior_score, ada_dict[h], pr_dict[h], cnt_tmp[h], str(h)])
+            test_list.append([h.posterior_score, ada_dict[h], pr_dict[h], cnt_tmp[h], str(h)])
 
-        # Z = logsumexp([h.posterior_score for h in _set])
-        # test_list.sort(key=lambda x:x[0], reverse=True)
+        Z = logsumexp([h.posterior_score for h in _set])
+        test_list.sort(key=lambda x:x[0], reverse=True)
+
+        weighted_x = 0
+        weighted_axb = 0
+        for e in test_list:
+            weighted_x += np.exp(e[0] - Z) * e[1]
+            weighted_axb += np.exp(e[0] - Z) * e[2]
+        f = open('non_w'+suffix, 'a')
+        print >> f, weighted_x, weighted_axb
+        f.close()
         # print rank, i, '='*50
         # for i_t in xrange(3):
         #     print 'prob: ', np.exp(test_list[i_t][0] - Z), 'x_f-score',  test_list[i_t][1], 'axb_f-score',  test_list[i_t][2]
         #     print test_list[i_t][3]
+            # print test_list[i_t][5].compute_posterior(eval_data)
+            # print language.estimate_precision_and_recall(test_list[i_t][5], cnt_tmp[test_list[i_t][5]])
         # fff()
         # dump(test_list, open('test_list_'+str(rank)+'_'+str(i)+suffix, 'w'))
 
-        space_seq.append([prob_dict, ada_dict])
+        # space_seq.append([prob_dict, ada_dict])
         print 'rank', rank, i, 'done'; fff()
 
     dump([space_seq, pr_dict], open('non_seq'+str(rank)+suffix, 'w'))
+
+
+def make_pos2(jump, temp):
+    """
+    1. read raw output
+    2. compute precision & recall on nonadjacent and adjacent contents
+    3. evaluate posterior probability on different data sizes
+    4. dump the sequence
+
+    run: mpiexec -n 4
+    """
+
+    print 'loading..'; fff()
+    rec = load_hypo('out/simulations/nonadjacent/', ['0'])
+
+    print 'estimating pr'; fff()
+    pr_dict = {}
+    _set = set()
+    cnt_tmp = {}
+    for e in rec:
+        for h in e[1]:
+            if h in _set: continue
+            cnt = Counter([h() for _ in xrange(1024)])
+            cnt_tmp[h] = cnt
+            base = sum(cnt.values())
+            num = 0
+            for k, v in cnt.iteritems():
+                if k is None or len(k) < 2: continue
+                if k[0] + k[-1] in ['ab', 'cd', 'ef']: num += v
+            pr_dict[h] = float(num) / base
+            _set.add(h)
+
+    work_list = range(2, 17, jump)
+    for i in work_list:
+        language = LongDependency(max_length=i)
+
+        eval_data = {}
+        for e in language.str_sets:
+            eval_data[e] = 144.0 / len(language.str_sets)
+        eval_data = [FunctionData(input=[], output=eval_data)]
+
+        score = np.zeros(len(_set), dtype=np.float64)
+        prec = np.zeros(len(_set), dtype=np.float64)
+
+        # prob_dict = {}
+        # test_list = []
+
+        for ind, h in enumerate(_set):
+            h.likelihood_temperature = temp
+            score[ind] = h.compute_posterior(eval_data)
+            prec[ind] = pr_dict[h]
+            # prob_dict[h] = h.compute_posterior(eval_data)
+            # test_list.append([h.posterior_score, pr_dict[h], cnt_tmp[h], str(h), h])
+
+        # test_list.sort(key=lambda x: x[0], reverse=True)
+        # Z = logsumexp([h.posterior_score for h in _set])
+        #
+        # weighted_axb = sum([np.exp(e[0] - Z) * e[1] for e in test_list])
+        # print i, weighted_axb
+        # for i_t in xrange(3):
+        #     print 'prob: ', np.exp(test_list[i_t][0] - Z), 'axb_f-score',  test_list[i_t][1]
+        #     print test_list[i_t][2]
+        #     # print test_list[i_t][4].compute_posterior(eval_data)
+        #     # print language.estimate_precision_and_recall(test_list[i_t][5], cnt_tmp[test_list[i_t][5]])
+        # print '='*50
+        # fff()
+
+        #
+        # f = open('non_w'+suffix, 'a')
+        # print >> f, Z, weighted_axb
+        # print
+        # f.close()
+        #
+        # print 'size: %i' % i, Z, weighted_axb; fff()
+
+        if rank != 0:
+            comm.send(score, dest=0)
+            comm.send(prec, dest=0)
+        else:
+            for r in xrange(size - 1):
+                score += comm.recv(source=r+1)
+                prec += comm.recv(source=r+1)
+            score /= size
+            prec /= size
+            Z = logsumexp(score)
+
+            weighted_axb = np.sum(np.exp(score-Z) * prec)
+
+            f = open('non_w'+suffix, 'a')
+            print >> f, Z, weighted_axb
+            print i, Z, weighted_axb; fff()
+            f.close()
+        # dump([space_seq, pr_dict], open('non_seq'+str(rank)+suffix, 'w'))
 
 
 def dis_pos(jump, is_plot, file_name, axb_bound, x_bound):
@@ -489,7 +626,7 @@ def dis_pos(jump, is_plot, file_name, axb_bound, x_bound):
         avg_pr_dict[h] /= 4
 
     for axb_bound in np.arange(0.1, 1, 0.1):
-        for x_bound in np.arange(0.02, 0.2, 0.02):
+        for x_bound in np.arange(0.1, 1, 0.1):
             seq = []
             seq1 = []
             seq2 = []
@@ -549,9 +686,11 @@ if __name__ == '__main__':
     elif options.MODE == 'staged_plt':
         get_kl_seq2(jump=options.JUMP, is_plot=options.PLOT, file_name=options.FILE)
     elif options.MODE == 'nonadjacent_mk':
-        make_pos(jump=options.JUMP, temp=options.TEMP)
+        make_pos2(jump=options.JUMP, temp=options.TEMP)
     elif options.MODE == 'nonadjacent_plt':
         dis_pos(jump=options.JUMP, is_plot=options.PLOT, file_name=options.FILE, axb_bound=options.AXB, x_bound=options.X)
+    elif options.MODE == 'parse_simple':
+        most_prob(options.FILE)
 
     # test_hypo_stat()
     #
@@ -559,7 +698,7 @@ if __name__ == '__main__':
     # s = pstats.Stats("Profile.prof")
     # s.strip_dirs().sort_stats("time").print_stats()
 
-    # avg_seq_set = load(open('avg_seq_set_0829_053650'))
+    # avg_seq_set = load(open('avg_seq_set_0829_022210'))
     # for avg_seq in avg_seq_set:
     #     for i in xrange(1, len(avg_seq)):
     #         avg_seq[i] = logsumexp([avg_seq[i], avg_seq[i-1]])

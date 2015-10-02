@@ -40,11 +40,15 @@ class FormalLanguage(object):
 
     def sample_data_as_FuncData(self, n, avg=True):
         """
+        n: can be float in avg mode
         finite: limits the max_length of data
         avg: sample for multiple times and average to reduce noise, note the cnt can have fraction
         """
+        if n == 0:
+            return [FunctionData(input=[], output=Counter())]
+
         if avg:
-            cnt = Counter(self.sample_data(n*512))
+            cnt = Counter(self.sample_data(int(n*512)))
             n = float(512)
             for key in cnt.keys():
                 cnt[key] /= n

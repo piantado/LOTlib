@@ -1,4 +1,4 @@
-from copy import copy
+from copy import deepcopy
 from LOTlib.Miscellaneous import flip, qq, attrmem
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
 from LOTlib.Hypotheses.FunctionHypothesis import FunctionHypothesis
@@ -81,7 +81,7 @@ class SimpleLexicon(Hypothesis):
         Propose to the lexicon by flipping a coin for each word and proposing to it.
         """
 
-        new = copy(self)  ## Now we just copy the whole thing
+        new = deepcopy(self)  ## Now we just copy the whole thing
         fb = 0.0
 
         for w in self.all_words():
