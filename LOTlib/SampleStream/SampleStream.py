@@ -3,7 +3,7 @@ import collections
 class SampleStream(object):
     """
     SampleStream is the basic class that others in this directory inherit from. It allows constructs
-    where we process and pass on samples. (See example below)
+    where we process and pass on samples.
     """
 
     def __init__(self, generator=None):
@@ -11,14 +11,18 @@ class SampleStream(object):
         self.generator = generator
 
     def update(self, generator):
-        """ When given a generator, I will __enter__ and __exit__ (and on all of my actions)"""
-        with self:
+        """ This ist eh basic call to make me process a generator.
+            I will __enter__ and __exit__ (and on all of my actions)"""
+        with self: # force __enter__ and __exit__
             for x in generator:
                 v = self.process(x)
                 if v is not None: # none means skip
                     yield v
 
     def process(self, x):
+        """ Process a single sample. This should NOT be called except from update, since it won't enforce
+            __enter__ and __exit__
+        """
 
         v = self.process_(x)
         for a in self.actions:
@@ -73,11 +77,11 @@ if __name__ == "__main__":
     from LOTlib import break_ctrlc
     from LOTlib.Examples.Number.Model import make_hypothesis, make_data
     from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
-    from LOTlib.MCMCSummary import *
+    from LOTlib.SampleStream import *
 
     sampler = break_ctrlc(MHSampler(make_hypothesis(), make_data()))
 
-    tn = TopN(N=10)
+    tn = Top(N=10, path="top.pkl")
 
     for h in SampleStream(sampler) >> PosteriorTrace(plot_every=100) >> tn >> Save('hypotheses.pkl') \
             >> Tee( Unique() >> PrintH(), Skip(30) >> Print(prefix="#\t")):

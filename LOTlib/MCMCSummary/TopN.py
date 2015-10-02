@@ -6,7 +6,7 @@ from LOTlib.FiniteBestSet import FiniteBestSet
 
 from SampleStream import SampleStream
 
-class TopN(SampleStream):
+class TopN(object):
     """
     This  uses a FiniteBestSet to store the top N hypotheses found.
 
@@ -21,10 +21,6 @@ class TopN(SampleStream):
         self.count = 0
 
         self.actions = []  # to keep it as a functioning SampleStream
-
-    def process_(self, x):
-        self.add(x)
-        return x
 
     def add(self, h):
 
