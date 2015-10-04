@@ -31,8 +31,7 @@ if __name__ == '__main__':
     for e in language.all_strings(max_length=30):
         print e
 
-    print language.sample_data_as_FuncData(128, max_length=30)
-
+    print language.sample_data_as_FuncData(128)
     print language.is_valid_string('aaabb')
     print language.is_valid_string('abc')
     print language.is_valid_string('abbcc')

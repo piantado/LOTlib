@@ -4,9 +4,9 @@ from LOTlib.Examples.FormalLanguageTheory.Language.FormalLanguage import FormalL
 
 class Dyck(FormalLanguage):
     """
-    This one is very hard to learn, please run it with at least 1e5 MCMC steps
+        This one is very hard to learn, please run it with at least 1e5 MCMC steps
     """
-    def __init__(self, A='a', B='b', max_length=6):
+    def __init__(self, A='a', B='b', max_length=8):
         assert len(A) == 1 and len(B) == 1, 'atom length should be one'
 
         self.A = A
@@ -46,6 +46,19 @@ class Dyck(FormalLanguage):
     def string_log_probability(self, s):
         return -len(s)/2
 
+    def is_valid_string(self, s):
+
+        if len(s) < 2: return False
+
+        cnt = 0
+        for e in s:
+            if e == self.A:
+                cnt+=1
+            elif e==self.B:
+                cnt-=1
+                if cnt < 0: return False
+
+        return cnt == 0
 
 # just for testing
 if __name__ == '__main__':
@@ -58,7 +71,7 @@ if __name__ == '__main__':
 
     lang = Dyck()
 
-    for e in lang.all_strings(max_length=16):
+    for e in lang.all_strings(max_length=8):
         print e
 
     # language = AnBn()

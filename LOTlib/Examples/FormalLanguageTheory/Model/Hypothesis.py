@@ -46,7 +46,7 @@ class AnBnCnHypothesis(StochasticFunctionLikelihood, FactorizedDataHypothesis):
 
         ll = 0.0 # We are going to compute a pseudo-likelihood, counting close strings as being close
         for k in datum.output.keys():
-            ll += datum.output[k] * logsumexp([ log(llcounts[r])-log(lo) - 1.0 * distance(r, k) for r in llcounts.keys() ])
+            ll += datum.output[k] * logsumexp([ log(llcounts[r])-log(lo) - 100.0 * distance(r, k) for r in llcounts.keys() ])
         return ll
 
 
@@ -70,7 +70,7 @@ class SimpleEnglishHypothesis(StochasticFunctionLikelihood, FactorizedLambdaHypo
 
         ll = 0.0 # We are going to compute a pseudo-likelihood, counting close strings as being close
         for k in datum.output.keys():
-            ll += datum.output[k] * logsumexp([ log(llcounts[r])-log(lo) - 1.0 * distance(r, k) for r in llcounts.keys() ])
+            ll += datum.output[k] * logsumexp([ log(llcounts[r])-log(lo) - 100.0 * distance(r, k) for r in llcounts.keys() ])
         return ll
 
 
@@ -86,21 +86,5 @@ def make_hypothesis(s, **kwargs):
             for e in terminals:
                 grammar.add_rule('ATOM', q(e), None, 2)
 
-    # return AnBnCnHypothesis(grammar=grammar, **kwargs) if s != 'SimpleEnglish' and s != 'LongDependency' else SimpleEnglishHypothesis(grammar=grammar, **kwargs)
     return SimpleEnglishHypothesis(grammar=grammar, **kwargs)
-
-# from LOTlib.Evaluation.Eval import register_primitive
-# from LOTlib.Miscellaneous import flatten2str
-# register_primitive(flatten2str)
-# import sys
-# sys.setrecursionlimit(1000)
-# h = make_hypothesis('SimpleEnglish', N=4)
-# for i in xrange(1000):
-#     if i % 100 == 0: print i
-#     h_new, p = h.propose()
-#     h_new()
-
-# a = lambda: 'a'
-# b = lambda:
-# arg = [[]]
 

@@ -40,24 +40,29 @@ def simple_mpi_map(run, args):
     print 'rank: ', rank, 'running..'; fff()
     hypo_set = run(*(args[rank]))
 
-    if rank == 0:
-        _set = set()
-        _set.update(hypo_set)
-        for i in xrange(size - 1):
-            _set.update(comm.recv(source=i+1))
-            print 'rank: ', rank, 'recv: ', i; fff()
-        return _set
-    else:
-        comm.send(hypo_set, dest=0)
-        print 'rank: ', rank, 'send: ', 0; fff()
-        sys.exit(0)
+    dump(hypo_set, open(prefix+'hypotheses_'+options.LANG+'_%i'%rank+suffix, 'w'))
+
+    # if rank == 0:
+    #     _set = set()
+    #     _set.update(hypo_set)
+    #     for i in xrange(size - 1):
+    #         _set.update(comm.recv(source=i+1))
+    #         print 'rank: ', rank, 'recv: ', i; fff()
+    #     return _set
+    # else:
+    #     comm.send(hypo_set, dest=0)
+    #     print 'rank: ', rank, 'send: ', 0; fff()
+    #     sys.exit(0)
 
 if __name__ == "__main__":
     """
         example:
             mpiexec -n 12 python my_search_stp.py --language=An --finite=10 --N=1 --bound=15
             mpiexec -n 12 python my_search_stp.py --language=AnBn --finite=20 --N=1 --terminal=b --bound=15
+            mpiexec -n 12 python my_search_stp.py --language=AnB2n --finite=30 --N=1 --terminal=b --bound=15
             mpiexec -n 12 python my_search_stp.py --language=AnBnCn --finite=18 --N=3 --terminal=bc --bound=5
+            mpiexec -n 12 python my_search_stp.py --language=Dyck --finite=8 --N=2 --terminal=b --bound=15 --steps=100000
+            mpiexec -n 12 python my_search_stp.py --language=SimpleEnglish --finite=8 --N=3 --bound=5 --steps=100000
     """
     # ========================================================================================================
     # Process command line arguments /
@@ -97,7 +102,7 @@ if __name__ == "__main__":
     # Get stats
     # ========================================================================================================
 
-    dump(hypotheses, open(prefix+'hypotheses_'+options.LANG+suffix, 'w'))
+    # dump(hypotheses, open(prefix+'hypotheses_'+options.LANG+suffix, 'w'))
 
     # # get precision and recall for h
     # pr_data = language.sample_data_as_FuncData(1024)
