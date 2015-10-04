@@ -27,6 +27,7 @@ class SampleStream(object):
         """
         Process x and push it to my kids if I should
         """
+
         v = self.process(x)
         if v is not None:
             for o in self.outputs:
@@ -42,6 +43,7 @@ class SampleStream(object):
 
         We have to return a new SampleStream object or else we can't chain >>
         """
+
         self.outputs.append(other)
         other.parent = self
 
@@ -88,9 +90,6 @@ if __name__ == "__main__":
     for h in SampleStream(sampler) >> Tee(Skip(2) >> Unique() >> Print(), PosteriorTrace()) >> Z():
         pass
 
-        # >> PosteriorTrace(plot_every=100) >> tn >> Save('hypotheses.pkl') \
-        #     >> Tee( Unique() >> PrintH(), Skip(30) >> Print(prefix="#\t")):
-        # pass
 
 
 
