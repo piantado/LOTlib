@@ -1,0 +1,1 @@
+Grammar inference used to be run in LOTlib, but as of October 2015 efforts have shifted to run all grammar inference in stan. See LOTlib.GrammarInference
