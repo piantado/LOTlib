@@ -19,7 +19,7 @@ import sys
 from mpi4py import MPI
 from Simulation.utils import uniform_data
 from optparse import OptionParser
-
+from Language.Index import instance
 import pstats, cProfile
 
 comm = MPI.COMM_WORLD
@@ -37,6 +37,8 @@ parser.add_option("--file", dest="FILE", type="string", default='', help="")
 parser.add_option("--mode", dest="MODE", type="string", default='', help="")
 parser.add_option("--axb", dest="AXB", type="float", default=0.3, help="")
 parser.add_option("--x", dest="X", type="float", default=0.08, help="")
+parser.add_option("--language", dest="LANG", type="string", default='An', help="")
+parser.add_option("--finite", dest="FINITE", type="int", default=10, help="")
 (options, args) = parser.parse_args()
 
 def slice_list(input, size):
@@ -211,11 +213,11 @@ def get_kl_seq2(jump, is_plot, file_name):
             current_dict = seq[i]
             next_dict = seq[i+1]
             kl = compute_kl(current_dict, next_dict)
-            # kl_seq.append(log(kl))
+            kl_sum += kl; kl_seq.append(kl_sum)
             print 'KL from %i to %i: ' % (i, i+1), kl; fff()
 
             f = open('tmp_out', 'a')
-            kl_sum += kl
+
             print >> f, kl_sum
 
         kl_seq_set.append(kl_seq)
@@ -236,15 +238,16 @@ def get_kl_seq2(jump, is_plot, file_name):
     # dump(kl_seq_set, open('kl_seq_set'+suffix, 'w'))
     # dump(avg_seq_set, open('avg_seq_set'+suffix, 'w'))
     #
-    # if is_plot == 'yes':
-    #     staged, = plt.plot(range(12, 145, jump), avg_seq_set[0], label='staged')
-    #     normal, = plt.plot(range(12, 145, jump), avg_seq_set[1], label='normal')
-    #     uniform, = plt.plot(range(12, 145, jump), avg_seq_set[2], label='uniform')
-    #
-    #     plt.legend(handles=[normal, staged, uniform])
-    #     plt.ylabel('KL-divergence')
-    #     plt.xlabel('data')
-    #     plt.show()
+    if is_plot == 'yes':
+        staged, = plt.plot([10**e for e in np.arange(0, 2.5, 0.1)], kl_seq_set[0], label='staged')
+        normal, = plt.plot([10**e for e in np.arange(0, 2.5, 0.1)], kl_seq_set[1], label='normal')
+        uniform, = plt.plot([10**e for e in np.arange(0, 2.5, 0.1)], kl_seq_set[2], label='uniform')
+
+        plt.legend(handles=[normal, staged, uniform])
+        plt.ylabel('Cumulative KL-divergence')
+        plt.xlabel('Size of Data')
+        plt.title('SS and SF')
+        plt.show()
 
 
 def make_staged_seq():
@@ -278,8 +281,7 @@ def make_staged_seq2(jump, temp):
 
     if rank in work_list[0]:
         seq = []
-        # infos = [[i, min(4*((i-1)/48+1), 12)] for i in xrange(12, 145, jump)]
-        infos = [[i, min(4*((int(i)-1)/48+1), 12)] for i in [10**e for e in np.arange(0, 2.5, 0.1)]]
+        infos = [[i, min(4*((int(i)-1)/48+1), 12)] for i in [10**e for e in np.arange(0, 2.2, 0.1)]]
 
         for e in infos:
             prob_dict = {}
@@ -295,8 +297,7 @@ def make_staged_seq2(jump, temp):
 
     elif rank in work_list[1]:
         seq = []
-        # infos = [[i, 12] for i in xrange(12, 145, jump)]
-        infos = [[i, 12] for i in [10**e for e in np.arange(0, 2.5, 0.1)]]
+        infos = [[i, 12] for i in [10**e for e in np.arange(0, 2.2, 0.1)]]
 
         for e in infos:
             prob_dict = {}
@@ -312,8 +313,8 @@ def make_staged_seq2(jump, temp):
 
     else:
         seq = []
-        # infos = [[i, 12] for i in xrange(12, 145, jump)]
-        infos = [[i, 12] for i in [10**e for e in np.arange(0, 2.5, 0.1)]]
+        infos = [[i, 12] for i in [10**e for e in np.arange(0, 2.2, 0.1)]]
+
         for e in infos:
             prob_dict = {}
             eval_data = uniform_data(e[0], e[1])
@@ -325,6 +326,7 @@ def make_staged_seq2(jump, temp):
             seq.append(prob_dict)
             print 'rank: ', rank, e, 'done'; fff()
 
+    # TODO no need ?
     from copy import deepcopy
     dict_0 = deepcopy(seq[0])
     for h in dict_0:
@@ -678,6 +680,87 @@ def test_lis_disp(names):
                 print 'p ', np.exp(li[i][0] -Z), 'x_f-score ', li[i][1], 'axb_f-score', li[i][2]
                 print li[i][4]
 
+# ===========================================================================
+# parse & plot
+# ===========================================================================
+def parse_plot(lang_name, finite, is_plot):
+    """
+        run: mpi supported
+    """
+    _dir = 'out/final/'
+    global size
+    global rank
+
+    print 'loading..'; fff()
+    topn = set()
+    for file_name in listdir(_dir):
+        if lang_name in file_name:
+            _set = load(open(_dir+file_name))
+            topn.update([h for h in _set])
+
+    language = instance(lang_name, finite)
+
+    print 'getting p&r..'; fff()
+    prf_dict = {}
+    pr_data = language.sample_data_as_FuncData(1024)
+    for h in topn:
+        p, r = language.estimate_precision_and_recall(h, pr_data)
+        prf_dict[h] = [p, r, 0 if p+r == 0 else 2*p*r/(p+r)]
+
+    if rank == 0:
+        dump(prf_dict, open(lang_name+'_prf_dict'+suffix, 'w'))
+
+    print rank, 'getting posterior'; fff()
+    work_list = slice_list(np.arange(0, 30, 1), size)
+    seq = []
+    for s in work_list[rank]:
+        eval_data = language.sample_data_as_FuncData(s)
+        for h in topn:
+            h.likelihood_temperature = 100
+            h.compute_posterior(eval_data)
+
+        Z = logsumexp([h.posterior_score for h in topn])
+        wfs = sum([prf_dict[h][2]*np.exp(h.posterior_score - Z) for h in topn])
+        seq.append([s, wfs])
+        print 'size: %.1f' % s, 'weighted F-score: %.2f' % wfs; fff()
+
+        #debug
+        _list = [h for h in topn]; _list.sort(key=lambda x: x.posterior_score, reverse=True)
+        for i in xrange(3):
+            print 'prob: ', np.exp(_list[i].posterior_score - Z), 'p,r: ', prf_dict[_list[i]][:2],
+            print Counter([_list[i]() for _ in xrange(256)])
+            print _list[i]
+        print '='*50; fff()
+
+    if rank == 0:
+        for i in xrange(1, size):
+            seq += comm.recv(source=i)
+    else:
+        comm.send(seq, dest=0)
+        sys.exit(0)
+
+    seq.sort(key=lambda x: x[0])
+    dump(seq, open(lang_name+'_seq'+suffix, 'w'))
+
+    if is_plot == 'yes':
+        x, y = zip(*seq)
+        plt.plot(x, y)
+
+        plt.ylabel('Weighted F-score')
+        plt.xlabel('Size of Data')
+        plt.title(lang_name)
+        plt.show()
+
+
+def only_plot(lang_name, suffix):
+    seq = load(open(lang_name+'_seq'+suffix))
+    x, y = zip(*seq)
+    plt.plot(x, y)
+
+    plt.ylabel('Weighted F-score')
+    plt.xlabel('Size of Data')
+    plt.title(lang_name)
+    plt.show()
 
 if __name__ == '__main__':
 
@@ -691,6 +774,19 @@ if __name__ == '__main__':
         dis_pos(jump=options.JUMP, is_plot=options.PLOT, file_name=options.FILE, axb_bound=options.AXB, x_bound=options.X)
     elif options.MODE == 'parse_simple':
         most_prob(options.FILE)
+    elif options.MODE == 'parse_plot':
+        parse_plot(options.LANG, options.FINITE, is_plot=options.PLOT)
+    elif options.MODE == 'only_plot':
+        only_plot(options.LANG, options.FILE)
+
+    # seq = [[2  ,0.167012421	], [4  ,0.404128998	], [6  ,0.408503541], [8  ,0.346094762], [10 ,0.43615293], [12 ,0.995324843], [14 ,0.987169], [16 ,0.979347514], [18 ,0.983990461], [20 ,0.988215573	], [22 ,0.970604139	], [24 ,1]]
+    # x, y = zip(*seq)
+    # plt.plot(x, y)
+    #
+    # plt.ylabel('Weighted F-score')
+    # plt.xlabel('Size of Data')
+    # plt.title('Nonadjacent Dependency')
+    # plt.show()
 
     # test_hypo_stat()
     #
