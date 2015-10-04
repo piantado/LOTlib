@@ -1,5 +1,6 @@
 import collections
 
+
 class SampleStream(object):
     """
     SampleStream is the basic class that others in this directory inherit from. It allows constructs
@@ -7,33 +8,29 @@ class SampleStream(object):
     """
 
     def __init__(self, generator=None):
-        self.actions = [] # what do I do to things?
+        self.outputs = [] # what do I do to things?
+        self.parent = None # back pointers are needed to call "iter"
         self.generator = generator
 
-    def update(self, generator):
-        """ This ist eh basic call to make me process a generator.
-            I will __enter__ and __exit__ (and on all of my actions)"""
-        with self: # force __enter__ and __exit__
-            for x in generator:
-                v = self.process(x)
-                if v is not None: # none means skip
-                    yield v
+    def root(self):
+        if self.parent is None:
+            return self
+        else:
+            return self.parent.root()
 
     def process(self, x):
-        """ Process a single sample. This should NOT be called except from update, since it won't enforce
-            __enter__ and __exit__
-        """
-
-        v = self.process_(x)
-        for a in self.actions:
-            if v is None: break
-            v = a.process(v)
-        return v
-
-    def process_(self, x):
         """ The main processing step that must be overridden. If it returns x, the sample continues in the stream;
             if it return None, the sample is deleted """
         return x
+
+    def process_and_push(self, x):
+        """
+        Process x and push it to my kids if I should
+        """
+        v = self.process(x)
+        if v is not None:
+            for o in self.outputs:
+                o.process_and_push(v)
 
     def __rshift__(self, other):
         """
@@ -45,29 +42,36 @@ class SampleStream(object):
 
         We have to return a new SampleStream object or else we can't chain >>
         """
+        self.outputs.append(other)
+        other.parent = self
 
-        self.actions.append(other)
-
-        return self
+        return other
 
     def __iter__(self):
-        assert self.generator is not None, "*** Cannot iter without a generator"
-        for x in self.update(self.generator):
-            yield x
+        if self.parent is not None:
+            assert self.generator is None, "*** Cannot have a parent and a generator"
 
-    def __call__(self, x):
-        if isinstance(x, collections.Iterable):
-            self.update(x)
+            # Just act as though my parent is generating
+            # This means I can call "iter" on a long chain of >>, and it will act as though
+            # The top generator is being run through
+            for x in self.parent:
+                yield x
         else:
-            self.process(x)
+            # Otherwise, I am the top level. So I should process and then make my kids process too.
+
+            assert self.generator is not None, "*** If I don't have a parent, I must have a generator"
+            with self:
+                for x in self.generator:
+                    self.process_and_push(x)
+
 
     def __enter__(self):
-        for a in self.actions:
+        for a in self.outputs:
             a.__enter__()
 
     def __exit__(self, t, value, traceback):
         """ I defaultly call all of my children's exits """
-        for a in self.actions:
+        for a in self.outputs:
             a.__exit__(t, value, traceback)
         return False
 
@@ -81,13 +85,13 @@ if __name__ == "__main__":
 
     sampler = break_ctrlc(MHSampler(make_hypothesis(), make_data()))
 
-    tn = Top(N=10, path="top.pkl")
-
-    for h in SampleStream(sampler) >> PosteriorTrace(plot_every=100) >> tn >> Save('hypotheses.pkl') \
-            >> Tee( Unique() >> PrintH(), Skip(30) >> Print(prefix="#\t")):
+    for h in SampleStream(sampler) >> Tee(Skip(2) >> Unique() >> Print(), PosteriorTrace()) >> Z():
         pass
 
-    tn.display()
+        # >> PosteriorTrace(plot_every=100) >> tn >> Save('hypotheses.pkl') \
+        #     >> Tee( Unique() >> PrintH(), Skip(30) >> Print(prefix="#\t")):
+        # pass
+
 
 
 

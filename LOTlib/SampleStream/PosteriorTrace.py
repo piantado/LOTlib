@@ -15,7 +15,7 @@ class PosteriorTrace(SampleStream):
 
         SampleStream.__init__(self, generator)
 
-    def process_(self, h):
+    def process(self, h):
         self.posteriors.append(  getattr(h, 'posterior_score') )
         self.priors.append(      getattr(h, 'prior') )
         self.likelihoods.append( getattr(h, 'likelihood') )

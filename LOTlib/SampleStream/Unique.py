@@ -2,11 +2,12 @@
 from SampleStream import SampleStream
 
 class Unique(SampleStream):
-    def __init__(self, generator=None):
-        self.seen = set()
-        SampleStream.__init__(self, generator=generator)
+    def __init__(self):
+        SampleStream.__init__(self)
 
-    def process_(self, x):
+        self.seen = set()
+
+    def process(self, x):
         if x in self.seen:
             return None
         else:

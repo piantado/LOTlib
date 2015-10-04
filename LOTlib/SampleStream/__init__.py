@@ -2,6 +2,7 @@ from LOTlib import break_ctrlc
 
 from SampleStream import SampleStream
 
+from Delta import Delta
 from Top import Top
 from Z import Z
 from Skip import Skip

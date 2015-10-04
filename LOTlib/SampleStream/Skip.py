@@ -6,7 +6,7 @@ class Skip(SampleStream):
         self.n = n
         self.cnt = 0
 
-    def process_(self, x):
+    def process(self, x):
         self.cnt += 1
         if self.cnt % self.n == 0:
             return x

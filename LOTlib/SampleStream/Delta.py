@@ -9,7 +9,7 @@ class Delta(SampleStream):
         self.last = None
         SampleStream.__init__(self, generator=generator)
 
-    def process_(self, x):
+    def process(self, x):
         if self.last is not None and x == self.last:
             return None
         else:

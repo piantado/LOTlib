@@ -2,13 +2,13 @@ import pickle
 from SampleStream import SampleStream
 
 class Save(SampleStream):
-    def __init__(self, path):
+    def __init__(self, path='samples.pkl'):
         SampleStream.__init__(self, generator=None)
 
         self.path = path
         self.samples = []
 
-    def process_(self, x):
+    def process(self, x):
         self.samples.append(x)
         return x
 
