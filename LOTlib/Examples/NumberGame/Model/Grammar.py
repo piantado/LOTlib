@@ -1,6 +1,13 @@
-"""
 
-In the model used in Josh Tenenbaum's thesis, the following rules were used . . .
+from LOTlib.Evaluation.Eval import register_primitive
+
+from LOTlib.Grammar import Grammar
+
+# =======================
+# Mixture model grammar
+# =======================
+"""
+This implements the model from Josh Tenenbaum's thesis, the following rules were used:
 
 Math Rules:  p = lambda
 -----------------------
@@ -44,23 +51,8 @@ Math Rules:  p = lambda
 Interval Rules:  p = (lambda - 1)
 ---------------------------------
 - all range[n,m] subset of r[1,100], such that n <=m  (5,050 rules like this!)
-
-
 """
-from LOTlib.Evaluation.Eval import register_primitive
-from LOTlib.Grammar import Grammar
 
-
-# ============================================================================================================
-# Mixture model grammar
-# =====================
-#
-# This is identical to the model used in Josh Tenenbaum's thesis, except that (hopefully) we can do cooler
-#  stuff with optimizing the hyperparameter lambda (aka `lambda_mix`) sampling GrammarHypotheses!
-#
-# Math rules & interval rules are the 2 probabilities mixed in this model.
-#
-#
 
 mix_grammar = Grammar()
 mix_grammar.add_rule('START', '', ['INTERVAL'], 1.)
@@ -112,9 +104,9 @@ for i in range(1, 101):
     mix_grammar.add_rule('CONST', '', [str(i)], 1.)
 
 
-# ============================================================================================================
+# ===========================
 # independent-Priors Grammar
-# =========================
+# ===========================
 #
 # This has the same rules as the mixture model above, except each rule has an individual probability.
 #
@@ -160,22 +152,9 @@ for i in range(1, 101):
     independent_grammar.add_rule('CONST', '', [str(i)], 1.)
 
 
-# ============================================================================================================
+# ====================
 # LOTlib-Style Grammar
 # ====================
-#
-# This grammar should generate all the hypotheses of the grammars listed above (and others!) as subset of
-#  a larger language (possible w/ recursion). Basically, this grammar can recurse wherever there is an 'X',
-#  and has leaves wherever there is a 'CONST'...
-#
-# We don't know what will happen so we can see, and compare it w/ our results above as well as Josh's
-#  original results. Science!
-#
-# Note:
-#   if we get rules like [X -> X*X] inflated to a high probability, we will probably get super-large
-#   hypotheses that will break things
-#
-#
 
 lot_grammar = Grammar()
 lot_grammar.add_rule('START', '', ['SET'], 1.)
@@ -184,7 +163,7 @@ lot_grammar.add_rule('SET', 'setdifference_', ['SET', 'SET'], .1)
 lot_grammar.add_rule('SET', 'intersection_', ['SET', 'SET'], .1)
 lot_grammar.add_rule('SET', 'union_', ['SET', 'SET'], .1)
 
-lot_grammar.add_rule('SET', '', ['INTERVAL'], 1.)
+lot_grammar.add_rule('SET', '', ['RANGE'], 1.)
 lot_grammar.add_rule('SET', '', ['MATH'], 1.)
 
 # Math rules
@@ -195,40 +174,23 @@ lot_grammar.add_rule('FULL_RANGE', 'range_set_', ['1', '100'], 1.)
 lot_grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1., bv_type='EXPR', bv_p=2.)
 
 lot_grammar.add_rule('EXPR', 'isprime_', ['EXPR'], 1.)
-# NOTE: there is no distinction here between   2^n  &  n^2  !!!
-lot_grammar.add_rule('EXPR', 'ipowf_', ['EXPR', 'EXPR'], .3)
-lot_grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 1.)
-lot_grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1.)
-lot_grammar.add_rule('EXPR', 'ends_in_', ['EXPR', 'EXPR'], 1.)
-lot_grammar.add_rule('EXPR', 'contains_digit_', ['EXPR', 'EXPR'], 1.)
+lot_grammar.add_rule('EXPR', 'ipowf_', ['EXPR', 'OPCONST'], .3)
+lot_grammar.add_rule('EXPR', 'ipowf_', ['OPCONST', 'EXPR'], .3)
+lot_grammar.add_rule('EXPR', 'times_', ['EXPR', 'OPCONST'], 1.)
+lot_grammar.add_rule('EXPR', 'plus_', ['EXPR', 'OPCONST'], 1.)
+lot_grammar.add_rule('EXPR', 'ends_in_', ['EXPR', 'OPCONST'], 1.)
+lot_grammar.add_rule('EXPR', 'contains_digit_', ['EXPR', 'OPCONST'], 1.)
 
-lot_grammar.add_rule('EXPR', '', ['OPCONST'], 20.)
-for i in range(1, 11):
-    lot_grammar.add_rule('OPCONST', '', [str(i)], 3.)
-for i in [11, 12, 13, 14, 15]:
-    lot_grammar.add_rule('OPCONST', '', [str(i)], 1.)
+for i in range(1, 50):
+    lot_grammar.add_rule('OPCONST', '', [str(i)], 1./i**2)
 
-# Interval rules
-# --------------
-lot_grammar.add_rule('INTERVAL', '', ['RANGE'], 1.)
 lot_grammar.add_rule('RANGE', 'range_set_', ['CONST', 'CONST'], 1.)
 for i in range(1, 101):
-    if i in [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
+    if i % 10 == 0: # decades get a higher prior
         lot_grammar.add_rule('CONST', '', [str(i)], 5.)
     else:
         lot_grammar.add_rule('CONST', '', [str(i)], 1.)
 
-
-
-import copy
-import numpy as np
-
-def grammar_gamma(grammar, scale=1.0):
-    grammar = copy.copy(grammar)
-    rules = [r for r in [r for sublist in grammar.rules.values() for r in sublist] if not (r.nt == 'CONST')]
-    for r in rules:
-        r.p = np.random.gamma(r.p, scale)
-    return grammar
 
 
 

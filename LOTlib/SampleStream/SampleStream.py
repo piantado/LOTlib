@@ -31,7 +31,7 @@ class SampleStream(object):
         v = self.process(x)
 
         if len(self.outputs) > 0: # If I have children, return the output of my last child
-            last = None 
+            last = None
             if v is not None:
                 for o in self.outputs:
                     last = o.process_and_push(v)
