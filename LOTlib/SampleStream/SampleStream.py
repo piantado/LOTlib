@@ -29,9 +29,16 @@ class SampleStream(object):
         """
 
         v = self.process(x)
-        if v is not None:
-            for o in self.outputs:
-                o.process_and_push(v)
+
+        if len(self.outputs) > 0: # If I have children, return the output of my last child
+            if v is not None:
+                for o in self.outputs:
+                    last = o.process_and_push(v)
+
+            return last # return our last output
+        else:
+            # Otherwise return what I did (if I'm the leaf)
+            return v
 
     def __rshift__(self, other):
         """
@@ -60,11 +67,16 @@ class SampleStream(object):
                 yield x
         else:
             # Otherwise, I am the top level. So I should process and then make my kids process too.
-
+            # assert I am the top level
             assert self.generator is not None, "*** If I don't have a parent, I must have a generator"
             with self:
                 for x in self.generator:
-                    self.process_and_push(x)
+                    ## Ugh the top level has to yield the result of recursing process_and_push all the way down
+                    v = self.process_and_push(x)
+
+
+                    if v is not None:
+                        yield v
 
 
     def __enter__(self):
