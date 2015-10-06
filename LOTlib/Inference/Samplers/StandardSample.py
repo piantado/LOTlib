@@ -2,7 +2,7 @@
 import LOTlib
 import pickle
 from LOTlib.FunctionNode import cleanFunctionNodeString
-from LOTlib.MCMCSummary.TopN import TopN
+from LOTlib.TopN import TopN
 from LOTlib.Miscellaneous import qq
 from LOTlib import break_ctrlc
 

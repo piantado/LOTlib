@@ -1,7 +1,6 @@
 import collections
 
 from LOTlib.Miscellaneous import logsumexp, qq
-from MCMCSummary import MCMCSummary
 from LOTlib.FiniteBestSet import FiniteBestSet
 
 class TopN(object):

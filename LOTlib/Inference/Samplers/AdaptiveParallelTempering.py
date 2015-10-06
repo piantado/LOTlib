@@ -69,8 +69,7 @@ if __name__ == "__main__":
     from LOTlib.Examples.Number2015.Model import generate_data, make_h0
     data = generate_data(300)
 
-    from LOTlib.MCMCSummary.Z import Z
-    from LOTlib.MCMCSummary.TopN import TopN
+    from LOTlib.TopN import TopN
     z = Z(unique=True)
     tn = TopN(N=10)
 

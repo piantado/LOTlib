@@ -17,7 +17,7 @@ from Model.Grammar import lot_grammar as grammar
 import LOTlib
 from LOTlib import break_ctrlc
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
-from LOTlib.MCMCSummary.TopN import TopN
+from LOTlib.TopN import TopN
 
 def myrun(observed_set):
 

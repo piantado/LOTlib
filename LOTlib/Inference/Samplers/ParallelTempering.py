@@ -117,8 +117,6 @@ if __name__ == "__main__":
 
     data = make_data(1000)
 
-    from LOTlib.MCMCSummary.Z import Z
-    from LOTlib.MCMCSummary.TopN import TopN
     z = Z(unique=True)
     tn = TopN(N=10)
 

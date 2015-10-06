@@ -5,7 +5,7 @@ Run inference on each target concept and save the output
 """
 import pickle
 from LOTlib import break_ctrlc
-from LOTlib.MCMCSummary.TopN import TopN
+from LOTlib.TopN import TopN
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from Model import *
 from TargetConcepts import TargetConcepts

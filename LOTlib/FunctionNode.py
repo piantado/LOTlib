@@ -4,7 +4,7 @@ import re
 from copy import copy, deepcopy
 from math import log
 from random import random
-from LOTlib.GrammarRule import BVRuleContextManager
+
 from LOTlib.Miscellaneous import lambdaTrue, lambdaOne
 
 
@@ -783,3 +783,4 @@ class BVUseFunctionNode(FunctionNode):
 
 # NOTE: This must come at the end to meet dependencies
 from LOTlib.Visualization.Stringification import pystring, fullstring
+from LOTlib.GrammarRule import BVRuleContextManager
