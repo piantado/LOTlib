@@ -5,10 +5,9 @@
 
 # We will map tuples of concept-list, set, response to counts.
 import pandas
-import math
 from collections import Counter
 
-def load_human_data(path='HumanData/numbergame_data.csv'):
+def load_human_data(path='numbergame_data.csv'):
 
     human_data = pandas.read_csv(path, sep=',', low_memory=False, index_col=False)
 
