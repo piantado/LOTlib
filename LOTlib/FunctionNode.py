@@ -4,7 +4,7 @@ import re
 from copy import copy, deepcopy
 from math import log
 from random import random
-from LOTlib.BVRuleContextManager import BVRuleContextManager
+from LOTlib.GrammarRule import BVRuleContextManager
 from LOTlib.Miscellaneous import lambdaTrue, lambdaOne
 
 

@@ -8,8 +8,7 @@ import itertools
 
 from LOTlib import break_ctrlc
 from LOTlib.Miscellaneous import *
-from LOTlib.GrammarRule import GrammarRule, BVAddGrammarRule
-from LOTlib.BVRuleContextManager import BVRuleContextManager
+from LOTlib.GrammarRule import GrammarRule, BVAddGrammarRule, BVRuleContextManager
 from LOTlib.FunctionNode import FunctionNode
 
 class Grammar:
