@@ -1,3 +1,5 @@
+- primitives -- the function types, etc. 
+- prior -- bound on depth, etc. 
 
 # Introduction
 
@@ -95,7 +97,7 @@ Given that our hypothesis wants those kinds of data, we can then create data as 
     from LOTlib.DataAndObjects import FunctionData
     data = [ FunctionData(input=[], output=12, alpha=0.95) ]
 ```
-Note here that the most natural form of data is a list--even if its only a single element--where each element, a datum, gets passed to `compute_single_likelihood`. 
+Note here that the most natural form of data is a list--even if its only a single element--where each element, a datum, gets passed to `compute_single_likelihood`. The data here specifies the input, output, and noise value `alpha`. Note that even though `alpha` could live as an attribute of hypotheses, it makes most sense to view it as a known part of the data. 
 
 ## Making hypotheses
 
@@ -151,6 +153,8 @@ It's possible that in running the above code, you got a zero division error. Can
 
 Fortunately, we can hack our hypothesis class to address this by catching the exception. A smart way to do this is to override `__call__` and return an appropriate value when such an error occurs:
 ```python
+    from math import log
+    from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
     class MyHypothesis(LOTHypothesis):
         def __init__(self, **kwargs):
@@ -219,6 +223,7 @@ If our sampler is working correctly, it should be the case that the time average
     fig.show()
     
 ```
+
 
 ## Sample Streams
 
@@ -325,7 +330,17 @@ Of course, SampleStream also has a way to get at the best hypotheses. It is the 
 
 ## Hypotheses as functions
 
-Remember how we made `args=[]` in the definition of MyHypothesis? That stated that a hypothesis was not a function of any arguments. Here is a new listing where MyHypothesis requires a function. There are two other primary changes: the grammar now has to allow the argument (`x`) to be produced in expressions, and the `datum.input` has to provide an argument, which gets bound to `x` when the function is evaluated. 
+Remember how we made `args=[]` in the definition of MyHypothesis? That stated that a hypothesis was not a function of any arguments. However, you may have noticed that when a hypothesis is converting to a string (for printing or evaling) it acquired an additional `lambda` on the outside, indicating that the hypothesis was a function of no arguments. Compare a tree produced by the grammar, with the hypothesis created with the tree as its "value". To do this, we can pass the tree as a `value` in the hypothesis constructor:
+```python
+    t = grammar.generate()
+    print str(t)
+
+    h = MyHypothesis(value=t)
+    print str(h)    
+```
+This is an important distinction: the result of `grammar.generate()` is always a tree, or a hierarchy of `LOTlib.FunctionNode`s which can get rendered into a string. A LOTHypothesis, in contrast, is always a function of some arguments. When there are no arguments, it is a [thunk](https://en.wikipedia.org/wiki/Thunk). 
+
+Here is a new listing where a class like MyHypothesis requires an argument. Now, when it renders, it comes with a `lambda x` in front, rather than just a `lambda`. There are two other primary changes: the grammar now has to allow the argument (`x`) to be produced in expressions, and the `datum.input` has to provide an argument, which gets bound to `x` when the function is evaluated. 
 ```python
     ######################################## 
     ## Define a grammar
@@ -483,7 +498,7 @@ Here, `lambda` is a special LOTlib keyword that *introduces a bound variable* wi
     for _ in xrange(1000):
         print grammar.generate()
 ```
-Now some of the trees contain `lambda` expressions, which bind a variable (defaultly rendered as `y1`). The variable `y1` can only be used below its corresponding lambda, making the grammar in LOTlib technically not context-free, but very weakly context-sensitive. The variables like `y1` are called **bound variables** in LOTlib. 
+Now some of the trees contain `lambda` expressions, which bind a variable (defaultly rendered as `y1`). The variable `y1` can only be used below its corresponding lambda, making the grammar in LOTlib technically not context-free, but very weakly context-sensitive. The variables like `y1` are called **bound variables** in LOTlib. Note that they are numbered by their height in the tree, making them unique to the nodes below, but neither sequential, nor unique in the whole tree (underlyingly, they have unique names no matter what, but not when rendered into strings). 
 
 These bound variables count towards the prior (when using `grammar.log_probability`) in exactly the way they should: when a nonterminal (specified in `bv_type`) can expand to a given bound variable, that costs probability, and other expansions must lose probability. The default in LOTlib is to always renormalize the probabilities specified. Note that in the `add_rule` command, we can change the probability that a EXPR->yi rule has by passing in a bv_p argument:
 ```python
@@ -522,36 +537,125 @@ To define lambdas as functions, we only need to specify a `bv_args` list in the 
     grammar.add_rule('EXPR', '(float(%s) / float(%s))', ['EXPR', 'EXPR'], 1.0)
     grammar.add_rule('EXPR', '(-%s)', ['EXPR'], 1.0)
     
-    grammar.add_rule('EXPR', 'x', None, 1.0) 
+    grammar.add_rule('EXPR', 'x', None, 1.0)  
 
     for n in xrange(1,10):
         grammar.add_rule('EXPR', str(n), None, 5.0/n**2)
 
-    # Same lambda as above
-    grammar.add_rule('EXPR', '(%s)(%s)',  ['FUNC', 'EXPR'], 1.0)
-    grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1.0, bv_type='EXPR')
+    # Allow ourselves to define functions. This means creating a bound 
+    # variable that can be bound to a FUNC. Where, the bound variable
+    # is defined (here, FUNCDEF) we are allowed to use it. 
+    grammar.add_rule('EXPR', '((%s)(%s))',  ['FUNCDEF', 'FUNC'], 1.0)
 
-    # But also allow EXPR to 
-    grammar.add_rule('EXPR', '(%s)(%s)',  ['FUNCDEF', 'FUNC'], 1.0)
-    
-    # And define a function Fi whose argument is an EXPR. The body of this
-    # function
-    grammar.add_rule('FUNCDEF', 'lambda', ['EXPR'], 1.0, bv_type='FUNC', bv_args=['EXPR'], bv_prefix='F')
+    # The function definition has a bound variable who can be applied as
+    # a function, whose arguments are an EXPR (set by the type of the FUNC above)
+    # and whose name is F, and who when applied to an EXPR returns an EXPR
+    # We'll also set bv_p here. Feel free to play with it and see what that does. 
+    grammar.add_rule('FUNCDEF', 'lambda', ['EXPR'], 1.0, bv_type='EXPR', bv_args=['EXPR'], bv_prefix='F')
+
+    # and we have to say what a FUNC is. It's a function (lambda) from an EXPR to an EXPR
+    grammar.add_rule('FUNC', 'lambda', ['EXPR'], 1.0, bv_type='EXPR')
 
 ```
 Let's look at some hypotheses. Here, we'll show only those that use `F1` as a function (thus contain the string `"F1("`:
 ```python
     import re 
 
-    for _ in xrange(10000):
+    for _ in xrange(50000):
         t = grammar.generate()
         if re.search(r"F1\(", str(t)):
             print t
 ```
+For instance, this code might generate the following expression, which is obscure, though acceptable, python:
+```python
+    ((lambda F1: F1(x+1))(lambda y1: y1+3))
+```
+Here, we have define a variable `F1` that really represents the *function* `lambda y1: y1+3`. The value that is returned is the value of applying `F1` to the overall hypothesis value `x` plus `1`. Note that LOTlib here has correctly used `F1` in a context where an EXPR is needed (due to `bv_type='EXPR'` on `FUNCDEF`). It knows that the argument to `F1` is also an EXPR, which here happens to be expanded to `x+1`. It also knows that `F1` is itself a function, and it binds this function (through the outermost apply) to `lambda y1: y1+3`. LOTlib knows that `F1` can only be used in the left hand side of this appyl, and `y1` can only be used on the right. This holds even if multiple bound variables of different types are generated. 
 
+This ability to define functions provides some of the most interesting learning dynamics for the model. A nice example is provided in LOTlib.Examples.Magnetism, where learners take data and learn predicates classifying observable objects into two kinds, as well as laws stated over those kinds.
 
+## Recursive functions
 
+Well that's wonderful, but what if we want a function to refer to *itself*? This is common in programming languages in the form of recursive definitions. This takes a little finagling in the LOTlib internals, but there is a class that implements recursion straightforwardly: `RecursiveLOTHypothesis`. Internally, hypothesis of this type always have an argument (defaultly called `recurse_`) which binds to themselves! 
 
+Here is a simple example:
+```python
+
+    ######################################## 
+    ## Define the grammar
+    ######################################## 
+    
+    from LOTlib.Grammar import Grammar
+    grammar = Grammar(start='EXPR')
+    
+    # for simplicity, two operations
+    grammar.add_rule('EXPR', '(%s + %s)', ['EXPR', 'EXPR'], 1.0)
+    grammar.add_rule('EXPR', '(%s * %s)', ['EXPR', 'EXPR'], 1.0)
+    
+    # we'll just allow two terminals for simplicity
+    # We have to upweight them a little to keep things well-defined
+    grammar.add_rule('EXPR', 'x', None, 10.0) 
+    grammar.add_rule('EXPR', '1', None, 10.0) 
+    
+    # If we're going to allow recursion, we better have a base case
+    # But this probably requires an "if" statement. LOTlib's "if_" 
+    # primitive will do the trick
+    grammar.add_rule('EXPR', 'if_', ['BOOL', 'EXPR', 'EXPR'], 1.0)
+    
+    # and we need to define a boolean. For now, let's just check
+    # if x=1
+    grammar.add_rule('BOOL', 'x==1', None, 1.0)
+    
+    # and the recursive operation -- I am myself a function
+    # from EXPR to EXPR, so recurse should be as well
+    grammar.add_rule('EXPR', 'recurse_', ['x-1'], 1.0) 
+    
+    ######################################## 
+    ## Define the hypothesis
+    ######################################## 
+    from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis
+    
+    
+    class MyRecursiveHypothesis(RecursiveLOTHypothesis):
+        def __init__(self, **kwargs):
+            RecursiveLOTHypothesis.__init__(self, grammar=grammar, args=['x'], **kwargs)
+        
+    ######################################## 
+    ## Look at some examples
+    ######################################## 
+    import re
+    from LOTlib.Evaluation.EvaluationException import RecursionDepthException
+    
+    for _ in xrange(50000):
+        h = MyRecursiveHypothesis()
+        
+        # Now when we call h, something funny may happen: we may get
+        # an exception for recursing too deep. If this happens for some 
+        # reasonable xes, let's not print the hypothesis -- it must not 
+        # be well-defined
+        try:
+            # try our function out
+            values = map(h, range(1,10))
+        except RecursionDepthException:
+            continue
+            
+        # if we succeed, let's only show hypotheses that use recurse:
+        if re.search(r"recurse_\(", str(h)):
+            print h 
+            print values
+```
+Note that there is nothing special about the `recurse_` name: it can be changed by setting `recurse=...` in `RecursiveLOTHypothesis.__init__`, but then the name should also be changed in the grammar. In this tutorial, we have only looked at defining the grammar, not in inferring recursive hypotheses. LOTlib.Examples.Number is an example of learning a genuinely recursive function from data. 
+
+# Lexicons
+
+Part of what makes cognitive systems powerful is that we don't have just one function, we have many. A Lexicon is LOTlib's way of allowing inference to work on many functions at once. A Lexicon is a hypothesis class like any other (meaning it defines `Lexicon.compute_prior`, `Lexicon.compute_likelihood`, and `Lexicon.compute_posterior`) but it binds together any number of LOTHypotheses into the "meanings" for "words." Here is a simple example:
+```python
+    from LOTlib.Hypotheses.Lexicon import SimpleLexicon
+    
+    class MyLexicon(SimpleLexicon):
+        def __init__()
+
+```
 
 
 # Grammar inference
@@ -579,12 +683,3 @@ Often, though, in LOTlib models it helps to start multiple chains. Each chain ge
 ```
 
 
-
-## Function with arguments
-
-## Use of examples
-
-
-If we want to create an instance of this hypothesis, 
-
-What LOTlib does is take this prior distribution on compositions and data, and infer the posterior distribution on hypotheses (or trees, or compositions of primitives). There is only a little magic involved in LOTlib---it has 
