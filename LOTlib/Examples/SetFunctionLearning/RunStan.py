@@ -55,7 +55,7 @@ from Model.Grammar import grammar
 
 trees = [h.value for h in hypotheses]
 
-counts, sig2idx = create_counts(grammar, trees)
+counts, sig2idx, prior_offset = create_counts(grammar, trees)
 
 print "# Computed counts for each hypothesis & nonterminal"
 
@@ -110,13 +110,14 @@ print "# Created L, NYes, NTrials, and HOutput of size %s" % len(L)
 import pystan
 from LOTlib.GrammarInference.GrammarInference import make_stan_code
 
-rule_counts = {nt: counts['count_%s'%nt].shape[1] for nt in grammar.nonterminals()}
-stan_code = make_stan_code(rule_counts)
+stan_code = make_stan_code(counts)
 
 stan_data = {
     'N_HYPOTHESES': len(hypotheses),
     'N_DATA': len(NTrials),
     'N_GROUPS': len(GroupLength),
+
+    'PriorOffset': prior_offset,
 
     'L': L,
     'GroupLength': GroupLength,
@@ -125,15 +126,15 @@ stan_data = {
     'NTrials': NTrials,
     'Output': Output
 }
-stan_data.update(counts) # and add info about counts
+stan_data.update({ 'count_%s'%nt:counts[nt] for nt in counts.keys()}) # add the prior counts. Note we have to convert their names here
 
 for s in sorted(sig2idx.keys(), key=lambda x: (x[0], sig2idx[x]) ):
     print s, sig2idx[s]
 
 print "# Saving stan data"
 
-with open("stan_data.pkl", 'w') as f:
-    pickle.dump(stan_data, f)
+# with open("stan_data.pkl", 'w') as f:
+#     pickle.dump(stan_data, f)
 
 
 print "# Running with code\n", stan_code

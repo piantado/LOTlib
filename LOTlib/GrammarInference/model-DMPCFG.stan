@@ -11,6 +11,8 @@ data {
     // rule counts for each hypothesis
     %(COUNT_DEF)s
 
+    vector[N_HYPOTHESES] PriorOffset; // a constant prior penalty for each hypothesis
+
     int<lower=0>          GroupLength[N_GROUPS];             // the length of each group (used in segments below)
     vector[N_HYPOTHESES]            L[N_GROUPS];     // log likelihood of data.input
 
@@ -44,7 +46,7 @@ model {
     %(X_PRIOR)s
 
     // prior for each hypothesis -- here just normalize x, even though it should be normalized per-nonterminal
-    priors <- rep_vector(0.0, N_HYPOTHESES);
+    priors <- rep_vector(0.0, N_HYPOTHESES) + PriorOffset;
     %(COMPUTE_PRIOR)s
 
     // likelihood of each human data point

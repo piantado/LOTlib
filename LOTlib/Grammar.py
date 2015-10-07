@@ -67,6 +67,14 @@ class Grammar:
             "Grammar Error: " + str(len(matching_rules)) + " matching rules for this FunctionNode! %s %s" % (t.get_rule_signature(), str(t))
         return matching_rules[0]
 
+    def single_probability(self, t):
+        # in this tree, in its context (recursing up), what is the probability of this single expansion?
+
+        with BVRuleContextManager(self, t, recurse_up=True):
+            z = log(sum([ r.p for r in self.get_rules(t.returntype) ]))
+            r = self.get_matching_rule(t)
+            return log(r.p)-z
+
     def log_probability(self, t):
         """
         Returns the log probability of t, recomputing everything (as we do now)
