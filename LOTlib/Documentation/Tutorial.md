@@ -1,4 +1,4 @@
-- primitives -- the function types, etc. 
+
 - prior -- bound on depth, etc. 
 
 # Introduction
@@ -223,7 +223,57 @@ If our sampler is working correctly, it should be the case that the time average
     fig.show()
     
 ```
+## Primitives
 
+LOTlib also builds in a number of primitive operations, which live in LOTlib.Evaluation.Primitives. When these are supplied as the <FUNCTION> in grammar rule, they act as functions that get called. **By convention, LOTlib internal primitives end in an underscore**. Here is an example equivalent to the grammar above, but using LOTlib function calls. 
+```python 
+
+    grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1.0)
+    grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 1.0)
+    grammar.add_rule('EXPR', 'divide_(float(%s),float(%s))', ['EXPR', 'EXPR'], 1.0)
+    grammar.add_rule('EXPR', 'neg_', ['EXPR'], 1.0)
+    
+```
+Note that when these are rendered into strings, they appear as function calls (and not just string substitutions to make python code) as in
+```python
+    times_(plus_(x,neg_(1)), plus_(1,1))
+```
+There are many functions built-in to python, including a number of operations for manipulating sets, numbers, and logic. The code for `divide_` shows that it does not cast its arguments to floats: here we have to do so using string substitution as above. 
+
+You can also create new primitives. To make a custom function accessible to LOTlib's evaluator, use the `@primitive` decorator:
+```python
+    from LOTlib.Evaluation.Eval import primitive
+    
+    @primitive
+    def my_stupid_primitive_(x):
+        return x+90253
+```
+Now if you use `my_stupid_primitive_` in a grammar rule, it can be "run" just like any normal python code
+```python
+    grammar.add_rule('EXPR', 'my_stupid_primitive_', ['EXPR'], 1.0)
+```
+It is friendly to give it an underscore to make sure it's not confused for a normal python function.
+
+## Nonterminals in the grammar
+
+It may not have been obvious in the above examples, but the <NONTERMINAL> part of each grammar rule can be viewed as specifying the *return type* of the function that rule correspond to, while the <ARGUMENTS> can be viewed as the types of the arguments. Thus, what a grammar mainly does is ensure that the primitives all get arguments of the corret types. 
+
+Let's see another example: suppose we had two kinds of things: booleans (BOOL) and numbers (EXPR). We might write a grammar like this
+```python
+    grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1.0)
+    grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 1.0)
+    
+    # Use something that renders into if statements in real python
+    grammar.add_rule('EXPR', '(%s if %s else %s)', ['EXPR', 'BOOL', 'EXPR'], 1.0)
+
+    # Now how do we get a boolean?
+    grammar.add_rule('BOOL', '(%s > %s)', ['EXPR', 'EXPR'], 1.0)
+    grammar.add_rule('BOOL', '(%s >= %s)', ['EXPR', 'EXPR'], 1.0)
+
+    # And a terminal
+    grammar.add_rule('EXPR', '1', 10.0)
+```
+Here, the second argument to the `if` line must be a BOOL, and so we have given LOTlib a way to create code that returns BOOLs. It just happens that this code is a comparison of numbers, or EXPRs. 
 
 ## Sample Streams
 
@@ -576,7 +626,7 @@ This ability to define functions provides some of the most interesting learning 
 
 ## Recursive functions
 
-Well that's wonderful, but what if we want a function to refer to *itself*? This is common in programming languages in the form of recursive definitions. This takes a little finagling in the LOTlib internals, but there is a class that implements recursion straightforwardly: `RecursiveLOTHypothesis`. Internally, hypothesis of this type always have an argument (defaultly called `recurse_`) which binds to themselves! 
+Well that's wonderful, but what if we want a function to refer to *itself*? This is common in programming languages in the form of [recursive](https://en.wikipedia.org/wiki/Recursion_%28computer_science%29) definitions. This takes a little finagling in the LOTlib internals (through ambitious use of the [Y-combinator](https://en.wikipedia.org/wiki/Fixed-point_combinator#Fixed_point_combinators_in_lambda_calculus)) which you don't have to worry about. There is a class that implements recursion straightforwardly: `RecursiveLOTHypothesis`. Internally, hypothesis of this type always have an argument (defaultly called `recurse_`) which binds to themselves! 
 
 Here is a simple example:
 ```python
