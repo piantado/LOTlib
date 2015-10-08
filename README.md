@@ -14,12 +14,13 @@ REQUIREMENTS
 
 - numpy
 - scipy
-
-The following are infrequently used (i.e., not required for most functionality):
-
-- matplotlib (plotting)
-- mpi4py (if using MPI)
 - cachetools (for memoization)
+
+The following are used by some LOTlib components:
+
+- pystan (for Grammar inference)
+- matplotlib (for plotting)
+- mpi4py (for running on MPI)
 - graphviz (for DOT images of trees)
 
 INSTALLATION
@@ -42,9 +43,9 @@ And you should be ready to use the library via:
 EXAMPLES and TUTORIAL
 ---------------------
 
-A good starting place is the FOL folder, which contains a simple example to generate first-order logical expressions. These have simple boolean functions as well as lambda expressions. 
+A tutorial can be found in the "Documentation" folder above. 
 
-The best reference for learning how to create/modify grammars is Tutorial/FunctionNodeDemo. It contains all of the syntax for various parts of grammars, including how to use primitives and lambdas. 
+A good starting place is the FOL folder, which contains a simple example to generate first-order logical expressions. These have simple boolean functions as well as lambda expressions. 
 
 More examples are provided in the "Examples" folder. These include: simple symbolic regression, the recursive number learning model, a quantifier learning model. The "tests" folder may also be useful, as this runs some simple models to check for, e.g., correct sampling and inference. 
 
