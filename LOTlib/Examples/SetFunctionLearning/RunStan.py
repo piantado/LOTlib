@@ -88,7 +88,7 @@ NTrials  = []
 Output  = []
 GroupLength = []
 
-for concept in concept2data.keys()[:5]:
+for concept in concept2data.keys():
 
     data = concept2data[concept]
 
