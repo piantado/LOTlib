@@ -38,6 +38,8 @@ class GrammarRule(object):
     """
     def __init__(self, nt, name, to, p=1.0, bv_prefix=None):
         p = float(p)
+        assert p>0.0, "*** p=0 in rule %s %s %s. What are you thinking?" %(nt,name,to)
+
         self.__dict__.update(locals())
 
         assert to is None or isinstance(to, list) or isinstance(to, tuple), "*** 'to' in a GrammarRule must be a list!"
