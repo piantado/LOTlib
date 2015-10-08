@@ -593,3 +593,17 @@ def attrmem(aname):
 
     return wrap1
 
+# ------------------------------------------------------------------------------------------------------------
+# Help with logging and IO
+# ------------------------------------------------------------------------------------------------------------
+import shutil
+
+def setup_directory(path):
+    # Create a directory for logging and output
+
+    if os.path.exists(path):
+        shutil.rmtree(path)
+
+    os.mkdir(path)
+
+
