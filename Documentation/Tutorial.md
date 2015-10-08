@@ -1,5 +1,4 @@
 
-- prior -- bound on depth, etc. 
 
 # Introduction
 
