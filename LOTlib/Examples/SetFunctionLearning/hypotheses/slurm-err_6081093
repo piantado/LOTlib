@@ -1,7 +1,0 @@
-slurmstepd: Step 6081093.0 exceeded memory limit (24710024 > 24576000), being killed
-srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
-slurmstepd: *** STEP 6081093.0 CANCELLED AT 2015-10-08T07:18:39 *** on bhc0155
-slurmstepd: Exceeded job memory limit
-srun: error: bhc0155: tasks 0-23: Killed
-srun: Terminating job step 6081093.0
-srun: error: bhc0156: tasks 24-47: Killed
