@@ -2,22 +2,39 @@
     Convert everything to a stan-runnable file
 """
 import pickle
+import numpy
 
 def build_conceptlist(c,l):
     return "CONCEPT_%s__LIST_%s.txt"%(c,l)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Set up some logging
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+from LOTlib.Miscellaneous import setup_directory, qq
+
+LOG = "stan-log"
+setup_directory(LOG) # make a directory for ourselves
+
+# Make sure we print the entire matrix
+numpy.set_printoptions(threshold=numpy.inf)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load the hypotheses
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # map each concept to a hypothesis
-with open('hypotheses.pkl', 'r') as f:
+with open('hypotheses/hypotheses-1.pkl', 'r') as f:
     concept2hypotheses = pickle.load(f)
-print "# Loaded hypotheses: ", map(len, concept2hypotheses.values())
 
 hypotheses = set()
 for hset in concept2hypotheses.values():
     hypotheses.update(hset)
+
+
+print "# Loaded %s hypotheses" % len(hypotheses)
+with open(LOG+"/hypotheses.txt", 'w') as f:
+    for i, h in enumerate(hypotheses):
+        print >>f, i, qq(h)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load the human data
@@ -55,7 +72,7 @@ from Model.Grammar import grammar
 
 trees = [h.value for h in hypotheses]
 
-counts, sig2idx, prior_offset = create_counts(grammar, trees)
+counts, sig2idx, prior_offset = create_counts(grammar, trees, log=LOG)
 
 print "# Computed counts for each hypothesis & nonterminal"
 
@@ -71,7 +88,7 @@ NTrials  = []
 Output  = []
 GroupLength = []
 
-for concept in concept2data.keys():
+for concept in concept2data.keys()[:5]:
 
     data = concept2data[concept]
 
@@ -99,12 +116,12 @@ for concept in concept2data.keys():
             else:
                 print "*** Warning, %s not in human_yes or human_no"%str(k)
 
-    print "#\t Loaded concept %s"%concept
+    # print "#\t Loaded human data for concept %s" % concept
 
 print "# Created L, NYes, NTrials, and HOutput of size %s" % len(L)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Run Stan
+# Set up stan
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import pystan
@@ -128,24 +145,66 @@ stan_data = {
 }
 stan_data.update({ 'count_%s'%nt:counts[nt] for nt in counts.keys()}) # add the prior counts. Note we have to convert their names here
 
-for s in sorted(sig2idx.keys(), key=lambda x: (x[0], sig2idx[x]) ):
-    print s, sig2idx[s]
-
-print "# Saving stan data"
-
-# with open("stan_data.pkl", 'w') as f:
-#     pickle.dump(stan_data, f)
+print "# Summary of model size:"
+for nt in counts:
+    print "# Matrix %s is %s x %s" % (nt, counts[nt].shape[0], counts[nt].shape[1])
 
 
-print "# Running with code\n", stan_code
+model_code = make_stan_code(counts, log=LOG)
 
-fit = pystan.stan(model_code=stan_code,  data=stan_data, iter=50, chains=2)
-fit.plot().savefig("fig.pdf")
-print(fit)
+sm = pystan.StanModel(model_code=model_code)
+
+print "# Created Stan model"
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Run Stan optimization and bootstrap
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+fit = sm.optimizing(data=stan_data)
+
+for k in fit:
+    if isinstance(fit[k].tolist(), list):
+        for i, v in enumerate(fit[k].tolist()):
+            print "real", k, i, v
+    else:
+        print "real", k, 0, fit[k].tolist()
+
+
+## And bootstrap
+import scipy.stats
+
+y = numpy.array(NYes, dtype=float) # so we can take ratios
+n = numpy.array(NTrials)
+
+for rep in xrange(100):
+
+    # Resample our yeses
+    stan_data['NYes'] = scipy.stats.binom.rvs(n, y/n)
+
+    # and re-run
+    fit = sm.optimizing(data=stan_data)
+
+    for k in fit:
+        if isinstance(fit[k].tolist(), list):
+            for i, v in enumerate(fit[k].tolist()):
+                print "boot", k, i, v
+        else:
+            print "boot", k, 0, fit[k].tolist()
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Run Stan sampling -- very slow
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# samples = sm.sampling(data=stan_data, iter=100, chains=4, sample_file="./stan_samples")
+
+# print "# Running"
+# fit = pystan.stan(model_code=stan_code,  data=stan_data, warmup=50, iter=500, chains=4)
+# print(fit)
 
 ## And save
-with open("stan_fit.pkl", 'w') as f:
-    pickle.dump(fit, f)
+# with open("stan_fit.pkl", 'w') as f:
+#     pickle.dump(fit, f)
 
+# fit.plot().savefig("fig.pdf")
 
 # print(fit.extract(permuted=True))

@@ -4,20 +4,15 @@
 
 import pickle
 import numpy
-from LOTlib.Miscellaneous import qq
+from LOTlib.Miscellaneous import qq, setup_directory
 from Model import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Set up some logging
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-import os
-import sys
-
 LOG = "stan-log"
-
-if not os.path.exists(LOG):
-    os.mkdir(LOG)
+setup_directory(LOG) # make a directory for ourselves
 
 # Make sure we print the entire matrix
 numpy.set_printoptions(threshold=numpy.inf)
@@ -56,7 +51,7 @@ print "# Loaded human data"
 observed_sets = set([ k[0] for k in human_nyes.keys() ])
 
 ## TRIM TO FEWER
-observed_sets = set(list(observed_sets)[:100])
+# observed_sets = set(list(observed_sets)[:100])
 
 print "# Loaded %s observed sets" % len(observed_sets)
 
@@ -68,27 +63,13 @@ from LOTlib.GrammarInference.GrammarInference import create_counts
 
 trees = [h.value for h in hypotheses]
 
+# Decide which rules to use
 which_rules = [ r for r in grammar if r.nt in ['SET', 'MATH', 'EXPR'] ]
 
-counts, sig2idx, prior_offset = create_counts(grammar, trees, which_rules=which_rules)
+counts, sig2idx, prior_offset = create_counts(grammar, trees, which_rules=which_rules, log=LOG)
 
 print "# Computed counts for each hypothesis & nonterminal"
 
-# - - logging - - - - - - - -
-for nt in counts.keys():
-    with open(LOG+"/counts_%s.txt"%nt, 'w') as f:
-        for r in xrange(counts[nt].shape[0]):
-            print >>f, r, ' '.join(map(str, counts[nt][r,:].tolist()))
-
-# - - logging - - - - - - - -
-with open(LOG+"/sig2idx.txt", 'w') as f:
-    for s in sorted(sig2idx.keys(), key=lambda x: (x[0], sig2idx[x]) ):
-        print >>f,  s[0], sig2idx[s], qq(s)
-
-# - - logging - - - - - - - -
-with open(LOG+"/prior_offset.txt", 'w') as f:
-    for i, x in enumerate(prior_offset):
-        print >>f, i, x
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Build up the info about the data
@@ -114,12 +95,20 @@ for os in observed_sets:
         h.stored_likelihood = h.compute_single_likelihood(datum, cached_set=h.cached_set)
 
     L.append([ h.stored_likelihood for h in hypotheses ]) # each likelihood
-    GroupLength.append(len(domain))
 
+    gl = 0 # how many did we actually ad?
     for i in domain:
-        Output.append( [ 1*(i in h.cached_set) for h in hypotheses])
-        NYes.append( human_nyes[tuple([os,i])] )
-        NTrials.append( human_ntrials[tuple([os,i])] )
+        k = tuple([os,i])
+
+        if k in human_nyes and k in human_ntrials:
+            gl += 1
+            Output.append( [ 1*(i in h.cached_set) for h in hypotheses])
+            NYes.append( human_nyes[k] )
+            NTrials.append( human_ntrials[k] )
+        else:
+            print "*** Warning %s not in human data!" % str(k)
+
+    GroupLength.append(gl)
 
     # print "#\t Loaded observed set %s" % str(os)
 
@@ -132,7 +121,7 @@ print "# Created NYes, NTrials, and Output of size %s" % len(L)
 import pystan
 from LOTlib.GrammarInference.GrammarInference import make_stan_code
 
-stan_code = make_stan_code(counts)
+stan_code = make_stan_code(counts, log=LOG)
 
 stan_data = {
     'N_HYPOTHESES': len(hypotheses),
@@ -154,14 +143,56 @@ print "# Summary of model size:"
 for nt in counts:
     print "# Matrix %s is %s x %s" % (nt, counts[nt].shape[0], counts[nt].shape[1])
 
+model_code = make_stan_code(counts)
 
-# - - logging - - - - - - - -
-with open(LOG+"/model.stan", 'w') as f:
-    print >>f, stan_code
+sm = pystan.StanModel(model_code=model_code)
 
-print "# Running"
-fit = pystan.stan(model_code=stan_code,  data=stan_data, warmup=50, iter=500, chains=4)
-print(fit)
+print "# Created Stan model"
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Run Stan optimization and bootstrap
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+fit = sm.optimizing(data=stan_data)
+
+for k in fit:
+    if isinstance(fit[k].tolist(), list):
+        for i, v in enumerate(fit[k].tolist()):
+            print "real", k, i, v
+    else:
+        print "real", k, 0, fit[k].tolist()
+
+
+## And bootstrap
+import scipy.stats
+
+y = numpy.array(NYes, dtype=float) # so we can take ratios
+n = numpy.array(NTrials)
+
+for rep in xrange(100):
+
+    # Resample our yeses
+    stan_data['NYes'] = scipy.stats.binom.rvs(n, y/n)
+
+    # and re-run
+    fit = sm.optimizing(data=stan_data)
+
+    for k in fit:
+        if isinstance(fit[k].tolist(), list):
+            for i, v in enumerate(fit[k].tolist()):
+                print "boot", k, i, v
+        else:
+            print "boot", k, 0, fit[k].tolist()
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Run Stan sampling
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# samples = sm.sampling(data=stan_data, iter=100, chains=4, sample_file="./stan_samples")
+
+# print "# Running"
+# fit = pystan.stan(model_code=stan_code,  data=stan_data, warmup=50, iter=500, chains=4)
+# print(fit)
 
 ## And save
 # with open("stan_fit.pkl", 'w') as f:
