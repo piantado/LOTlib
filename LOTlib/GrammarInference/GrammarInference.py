@@ -21,10 +21,14 @@ import numpy
 import os
 from LOTlib.FunctionNode import BVUseFunctionNode
 
+from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+from LOTlib.Hypotheses.Lexicon.SimpleLexicon import SimpleLexicon
+from LOTlib.FunctionNode import FunctionNode
+
 DEFAULT_STAN_FILE = os.path.join(os.path.dirname(__file__), 'model-DMPCFG-Binomial.stan')
 
 from collections import Counter
-def create_counts(grammar, trees, which_rules=None, log=None):
+def create_counts(grammar, hypotheses, which_rules=None, log=None):
     """
         Make the rule counts for each nonterminal. This returns three things:
             count[nt][trees,rule] -- a hash from nonterminals to a matrix of rule counts
@@ -39,12 +43,12 @@ def create_counts(grammar, trees, which_rules=None, log=None):
     if which_rules is None:
         which_rules = grammar_rules
 
-    assert which_rules <= grammar_rules, "*** Somehow we got a rule not in the grammar!"
+    assert set(which_rules) <= set(grammar_rules), "*** Somehow we got a rule not in the grammar: %s" % str(set(grammar_rules)-set(which_rules))
 
     # convert rules to signatures for checking below
     which_signatures = { r.get_rule_signature() for r in which_rules }
 
-    prior_offset = [0.0 for _ in trees] # the log probability of all rules NOT in grammar_rules
+    prior_offset = [0.0 for _ in hypotheses] # the log probability of all rules NOT in grammar_rules
 
     # First set up the mapping between signatures and indexes
     sig2idx = dict() # map each signature to a unique index in its nonterminal
@@ -60,15 +64,25 @@ def create_counts(grammar, trees, which_rules=None, log=None):
     # the prior_offsets
 
     # set up the counts as all zeros
-    counts = { nt: numpy.zeros( (len(trees), next_free_idx[nt])) for nt in next_free_idx.keys() }
+    counts = { nt: numpy.zeros( (len(hypotheses), next_free_idx[nt])) for nt in next_free_idx.keys() }
 
-    for i, tree in enumerate(trees):
+    for i, h in enumerate(hypotheses):
 
-        for n in tree:
+        # Build up a lost of all the nodes, depending on what type of hypotheses we got
+        if isinstance(h, FunctionNode):
+            nodes = [n for n in h]
+        if isinstance(h, LOTHypothesis):
+            nodes = [n for n in h.value]
+        elif isinstance(h, SimpleLexicon):
+            nodes = []
+            for w in h.value.keys():
+                assert isinstance(h.value[w], LOTHypothesis), "*** Not implemented unless Lexicon values are LOTHypotheses"
+                nodes.extend([n for n in h.value[w].value])
 
+        # Iterate through the nodes and count rule usage
+        for n in nodes:
             if n.get_rule_signature() in which_signatures:
-
-                if not isinstance(n, BVUseFunctionNode):
+                if not isinstance(n, BVUseFunctionNode): ## NOTE: Not currently doing bound variables
                     nt, s = n.returntype, n.get_rule_signature()
                     counts[nt][i, sig2idx[s]] += 1
             else:
@@ -126,9 +140,9 @@ def make_stan_code(counts, template=DEFAULT_STAN_FILE, log=None):
 
     return stan_code
 
-
-def pretty_print_optimized_parameters(fit):
-    pass
+#
+# def pretty_print_optimized_parameters(fit):
+#     pass
 
 
 

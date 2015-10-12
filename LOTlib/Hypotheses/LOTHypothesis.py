@@ -26,7 +26,7 @@ class LOTHypothesis(FunctionHypothesis, RegenerationProposer):
 
     """
 
-    def __init__(self, grammar=None, value=None, f=None, start=None, ALPHA=0.9, maxnodes=25, args=['x'], **kwargs):
+    def __init__(self, grammar=None, value=None, f=None, maxnodes=25, args=['x'], **kwargs):
 
         # Save all of our keywords
         self.__dict__.update(locals())

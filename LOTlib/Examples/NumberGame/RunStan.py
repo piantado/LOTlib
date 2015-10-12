@@ -143,9 +143,7 @@ print "# Summary of model size:"
 for nt in counts:
     print "# Matrix %s is %s x %s" % (nt, counts[nt].shape[0], counts[nt].shape[1])
 
-model_code = make_stan_code(counts)
-
-sm = pystan.StanModel(model_code=model_code)
+sm = pystan.StanModel(model_code=stan_code)
 
 print "# Created Stan model"
 
