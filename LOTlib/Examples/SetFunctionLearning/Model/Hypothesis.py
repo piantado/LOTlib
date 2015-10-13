@@ -7,11 +7,10 @@ from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
 class SFLHypothesis(LOTHypothesis):
     def __init__(self, value=None, alpha=0.99, baserate=0.5):
-        LOTHypothesis.__init__(self, grammar, value=value, alpha=alpha, baserate=baserate)
+        LOTHypothesis.__init__(self, grammar, value=value, args=['S', 'x'], alpha=alpha, baserate=baserate)
 
-    def evaluate_on_set(self, s): ## TODO: NOTE: THIS WILL HAVE TO CHANGE WHEN S IS AN ARGUMENT
-
-        return map(self, s)
+    def evaluate_on_set(self, s):
+        return [self(s,x) for x in s]
 
     def compute_single_likelihood(self, datum):
 
