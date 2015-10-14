@@ -19,6 +19,7 @@
 import pystan
 import numpy
 import os
+import re
 from LOTlib.FunctionNode import BVUseFunctionNode
 
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
@@ -44,6 +45,12 @@ def create_counts(grammar, hypotheses, which_rules=None, log=None):
         which_rules = grammar_rules
 
     assert set(which_rules) <= set(grammar_rules), "*** Somehow we got a rule not in the grammar: %s" % str(set(grammar_rules)-set(which_rules))
+
+
+    # Check the grammar rules
+    for r in which_rules:
+        assert not re.search(r"[^a-zA-Z_0-9]", r.nt), "*** Nonterminal names must be alphanumeric %s"%str(r)
+
 
     # convert rules to signatures for checking below
     which_signatures = { r.get_rule_signature() for r in which_rules }
