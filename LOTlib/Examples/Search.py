@@ -62,9 +62,10 @@ if __name__ == "__main__":
 
     alsoprint = eval(options.ALSO_PRINT)
 
-    if options.DATA == -1:
+    if options.DATA_STEP > 0:
         data_amounts = range(options.DATA_MIN, options.DATA_MAX, options.DATA_STEP)
     else:
+        assert options.DATA_STEP > 0, "*** Must specify either data or dmin, dmax, dstep"
         data_amounts = [options.DATA]
 
     # ========================================================================================================

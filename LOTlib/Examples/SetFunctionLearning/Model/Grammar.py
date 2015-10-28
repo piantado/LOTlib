@@ -63,10 +63,10 @@ grammar.add_rule('OBJECT', 'x', None, 1.0)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # And add in quantification
 
-grammar.add_rule('BOOL', 'forall_', ['<OBJECT,BOOL>', 'SET'], 1.0)
-grammar.add_rule('BOOL', 'exists_', ['<OBJECT,BOOL>', 'SET'], 1.0)
+grammar.add_rule('BOOL', 'forall_', ['OBJECT2BOOL', 'SET'], 1.0)
+grammar.add_rule('BOOL', 'exists_', ['OBJECT2BOOL', 'SET'], 1.0)
 
-grammar.add_rule('<OBJECT,BOOL>', 'lambda', ['BOOL'], 1.0, bv_type='OBJECT')
+grammar.add_rule('OBJECT2BOOL', 'lambda', ['BOOL'], 1.0, bv_type='OBJECT')
 
 grammar.add_rule('SET', 'S', None, 1.0)
 grammar.add_rule('SET', '(set(S)-set([x]))', None, 1.0)

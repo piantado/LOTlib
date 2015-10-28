@@ -23,7 +23,7 @@ numpy.set_printoptions(threshold=numpy.inf)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # map each concept to a hypothesis
-with open('hypotheses/hypotheses-1.pkl', 'r') as f:
+with open('hypotheses/hypotheses-10.pkl', 'r') as f:
     concept2hypotheses = pickle.load(f)
 
 hypotheses = set()
@@ -98,7 +98,7 @@ for concept in concept2data.keys():
 
     for di in xrange(25):
         ll  = [ sum(h.stored_likelihood[:di]) for h in hypotheses ] # each likelihood
-        out = [ map(lambda x: 1*h(x), data[di].input) for h in hypotheses] # each response
+        out = [ map(lambda x: 1*h(data[di].input, x), data[di].input) for h in hypotheses] # each response
 
         # This group will be as long as this number of data points
         GroupLength.append( len(data[di].input) )
