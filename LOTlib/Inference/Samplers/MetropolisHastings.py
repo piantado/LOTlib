@@ -2,7 +2,7 @@
 
 from LOTlib.Miscellaneous import q, qq, Infinity
 from LOTlib.Inference.MHShared import MH_acceptance
-from LOTlib.Inference.Sampler import Sampler
+from LOTlib.Inference.Samplers.Sampler import Sampler
 
 
 class MHSampler(Sampler):
@@ -102,7 +102,9 @@ class MHSampler(Sampler):
         Reset acceptance and proposal counters.
 
         """
-        self.acceptance_count, self.proposal_count = 0, 0
+        self.acceptance_count = 0
+        self.proposal_count   = 0
+        self.posterior_calls  = 0
 
     def acceptance_ratio(self):
         """
@@ -123,7 +125,6 @@ class MHSampler(Sampler):
 
     def next(self):
         """Generate another sample."""
-
         if self.samples_yielded >= self.steps:
             raise StopIteration
         else:
