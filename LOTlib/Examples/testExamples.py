@@ -12,16 +12,20 @@ class ExampleLoaderTest(unittest.TestCase):
     def runTest(self):
 
         for model in ['EvenOdd', 'FOL', 'Magnetism.Simple', 'Magnetism.Complex',
-                      'NAND', 'Number', 'RegularExpression', 'RationalRules.TwoConcepts',
+                      'NAND', 'Number', 'RegularExpression',# 'RationalRules.TwoConcepts',
                       'StochasticGrammarInduction', 'SymbolicRegression.Galileo',
                       'SymbolicRegression.Symbolic']:
-            print "# Testing loading of example ", model
+            print "# Testing loading of example", model
 
             make_hypothesis, make_data = load_example(model)
 
-            h0 = make_hypothesis()
             d  = make_data()
             d  = make_data(10) # require an amount
 
-            for _ in MHSampler(h0, d, steps=10):
+            # Let's just try initializing a bunch of times
+            for _ in xrange(100):
+                h0 = make_hypothesis()
+
+            # and ensure that the samplign will run
+            for _ in MHSampler(h0, d, steps=100):
                 pass

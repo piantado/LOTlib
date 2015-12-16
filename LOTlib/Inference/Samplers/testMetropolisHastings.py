@@ -19,7 +19,7 @@ class TestMetropolisHastings(unittest.TestCase):
 
     """
     def runTest(self):
-        NSAMPLES = 100000
+        NSAMPLES = 10000
 
         from LOTlib.DefaultGrammars import finiteTestGrammar as grammar
 
@@ -34,11 +34,13 @@ class TestMetropolisHastings(unittest.TestCase):
             def compute_prior(self):
                 return grammar.log_probability(self.value)
 
+        print "# Taking MHSampler for a test run"
         cnt = Counter()
         h0 = MyH(grammar=grammar)
-        for h in MHSampler(h0, [], steps=NSAMPLES, skip=10): # huh the skip here seems to be important
+        for h in break_ctrlc(MHSampler(h0, [], steps=NSAMPLES, skip=10)): # huh the skip here seems to be important
             cnt[h] += 1
         trees = list(cnt.keys())
+        print "# Done taking MHSampler for a test run"
 
         ## TODO: When the MCMC methods get cleaned up for how many samples they return, we will assert that we got the right number here
         # assert sum(cnt.values()) == NSAMPLES # Just make sure we aren't using a sampler that returns fewer samples! I'm looking at you, ParallelTempering

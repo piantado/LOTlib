@@ -6,6 +6,7 @@ from LOTlib.FunctionNode import FunctionNode, BVUseFunctionNode, BVAddFunctionNo
 
 class EnumerationTest(unittest.TestCase):
     def runTest(self):
+        print "# Testing grammar enumeration"
         n = 0
         for t in finiteTestGrammar.enumerate():
             n += 1
@@ -15,7 +16,8 @@ class EnumerationTest(unittest.TestCase):
 import re
 class GrammarTreeTest(unittest.TestCase):
     def runTest(self):
-        for grammar in [finiteTestGrammar, infiniteTestGrammar]:
+        for i, grammar in enumerate([finiteTestGrammar, infiniteTestGrammar]):
+            print "# Testing grammar ", i 
 
             for _ in xrange(10000):
                 t = grammar.generate()
