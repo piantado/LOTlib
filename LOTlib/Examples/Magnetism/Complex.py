@@ -45,7 +45,7 @@ for o in OBJECTS:
 from LOTlib.DataAndObjects import FunctionData
 
 # Set up data -- true output means attraction (p=positive; n=negative)
-def make_data(n):
+def make_data(n=1):
 
     data = []
 

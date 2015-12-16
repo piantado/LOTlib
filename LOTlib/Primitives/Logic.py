@@ -1,5 +1,4 @@
-from LOTlib.Evaluation.Eval import primitive
-
+from LOTlib.Eval import primitive
 import itertools
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

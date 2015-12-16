@@ -1,4 +1,4 @@
-from LOTlib.Evaluation.Eval import primitive
+from LOTlib.Eval import primitive
 from LOTlib.Miscellaneous import flip, Infinity
 import numpy
 

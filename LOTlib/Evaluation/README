@@ -1,5 +1,0 @@
-Functions for "eval"ing in LOTlib. 
-
-This includes standard python eval (Evaluation), CombinatoryLogic and evaluation of pure untyped lambda calculus. 
-
-EvaluationException is included and raised when any of these evals go too deep. 

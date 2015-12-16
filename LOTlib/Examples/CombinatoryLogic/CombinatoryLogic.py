@@ -14,7 +14,7 @@ Much much faster scheme code is available from Steve.
 """
 
 from LOTlib.Miscellaneous import unlist_singleton
-from EvaluationException import EvaluationException
+from LOTlib.Eval import EvaluationException
 MAX_DEPTH = 25
 MAX_LENGTH = 25
 
@@ -26,7 +26,6 @@ class CombinatorEvaluationException(EvaluationException): pass
 class CombinatorEvaluationDepthException(CombinatorEvaluationException): pass
 
 class CombinatorEvaluationLengthException(CombinatorEvaluationException): pass
-
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # evaluate combinators

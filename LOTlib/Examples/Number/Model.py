@@ -4,7 +4,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from collections import defaultdict
-from LOTlib.Evaluation.Eval import primitive
+from LOTlib.Eval import primitive
 
 # counting list
 # the next word in the list -- we'll implement these as a hash table
@@ -131,7 +131,7 @@ for w in WORDS:
 
 from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis
 from LOTlib.Miscellaneous import log, Infinity, log1mexp, attrmem
-from LOTlib.Evaluation.EvaluationException import EvaluationException
+from LOTlib.Eval import EvaluationException
 
 class NumberExpression(RecursiveLOTHypothesis):
     

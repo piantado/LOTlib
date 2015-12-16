@@ -3,7 +3,7 @@ from Levenshtein import distance
 from math import log
 from LOTlib.Hypotheses.Likelihoods.StochasticFunctionLikelihood import StochasticFunctionLikelihood
 from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis
-from LOTlib.Evaluation.EvaluationException import RecursionDepthException
+from LOTlib.Eval import RecursionDepthException
 from LOTlib.Hypotheses.FactorizedDataHypothesis import FactorizedLambdaHypothesis, FactorizedDataHypothesis
 from LOTlib.Hypotheses.FactorizedDataHypothesis import InnerHypothesis
 from LOTlib.Examples.FormalLanguageTheory.Model.Grammar import a_grammar, eng_grammar # passed in as kwargs

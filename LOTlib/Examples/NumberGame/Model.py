@@ -1,6 +1,6 @@
 
 from math import log
-from LOTlib.Evaluation.EvaluationException import TooBigException
+from LOTlib.Eval import TooBigException
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis, Infinity
 from LOTlib.Miscellaneous import attrmem
 
@@ -89,7 +89,7 @@ class NumberGameHypothesis(LOTHypothesis):
 # Define the grammars
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from LOTlib.Evaluation.Eval import register_primitive
+from LOTlib.Eval import register_primitive
 
 from LOTlib.Grammar import Grammar
 

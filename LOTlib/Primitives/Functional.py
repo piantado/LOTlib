@@ -1,6 +1,5 @@
-from LOTlib.Evaluation.Eval import primitive
+from LOTlib.Eval import primitive, RecursionDepthException
 from LOTlib.Miscellaneous import raise_exception
-from LOTlib.Evaluation.EvaluationException import RecursionDepthException
 
 ## TODO: Add transitive closure of an operation
 

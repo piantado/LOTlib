@@ -3,14 +3,26 @@
 """
 import sys
 
+"""
+    The exceptions we throw for all problems in Evaluation
+"""
+
+class EvaluationException(Exception):
+    pass
+
+class TooBigException(EvaluationException):
+    pass
+
+class RecursionDepthException(EvaluationException):
+    pass
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # We define two variables, one for how many function calls have been
 # used in a single function/hypothesis, and one for how many have been
 # run over the entire course of the experiment
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 # LOCAL_PRIMITIVE_OPS = 0
 # GLOBAL_PRIMITIVE_OPS = 0
+#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def primitive(fn):
     """A decocator for basic primitives that increments our counters. Used to be known as @LOTlib_primitive"""
@@ -77,19 +89,3 @@ def register_primitive(function, name=None):
 
     sys.modules['__builtin__'].__dict__[name] = function
 
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~~~ We must import all of these to ensure that they execute and call LOTlib_primitive
-#~~~ everywhere that they should.
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-import Primitives.Arithmetic
-import Primitives.Combinators
-import Primitives.Features
-import Primitives.Functional
-import Primitives.Logic
-import Primitives.Number
-import Primitives.Semantics
-import Primitives.SetTheory
-import Primitives.Stochastics
-import Primitives.Trees
