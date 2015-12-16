@@ -50,4 +50,5 @@ class Sampler(object):
         """
         A wrapper for hypothesis.compute_posterior(data) that can be overwritten in fancy subclassses.
         """
+        self.posterior_calls += 1
         return h.compute_posterior(data)

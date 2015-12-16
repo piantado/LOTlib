@@ -45,18 +45,19 @@ for o in OBJECTS:
 from LOTlib.DataAndObjects import FunctionData
 
 # Set up data -- true output means attraction (p=positive; n=negative)
-def make_data():
+def make_data(n):
 
     data = []
 
-    for a,b in itertools.product(OBJECTS, OBJECTS):
+    for _ in xrange(n):
+        for a,b in itertools.product(OBJECTS, OBJECTS):
 
-        myinput  = [a,b]
+            myinput  = [a,b]
 
-        # opposites (n/p) interact; x interacts with nothing
-        myoutput = (a[0] != b[0]) and (a[0] != 'x') and (b[0] != 'x')
+            # opposites (n/p) interact; x interacts with nothing
+            myoutput = (a[0] != b[0]) and (a[0] != 'x') and (b[0] != 'x')
 
-        data.append( FunctionData(input=myinput, output=myoutput, alpha=0.99) )
+            data.append( FunctionData(input=myinput, output=myoutput, alpha=0.99) )
 
 
     return data

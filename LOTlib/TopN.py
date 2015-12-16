@@ -22,6 +22,7 @@ class TopN(object):
     """
 
     def __init__(self, N=Infinity, key='posterior_score'):
+        assert N > 0, "*** TopN must have N>0"
         self.N = N
         self.key = key
 

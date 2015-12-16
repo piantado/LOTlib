@@ -174,6 +174,13 @@ class NumberExpression(RecursiveLOTHypothesis):
         else:
             return log((1.0 - datum.alpha)/10.0 + datum.alpha * (response == datum.output))
 
+    def sample_output(self, datum):
+        # return a sample of my output given the input in datum
+        if random() < datum.alpha:
+            return self(*datum.input)
+        else:
+            return weighted_sample( WORDS ) # uniform sample
+
     def get_knower_pattern(self):
         # compute a string describing the behavior of this knower-level
         resp = [ self(set(sample_sets_of_objects(n, all_objects))) for n in xrange(1, 10)]

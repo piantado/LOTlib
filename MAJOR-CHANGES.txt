@@ -1,3 +1,4 @@
+    - Changed FiniteBestSet to TopN; rewritten for clarity
 October 8 2015
     - Added stream processing functions to MCMCSummary. SampleStream now allows a convenient notation for processing streams of samples. 
     - Moved standard_sample to Inference.Samplers.StandardSample

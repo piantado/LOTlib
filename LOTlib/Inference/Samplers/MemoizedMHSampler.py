@@ -14,12 +14,13 @@ class MemoizedMHSampler(MHSampler):
         self.mem = LRUCache(maxsize=memoize)
 
     def compute_posterior(self, h, data):
+
         if h in self.mem:
             ret = self.mem[h]
             h.posterior_score = ret # set this because it may not be set
             return ret
         else:
-            ret = MHSampler.compute_posterior(self, h, data)
+            ret = MHSampler.compute_posterior(self, h, data) # calls update to posterior counter
             self.mem[h] = ret
             return ret
 

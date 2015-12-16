@@ -5,11 +5,11 @@
 
 from LOTlib.DataAndObjects import FunctionData, Obj
 
-def make_data(alpha=0.999):
+def make_data(n=1, alpha=0.999):
     return [FunctionData(input=[Obj(shape='square', color='red')], output=True, alpha=alpha),
             FunctionData(input=[Obj(shape='square', color='blue')], output=False, alpha=alpha),
             FunctionData(input=[Obj(shape='triangle', color='blue')], output=False, alpha=alpha),
-            FunctionData(input=[Obj(shape='triangle', color='red')], output=False, alpha=alpha)]
+            FunctionData(input=[Obj(shape='triangle', color='red')], output=False, alpha=alpha)]*n
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
