@@ -136,13 +136,13 @@ class MHSampler(Sampler):
                 # compute the shortcut value of the likelihood
                 # We will only be accepted if ll < ll_cutoff, which we can use in self.compute_posterior
                 # to speed things along
-                # Note that this requires passing the same p to MH_acceptance
+                # Note that this requires passing the same p to MH_acceptance, since it determines the cutoff
                 p = random() # the random number
-                ll_cutoff = log(p)*self.acceptance_temperature + \
+                ll_cutoff = (log(p)*self.acceptance_temperature + \
                             -self.proposal.prior/self.prior_temperature + \
                             self.current_sample.prior/self.prior_temperature + \
                             self.current_sample.likelihood/self.likelihood_temperature + \
-                            fb
+                            fb) * self.likelihood_temperature
 
                 # Call myself so memoized subclasses can override
                 self.compute_posterior(self.proposal, self.data, shortcut=ll_cutoff)
@@ -174,8 +174,7 @@ class MHSampler(Sampler):
 
 if __name__ == "__main__":
 
-    # --------------------------------------------------------------------------------------------------------
-    # Example 1
+    # Just an example
     from LOTlib import break_ctrlc
     from LOTlib.Examples.Number.Model import make_data, NumberExpression, grammar
 
@@ -185,14 +184,4 @@ if __name__ == "__main__":
     for h in break_ctrlc(sampler):
         print h.posterior_score, h.prior, h.likelihood, h.compute_likelihood(data), h
 
-    # --------------------------------------------------------------------------------------------------------
-    # Example 2
-
-    # from LOTlib.Examples.Number.Shared import generate_data, NumberExpression, grammar, get_knower_pattern
-    #
-    # data = generate_data(500)
-    # h0 = NumberExpression(grammar)
-    # for h in mh_sample(h0, data, 10000):
-    #         print q(get_knower_pattern(h)), h.lp, h.prior, h.likelihood, q(h)
-    #
 
