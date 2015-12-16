@@ -17,7 +17,7 @@ import re
 class GrammarTreeTest(unittest.TestCase):
     def runTest(self):
         for i, grammar in enumerate([finiteTestGrammar, infiniteTestGrammar]):
-            print "# Testing grammar ", i 
+            print "# Testing grammar ", i
 
             for _ in xrange(10000):
                 t = grammar.generate()

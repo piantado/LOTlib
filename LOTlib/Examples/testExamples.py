@@ -12,7 +12,7 @@ class ExampleLoaderTest(unittest.TestCase):
     def runTest(self):
 
         for model in ['EvenOdd', 'FOL', 'Magnetism.Simple', 'Magnetism.Complex',
-                      'NAND', 'Number', 'RegularExpression',# 'RationalRules.TwoConcepts',
+                      'NAND', 'Number', 'RegularExpression', 'RationalRules',
                       'StochasticGrammarInduction', 'SymbolicRegression.Galileo',
                       'SymbolicRegression.Symbolic']:
             print "# Testing loading of example", model
