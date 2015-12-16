@@ -14,8 +14,12 @@ from MetropolisHastings import MHSampler
 class TestMetropolisHastings(unittest.TestCase):
     """
     Test the sampler, using a default grammar
+
+    TODO: Add tree checks to samples from the sampler!
+
     """
     def runTest(self):
+        NSAMPLES = 100000
 
         from LOTlib.DefaultGrammars import finiteTestGrammar as grammar
 
@@ -29,8 +33,6 @@ class TestMetropolisHastings(unittest.TestCase):
             @attrmem('prior')
             def compute_prior(self):
                 return grammar.log_probability(self.value)
-
-        NSAMPLES = 10000
 
         cnt = Counter()
         h0 = MyH(grammar=grammar)
@@ -100,31 +102,3 @@ class TestMetropolisHastings(unittest.TestCase):
     #     return csq, pv
 
 
-
-    #
-    # def plot_sampler(self, opath, sampler):
-    #     """
-    #     Plot the sampler, for cases with many zeros where chisquared won't work well
-    #     """
-    #     cnt = Counter()
-    #     for h in break_ctrlc(sampler):
-    #         cnt[h.value] += 1
-    #
-    #     Z = logsumexp([ self.grammar.log_probability(t) for t in self.trees]) # renormalize to the trees in self.trees
-    #     obsc = [cnt[t] for t in self.trees]
-    #     expc = [exp(self.grammar.log_probability(t)-Z)*sum(obsc) for t in self.trees]
-    #
-    #     for t, c, s in zip(self.trees, obsc, expc):
-    #         print c, "\t", s, "\t", t
-    #
-    #
-    #     expc, obsc, trees = zip(*sorted(zip(expc, obsc, self.trees), reverse=True))
-    #
-    #     import matplotlib.pyplot as plt
-    #     from numpy import log
-    #     plt.subplot(111)
-    #     # Log here spaces things out at the high end, where we can see it!
-    #     plt.scatter(log(range(len(trees))), expc, color="red", alpha=1.)
-    #     plt.scatter(log(range(len(trees))), obsc, color="blue", marker="x", alpha=1.)
-    #     plt.savefig(opath)
-    #     plt.clf()
