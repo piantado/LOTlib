@@ -11,7 +11,6 @@ def make_data(n=1, alpha=0.999):
             FunctionData(input=[Obj(shape='triangle', color='blue')], output=False, alpha=alpha),
             FunctionData(input=[Obj(shape='triangle', color='red')], output=False, alpha=alpha)]*n
 
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Grammar
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

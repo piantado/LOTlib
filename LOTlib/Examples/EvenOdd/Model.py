@@ -32,12 +32,12 @@ for w in WORDS:
 
 from LOTlib.DataAndObjects import FunctionData
 
-def make_data(alpha=0.99):
+def make_data(n=1, alpha=0.99):
     data = []
     for x in xrange(1, 10):
         data.append( FunctionData(input=['even', x], output=(x % 2 == 0), alpha=alpha) )
         data.append( FunctionData(input=['odd',  x], output=(x % 2 == 1), alpha=alpha) )
-    return data
+    return data*n
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Hypothesis
