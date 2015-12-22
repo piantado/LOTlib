@@ -1,3 +1,7 @@
+Dec 16 2015
+    - Moved some examples and Sandbox to Projects subfolder
+    - Removed Evaluation and moved its parts to LOTlib.Eval (that's where @primitive lives now)
+    - Removed testing and integrated unit tests throughout
     - Changed FiniteBestSet to TopN; rewritten for clarity
 October 8 2015
     - Added stream processing functions to MCMCSummary. SampleStream now allows a convenient notation for processing streams of samples. 

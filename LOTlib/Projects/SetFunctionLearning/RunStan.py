@@ -66,7 +66,7 @@ print "# Loaded concept2data"
 # Get the rule count matrices
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from LOTlib.GrammarInference.GrammarInference import create_counts
+from LOTlib.Inference.GrammarInference.GrammarInference import create_counts
 
 from Model.Grammar import grammar
 
@@ -125,7 +125,7 @@ print "# Created L, NYes, NTrials, and HOutput of size %s" % len(L)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import pystan
-from LOTlib.GrammarInference.GrammarInference import make_stan_code
+from LOTlib.Inference.GrammarInference.GrammarInference import make_stan_code
 
 stan_code = make_stan_code(counts)
 

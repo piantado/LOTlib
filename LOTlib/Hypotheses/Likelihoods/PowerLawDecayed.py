@@ -59,7 +59,8 @@ class PowerLawDecayed(object):
         """
                 This is overwritten, writes to stored_likelihood, and then calls get_cumulative_likelihoods
         """
-        assert shortcut == -Infinity, "*** Not implemented for shortcuts!"
+
+        ## NOTE: Shortcut is not yet implemented here
 
         self.stored_likelihood = [self.compute_single_likelihood(datum, **kwargs) for datum in data]
 

@@ -3,7 +3,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Define primitives
 
-from LOTlib.Evaluation.Eval import register_primitive
+from LOTlib.Eval import register_primitive
 
 @register_primitive
 def circle_(x):
