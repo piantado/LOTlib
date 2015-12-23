@@ -133,19 +133,8 @@ class MHSampler(Sampler):
                 assert self.proposal is not self.current_sample, "*** Proposal cannot be the same as the current sample!"
                 assert self.proposal.value is not self.current_sample.value, "*** Proposal cannot be the same as the current sample!"
 
-                # compute the shortcut value of the likelihood
-                # We will only be accepted if ll < ll_cutoff, which we can use in self.compute_posterior
-                # to speed things along
-                # Note that this requires passing the same p to MH_acceptance, since it determines the cutoff
-                p = random() # the random number
-                ll_cutoff = (log(p)*self.acceptance_temperature + \
-                            -self.proposal.prior/self.prior_temperature + \
-                            self.current_sample.prior/self.prior_temperature + \
-                            self.current_sample.likelihood/self.likelihood_temperature + \
-                            fb) * self.likelihood_temperature
-
                 # Call myself so memoized subclasses can override
-                self.compute_posterior(self.proposal, self.data, shortcut=ll_cutoff)
+                self.compute_posterior(self.proposal, self.data)
 
                 # Note: It is important that we re-compute from the temperature since these may be altered
                 #    externally from ParallelTempering and others
@@ -160,7 +149,7 @@ class MHSampler(Sampler):
                     print ""
                 
                 # if MH_acceptance(cur, prop, fb, acceptance_temperature=self.acceptance_temperature): # this was the old form
-                if MH_acceptance(cur, prop, fb, p=p, acceptance_temperature=self.acceptance_temperature):
+                if MH_acceptance(cur, prop, fb, acceptance_temperature=self.acceptance_temperature):
                     self.current_sample = self.proposal
                     self.was_accepted = True
                     self.acceptance_count += 1
