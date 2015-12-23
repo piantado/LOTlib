@@ -136,7 +136,7 @@ from LOTlib.Eval import EvaluationException
 class NumberExpression(RecursiveLOTHypothesis):
     
     def __init__(self, grammar=None, value=None, f=None, args=['x'], gamma=-30, **kwargs):
-        RecursiveLOTHypothesis.__init__(self, grammar, value=value, args=['x'], **kwargs)
+        RecursiveLOTHypothesis.__init__(self, grammar, value=value, args=['x'], f=f, **kwargs)
         self.gamma=gamma
         self.lg1mgamma=log1mexp(gamma)
 

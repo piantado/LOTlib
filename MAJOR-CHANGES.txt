@@ -1,4 +1,6 @@
 Dec 16 2015
+	- added shortcut sampling scheme
+	- reconfigured pystring and classes to allow bv without lambdas
     - Moved some examples and Sandbox to Projects subfolder
     - Removed Evaluation and moved its parts to LOTlib.Eval (that's where @primitive lives now)
     - Removed testing and integrated unit tests throughout
