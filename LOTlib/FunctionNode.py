@@ -65,10 +65,7 @@ class FunctionNode(object):
         self.added_rule = None
         
         assert self.name is None or isinstance(self.name, str)
-        
-        if self.name is not None and self.name.lower() == 'applylambda':
-            raise NotImplementedError # Let's not support any applylambda for now
-    
+
     def setto(self, q):
         """Makes all the parts the same as q, not copies.
 
@@ -663,6 +660,7 @@ class BVAddFunctionNode(FunctionNode):
     def __init__(self, parent, returntype, name, args,  added_rule=None):
         FunctionNode.__init__(self, parent, returntype, name, args)
         self.added_rule = added_rule
+        assert added_rule is not None, "*** Cannot use BVAddFunctionNode if added_rule is None!"
 
     def uses_bv(self):
         """ Is my rule used below? """
@@ -844,22 +842,16 @@ def fullstring(x, d=0, bv_names=None):
             bv_names = dict()
 
 
-        if x.name == 'lambda':
+        if isinstance(x, BVAddFunctionNode):
             # On a lambda, we must add the introduced bv, and then remove it again afterwards
 
-            bvn = ''
-            if isinstance(x, BVAddFunctionNode) and x.added_rule is not None:
-                bvn = x.added_rule.bv_prefix+str(d)
-                bv_names[x.added_rule.name] = bvn
+            bvn = x.added_rule.bv_prefix+str(d)
+            bv_names[x.added_rule.name] = bvn
 
             assert len(x.args) == 1
-            ret = 'lambda<%s> %s: %s' % ( x.returntype, bvn, fullstring(x.args[0], d=d+1, bv_names=bv_names) )
+            ret = '%s<%s> %s: %s' % ( x.name, x.returntype, bvn, fullstring(x.args[0], d=d+1, bv_names=bv_names) )
 
-            if isinstance(x, BVAddFunctionNode) and x.added_rule is not None:
-                try:
-                    del bv_names[x.added_rule.name]
-                except KeyError:
-                    x.fullprint()
+            del bv_names[x.added_rule.name]
 
             return ret
         else:
@@ -892,52 +884,63 @@ def pystring(x, d=0, bv_names=None):
         if bv_names is None:
             bv_names = dict()
 
-        if x.name == "if_": # this gets translated
+        bvn = '' # used when lambda but not BVAddFunctionNode
+        if isinstance(x, BVAddFunctionNode):
+            bvn = x.added_rule.bv_prefix+str(d)
+            bv_names[x.added_rule.name] = bvn
+            assert len(x.args) == 1
+
+
+        # Now handle the name special cases
+        if x.args is None: # terminal
+            if isinstance(x, BVUseFunctionNode):
+                ret = bv_names.get(x.name, x.name)
+            else:
+                ret = x.name
+
+        elif x.name == "if_": # this gets translated
             assert len(x.args) == 3, "if_ requires 3 arguments!"
             # This converts from scheme (if bool s t) to python (s if bool else t)
-            b = pystring(x.args[0], d=d+1, bv_names=bv_names)
-            s = pystring(x.args[1], d=d+1, bv_names=bv_names)
-            t = pystring(x.args[2], d=d+1, bv_names=bv_names)
-            return '( %s if %s else %s )' % (s, b, t)
+            ret = '( %s if %s else %s )' % (pystring(x.args[1], d=d+1, bv_names=bv_names),
+                                            pystring(x.args[0], d=d+1, bv_names=bv_names),
+                                            pystring(x.args[2], d=d+1, bv_names=bv_names))
+
         elif x.name == '':
             assert len(x.args) == 1, "Null names must have exactly 1 argument"
-            return pystring(x.args[0], d=d, bv_names=bv_names)
+            ret = pystring(x.args[0], d=d, bv_names=bv_names)
+
         elif x.name == ',': # comma join
-            return ', '.join(map(lambda a: pystring(a, d=d, bv_names=bv_names), x.args))
+            ret = ', '.join(map(lambda a: pystring(a, d=d, bv_names=bv_names), x.args))
+
         elif x.name == "apply_":
             assert x.args is not None and len(x.args)==2, "Apply requires exactly 2 arguments"
             #print ">>>>", self.args
-            return '( %s )( %s )' % tuple(map(lambda a: pystring(a, d=d, bv_names=bv_names), x.args))
-        elif x.name == 'lambda':
-            # On a lambda, we must add the introduced bv, and then remove it again afterwards
+            ret = '( %s )( %s )' % tuple(map(lambda a: pystring(a, d=d, bv_names=bv_names), x.args))
 
-            bvn = ''
-            if isinstance(x, BVAddFunctionNode) and x.added_rule is not None:
-                bvn = x.added_rule.bv_prefix+str(d)
-                bv_names[x.added_rule.name] = bvn
-
-            assert len(x.args) == 1
-            ret = 'lambda %s: %s' % ( bvn, pystring(x.args[0], d=d+1, bv_names=bv_names) )
-
-            if isinstance(x, BVAddFunctionNode) and x.added_rule is not None:
-                try:
-                    del bv_names[x.added_rule.name]
-                except KeyError:
-                    x.fullprint()
-
-            return ret
         elif percent_s_regex.search(x.name): # If we match the python string substitution character %s, then format
-            return x.name % tuple(map(lambda a: pystring(a, d=d+1, bv_names=bv_names), x.args))
+            ret = x.name % tuple(map(lambda a: pystring(a, d=d+1, bv_names=bv_names), x.args))
+
+        elif x.name == 'lambda': # we are a lambda but NOT a BVAddFunctionNode -- a lambda thunk!
+                assert len(x.args) == 1
+                ret = 'lambda %s: %s' % (bvn, pystring(x.args[0], d=d+1, bv_names=bv_names))
         else:
 
             name = x.name
-            if isinstance(x, BVUseFunctionNode):
+            if isinstance(x, BVUseFunctionNode): # handle bv functions
                 name = bv_names.get(x.name, x.name)
 
-            if x.args is None:
-                return name
-            else:
-                return name+'('+', '.join(map(lambda a: pystring(a, d=d+1, bv_names=bv_names), x.args))+')'
+            ret = name+'('+', '.join(map(lambda a: pystring(a, d=d+1, bv_names=bv_names), x.args))+')'
+
+        # On a lambda, we must add the introduced bv, and then remove it again afterwards
+        if isinstance(x, BVAddFunctionNode):
+            del bv_names[x.added_rule.name]
+
+        return ret
+
+
+
+
+
 
 
 def lambdastring(fn, d=0, bv_names=None):
