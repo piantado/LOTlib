@@ -907,15 +907,15 @@ def pystring(x, d=0, bv_names=None):
 
         elif x.name == '':
             assert len(x.args) == 1, "Null names must have exactly 1 argument"
-            ret = pystring(x.args[0], d=d, bv_names=bv_names)
+            ret = pystring(x.args[0], d=d+1, bv_names=bv_names)
 
         elif x.name == ',': # comma join
-            ret = ', '.join(map(lambda a: pystring(a, d=d, bv_names=bv_names), x.args))
+            ret = ', '.join(map(lambda a: pystring(a, d=d+1, bv_names=bv_names), x.args))
 
         elif x.name == "apply_":
             assert x.args is not None and len(x.args)==2, "Apply requires exactly 2 arguments"
             #print ">>>>", self.args
-            ret = '( %s )( %s )' % tuple(map(lambda a: pystring(a, d=d, bv_names=bv_names), x.args))
+            ret = '( %s )( %s )' % tuple(map(lambda a: pystring(a, d=d+1, bv_names=bv_names), x.args))
 
         elif percent_s_regex.search(x.name): # If we match the python string substitution character %s, then format
             ret = x.name % tuple(map(lambda a: pystring(a, d=d+1, bv_names=bv_names), x.args))
