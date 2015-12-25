@@ -941,37 +941,3 @@ def pystring(x, d=0, bv_names=None):
 
 
 
-
-
-def lambdastring(fn, d=0, bv_names=None):
-    """
-            A nicer printer for pure lambda calculus. This can use unicode for lambdas
-    """
-    if bv_names is None:
-        bv_names = dict()
-
-    if fn is None: # just pass these through -- simplifies a lot
-        return None
-    elif fn.name == '':
-        assert len(fn.args)==1
-        return lambdastring(fn.args[0])
-    elif isinstance(fn, BVAddFunctionNode):
-        assert len(fn.args)==1 and fn.name == 'lambda'
-        if fn.added_rule is not None:
-            bvn = fn.added_rule.bv_prefix+str(d)
-            bv_names[fn.added_rule.name] = bvn
-        return u"\u03BB%s.%s" % (bvn, lambdastring(fn.args[0], d=d+1, bv_names=bv_names)) # unicode version with lambda
-        #return "L%s.%s" % (bvn, lambda_str(fn.args[0], d=d+1, bv_names=bv_names))
-    elif fn.name == 'apply_':
-        assert len(fn.args)==2
-        if fn.args[0].name == 'lambda':
-            return "((%s)(%s))" % tuple(map(lambda a: lambdastring(a, d=d+1, bv_names=bv_names), fn.args))
-        else:
-            return "(%s(%s))"   % tuple(map(lambda a: lambdastring(a, d=d+1, bv_names=bv_names), fn.args))
-    elif isinstance(fn, BVUseFunctionNode):
-        assert fn.args is None
-        return bv_names[fn.name]
-    else:
-        assert fn.args is None
-        assert not percent_s_regex(fn.name), "*** String formatting not yet supported for lambdastring"
-        return str(fn.name)
