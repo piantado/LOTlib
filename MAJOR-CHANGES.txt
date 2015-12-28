@@ -1,3 +1,5 @@
+Dec 26 2015
+	- Added examples for Prolog and PureLambdaCalculus, along with a few associated fixes
 Dec 16 2015
 	- added shortcut sampling scheme
 	- reconfigured pystring and classes to allow bv without lambdas

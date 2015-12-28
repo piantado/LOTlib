@@ -148,16 +148,19 @@ def print_lexicon_and_data(L, data):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Set up standard exports
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-DEFAULT_DATA = "domains/boolean-logic.txt"
-def make_hypothesis(**kwargs):
-    words, data = load_words_and_data(options.IN)
+
+import os
+DEFAULT_DATA = os.path.join(os.path.dirname(__file__), "domains/boolean-logic.txt")
+
+def make_hypothesis(data=DEFAULT_DATA, **kwargs):
+    words, data = load_words_and_data(data)
     L0 = PureLambdaLexicon(**kwargs)
     for w in words:
         L0.set_word(w, LOTHypothesis(grammar, args=[], maxnodes=15))
     return L0
 
-def make_data(n=1):
-    words, data = load_words_and_data(options.IN)
+def make_data(n=1, data=DEFAULT_DATA):
+    words, data = load_words_and_data(data)
     return data*n
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -180,7 +183,7 @@ if __name__ == "__main__":
         L0.set_word(w, LOTHypothesis(grammar, args=[], maxnodes=15))
 
     for L in break_ctrlc(MHSampler(L0, data)):
-        #print_lexicon_and_data(L, data)
+        # print_lexicon_and_data(L, data) # If you want to see all the output for each data point, use this
 
         print L.posterior_score, L.prior, L.likelihood
         print L, "\n"

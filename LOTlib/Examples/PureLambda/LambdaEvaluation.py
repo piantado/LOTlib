@@ -6,7 +6,7 @@
 
 from copy import copy
 from LOTlib.Eval import EvaluationException
-from LOTlib.FunctionNode import FunctionNode, BVAddFunctionNode, BVUseFunctionNode
+from LOTlib.FunctionNode import FunctionNode, BVAddFunctionNode, BVUseFunctionNode, percent_s_regex
 
 MAX_RECURSE_DEPTH = 25
 MAX_NODES = 50 # how many is the max, in all stages of eval?
