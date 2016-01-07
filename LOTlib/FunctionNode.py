@@ -791,6 +791,7 @@ class BVUseFunctionNode(FunctionNode):
 
 import re
 percent_s_regex = re.compile(r"%s")
+bv_regex = re.compile(r"\<BV\>")
 
 def schemestring(x, d=0, bv_names=None):
     """Outputs a scheme string in (lambda (x) (+ x 3)) format.
@@ -888,7 +889,7 @@ def pystring(x, d=0, bv_names=None):
         if isinstance(x, BVAddFunctionNode):
             bvn = x.added_rule.bv_prefix+str(d)
             bv_names[x.added_rule.name] = bvn
-            assert len(x.args) == 1
+            # assert len(x.args) == 1
 
 
         # Now handle the name special cases
@@ -914,7 +915,7 @@ def pystring(x, d=0, bv_names=None):
 
         elif x.name == "apply_":
             assert x.args is not None and len(x.args)==2, "Apply requires exactly 2 arguments"
-            #print ">>>>", self.args
+
             ret = '( %s )( %s )' % tuple(map(lambda a: pystring(a, d=d+1, bv_names=bv_names), x.args))
 
         elif percent_s_regex.search(x.name): # If we match the python string substitution character %s, then format
@@ -930,6 +931,10 @@ def pystring(x, d=0, bv_names=None):
                 name = bv_names.get(x.name, x.name)
 
             ret = name+'('+', '.join(map(lambda a: pystring(a, d=d+1, bv_names=bv_names), x.args))+')'
+
+        # and if we have any bv matches, then insert the bv we introduce
+        if bv_regex.search(ret):
+            ret = bv_regex.sub(bvn, ret)
 
         # On a lambda, we must add the introduced bv, and then remove it again afterwards
         if isinstance(x, BVAddFunctionNode):
