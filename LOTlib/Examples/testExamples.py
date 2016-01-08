@@ -14,7 +14,7 @@ class ExampleLoaderTest(unittest.TestCase):
         for model in ['EvenOdd', 'FOL', 'Magnetism.Simple', 'Magnetism.Complex',
                       'NAND', 'Number', 'RegularExpression', 'RationalRules',
                       'StochasticGrammarInduction', 'SymbolicRegression.Galileo',
-                      'SymbolicRegression.Symbolic', 'Prolog', 'PureLambda']:
+                      'SymbolicRegression.Symbolic', 'PureLambda']:
             print "# Testing loading of example", model
 
             make_hypothesis, make_data = load_example(model)

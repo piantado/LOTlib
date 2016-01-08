@@ -18,7 +18,16 @@ class Hypothesis(object):
         likelihood_temperature: Temperature used when running compute_likelihood.
 
     """
-    def __init__(self, value=None, prior_temperature=1.0, likelihood_temperature=1.0, **kwargs):
+    def __init__(self, value=None, prior_temperature=1.0, likelihood_temperature=1.0, display="%s", **kwargs):
+        """
+        :param value:  - the value of teh hypothesis
+        :param prior_temperature: A prior temperature to be included in compute_prior
+        :param likelihood_temperature: A likelihood temperature to be included in compute_likelihood
+        :param display: A string specifying the display formatting
+        :param kwargs: Additional arguments
+        :return:
+        """
+        self.display = display
         self.__dict__.update(kwargs)
 
         self.set_value(value)
@@ -134,7 +143,7 @@ class Hypothesis(object):
     # ========================================================================================================
     #  These are just handy:
     def __str__(self):
-        return str(self.value)
+        return self.display % str(self.value)
     def __repr__(self):
         return str(self)
 
