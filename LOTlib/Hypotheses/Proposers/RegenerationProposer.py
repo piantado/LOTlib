@@ -35,7 +35,8 @@ class RegenerationProposer(LOTProposer):
         
         # compute the forward/backward probability    
         f = lp + self.grammar.log_probability(newt)
-        b = (log(1.0*resampleProbability(n)) - log(newt.sample_node_normalizer(resampleProbability=resampleProbability))) + self.grammar.log_probability(t)
+        b = (log(1.0*resampleProbability(n)) - log(newt.sample_node_normalizer(resampleProbability=resampleProbability)))\
+            + self.grammar.log_probability(t)
 
         return [newt, f-b]
 

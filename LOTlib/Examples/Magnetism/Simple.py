@@ -46,7 +46,7 @@ grammar.add_rule('BASE-OBJECT', qq('n2'), None, 1.0)
 
 from LOTlib.DataAndObjects import FunctionData
 
-def make_data(alpha=0.99, *args, **kwargs):
+def make_data(n=1, alpha=0.99, *args, **kwargs):
     # Set up data -- true output means attraction (p=positive; n=negative)
     return [ FunctionData(input=[ "p1", "n1" ], output=True, alpha=alpha),
                      FunctionData(input=[ "p1", "n2" ], output=True, alpha=alpha),
@@ -66,7 +66,7 @@ def make_data(alpha=0.99, *args, **kwargs):
                      FunctionData(input=[ "n2", "n1" ], output=False, alpha=alpha),
                      FunctionData(input=[ "n2", "n2" ], output=False, alpha=alpha),
                      FunctionData(input=[ "n2", "p1" ], output=True, alpha=alpha),
-                     FunctionData(input=[ "n2", "p2" ], output=True, alpha=alpha)]
+                     FunctionData(input=[ "n2", "p2" ], output=True, alpha=alpha)] * n
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

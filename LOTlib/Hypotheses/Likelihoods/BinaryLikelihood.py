@@ -1,6 +1,6 @@
 
 from math import log
-from LOTlib.Evaluation.EvaluationException import RecursionDepthException
+from LOTlib.Eval import RecursionDepthException
 from LOTlib.Miscellaneous import Infinity
 
 class BinaryLikelihood(object):

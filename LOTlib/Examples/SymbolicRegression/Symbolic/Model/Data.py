@@ -8,7 +8,7 @@ def F1(x):
     return x + sin(1.0/x)
 
 # Make up some learning data for the symbolic regression
-def make_data(target=F1, data_size=100, sd=0.1):
+def make_data(n=1, target=F1, data_size=100, sd=0.1):
 
     # initialize the data
     data = []
@@ -17,4 +17,4 @@ def make_data(target=F1, data_size=100, sd=0.1):
         y = target(x) + normal()*sd
         data.append( FunctionData(input=[x], output=y, ll_sd=sd) )
 
-    return data
+    return data*n

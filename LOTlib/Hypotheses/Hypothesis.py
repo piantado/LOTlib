@@ -77,15 +77,24 @@ class Hypothesis(object):
 
     # And the main likelihood function just maps compute_single_likelihood over the data
     @attrmem('likelihood')
-    def compute_likelihood(self, data, **kwargs):
+    def compute_likelihood(self, data, shortcut=-Infinity, **kwargs):
         """Compute the likelihood of the iterable of data.
 
         This is typically NOT subclassed, as compute_single_likelihood is what subclasses should implement.
 
-        Versions using decayed likelihood can be found in Hypothesis.DecayedLikelihoodHypothesis.
+        Shortcut here allows us to stop evaluation if the likelihood falls below the shortcut value (taking into account temperature)
 
+        Versions using decayed likelihood can be found in Hypothesis.DecayedLikelihoodHypothesis.
         """
-        return sum([self.compute_single_likelihood(datum, **kwargs) for datum in data]) / self.likelihood_temperature
+
+        ll = 0.0
+        for datum in data:
+            ll += self.compute_single_likelihood(datum, **kwargs) / self.likelihood_temperature
+            if ll < shortcut:
+                # print "** Shortcut", self
+                return -Infinity
+
+        return ll
 
     # ========================================================================================================
     #  Methods for accessing likelihoods etc. on a big arrays of data

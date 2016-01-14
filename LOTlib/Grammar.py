@@ -105,9 +105,7 @@ class Grammar:
 
         Arguments
             nt (str): The Nonterminal. e.g. S in "S -> NP VP"
-            name (str): The name of this function. NOTE: If you are introducing a bound variable,
-              the name of this function must reflect that it is a lambda node! Currently, the only way to
-              do this is to name it 'lambda'.
+            name (str): The name of this function.
             to (list<str>): What you expand to (usually a FunctionNode).
             p (float): Unnormalized probability of expansion
             bv_type (str): What bound variable was introduced
@@ -117,12 +115,9 @@ class Grammar:
         self.rule_count += 1
         assert name is not None, "To use null names, use an empty string ('') as the name."
         if bv_type is not None:
-            assert name.lower() == 'lambda', \
-                "When introducing bound variables, the name of the expanded function must be 'lambda'."
-
             newrule = BVAddGrammarRule(nt, name,to, p=p, bv_type=bv_type, bv_args=bv_args, bv_prefix=bv_prefix, bv_p=bv_p)
         else:
-            newrule = GrammarRule(nt,name,to, p=p)
+            newrule = GrammarRule(nt, name, to, p=p)
 
         self.rules[nt].append(newrule)
         return newrule
