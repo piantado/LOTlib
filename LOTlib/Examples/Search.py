@@ -62,16 +62,17 @@ if __name__ == "__main__":
 
     alsoprint = eval(options.ALSO_PRINT)
 
-    if options.DATA == -1:
+    if options.DATA_STEP > 0:
         data_amounts = range(options.DATA_MIN, options.DATA_MAX, options.DATA_STEP)
     else:
+        assert options.DATA > 0, "*** Must specify either data or dmin, dmax, dstep"
         data_amounts = [options.DATA]
 
     # ========================================================================================================
     # Load the model specified on the command line
     # ========================================================================================================
 
-    from LOTlib.Examples.ExampleLoader import load_example
+    from LOTlib.Examples import load_example
 
     make_hypothesis, make_data = load_example(options.MODEL)
 
@@ -104,7 +105,7 @@ if __name__ == "__main__":
 
                 if eval_data is not None:
                     h.compute_posterior(eval_data) # evaluate on the big data
-                    print h.prior, h.likelihood / options.EVAL_DATA, \
+                    print h.posterior_score, h.prior, h.likelihood / options.EVAL_DATA, \
                             alsoprint(h) if alsoprint is not None else '',\
                             qq(cleanFunctionNodeString(h))
 

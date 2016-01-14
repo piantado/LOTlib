@@ -4,7 +4,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from collections import defaultdict
-from LOTlib.Evaluation.Eval import primitive
+from LOTlib.Eval import primitive
 
 # counting list
 # the next word in the list -- we'll implement these as a hash table
@@ -131,12 +131,12 @@ for w in WORDS:
 
 from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis
 from LOTlib.Miscellaneous import log, Infinity, log1mexp, attrmem
-from LOTlib.Evaluation.EvaluationException import EvaluationException
+from LOTlib.Eval import EvaluationException
 
 class NumberExpression(RecursiveLOTHypothesis):
     
     def __init__(self, grammar=None, value=None, f=None, args=['x'], gamma=-30, **kwargs):
-        RecursiveLOTHypothesis.__init__(self, grammar, value=value, args=['x'], **kwargs)
+        RecursiveLOTHypothesis.__init__(self, grammar, value=value, args=['x'], f=f, **kwargs)
         self.gamma=gamma
         self.lg1mgamma=log1mexp(gamma)
 
@@ -173,6 +173,13 @@ class NumberExpression(RecursiveLOTHypothesis):
             return log(1.0/10.0) # if undefined, just sample from a base distribution
         else:
             return log((1.0 - datum.alpha)/10.0 + datum.alpha * (response == datum.output))
+
+    def sample_output(self, datum):
+        # return a sample of my output given the input in datum
+        if random() < datum.alpha:
+            return self(*datum.input)
+        else:
+            return weighted_sample( WORDS ) # uniform sample
 
     def get_knower_pattern(self):
         # compute a string describing the behavior of this knower-level

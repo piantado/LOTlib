@@ -10,10 +10,17 @@ from LOTlib.Grammar import Grammar
 grammar = Grammar()
 grammar.add_rule('START', '', ['EXPR'], 1.0)
 
-grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1.0)
-grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 1.0)
+
+grammar.add_rule('EXPR', '(%s + %s)', ['EXPR', 'EXPR'], 1.0)
+grammar.add_rule('EXPR', '(%s * %s)', ['EXPR', 'EXPR'], 1.0)
+# grammar.add_rule('EXPR', '(%s / %s)', ['EXPR', 'EXPR'], 1.0)
+grammar.add_rule('EXPR', '(%s - %s)', ['EXPR', 'EXPR'], 1.0)
+
+
+# grammar.add_rule('EXPR', 'plus_', ['EXPR', 'EXPR'], 1.0)
+# grammar.add_rule('EXPR', 'times_', ['EXPR', 'EXPR'], 1.0)
 grammar.add_rule('EXPR', 'divide_', ['EXPR', 'EXPR'], 1.0)
-grammar.add_rule('EXPR', 'subtract_', ['EXPR', 'EXPR'], 1.0)
+# grammar.add_rule('EXPR', 'subtract_', ['EXPR', 'EXPR'], 1.0)
 
 grammar.add_rule('EXPR', 'exp_', ['EXPR'], 1.0)
 grammar.add_rule('EXPR', 'log_', ['EXPR'], 1.0)

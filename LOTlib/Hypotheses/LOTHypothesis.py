@@ -1,8 +1,8 @@
-from LOTlib.Evaluation.Eval import * # Necessary for compile_function eval below
-from LOTlib.Evaluation.EvaluationException import TooBigException, EvaluationException
+from LOTlib.Eval import * # Necessary for compile_function eval below
 from LOTlib.Hypotheses.FunctionHypothesis import FunctionHypothesis
 from LOTlib.Hypotheses.Proposers.RegenerationProposer import RegenerationProposer
 from LOTlib.Miscellaneous import Infinity, raise_exception, attrmem
+from LOTlib.Primitives import *
 
 class LOTHypothesis(FunctionHypothesis, RegenerationProposer):
     """A FunctionHypothesis built from a grammar.

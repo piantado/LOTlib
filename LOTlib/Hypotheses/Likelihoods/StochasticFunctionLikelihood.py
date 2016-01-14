@@ -10,6 +10,7 @@ from LOTlib.Miscellaneous import attrmem, nicelog
 from collections import Counter
 
 class StochasticFunctionLikelihood(object):
+    # NOTE: TODO: Should make this delete ll_counts when value changes
 
     @attrmem('ll_counts')
     def make_ll_counts(self, input, nsamples=512):
@@ -27,7 +28,17 @@ class StochasticFunctionLikelihood(object):
             llcounts[self(*input)] += 1
 
         return llcounts
+    #
+    # def set_value(self, *args, **kwargs):
+    #     ret = super(type(self), self).set_value(self, *args, **kwargs)
+    #     self.ll_counts = None
+    #     return ret
 
+
+    # def __copy__(self, **kwargs):
+    #     h = super(self).__copy__(**kwargs)
+    #     h.ll_counts = None
+    #     return h
 
     def compute_single_likelihood(self, datum, llcounts=None, nsamples=512, sm=0.1):
         """

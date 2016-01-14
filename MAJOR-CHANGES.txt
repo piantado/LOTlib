@@ -1,3 +1,12 @@
+Dec 26 2015
+	- Added examples for Prolog and PureLambdaCalculus, along with a few associated fixes
+Dec 16 2015
+	- added shortcut sampling scheme
+	- reconfigured pystring and classes to allow bv without lambdas
+    - Moved some examples and Sandbox to Projects subfolder
+    - Removed Evaluation and moved its parts to LOTlib.Eval (that's where @primitive lives now)
+    - Removed testing and integrated unit tests throughout
+    - Changed FiniteBestSet to TopN; rewritten for clarity
 October 8 2015
     - Added stream processing functions to MCMCSummary. SampleStream now allows a convenient notation for processing streams of samples. 
     - Moved standard_sample to Inference.Samplers.StandardSample

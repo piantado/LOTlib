@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     # Run the vanilla sampler. Without steps, it will run infinitely
     # this prints out posterior (posterior_score), prior, likelihood,
-    for h in break_ctrlc(MHSampler(h0, data, 10000, skip=100)):
+    for h in break_ctrlc(MHSampler(h0, data, 10000, skip=100, shortcut_likelihood=False)):
         print h.posterior_score, h.prior, h.likelihood, q(h)
 
     # This setup requires the *later* data to be upweighted, meaning that hypotheses that get

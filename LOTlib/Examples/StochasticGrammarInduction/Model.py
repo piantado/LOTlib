@@ -25,7 +25,7 @@ import LOTlib.Miscellaneous
 from LOTlib.Grammar import Grammar
 from LOTlib.Miscellaneous import q
 
-from LOTlib.Evaluation.Eval import register_primitive
+from LOTlib.Eval import register_primitive
 register_primitive(LOTlib.Miscellaneous.flatten2str)
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #

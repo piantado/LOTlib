@@ -1,5 +1,5 @@
 import numpy
-from LOTlib.Miscellaneous import attrmem
+from LOTlib.Miscellaneous import attrmem, Infinity
 
 class PowerLawDecayed(object):
     """
@@ -7,6 +7,8 @@ class PowerLawDecayed(object):
             is weighted more strongly, via the parameter ll_decay
 
             By default, we store the likelihoods for each data point (as we may fit ll_decay)
+
+            ## TODO: Update this to work with the shortcut evaluation.
     """
 
 
@@ -53,16 +55,13 @@ class PowerLawDecayed(object):
         return self.get_cumulative_likelihoods(shift_right=shift_right) + self.prior
 
     @attrmem('likelihood')
-    def compute_likelihood(self, data):
+    def compute_likelihood(self, data, shortcut=-Infinity, **kwargs):
         """
                 This is overwritten, writes to stored_likelihood, and then calls get_cumulative_likelihoods
         """
-        self.stored_likelihood = [self.compute_single_likelihood(datum) for datum in data]
-        
-        cumu_lls = self.get_cumulative_likelihoods()
 
-        self.likelihood = cumu_lls[-1]/self.likelihood_temperature
+        ## NOTE: Shortcut is not yet implemented here
 
-        self.posterior_score = self.prior + self.likelihood
+        self.stored_likelihood = [self.compute_single_likelihood(datum, **kwargs) for datum in data]
 
-        return self.likelihood
+        return self.get_cumulative_likelihoods()[-1]/self.likelihood_temperature

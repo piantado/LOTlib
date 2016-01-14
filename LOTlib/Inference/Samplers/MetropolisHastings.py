@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from LOTlib.Miscellaneous import q, qq, Infinity
-from LOTlib.Inference.MHShared import MH_acceptance
-from LOTlib.Inference.Sampler import Sampler
+from LOTlib.Inference.Samplers.Sampler import Sampler, MH_acceptance
 
+from math import log, exp
+from random import random
 
 class MHSampler(Sampler):
     """A class to implement MH sampling.
@@ -53,6 +54,9 @@ class MHSampler(Sampler):
         This weights the probability of accepting proposals.
     trace : bool
         If true, print stuff as we sample.
+    shortcut_likelihood : bool
+        If true, we allow for short-cut evaluation of the likelihood, rejecting when we can if the ll
+        drops below the acceptance value
 
     Attributes
     ----------
@@ -64,7 +68,8 @@ class MHSampler(Sampler):
 
     """
     def __init__(self, current_sample, data, steps=Infinity, proposer=None, skip=0,
-                 prior_temperature=1.0, likelihood_temperature=1.0, acceptance_temperature=1.0, trace=False):
+                 prior_temperature=1.0, likelihood_temperature=1.0, acceptance_temperature=1.0, trace=False,
+                 shortcut_likelihood=True):
         self.__dict__.update(locals())
         self.was_accepted = None
 
@@ -102,7 +107,9 @@ class MHSampler(Sampler):
         Reset acceptance and proposal counters.
 
         """
-        self.acceptance_count, self.proposal_count = 0, 0
+        self.acceptance_count = 0
+        self.proposal_count   = 0
+        self.posterior_calls  = 0
 
     def acceptance_ratio(self):
         """
@@ -114,16 +121,8 @@ class MHSampler(Sampler):
         else:
             return float("nan")
 
-    def internal_sample(self, h):
-        """This is called on each yielded h.
-
-        It serves no function in MHSampler, but is necessary in others like TabooMCMC.
-        """
-        pass
-
     def next(self):
         """Generate another sample."""
-
         if self.samples_yielded >= self.steps:
             raise StopIteration
         else:
@@ -131,19 +130,16 @@ class MHSampler(Sampler):
 
                 self.proposal, fb = self.proposer(self.current_sample)
 
-                # print self.proposal
                 assert self.proposal is not self.current_sample, "*** Proposal cannot be the same as the current sample!"
                 assert self.proposal.value is not self.current_sample.value, "*** Proposal cannot be the same as the current sample!"
 
                 # Call myself so memoized subclasses can override
                 self.compute_posterior(self.proposal, self.data)
 
-                np, nl = self.proposal.prior, self.proposal.likelihood
-
                 # Note: It is important that we re-compute from the temperature since these may be altered
                 #    externally from ParallelTempering and others
-                prop = (np/self.prior_temperature +
-                        nl/self.likelihood_temperature)
+                prop = (self.proposal.prior/self.prior_temperature +
+                        self.proposal.likelihood/self.likelihood_temperature)
                 cur = (self.current_sample.prior/self.prior_temperature +
                        self.current_sample.likelihood/self.likelihood_temperature)
 
@@ -152,6 +148,7 @@ class MHSampler(Sampler):
                     print "# Proposal:", round(prop,3), self.proposal
                     print ""
                 
+                # if MH_acceptance(cur, prop, fb, acceptance_temperature=self.acceptance_temperature): # this was the old form
                 if MH_acceptance(cur, prop, fb, acceptance_temperature=self.acceptance_temperature):
                     self.current_sample = self.proposal
                     self.was_accepted = True
@@ -159,7 +156,6 @@ class MHSampler(Sampler):
                 else:
                     self.was_accepted = False
 
-                self.internal_sample(self.current_sample)
                 self.proposal_count += 1
 
             self.samples_yielded += 1
@@ -167,26 +163,14 @@ class MHSampler(Sampler):
 
 if __name__ == "__main__":
 
-    # --------------------------------------------------------------------------------------------------------
-    # Example 1
+    # Just an example
+    from LOTlib import break_ctrlc
+    from LOTlib.Examples.Number.Model import make_data, NumberExpression, grammar
 
-    from LOTlib.Examples.Number.Model import generate_data, NumberExpression, grammar, get_knower_pattern
-
-    data = generate_data(300)
+    data = make_data(300)
     h0 = NumberExpression(grammar)
-    sampler = MHSampler(h0, data, steps=2000)
-    for h in sampler:
-        print h.posterior_score, h
-        # print q(get_knower_pattern(h)), h.posterior_score, h.prior, h.likelihood, q(h), sampler.acceptance_count, sampler.acceptance_ratio()
+    sampler = MHSampler(h0, data, steps=100000)
+    for h in break_ctrlc(sampler):
+        print h.posterior_score, h.prior, h.likelihood, h.compute_likelihood(data), h
 
-    # --------------------------------------------------------------------------------------------------------
-    # Example 2
-
-    # from LOTlib.Examples.Number.Shared import generate_data, NumberExpression, grammar, get_knower_pattern
-    #
-    # data = generate_data(500)
-    # h0 = NumberExpression(grammar)
-    # for h in mh_sample(h0, data, 10000):
-    #         print q(get_knower_pattern(h)), h.lp, h.prior, h.likelihood, q(h)
-    #
 

@@ -109,7 +109,6 @@ class BVAddGrammarRule(GrammarRule):
     def __init__(self, nt, name, to, p=1.0, bv_prefix="y", bv_type=None, bv_args=None, bv_p=None):
         p = float(p)
         self.__dict__.update(locals())
-        assert name is 'lambda' # For now, let's assume these must be lambdas.
         assert bv_type is not None, "Did you mean to use a GrammarRule instead of a BVGrammarRule?"
         assert isinstance(bv_type, str), "bv_type must be a string! Make sure it's not a tuple or list."
         
@@ -130,8 +129,7 @@ class BVAddGrammarRule(GrammarRule):
         bvp = self.bv_p
         if bvp is None:
             bvp = grammar.BV_P
-        return BVUseGrammarRule(self.bv_type, self.bv_args,
-                                p=bvp, bv_prefix=self.bv_prefix)
+        return BVUseGrammarRule(self.bv_type, self.bv_args, p=bvp, bv_prefix=self.bv_prefix)
 
     def make_FunctionNodeStub(self, grammar, parent):
         """Return a FunctionNode with none of the arguments realized. That's a "stub"
