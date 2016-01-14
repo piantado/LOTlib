@@ -2,7 +2,7 @@ import numpy as np
 from collections import Counter
 from LOTlib.DataAndObjects import FunctionData
 from LOTlib.Miscellaneous import logsumexp, Infinity, weighted_sample
-
+from copy import deepcopy
 
 class FormalLanguage(object):
     """
@@ -56,12 +56,21 @@ class FormalLanguage(object):
 
         return [FunctionData(input=[], output=Counter(self.sample_data(n)))]
 
-    def estimate_precision_and_recall(self, h, data):
+    def estimate_precision_and_recall(self, h, data, truncate=True):
         """
-        the precision and recall of h given a data set, it should be usually large
+            the precision and recall of h given a data set, data should be usually large
+
+            truncate: ignore those generated strings from h whose lengths exceed the max length in data set, it should
+             be set False in finite vs infinite case.
         """
         output = set(data[0].output.keys())
         h_out = set([h() for _ in xrange(int(sum(data[0].output.values())))])
+
+        if truncate:
+            max_len = max(map(len, output))
+            tmp = deepcopy(h_out)
+            for _str in tmp:
+                if len(_str) > max_len: h_out.remove(_str)
 
         base = len(h_out)
         cnt = 0.0
