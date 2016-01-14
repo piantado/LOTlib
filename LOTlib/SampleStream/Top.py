@@ -1,5 +1,5 @@
 from LOTlib.Miscellaneous import logsumexp, qq
-from LOTlib.TopN import TopN
+from LOTlib.FiniteBestSet import FiniteBestSet
 import pickle
 from SampleStream import SampleStream
 
@@ -19,18 +19,18 @@ class Top(SampleStream):
         """
         self.__dict__.update(locals())
         SampleStream.__init__(self)
-        self.top = TopN(N=N, key=key)
+        self.fbs = FiniteBestSet(N=N, key=key)
 
     def process(self, x):
         """ Overwrite process so all outputs are NOT sent to children.
         """
-        self.top.add(x)
+        self.fbs.add(x)
         return None # Do no pass through
 
     def __exit__(self, t, value, traceback):
 
         ## Here, only on exit do I give my data (the tops) to my outputs
-        for v in self.top.get_all(sorted=sorted):
+        for v in self.fbs.get_all(sorted=sorted):
             # Cannot just call self.process_and_push since self.process always returns None
             if v is not None:
                 for a in self.outputs:

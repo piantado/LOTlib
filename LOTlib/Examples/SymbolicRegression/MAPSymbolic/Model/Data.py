@@ -8,22 +8,16 @@ from numpy import sin
 
 from LOTlib.DataAndObjects import FunctionData
 
-# def F(x):
-#     return 3.*x + sin(4.3/x)
-#
-# def make_data(target=F, data_size=100, sd=1.0):
-#     """Make up some learning data for the symbolic regression."""
-#
-#     data = []
-#     for i in range(data_size):
-#         x = random()
-#         y = target(x) + normal()*sd
-#         data.append( FunctionData(input=[x], output=y, ll_sd=sd) )
-#
-#     return data
+def F(x):
+    return 3.*x + sin(4.3/x)
 
-def make_data(*args, **kwargs):
-    print "# Ignoring make_data arguments", args, kwargs
+def make_data(target=F, data_size=100, sd=1.0):
+    """Make up some learning data for the symbolic regression."""
 
-    from LOTlib.Examples.SymbolicRegression.Galileo.Model.Data import make_data as md
-    return md()
+    data = []
+    for i in range(data_size):
+        x = random()
+        y = target(x) + normal()*sd
+        data.append( FunctionData(input=[x], output=y, ll_sd=sd) )
+
+    return data

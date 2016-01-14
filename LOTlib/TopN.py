@@ -1,91 +1,67 @@
-# -*- coding: utf-8 -*-
+import collections
 
-import heapq
-from LOTlib.Miscellaneous import Infinity
-
-class QueueItem(object):
-    """
-            A wrapper to hold items and scores in the queue--just wraps "cmp" on a priority value
-    """
-    def __init__(self, item, p):
-        self.item = item
-        self.priority = p
-
-    def __cmp__(self, y):
-        # Comparisons are based on priority
-        return cmp(self.priority, y.priority)
+from LOTlib.Miscellaneous import logsumexp, qq
+from LOTlib.FiniteBestSet import FiniteBestSet
 
 class TopN(object):
     """
-            This class stores the top N (possibly infinite) hypotheses it observes, keeping only unique ones.
-            It works by storing a priority queue (in the opposite order), and popping off the worst as we need to add more
+    This  uses a FiniteBestSet to store the top N hypotheses found.
+
+    NOTE: __iter__ here iterates over what this contains. This means that we can't use it in
+    a for h in TopN(MHSampler(...)) setup. But why would you want to?
+
     """
 
-    def __init__(self, N=Infinity, key='posterior_score'):
-        assert N > 0, "*** TopN must have N>0"
-        self.N = N
-        self.key = key
+    def __init__(self, N=1000, key='posterior_score', thin=1):
+        self.__dict__.update(locals())
+        self.fbs = FiniteBestSet(N=N, key=key)
+        self.count = 0
 
-        self.Q = [] # we use heapq to
-        self.unique_set = set()
+        self.actions = []  # to keep it as a functioning SampleStream
 
-    def __contains__(self, y):
-        return (y in self.unique_set)
+    def add(self, h):
+
+        self.count += 1
+
+        if self.count % self.thin == 0:
+            self.fbs.add(h)
+
+    def get_all(self, sorted=False):
+        for h in self.fbs.get_all(sorted=sorted):
+            yield h
 
     def __iter__(self):
-        for x in self.Q:
-            yield x.item
+        for h in self.fbs.get_all():
+            yield h
 
-    def __len__(self):
-        return len(self.Q)
+    def Z(self):
+        """
+        Normalizer of everything
+        """
+        return logsumexp([h.posterior_score for h in self.get_all(sorted=False)])
 
-    def add(self, x, p=None):
-        # print [h for h in self]
+    def normalize(self, d):
+        """
+        Change the posterior_score on hypotheses so they sum to 1
+        """
+        Z = self.Z()
+        for h in self.fbs.get_all(sorted=False):
+            h.posterior_score = h.posterior_score - Z
 
-        if p is None:
-            p = getattr(x, self.key)
-
-        # Add if we are too short or our priority is better than the *worst*
-        # AND we aren't in the set
-        if (len(self.Q) < self.N or p > self.Q[0].priority) \
-           and x not in self.unique_set:
-
-            l = len(self.Q)
-            assert l <= self.N
-
-            heapq.heappush(self.Q, QueueItem(x,p))
-            self.unique_set.add(x)
-
-            # And fix our size
-            if len(self.Q) > self.N:
-                y = heapq.heappop(self.Q)
-                self.unique_set.remove(y.item)
-                assert len(self.Q) == self.N
-
-    def get_all(self, **kwargs):
-        """ Return all elements (arbitrary order). Does NOT return a copy. This uses kwargs so that we can call one 'sorted' """
-        if kwargs.get('sorted', False):
-            return [ c.item for c in sorted(self.Q, reverse=kwargs.get('decreasing',False))]
-        else:
-            return [ c.item for c in self.Q]
+    def display(self):
+        for h in self.get_all():
+            print h.posterior_score, h.prior, h.likelihood, qq(h)
 
     def update(self, y):
-        for yi in y:
-            self.add(yi)
+        if isinstance(y, TopN):
+            assert y.key == self.key
+            for h in y.fbs.get_all(sorted=False):
+                self.add(h)
+        elif isinstance(y, collections.Iterable):
+            for yi in y:
+                self.update(yi)
+        elif isinstance(y, FiniteBestSet):
+            self.fbs.merge(y)
+        else:
+            raise NotImplementedError
 
-
-if __name__ == "__main__":
-
-    import random
-
-    # Check the max
-    for i in xrange(100):
-        Q = TopN(N=10)
-
-        ar = range(-100, 100)
-        random.shuffle(ar)
-        for x in ar: Q.add(x,x)
-
-        assert set(Q.get_all()).issuperset( set([90,91,92,93,94,95,96,97,98,99]))
-
-    print "Passed!"

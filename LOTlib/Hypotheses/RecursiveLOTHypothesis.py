@@ -1,6 +1,6 @@
 
 from LOTHypothesis import LOTHypothesis, raise_exception
-from LOTlib.Eval import RecursionDepthException, TooBigException, EvaluationException
+from LOTlib.Evaluation.EvaluationException import RecursionDepthException, TooBigException, EvaluationException
 
 class RecursiveLOTHypothesis(LOTHypothesis):
     """

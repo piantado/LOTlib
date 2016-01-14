@@ -1,6 +1,6 @@
 
 from SimpleLexicon import SimpleLexicon
-from LOTlib.Eval import RecursionDepthException
+from LOTlib.Evaluation.EvaluationException import RecursionDepthException
 
 class RecursiveLexicon(SimpleLexicon):
     """

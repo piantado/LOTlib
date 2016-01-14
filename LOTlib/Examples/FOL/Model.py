@@ -50,8 +50,8 @@ def make_hypothesis(**kwargs):
 from LOTlib.DataAndObjects import FunctionData, Obj # for nicely managing data
 
 # Make up some data -- here just one set containing {red, red, green} colors that is mapped to True
-def make_data(n=1):
-    return [ FunctionData(input=[ {Obj(color='red'), Obj(color='red'), Obj(color='green')} ], output=True, alpha=0.99) ]*n
+def make_data():
+    return [ FunctionData(input=[ {Obj(color='red'), Obj(color='red'), Obj(color='green')} ], output=True, alpha=0.99) ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Main

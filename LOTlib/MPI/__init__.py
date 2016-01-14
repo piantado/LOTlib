@@ -6,4 +6,3 @@
 
 """
 
-from MPI_map import *

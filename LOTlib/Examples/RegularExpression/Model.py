@@ -41,7 +41,7 @@ for v in 'abc.':
 from LOTlib.FunctionNode import isFunctionNode
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Hypotheses.Likelihoods.BinaryLikelihood import BinaryLikelihood
-from LOTlib.Eval import EvaluationException
+from LOTlib.Evaluation.EvaluationException import EvaluationException
 import re
 
 class RegexHypothesis(BinaryLikelihood, LOTHypothesis):

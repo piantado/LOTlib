@@ -35,29 +35,24 @@ class TabooMCMC(MHSampler):
         self.penalty = penalty
         self.seen = Counter()
 
-    def next(self):
-        v = MHSampler.next(self)
-        self.seen[v] += 1
-        return v
+    def internal_sample(self, h):
+        self.seen[h] += 1
 
-    def compute_posterior(self, h, data, **kwargs):
+    def compute_posterior(self, h, data):
         """
         Compute prior & likelihood for `h`, penalizing prior by how many samples have been generated so far.
 
         """
-        return self.seen[h] * self.penalty + h.compute_posterior(data, **kwargs)
+        return self.seen[h] * self.penalty + h.compute_posterior(data)
 
 
 if __name__ == "__main__":
 
-    from LOTlib import break_ctrlc
     from LOTlib.Examples.Number.Model import *
     from LOTlib.Miscellaneous import q
 
-    data = make_data(500)
+    data = generate_data(500)
     h0 = NumberExpression(grammar)
+    for h in TabooMCMC(h0, data, steps=10000):
 
-    tmc = TabooMCMC(h0, data, steps=10000)
-
-    for h in break_ctrlc(tmc):
-        print tmc.seen[h],  h.posterior_score, h.prior, h.likelihood, q(h)
+        print q(get_knower_pattern(h)), h.posterior_score, h.prior, h.likelihood, q(h)

@@ -31,7 +31,7 @@ if __name__ == "__main__":
     # Load the model specified on the command line
     # ========================================================================================================
 
-    from LOTlib.Examples import load_example
+    from LOTlib.Examples.ExampleLoader import load_example
 
     make_hypothesis, make_data = load_example(options.MODEL)
 

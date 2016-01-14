@@ -35,10 +35,7 @@ class FunctionHypothesis(Hypothesis):
         """
         Strings of FunctionHypotheses wrap in an implicit lambda and args
         """
-        if self.args is None:
-            return str(self.value)
-        else:
-            return 'lambda %s: %s' % (','.join(self.args), str(self.value))
+        return 'lambda %s: %s' % (','.join(self.args), str(self.value))
 
 
     def __call__(self, *vals):
