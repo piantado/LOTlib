@@ -849,8 +849,7 @@ def fullstring(x, d=0, bv_names=None):
             bvn = x.added_rule.bv_prefix+str(d)
             bv_names[x.added_rule.name] = bvn
 
-            assert len(x.args) == 1
-            ret = '%s<%s> %s: %s' % ( x.name, x.returntype, bvn, fullstring(x.args[0], d=d+1, bv_names=bv_names) )
+            ret = '%s<%s> %s: %s' % ( x.name, x.returntype, bvn, [fullstring(xi, d=d+1, bv_names=bv_names) for xi in x.args] )
 
             del bv_names[x.added_rule.name]
 
