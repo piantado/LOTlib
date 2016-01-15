@@ -7,7 +7,7 @@ from collections import Counter
 from LOTlib.DataAndObjects import FunctionData
 import LOTlib
 from LOTlib.Inference.Samplers.StandardSample import standard_sample
-from LOTlib.Examples.FormalLanguageTheory.Language.Index import instance
+from LOTlib.Projects.FormalLanguageTheory.Language.Index import instance
 
 parser = OptionParser()
 parser.add_option("--steps", dest="STEPS", type="int", default=10000, help="Number of samples to run")

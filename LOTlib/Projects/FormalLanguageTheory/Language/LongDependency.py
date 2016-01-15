@@ -1,4 +1,4 @@
-from LOTlib.Examples.FormalLanguageTheory.Language.FormalLanguage import FormalLanguage
+from FormalLanguage import FormalLanguage
 import itertools
 from collections import Counter
 from LOTlib.Miscellaneous import logsumexp

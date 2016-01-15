@@ -1,21 +1,22 @@
 import re
-from LOTlib.Examples.FormalLanguageTheory.Language.FormalLanguage import FormalLanguage
+from LOTlib.Projects.FormalLanguageTheory.Language.FormalLanguage import FormalLanguage
 
 
 class ABn(FormalLanguage):
 
-    def __init__(self, atom='ab', max_length=10):
-        assert max_length >= 2
+    def __init__(self, atom='ab', max_length=20):
+        assert max_length % 2 == 0 and max_length >= 2, 'invalid max_length'
         self.atom = atom
         FormalLanguage.__init__(self, max_length)
 
     def all_strings(self, max_length):
 
-        for i in xrange(2, max_length+1, 2):
-            yield self.atom * (i / 2)
+        for i in xrange(1, max_length/2 + 1):
+            yield self.atom * i
 
     def string_log_probability(self, s):
         return -len(s)/2
+
 
 # just for testing
 if __name__ == '__main__':

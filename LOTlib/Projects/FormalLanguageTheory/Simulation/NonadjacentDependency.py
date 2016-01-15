@@ -1,8 +1,8 @@
 from utils import *
-from LOTlib.Evaluation.Eval import register_primitive
+from LOTlib.Eval import register_primitive
 from LOTlib.Miscellaneous import flatten2str
-from LOTlib.Examples.FormalLanguageTheory.Model.Hypothesis import make_hypothesis
-from LOTlib.Examples.FormalLanguageTheory.Language.LongDependency import LongDependency
+from LOTlib.Projects.FormalLanguageTheory.Model.Hypothesis import make_hypothesis
+from LOTlib.Projects.FormalLanguageTheory.Language.LongDependency import LongDependency
 import time
 from mpi4py import MPI
 

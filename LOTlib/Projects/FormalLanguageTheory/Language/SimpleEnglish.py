@@ -1,4 +1,4 @@
-from LOTlib.Examples.FormalLanguageTheory.Language.FormalLanguage import FormalLanguage
+from FormalLanguage import FormalLanguage
 from LOTlib.Grammar import Grammar
 
 class SimpleEnglish(FormalLanguage):

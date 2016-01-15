@@ -7,9 +7,8 @@ import time
 import numpy as np
 import LOTlib
 from LOTlib.Miscellaneous import display_option_summary
-# from LOTlib.MPI.MPI_map import is_master_process, MPI_map
 from LOTlib.Inference.Samplers.StandardSample import standard_sample
-from LOTlib.Evaluation.Eval import register_primitive
+from LOTlib.Eval import register_primitive
 from LOTlib.Miscellaneous import flatten2str, logsumexp, qq
 from Model.Hypothesis import make_hypothesis
 from Language.Index import instance
@@ -42,17 +41,6 @@ def simple_mpi_map(run, args):
 
     dump(hypo_set, open(prefix+'hypotheses_'+options.LANG+'_%i'%rank+suffix, 'w'))
 
-    # if rank == 0:
-    #     _set = set()
-    #     _set.update(hypo_set)
-    #     for i in xrange(size - 1):
-    #         _set.update(comm.recv(source=i+1))
-    #         print 'rank: ', rank, 'recv: ', i; fff()
-    #     return _set
-    # else:
-    #     comm.send(hypo_set, dest=0)
-    #     print 'rank: ', rank, 'send: ', 0; fff()
-    #     sys.exit(0)
 
 if __name__ == "__main__":
     """
@@ -84,56 +72,12 @@ if __name__ == "__main__":
     # prefix = '/home/lijm/WORK/yuan/lot/'
     suffix = time.strftime('_' + options.NAME + '_%m%d_%H%M%S', time.localtime())
 
-    # set the output codec -- needed to display lambda to stdout
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
-    if rank == 0:
-        display_option_summary(options); fff()
+    if rank == 0: display_option_summary(options); fff()
 
-    # you need to run 12 machine on that
     DATA_RANGE = np.arange(0, 70, 6)
-    # DATA_RANGE = np.arange(70, 140, 6)
 
     language = instance(options.LANG, options.FINITE)
     args = list(itertools.product([make_hypothesis], [language], DATA_RANGE))
-    # run on MPI
-    # results = MPI_map(run, args)
+
     hypotheses = simple_mpi_map(run, args)
-
-    # ========================================================================================================
-    # Get stats
-    # ========================================================================================================
-
-    # dump(hypotheses, open(prefix+'hypotheses_'+options.LANG+suffix, 'w'))
-
-    # # get precision and recall for h
-    # pr_data = language.sample_data_as_FuncData(1024)
-    # p = []
-    # r = []
-    # print 'compute precision and recall..'; fff()
-    # for h in hypotheses:
-    #     precision, recall = language.estimate_precision_and_recall(h, pr_data)
-    #     p.append(precision)
-    #     r.append(recall)
-    #
-    # # Now go through each hypothesis and print out some summary stats
-    # for data_size in DATA_RANGE:
-    #     print 'get stats from size : ', data_size ; fff()
-    #
-    #     evaluation_data = language.sample_data_as_FuncData(data_size)
-    #
-    #     # Now update everyone's posterior
-    #     for h in hypotheses:
-    #         h.compute_posterior(evaluation_data)
-    #
-    #     # compute the normalizing constant. This is the log of the sum of the probabilities
-    #     Z = logsumexp([h.posterior_score for h in hypotheses])
-    #
-    #     f = open(prefix + 'out' + suffix, 'a')
-    #     cnt = 0
-    #     for h in hypotheses:
-    #         #compute the number of different strings we generate
-    #         generated_strings = set([h() for _ in xrange(1000)])
-    #         print >> f, data_size, np.exp(h.posterior_score-Z), h.posterior_score, h.prior, \
-    #             h.likelihood, len(generated_strings), qq(h), p[cnt], r[cnt]
-    #         cnt += 1
-    #     f.close()
