@@ -14,7 +14,7 @@ class FunctionHypothesis(Hypothesis):
             This can also be called like a function, as in fh(data)!
     """
 
-    def __init__(self, value=None, f=None, args=['x'], **kwargs):
+    def __init__(self, value=None, f=None, display="lambda x: %s", **kwargs):
         """
                 *value* - the value of this hypothesis
 
@@ -22,24 +22,12 @@ class FunctionHypothesis(Hypothesis):
 
                 *args* - the arguments to the function
         """
-        self.args = args # must come first since below calls value2function
-
         # this initializes prior and likleihood variables, so keep it here!
         # However, don't give it value, since then it calls set_value with no f argument!
-        Hypothesis.__init__(self, None, **kwargs)
+        Hypothesis.__init__(self, None, display=display, **kwargs)
 
         # And set our value
         self.set_value(value, f=f)
-
-    def __str__(self):
-        """
-        Strings of FunctionHypotheses wrap in an implicit lambda and args
-        """
-        if self.args is None:
-            return str(self.value)
-        else:
-            return 'lambda %s: %s' % (','.join(self.args), str(self.value))
-
 
     def __call__(self, *vals):
 
