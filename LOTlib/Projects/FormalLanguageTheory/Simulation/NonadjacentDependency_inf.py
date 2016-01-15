@@ -19,12 +19,12 @@ def no_data(a, max_length=None):
 
 if __name__ == '__main__':
     """
-    run with script: mpiexec -n 12 python NonadjacentDependency_inf.py --steps=50000 --language=LongDependency --N=1 --mode=0/1
+    run with script: mpiexec -n 12 python NonadjacentDependency_inf.py --steps=50000 --language=LongDependency --N=2 --bound=7
     """
     # ========================================================================================================
     # Process command line arguments
     # ========================================================================================================
-    parser.add_option("--mode", dest="MODE", type="int", default=0, help="long or short")
+    parser.add_option("--bound", dest="BOUND", type="int", default=5, help="recursion bound")
     (options, args) = parser.parse_args()
 
     suffix = time.strftime('_' + options.NAME + '_%m%d_%H%M%S', time.localtime())
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     # Running
     # ========================================================================================================
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
-    work_list = [make_hypothesis, 144, np.arange(2, 12, 2)[rank], options, None, ['c', 'd', 'e', 'f', 'h', 'i', 'j', 'k']]
+    work_list = [make_hypothesis, 144, np.arange(2, 25, 2)[rank], options, None, ['c', 'd', 'e', 'f', 'h', 'i', 'j', 'k']]
     # work_list = [make_hypothesis, 144, 2, options, no_data, ['c', 'd', 'e', 'f']]
 
     topn = run(*work_list)
