@@ -1,14 +1,14 @@
 from pickle import load, dump
 from collections import Counter
-from LOTlib.Evaluation.Eval import register_primitive
+from LOTlib.Eval import register_primitive
 from LOTlib.Miscellaneous import flatten2str
 import numpy as np
 register_primitive(flatten2str)
 import matplotlib.pyplot as plt
 import matplotlib
 from os import listdir
-from LOTlib.Examples.FormalLanguageTheory.Language.AnBn import AnBn
-from LOTlib.Examples.FormalLanguageTheory.Language.LongDependency import LongDependency
+from LOTlib.Projects.FormalLanguageTheory.Language.AnBn import AnBn
+from LOTlib.Projects.FormalLanguageTheory.Language.LongDependency import LongDependency
 import time
 from LOTlib.DataAndObjects import FunctionData
 from LOTlib.Miscellaneous import logsumexp
@@ -19,7 +19,6 @@ from mpi4py import MPI
 from Simulation.utils import uniform_data
 from optparse import OptionParser
 from Language.Index import instance
-import pstats, cProfile
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()

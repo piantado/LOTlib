@@ -45,16 +45,16 @@ class FormalLanguage(object):
         avg: sample for multiple times and average to reduce noise, note the cnt can have fraction
         """
         if n == 0:
-            return [FunctionData(input=[], output=Counter())]
+            return [FunctionData(input=[''], output=Counter())]
 
         if avg:
             cnt = Counter(self.sample_data(int(n*512)))
             n = float(512)
             for key in cnt.keys():
                 cnt[key] /= n
-            return [FunctionData(input=[], output=cnt)]
+            return [FunctionData(input=[''], output=cnt)]
 
-        return [FunctionData(input=[], output=Counter(self.sample_data(n)))]
+        return [FunctionData(input=[''], output=Counter(self.sample_data(n)))]
 
     def estimate_precision_and_recall(self, h, data, truncate=True):
         """

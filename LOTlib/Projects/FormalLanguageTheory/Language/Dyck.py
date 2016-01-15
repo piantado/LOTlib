@@ -1,5 +1,5 @@
 from collections import Counter
-from LOTlib.Examples.FormalLanguageTheory.Language.FormalLanguage import FormalLanguage
+from FormalLanguage import FormalLanguage
 
 
 class Dyck(FormalLanguage):

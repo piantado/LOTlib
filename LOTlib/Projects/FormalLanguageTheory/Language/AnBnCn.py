@@ -1,5 +1,5 @@
 import re
-from LOTlib.Examples.FormalLanguageTheory.Language.FormalLanguage import FormalLanguage
+from FormalLanguage import FormalLanguage
 
 
 class AnBnCn(FormalLanguage):

@@ -1,12 +1,12 @@
-from LOTlib.Examples.FormalLanguageTheory.Language.An import An
-from LOTlib.Examples.FormalLanguageTheory.Language.AnBn import AnBn
-from LOTlib.Examples.FormalLanguageTheory.Language.AnB2n import AnB2n
-from LOTlib.Examples.FormalLanguageTheory.Language.AnCstarBn import AnCstarBn
-from LOTlib.Examples.FormalLanguageTheory.Language.AnBnCn import AnBnCn
-from LOTlib.Examples.FormalLanguageTheory.Language.Dyck import Dyck
-from LOTlib.Examples.FormalLanguageTheory.Language.SimpleEnglish import SimpleEnglish
-from LOTlib.Examples.FormalLanguageTheory.Language.LongDependency import LongDependency
-from LOTlib.Examples.FormalLanguageTheory.Language.ABn import ABn
+from An import An
+from AnBn import AnBn
+from AnB2n import AnB2n
+from AnCstarBn import AnCstarBn
+from AnBnCn import AnBnCn
+from Dyck import Dyck
+from SimpleEnglish import SimpleEnglish
+from LongDependency import LongDependency
+from ABn import ABn
 
 
 def instance(s, max_length):
