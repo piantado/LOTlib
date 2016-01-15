@@ -14,21 +14,16 @@ class RecursiveLOTHypothesis(LOTHypothesis):
     For a Demo, see LOTlib.Examples.Number
     """
 
-    def __init__(self, grammar, recurse='recurse_', recurse_bound=25, args=['x'], **kwargs):
+    def __init__(self, grammar, recurse_bound=25, display="lambda recurse_, x: %s", **kwargs):
         """
         Initializer. recurse gives the name for the recursion operation internally.
         """
 
         # save recurse symbol
-        self.recurse = recurse
         self.recursive_depth_bound = recurse_bound # how deep can we recurse?
         self.recursive_call_depth = 0 # how far down have we recursed?
 
-        # automatically put 'recurse' onto args
-        assert recurse not in args # not already specified
-        args = [recurse] + args
-
-        LOTHypothesis.__init__(self, grammar, args=args, **kwargs)
+        LOTHypothesis.__init__(self, grammar, display=display, **kwargs)
 
     def recursive_call(self, *args):
         """

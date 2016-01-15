@@ -74,7 +74,7 @@ from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
 class MyHypothesis(StochasticFunctionLikelihood, LOTHypothesis):
     def __init__(self, grammar=None, **kwargs):
-        LOTHypothesis.__init__(self, grammar, args=[''], **kwargs)
+        LOTHypothesis.__init__(self, grammar, display='lambda : %s', **kwargs)
 
 def make_hypothesis():
     return MyHypothesis(grammar)

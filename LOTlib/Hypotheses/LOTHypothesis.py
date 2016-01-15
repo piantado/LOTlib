@@ -26,7 +26,7 @@ class LOTHypothesis(FunctionHypothesis, RegenerationProposer):
 
     """
 
-    def __init__(self, grammar=None, value=None, f=None, maxnodes=25, args=['x'], **kwargs):
+    def __init__(self, grammar=None, value=None, f=None, maxnodes=25, **kwargs):
 
         # Save all of our keywords
         self.__dict__.update(locals())
@@ -34,7 +34,7 @@ class LOTHypothesis(FunctionHypothesis, RegenerationProposer):
         if value is None and grammar is not None:
             value = grammar.generate()
 
-        FunctionHypothesis.__init__(self, value=value, f=f, args=args, **kwargs)
+        FunctionHypothesis.__init__(self, value=value, f=f, **kwargs)
 
         self.likelihood = 0.0
         self.rules_vector = None

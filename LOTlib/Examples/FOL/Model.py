@@ -38,7 +38,7 @@ from LOTlib.Hypotheses.Likelihoods.BinaryLikelihood import BinaryLikelihood
 
 class MyHypothesis(BinaryLikelihood, LOTHypothesis):
     def __init__(self, grammar=grammar, **kwargs):
-        LOTHypothesis.__init__(self, grammar=grammar, args=['S'], **kwargs)
+        LOTHypothesis.__init__(self, grammar=grammar, display='lambda S: %s', **kwargs)
 
 def make_hypothesis(**kwargs):
     return MyHypothesis(**kwargs)

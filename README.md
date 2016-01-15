@@ -22,6 +22,7 @@ The following are used by some LOTlib components:
 - matplotlib (for plotting)
 - mpi4py (for running on MPI)
 - graphviz (for DOT images of trees)
+- pyswip (for Prolog example)
 
 INSTALLATION
 ------------

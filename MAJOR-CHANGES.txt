@@ -1,3 +1,8 @@
+Jan 7 2016
+	- Added "display" to hypotheses to specify printing. This replaced FunctionHypothesis.args and LOTHypothesis.args, and makes it easier to write less function code, since we can display with arbitrary strings
+	- Removed special printing from FunctionNode -- everything should use string interpolation now. Removed: If, apply, lambda, comma, ''
+	- Included BV printing -- now a node that introduces a BV can use it in its interpolation string via <BV>
+	- Updated version (technically, not backwards compatible)
 Dec 26 2015
 	- Added examples for Prolog and PureLambdaCalculus, along with a few associated fixes
 Dec 16 2015

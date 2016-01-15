@@ -78,7 +78,7 @@ from LOTlib.Hypotheses.Likelihoods.BinaryLikelihood import BinaryLikelihood
 
 class MyHypothesis(BinaryLikelihood, LOTHypothesis):
     def __init__(self, **kwargs ):
-        LOTHypothesis.__init__(self, grammar, args=['x', 'y'], **kwargs)
+        LOTHypothesis.__init__(self, grammar, display='lambda x,y: %s', **kwargs)
 
 def make_hypothesis(**kwargs):
     return MyHypothesis(**kwargs)

@@ -55,7 +55,7 @@ def make_hypothesis(**kwargs):
     h = EvenOddLexicon(**kwargs)
 
     for w in WORDS:
-        h.set_word(w, LOTHypothesis(grammar, args=['lexicon', 'x']))
+        h.set_word(w, LOTHypothesis(grammar, display='lambda lexicon, x: %s'))
 
     return h
 
