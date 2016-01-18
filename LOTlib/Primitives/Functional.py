@@ -14,6 +14,9 @@ from LOTlib.Miscellaneous import raise_exception
 Y = lambda f: (lambda x: x(x))(lambda y: f(lambda *args: y(y)(*args)) )
 MAX_RECURSION = 25
 
+@primitive
+def raise_exception(e):
+    raise e
 
 def Y_bounded(f):
     """

@@ -40,7 +40,6 @@ class InsertDeleteProposer(LOTProposer):
 
 
     def propose_tree(self, t):
-
         newt = copy(t)
 
         if random() < 0.5: # So we insert
@@ -55,7 +54,7 @@ class InsertDeleteProposer(LOTProposer):
             # Since it's an insert, see if there is a (replicating) rule that expands
             # from ni.returntype to some ni.returntype
             replicating_rules = filter(is_replicating_GrammarRule, self.grammar.rules[ni.returntype])
-            if len(replicating_rules) == 0:  return [newt, fb]
+            if len(replicating_rules) == 0:  return [newt, 0.0]
 
             # sample a rule and compute its probability (not under the predicate)
             r = sample1(replicating_rules)
@@ -153,7 +152,7 @@ if __name__ == "__main__":
 
     from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
-    idp = InsertDeleteProposal(grammar)
+    idp = InsertDeleteProposer(grammar)
 
     #data = generate_data(100)
     h = make_h0(proposal_function=idp)
