@@ -1,27 +1,26 @@
 
 from LOTlib.Hypotheses.Proposers import ProposalFailedException
-from LOTlib.Miscellaneous import sample1
+from LOTlib.Miscellaneous import sample1, nicelog
 from LOTlib.FunctionNode import *
 from LOTProposer import LOTProposer
 from LOTlib.GrammarRule import *
 from LOTlib.BVRuleContextManager import BVRuleContextManager
 from LOTlib.FunctionNode import NodeSamplingException
 
-def is_replicating_GrammarRule(r):
-    """
-        A Grammar is replicating if one if its children has the same returntype, and it's not a BVAdd
-        It cant' be a BVAdd because by deleting it we will lose its bound variable
-    """
-    return (not isinstance(r, BVAddGrammarRule)) and any([r.nt==a for a in None2Empty(r.to)])
 
-def is_replicating_FunctionNode(x):
-    """
-            A function node is replicating (by definition) if one of its children is of the same type
-    """
+
+def can_insert_GrammarRule(r):
+    return any([r.nt==a for a in None2Empty(r.to)])
+def can_insert_FunctionNode(x):
     return any([x.returntype == a.returntype for a in x.argFunctionNodes()])
 
-def isNotBVAddFunctionNode(x):
-    return (not isinstance(x, BVAddFunctionNode))
+def can_delete_GrammarRule(r):
+    return any([r.nt==a for a in None2Empty(r.to)])
+def can_delete_FunctionNode(x):
+    if isinstance(x, BVAddFunctionNode) and x.uses_bv():
+        return False
+    else:
+        return any([x.returntype == a.returntype for a in x.argFunctionNodes()])
 
 class InsertDeleteProposer(LOTProposer):
     """
@@ -47,13 +46,13 @@ class InsertDeleteProposer(LOTProposer):
             # Choose a node at random to insert on
             # TODO: We could precompute the nonterminals we can do this move on, if we wanted
             try:
-                ni, lp = newt.sample_subnode(isNotBVAddFunctionNode)
+                ni, lp = newt.sample_subnode(can_insert_FunctionNode)
             except NodeSamplingException:
                 raise ProposalFailedException
 
             # Since it's an insert, see if there is a (replicating) rule that expands
             # from ni.returntype to some ni.returntype
-            replicating_rules = filter(is_replicating_GrammarRule, self.grammar.rules[ni.returntype])
+            replicating_rules = filter(can_insert_GrammarRule, self.grammar.rules[ni.returntype])
             if len(replicating_rules) == 0:  return [newt, 0.0]
 
             # sample a rule and compute its probability (not under the predicate)
@@ -86,18 +85,18 @@ class InsertDeleteProposer(LOTProposer):
                 # what is the prob mass of the new stuff?
                 new_lp_below =  sum([ self.grammar.log_probability(fn.args[i]) if (i!=replace_i and isFunctionNode(fn.args[i])) else 0. for i in xrange(len(fn.args))])
                 # What is the new normalizer?
-                newZ = newt.sample_node_normalizer(isNotBVAddFunctionNode)
+                newZ = newt.sample_node_normalizer(can_delete_FunctionNode)
                 assert newZ > 0
                 # To sample forward: choose the node ni, choose the replicating rule, choose which "to" to expand (we could have put it on any of the replicating rules that are identical), and genreate the rest of the tree
                 f = lp + (-log(len(replicating_rules))) + (log(after_same_children)-log(len(replicatingindices))) + new_lp_below
                 # To go backwards, choose the inserted rule, and any of the identical children, out of all replicators
-                b = (log(1.0*isNotBVAddFunctionNode(fn)) - log(newZ)) + (log(after_same_children) - log(len(fn.args)))
+                b = (log(1.0*can_delete_FunctionNode(fn)) - log(newZ)) + (log(after_same_children) - log(len(fn.args)))
 
         else: # A delete move!
 
             # Sample a node at random
             try:
-                ni, lp = newt.sample_subnode(isNotBVAddFunctionNode) # this could raise exception
+                ni, lp = newt.sample_subnode(can_delete_FunctionNode) # this could raise exception
 
                 # Really, it had to be not None
                 if ni.args is None:
@@ -112,7 +111,7 @@ class InsertDeleteProposer(LOTProposer):
             if nrk == 0:
                 raise ProposalFailedException
 
-            replicating_rules = filter(is_replicating_GrammarRule, self.grammar.rules[ni.returntype])
+            replicating_rules = filter(can_delete_GrammarRule, self.grammar.rules[ni.returntype])
             assert len(replicating_rules) > 0 # better be some or where did ni come from?
 
             samplei = sample1(replicating_kid_indices) # who to promote; NOTE: not done via any weighting
@@ -132,11 +131,11 @@ class InsertDeleteProposer(LOTProposer):
                 ni.setto( ni.args[samplei] )
 
                 # And compute f/b probs
-                newZ = newt.sample_node_normalizer(resampleProbability=isNotBVAddFunctionNode)
+                newZ = newt.sample_node_normalizer(resampleProbability=can_insert_FunctionNode)
                 # To go forward, choose the node, and then from all equivalent children
                 f = lp + (log(before_same_children) - log(nrk))
                 # To go back, choose the node, choose the replicating rule, choose where to put it, and generate the rest of the tree
-                b = (log(1.0*isNotBVAddFunctionNode(ni)) - log(newZ))  + -log(len(replicating_rules)) + (log(before_same_children) - log(nrk)) + old_lp_below
+                b = (nicelog(1.0*can_insert_FunctionNode(ni)) - nicelog(newZ))  + -nicelog(len(replicating_rules)) + (nicelog(before_same_children) - nicelog(nrk)) + old_lp_below
 
         return [newt, f-b]
 
