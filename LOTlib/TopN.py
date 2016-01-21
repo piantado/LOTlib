@@ -73,6 +73,8 @@ class TopN(object):
         for yi in y:
             self.add(yi)
 
+    def best(self):
+        return self.get_all(sorted=True)[-1]
 
 if __name__ == "__main__":
 

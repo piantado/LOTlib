@@ -28,6 +28,9 @@ class LOTHypothesis(FunctionHypothesis, RegenerationProposer):
 
     def __init__(self, grammar=None, value=None, f=None, maxnodes=25, **kwargs):
 
+        if 'args' in kwargs:
+            assert False, "*** Use of 'args' is deprecated. Use display='...' instead."
+
         # Save all of our keywords
         self.__dict__.update(locals())
 
