@@ -1,10 +1,10 @@
 from LOTlib.Eval import * # Necessary for compile_function eval below
 from LOTlib.Hypotheses.FunctionHypothesis import FunctionHypothesis
-from LOTlib.Hypotheses.Proposers.RegenerationProposer import RegenerationProposer
+from LOTlib.Hypotheses.Proposers import regeneration_proposal, ProposalFailedException
 from LOTlib.Miscellaneous import Infinity, raise_exception, attrmem
 from LOTlib.Primitives import *
 
-class LOTHypothesis(FunctionHypothesis, RegenerationProposer):
+class LOTHypothesis(FunctionHypothesis):
     """A FunctionHypothesis built from a grammar.
 
     Arguments
@@ -70,6 +70,19 @@ class LOTHypothesis(FunctionHypothesis, RegenerationProposer):
 
     def compute_single_likelihood(self, datum):
         raise NotImplementedError
+
+    def propose(self, **kwargs):
+        ret_value, fb = None, None
+        while True: # keep trying to propose
+            try:
+                ret_value, fb = regeneration_proposal(self.grammar, self.value, **kwargs)
+                break
+            except ProposalFailedException:
+                pass
+
+        ret = self.__copy__(value=ret_value)
+
+        return ret, fb
 
     # --------------------------------------------------------------------------------------------------------
     # Compute prior

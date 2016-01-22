@@ -1,3 +1,5 @@
+Jan 21 2016
+	- Extreme simplification of proposals. 
 Jan 7 2016
 	- Added "display" to hypotheses to specify printing. This replaced FunctionHypothesis.args and LOTHypothesis.args, and makes it easier to write less function code, since we can display with arbitrary strings
 	- Removed special printing from FunctionNode -- everything should use string interpolation now. Removed: If, apply, lambda, comma, ''
