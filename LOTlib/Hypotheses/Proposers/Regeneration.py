@@ -1,4 +1,3 @@
-from LOTProposer import LOTProposer
 from LOTlib.Hypotheses.Proposers import ProposalFailedException
 from LOTlib.FunctionNode import NodeSamplingException
 from LOTlib.Miscellaneous import lambdaOne, Infinity, logplusexp, dropfirst

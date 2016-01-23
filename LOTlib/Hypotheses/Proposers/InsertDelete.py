@@ -2,7 +2,6 @@
 from LOTlib.Hypotheses.Proposers import ProposalFailedException
 from LOTlib.Miscellaneous import sample1, nicelog
 from LOTlib.FunctionNode import *
-from LOTProposer import LOTProposer
 from LOTlib.GrammarRule import *
 from LOTlib.BVRuleContextManager import BVRuleContextManager
 from LOTlib.FunctionNode import NodeSamplingException
