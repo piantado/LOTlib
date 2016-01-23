@@ -36,7 +36,7 @@ def standard_sample(make_hypothesis, make_data, show_skip=9, show=True, N=100, s
                 h.prior, \
                 h.likelihood, \
                 f(h) if f is not None else '', \
-                qq(cleanFunctionNodeString(h)), \
+                qq(cleanFunctionNodeString(h))
 
     if save_top is not None:
         print "# Saving top hypotheses"
