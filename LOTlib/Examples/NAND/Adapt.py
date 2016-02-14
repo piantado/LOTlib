@@ -14,7 +14,7 @@ from Model.Grammar import grammar
 if __name__ == "__main__":
 
     NDATA = 10
-    N_SUBTREES_PER_NODE = 50
+    N_SUBTREES_PER_NODE = 10
     SUBTREE_P = 0.5 # when we generate a partial subtree, how likely are we to take each kid?
 
     # Make the data(s)

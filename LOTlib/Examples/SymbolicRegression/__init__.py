@@ -1,3 +1,3 @@
 
-from Grammar import grammar
+from Model import *
 
