@@ -10,7 +10,7 @@ from LOTlib.Miscellaneous import display_option_summary
 from LOTlib.Inference.Samplers.StandardSample import standard_sample
 from LOTlib.Eval import register_primitive
 from LOTlib.Miscellaneous import flatten2str, logsumexp, qq
-from Model.Hypothesis import make_hypothesis
+# from Model.Hypothesis import make_hypothesis
 from Language.Index import instance
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
@@ -20,7 +20,6 @@ fff = sys.stdout.flush
 
 register_primitive(flatten2str)
 
-
 def run(mk_hypothesis, lang, size):
     """
     This out on the DATA_RANGE amounts of data and returns all hypotheses in top count
@@ -28,11 +27,11 @@ def run(mk_hypothesis, lang, size):
     if LOTlib.SIG_INTERRUPTED:
         return set()
 
-    return standard_sample(lambda: mk_hypothesis(options.LANG, N=options.N, rank=rank, terminals=options.TERMINALS, bound=options.BOUND),
+    return standard_sample(lambda: mk_hypothesis(options.LANG),
                            lambda: lang.sample_data_as_FuncData(size),
                            N=options.TOP_COUNT,
                            steps=options.STEPS,
-                           show=True, skip=200, save_top=None)
+                           show=True, show_skip=200, skip=10, save_top=None)
 
 
 def simple_mpi_map(run, args):
@@ -78,6 +77,7 @@ if __name__ == "__main__":
     DATA_RANGE = np.arange(0, 70, 6)
 
     language = instance(options.LANG, options.FINITE)
-    args = list(itertools.product([make_hypothesis], [language], DATA_RANGE))
+    from Model.model5 import make_new_hypothesis
+    args = list(itertools.product([make_new_hypothesis], [language], DATA_RANGE))
 
     hypotheses = simple_mpi_map(run, args)

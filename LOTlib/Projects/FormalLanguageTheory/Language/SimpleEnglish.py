@@ -19,15 +19,20 @@ class SimpleEnglish(FormalLanguage):
         FormalLanguage.__init__(self, max_length)
 
     def all_strings(self, max_length):
+
+        y = 0
+
         for x in self.grammar.enumerate(d=max_length):
             s = ''.join(x.all_leaves())
             if len(s) < max_length:
+                y += 1
                 yield s
 
+        print '!!!', y
 
 # just for testing
 if __name__ == '__main__':
-    language = SimpleEnglish(8)
+    language = SimpleEnglish(11)
 
     # for _ in xrange(100):
     #     x =  language.grammar.generate()
@@ -42,9 +47,9 @@ if __name__ == '__main__':
     # for e in language.all_strings(max_length=8):
     #     print e
 
-    print language.sample_data_as_FuncData(300)
+    print language.sample_data_as_FuncData(256)
 
-    # print language.is_valid_string('PV')
+    # print language.is_valid_string('PV')`
     # print language.is_valid_string('DAANV')
     # print language.is_valid_string('PVTPV')
     # print language.is_valid_string('PVDN')

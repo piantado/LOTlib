@@ -64,13 +64,23 @@ class FormalLanguage(object):
              be set False in finite vs infinite case.
         """
         output = set(data[0].output.keys())
-        h_out = set([h() for _ in xrange(int(sum(data[0].output.values())))])
+        from LOTlib.Eval import RecursionDepthException, EvaluationException
+        tmp_list = []
+        for _ in xrange(int(sum(data[0].output.values()))):
+            try:
+                tmp_list.append(h())
+            except (IndexError, RuntimeError, EvaluationException, RecursionDepthException):
+                tmp_list.append('')
+        h_llcounts = Counter(tmp_list)
+        h_out = set(h_llcounts.keys())
 
         if truncate:
             max_len = max(map(len, output))
             tmp = deepcopy(h_out)
             for _str in tmp:
-                if len(_str) > max_len: h_out.remove(_str)
+                if len(_str) > max_len:
+                    h_out.remove(_str)
+                    del h_llcounts[_str]
 
         base = len(h_out)
         cnt = 0.0
@@ -84,7 +94,7 @@ class FormalLanguage(object):
             if v in h_out: cnt += 1
         recall = cnt / base
 
-        return precision, recall
+        return precision, recall, h_llcounts
 
     def estimate_KL_divergence(self, h, n=1024, max_length=50):
         """ Estimate the KL divergence between me and h """

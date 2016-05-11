@@ -40,7 +40,7 @@ def no_data(a, max_length=None):
 
 if __name__ == '__main__':
     """
-    run with script: mpiexec -n 12 python StagedInput_inf.py --steps=40000 --language=AnBn --finite=12 --N=1 --mode=0/1
+    run with script: mpiexec -n 12 python StagedInput_inf.py --steps=40000 --language=AnBn -- --finite=12 --N=1 --mode=0/1
     """
     # ========================================================================================================
     # Process command line arguments
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     suffix = time.strftime('_' + str(rank) + '_' + options.NAME + '_%m%d_%H%M%S', time.localtime())
     prefix = './'
     # prefix = '../out/simulations/staged/'
-    # prefix = '/ho.me/lijm/WORK/yuan/lot/staged/'
+    # prefix = '/home/lijm/WORK/yuan/lot/staged/'
     # ========================================================================================================
     # Running
     # ========================================================================================================

@@ -7,6 +7,7 @@
 # testing and header generators
 test_generator.py
 header_generator.py
+out/
 
 # Notes
 *.note
