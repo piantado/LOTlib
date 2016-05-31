@@ -443,6 +443,12 @@ from itertools import imap
 def argmax(lst):
     return max([(x,i) for i,x in enumerate(lst)])[1]
 
+
+def logit(p):
+    return log(p/(1.-p))
+def ilogit(x):
+    return 1./(1.+exp(-x))
+
 # ------------------------------------------------------------------------------------------------------------
 # Sampling functions
 # ------------------------------------------------------------------------------------------------------------
