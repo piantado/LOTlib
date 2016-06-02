@@ -63,6 +63,7 @@ class LogitNormalDistribution(Stochastic):
 
         return ret, 0.0 # symmetric
 
+
 class DirichletDistribution(Stochastic):
 
     SMOOTHING = 1e-6

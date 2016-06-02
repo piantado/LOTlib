@@ -1,22 +1,21 @@
 import numpy as np
 from random import random
-from copy import copy
+from copy import copy, deepcopy
 from scipy.misc import logsumexp
 from scipy.stats import dirichlet, binom, gamma, norm, beta
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
 from LOTlib.Miscellaneous import sample1
+from LOTlib.Hypotheses.Stochastics import *
 
 class AlphaBetaGrammarHypothesis(Hypothesis):
+    """
+    This hypothesis does inference over a grammar as well as parameters alpha (noise) and beta (base rate),
+    and a likelihood temperature.
+    """
 
-    # Priors on parameters
-    BETA_PRIOR = np.array([1.,1.])
-    ALPHA_PRIOR = np.array([100., 100.])
-    LLT_PRIOR = np.array([1., 1.])
+    P_PROPOSE_RULEP = 0.75 # what proportion of the time do we propose to the rule probabilities?
 
-    P_PROPOSE_VALUE = 0.25 # what proportion of the time do we propose to value?
-
-    def __init__(self, Counts, Hypotheses, L, GroupLength, prior_offset, Nyes, Ntrials, ModelResponse, alpha=None, \
-                 beta=None, llt=None, value=None,  scale=600, step_size=0.01):
+    def __init__(self, Counts, L, GroupLength, prior_offset, Nyes, Ntrials, ModelResponse, value=None):
         """
             Counts - nonterminal -> #h x #rules counts
             Hypotheses - #h
@@ -26,38 +25,28 @@ class AlphaBetaGrammarHypothesis(Hypothesis):
             Ntrials       - #item
             ModelResponse - #h x #item - each hypothesis' response to the i'th item (1 or 0)
         """
+
         assert sum(GroupLength) == len(Nyes) == len(Ntrials)
 
+        L = numpy.array(L)
+
         self.__dict__.update(locals())
-
-        self.N_hyps = len(Hypotheses)
         self.N_groups = len(GroupLength)
-
         self.nts    = Counts.keys() # all nonterminals
         self.nrules = { nt: Counts[nt].shape[1] for nt in self.nts} # number of rules for each nonterminal
+        self.N_hyps = Counts[self.nts[0]].shape[0]
 
-        # the dirichlet prior on parameters
-        self.value_prior = { nt: np.ones(self.nrules[nt]) for nt in self.nts }
-        self.set_value(value)
-        Hypothesis.__init__(self)
-
-    def set_value(self, value):
-        # store the parameters in a hash from nonterminal to vector of probabilities
         if value is None:
-            self.value = dict()
-            for nt in self.nts:
-                self.value[nt] = dirichlet.rvs(np.ones(self.nrules[nt]))[0] ## TODO: Check [0] here
-        else:
-            self.value = value
+            value = {
+                      'rulep': { nt: DirichletDistribution(alpha=np.ones(self.nrules[nt])) for nt in self.nts },
+                      'alpha': BetaDistribution(1,1),
+                      'beta':  BetaDistribution(1,1),
+                      'llt':   NormalDistribution(1,0.1) # TODO: Should be a lognormal or gamma
+                     }
 
-        if self.beta is None:
-            self.beta = dirichlet.rvs(AlphaBetaGrammarHypothesis.BETA_PRIOR)[0][0]
-        if self.alpha is None:
-            self.alpha = dirichlet.rvs(AlphaBetaGrammarHypothesis.ALPHA_PRIOR)[0][0]
-        if self.llt is None:
-            self.llt = gamma.rvs(*AlphaBetaGrammarHypothesis.LLT_PRIOR, size=1)[0] # TODO: Check, parameters, rvs, size
+        Hypothesis.__init__(self, value=value) # sets the value
 
-
+    @attrmem('likelihood')
     def compute_likelihood(self, data, **kwargs):
         # The likelihood of the human data
         assert len(data) == 0
@@ -65,77 +54,53 @@ class AlphaBetaGrammarHypothesis(Hypothesis):
         # compute each hypothesis' prior, fixed over all data
         priors = np.ones(self.N_hyps) * self.prior_offset #   #h x 1 vector
         for nt in self.nts: # sum over all nonterminals
-            priors = priors + np.dot(np.log(self.value[nt]), self.Counts[nt].T) # TODO: Check .T
+            priors = priors + np.dot(np.log(self.value['rulep'][nt].value), self.Counts[nt].T) # TODO: Check .T
+
+        alpha = self.value['alpha'].value[0]
+        beta  = self.value['beta'].value[0]
+        llt   = abs(self.value['llt'].value) # TODO: This for now... We should change this to be gamma
 
         pos = 0 # what response are we on?
         likelihood = 0.0
         for g in xrange(self.N_groups): ## TODO: Check offset
-            posteriors =  self.L[g]/self.llt + priors # posterior score
+            posteriors =  self.L[g]/llt + priors # posterior score
             posteriors = np.exp(posteriors - logsumexp(posteriors)) # posterior probability
 
             # Now compute the probability of the human data
             for _ in xrange(1, self.GroupLength[g]):
-                ps = (1 - self.alpha) * self.beta + self.alpha * np.dot(posteriors, self.ModelResponse[pos])
+                ps = (1 - alpha) * beta + alpha * np.dot(posteriors, self.ModelResponse[pos])
                 # ps = np.dot(posteriors, self.ModelResponse[pos]) # model probabiltiy of saying yes # TODO: Check matrix multiply
 
                 likelihood += binom.logpmf(self.Nyes[pos], self.Ntrials[pos], ps)
                 pos = pos + 1
 
-        self.likelihood = likelihood
         return likelihood
 
+    @attrmem('prior')
     def compute_prior(self):
-        if self.alpha >= 1 or self.alpha <= 0:
-            self.prior = -np.inf
-            return self.prior
-        else:
-            self.prior = -1*(sum([ np.sum(dirichlet.logpdf(self.value[nt], self.value_prior[nt])) for nt in self.nts ]) + \
-                                #dirichlet.logpdf(np.array([self.beta, 1.-self.beta]), AlphaBetaGrammarMH.BETA_PRIOR) + \
-                                #dirichlet.logpdf(np.array([self.alpha, 1.-self.alpha]), AlphaBetaGrammarMH.ALPHA_PRIOR) + \
-                                gamma.logpdf(self.llt, *AlphaBetaGrammarHypothesis.LLT_PRIOR)) # TODO: Check ordering of parameters
-            return self.prior
+        return self.value['alpha'].compute_prior() + \
+               self.value['beta'].compute_prior() + \
+               self.value['llt'].compute_prior() + \
+               sum([ x.compute_prior() for x in self.value['rulep'].values()])
+
 
     def propose(self, epsilon=1e-10):
         # should return is f-b, proposal
 
-        if random() < AlphaBetaGrammarHypothesis.P_PROPOSE_VALUE:
+        prop = type(self)(self.Counts, self.L, self.GroupLength, self.prior_offset, self.Nyes, \
+                          self.Ntrials, self.ModelResponse, value=deepcopy(self.value))
+        fb = 0.0
 
-            # uses epsilon smoothing to keep away from 0,1
-            fb = 0.0
+        if random() < AlphaBetaGrammarHypothesis.P_PROPOSE_RULEP: # propose to the rule parameters
 
-            # change value
-            newvalue = dict()
-            for nt in self.nts:
-                inx = sample1(range(0, self.nrules[nt]))
-                a = copy(self.value[nt])
-                a[inx] = beta.rvs(self.value[nt][inx]*100, 100-self.value[nt][inx]*100) + epsilon
+            nt = sample1(self.nts) # which do we propose to?
 
-                #a = dirichlet.rvs(self.value[nt] * self.scale)[0] + epsilon
-                newvalue[nt] = a / np.sum(a)
-                fb += dirichlet.logpdf(newvalue[nt],self.value[nt]) - dirichlet.logpdf(self.value[nt],newvalue[nt])
+            prop.value['rulep'][nt], fb = prop.value['rulep'][nt].propose()
 
-            # make a new proposal. DON'T copy the matrices, but make a new value
-            prop = AlphaBetaGrammarHypothesis(self.Counts, self.Hypotheses, self.L, self.GroupLength, self.prior_offset, self.Nyes,
-                                      self.Ntrials, self.ModelResponse, value=newvalue, scale=self.scale, alpha=self.alpha,
-                                      beta=self.beta, llt=self.llt)
+        else: # propose to one of the other grammar variables
 
-            return prop, fb
+            which = sample1(['alpha', 'beta', 'llt'])
 
-        else:
+            prop.value[which], fb = prop.value[which].propose()
 
-            fb = 0.0
-
-            newalpha = norm.rvs(loc=self.alpha, scale=self.step_size)
-            fb += norm.logpdf(newalpha, self.alpha, self.step_size) - norm.logpdf(self.alpha, newalpha, self.step_size)
-
-            newbeta = norm.rvs(loc=self.beta, scale=self.step_size) - 1e-5
-            fb += norm.logpdf(newbeta, self.beta, self.step_size) - norm.logpdf(self.beta, newbeta, self.step_size)
-
-            newllt = norm.rvs(loc=self.llt, scale=self.step_size)
-            fb += norm.logpdf(newllt, self.llt, self.step_size) - norm.logpdf(self.llt, newllt, self.step_size)
-
-            prop = AlphaBetaGrammarHypothesis(self.Counts, self.Hypotheses, self.L, self.GroupLength, self.prior_offset, self.Nyes,
-                                      self.Ntrials, self.ModelResponse, value=self.value, scale=self.scale, alpha=newalpha,
-                                      beta=newbeta, llt=newllt)
-
-            return prop, fb
+        return prop, fb

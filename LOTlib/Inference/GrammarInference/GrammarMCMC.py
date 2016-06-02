@@ -1,4 +1,7 @@
 import pickle
+
+from LOTlib import break_ctrlc
+
 from LearnHypotheses import *
 
 with open('HypothesisSpace.pkl', 'r') as f:
@@ -52,12 +55,10 @@ print "# Computed counts for each hypothesis & nonterminal"
 from AlphaBetaGrammar import AlphaBetaGrammarHypothesis
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
-h0 = AlphaBetaGrammarHypothesis(counts, hypotheses, L, GroupLength, prior_offset, NYes, NTrials, Output, scale=600, step_size=0.5)
-mhs = MHSampler(h0, [], 10000)
-for s, h in enumerate(mhs):
-
-    if s % 100 == 0:
-        a = str(mhs.acceptance_ratio()) + ',' + str(h.prior) + ',' + str(h.likelihood) + ',' + ','.join([str(x) for x in h.value['PREDICATE']])
-        print a
-        a += ',' + str(h.alpha) + ',' + str(h.beta) + ',' + str(h.llt)
-        print str(h.alpha) + ',' + str(h.beta) + ',' + str(h.llt)
+h0 = AlphaBetaGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
+mhs = MHSampler(h0, [], 100000, skip=100)
+for s, h in break_ctrlc(enumerate(mhs)):
+    a = str(mhs.acceptance_ratio()) + ',' + str(h.prior) + ',' + str(h.likelihood) +  ',' +\
+        str(h.value['alpha'].value[0]) + ',' + str(h.value['beta'].value[0]) + ',' + str(h.value['llt']) + ',' + \
+        ','.join([str(x) for x in h.value['rulep']['PREDICATE'].value ])
+    print a
