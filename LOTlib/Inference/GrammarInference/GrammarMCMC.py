@@ -49,10 +49,10 @@ counts, sig2idx, prior_offset = create_counts(grammar, hypotheses, which_rules=w
 
 print "# Computed counts for each hypothesis & nonterminal"
 
-from AlphaBetaGrammar import AlphaBetaGrammarMH
+from AlphaBetaGrammar import AlphaBetaGrammarHypothesis
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
-h0 = AlphaBetaGrammarMH(counts, hypotheses, L, GroupLength, prior_offset, NYes, NTrials, Output, scale=600, step_size=0.5)
+h0 = AlphaBetaGrammarHypothesis(counts, hypotheses, L, GroupLength, prior_offset, NYes, NTrials, Output, scale=600, step_size=0.5)
 mhs = MHSampler(h0, [], 10000)
 for s, h in enumerate(mhs):
     if s % 100 == 0:

@@ -6,7 +6,7 @@ from scipy.stats import dirichlet, binom, gamma, norm, beta
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
 from LOTlib.Miscellaneous import sample1
 
-class AlphaBetaGrammarMH(Hypothesis):
+class AlphaBetaGrammarHypothesis(Hypothesis):
 
     # Priors on parameters
     BETA_PRIOR = np.array([1.,1.])
