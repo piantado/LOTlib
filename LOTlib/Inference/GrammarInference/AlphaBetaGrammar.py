@@ -51,11 +51,11 @@ class AlphaBetaGrammarHypothesis(Hypothesis):
             self.value = value
 
         if self.beta is None:
-            self.beta = dirichlet.rvs(AlphaBetaGrammarMH.BETA_PRIOR)[0][0]
+            self.beta = dirichlet.rvs(AlphaBetaGrammarHypothesis.BETA_PRIOR)[0][0]
         if self.alpha is None:
-            self.alpha = dirichlet.rvs(AlphaBetaGrammarMH.ALPHA_PRIOR)[0][0]
+            self.alpha = dirichlet.rvs(AlphaBetaGrammarHypothesis.ALPHA_PRIOR)[0][0]
         if self.llt is None:
-            self.llt = gamma.rvs(*AlphaBetaGrammarMH.LLT_PRIOR, size=1)[0] # TODO: Check, parameters, rvs, size
+            self.llt = gamma.rvs(*AlphaBetaGrammarHypothesis.LLT_PRIOR, size=1)[0] # TODO: Check, parameters, rvs, size
 
 
     def compute_likelihood(self, data, **kwargs):
@@ -92,13 +92,13 @@ class AlphaBetaGrammarHypothesis(Hypothesis):
             self.prior = -1*(sum([ np.sum(dirichlet.logpdf(self.value[nt], self.value_prior[nt])) for nt in self.nts ]) + \
                                 #dirichlet.logpdf(np.array([self.beta, 1.-self.beta]), AlphaBetaGrammarMH.BETA_PRIOR) + \
                                 #dirichlet.logpdf(np.array([self.alpha, 1.-self.alpha]), AlphaBetaGrammarMH.ALPHA_PRIOR) + \
-                                gamma.logpdf(self.llt, *AlphaBetaGrammarMH.LLT_PRIOR)) # TODO: Check ordering of parameters
+                                gamma.logpdf(self.llt, *AlphaBetaGrammarHypothesis.LLT_PRIOR)) # TODO: Check ordering of parameters
             return self.prior
 
     def propose(self, epsilon=1e-10):
         # should return is f-b, proposal
 
-        if random() < AlphaBetaGrammarMH.P_PROPOSE_VALUE:
+        if random() < AlphaBetaGrammarHypothesis.P_PROPOSE_VALUE:
 
             # uses epsilon smoothing to keep away from 0,1
             fb = 0.0
@@ -115,7 +115,7 @@ class AlphaBetaGrammarHypothesis(Hypothesis):
                 fb += dirichlet.logpdf(newvalue[nt],self.value[nt]) - dirichlet.logpdf(self.value[nt],newvalue[nt])
 
             # make a new proposal. DON'T copy the matrices, but make a new value
-            prop = AlphaBetaGrammarMH(self.Counts, self.Hypotheses, self.L, self.GroupLength, self.prior_offset, self.Nyes,
+            prop = AlphaBetaGrammarHypothesis(self.Counts, self.Hypotheses, self.L, self.GroupLength, self.prior_offset, self.Nyes,
                                       self.Ntrials, self.ModelResponse, value=newvalue, scale=self.scale, alpha=self.alpha,
                                       beta=self.beta, llt=self.llt)
 
@@ -134,7 +134,7 @@ class AlphaBetaGrammarHypothesis(Hypothesis):
             newllt = norm.rvs(loc=self.llt, scale=self.step_size)
             fb += norm.logpdf(newllt, self.llt, self.step_size) - norm.logpdf(self.llt, newllt, self.step_size)
 
-            prop = AlphaBetaGrammarMH(self.Counts, self.Hypotheses, self.L, self.GroupLength, self.prior_offset, self.Nyes,
+            prop = AlphaBetaGrammarHypothesis(self.Counts, self.Hypotheses, self.L, self.GroupLength, self.prior_offset, self.Nyes,
                                       self.Ntrials, self.ModelResponse, value=self.value, scale=self.scale, alpha=newalpha,
                                       beta=newbeta, llt=newllt)
 

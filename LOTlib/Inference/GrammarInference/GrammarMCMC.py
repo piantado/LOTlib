@@ -40,7 +40,7 @@ GroupLength = [8]
 print "# Loaded %s observed rows" % len(NYes)
 print "# Organized %s groups" % len(GroupLength)
 
-from LOTlib.GrammarInference.GrammarInference import create_counts
+from LOTlib.Inference.GrammarInference.GrammarInference import create_counts
 
 # Decide which rules to use
 which_rules = [r for r in grammar if r.nt in ['PREDICATE']]
@@ -55,6 +55,7 @@ from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 h0 = AlphaBetaGrammarHypothesis(counts, hypotheses, L, GroupLength, prior_offset, NYes, NTrials, Output, scale=600, step_size=0.5)
 mhs = MHSampler(h0, [], 10000)
 for s, h in enumerate(mhs):
+
     if s % 100 == 0:
         a = str(mhs.acceptance_ratio()) + ',' + str(h.prior) + ',' + str(h.likelihood) + ',' + ','.join([str(x) for x in h.value['PREDICATE']])
         print a
