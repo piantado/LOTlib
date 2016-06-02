@@ -17,8 +17,8 @@ module load python/2.7.10/b1
 module load openmpi/1.6.5/b1
 
 # This will run them sequentially
- srun time python MakeHypotheses.py --out=hypotheses/hypotheses-1.pkl   --steps=100000 --top=1 --chains=10
-# srun time python MakeHypotheses.py --out=hypotheses/hypotheses-10.pkl  --steps=100000 --top=10 --chains=10
+# srun time python MakeHypotheses.py --out=hypotheses/hypotheses-1.pkl   --steps=100000 --top=1 --chains=10
+ srun time python MakeHypotheses.py --out=hypotheses/hypotheses-10.pkl  --steps=100000 --top=10 --chains=10
 # srun time python MakeHypotheses.py --out=hypotheses/hypotheses-100.pkl --steps=100000 --top=100 --chains=10
 
 

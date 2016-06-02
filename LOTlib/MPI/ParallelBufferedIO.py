@@ -4,7 +4,7 @@
 
 
 from multiprocessing import Process, Queue
-from lockfile import FileLock
+#from lockfile import FileLock
 import os
 import time
 import atexit
