@@ -7,7 +7,7 @@ from LOTlib.DataAndObjects import FunctionData, Obj
 
 def make_data(n=1, alpha=0.9):
     return [FunctionData(input=[Obj(shape='square', color='red', size='large')], output=False, alpha=alpha),
-            FunctionData(input=[Obj(shape='triangle', color='green', size='small')], output=False, alpha=alpha)]*n
+            FunctionData(input=[Obj(shape='triangle', color='green', size='small')], output=True, alpha=alpha)]*n
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Grammar
@@ -21,20 +21,12 @@ grammar = DNF
 
 # Two predicates for checking x's color and shape
 # Note: per style, functions in the LOT end in _
-grammar.add_rule('PREDICATE', 'is_color_', ['x', 'COLOR'], 1.0)
-grammar.add_rule('PREDICATE', 'is_shape_', ['x', 'SHAPE'], 1.0)
-grammar.add_rule('PREDICATE', 'is_size_',  ['x', 'SIZE'],  1.0)
-
-# Some colors/shapes each (for this simple demo)
-# These are written in quotes so they can be evaled
-grammar.add_rule('COLOR', q('red'), None, 1.0)
-grammar.add_rule('COLOR', q('green'), None, 1.0)
-
-grammar.add_rule('SHAPE', q('square'), None, 1.0)
-grammar.add_rule('SHAPE', q('triangle'), None, 1.0)
-
-grammar.add_rule('SIZE', q('small'), None, 1.0)
-grammar.add_rule('SIZE', q('large'), None, 1.0)
+grammar.add_rule('PREDICATE', 'is_color_(x, "red")', None, 1.0)
+grammar.add_rule('PREDICATE', 'is_color_(x, "green")', None, 1.0)
+grammar.add_rule('PREDICATE', 'is_shape_(x, "square")', None, 1.0)
+grammar.add_rule('PREDICATE', 'is_shape_(x, "triangle")', None, 1.0)
+grammar.add_rule('PREDICATE', 'is_size_(x, "small")',  None,  1.0)
+grammar.add_rule('PREDICATE', 'is_size_(x, "large")',  None,  1.0)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Hypothesis
@@ -56,6 +48,7 @@ if __name__ == "__main__":
     mhs = MHSampler(make_hypothesis(), make_data(), 1000000, likelihood_temperature = 1., prior_temperature = 1.)
 
     for samples_yielded, h in break_ctrlc(enumerate(mhs)):
+        h.ll_decay = 0.
         hyps.add(h)
 
     import pickle

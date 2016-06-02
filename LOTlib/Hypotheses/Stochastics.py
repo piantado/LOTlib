@@ -101,8 +101,6 @@ class DirichletDistribution(Stochastic):
         return ret, fb
 
 class GibbsDirchlet(DirichletDistribution):
-    def __init__(self, **kwargs):
-        DirichletDistribution.__init__(self, **kwargs)
 
     def propose(self):
         ret = copy(self)

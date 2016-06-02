@@ -4,10 +4,14 @@ from LOTlib import break_ctrlc
 
 from LearnHypotheses import *
 
+'''
 with open('HypothesisSpace.pkl', 'r') as f:
     hypotheses = list(pickle.load(f))
 
 print "# Loaded hypotheses: ", len(hypotheses)
+'''
+
+hypotheses = set([RationalRulesLOTHypothesis(grammar=grammar, rrAlpha=1.0) for _ in xrange(10000)])
 
 from LOTlib.DataAndObjects import make_all_objects
 
@@ -15,7 +19,7 @@ objects = make_all_objects(size=['small', 'large'], color=['red', 'green'], shap
 
 data = make_data()
 
-L = [[h.compute_likelihood(data) for h in hypotheses]]
+L = [[0 for h in hypotheses]] #h.compute_likelihood(data)
 '''
 Red      = 1__
 Square   = _1_
@@ -24,6 +28,12 @@ Green    = 0__
 Triangle = _0_
 Small    = __0
 '''
+
+def human(obj):
+    if obj.color == 'red':
+        return 100
+    else:
+        return 1
 
 NYes = [100,   # 111 FALSE
         100,   # 110
@@ -34,10 +44,12 @@ NYes = [100,   # 111 FALSE
         1,   # 010
         1]   # 011
 
+NYes = [human(o) for o in objects]
+
 NTrials = [100]*8
 
 Output = [ [1 * h(obj) for h in hypotheses] for obj in objects]
-
+print objects
 GroupLength = [8]
 
 print "# Loaded %s observed rows" % len(NYes)
@@ -47,7 +59,7 @@ from LOTlib.Inference.GrammarInference.GrammarInference import create_counts
 
 # Decide which rules to use
 which_rules = [r for r in grammar if r.nt in ['PREDICATE']]
-
+print which_rules
 counts, sig2idx, prior_offset = create_counts(grammar, hypotheses, which_rules=which_rules)
 
 print "# Computed counts for each hypothesis & nonterminal"
@@ -57,8 +69,8 @@ from GrammarHypothesis import GrammarHypothesis
 from GrammarLLTHypothesis import GrammarLLTHypothesis
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
-h0 = GrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
-#h0 = GrammarLLTHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
+#h0 = GrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
+h0 = GrammarLLTHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
 #h0 = AlphaBetaGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
 
 mhs = MHSampler(h0, [], 100000, skip=100)
