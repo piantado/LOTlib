@@ -14,6 +14,9 @@ def is_shape_(x,y): return (x.shape == y)
 def is_pattern_(x,y): return (x.pattern == y)
 
 @primitive
+def is_size_(x,y): return (x.size == y)
+
+@primitive
 def isattr_(x,a,y):
     return getattr(x,a) == y
 

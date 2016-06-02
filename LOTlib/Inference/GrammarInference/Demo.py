@@ -9,11 +9,11 @@ with open('HypothesisSpace.pkl', 'r') as f:
 
 print "# Loaded hypotheses: ", len(hypotheses)
 
-objects = ['RED_SQUARE_LARGE', 'RED_SQUARE_SMALL', 'RED_TRIANGLE_LARGE', 'RED_TRIANGLE_SMALL',
-           'GREEN_TRIANGLE_SMALL', 'GREEN_TRIANGLE_LARGE', 'GREEN_SQUARE_SMALL', 'GREEN_SQUARE_LARGE']
+from LOTlib.DataAndObjects import make_all_objects
 
-data = [FunctionData(input = ["GREEN_TRIANGLE_SMALL"], output = 1, alpha = 0.9),
-        FunctionData(input = ["RED_SQUARE_LARGE"], output = 0, alpha = 0.9)]
+objects = make_all_objects(size=['small', 'large'], color=['red', 'green'], shape=['square', 'triangle'])
+
+data = make_data()
 
 L = [[h.compute_likelihood(data) for h in hypotheses]]
 '''
@@ -26,9 +26,9 @@ Small    = __0
 '''
 
 NYes = [100,   # 111 FALSE
-        1,   # 110
-        1,   # 101
-        1,   # 100
+        100,   # 110
+        100,   # 101
+        100,   # 100
         1,   # 000 TRUE
         1,   # 001
         1,   # 010
@@ -53,12 +53,24 @@ counts, sig2idx, prior_offset = create_counts(grammar, hypotheses, which_rules=w
 print "# Computed counts for each hypothesis & nonterminal"
 
 from AlphaBetaGrammar import AlphaBetaGrammarHypothesis
+from GrammarHypothesis import GrammarHypothesis
+from GrammarLLTHypothesis import GrammarLLTHypothesis
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
-h0 = AlphaBetaGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
+h0 = GrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
+#h0 = GrammarLLTHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
+#h0 = AlphaBetaGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
+
 mhs = MHSampler(h0, [], 100000, skip=100)
 for s, h in break_ctrlc(enumerate(mhs)):
-    a = str(mhs.acceptance_ratio()) + ',' + str(h.prior) + ',' + str(h.likelihood) +  ',' +\
+    if isinstance(h0, GrammarHypothesis):
+        a = str(mhs.acceptance_ratio()) + ',' + str(h.prior) + ',' + str(h.likelihood) +  ',' +\
+            ','.join([str(x) for x in h.value['PREDICATE'].value ])
+    elif isinstance(h0, GrammarLLTHypothesis):
+        a = str(mhs.acceptance_ratio()) + ',' + str(h.prior) + ',' + str(h.likelihood) +  ',' +\
+            str(h.value['llt']) + ',' + ','.join([str(x) for x in h.value['rulep']['PREDICATE'].value])
+    else:
+        a = str(mhs.acceptance_ratio()) + ',' + str(h.prior) + ',' + str(h.likelihood) +  ',' + \
         str(h.value['alpha'].value[0]) + ',' + str(h.value['beta'].value[0]) + ',' + str(h.value['llt']) + ',' + \
         ','.join([str(x) for x in h.value['rulep']['PREDICATE'].value ])
     print a

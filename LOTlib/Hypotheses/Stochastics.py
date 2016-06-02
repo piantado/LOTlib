@@ -4,7 +4,7 @@ from scipy.stats import norm
 from scipy.stats import dirichlet
 
 from LOTlib import break_ctrlc
-from LOTlib.Miscellaneous import Infinity, attrmem, logit, ilogit
+from LOTlib.Miscellaneous import Infinity, attrmem, logit, ilogit, sample1
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
 
 
@@ -92,6 +92,27 @@ class DirichletDistribution(Stochastic):
 
         # add a tiny bit of smoothing away from 0/1
         ret.value = (1.0 - DirichletDistribution.SMOOTHING) * ret.value + DirichletDistribution.SMOOTHING / 2.0
+        # and renormalize it, slightly breaking MCMC
+        ret.value = ret.value / sum(ret.value)
+
+        fb = dirichlet.logpdf(ret.value, self.value * self.proposal_scale) -\
+             dirichlet.logpdf(self.value, ret.value * self.proposal_scale)
+
+        return ret, fb
+
+class GibbsDirchlet(DirichletDistribution):
+    def __init__(self, **kwargs):
+        DirichletDistribution.__init__(self, **kwargs)
+
+    def propose(self):
+        ret = copy(self)
+
+        inx = sample1(range(0,self.alpha.shape[0]))
+        ret.value[inx] = numpy.random.beta(self.value[inx]*self.proposal_scale,
+                                           self.proposal_scale - self.value[inx] * self.proposal_scale)
+
+        # add a tiny bit of smoothing away from 0/1
+        ret.value[inx] = (1.0 - DirichletDistribution.SMOOTHING) * ret.value[inx] + DirichletDistribution.SMOOTHING / 2.0
         # and renormalize it, slightly breaking MCMC
         ret.value = ret.value / sum(ret.value)
 

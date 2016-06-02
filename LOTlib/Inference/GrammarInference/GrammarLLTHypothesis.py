@@ -1,19 +1,15 @@
 import numpy as np
-from random import random
-from copy import copy, deepcopy
+from copy import deepcopy
 from scipy.misc import logsumexp
-from scipy.stats import dirichlet, binom, gamma, norm, beta
-from LOTlib.Hypotheses.Hypothesis import Hypothesis
+from scipy.stats import binom
 from LOTlib.Miscellaneous import sample1
 from LOTlib.Hypotheses.Stochastics import *
 
-class AlphaBetaGrammarHypothesis(Hypothesis):
+class GrammarLLTHypothesis(Hypothesis):
     """
     This hypothesis does inference over a grammar as well as parameters alpha (noise) and beta (base rate),
     and a likelihood temperature.
     """
-
-    P_PROPOSE_RULEP = 0.75 # what proportion of the time do we propose to the rule probabilities?
 
     def __init__(self, Counts, L, GroupLength, prior_offset, Nyes, Ntrials, ModelResponse, value=None):
         """
@@ -39,8 +35,6 @@ class AlphaBetaGrammarHypothesis(Hypothesis):
         if value is None:
             value = {
                       'rulep': { nt: GibbsDirchlet(alpha=np.ones(self.nrules[nt]), proposal_scale=100.) for nt in self.nts },
-                      'alpha': BetaDistribution(1,1),
-                      'beta':  BetaDistribution(1,1),
                       'llt':   NormalDistribution(1,0.1) # TODO: Should be a lognormal or gamma
                      }
 
@@ -54,22 +48,19 @@ class AlphaBetaGrammarHypothesis(Hypothesis):
         # compute each hypothesis' prior, fixed over all data
         priors = np.ones(self.N_hyps) * self.prior_offset #   #h x 1 vector
         for nt in self.nts: # sum over all nonterminals
-            priors = priors + np.dot(np.log(self.value['rulep'][nt].value), self.Counts[nt].T) # TODO: Check .T
+            priors = priors + np.dot(np.log(self.value['rulep'][nt].value), self.Counts[nt].T)
 
-        alpha = self.value['alpha'].value[0]
-        beta  = self.value['beta'].value[0]
-        llt   = abs(self.value['llt'].value) # TODO: This for now... We should change this to be gamma
+        llt   = abs(self.value['llt'].value)
 
         pos = 0 # what response are we on?
         likelihood = 0.0
         for g in xrange(self.N_groups): ## TODO: Check offset
-            posteriors =  self.L[g]/llt + priors # posterior score
+            posteriors =  self.L[g] / llt + priors # posterior score
             posteriors = np.exp(posteriors - logsumexp(posteriors)) # posterior probability
 
             # Now compute the probability of the human data
             for _ in xrange(1, self.GroupLength[g]):
-                ps = (1 - alpha) * beta + alpha * np.dot(posteriors, self.ModelResponse[pos])
-                # ps = np.dot(posteriors, self.ModelResponse[pos]) # model probabiltiy of saying yes # TODO: Check matrix multiply
+                ps = np.dot(posteriors, self.ModelResponse[pos])
 
                 likelihood += binom.logpmf(self.Nyes[pos], self.Ntrials[pos], ps)
                 pos = pos + 1
@@ -78,9 +69,7 @@ class AlphaBetaGrammarHypothesis(Hypothesis):
 
     @attrmem('prior')
     def compute_prior(self):
-        return self.value['alpha'].compute_prior() + \
-               self.value['beta'].compute_prior() + \
-               self.value['llt'].compute_prior() + \
+        return self.value['llt'].compute_prior() + \
                sum([ x.compute_prior() for x in self.value['rulep'].values()])
 
 
@@ -89,18 +78,10 @@ class AlphaBetaGrammarHypothesis(Hypothesis):
 
         prop = type(self)(self.Counts, self.L, self.GroupLength, self.prior_offset, self.Nyes, \
                           self.Ntrials, self.ModelResponse, value=deepcopy(self.value))
-        fb = 0.0
 
-        if random() < AlphaBetaGrammarHypothesis.P_PROPOSE_RULEP: # propose to the rule parameters
+        nt = sample1(self.nts) # which do we propose to?
 
-            nt = sample1(self.nts) # which do we propose to?
+        prop.value['rulep'][nt], fb0 = prop.value['rulep'][nt].propose()
+        prop.value['llt'], fb1 = prop.value['llt'].propose()
 
-            prop.value['rulep'][nt], fb = prop.value['rulep'][nt].propose()
-
-        else: # propose to one of the other grammar variables
-
-            which = sample1(['alpha', 'beta', 'llt'])
-
-            prop.value[which], fb = prop.value[which].propose()
-
-        return prop, fb
+        return prop, fb0+fb1
