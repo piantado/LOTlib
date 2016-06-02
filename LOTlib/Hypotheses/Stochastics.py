@@ -67,7 +67,7 @@ class DirichletDistribution(Stochastic):
 
     SMOOTHING = 1e-6
 
-    def __init__(self, value=None, alpha=None, proposal_scale=1.0, **kwargs):
+    def __init__(self, value=None, alpha=None, proposal_scale=50.0, **kwargs):
         """
         Can be specified as value=numpy.array([...]), n= and alpha=
         """
