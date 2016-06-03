@@ -2,7 +2,6 @@ import pickle
 import numpy
 from LOTlib import break_ctrlc
 
-
 from Model import *
 
 '''
@@ -58,8 +57,8 @@ from LOTlib.Inference.GrammarInference.FullGrammarHypothesis import FullGrammarH
 
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
-h0 = SimpleGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
-# h0 = FullGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
+# h0 = SimpleGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
+h0 = FullGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
 
 mhs = MHSampler(h0, [], 100000, skip=500)
 for s, h in break_ctrlc(enumerate(mhs)):
