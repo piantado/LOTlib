@@ -21,11 +21,11 @@ objects = make_all_objects(size=['small', 'large'], color=['red', 'green'], shap
 
 data = make_data()
 
-L = [[h.compute_likelihood(data) for h in hypotheses]] #
+L = [[h.compute_likelihood(data) for h in hypotheses]]
 
 # We'll use this to simulate the human
 def human(obj):
-    if obj.color == 'red':
+    if obj.shape == 'square':
         return 100
     else:
         return 1
@@ -57,7 +57,7 @@ from LOTlib.Inference.GrammarInference.FullGrammarHypothesis import FullGrammarH
 
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
-# h0 = SimpleGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
+#h0 = SimpleGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
 h0 = FullGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
 
 mhs = MHSampler(h0, [], 100000, skip=500)

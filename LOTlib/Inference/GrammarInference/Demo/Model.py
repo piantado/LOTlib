@@ -14,7 +14,6 @@ def make_data(n=1, alpha=0.9):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from LOTlib.DefaultGrammars import SimpleBoolean
-from LOTlib.Miscellaneous import q
 
 # DNF defaultly includes the logical connectives so we need to add predicates to it.
 grammar = SimpleBoolean

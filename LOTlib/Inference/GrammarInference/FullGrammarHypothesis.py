@@ -40,8 +40,8 @@ class FullGrammarHypothesis(Hypothesis):
                       'rulep': { nt: GibbsDirchlet(alpha=np.ones(self.nrules[nt]), proposal_scale=100.) for nt in self.nts },
                       'alpha': BetaDistribution(1,1),
                       'beta':  BetaDistribution(1,1),
-                      'likelihood_temperature':   NormalDistribution(1,0.1), # TODO: Should be a lognormal or gamma
-                      'prior_temperature': NormalDistribution(1, 0.1)   # TODO: Should be a lognormal or gamma
+                      'likelihood_temperature':   GammaDistribution(a=1, scale=1, proposal_scale=10.), # TODO: Should be a lognormal or gamma
+                      'prior_temperature': GammaDistribution(a=1, scale=1, proposal_scale=10.)   # TODO: Should be a lognormal or gamma
             }
 
         Hypothesis.__init__(self, value=value) # sets the value
