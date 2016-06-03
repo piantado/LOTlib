@@ -46,22 +46,22 @@ class GrammarLLTHypothesis(Hypothesis):
         assert len(data) == 0
 
         # compute each hypothesis' prior, fixed over all data
-        priors = np.ones(self.N_hyps) * self.prior_offset #   #h x 1 vector
+        priors = self.prior_offset #   #h x 1 vector
         for nt in self.nts: # sum over all nonterminals
+            # print nt, np.log(self.value['rulep'][nt].value), self.Counts[nt].T
             priors = priors + np.dot(np.log(self.value['rulep'][nt].value), self.Counts[nt].T)
 
-        llt   = abs(self.value['llt'].value)
+        llt = abs(self.value['llt'].value)
 
         pos = 0 # what response are we on?
         likelihood = 0.0
-        for g in xrange(self.N_groups): ## TODO: Check offset
+        for g in xrange(self.N_groups):
             posteriors =  self.L[g] / llt + priors # posterior score
             posteriors = np.exp(posteriors - logsumexp(posteriors)) # posterior probability
 
             # Now compute the probability of the human data
-            for _ in xrange(1, self.GroupLength[g]):
+            for _ in xrange(self.GroupLength[g]):
                 ps = np.dot(posteriors, self.ModelResponse[pos])
-
                 likelihood += binom.logpmf(self.Nyes[pos], self.Ntrials[pos], ps)
                 pos = pos + 1
 

@@ -1,14 +1,7 @@
 """
-    Fit a grammar model in stan
-
-    TODO: Include the option to NOT use some grammar rules!!
-        This will require a prior_offset, that takes into account those rules' probability mass
-
-    TODO: FIX MISSING BOUND VARIABLES
-
+    Utility for precomputing some key information in doing grammar inference
 """
 
-import pystan
 import numpy
 import os
 import re
@@ -19,14 +12,16 @@ from LOTlib.Hypotheses.Lexicon.SimpleLexicon import SimpleLexicon
 from LOTlib.FunctionNode import FunctionNode
 
 from collections import Counter
+
+
 def create_counts(grammar, hypotheses, which_rules=None, log=None):
     """
         Make the rule counts for each nonterminal. This returns three things:
             count[nt][trees,rule] -- a hash from nonterminals to a matrix of rule counts
             sig2idx[signature] - a hash from rule signatures to their index in the count matrix
-            prior_offset[trees] - how much the prior should be offset for each hypothesis
+            prior_offset[trees] - how much the prior should be offset for each hypothesis (incorporating the rules not in which_rules)
 
-        which_rules -- optionally specify a subset of rules. If None, all are used.
+        which_rules -- optionally specify a subset of rules to include. If None, all are used.
     """
 
     grammar_rules = [r for r in grammar] # all of the rules
