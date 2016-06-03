@@ -1,7 +1,7 @@
 import numpy
 from copy import copy
 from scipy.stats import norm
-from scipy.stats import dirichlet
+from scipy.stats import dirichlet, gamma
 
 from LOTlib import break_ctrlc
 from LOTlib.Miscellaneous import Infinity, attrmem, logit, ilogit, sample1
@@ -38,6 +38,30 @@ class NormalDistribution(Stochastic):
         ret.value = norm.rvs(loc=self.value, scale=self.proposal_sd)
 
         return ret, 0.0 # symmetric
+
+class GammaDistribution(Stochastic):
+
+    def __init__(self, value=None, a=1.0, scale=1.0, proposal_scale=1.0, **kwargs):
+        Stochastic.__init__(self, value=value, **kwargs)
+        self.a = a
+        self.scale = scale
+        self.proposal_scale = proposal_scale
+
+        if value is None:
+            self.set_value(gamma.rvs(a, scale=scale))
+
+    @attrmem('prior')
+    def compute_prior(self):
+        return gamma.logpdf(self.value, self.a, scale=self.scale)
+
+    def propose(self):
+        ret = copy(self)
+        ret.value = gamma.rvs(self.value * self.proposal_scale, scale=1./self.proposal_scale)
+
+        fb = gamma.logpdf(ret.value, self.value * self.proposal_scale, scale=1./self.proposal_scale) -\
+             gamma.logpdf(self.value, ret.value * self.proposal_scale, scale=1./self.proposal_scale)
+
+        return ret, fb
 
 class LogitNormalDistribution(Stochastic):
     """
@@ -111,11 +135,19 @@ class GibbsDirchlet(DirichletDistribution):
 
         # add a tiny bit of smoothing away from 0/1
         ret.value[inx] = (1.0 - DirichletDistribution.SMOOTHING) * ret.value[inx] + DirichletDistribution.SMOOTHING / 2.0
+        v = sum(ret.value)
+        '''
         # and renormalize it, slightly breaking MCMC
         ret.value = ret.value / sum(ret.value)
-
         fb = dirichlet.logpdf(ret.value, self.value * self.proposal_scale) -\
              dirichlet.logpdf(self.value, ret.value * self.proposal_scale)
+
+        '''
+        fb = sum([gamma.logpdf(n, o) for o, n in zip(self.value, ret.value)]) + gamma.logpdf(v, 1) -\
+             sum([gamma.logpdf(o, n) for o, n in zip(self.value, ret.value)]) - gamma.logpdf(1, v)
+
+        # and renormalize it, slightly breaking MCMC
+        ret.value = ret.value / sum(ret.value)
 
         return ret, fb
 
