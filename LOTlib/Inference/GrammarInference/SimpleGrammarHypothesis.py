@@ -46,6 +46,8 @@ class SimpleGrammarHypothesis(Hypothesis):
         for nt in self.nts: # sum over all nonterminals
             priors = priors + np.dot(np.log(self.value[nt].value), self.Counts[nt].T)
 
+        priors = priors - np.log(sum(np.exp(priors)))
+
         pos = 0 # what response are we on?
         likelihood = 0.0
         for g in xrange(self.N_groups): ## TODO: Check offset

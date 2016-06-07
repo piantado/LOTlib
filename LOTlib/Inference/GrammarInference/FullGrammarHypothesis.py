@@ -60,6 +60,8 @@ class FullGrammarHypothesis(Hypothesis):
         priors = np.ones(self.N_hyps) * self.prior_offset #   #h x 1 vector
         for nt in self.nts: # sum over all nonterminals
             priors = priors + np.dot(np.log(self.value['rulep'][nt].value), self.Counts[nt].T) # TODO: Check .T
+
+        priors = priors - np.log(sum(np.exp(priors)))
         priors = priors / pt # include prior temp
 
         pos = 0 # what response are we on?
