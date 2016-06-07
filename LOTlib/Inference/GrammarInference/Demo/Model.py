@@ -5,9 +5,15 @@
 
 from LOTlib.DataAndObjects import FunctionData, Obj
 
-def make_data(n=1, alpha=0.9):
-    return [FunctionData(input=[Obj(shape='square', color='red', size='large')], output=False, alpha=alpha),
-            FunctionData(input=[Obj(shape='triangle', color='green', size='small')], output=True, alpha=alpha)]*n
+def make_data(n=1, alpha=0.9, dataset=['A']):
+    data = []
+    if 'A' in dataset:
+        data.append([FunctionData(input=[Obj(shape='rhombus', color='cinnabar', size='miniature')], output=False, alpha=alpha),
+                FunctionData(input=[Obj(shape='pentagon', color='viridian', size='colossal')], output=True, alpha=alpha)]*n)
+    if 'B' in dataset:
+        data.append([FunctionData(input=[Obj(shape='rhombus', color='cinnabar', size='miniature')], output=False, alpha=alpha),
+                FunctionData(input=[Obj(shape='dodecahedron', color='cerulean', size='intermediate')], output=True, alpha=alpha)]*n)
+    return data
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Grammar
@@ -20,12 +26,15 @@ grammar = SimpleBoolean
 
 # Two predicates for checking x's color and shape
 # Note: per style, functions in the LOT end in _
-grammar.add_rule('PREDICATE', 'is_color_(x, "red")', None, 1.0)
-grammar.add_rule('PREDICATE', 'is_color_(x, "green")', None, 1.0)
-grammar.add_rule('PREDICATE', 'is_shape_(x, "square")', None, 1.0)
-grammar.add_rule('PREDICATE', 'is_shape_(x, "triangle")', None, 1.0)
-grammar.add_rule('PREDICATE', 'is_size_(x, "small")',  None,  1.0)
-grammar.add_rule('PREDICATE', 'is_size_(x, "large")',  None,  1.0)
+grammar.add_rule('PREDICATE', 'is_color_(x, "cinnabar")', None, 1.0)
+grammar.add_rule('PREDICATE', 'is_color_(x, "viridian")', None, 1.0)
+grammar.add_rule('PREDICATE', 'is_color_(x, "cerulean")', None, 1.0)
+grammar.add_rule('PREDICATE', 'is_shape_(x, "rhombus")', None, 1.0)
+grammar.add_rule('PREDICATE', 'is_shape_(x, "pentagon")', None, 1.0)
+grammar.add_rule('PREDICATE', 'is_shape_(x, "dodecahedron")', None, 1.0)
+grammar.add_rule('PREDICATE', 'is_size_(x, "miniature")',  None,  1.0)
+grammar.add_rule('PREDICATE', 'is_size_(x, "intermediate")',  None,  1.0)
+grammar.add_rule('PREDICATE', 'is_size_(x, "colossal")',  None,  1.0)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Hypothesis

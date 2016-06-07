@@ -40,8 +40,8 @@ class FullGrammarHypothesis(Hypothesis):
                       'rulep': { nt: GibbsDirchlet(alpha=np.ones(self.nrules[nt]), proposal_scale=100.) for nt in self.nts },
                       'alpha': BetaDistribution(1,1),
                       'beta':  BetaDistribution(1,1),
-                      'likelihood_temperature':   GammaDistribution(a=1, scale=1, proposal_scale=10.), # TODO: Should be a lognormal or gamma
-                      'prior_temperature': GammaDistribution(a=1, scale=1, proposal_scale=10.)   # TODO: Should be a lognormal or gamma
+                      'likelihood_temperature':   GammaDistribution(a=1, scale=1, proposal_scale=10.),
+                      'prior_temperature': GammaDistribution(a=1, scale=1, proposal_scale=10.)
             }
 
         Hypothesis.__init__(self, value=value) # sets the value
@@ -53,27 +53,27 @@ class FullGrammarHypothesis(Hypothesis):
 
         alpha = self.value['alpha'].value[0]
         beta = self.value['beta'].value[0]
-        llt = abs(self.value['likelihood_temperature'].value)  # TODO: This for now... We should change this to be gamma
-        pt = abs(self.value['prior_temperature'].value)
+        llt = self.value['likelihood_temperature'].value
+        pt = self.value['prior_temperature'].value
 
         # compute each hypothesis' prior, fixed over all data
         priors = np.ones(self.N_hyps) * self.prior_offset #   #h x 1 vector
         for nt in self.nts: # sum over all nonterminals
-            priors = priors + np.dot(np.log(self.value['rulep'][nt].value), self.Counts[nt].T) # TODO: Check .T
+            priors = priors + np.dot(np.log(self.value['rulep'][nt].value), self.Counts[nt].T)
 
         priors = priors - np.log(sum(np.exp(priors)))
         priors = priors / pt # include prior temp
 
         pos = 0 # what response are we on?
         likelihood = 0.0
-        for g in xrange(self.N_groups): ## TODO: Check offset
+        for g in xrange(self.N_groups):
             posteriors =  self.L[g]/llt + priors # posterior score
             posteriors = np.exp(posteriors - logsumexp(posteriors)) # posterior probability
 
             # Now compute the probability of the human data
-            for _ in xrange(1, self.GroupLength[g]):
+            for _ in xrange(self.GroupLength[g]):
                 ps = (1 - alpha) * beta + alpha * np.dot(posteriors, self.ModelResponse[pos])
-                # ps = np.dot(posteriors, self.ModelResponse[pos]) # model probabiltiy of saying yes # TODO: Check matrix multiply
+                # ps = np.dot(posteriors, self.ModelResponse[pos]) # model probabiltiy of saying yes
 
                 likelihood += binom.logpmf(self.Nyes[pos], self.Ntrials[pos], ps)
                 pos = pos + 1

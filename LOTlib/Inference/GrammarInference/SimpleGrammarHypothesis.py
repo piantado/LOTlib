@@ -50,12 +50,12 @@ class SimpleGrammarHypothesis(Hypothesis):
 
         pos = 0 # what response are we on?
         likelihood = 0.0
-        for g in xrange(self.N_groups): ## TODO: Check offset
+        for g in xrange(self.N_groups):
             posteriors =  self.L[g] + priors # posterior score
             posteriors = np.exp(posteriors - logsumexp(posteriors)) # posterior probability
 
             # Now compute the probability of the human data
-            for _ in xrange(1, self.GroupLength[g]):
+            for _ in xrange(self.GroupLength[g]):
                 ps = np.dot(posteriors, self.ModelResponse[pos])
 
                 likelihood += binom.logpmf(self.Nyes[pos], self.Ntrials[pos], ps)
