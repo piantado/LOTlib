@@ -1,7 +1,7 @@
 import numpy
 from copy import copy
 from scipy.stats import norm
-from scipy.stats import dirichlet, gamma
+from scipy.stats import dirichlet, gamma, beta
 
 from LOTlib import break_ctrlc
 from LOTlib.Miscellaneous import Infinity, attrmem, logit, ilogit, sample1
@@ -146,8 +146,20 @@ class GibbsDirchlet(DirichletDistribution):
         fb = sum([gamma.logpdf(n, o) for o, n in zip(self.value, ret.value)]) + gamma.logpdf(v, 1) -\
              sum([gamma.logpdf(o, n) for o, n in zip(self.value, ret.value)]) - gamma.logpdf(1, v)
 
+
         # and renormalize it, slightly breaking MCMC
         ret.value = ret.value / sum(ret.value)
+
+        return ret, fb
+
+class PriorDirichletDistribution(DirichletDistribution):
+    """ propose from the prior (useful for debugging)
+    """
+
+    def propose(self):
+        ret = PriorDirichletDistribution(value = numpy.random.dirichlet(self.alpha), alpha=self.alpha)
+
+        fb = dirichlet.logpdf(ret.value, self.alpha) - dirichlet.logpdf(self.value, self.alpha)
 
         return ret, fb
 
