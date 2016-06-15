@@ -112,6 +112,8 @@ class DirichletDistribution(Stochastic):
     def propose(self):
         ret = copy(self)
 
+        if len(ret.value) == 1: return ret, 0.0 # handle singleton rules
+
         ret.value = numpy.random.dirichlet(self.value * self.proposal_scale)
 
         # add a tiny bit of smoothing away from 0/1
@@ -128,6 +130,8 @@ class GibbsDirchlet(DirichletDistribution):
 
     def propose(self):
         ret = copy(self)
+
+        if len(ret.value) == 1: return ret, 0.0 # handle singleton rules
 
         inx = sample1(range(0,self.alpha.shape[0]))
         ret.value[inx] = numpy.random.beta(self.value[inx]*self.proposal_scale,
@@ -157,6 +161,8 @@ class PriorDirichletDistribution(DirichletDistribution):
     """
 
     def propose(self):
+        if len(self.value) == 1: return PriorDirichletDistribution(value=self.value,alpha=self.value), 0.0 # handle singleton rules
+
         ret = PriorDirichletDistribution(value = numpy.random.dirichlet(self.alpha), alpha=self.alpha)
 
         fb = dirichlet.logpdf(ret.value, self.alpha) - dirichlet.logpdf(self.value, self.alpha)
