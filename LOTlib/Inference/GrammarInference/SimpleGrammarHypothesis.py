@@ -32,7 +32,7 @@ class SimpleGrammarHypothesis(Hypothesis):
         self.N_hyps = Counts[self.nts[0]].shape[0]
 
         if value is None:
-            value = { nt: GibbsDirchlet(alpha=np.ones(self.nrules[nt]), proposal_scale=100.) for nt in self.nts }
+            value = { nt: GibbsDirchlet(alpha=np.ones(self.nrules[nt]), proposal_scale=1000.) for nt in self.nts }
 
         Hypothesis.__init__(self, value=value) # sets the value
 

@@ -37,7 +37,7 @@ class FullGrammarHypothesis(Hypothesis):
 
         if value is None:
             value = {
-                      'rulep': { nt: GibbsDirchlet(alpha=np.ones(self.nrules[nt]), proposal_scale=100.) for nt in self.nts },
+                      'rulep': { nt: GibbsDirchlet(alpha=np.ones(self.nrules[nt]), proposal_scale=1000.) for nt in self.nts },
                       'alpha': BetaDistribution(1,1),
                       'beta':  BetaDistribution(1,1),
                       'likelihood_temperature':   GammaDistribution(a=1, scale=1, proposal_scale=10.),
