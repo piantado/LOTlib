@@ -136,15 +136,9 @@ class GibbsDirchlet(DirichletDistribution):
         # add a tiny bit of smoothing away from 0/1
         ret.value[inx] = (1.0 - DirichletDistribution.SMOOTHING) * ret.value[inx] + DirichletDistribution.SMOOTHING / 2.0
         v = sum(ret.value)
-        '''
-        # and renormalize it, slightly breaking MCMC
-        ret.value = ret.value / sum(ret.value)
-        fb = dirichlet.logpdf(ret.value, self.value * self.proposal_scale) -\
-             dirichlet.logpdf(self.value, ret.value * self.proposal_scale)
 
-        '''
-        fb = sum([gamma.logpdf(n, o) for o, n in zip(self.value, ret.value)]) + gamma.logpdf(v, 1) -\
-             sum([gamma.logpdf(o, n) for o, n in zip(self.value, ret.value)]) - gamma.logpdf(1, v)
+        fb = sum(gamma.logpdf(ret.value, self.value)) + gamma.logpdf(v, 1) -\
+             sum(gamma.logpdf(self.value, ret.value)) - gamma.logpdf(1, v)
 
         # and renormalize it, slightly breaking MCMC
         ret.value = ret.value / sum(ret.value)
