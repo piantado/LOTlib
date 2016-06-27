@@ -22,30 +22,7 @@ for h in hypotheses:
 
 from LOTlib.DataAndObjects import make_all_objects
 
-<<<<<<< HEAD
-objects = make_all_objects(size=['small', 'large'], color=['red', 'green'], shape=['square', 'triangle'])
 
-data = [FunctionData(input=[Obj(shape='square', color='red', size='large')], output=True, alpha=0.9),
-        FunctionData(input=[Obj(shape='triangle', color='red', size='large')], output=False, alpha=0.9)] #make_data()
-
-L = [[h.compute_likelihood(data) for h in hypotheses]]
-
-# We'll use this to simulate the human
-def human(obj):
-    if obj.shape == 'square':
-        return 90
-    else:
-        return 10
-
-NYes = [human(o) for o in objects]
-
-NTrials = [100]*len(objects)
-
-
-Output = numpy.array([ [1 * h(obj) for h in hypotheses] for obj in objects])
-
-GroupLength = [8]
-=======
 objects = make_all_objects(size=['miniature', 'intermediate', 'colossal'],
                            color=['cinnabar', 'viridian', 'cerulean'],
                            shape=['rhombus', 'pentagon', 'dodecahedron'])
@@ -81,7 +58,6 @@ with open('Viz/Model_' + MODEL + '.csv', 'w') as f:
     f.writelines('\n'.join([','.join([str(r) for r in h]) for h in Output.T]))
 
 GroupLength = [len(objects) for _ in data]
->>>>>>> 85ffd1f8ccad6cb647a59216d2a776faefbc1d42
 
 print "# Loaded %s observed rows" % len(NYes)
 print "# Organized %s groups" % len(GroupLength)
@@ -106,7 +82,6 @@ from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
 h0 = SimpleGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
 # h0 = FullGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
-
 
 writ = []
 mhs = MHSampler(h0, [], 100, skip=500)
