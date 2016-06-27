@@ -13,22 +13,25 @@ print "# Loaded hypotheses: ", len(hypotheses)
 '''
 
 # For now, we'll just sample from the prior
-hypotheses = set([RationalRulesLOTHypothesis(grammar=grammar, maxnodes=100) for _ in xrange(10000)])
+hypotheses = set([RationalRulesLOTHypothesis(grammar=grammar, maxnodes=100) for _ in xrange(20)])
+for h in hypotheses:
+    print h
 
 from LOTlib.DataAndObjects import make_all_objects
 
 objects = make_all_objects(size=['small', 'large'], color=['red', 'green'], shape=['square', 'triangle'])
 
-data = make_data()
+data = [FunctionData(input=[Obj(shape='square', color='red', size='large')], output=True, alpha=0.9),
+        FunctionData(input=[Obj(shape='triangle', color='red', size='large')], output=False, alpha=0.9)] #make_data()
 
 L = [[h.compute_likelihood(data) for h in hypotheses]]
 
 # We'll use this to simulate the human
 def human(obj):
     if obj.shape == 'square':
-        return 100
+        return 90
     else:
-        return 1
+        return 10
 
 NYes = [human(o) for o in objects]
 
@@ -57,8 +60,8 @@ from LOTlib.Inference.GrammarInference.FullGrammarHypothesis import FullGrammarH
 
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
-#h0 = SimpleGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
-h0 = FullGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
+h0 = SimpleGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
+# h0 = FullGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
 
 mhs = MHSampler(h0, [], 100000, skip=500)
 for s, h in break_ctrlc(enumerate(mhs)):

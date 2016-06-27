@@ -13,10 +13,16 @@ def make_data(n=1, alpha=0.9):
 # Grammar
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from LOTlib.DefaultGrammars import SimpleBoolean
+# from LOTlib.DefaultGrammars import SimpleBoolean
 
 # DNF defaultly includes the logical connectives so we need to add predicates to it.
-grammar = SimpleBoolean
+# grammar = SimpleBoolean
+
+from LOTlib.Grammar import Grammar
+
+grammar = Grammar()
+
+grammar.add_rule('START', '', ['PREDICATE'], 1.0)
 
 # Two predicates for checking x's color and shape
 # Note: per style, functions in the LOT end in _

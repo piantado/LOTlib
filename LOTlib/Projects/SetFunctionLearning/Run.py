@@ -20,7 +20,8 @@ numpy.set_printoptions(threshold=numpy.inf)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # map each concept to a hypothesis
-with open('hypotheses/hypotheses-1.pkl', 'r') as f:
+with open('hypotheses.pkl', 'r') as f:
+# with open('hypotheses/hypotheses-1.pkl', 'r') as f:
     concept2hypotheses = pickle.load(f)
 
 hypotheses = set()
@@ -119,19 +120,48 @@ print "# Created L, NYes, NTrials, and HOutput of size %s" % len(L)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run inference
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# from LOTlib import break_ctrlc
+#
+# from LOTlib.Inference.GrammarInference.FullGrammarHypothesis import FullGrammarHypothesis
+#
+# from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
+#
+# h0 = FullGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
+# mhs = MHSampler(h0, [], 100000, skip=0)
+#
+# for s, h in break_ctrlc(enumerate(mhs)):
+#
+#     print mhs.acceptance_ratio(), h.prior, h.likelihood,\
+#           h.value['alpha'].value[0], h.value['beta'].value[0],\
+#           h.value['prior_temperature'].value, h.value['likelihood_temperature'].value,\
+#           'RULES',\
+#           ' '.join([str(x) for x in h.value['rulep']['BOOL'].value ]),\
+#           ' '.join([str(x) for x in h.value['rulep']['PREDICATE'].value ]),\
+#           ' '.join([str(x) for x in h.value['rulep']['START'].value ]),\
+#           ' '.join([str(x) for x in h.value['rulep']['SET'].value ])
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Run gradient ascent
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 from LOTlib import break_ctrlc
 
 from LOTlib.Inference.GrammarInference.FullGrammarHypothesis import FullGrammarHypothesis
 
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
+
+from LOTlib.Inference.GrammarInference.GradientGrammarInference import GrammarGradient
+
 h0 = FullGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
-mhs = MHSampler(h0, [], 100000, skip=0)
 
-for s, h in break_ctrlc(enumerate(mhs)):
+for h in break_ctrlc(GrammarGradient(h0,[])):
 
-    print mhs.acceptance_ratio(), h.prior, h.likelihood,\
-          h.value['alpha'].value[0], h.value['beta'].value[0], \
-        h.value['prior_temperature'].value, h.value['likelihood_temperature'].value, \
-        ' '.join([str(x) for x in h.value['rulep']['BOOL'].value ]),\
-          ' '.join([str(x) for x in h.value['rulep']['PREDICATE'].value ])
+    print 0.0, h.prior, h.likelihood,\
+          h.value['alpha'].value[0], h.value['beta'].value[0],\
+          h.value['prior_temperature'].value, h.value['likelihood_temperature'].value,\
+          'RULES',\
+          ' '.join([str(x) for x in h.value['rulep']['BOOL'].value ]),\
+          ' '.join([str(x) for x in h.value['rulep']['PREDICATE'].value ]),\
+          ' '.join([str(x) for x in h.value['rulep']['START'].value ]),\
+          ' '.join([str(x) for x in h.value['rulep']['SET'].value ])

@@ -2,9 +2,6 @@ from LOTlib.Eval import primitive
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Combinators -- all curried
-# NOTE: Evaluation.CombinatoryLogic also uses combinators, but
-#       implements a direct evaluator rather than these lambdas
-#       which will get evaled in python
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 @primitive
@@ -40,3 +37,10 @@ def S_(x):
 
     """
     return lambda y: lambda z: x(z)(y(z))
+
+@primitive
+def Y_(x):
+    """
+    Y-combinator (for recursion)
+    """
+    return x(Y_(x))

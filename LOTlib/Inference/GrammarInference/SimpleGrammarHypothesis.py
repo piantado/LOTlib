@@ -33,7 +33,7 @@ class SimpleGrammarHypothesis(Hypothesis):
 
         if value is None:
             value = { nt: GibbsDirchlet(alpha=np.ones(self.nrules[nt]), proposal_scale=100.) for nt in self.nts }
-
+            # value = { nt: PriorDirichletDistribution(alpha=np.ones(self.nrules[nt])) for nt in self.nts }
         Hypothesis.__init__(self, value=value) # sets the value
 
     @attrmem('likelihood')
