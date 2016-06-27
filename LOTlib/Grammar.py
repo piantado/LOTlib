@@ -1,4 +1,5 @@
 # *- coding: utf-8 -*-
+
 try: import numpy as np
 except ImportError: import numpypy as np
 
@@ -6,7 +7,6 @@ from copy import copy
 from collections import defaultdict
 import itertools
 
-from LOTlib import break_ctrlc
 from LOTlib.Miscellaneous import *
 from LOTlib.GrammarRule import GrammarRule, BVAddGrammarRule
 from LOTlib.BVRuleContextManager import BVRuleContextManager

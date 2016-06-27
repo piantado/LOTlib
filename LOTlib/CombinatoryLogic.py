@@ -66,9 +66,9 @@ grammar.add_rule('CLEXPR', '"K"', None, 1.0)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 if __name__ == "__main__":
-    from LOTlib import SIG_INTERRUPTED
+    import LOTlib
 
-    while not SIG_INTERRUPTED:
+    while not LOTlib.SIG_INTERRUPTED:
         x = eval(str(grammar.generate()))
         print x
         try:
