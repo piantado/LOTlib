@@ -32,8 +32,8 @@ class SimpleGrammarHypothesis(Hypothesis):
         self.N_hyps = Counts[self.nts[0]].shape[0]
 
         if value is None:
-            value = { nt: GibbsDirchlet(alpha=np.ones(self.nrules[nt]), proposal_scale=100.) for nt in self.nts }
-            # value = { nt: PriorDirichletDistribution(alpha=np.ones(self.nrules[nt])) for nt in self.nts }
+            value = { nt: GibbsDirchlet(alpha=np.ones(self.nrules[nt]), proposal_scale=1000.) for nt in self.nts }
+
         Hypothesis.__init__(self, value=value) # sets the value
 
     @attrmem('likelihood')
@@ -46,14 +46,16 @@ class SimpleGrammarHypothesis(Hypothesis):
         for nt in self.nts: # sum over all nonterminals
             priors = priors + np.dot(np.log(self.value[nt].value), self.Counts[nt].T)
 
+        priors = priors - np.log(sum(np.exp(priors)))
+
         pos = 0 # what response are we on?
         likelihood = 0.0
-        for g in xrange(self.N_groups): ## TODO: Check offset
+        for g in xrange(self.N_groups):
             posteriors =  self.L[g] + priors # posterior score
             posteriors = np.exp(posteriors - logsumexp(posteriors)) # posterior probability
 
             # Now compute the probability of the human data
-            for _ in xrange(1, self.GroupLength[g]):
+            for _ in xrange(self.GroupLength[g]):
                 ps = np.dot(posteriors, self.ModelResponse[pos])
 
                 likelihood += binom.logpmf(self.Nyes[pos], self.Ntrials[pos], ps)
