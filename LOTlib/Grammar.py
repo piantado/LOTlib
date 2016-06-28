@@ -12,6 +12,12 @@ from LOTlib.GrammarRule import GrammarRule, BVAddGrammarRule
 from LOTlib.BVRuleContextManager import BVRuleContextManager
 from LOTlib.FunctionNode import FunctionNode
 
+
+# when we pack, we are allowed to use these characters, in this order
+import string
+pack_string = '0123456789'+string.ascii_lowercase+string.ascii_uppercase
+
+
 class Grammar:
     """
     A PCFG-ish class that can handle rules that introduce bound variables
@@ -36,6 +42,14 @@ class Grammar:
         The possible rules for any nonterminal
         """
         return self.rules[nt]
+
+    def get_all_rules(self):
+        """
+        A list of all rules
+        """
+        for nt in self.nonterminals():
+            for r in self.get_rules(nt):
+                yield r
 
     def is_nonterminal(self, x):
         """A nonterminal is just something that is a key for self.rules"""
@@ -150,9 +164,7 @@ class Grammar:
 
         # Dispatch different kinds of generation
         if isinstance(x,list):            
-            # If we get a list, just map along it to generate.
-            # We don't count lists as depth--only FunctionNodes.
-            return map(lambda xi: self.generate(x=xi), x)
+            return map(lambda xi: self.generate(x=xi), x)             # If we get a list, just map along it to generate.
         elif self.is_nonterminal(x):
 
             # sample a grammar rule
@@ -323,3 +335,62 @@ class Grammar:
             for r in self.get_rules(nt):
                 r.p = r.p / z
 
+
+    # --------------------------------------------------------------------------------------------------------
+    # Packing and unpacking trees
+    # --------------------------------------------------------------------------------------------------------
+
+    def pack_ascii(self, t):
+        """
+        Pack a tree into a simple ascii string, using grammar.
+        Not particularly optimized, but simple
+        """
+        s = ''
+        for x in t.iterate_subnodes(self):
+            which_rule = None
+            for idx, r in enumerate(self.get_rules(x.returntype)):
+                if x.get_rule_signature() == r.get_rule_signature():
+                    assert which_rule == None, "*** Error, multiple matching rules "
+                    which_rule = idx
+                    # break # could break here but then we won't check for multiple matches
+            s = s + pack_string[which_rule]
+        return s
+
+
+    def unpack_ascii(self, s):
+        # we must convert to list(s) so that it will support pop, delete
+        s = list(s)
+        return self.unpack_ascii_rec(s, self.start)
+
+
+    def unpack_ascii_rec(self, s, x):
+        """
+        Unpack a string into a tree. Follows the format of Grammar.generate, but indexes
+        the choices with s
+        """
+        assert x is not None  # should have been given by unpack_ascii
+
+        # Dispatch different kinds of generation
+        if isinstance(x, list):
+            return map(lambda xi: self.unpack_ascii_rec(s, x=xi), x)
+        elif self.is_nonterminal(x):
+            rules = self.get_rules(x)
+
+            # instead of sampling a rule, get it from the string
+            i = pack_string.index(s[0])
+            del s[0]  # remove (works since its a list)
+            r = rules[i]
+
+            # Make a stub for this functionNode
+            fn = r.make_FunctionNodeStub(self, None)
+            with BVRuleContextManager(self, fn, recurse_up=False):
+                if fn.args is not None:
+                    fn.args = self.unpack_ascii_rec(s, fn.args)
+
+                for a in fn.argFunctionNodes():
+                    a.parent = fn
+
+            return fn
+
+        else:  # must be a terminal
+            return x
