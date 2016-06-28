@@ -29,7 +29,7 @@ class StochasticFunctionLikelihood(object):
 
     def set_value(self, *args, **kwargs):
         ret = super(type(self), self).set_value(self, *args, **kwargs)
-        self.ll_counts = None # We must recompute these
+        ret.ll_counts = None # We must recompute these
         return ret
 
     def compute_single_likelihood(self, datum, llcounts=None, nsamples=512, sm=0.1):
