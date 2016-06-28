@@ -338,6 +338,8 @@ class Grammar:
 
     # --------------------------------------------------------------------------------------------------------
     # Packing and unpacking trees
+    # This is useful for storing trees in a more concise, ascii format. Much smaller size than
+    # pickling hypotheses
     # --------------------------------------------------------------------------------------------------------
 
     def pack_ascii(self, t):

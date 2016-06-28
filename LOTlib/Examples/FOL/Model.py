@@ -63,7 +63,15 @@ if __name__ == "__main__":
 
     standard_sample(make_hypothesis, make_data, save_top=False)
 
-
+    #
+    # from LOTlib import break_ctrlc
+    # from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
+    #
+    # h0 = make_hypothesis()
+    # data = make_data(10)
+    #
+    # for h in break_ctrlc(MHSampler(h0, data, skip=100)):
+    #     print h.posterior_score, grammar.pack_ascii(h.value), h
 
 
 
