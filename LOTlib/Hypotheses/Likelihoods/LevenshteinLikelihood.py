@@ -1,9 +1,19 @@
 from StochasticFunctionLikelihood import StochasticFunctionLikelihood
 from LOTlib.Miscellaneous import logsumexp
+from LOTlib.Hypotheses.Hypothesis import Hypothesis
 from Levenshtein import distance
 from math import log
 
-class LevenshteinLikelihood(StochasticFunctionLikelihood):
+class LevenshteinLikelihood(Hypothesis):
+    """
+    A (pseudo)likelihood function that is e^(-string edit distance)
+    """
+
+    def compute_single_likelihood(self, datum, distance_factor=1.0):
+        return -distance_factor*distance(datum.output, self(*datum.input))
+
+
+class StochasticLevenshteinLikelihood(StochasticFunctionLikelihood):
     """
     A levenshtein distance metric on likelihoods, where the output of a program is corrupted by
     levenshtein noise. This allows for a smoother space of hypotheses over strings.
@@ -12,10 +22,8 @@ class LevenshteinLikelihood(StochasticFunctionLikelihood):
     to compute_likelihood to get it here.
     """
 
-    def compute_single_likelihood(self, datum, distance_factor=100.0):
+    def compute_single_likelihood(self, datum, llcounts, distance_factor=100.0):
         assert isinstance(datum.output, dict), "Data supplied must be a dict (function outputs to counts)"
-
-        llcounts = self.make_ll_counts(datum.input)
 
         lo = sum(llcounts.values()) # normalizing constant
 
