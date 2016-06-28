@@ -1,4 +1,4 @@
-from StochasticFunctionLikelihood import StochasticFunctionLikelihood
+from StochasticLikelihood import StochasticLikelihood
 from LOTlib.Miscellaneous import logsumexp
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
 from Levenshtein import distance
@@ -13,7 +13,7 @@ class LevenshteinLikelihood(Hypothesis):
         return -distance_factor*distance(datum.output, self(*datum.input))
 
 
-class StochasticLevenshteinLikelihood(StochasticFunctionLikelihood):
+class StochasticLevenshteinLikelihood(StochasticLikelihood):
     """
     A levenshtein distance metric on likelihoods, where the output of a program is corrupted by
     levenshtein noise. This allows for a smoother space of hypotheses over strings.
