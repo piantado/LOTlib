@@ -6,10 +6,11 @@
     NOTE: A very subtle error can occur if exceptions (like TooBigException) are caught in __call__, then ll_counts may never get set.
 """
 
+from LOTlib.Hypotheses.Hypothesis import Hypothesis
 from LOTlib.Miscellaneous import attrmem, nicelog, Infinity
 from collections import Counter
 
-class StochasticLikelihood(object):
+class StochasticLikelihood(Hypothesis):
 
     @attrmem('ll_counts')
     def make_ll_counts(self, input, nsamples=512):
@@ -18,20 +19,17 @@ class StochasticLikelihood(object):
             returning a dictionary of how often each outcome occurred
         """
 
-        if nsamples is None:
-            nsamples = self.nsamples
-
         llcounts = Counter()
 
-        for i in xrange(nsamples):
+        for _ in xrange(nsamples):
             llcounts[self(*input)] += 1
 
         return llcounts
 
-    def set_value(self, *args, **kwargs):
-        ret = super(type(self), self).set_value(self, *args, **kwargs)
-        ret.ll_counts = None # We must recompute these
-        return ret
+    # def set_value(self, *args, **kwargs):
+    #     ret = super(StochasticLikelihood, self).set_value(self, *args, **kwargs)
+    #     ret.ll_counts = None # We must recompute these
+    #     return ret
 
     def compute_single_likelihood(self, datum, llcounts, sm=0.1):
         """
