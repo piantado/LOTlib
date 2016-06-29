@@ -68,10 +68,10 @@ grammar.add_rule('LAMBDATHUNK', 'lambda', ['EXPR'], 1., bv_type=None, bv_args=No
 # Hypothesis
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from LOTlib.Hypotheses.Likelihoods.StochasticFunctionLikelihood import StochasticFunctionLikelihood
+from LOTlib.Hypotheses.Likelihoods.StochasticLikelihood import StochasticLikelihood
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
-class MyHypothesis(StochasticFunctionLikelihood, LOTHypothesis):
+class MyHypothesis(StochasticLikelihood, LOTHypothesis):
     def __init__(self, grammar=None, **kwargs):
         LOTHypothesis.__init__(self, grammar, display='lambda : %s', **kwargs)
 
