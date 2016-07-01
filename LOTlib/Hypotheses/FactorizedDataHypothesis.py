@@ -7,14 +7,15 @@ import random
 from copy import deepcopy
 
 from LOTlib.Hypotheses.Lexicon.SimpleLexicon import SimpleLexicon
-from LOTlib.Hypotheses.Likelihoods.StochasticFunctionLikelihood import StochasticFunctionLikelihood
+from LOTlib.Hypotheses.Hypothesis import Hypothesis
+from LOTlib.Hypotheses.Likelihoods.StochasticLikelihood import StochasticLikelihood
 from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis, RecursionDepthException
-from LOTlib.Hypotheses.Proposers.RegenerationProposer import RegenerationProposer
-from LOTlib.Hypotheses.Proposers.InsertDeleteProposer import InsertDeleteProposer
-from LOTlib.Evaluation.EvaluationException import TooBigException
+from LOTlib.Hypotheses.Proposers.Regeneration import regeneration_proposal
+from LOTlib.Hypotheses.Proposers.InsertDelete import insert_delete_proposal
+from LOTlib.Eval import TooBigException
 
 
-class InnerHypothesis(StochasticFunctionLikelihood, RecursiveLOTHypothesis, RegenerationProposer, InsertDeleteProposer):
+class InnerHypothesis(StochasticLikelihood, RecursiveLOTHypothesis):
     """
     The type of each function F.
     """
@@ -29,9 +30,14 @@ class InnerHypothesis(StochasticFunctionLikelihood, RecursiveLOTHypothesis, Rege
 
     def propose(self):
         if random.random() < 0.5:
-            return RegenerationProposer.propose(self)
+            ret = regeneration_proposal(self.grammar, self.value)
+
         else:
-            return InsertDeleteProposer.propose(self)
+            ret = insert_delete_proposal(self.grammar, self.value)
+
+        p = Hypothesis.__copy__(self, value=ret[0])
+        ret[0] = p
+        return ret
 
 
 class FactorizedDataHypothesis(SimpleLexicon):
@@ -118,7 +124,10 @@ class FactorizedLambdaHypothesis(SimpleLexicon):
                     args.append(argi)
 
                 # and add a rule for the n-ary recursion
-                nthgrammar.add_rule('LIST', 'recurse_', ['FUNCTION']*(w), 1.)
+                if w > 0:
+                    nthgrammar.add_rule('LIST', 'recurse_', ['FUNCTION']*(w), 1.)
+                else:
+                    nthgrammar.add_rule('LIST', 'recurse_', 1.)
                 # we wrap the content with lambda to make it callable for next recursion level
                 nthgrammar.add_rule('FUNCTION', 'lambda', ['LIST'], 1.)
                 nthgrammar.add_rule('LIST', '(%s)()', ['FUNCTION'], 1.)
@@ -132,6 +141,12 @@ class FactorizedLambdaHypothesis(SimpleLexicon):
         for w in xrange(self.N):
             # pass the callable version of this hypothesis to next one
             f = self.get_word(w); arg = deepcopy(theargs)
+
+            # TODO print lambda
+#            print w
+#            print f
+#            print arg
+
             v = lambda f=f, arg=arg: self.try_run(f, arg)
             theargs.append(v)
             # print "V=", v, theargs

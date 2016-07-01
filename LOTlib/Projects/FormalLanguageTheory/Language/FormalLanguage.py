@@ -44,17 +44,24 @@ class FormalLanguage(object):
         finite: limits the max_length of data
         avg: sample for multiple times and average to reduce noise, note the cnt can have fraction
         """
+        out = FunctionData(input=[''], output=None)
+        out.input = ''
+
         if n == 0:
-            return [FunctionData(input=[''], output=Counter())]
+            out.output = Counter()
+            return [out]
 
         if avg:
             cnt = Counter(self.sample_data(int(n*512)))
             n = float(512)
             for key in cnt.keys():
                 cnt[key] /= n
-            return [FunctionData(input=[''], output=cnt)]
 
-        return [FunctionData(input=[''], output=Counter(self.sample_data(n)))]
+            out.output = cnt
+            return [out]
+        
+        out.output = Counter(self.sample_data(n))
+        return [out]
 
     def estimate_precision_and_recall(self, h, data, truncate=True):
         """

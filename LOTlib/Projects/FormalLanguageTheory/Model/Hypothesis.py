@@ -1,16 +1,16 @@
 from LOTlib.Miscellaneous import logsumexp
 from Levenshtein import distance
 from math import log
-from LOTlib.Hypotheses.Likelihoods.StochasticFunctionLikelihood import StochasticFunctionLikelihood
+from LOTlib.Hypotheses.Likelihoods.StochasticLikelihood import StochasticLikelihood
 from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis
 from LOTlib.Eval import RecursionDepthException
 from LOTlib.Hypotheses.FactorizedDataHypothesis import FactorizedLambdaHypothesis, FactorizedDataHypothesis
 from LOTlib.Hypotheses.FactorizedDataHypothesis import InnerHypothesis
-from LOTlib.Examples.FormalLanguageTheory.Model.Grammar import a_grammar, eng_grammar # passed in as kwargs
+from LOTlib.Projects.FormalLanguageTheory.Model.Grammar import a_grammar, eng_grammar # passed in as kwargs
 from LOTlib.Miscellaneous import q
 
 
-class FormalLanguageHypothesis(StochasticFunctionLikelihood, RecursiveLOTHypothesis):
+class FormalLanguageHypothesis(StochasticLikelihood, RecursiveLOTHypothesis):
     def __init__(self, grammar=None, **kwargs):
         RecursiveLOTHypothesis.__init__(self, grammar, args=[], recurse_bound=20, maxnodes=100, **kwargs)
 
@@ -21,7 +21,7 @@ class FormalLanguageHypothesis(StochasticFunctionLikelihood, RecursiveLOTHypothe
             return None
 
 
-class AnBnCnHypothesis(StochasticFunctionLikelihood, FactorizedDataHypothesis):
+class AnBnCnHypothesis(StochasticLikelihood, FactorizedDataHypothesis):
     """
     A particular instantiation of FactorizedDataHypothesis, with a likelihood function based on
     levenshtein distance (with small noise rate -- corresponding to -100*distance)
@@ -50,12 +50,13 @@ class AnBnCnHypothesis(StochasticFunctionLikelihood, FactorizedDataHypothesis):
         return ll
 
 
-class SimpleEnglishHypothesis(StochasticFunctionLikelihood, FactorizedLambdaHypothesis):
+class SimpleEnglishHypothesis(StochasticLikelihood, FactorizedLambdaHypothesis):
 
     def __init__(self, **kwargs):
         if 'bound' in kwargs:
             self.recurse_bound = kwargs.pop('bound')
         self.maxnodes = 125
+        self.fixed_ll_counts = None
         FactorizedLambdaHypothesis.__init__(self, recurse_bound=self.recurse_bound, maxnodes=self.maxnodes, **kwargs)
 
     def make_hypothesis(self, **kwargs):
@@ -64,7 +65,7 @@ class SimpleEnglishHypothesis(StochasticFunctionLikelihood, FactorizedLambdaHypo
     def compute_single_likelihood(self, datum):
         assert isinstance(datum.output, dict), "Data supplied must be a dict (function outputs to counts)"
 
-        llcounts = self.make_ll_counts(datum.input)
+        llcounts = self.make_ll_counts(datum.input) if self.fixed_ll_counts is None else self.fixed_ll_counts
 
         lo = sum(llcounts.values())
 

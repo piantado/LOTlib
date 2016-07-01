@@ -23,7 +23,7 @@ class RecursiveLOTHypothesis(LOTHypothesis):
         self.recursive_depth_bound = recurse_bound # how deep can we recurse?
         self.recursive_call_depth = 0 # how far down have we recursed?
 
-        LOTHypothesis.__init__(self, grammar, display=display, **kwargs)
+        LOTHypothesis.__init__(self, grammar, display=display)
 
     def recursive_call(self, *args):
         """

@@ -32,7 +32,7 @@ def run(mk_hypothesis, lang, size):
                            lambda: lang.sample_data_as_FuncData(size),
                            N=options.TOP_COUNT,
                            steps=options.STEPS,
-                           show=True, skip=200, save_top=None)
+                           show=True, show_skip=200, save_top=None)
 
 
 def simple_mpi_map(run, args):
