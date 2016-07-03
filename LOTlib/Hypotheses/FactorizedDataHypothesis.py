@@ -19,8 +19,8 @@ class InnerHypothesis(StochasticLikelihood, RecursiveLOTHypothesis):
     """
     The type of each function F.
     """
-    def __init__(self, grammar=None, **kwargs):
-        RecursiveLOTHypothesis.__init__(self, grammar=grammar, **kwargs)
+    def __init__(self, grammar=None, display="lambda recurse_: %s", **kwargs):
+        RecursiveLOTHypothesis.__init__(self, grammar=grammar, display=display, **kwargs)
 
     def __call__(self, *args):
         try:
@@ -124,15 +124,12 @@ class FactorizedLambdaHypothesis(SimpleLexicon):
                     args.append(argi)
 
                 # and add a rule for the n-ary recursion
-                if w > 0:
-                    nthgrammar.add_rule('LIST', 'recurse_', ['FUNCTION']*(w), 1.)
-                else:
-                    nthgrammar.add_rule('LIST', 'recurse_', 1.)
+                nthgrammar.add_rule('LIST', 'recurse_', ['FUNCTION']*(w), 1.)
                 # we wrap the content with lambda to make it callable for next recursion level
                 nthgrammar.add_rule('FUNCTION', 'lambda', ['LIST'], 1.)
                 nthgrammar.add_rule('LIST', '(%s)()', ['FUNCTION'], 1.)
 
-                self.set_word(w, self.make_hypothesis(grammar=nthgrammar, args=args))
+                self.set_word(w, self.make_hypothesis(grammar=nthgrammar))
 
     def __call__(self):
         # The call here must take no arguments. If this changes, alter x%si above
