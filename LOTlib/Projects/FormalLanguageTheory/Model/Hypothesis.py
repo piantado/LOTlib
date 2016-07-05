@@ -7,7 +7,7 @@ from LOTlib.Eval import RecursionDepthException
 from LOTlib.Hypotheses.FactorizedDataHypothesis import FactorizedLambdaHypothesis, FactorizedDataHypothesis
 from LOTlib.Hypotheses.FactorizedDataHypothesis import InnerHypothesis
 from LOTlib.Projects.FormalLanguageTheory.Model.Grammar import a_grammar, eng_grammar # passed in as kwargs
-from LOTlib.Miscellaneous import q
+from LOTlib.Miscellaneous import q, Infinity, attrmem
 
 
 class FormalLanguageHypothesis(StochasticLikelihood, RecursiveLOTHypothesis):
@@ -61,6 +61,15 @@ class SimpleEnglishHypothesis(StochasticLikelihood, FactorizedLambdaHypothesis):
 
     def make_hypothesis(self, **kwargs):
         return InnerHypothesis(recurse_bound=self.recurse_bound, maxnodes=self.maxnodes, **kwargs)
+
+    @attrmem('likelihood')
+    def compute_likelihood(self, data, shortcut=-Infinity, nsamples=512, **kwargs):
+
+        ll =0.0
+        for datum in data:
+            ll += self.compute_single_likelihood(datum) / self.likelihood_temperature
+
+        return ll
 
     def compute_single_likelihood(self, datum):
         assert isinstance(datum.output, dict), "Data supplied must be a dict (function outputs to counts)"
