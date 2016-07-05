@@ -7,14 +7,17 @@ import random
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def make_data(size=100):
+    mydata=lotsa(50,100)
     return [FunctionData(input=[],
                          #output={'g a k': size, 's a f': size, 'n a m':size, 'h a ng':size})]
                          #output={'f e ng': size, 's e ng': size, 's e k':size, 'h e ng':size})]
-                         output=lotsa(100,size))]
+                         #output=mydata)]
+                         output={'b i m': size, 'b o p': size})]
 
 
 
 #can make output dictionaries of the stimuli
+
 def generate():
     unrestricted = ['k', 'g', 'm', 'n']
     onsets = ['f', 'h']
@@ -65,7 +68,7 @@ grammar.add_rule('SET', '"%s"', ['STRING'], 1.0)
 grammar.add_rule('STRING', '%s%s', ['TERMINAL', 'STRING'], 1.0)
 grammar.add_rule('STRING', '%s', ['TERMINAL'], 1.0)
 
-grammar.add_rule('TERMINAL', 'g', None, TERMINAL_WEIGHT)
+'''grammar.add_rule('TERMINAL', 'g', None, TERMINAL_WEIGHT)
 grammar.add_rule('TERMINAL', 'e', None, TERMINAL_WEIGHT)
 grammar.add_rule('TERMINAL', 'k', None, TERMINAL_WEIGHT)
 grammar.add_rule('TERMINAL', 's', None, TERMINAL_WEIGHT)
@@ -73,7 +76,14 @@ grammar.add_rule('TERMINAL', 'f', None, TERMINAL_WEIGHT)
 grammar.add_rule('TERMINAL', 'n', None, TERMINAL_WEIGHT)
 grammar.add_rule('TERMINAL', 'm', None, TERMINAL_WEIGHT)
 grammar.add_rule('TERMINAL', 'h', None, TERMINAL_WEIGHT)
-grammar.add_rule('TERMINAL', 'N', None, TERMINAL_WEIGHT)
+grammar.add_rule('TERMINAL', 'N', None, TERMINAL_WEIGHT)'''
+
+grammar.add_rule('TERMINAL', 'b', None, TERMINAL_WEIGHT)
+grammar.add_rule('TERMINAL', 'm', None, TERMINAL_WEIGHT)
+grammar.add_rule('TERMINAL', 'p', None, TERMINAL_WEIGHT)
+grammar.add_rule('TERMINAL', 'i', None, TERMINAL_WEIGHT)
+grammar.add_rule('TERMINAL', 'o', None, TERMINAL_WEIGHT)
+
 
 
 
@@ -125,7 +135,9 @@ class MyHypothesis(StochasticFunctionLikelihood, LOTHypothesis):
 def make_hypothesis():
     return MyHypothesis(grammar)
 
-
+def runme(x):
+    print "Start: " + str(x)
+    return standard_sample(make_hypothesis, make_data, show=False, save_top="top.pkl", steps=10000)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Main
@@ -135,5 +147,15 @@ if __name__ == "__main__":
 
     from LOTlib.Inference.Samplers.StandardSample import standard_sample
 
-    standard_sample(make_hypothesis, make_data, show_skip=9, save_top=False)
+    standard_sample(make_hypothesis, make_data, show_skip=9, save_top="top.pkl")
+    '''from LOTlib.MPI import MPI_map
+    args=[[x] for x in range(8)]
+    myhyp=set()
+
+    for top in MPI_map(runme, args):
+        myhyp.update(top)
+
+    import pickle
+    pickle.dump(myhyp, open("topsy.pkl","wb"))'''
+
 
