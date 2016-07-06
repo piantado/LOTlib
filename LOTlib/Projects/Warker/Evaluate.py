@@ -23,7 +23,7 @@ for h in space:
 def make_counts(hypothesis, n=50):
      counts={}
      for _ in xrange(n):
-         val = hypothes
+         val = hypothesis()
          if val not in counts:
             counts.update({val:1})
          else:
