@@ -7,7 +7,7 @@ import random
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def make_data(size=100):
-    mydata=lotsa(50,100)
+    #mydata=lotsa(50,100)
     return [FunctionData(input=[],
                          #output={'g a k': size, 's a f': size, 'n a m':size, 'h a ng':size})]
                          #output={'f e ng': size, 's e ng': size, 's e k':size, 'h e ng':size})]
@@ -148,6 +148,8 @@ if __name__ == "__main__":
     from LOTlib.Inference.Samplers.StandardSample import standard_sample
 
     standard_sample(make_hypothesis, make_data, show_skip=9, save_top="top.pkl")
+
+    #for running parallel
     '''from LOTlib.MPI import MPI_map
     args=[[x] for x in range(8)]
     myhyp=set()
@@ -156,6 +158,6 @@ if __name__ == "__main__":
         myhyp.update(top)
 
     import pickle
-    pickle.dump(myhyp, open("topsy.pkl","wb"))'''
+    pickle.dump(myhyp, open("topsybop.pkl", "wb"))'''
 
 
