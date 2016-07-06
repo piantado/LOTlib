@@ -128,8 +128,13 @@ class FactorizedLambdaHypothesis(SimpleLexicon):
                 # we wrap the content with lambda to make it callable for next recursion level
                 nthgrammar.add_rule('FUNCTION', 'lambda', ['LIST'], 1.)
                 nthgrammar.add_rule('LIST', '(%s)()', ['FUNCTION'], 1.)
+                
+                arg_str = "lambda recurse_"
+                for argi in args:
+                    arg_str = arg_str + ", " + argi
+                arg_str = arg_str + ": %s"
 
-                self.set_word(w, self.make_hypothesis(grammar=nthgrammar))
+                self.set_word(w, self.make_hypothesis(grammar=nthgrammar, display=arg_str))
 
     def __call__(self):
         # The call here must take no arguments. If this changes, alter x%si above

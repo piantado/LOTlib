@@ -51,7 +51,7 @@ if __name__ == "__main__":
             mpiexec -n 12 python my_search_stp.py --language=AnB2n --finite=30 --N=1 --terminal=b --bound=15
             mpiexec -n 12 python my_search_stp.py --language=AnBnCn --finite=18 --N=3 --terminal=bc --bound=5
             mpiexec -n 12 python my_search_stp.py --language=Dyck --finite=8 --N=2 --terminal=b --bound=7 --steps=100000
-            mpiexec -n 12 python my_search_stp.py --language=SimpleEnglish --finite=8 --N=3 --bound=5 --steps=100000
+            mpiexec -n 12 python my_search_stp.py --language=SimpleEnglish --finite=1000 --N=3 --bound=5 --steps=10000
     """
     # ========================================================================================================
     # Process command line arguments /
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
     if rank == 0: display_option_summary(options); fff()
 
-    DATA_RANGE = np.arange(0, 70, 6)
+    DATA_RANGE = np.arange(120, 264, 12)
 
     language = instance(options.LANG, options.FINITE)
     args = list(itertools.product([make_hypothesis], [language], DATA_RANGE))
