@@ -12,7 +12,7 @@ from LOTlib.Miscellaneous import q, Infinity, attrmem
 
 class FormalLanguageHypothesis(StochasticLikelihood, RecursiveLOTHypothesis):
     def __init__(self, grammar=None, **kwargs):
-        RecursiveLOTHypothesis.__init__(self, grammar, args=[], recurse_bound=20, maxnodes=100, **kwargs)
+        RecursiveLOTHypothesis.__init__(self, grammar, display="lambda recurse_ : %s", recurse_bound=20, maxnodes=100, **kwargs)
 
     def __call__(self, *args):
         try:
