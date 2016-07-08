@@ -10,7 +10,7 @@ import itertools
 from LOTlib.Miscellaneous import *
 from LOTlib.GrammarRule import GrammarRule, BVAddGrammarRule
 from LOTlib.BVRuleContextManager import BVRuleContextManager
-from LOTlib.FunctionNode import FunctionNode
+from LOTlib.FunctionNode import FunctionNode, BVAddFunctionNode
 
 
 # when we pack, we are allowed to use these characters, in this order
@@ -342,52 +342,109 @@ class Grammar:
     # pickling hypotheses
     # --------------------------------------------------------------------------------------------------------
 
-    def pack_ascii(self, t):
+    def sig2idx(self):
+        """
+        Compute a dictionary from signatures to rule indices
+        this is so that when we add rules for bound variables, we don't
+        change all the rule indices.
+        NOTE: This step is slow and should be cached for a grammar
+        """
+        d = dict()
+        idx = 0 # store the rule index, making each unique. NOTE: we could make it unique for each nt, but that may mess with LZPrior
+
+        for nt in self.nonterminals():
+            for r in self.get_rules(nt):
+                d[r.get_rule_signature()] = idx
+                idx += 1
+
+        return d
+
+    def idx2rule(self):
+        """
+        Compute a dictionary from idx to rules that matches sig2idx
+        """
+        d = dict()
+        idx = 0 # store the rule index, making each unique. NOTE: we could make it unique for each nt, but that may mess with LZPrior
+
+        for nt in self.nonterminals():
+            for r in self.get_rules(nt):
+                d[idx] = r
+                idx += 1
+
+        return d
+
+    def pack_ascii(self, t, sig2idx=None):
         """
         Pack a tree into a simple ascii string, using grammar.
         Not particularly optimized, but simple
         """
+
+        if sig2idx is None:
+            sig2idx = self.sig2idx()
+
+
+        # the output string
         s = ''
-        for x in t.iterate_subnodes(self):
-            which_rule = None
-            for idx, r in enumerate(self.get_rules(x.returntype)):
-                if x.get_rule_signature() == r.get_rule_signature():
-                    assert which_rule == None, "*** Error, multiple matching rules "
-                    which_rule = idx
-                    # break # could break here but then we won't check for multiple matches
-            s = s + pack_string[which_rule]
+
+        # index
+        sig = t.get_rule_signature()
+        s = s + pack_string[sig2idx[sig]]
+
+        # add rule
+        if isinstance(t, BVAddFunctionNode):
+            r = t.added_rule
+            idx =  max(sig2idx.values())+1
+            sig2idx[r.get_rule_signature()] = idx
+
+        # recurse
+        for a in t.argFunctionNodes():
+            s = s+self.pack_ascii(a, sig2idx=sig2idx)
+
         return s
 
 
     def unpack_ascii(self, s):
         # we must convert to list(s) so that it will support pop, delete
         s = list(s)
-        return self.unpack_ascii_rec(s, self.start)
+
+        return self.unpack_ascii_rec(s, self.start, self.idx2rule())
 
 
-    def unpack_ascii_rec(self, s, x):
+    def unpack_ascii_rec(self, s, x, idx2rule):
         """
         Unpack a string into a tree. Follows the format of Grammar.generate, but indexes
         the choices with s
         """
         assert x is not None  # should have been given by unpack_ascii
-
+        # print ">>", x, idx2rule[15], idx2rule[16]
         # Dispatch different kinds of generation
         if isinstance(x, list):
-            return map(lambda xi: self.unpack_ascii_rec(s, x=xi), x)
+            return map(lambda xi: self.unpack_ascii_rec(s, xi, idx2rule), x)
+
         elif self.is_nonterminal(x):
             rules = self.get_rules(x)
 
+            # index
             # instead of sampling a rule, get it from the string
             i = pack_string.index(s[0])
-            del s[0]  # remove (works since its a list)
-            r = rules[i]
+            del s[0]  # remove (works since s is a list)
+            r = idx2rule[i]
 
             # Make a stub for this functionNode
             fn = r.make_FunctionNodeStub(self, None)
             with BVRuleContextManager(self, fn, recurse_up=False):
+
+                # add rule (to idx2rule)
+                if isinstance(r, BVAddGrammarRule):
+                    idx = max(idx2rule.keys()) + 1
+                    idx2rule[idx] = fn.added_rule
+
+                # recurse
                 if fn.args is not None:
-                    fn.args = self.unpack_ascii_rec(s, fn.args)
+                    fn.args = self.unpack_ascii_rec(s, fn.args, idx2rule)
+
+                # NOTE: We cannot remove the rule, because
+                # that's not how packing works
 
                 for a in fn.argFunctionNodes():
                     a.parent = fn
