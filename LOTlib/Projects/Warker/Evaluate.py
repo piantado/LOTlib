@@ -2,33 +2,22 @@ from __future__ import division
 import pickle
 from scipy.misc import logsumexp
 import numpy as np
-
+from LOTlib.Miscellaneous import Infinity, logplusexp, nicelog
 from Model import MyHypothesis
-from LOTlib.DataAndObjects import FunctionData
+
 print "Loading the hypothesis space . . ."
-spaceset = pickle.load(open("topsybop.pkl", "r"))
-
-
+#load the hypothesis space
+spaceset = pickle.load(open("tophyp.pkl", "r"))
 
 #make me a list
 space = list(spaceset)
 
 #probably have to deal with this later, but why is this one too long? It can't be evaluated!!!
 for h in space:
-    if(h.value.count_nodes() == 52):
+    if(h.value.count_nodes() >= 50):
        space.remove(h)
 
 
-# kind of like ll_counts, but my own
-def make_counts(hypothesis, n=50):
-     counts={}
-     for _ in xrange(n):
-         val = hypothes
-         if val not in counts:
-            counts.update({val:1})
-         else:
-             counts[val]+=1
-     return counts
 
 #make a list of the posterior_scores
 posteriors=[]
@@ -37,26 +26,49 @@ for h in space:
 
 #sum of the posterior scores gives you the probability of the data
 pdata = logsumexp(posteriors)
-print "P (D) : " + str(pdata)
 
 #but we want to know P(H|D), the probability of each of these hypotheses given the data. We normalize to find out!
 # (Now that we have a finite hypothesis space we can do this)
 
-bipcounts={}
-pbip = 0
-for h in space:
-    c = make_counts(h)
 
-    if 'b i p' in c:
-        prop = float((c['b i p'])/50) #proportion of seeing 'b i p' over the number of samples, which was 50 in make_counts
-        logprop = np.log(prop)
-        bipcounts.update({h:(logprop, h.posterior_score-pdata)})
-        #give a tuple of info: the log probability of bip for that hypothesis, and the probability of the hypothesis given the data
-        pbip += logprop + (h.posterior_score-pdata)
+#working with logs!
+#pbip = -Infinity
 
 
-print bipcounts
-print "Apprently, the probability of how much someone might expect to see 'bip' is exp("+ str(pbip) +")"
+illegals = ['s e k', 'N e k', 's e g', 'N e g', 's e m', ' N e m', 's e n', 'N e n', 'k e f', ' k e h', 'g e f', 'g e h', 'm e f', 'n e f', 'n e h']
+illegal_probs = dict((w, -Infinity) for w in illegals)
+
+
+for w in illegal_probs:
+    illegal_probs[w] = np.exp(logsumexp([nicelog(h.ll_counts[w] + 1e-6) - nicelog(sum(h.ll_counts.values())+(1e-6*len(h.ll_counts.keys()))) + (h.posterior_score - pdata) for h in space]))
+
+print illegal_probs.keys()
+print illegal_probs.values()
+
+
+#pbip = np.exp(logsumexp([nicelog(h.ll_counts['b i p']) - nicelog(sum(h.ll_counts.values())) + (h.posterior_score - pdata) for h in space]))
+#print "Given 'bim' and 'bop', the probability that I will expect to see 'bip' is:  " + str(pbip)
+
+legals = ['m e s', 'm e g', 'h e g', 'm e m', 'm e n', 'k e N', 'm e k', 'k e s', 'h e k', 'h e m', 'k e g', 'k e k', 'm e N', 'k e n', 'h e N', 'f e N', 'g e N', 'n e N', 'f e k', 'f e n', 'g e n', 'g e m', 'f e m', 'g e k', 'n e s', 'g e g', 'f e g', 'f e s', 'n e g', 'k e m', 'n e n', 'n e m', 'g e s', 'n e k']
+
+stim = set(np.random.choice(legals,4))
+legals = set(legals) - stim
+print stim
+
+legal_probs = legal_probs = dict((w, -Infinity) for w in legals)
+print legal_probs
+
+for w in legal_probs:
+    legal_probs[w] = np.exp(logsumexp([nicelog(h.ll_counts[w] + 1e-6) - nicelog(sum(h.ll_counts.values())+(1e-6*len(h.ll_counts.keys()))) + (h.posterior_score - pdata) for h in space]))
+
+
+
+# what I want to do: calculate percentages of legal errors
+# make the space
+# "present" a small subset of legal words (d)
+# P(H|d) = P(d|H)P(H) <-- how do I update you?
+# could use previous posterior as this new version's prior:
+# P(H|d1) = P(d1|H)P(H|d0)
 
 
 

@@ -1,42 +1,19 @@
 from LOTlib.Eval import primitive
 from LOTlib.DataAndObjects import FunctionData
-import random
+
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Data
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def make_data(size=100):
-    #mydata=lotsa(50,100)
     return [FunctionData(input=[],
-                         #output={'g a k': size, 's a f': size, 'n a m':size, 'h a ng':size})]
-                         #output={'f e ng': size, 's e ng': size, 's e k':size, 'h e ng':size})]
-                         #output=mydata)]
-                         output={'b i m': size, 'b o p': size})]
+                         #output={'b i m': size, 'b o p': size})]
+                         #output = {'n a f': 100, 'f a k': 100, 's i s': 100, 'n a s': 100, 'f a f': 100, 'k i n': 100, 'k i m': 100, 'n i m': 100, 's a f': 100, 'k i g': 100, 'f a s': 100, 's i m': 100, 'f a m': 100, 'n i s': 100, 'f a n': 100, 'n a m': 100, 'f i s': 100, 'g a n': 100, 'g a m': 100, 'n i f': 100, 'm a f': 100, 's a s': 100, 'g a f': 100, 's a n': 100, 's a m': 100, 's a k': 100, 'f i g': 100, 'g a s': 100, 'n a k': 100, 'n a n': 100, 'f i m': 100, 'm a s': 100, 'k i s': 100, 's i f': 100, 'k i f': 100, 'm i s': 100, 'm i m': 100, 'm i n': 100, 'f i f': 100, 'm a k': 100, 'm i f': 100})]
+                         output = {'f e N': 100, 'k e s': 100, 'h e s': 100, 'm e s': 100, 'g e N': 100, 'n e m': 100, 'h e k': 100, 'm e m': 100, 'm e g': 100, 'h e g': 100, 'n e N': 100, 'm e n': 100, 'h e m': 100, 'h e n': 100, 'f e k': 100, 'f e n': 100, 'g e n': 100, 'g e m': 100, 'f e m': 100, 'g e k': 100, 'n e s': 100, 'n e g': 100, 'g e g': 100, 'f e g': 100, 'f e s': 100, 'k e N': 100, 'k e n': 100, 'm e k': 100, 'n e n': 100, 'm e N': 100, 'g e s': 100, 'n e k': 100, 'k e m': 100})]
 
 
-
-#can make output dictionaries of the stimuli
-
-def generate():
-    unrestricted = ['k', 'g', 'm', 'n']
-    onsets = ['f', 'h']
-    codas = ['s', 'N']
-    vowels = ['e']
-
-    onsets += (unrestricted)
-    codas += (unrestricted)
-
-    stim = ''
-    stim+=random.choice(onsets)+' '+random.choice(vowels)+' '+random.choice(codas)
-    return stim
-
-def lotsa(n, size):
-    mydata = {}
-    for i in range(0,n):
-        mydata.update({generate():size})
-    print(mydata)
-    return mydata
 
 
 
@@ -68,21 +45,26 @@ grammar.add_rule('SET', '"%s"', ['STRING'], 1.0)
 grammar.add_rule('STRING', '%s%s', ['TERMINAL', 'STRING'], 1.0)
 grammar.add_rule('STRING', '%s', ['TERMINAL'], 1.0)
 
-'''grammar.add_rule('TERMINAL', 'g', None, TERMINAL_WEIGHT)
+
+
+
+grammar.add_rule('TERMINAL', 'g', None, TERMINAL_WEIGHT)
 grammar.add_rule('TERMINAL', 'e', None, TERMINAL_WEIGHT)
+#grammar.add_rule('TERMINAL', 'a', None, TERMINAL_WEIGHT)
+#grammar.add_rule('TERMINAL', 'i', None, TERMINAL_WEIGHT)
 grammar.add_rule('TERMINAL', 'k', None, TERMINAL_WEIGHT)
 grammar.add_rule('TERMINAL', 's', None, TERMINAL_WEIGHT)
 grammar.add_rule('TERMINAL', 'f', None, TERMINAL_WEIGHT)
 grammar.add_rule('TERMINAL', 'n', None, TERMINAL_WEIGHT)
 grammar.add_rule('TERMINAL', 'm', None, TERMINAL_WEIGHT)
 grammar.add_rule('TERMINAL', 'h', None, TERMINAL_WEIGHT)
-grammar.add_rule('TERMINAL', 'N', None, TERMINAL_WEIGHT)'''
+grammar.add_rule('TERMINAL', 'N', None, TERMINAL_WEIGHT)
 
-grammar.add_rule('TERMINAL', 'b', None, TERMINAL_WEIGHT)
+'''grammar.add_rule('TERMINAL', 'b', None, TERMINAL_WEIGHT)
 grammar.add_rule('TERMINAL', 'm', None, TERMINAL_WEIGHT)
 grammar.add_rule('TERMINAL', 'p', None, TERMINAL_WEIGHT)
 grammar.add_rule('TERMINAL', 'i', None, TERMINAL_WEIGHT)
-grammar.add_rule('TERMINAL', 'o', None, TERMINAL_WEIGHT)
+grammar.add_rule('TERMINAL', 'o', None, TERMINAL_WEIGHT)'''
 
 
 
@@ -147,10 +129,10 @@ if __name__ == "__main__":
 
     from LOTlib.Inference.Samplers.StandardSample import standard_sample
 
-    standard_sample(make_hypothesis, make_data, show_skip=9, save_top="top.pkl")
+    #standard_sample(make_hypothesis, make_data, show_skip=9, save_top="top.pkl")
 
     #for running parallel
-    '''from LOTlib.MPI import MPI_map
+    from LOTlib.MPI import MPI_map
     args=[[x] for x in range(8)]
     myhyp=set()
 
@@ -158,6 +140,6 @@ if __name__ == "__main__":
         myhyp.update(top)
 
     import pickle
-    pickle.dump(myhyp, open("topsybop.pkl", "wb"))'''
+    pickle.dump(myhyp, open("tophyp.pkl", "wb"))
 
 
