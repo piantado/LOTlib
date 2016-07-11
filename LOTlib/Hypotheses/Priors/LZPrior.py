@@ -1,14 +1,13 @@
 
 # Two possible libraries
 # import lzw # needed for LZ compression
-import lzstring
+# import lzstring
 
 from LOTlib.Miscellaneous import attrmem
 
-compressor = lzstring.LZString()
-
-# let's subtract off the min possible for some one character string
-minL = len(lzstring.LZString().compressToBase64("a"))
+# compressor = lzstring.LZString()
+# # let's subtract off the min possible for some one character string
+# minL = len(lzstring.LZString().compressToBase64("a"))
 
 class LZPrior(object):
     """
