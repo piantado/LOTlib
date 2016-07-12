@@ -64,10 +64,7 @@ print legal_probs
 
 ##later with new data
 stimuli = ['k a N', 'f a n', 'm a g', 'h a s']
-test = dict((w, -Infinity) for w in stimuli)
 
-pfaN = np.exp(logsumexp([nicelog(h.ll_counts['f e N'] + 1e-6) - nicelog(sum(h.ll_counts.values()) + (1e-6*len(h.ll_counts.keys()))) + (h.posterior_score - pdata) for h in space]))
-print pfaN
 
 
 
