@@ -18,7 +18,6 @@ for h in space:
        space.remove(h)
 
 
-
 #make a list of the posterior_scores
 posteriors=[]
 for h in space:
@@ -40,11 +39,11 @@ illegal_probs = dict((w, -Infinity) for w in illegals)
 
 
 for w in illegal_probs:
-    illegal_probs[w] = np.exp(logsumexp([nicelog(h.ll_counts[w] + 1e-6) - nicelog(sum(h.ll_counts.values())+(1e-6*len(h.ll_counts.keys()))) + (h.posterior_score - pdata) for h in space]))
+    illegal_probs[w] = np.exp(logsumexp([nicelog(h.ll_counts[w] + 1e-20) - nicelog(sum(h.ll_counts.values())+(1e-20*len(h.ll_counts.keys()))) + (h.posterior_score - pdata) for h in space]))
 
-print illegal_probs.keys()
-print illegal_probs.values()
-
+#print illegal_probs.keys()
+#print illegal_probs.values()
+print illegal_probs
 
 #pbip = np.exp(logsumexp([nicelog(h.ll_counts['b i p']) - nicelog(sum(h.ll_counts.values())) + (h.posterior_score - pdata) for h in space]))
 #print "Given 'bim' and 'bop', the probability that I will expect to see 'bip' is:  " + str(pbip)
@@ -53,13 +52,23 @@ legals = ['m e s', 'm e g', 'h e g', 'm e m', 'm e n', 'k e N', 'm e k', 'k e s'
 
 stim = set(np.random.choice(legals,4))
 legals = set(legals) - stim
-print stim
+#print stim
 
-legal_probs = legal_probs = dict((w, -Infinity) for w in legals)
+legal_probs = dict((w, -Infinity) for w in legals)
 print legal_probs
 
 for w in legal_probs:
     legal_probs[w] = np.exp(logsumexp([nicelog(h.ll_counts[w] + 1e-6) - nicelog(sum(h.ll_counts.values())+(1e-6*len(h.ll_counts.keys()))) + (h.posterior_score - pdata) for h in space]))
+
+print legal_probs
+
+##later with new data
+stimuli = ['k a N', 'f a n', 'm a g', 'h a s']
+test = dict((w, -Infinity) for w in stimuli)
+
+pfaN = np.exp(logsumexp([nicelog(h.ll_counts['f e N'] + 1e-6) - nicelog(sum(h.ll_counts.values()) + (1e-6*len(h.ll_counts.keys()))) + (h.posterior_score - pdata) for h in space]))
+print pfaN
+
 
 
 
@@ -69,6 +78,9 @@ for w in legal_probs:
 # P(H|d) = P(d|H)P(H) <-- how do I update you?
 # could use previous posterior as this new version's prior:
 # P(H|d1) = P(d1|H)P(H|d0)
+
+#Let's make a legality scorer for comparing sequences!
+#Given "kaN fan mag has" and "faN san hag kas": what are the different error types?
 
 
 

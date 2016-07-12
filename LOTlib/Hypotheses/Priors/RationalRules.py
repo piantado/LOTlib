@@ -1,8 +1,7 @@
 
 import numpy
-from math import log
 
-from LOTHypothesis import LOTHypothesis
+from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Miscellaneous import Infinity, beta, attrmem
 from LOTlib.FunctionNode import FunctionNode
 from collections import defaultdict
@@ -49,28 +48,21 @@ def RR_prior(grammar, t, alpha=1.0):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 from LOTlib.Hypotheses.Likelihoods.BinaryLikelihood import BinaryLikelihood
 
-class RationalRulesLOTHypothesis(BinaryLikelihood, LOTHypothesis):
+class RationaRulesPrior(object):
     """
             A FunctionHypothesis built from a grammar.
             Implement a Rational Rules (Goodman et al 2008)-style grammar over Boolean expressions.
 
     """
-    def __init__(self, grammar=None, value=None, rrAlpha=1.0, *args, **kwargs):
-        """
-                Everything is passed to LOTHypothesis
-        """
-        self.rrAlpha = rrAlpha
-
-        LOTHypothesis.__init__(self, grammar, value=value, *args, **kwargs)
 
     @attrmem('prior')
     def compute_prior(self):
         """
-
+            Rational rules prior
         """
         if self.value.count_subnodes() > self.maxnodes:
-            return-Infinity
+            return -Infinity
         else:
             # compute the prior with either RR or not.
-            return RR_prior(self.grammar, self.value, alpha=self.rrAlpha) / self.prior_temperature
+            return RR_prior(self.grammar, self.value, alpha=self.__dict__.get('rrAlpha', 1.0)) / self.prior_temperature
 

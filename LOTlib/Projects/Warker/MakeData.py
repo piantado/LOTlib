@@ -17,20 +17,38 @@ def dellData(bool):
     return stim
 
 
-def kaggikData():
-    onsetsg = ['g','f','s','m','n']
-    codask = ['k','f','s','m','n']
-    onsetsk = ['k','f','s','m','n']
-    codasg = ['g','f','s','m','n']
-    vowels = ['a', 'i']
+def kaggikData(bool):
+
+    unrestricted = ['f', 's', 'm', 'n']
+    onsetsa = ['g', 'h']
+    codasa = ['k', 'N']
+    onsetsi = ['k','h']
+    codasi = ['g','N']
+    vowels = ['a','i']
+
+    onsetsa += (unrestricted)
+    codasa += (unrestricted)
+    onsetsi += (unrestricted)
+    codasi+= (unrestricted)
 
     stim = ''
     v = random.choice(vowels)
+
     if v == 'a':
-        stim+=random.choice(onsetsg)+' '+v+' '+random.choice(codask)
+        if bool:
+            stim+=random.choice(onsetsa)+' '+v+' '+random.choice(codasa)
+        else:
+            stim+=random.choice(codasa)+' '+v+' '+random.choice(onsetsa)
     else:
-        stim+=random.choice(onsetsk)+' '+v+' '+random.choice(codasg)
+        if bool:
+            stim+=random.choice(onsetsi)+' '+v+' '+random.choice(codasi)
+        else:
+            stim+=random.choice(codasi)+' '+v+' '+random.choice(onsetsi)
+
     return stim
+
+
+
 
 
 
@@ -44,5 +62,14 @@ def lotsa(n, size, fn, bool):
         setty.add(fn(bool))
     print(setty)
     return mydata
-
-lotsa(100, 100, dellData,False)
+#lotsa(100, 100, dellData,False)
+d = lotsa(200,100, kaggikData,False)
+listy = []
+for k,v in d.items():
+    if 'N' in k or 'k' in k or 'g' in k or 'h' in k:
+        listy.append(k)
+print (listy)
+from LOTlib.Primitives import *
+from LOTlib.Miscellaneous import flatten2str
+for i in range(50):
+    print(flatten2str(if_(flip_(),cons_(cons_(sample_("fsnmgh"),'a'),sample_("fsnmkN")),cons_(cons_(sample_( "fsnmkh"),'i'),sample_("fsnmgN")))))
