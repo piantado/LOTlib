@@ -383,14 +383,14 @@ class Grammar:
             sig2idx = self.sig2idx()
 
 
-        # the output string
+        # the output string (starts empty)
         s = ''
 
-        # index
-        sig = t.get_rule_signature()
-        s = s + pack_string[sig2idx[sig]]
+        # compute the node's index (i.e. packed name)
+        # pack_string is a string, not a function
+        s = s + pack_string[sig2idx[t.get_rule_signature()]]
 
-        # add rule
+        # add rule if we're adding a bound variable (i.e. a lambda)
         if isinstance(t, BVAddFunctionNode):
             r = t.added_rule
             idx =  max(sig2idx.values())+1
@@ -400,8 +400,12 @@ class Grammar:
         for a in t.argFunctionNodes():
             s = s+self.pack_ascii(a, sig2idx=sig2idx)
 
+        # remove bound variable rule after recursing
+        if isinstance(t, BVAddFunctionNode):
+            r = t.added_rule
+            del sig2idx[r.get_rule_signature()]
+            
         return s
-
 
     def unpack_ascii(self, s):
         # we must convert to list(s) so that it will support pop, delete
@@ -409,19 +413,19 @@ class Grammar:
 
         return self.unpack_ascii_rec(s, self.start, self.idx2rule())
 
-
     def unpack_ascii_rec(self, s, x, idx2rule):
         """
         Unpack a string into a tree. Follows the format of Grammar.generate, but indexes
         the choices with s
         """
         assert x is not None  # should have been given by unpack_ascii
-        # print ">>", x, idx2rule[15], idx2rule[16]
+
         # Dispatch different kinds of generation
         if isinstance(x, list):
             return map(lambda xi: self.unpack_ascii_rec(s, xi, idx2rule), x)
 
         elif self.is_nonterminal(x):
+            
             rules = self.get_rules(x)
 
             # index
@@ -443,13 +447,20 @@ class Grammar:
                 if fn.args is not None:
                     fn.args = self.unpack_ascii_rec(s, fn.args, idx2rule)
 
-                # NOTE: We cannot remove the rule, because
-                # that's not how packing works
-
+                # remove rule (as we now do in packing, too)
+                if isinstance(r, BVAddGrammarRule):
+                    idx = max(idx2rule.keys())
+                    del idx2rule[idx]
+            
                 for a in fn.argFunctionNodes():
                     a.parent = fn
 
             return fn
 
-        else:  # must be a terminal
+        else: # must be a terminal
             return x
+
+    #def pack_test(self,n=1000):
+    #    """a quick test for packing and unpacking"""
+    #    one_test = lambda x: x == self.unpack_ascii(self.pack_ascii(x))
+    #    return all([one_test(self.generate()) for _ in xrange(n)])
