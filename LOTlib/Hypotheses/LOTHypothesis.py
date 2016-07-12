@@ -3,8 +3,9 @@ from LOTlib.Hypotheses.FunctionHypothesis import FunctionHypothesis
 from LOTlib.Hypotheses.Proposers import regeneration_proposal, ProposalFailedException
 from LOTlib.Miscellaneous import Infinity, raise_exception, attrmem
 from LOTlib.Primitives import *
+from Priors.PCFGPrior import PCFGPrior
 
-class LOTHypothesis(FunctionHypothesis):
+class LOTHypothesis(PCFGPrior, FunctionHypothesis):
     """A FunctionHypothesis built from a grammar.
 
     Arguments
@@ -83,18 +84,3 @@ class LOTHypothesis(FunctionHypothesis):
         ret = self.__copy__(value=ret_value)
 
         return ret, fb
-
-    # --------------------------------------------------------------------------------------------------------
-    # Compute prior
-
-    @attrmem('prior')
-    def compute_prior(self):
-        """Compute the log of the prior probability.
-
-        """
-        # Compute this hypothesis prior
-        if self.value.count_subnodes() > self.maxnodes:
-            return -Infinity
-        else:
-            # Compute prior with either RR or not.
-            return self.grammar.log_probability(self.value) / self.prior_temperature
