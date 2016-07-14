@@ -34,6 +34,7 @@ class LOTHypothesis(PCFGPrior, FunctionHypothesis):
 
         # Save all of our keywords
         self.__dict__.update(locals())
+        self.__dict__.pop('self')  # we don't want self.self! https://stackoverflow.com/questions/6025758/
 
         if value is None and grammar is not None:
             value = grammar.generate()

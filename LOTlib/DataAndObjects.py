@@ -96,6 +96,7 @@ class UtteranceData:
 
         """
         self.__dict__.update(locals())
+        self.__dict__.pop('self')  # we don't want self.self! https://stackoverflow.com/questions/6025758/
 
     def __repr__(self):
         return qq(str(self.utterance))+' in '+ str(self.context) + " from " + str(self.possible_utterances)

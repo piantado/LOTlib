@@ -1,20 +1,40 @@
 
-from LOTlib.Hypotheses.Proposers import ProposalFailedException
-from LOTlib.Miscellaneous import sample1, nicelog
+"""Insert / Delete proposals - nests an existing subtree inside a new
+rule or deletes the uppermost portion of a subtree and promotes one of
+its children (of the same type)
+
+"""
+
+from LOTlib.BVRuleContextManager import BVRuleContextManager
 from LOTlib.FunctionNode import *
 from LOTlib.GrammarRule import *
-from LOTlib.BVRuleContextManager import BVRuleContextManager
-from LOTlib.FunctionNode import NodeSamplingException
+from LOTlib.Hypotheses.Proposers import ProposalFailedException
+from LOTlib.Miscellaneous import sample1, nicelog
 
+class InsertDeleteProposal(object):
+    """The proposal function given by this class isn't ergodic!"""
+    def propose(self, **kwargs):
+        ret_value, fb = None, None
+        while True: # keep trying to propose
+            try:
+                ret_value, fb = insert_delete_proposal(self.grammar, self.value, **kwargs)
+                break
+            except ProposalFailedException:
+                pass
 
+        ret = self.__copy__(value=ret_value)
+
+        return ret, fb
 
 def can_insert_GrammarRule(r):
     return any([r.nt==a for a in None2Empty(r.to)])
+
 def can_insert_FunctionNode(x):
     return any([x.returntype == a.returntype for a in x.argFunctionNodes()])
 
 def can_delete_GrammarRule(r):
     return any([r.nt==a for a in None2Empty(r.to)])
+
 def can_delete_FunctionNode(x):
     if isinstance(x, BVAddFunctionNode) and x.uses_bv():
         return False
@@ -24,7 +44,7 @@ def can_delete_FunctionNode(x):
 def insert_delete_proposal(grammar, t):
     newt = copy(t)
 
-    if random() < 0.5: # So we insert
+    if random() < 0.5: # insert!
 
         # Choose a node at random to insert on
         # TODO: We could precompute the nonterminals we can do this move on, if we wanted
@@ -33,12 +53,12 @@ def insert_delete_proposal(grammar, t):
         except NodeSamplingException:
             raise ProposalFailedException
 
-        # Since it's an insert, see if there is a (replicating) rule that expands
-        # from ni.returntype to some ni.returntype
+        # is there a rule that expands from ni.returntype to some ni.returntype?
         replicating_rules = filter(can_insert_GrammarRule, grammar.rules[ni.returntype])
-        if len(replicating_rules) == 0:  return [newt, 0.0]
+        if len(replicating_rules) == 0:
+            raise ProposalFailedException
 
-        # sample a rule and compute its probability (not under the predicate)
+        # sample a rule
         r = sample1(replicating_rules)
 
         # the functionNode we are building
@@ -46,43 +66,48 @@ def insert_delete_proposal(grammar, t):
 
         # figure out which arg will be the existing ni
         replicatingindices = filter( lambda i: fn.args[i] == ni.returntype, xrange(len(fn.args)))
-        assert replicatingindices > 0 # since that's what a replicating rule is
+        if len(replicatingindices) <= 0: # should never happen
+            raise ProposalFailedException
+        
         replace_i = sample1(replicatingindices) # choose the one to replace
-        fn.args[replace_i] = copy(ni) # the one we replace
-
+        
         ## Now expand the other args, with the right rules in the grammar
         with BVRuleContextManager(grammar, fn, recurse_up=True):
 
-            # and generate the args below
             for i,a in enumerate(fn.args):
-                if i != replace_i:
-                    fn.args[i] = grammar.generate(a) #else generate like normalized
+                if i == replace_i:
+                    fn.args[i] = copy(ni) # the one we replace
+                else:
+                    fn.args[i] = grammar.generate(a) #else generate like normal
 
         # we need a count of how many kids are the same afterwards
         after_same_children = sum([x==ni for x in fn.args])
-
+                    
+        # perform the insertion
         ni.setto(fn)
 
+        # TODO: fix the fact that there are potentially multiple backward steps to give the equivalent tree
+        # need to use the right grammar for log_probability calculations
         with BVRuleContextManager(grammar, fn, recurse_up=True):
 
             # what is the prob mass of the new stuff?
             new_lp_below =  sum([ grammar.log_probability(fn.args[i]) if (i!=replace_i and isFunctionNode(fn.args[i])) else 0. for i in xrange(len(fn.args))])
+
             # What is the new normalizer?
             newZ = newt.sample_node_normalizer(can_delete_FunctionNode)
             assert newZ > 0
-            # To sample forward: choose the node ni, choose the replicating rule, choose which "to" to expand (we could have put it on any of the replicating rules that are identical), and genreate the rest of the tree
-            f = lp + (-log(len(replicating_rules))) + (log(after_same_children)-log(len(replicatingindices))) + new_lp_below
-            # To go backwards, choose the inserted rule, and any of the identical children, out of all replicators
-            b = (log(1.0*can_delete_FunctionNode(fn)) - log(newZ)) + (log(after_same_children) - log(len(fn.args)))
+            
+            # forward: choose the node ni, choose the replicating rule, choose which "to" to expand, and generate the rest of the tree
+            f = lp - nicelog(len(replicating_rules)) + (nicelog(after_same_children) - nicelog(len(replicatingindices))) + new_lp_below
+            # backward: choose the inserted node, choose one of the children identical to the original ni, and deterministically delete
+            b = (nicelog(1.0*can_delete_FunctionNode(fn)) - nicelog(newZ)) + (nicelog(after_same_children) - nicelog(len(replicatingindices)))
 
-    else: # A delete move!
+    else: # delete!
 
-        # Sample a node at random
-        try:
+        try: # sample a node at random
             ni, lp = newt.sample_subnode(can_delete_FunctionNode) # this could raise exception
 
-            # Really, it had to be not None
-            if ni.args is None:
+            if ni.args is None: # doesn't have children to promote
                 raise NodeSamplingException
 
         except NodeSamplingException:
@@ -110,44 +135,34 @@ def insert_delete_proposal(grammar, t):
             old_lp_below = sum([ grammar.log_probability(ni.args[i]) if (i!=samplei and isFunctionNode(ni.args[i])) else 0. for i in xrange(len(ni.args))])
 
             # and replace it
-            ni.args[samplei].parent = ni.parent # update this first ;; TODO: IS THIS NECSESARY?
             ni.setto( ni.args[samplei] )
 
-            # And compute f/b probs
             newZ = newt.sample_node_normalizer(resampleProbability=can_insert_FunctionNode)
-            # To go forward, choose the node, and then from all equivalent children
+            
+            # forward: choose the node, and then from all equivalent children
             f = lp + (log(before_same_children) - log(nrk))
-            # To go back, choose the node, choose the replicating rule, choose where to put it, and generate the rest of the tree
-            b = (nicelog(1.0*can_insert_FunctionNode(ni)) - nicelog(newZ))  + -nicelog(len(replicating_rules)) + (nicelog(before_same_children) - nicelog(nrk)) + old_lp_below
+            # backward: choose the node, choose the replicating rule, choose where to put it, and generate the rest of the tree
+            b = (nicelog(1.0*can_insert_FunctionNode(ni)) - nicelog(newZ)) - nicelog(len(replicating_rules)) + (nicelog(before_same_children) - nicelog(nrk)) + old_lp_below
 
     return [newt, f-b]
 
-if __name__ == "__main__":
+if __name__ == "__main__": # test code
+    ## NOTE: IN REAL LIFE, MIX WITH REGENERATION PROPOSAL -- ELSE NOT ERGODIC
 
-    from LOTlib import break_ctrlc
-    #from LOTlib.Examples.Number.Shared import grammar, make_h0, generate_data
-    #data = generate_data(300)
+    from LOTlib.Examples.Magnetism.Simple import grammar, make_data
+    from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+    from LOTlib.Hypotheses.Likelihoods.BinaryLikelihood import BinaryLikelihood
+    from LOTlib.Inference.Samplers.StandardSample import standard_sample
 
-    ## NOTE: TO NORMALLY USE THIS, YOU MUST MIX WITH REGENERATION PROPOSAL -- ELSE NOT ERGODIC
+    class IDHypothesis(BinaryLikelihood, InsertDeleteProposal, LOTHypothesis):
+        """
+        A recursive LOT hypothesis that computes its (pseudo)likelihood using a string edit
+        distance
+        """
+        def __init__(self, **kwargs ):
+            LOTHypothesis.__init__(self, grammar, display='lambda x,y: %s', **kwargs)
 
-    from LOTlib.Examples.Magnetism.Simple.Run import grammar, make_h0, data
+    def make_hypothesis(**kwargs):
+        return IDHypothesis(**kwargs)
 
-    from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
-
-    idp = InsertDeleteProposer(grammar)
-
-    #data = generate_data(100)
-    h = make_h0(proposal_function=idp)
-    for h in break_ctrlc(MHSampler(h, data, 100000)):
-        print h.posterior_score, h
-
-    """
-    for _ in xrange(100):
-        t = grammar.generate()
-        print "\n\n", t
-        for _ in xrange(10):
-            print "\t", idp.propose_tree(t)
-    """
-
-
-
+    standard_sample(make_hypothesis, make_data, save_top=False, show_skip=9)
