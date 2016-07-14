@@ -41,6 +41,7 @@ class GrammarRule(object):
         assert p>0.0, "*** p=0 in rule %s %s %s. What are you thinking?" %(nt,name,to)
 
         self.__dict__.update(locals())
+        self.__dict__.pop('self')  # we don't want self.self! https://stackoverflow.com/questions/6025758/
 
         assert to is None or isinstance(to, list) or isinstance(to, tuple), "*** 'to' in a GrammarRule must be a list!"
 
@@ -109,6 +110,7 @@ class BVAddGrammarRule(GrammarRule):
     def __init__(self, nt, name, to, p=1.0, bv_prefix="y", bv_type=None, bv_args=None, bv_p=None):
         p = float(p)
         self.__dict__.update(locals())
+        self.__dict__.pop('self')  # we don't want self.self! https://stackoverflow.com/questions/6025758/
         assert bv_type is not None, "Did you mean to use a GrammarRule instead of a BVGrammarRule?"
         assert isinstance(bv_type, str), "bv_type must be a string! Make sure it's not a tuple or list."
         

@@ -612,4 +612,15 @@ def setup_directory(path):
 
     os.mkdir(path)
 
+# ------------------------------------------------------------------------------------------------------------
+# Generic Equality - stolen from https://stackoverflow.com/questions/390250/
+# ------------------------------------------------------------------------------------------------------------
 
+class CommonEqualityMixin(object):
+
+    def __eq__(self, other):
+        return (isinstance(other, self.__class__)
+            and self.__dict__ == other.__dict__)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
