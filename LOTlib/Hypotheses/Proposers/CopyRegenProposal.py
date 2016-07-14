@@ -5,7 +5,7 @@ it.
 
 """
 
-from LOTlib.Hypotheses.Proposers.Regeneration import regeneration_proposal
+from LOTlib.Hypotheses.Proposers.RegenerationProposal import regeneration_proposal
 from LOTlib.Hypotheses.Proposers import ProposalFailedException
 from LOTlib.BVRuleContextManager import BVRuleContextManager
 from LOTlib.FunctionNode import NodeSamplingException
@@ -45,14 +45,15 @@ def copy_regen_proposal(grammar, t, resampleProbability=lambdaOne):
         # sample the source and then the target conditioned on having the same grammar as the source
         # Note: the two nodes need not be different
         try:
-            src, lp_choosing_src_in_old_tree = newt.sample_subnode(resampleProbability=resampleProbability)
+            src, lp_choosing_src_in_old_tree = newt.sample_subnode(resampleProbability)
             src_grammar = give_grammar(grammar,src)
             good_choice = lambda x: 1.0 if ((give_grammar(grammar,x) == src_grammar) and
                                             (x.returntype == src.returntype)) else 0.0
-            target, lp_choosing_target_in_old_tree = newt.sample_subnode(resampleProbability=good_choice)
+            target, lp_choosing_target_in_old_tree = newt.sample_subnode(good_choice)
         except NodeSamplingException:
             raise ProposalFailedException
 
+        # context manager not needed here since we already have the correct grammar
         lp_target_given_grammar = src_grammar.log_probability(target)
 
         # set target to be src via a deep copy
@@ -72,20 +73,18 @@ def copy_regen_proposal(grammar, t, resampleProbability=lambdaOne):
     else: # regenerate
 
         return regeneration_proposal(grammar, t, resampleProbability=resampleProbability)
-        
-if __name__ == "__main__": # test code
 
-    from LOTlib import break_ctrlc
-    from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-    from LOTlib.Hypotheses.Likelihoods.BinaryLikelihood import BinaryLikelihood
-    from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
+if __name__ == "__main__": # test code
 
     # We'd probably see better performance on a grammar with fewer
     # distinct types, but this one is a good testbed *because* it's
     # complex (lambdas, etc.)
     from LOTlib.Examples.Magnetism.Simple import grammar, make_data
+    from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+    from LOTlib.Hypotheses.Likelihoods.BinaryLikelihood import BinaryLikelihood
+    from LOTlib.Inference.Samplers.StandardSample import standard_sample
 
-    class CDHypothesis(BinaryLikelihood, CopyRegenProposal, LOTHypothesis):
+    class CRHypothesis(BinaryLikelihood, CopyRegenProposal, LOTHypothesis):
         """
         A recursive LOT hypothesis that computes its (pseudo)likelihood using a string edit
         distance
@@ -94,7 +93,6 @@ if __name__ == "__main__": # test code
             LOTHypothesis.__init__(self, grammar, display='lambda x,y: %s', **kwargs)
 
     def make_hypothesis(**kwargs):
-        return CDHypothesis(**kwargs)
+        return CRHypothesis(**kwargs)
 
-    for h in break_ctrlc(MHSampler(make_hypothesis(), data=make_data(n=100), steps=100000)):
-        print h.posterior_score, h
+    standard_sample(make_hypothesis, make_data, save_top=False)

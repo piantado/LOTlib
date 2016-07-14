@@ -6,5 +6,6 @@ class ProposalFailedException(Exception):
     """
     pass
 
-from Regeneration import regeneration_proposal
-from InsertDelete import insert_delete_proposal
+from CopyRegenProposal import copy_regen_proposal
+from InsertDeleteProposal import insert_delete_proposal
+from RegenerationProposal import regeneration_proposal
