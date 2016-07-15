@@ -46,11 +46,16 @@ all =['fff', 'ffs', 'ffn', 'ffm', 'ffg', 'ffh', 'ffs', 'ffk', 'ffN', 'ffe', 'fsf
 
 all_with_vowel = ['f f e', 'f s e', 'f n e', 'f m e', 'f g e', 'f h e', 'f s e', 'f k e', 'f N e', 'f e f', 'f e s', 'f e n', 'f e m', 'f e g', 'f e h', 'f e s', 'f e k', 'f e N', 'f e e', 's f e', 's s e', 's n e', 's m e', 's g e', 's h e', 's s e', 's k e', 's N e', 's e f', 's e s', 's e n', 's e m', 's e g', 's e h', 's e s', 's e k', 's e N', 's e e', 'n f e', 'n s e', 'n n e', 'n m e', 'n g e', 'n h e', 'n s e', 'n k e', 'n N e', 'n e f', 'n e s', 'n e n', 'n e m', 'n e g', 'n e h', 'n e s', 'n e k', 'n e N', 'n e e', 'm f e', 'm s e', 'm n e', 'm m e', 'm g e', 'm h e', 'm s e', 'm k e', 'm N e', 'm e f', 'm e s', 'm e n', 'm e m', 'm e g', 'm e h', 'm e s', 'm e k', 'm e N', 'm e e', 'g f e', 'g s e', 'g n e', 'g m e', 'g g e', 'g h e', 'g s e', 'g k e', 'g N e', 'g e f', 'g e s', 'g e n', 'g e m', 'g e g', 'g e h', 'g e s', 'g e k', 'g e N', 'g e e', 'h f e', 'h s e', 'h n e', 'h m e', 'h g e', 'h h e', 'h s e', 'h k e', 'h N e', 'h e f', 'h e s', 'h e n', 'h e m', 'h e g', 'h e h', 'h e s', 'h e k', 'h e N', 'h e e', 's f e', 's s e', 's n e', 's m e', 's g e', 's h e', 's s e', 's k e', 's N e', 's e f', 's e s', 's e n', 's e m', 's e g', 's e h', 's e s', 's e k', 's e N', 's e e', 'k f e', 'k s e', 'k n e', 'k m e', 'k g e', 'k h e', 'k s e', 'k k e', 'k N e', 'k e f', 'k e s', 'k e n', 'k e m', 'k e g', 'k e h', 'k e s', 'k e k', 'k e N', 'k e e', 'N f e', 'N s e', 'N n e', 'N m e', 'N g e', 'N h e', 'N s e', 'N k e', 'N N e', 'N e f', 'N e s', 'N e n', 'N e m', 'N e g', 'N e h', 'N e s', 'N e k', 'N e N', 'N e e', 'e f f', 'e f s', 'e f n', 'e f m', 'e f g', 'e f h', 'e f s', 'e f k', 'e f N', 'e f e', 'e s f', 'e s s', 'e s n', 'e s m', 'e s g', 'e s h', 'e s s', 'e s k', 'e s N', 'e s e', 'e n f', 'e n s', 'e n n', 'e n m', 'e n g', 'e n h', 'e n s', 'e n k', 'e n N', 'e n e', 'e m f', 'e m s', 'e m n', 'e m m', 'e m g', 'e m h', 'e m s', 'e m k', 'e m N', 'e m e', 'e g f', 'e g s', 'e g n', 'e g m', 'e g g', 'e g h', 'e g s', 'e g k', 'e g N', 'e g e', 'e h f', 'e h s', 'e h n', 'e h m', 'e h g', 'e h h', 'e h s', 'e h k', 'e h N', 'e h e', 'e s f', 'e s s', 'e s n', 'e s m', 'e s g', 'e s h', 'e s s', 'e s k', 'e s N', 'e s e', 'e k f', 'e k s', 'e k n', 'e k m', 'e k g', 'e k h', 'e k s', 'e k k', 'e k N', 'e k e', 'e N f', 'e N s', 'e N n', 'e N m', 'e N g', 'e N h', 'e N s', 'e N k', 'e N N', 'e N e', 'e e f', 'e e s', 'e e n', 'e e m', 'e e g', 'e e h', 'e e s', 'e e k', 'e e N', 'e e e']
 
+<<<<<<< HEAD
 test = dict((w, -Infinity) for w in all_with_vowel)
 for w in test:
     test[w] = np.exp(logsumexp([nicelog(h.ll_counts[w] + 1e-6) - nicelog(sum(h.ll_counts.values())+(1e-6*len(h.ll_counts.keys()))) + (h.posterior_score - pdata) for h in space]))
 print test.keys()
 print test.values()
+=======
+##later with new data
+stimuli = ['k a N', 'f a n', 'm a g', 'h a s']
+>>>>>>> 523837de65c8a6f42ae0603e309a4000019968cd
 
 
 

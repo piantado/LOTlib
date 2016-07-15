@@ -62,6 +62,7 @@ class FunctionNode(object):
 
     def __init__(self, parent, returntype, name, args):
         self.__dict__.update(locals())
+        self.__dict__.pop('self')  # we don't want self.self! https://stackoverflow.com/questions/6025758/
         self.added_rule = None
         
         assert self.name is None or isinstance(self.name, str)
@@ -417,7 +418,7 @@ class FunctionNode(object):
             raise NodeSamplingException
 
         r = random() * Z # now select a random number (giving a random node)
-        #
+
         # for t in self:
         #     trp = float(resampleProbability(t))
         #     r -= trp
