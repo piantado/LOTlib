@@ -1,7 +1,7 @@
 from LOTlib.Eval import * # Necessary for compile_function eval below
 from LOTlib.Hypotheses.FunctionHypothesis import FunctionHypothesis
 from LOTlib.Hypotheses.Proposers import regeneration_proposal, ProposalFailedException
-from LOTlib.Miscellaneous import Infinity, raise_exception, attrmem
+from LOTlib.Miscellaneous import self_update
 from LOTlib.Primitives import *
 from Priors.PCFGPrior import PCFGPrior
 
@@ -33,9 +33,7 @@ class LOTHypothesis(PCFGPrior, FunctionHypothesis):
             assert False, "*** Use of 'args' is deprecated. Use display='...' instead."
 
         # Save all of our keywords
-        self.__dict__.update(locals())
-        self.__dict__.pop('self')  # we don't want self.self! https://stackoverflow.com/questions/6025758/
-
+        self_update(self, locals())
         if value is None and grammar is not None:
             value = grammar.generate()
 

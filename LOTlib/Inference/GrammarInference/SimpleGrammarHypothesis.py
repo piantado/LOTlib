@@ -2,7 +2,7 @@ import numpy as np
 from copy import deepcopy
 from scipy.misc import logsumexp
 from scipy.stats import binom
-from LOTlib.Miscellaneous import sample1
+from LOTlib.Miscellaneous import sample1, self_update
 from LOTlib.Hypotheses.Stochastics import *
 
 class SimpleGrammarHypothesis(Hypothesis):
@@ -25,7 +25,7 @@ class SimpleGrammarHypothesis(Hypothesis):
 
         L = numpy.array(L)
 
-        self.__dict__.update(locals())
+        self_update(self,locals())
         self.N_groups = len(GroupLength)
         self.nts    = Counts.keys() # all nonterminals
         self.nrules = { nt: Counts[nt].shape[1] for nt in self.nts} # number of rules for each nonterminal

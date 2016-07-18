@@ -29,6 +29,14 @@ TAU = 6.28318530718     # fuck pi
 T = True
 F = False
 
+
+#-------------------------------------------------------------------------------------------------------------
+# self.__dict__.update creates a self.self object. We want to pop this off!
+# https://stackoverflow.com/questions/6025758/whats-the-pythonic-way-to-set-class-variables
+def self_update(s,l):
+    s.__dict__.update(l)
+    s.__dict__.pop('self')
+#_____________________________________________________________________________________________________________
 # ------------------------------------------------------------------------------------------------------------
 
 def first(x):

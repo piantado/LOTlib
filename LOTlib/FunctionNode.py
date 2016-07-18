@@ -6,7 +6,7 @@ from math import log
 from random import random
 
 from LOTlib.BVRuleContextManager import BVRuleContextManager
-from LOTlib.Miscellaneous import lambdaTrue, lambdaOne
+from LOTlib.Miscellaneous import lambdaTrue, lambdaOne, self_update
 
 
 # ------------------------------------------------------------------------------------------------------------
@@ -61,8 +61,7 @@ class FunctionNode(object):
     NoCopy = {'self', 'parent', 'returntype', 'name', 'args', 'parent'}
 
     def __init__(self, parent, returntype, name, args):
-        self.__dict__.update(locals())
-        self.__dict__.pop('self')  # we don't want self.self! https://stackoverflow.com/questions/6025758/
+        self_update(self,locals())
         self.added_rule = None
         
         assert self.name is None or isinstance(self.name, str)
