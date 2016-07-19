@@ -12,7 +12,7 @@ from LOTlib.Miscellaneous import q, Infinity, attrmem
 
 class FormalLanguageHypothesis(StochasticLikelihood, RecursiveLOTHypothesis):
     def __init__(self, grammar=None, **kwargs):
-        RecursiveLOTHypothesis.__init__(self, grammar, args=[], recurse_bound=20, maxnodes=100, **kwargs)
+        RecursiveLOTHypothesis.__init__(self, grammar, display="lambda recurse_ : %s", recurse_bound=20, maxnodes=100, **kwargs)
 
     def __call__(self, *args):
         try:
@@ -80,7 +80,8 @@ class SimpleEnglishHypothesis(StochasticLikelihood, FactorizedLambdaHypothesis):
 
         ll = 0.0 # We are going to compute a pseudo-likelihood, counting close strings as being close
         for k in datum.output.keys():
-            ll += datum.output[k] * logsumexp([ log(llcounts[r])-log(lo) - 100.0 * distance(r, k) for r in llcounts.keys() ])
+            # ll += datum.output[k] * logsumexp([ log(llcounts[r])-log(lo) - 100.0 * distance(r, k) for r in llcounts.keys() ])
+            ll += datum.output[k] * logsumexp([ log(llcounts[r])-log(lo) - 10000.0 * distance(r, k) for r in llcounts.keys() ])
         return ll
 
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from LOTlib.Miscellaneous import q, qq, Infinity
+from LOTlib.Miscellaneous import q, qq, Infinity, self_update
 from LOTlib.Inference.Samplers.Sampler import Sampler, MH_acceptance
 
 from math import log, exp
@@ -70,7 +70,7 @@ class MHSampler(Sampler):
     def __init__(self, current_sample, data, steps=Infinity, proposer=None, skip=0,
                  prior_temperature=1.0, likelihood_temperature=1.0, acceptance_temperature=1.0, trace=False,
                  shortcut_likelihood=True):
-        self.__dict__.update(locals())
+        self_update(self,locals())
         self.was_accepted = None
 
         if proposer is None:
