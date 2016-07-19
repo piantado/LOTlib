@@ -44,24 +44,18 @@ class FormalLanguage(object):
         finite: limits the max_length of data
         avg: sample for multiple times and average to reduce noise, note the cnt can have fraction
         """
-        out = FunctionData(input=[''], output=None)
-        out.input = ''
-
         if n == 0:
-            out.output = Counter()
-            return [out]
+            return [FunctionData(input=[], output=Counter())]
 
         if avg:
             cnt = Counter(self.sample_data(int(n*512)))
             n = float(512)
             for key in cnt.keys():
                 cnt[key] /= n
+            return [FunctionData(input=[], output=cnt)]
 
-            out.output = cnt
-            return [out]
-        
-        out.output = Counter(self.sample_data(n))
-        return [out]
+        return [FunctionData(input=[], output=Counter(self.sample_data(n)))]
+
 
     def estimate_precision_and_recall(self, h, data, truncate=True):
         """
@@ -71,13 +65,22 @@ class FormalLanguage(object):
              be set False in finite vs infinite case.
         """
         output = set(data[0].output.keys())
-        h_out = set([h() for _ in xrange(int(sum(data[0].output.values())))])
+        tmp_list = []
+        for _ in xrange(int(sum(data[0].output.values()))):
+            try:
+                tmp_list.append(h())
+            except:
+                tmp_list.append('')
+        h_llcounts = Counter(tmp_list)
+        h_out = set(h_llcounts.keys())
 
         if truncate:
             max_len = max(map(len, output))
             tmp = deepcopy(h_out)
             for _str in tmp:
-                if len(_str) > max_len: h_out.remove(_str)
+                if len(_str) > max_len:
+                    h_out.remove(_str)
+                    del h_llcounts[_str]
 
         base = len(h_out)
         cnt = 0.0
@@ -91,7 +94,9 @@ class FormalLanguage(object):
             if v in h_out: cnt += 1
         recall = cnt / base
 
-        return precision, recall
+        return precision, recall, h_llcounts
+
+
 
     def estimate_KL_divergence(self, h, n=1024, max_length=50):
         """ Estimate the KL divergence between me and h """

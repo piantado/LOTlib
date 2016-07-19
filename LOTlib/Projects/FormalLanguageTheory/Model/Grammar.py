@@ -21,6 +21,6 @@ for x in 'a':
     a_grammar.add_rule('ATOM', q(x), None, 2)
 
 eng_grammar = deepcopy(base_grammar)
-for x in 'davtn':
+for x in 'davtnih':
     eng_grammar.add_rule('ATOM', q(x), None, 2)
 

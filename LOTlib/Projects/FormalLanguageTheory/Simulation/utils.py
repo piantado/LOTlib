@@ -1,5 +1,5 @@
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
-from LOTlib.MCMCSummary.TopN import TopN
+from LOTlib.TopN import TopN
 from LOTlib.Miscellaneous import logsumexp
 from optparse import OptionParser
 import numpy as np
