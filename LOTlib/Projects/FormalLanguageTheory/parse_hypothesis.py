@@ -1,11 +1,12 @@
 from pickle import load, dump
 from collections import Counter
+
 from LOTlib.Eval import register_primitive
 from LOTlib.Miscellaneous import flatten2str
 import numpy as np
+from LOTlib.Projects.FormalLanguageTheory.Language.SimpleEnglish import SimpleEnglish
 register_primitive(flatten2str)
 import matplotlib.pyplot as plt
-import matplotlib
 from os import listdir
 from LOTlib.Projects.FormalLanguageTheory.Language.AnBn import AnBn
 from LOTlib.Projects.FormalLanguageTheory.Language.LongDependency import LongDependency
@@ -19,6 +20,9 @@ from mpi4py import MPI
 from Simulation.utils import uniform_data
 from optparse import OptionParser
 from Language.Index import instance
+import pstats, cProfile
+import os
+from copy import deepcopy
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
@@ -29,7 +33,7 @@ fff = sys.stdout.flush
 
 parser = OptionParser()
 parser.add_option("--jump", dest="JUMP", type="int", default=2, help="")
-parser.add_option("--temp", dest="TEMP", type="int", default=2, help="")
+parser.add_option("--temp", dest="TEMP", type="int", default=1, help="")
 parser.add_option("--plot", dest="PLOT", type="string", default='yes', help="")
 parser.add_option("--file", dest="FILE", type="string", default='', help="")
 parser.add_option("--mode", dest="MODE", type="string", default='', help="")
@@ -39,7 +43,8 @@ parser.add_option("--language", dest="LANG", type="string", default='An', help="
 parser.add_option("--finite", dest="FINITE", type="int", default=10, help="")
 parser.add_option("--wfs", dest="WFS", type="string", default='yes', help="")
 parser.add_option("--prob", dest="PROB", type="string", default='yes', help="")
-parser.add_option("--txt", dest="TXT", type="string", default='no', help="")
+parser.add_option("--stype", dest="STYPE", type="string", default='cube', help="")
+parser.add_option("--dtype", dest="DTYPE", type="string", default='staged', help="")
 (options, args) = parser.parse_args()
 
 def slice_list(input, size):
@@ -871,7 +876,7 @@ def parse_cube(lang_name, finite):
         example script:
             mpiexec -n 12 python parse_hypothesis.py --mode=parse_cube --language=An --finite=3/10
     """
-    _dir = 'out/final/'
+    _dir = 'out/'
     global size
     global rank
     topn = dict()
@@ -883,15 +888,16 @@ def parse_cube(lang_name, finite):
         set_topn = set()
         print 'loading..'; fff()
         for file_name in listdir(_dir):
-            if lang_name in file_name:
+            if lang_name + '_' in file_name:
                 _set = load(open(_dir+file_name))
                 set_topn.update([h for h in _set])
 
         print 'getting p&r..'; fff()
-        pr_data = language.sample_data_as_FuncData(1024)
+        pr_data = language.sample_data_as_FuncData(2048)
         for h in set_topn:
-            p, r = language.estimate_precision_and_recall(h, pr_data, truncate=truncate_flag)
+            p, r, h_llcounts = language.estimate_precision_and_recall(h, pr_data, truncate=truncate_flag)
             prf_dict[h] = [p, r, 0 if p+r == 0 else 2*p*r/(p+r)]
+            h.fixed_ll_counts = h_llcounts
 
         topn = dict(enumerate(set_topn))
         print 'bcasting..'; fff()
@@ -900,7 +906,8 @@ def parse_cube(lang_name, finite):
     prf_dict = comm.bcast(prf_dict, root=0)
 
     print rank, 'getting posterior'; fff()
-    work_list = slice_list(np.arange(0, 36, 1), size)
+    # work_list = slice_list(np.arange(0, 72, 6), size)
+    work_list = slice_list(np.arange(120, 264, 12), size)
 
     cube = []
     for s in work_list[rank]:
@@ -911,7 +918,7 @@ def parse_cube(lang_name, finite):
 
         Z = logsumexp([h.posterior_score for ind, h in topn.iteritems()])
 
-        table = [[ind, h.posterior_score, prf_dict[h][0], prf_dict[h][1], prf_dict[h][2], Counter([h() for _ in xrange(256)])] for ind, h in topn.iteritems()]
+        table = [[ind, h.posterior_score, prf_dict[h][0], prf_dict[h][1], prf_dict[h][2], h.fixed_ll_counts] for ind, h in topn.iteritems()]
         table.sort(key=lambda x: x[1], reverse=True)
         cube += [[s, Z, table]]
 
@@ -929,14 +936,16 @@ def parse_cube(lang_name, finite):
     dump([cube, topn], open(lang_name+'_stats'+suffix, 'w'))
 
 
-def cube2graph(file_name):
+def cube2graph(file_name, plot):
     """
         read the stats file and make graph & table
 
         example script:
-            python parse_hypothesis.py --mode=cube2graph --file=file
+            python parse_hypothesis.py --mode=cube2graph --file=file --plot=no
     """
-    cube, topn = load(open('./out/final_stats/'+file_name))
+    cube, topn = load(open('./stats/'+file_name))
+    # cube, topn = load(open('./'+file_name))
+
     x = []
     wfs = []
     wp = []
@@ -956,11 +965,30 @@ def cube2graph(file_name):
     # fig_other_f = None
     # for e in top10_f:
     #     fig_other_f, = plt.plot(x, e, '#B0B0B0', label='other hypothesis F-score')
+
     # smooth MAP_f
-    flag = False
-    for i in xrange(len(MAP_f)):
-        if -1e-2 < MAP_f[i] - 0.93 < 1e-2: flag = True
-        if flag: MAP_f[i] = 1.0
+    # flag = False
+    # for i in xrange(len(MAP_f)):
+    #     if -1e-2 < MAP_f[i] - 0.93 < 1e-2: flag = True
+    #     if flag: MAP_f[i] = 1.0
+
+    # make latex table
+    f_table = open(file_name+'_toph_table', 'w')
+    _, __, table = cube[-1]
+    for ind, score, p, r, f, strs in table:
+        print >> f_table, str(topn[ind]), '&', '%.2f' % score, '&', '%.2f' % p, '&', '%.2f' % r, '&', '%.2f' % f, '&', '%.2f' % np.exp(score - __), '&', '$(',
+
+        strs = [v for v in strs.keys()]; strs.sort(key=lambda x:len(x))
+        strs = ['\\mb{'+v+'}' for v in strs]
+        if strs[0] == '\\mb{}': strs[0] = '\\emptyset'
+        l = strs.pop()
+        for s in strs: print >> f_table, s, ',',
+        print >> f_table, l, ')$', '\\\\'
+    f_table.close()
+
+
+    dump([x, wfs, wp, wr, MAP_f], open(file_name+'_graph', 'w'))
+    if plot != 'yes': sys.exit(0)
 
     fig_wfs, = plt.plot(x, wfs, 'r', label='Weighted F-score')
     fig_wp, = plt.plot(x, wp, 'r--', label='Weighted precision')
@@ -973,52 +1001,60 @@ def cube2graph(file_name):
     # f.close()
 
     plt.ylabel('Scores')
-    plt.xlabel('Size of Data')
+    plt.xlabel('Amount of data')
     plt.legend(handles=[fig_wfs, fig_wp, fig_wr, fig_map_f], loc=5)
-    plt.axis([0, 30, 0, 1.05])
-    # plt.axis([0, 240, 0, 1.05])
+    # plt.axis([0, 30, 0, 1.05])
+    plt.axis([0, 240, 0, 1.05])
     matplotlib.rcParams.update({'font.size': 16})
 
-    # make latex table
-    f_table = open(file_name+'_toph_table', 'w')
-    _, __, table = cube[-1]
-    for ind, score, h, r, f, strs in table:
-        print >> f_table, str(topn[ind]), '&', '%.2f' % score, '&', '%.2f' % f, '&', '$(',
 
-        strs = [v for v in strs.keys()]; strs.sort(key=lambda x:len(x))
-        strs = ['\\mb{'+v+'}' for v in strs][0:5]
-        if strs[0] == '\\mb{}': strs[0] = '\\emptyset'
-        l = strs.pop()
-        for s in strs: print >> f_table, s, ',',
-        print >> f_table, l, ')$', '\\\\'
-
-    f_table.close()
 
     plt.show()
 
 
 
 
-def only_plot(lang_name, suffix, is_txt='no'):
-    x = []; y = []
+def only_plot(file_name, stype):
+    """
+        plot graph based on stats
 
-    if is_txt == 'yes':
-        f = open(lang_name+suffix)
-        for line in f:
-            a, b = line.split()
-            x.append(float(a))
-            y.append(float(b))
-    else:
-        seq = load(open(lang_name+'_seq'+suffix))
-        x, y = zip(*seq)
+        python parse_hypothesis.py --mode=only_plot --file=file --stype=cube
+    """
 
-    plt.plot(x, y)
+    if stype == 'cube':
+        x, wfs, wp, wr, MAP_f = load(open(file_name))
+        fig_wfs, = plt.plot(x, wfs, 'r', label='Weighted F-score')
+        fig_wp, = plt.plot(x, wp, 'r--', label='Weighted precision')
+        fig_wr, = plt.plot(x, wr, 'r-.', label='Weighted recall')
+        fig_map_f, = plt.plot(x, MAP_f, label='MAP hypothesis F-score')
 
-    plt.ylabel('Weighted F-score')
-    # plt.ylabel('Posterior Probability')
-    plt.xlabel('Size of Data')
-    plt.title(lang_name)
-    plt.show()
+        plt.ylabel('Scores')
+        plt.xlabel('Size of Data')
+        plt.legend(handles=[fig_wfs, fig_wp, fig_wr, fig_map_f], loc=5)
+        plt.axis([0, 66, 0, 1.05])
+        # plt.axis([0, 240, 0, 1.05])
+        matplotlib.rcParams.update({'font.size': 16})
+        plt.show()
+
+    # x = []; y = []
+    #
+    # if is_txt == 'yes':
+    #     f = open(lang_name+suffix)
+    #     for line in f:
+    #         a, b = line.split()
+    #         x.append(float(a))
+    #         y.append(float(b))
+    # else:
+    #     seq = load(open(lang_name+'_seq'+suffix))
+    #     x, y = zip(*seq)
+    #
+    # plt.plot(x, y)
+    #
+    # plt.ylabel('Weighted F-score')
+    # # plt.ylabel('Posterior Probability')
+    # plt.xlabel('Size of Data')
+    # plt.title(lang_name)
+    # plt.show()
 
 
 def temp():
@@ -1063,26 +1099,270 @@ def inf_prob(seq, _dict, flag, p1, p2):
         print ind, ': ', tmp; ind += 2
 
 
+# ==============================================
+# parse staged input case, a version made in 2016/04/26
+# ==============================================
+
+def make_staged_posterior_seq(_dir, temperature, lang_name, dtype):
+    """
+        script: python parse_hypothesis.py --mode=make_staged_posterior_seq --file=file --temp=1 --language=AnBn --dtype=staged/uniform
+
+        1. read raw file
+        2. compute fixed Counter
+        3. compute posterior for different amounts
+
+        dumped posterior format: [topn, [z,amount,finite,[s1,s2,....]], [], [], ....]
+
+        NOTE: if _dir is previously dumped posterior seq, then we use it
+    """
+    
+    if not (os.path.isfile(_dir) and 'posterior_seq' in _dir):
+
+        topn = set()
+
+        for filename in os.listdir(_dir):
+            if ('staged' in filename or 'normal' in filename) and 'seq' not in filename:
+                print 'load', filename
+                _set = load(open(_dir+filename))
+                topn.update([h for h in _set])
+        topn = list(topn)
+
+        # fix the llcnts to save time and make curve smooth
+        print 'get llcnts...'
+        for h in topn:
+            llcnts = Counter([h() for _ in xrange(2048)])
+            h.fixed_ll_counts = llcnts
+            
+            
+        seq = []
+        seq.append(topn)
+
+        for amount, finite in mk_staged_wlist(0,200,2,[48,96]):
+            
+            print 'posterior on', amount, finite
+            
+            if dtype == 'staged':
+                language = instance(lang_name, finite)
+                eval_data = language.sample_data_as_FuncData(amount)
+            elif dtype == 'uniform':
+                eval_data = uniform_data(amount, 12)
+
+            for h in topn:
+                h.likelihood_temperature = temperature
+                h.compute_posterior(eval_data)
+
+            Z = logsumexp([h.posterior_score for h in topn])
+            seq.append([Z, amount, finite, [h.posterior_score for h in topn]])
+
+        dump(seq,open(dtype + '_posterior_seq' + suffix, 'w'))
+
+    else:
+        seq = load(open(_dir))
+    
+
+    # ====================== compute KL based on seq =======================
+    
+    print 'compute kl seq...'
+    kl_seq = []
+    topn = seq.pop(0)
+    for i in xrange(len(seq)-1):
+        kl_seq.append([seq[i][1],compute_kl2(seq[i],seq[i+1])])
+
+    dump(kl_seq,open(dtype + '_kl_seq' + suffix,'w'))
+
+
+
+
+def compute_kl2(now, nxt):
+    now_z, _, __, now_scores = now
+    nxt_z, _, __, nxt_scores = nxt
+
+    kl = 0.0
+
+    for i in xrange(len(now_scores)):
+        p = np.exp(now_scores[i] - now_z)
+        if p == 0: continue
+        kl += p * (now_scores[i] - nxt_scores[i] + nxt_z - now_z)
+
+    return kl
+
+    
+
+
+
+def mk_staged_wlist(left, right, step, stage):
+    stage1, stage2 = stage
+    w_list = [[i, 0] for i in xrange(left, right, step)]
+    
+    ind = 0
+    
+    for amount, _ in deepcopy(w_list):
+        if amount < stage1:
+            w_list[ind][1] = 4
+        elif amount < stage2:
+            w_list[ind][1] = 8
+        else:
+            w_list[ind][1] = 12
+        ind += 1
+
+    return w_list
+
+
+def plt_kl_seq(file1, file2):
+    
+    
+
+    staged_seq = load(open(file1))
+    uniform_seq = load(open(file2))
+
+    x, y = zip(*staged_seq)
+    f, (ax1, ax2) = plt.subplots(1,2)
+    ax1.plot(x, y)
+    ax1.set_title('staged')
+
+    x, y = zip(*uniform_seq)
+    ax2.plot(x, y)
+    ax2.set_title('uiform')
+
+    plt.show()
+    
+
+# ======================================================
+# parse nonadjacent case
+# ======================================================
+
+def parse_nonadjacent(_dir,temperature):
+    """
+        1. read raw hypos
+        2. get fixed llcnts
+        3. compute posterior given different data pool sizes
+
+        NOTE: if _dir is previously dumped topn then load it
+    """
+
+    if 'nonadjacent_topn' not in _dir:
+        topn = set()
+        for filename in os.listdir(_dir):
+            if 'nonadjacent' in filename and 'seq' not in filename:
+                print 'load', filename
+                _set = load(open(_dir+filename))
+                topn.update([h for h in _set])
+        topn = list(topn)
+    
+        # fix the llcnts to save time and make curve smooth
+        print 'get llcnts...'
+        topn = gen_fixlen_llcnts(topn, 5)
+        dump(topn, open(_dir+'_nonadjacent_topn'+suffix, 'w'))
+
+    else:
+        print 'load', _dir
+        topn = load(open(_dir))
+
+    # find all correct hypotheses
+    topn = list(topn)
+    correct_set = set()
+
+    for i in xrange(len(topn)):
+
+        flag = True
+        for k,v in topn[i].fixed_ll_counts.iteritems():                
+            if len(k) < 2: 
+                continue
+            elif k[0] == 'a' and k[-1] in 'b':
+                continue
+            elif k[0] == 'c' and k[-1] in 'bd':
+                continue
+            elif k[0] == 'e' and k[-1] in 'bdf':
+                continue
+            flag=False
+            break
+
+        if flag: correct_set.add(i)
+
+    print len(correct_set), 'of', len(topn), 'are correct'
+    
+    # get posterior
+    w_list = range(2, 25, 1)
+    amount_list = range(24, 144, 5)
+    posterior_seq = []
+    for i in xrange(len(w_list)):
+        pool_size = w_list[i]
+        language = LongDependency(max_length=pool_size)
+        eval_data = [FunctionData(input=[], output={e: float(amount_list[i])/pool_size for e in language.str_sets})]
+
+        for h in topn:
+            h.likelihood_temperature = temperature
+            h.compute_posterior(eval_data)
+
+        Z = logsumexp([h.posterior_score for h in topn])
+        
+        
+        prob = 0
+        for i in xrange(len(topn)):
+            if i in correct_set:
+                prob += np.exp(topn[i].posterior_score - Z)
+        print 'pool_size', pool_size, 'prob', prob
+        posterior_seq.append([pool_size, prob])
+        
+        #debug
+        _list = [h for h in topn]; _list.sort(key=lambda x: x.posterior_score, reverse=True)
+        for i in xrange(3):
+            print 'prob: ', np.exp(_list[i].posterior_score - Z),
+            print h.fixed_ll_counts
+            print _list[i]
+        print '='*50; fff()
+
+    dump(posterior_seq, open('nonadjacent_posterior_seq'+suffix,'w'))
+ 
+
+def gen_fixlen_llcnts(topn, _len, num=2048):
+    """
+        force to generate llcnts with a fixed length
+    """
+
+    for h in topn:
+        
+        llcnts = Counter([h() for _ in xrange(2048)])
+        for k,v in deepcopy(llcnts).iteritems():
+            if len(k) != 5:
+                del llcnts[k]
+    
+        now_num = float(sum(llcnts.values()))
+        for k in deepcopy(llcnts).keys(): llcnts[k] *= (num/now_num)
+
+        h.fixed_ll_counts = llcnts
+
+    return topn
+
+
+
+
+
+
 if __name__ == '__main__':
 
-    if options.MODE == 'staged_mk':
-        make_staged_seq2(jump=options.JUMP, temp=options.TEMP)
-    elif options.MODE == 'staged_plt':
-        get_kl_seq2(jump=options.JUMP, is_plot=options.PLOT, file_name=options.FILE)
-    elif options.MODE == 'nonadjacent_mk':
-        parse_nonadjacent(temperature=options.TEMP)
-    elif options.MODE == 'nonadjacent_plt':
-        dis_pos(jump=options.JUMP, is_plot=options.PLOT, file_name=options.FILE, axb_bound=options.AXB, x_bound=options.X)
-    elif options.MODE == 'parse_simple':
-        most_prob(options.FILE)
+#    if options.MODE == 'staged_mk':
+#        make_staged_seq2(jump=options.JUMP, temp=options.TEMP)
+#    elif options.MODE == 'staged_plt':
+#        get_kl_seq2(jump=options.JUMP, is_plot=options.PLOT, file_name=options.FILE)
+#    elif options.MODE == 'nonadjacent_mk':
+#        parse_nonadjacent(temperature=options.TEMP)
+#    elif options.MODE == 'nonadjacent_plt':
+#        dis_pos(jump=options.JUMP, is_plot=options.PLOT, file_name=options.FILE, axb_bound=options.AXB, x_bound=options.X)
+#    elif options.MODE == 'parse_simple':
+#        most_prob(options.FILE)
+    if options.MODE == 'make_staged_posterior_seq':
+        make_staged_posterior_seq(options.FILE, options.TEMP, options.LANG, options.DTYPE)
+    elif options.MODE == 'parse_nonadjacent':
+        parse_nonadjacent(options.FILE, options.TEMP)
     elif options.MODE == 'parse_plot':
         parse_plot(options.LANG, options.FINITE, is_plot=options.PLOT)
     elif options.MODE == 'only_plot':
-        only_plot(options.LANG, options.FILE, options.TXT)
+        only_plot(options.FILE, options.STYPE)
     elif options.MODE == 'parse_cube':
         parse_cube(options.LANG, options.FINITE)
     elif options.MODE == 'cube2graph':
-        cube2graph(options.FILE)
+        cube2graph(options.FILE, options.PLOT)
 
 
     # seq = [[2  ,0.167012421	], [4  ,0.404128998	], [6  ,0.408503541], [8  ,0.346094762], [10 ,0.43615293], [12 ,0.995324843], [14 ,0.987169], [16 ,0.979347514], [18 ,0.983990461], [20 ,0.988215573	], [22 ,0.970604139	], [24 ,1]]

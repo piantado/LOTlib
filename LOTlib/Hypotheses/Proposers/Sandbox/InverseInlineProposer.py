@@ -3,7 +3,7 @@ from math import log
 from collections import defaultdict
 
 from LOTProposer import LOTProposer
-from LOTlib.Miscellaneous import sample1, lambdaOne, dropfirst
+from LOTlib.Miscellaneous import sample1, lambdaOne, dropfirst, self_update
 from LOTlib.GrammarRule import *
 from LOTlib.Hypotheses.Proposers import ProposalFailedException
 from LOTlib.FunctionNode import NodeSamplingException
@@ -27,7 +27,7 @@ class InverseInlineProposer(LOTProposer):
         """
             This takes a grammar and a regex to match variable names
         """
-        self.__dict__.update(locals())
+        self_update(self,locals())
         LOTProposer.__init__(self, grammar)
 
         # check that we used "apply_" instead of "apply"

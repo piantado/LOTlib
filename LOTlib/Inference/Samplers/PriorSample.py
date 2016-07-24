@@ -2,7 +2,7 @@
         Inference - sample from the prior (as a baseline comparison)
 """
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-from LOTlib.Miscellaneous import Infinity
+from LOTlib.Miscellaneous import Infinity, self_update
 
 class PriorSampler(object):
     """
@@ -11,7 +11,7 @@ class PriorSampler(object):
     """
 
     def __init__(self, h0, data, steps=Infinity):
-        self.__dict__.update(locals())
+        self_update(self, locals())
         assert isinstance(h0, LOTHypothesis) # only implemented for LOTHypothesis
         self.samples_yielded = 0
 

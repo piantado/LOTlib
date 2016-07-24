@@ -1,75 +1,36 @@
-import random
+from itertools import product
 
-def dellData(bool):
-    unrestricted = ['k', 'g', 'm', 'n']
-    onsets = ['f', 'h']
-    codas = ['s', 'N']
-    vowels = ['e']
-
-    onsets += (unrestricted)
-    codas += (unrestricted)
-
-    stim = ''
-    if(bool):
-        stim+=random.choice(onsets)+' '+random.choice(vowels)+' '+random.choice(codas)
-    else:
-        stim+=random.choice(codas)+' '+random.choice(vowels)+' '+random.choice(onsets)
-    return stim
+def unique_chars_set(s):
+    s = ''.join(s.split())
+    return len(s) == len(set(s))
 
 
-def kaggikData(bool):
+all_words = [''.join(i) for i in product(['f ','s ','n ','m ','g ','h ','s ','k ','N ','e '], repeat = 3)]
+#print all_words
 
-    unrestricted = ['f', 's', 'm', 'n']
-    onsetsa = ['g', 'h']
-    codasa = ['k', 'N']
-    onsetsi = ['k','h']
-    codasi = ['g','N']
-    vowels = ['a','i']
+words_with_vowel = []
+stim_words = []
 
-    onsetsa += (unrestricted)
-    codasa += (unrestricted)
-    onsetsi += (unrestricted)
-    codasi+= (unrestricted)
-
-    stim = ''
-    v = random.choice(vowels)
-
-    if v == 'a':
-        if bool:
-            stim+=random.choice(onsetsa)+' '+v+' '+random.choice(codasa)
-        else:
-            stim+=random.choice(codasa)+' '+v+' '+random.choice(onsetsa)
-    else:
-        if bool:
-            stim+=random.choice(onsetsi)+' '+v+' '+random.choice(codasi)
-        else:
-            stim+=random.choice(codasi)+' '+v+' '+random.choice(onsetsi)
-
-    return stim
+for w in all_words:
+    if 'e' in w:
+        s = w.strip(' \t\n\r')
+        words_with_vowel.append(s)
+        if unique_chars_set(w):
+            if w[2]=='e':
+                stim_words.append(w)
+#print words_with_vowel
+#print stim_words
 
 
 
+KGall_words = [''.join(i) for i in product(['f ','s ','n ','m ','g ','h ','s ','k ','N ','a ','i '], repeat = 3)]
+kaggik_words = []
+for w in KGall_words:
+    w = w.strip(' \t\n\r')
+    if unique_chars_set(w) and (w[4]!= 'h') and (w[0]!="N") and (w[0]!='a' and w[0]!= 'i') and (w[4]!= 'a' and w[4]!= 'i'):
+        if w[2]=='a' and w[4]!='k':
+            kaggik_words.append(w)
+        if w[2]=='i' and w[4]!='g':
+            kaggik_words.append(w)
 
-
-
-
-
-def lotsa(n, size, fn, bool):
-    mydata = {}
-    setty = set()
-    for i in range(0,n):
-        mydata.update({fn(bool):size})
-        setty.add(fn(bool))
-    print(setty)
-    return mydata
-#lotsa(100, 100, dellData,False)
-d = lotsa(200,100, kaggikData,False)
-listy = []
-for k,v in d.items():
-    if 'N' in k or 'k' in k or 'g' in k or 'h' in k:
-        listy.append(k)
-print (listy)
-from LOTlib.Primitives import *
-from LOTlib.Miscellaneous import flatten2str
-for i in range(50):
-    print(flatten2str(if_(flip_(),cons_(cons_(sample_("fsnmgh"),'a'),sample_("fsnmkN")),cons_(cons_(sample_( "fsnmkh"),'i'),sample_("fsnmgN")))))
+print kaggik_words

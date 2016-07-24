@@ -2,6 +2,7 @@ import copy
 import random
 import numpy as np
 from Hypothesis import Hypothesis
+from LOTlib.Miscellaneous import self_update
 
 
 class VectorHypothesis(Hypothesis):
@@ -18,7 +19,7 @@ class VectorHypothesis(Hypothesis):
         proposal = proposal * propose_mask
         self.proposal = proposal
         Hypothesis.__init__(self, value=value)
-        self.__dict__.update(locals())
+        self_update(self, locals())
 
     def propose(self):
         """New value is sampled from a normal centered @ old values, w/ proposal as covariance."""
