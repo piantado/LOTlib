@@ -61,6 +61,7 @@ class FunctionNode(object):
     NoCopy = {'self', 'parent', 'returntype', 'name', 'args', 'parent'}
 
     def __init__(self, parent, returntype, name, args):
+
         self.__dict__.update(locals())
         self.__dict__.pop('self')  # we don't want self.self! https://stackoverflow.com/questions/6025758/
         self.added_rule = None
