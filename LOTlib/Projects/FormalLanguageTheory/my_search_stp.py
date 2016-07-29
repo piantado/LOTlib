@@ -25,18 +25,20 @@ register_primitive(flatten2str)
 global prefix
 prefix = ""
 
-def run(mk_hypothesis, options, ndata):
+def run(options, ndata):
     """
     This out on the DATA_RANGE amounts of data and returns all hypotheses in top count
     """
     if LOTlib.SIG_INTERRUPTED:
         return set()
 
-
     language = instance(options.LANG, options.FINITE)
+    print language
+
 
     tn = TopN(N=options.TOP_COUNT)
-    h0 = mk_hypothesis(language, N=options.N, rank=rank, terminals=options.TERMINALS, bound=options.BOUND)
+    h0 = make_hypothesis(options.LANG, N=options.N, rank=rank, terminals=options.TERMINALS, bound=options.BOUND)
+
     data = language.sample_data_as_FuncData(ndata)
 
     for i, h in enumerate(break_ctrlc(MHSampler(h0, data, steps=options.STEPS))):
@@ -95,6 +97,6 @@ if __name__ == "__main__":
     #DATA_RANGE = np.arange(120, 264, 12)
     DATA_RANGE = np.arange(10, 1000, 10)
 
-    args = list(itertools.product([make_hypothesis], [options], DATA_RANGE))
+    args = list(itertools.product([options], DATA_RANGE))
 
     hypotheses = simple_mpi_map(run, args)
