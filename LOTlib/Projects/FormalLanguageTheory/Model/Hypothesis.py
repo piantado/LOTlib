@@ -18,7 +18,7 @@ class FormalLanguageHypothesis(StochasticLikelihood, RecursiveLOTHypothesis):
         try:
             return RecursiveLOTHypothesis.__call__(self, *args)
         except RecursionDepthException:  # catch recursion and too big
-            return None
+            return ''
 
 
 class AnBnCnHypothesis(StochasticLikelihood, FactorizedDataHypothesis):
