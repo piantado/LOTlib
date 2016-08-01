@@ -13,11 +13,15 @@ class FormalLanguage(object):
         # Sample a string of data
         cnt = Counter()
         for _ in xrange(n):
-            s = self.grammar.generate()
+            s = str(self.grammar.generate())
             cnt[s] += 1
 
-        return [FunctionData(input=[], output=cnt)]
+        return [FunctionData(input=(), output=cnt)]
 
+    def terminals(self):
+        """ This returns a list of terminal symbols, specific to each language
+        """
+        raise NotImplementedError
 
     def estimate_precision_and_recall(self, h, data, truncate=True):
         """

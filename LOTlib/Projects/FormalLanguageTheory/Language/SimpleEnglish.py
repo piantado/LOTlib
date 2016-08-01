@@ -10,14 +10,16 @@ class SimpleEnglish(FormalLanguage):
         self.grammar = Grammar(start='S')
         self.grammar.add_rule('S', '%s%s', ['NP', 'VP'], 1.0)
         self.grammar.add_rule('NP', 'd%sn', ['AP'], 1.0)
-        self.grammar.add_rule('AP', 'a%s', ['AP'], 1.0)
-        self.grammar.add_rule('AP', 'a',  None, 1.0)
+        self.grammar.add_rule('AP', 'a%s', ['AP'], 0.10)
+        self.grammar.add_rule('AP', 'a',  None, 0.90)
 
         self.grammar.add_rule('VP', '%s', ['v'], 1.0)
         self.grammar.add_rule('VP', 'v%s', ['NP'], 1.0)
-        self.grammar.add_rule('VP', 'vt%s', ['S'], 1.0)
-        self.grammar.add_rule('S', 'i%sh%s', ['S','S'], 0.5) # add if S then S grammar
+        self.grammar.add_rule('VP', 'vt%s', ['S'], .20)
+        self.grammar.add_rule('S', 'i%sh%s', ['S','S'], 0.1) # add if S then S grammar
 
+    def terminals(self):
+        return list('dnavtih')
 
 # just for testing
 if __name__ == '__main__':

@@ -7,23 +7,28 @@ from pickle import dump
 import time
 import numpy as np
 import LOTlib
-from LOTlib.Miscellaneous import display_option_summary
+from LOTlib.Miscellaneous import display_option_summary, q
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib.Eval import register_primitive
 from LOTlib.Miscellaneous import flatten2str, logsumexp, qq
 from LOTlib.TopN import TopN
-from Model.Hypothesis import make_hypothesis
-from Language.Index import instance
+from Model.Hypothesis import AnBnCnHypothesis
+from Language import *
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
 size = comm.Get_size()
 rank = comm.Get_rank()
 fff = sys.stdout.flush
 
+from copy import deepcopy
+from LOTlib.Projects.FormalLanguageTheory.Model.Grammar import base_grammar # passed in as kwargs
+
 register_primitive(flatten2str)
 
 global prefix
+global suffix
 prefix = ""
+suffix = ""
 
 def run(options, ndata):
     """
@@ -32,23 +37,27 @@ def run(options, ndata):
     if LOTlib.SIG_INTERRUPTED:
         return set()
 
-    language = instance(options.LANG, options.FINITE)
-    print language
+    language = eval(options.LANG+"()")
+    data = language.sample_data(ndata)
 
+    grammar = deepcopy(base_grammar)
+    for t in language.terminals():  # add in the specifics
+        grammar.add_rule('ATOM', q(t), None, 2)
+
+    h0 = AnBnCnHypothesis(grammar=grammar, N=options.N)
 
     tn = TopN(N=options.TOP_COUNT)
-    h0 = make_hypothesis(options.LANG, N=options.N, rank=rank, terminals=options.TERMINALS, bound=options.BOUND)
 
-    data = language.sample_data_as_FuncData(ndata)
+    with open(prefix+'hypotheses_'+options.LANG+'_%i'%rank+suffix+".txt", 'a') as ofile:
 
-    for i, h in enumerate(break_ctrlc(MHSampler(h0, data, steps=options.STEPS))):
-        tn.add(h)
+        for i, h in enumerate(break_ctrlc(MHSampler(h0, data, steps=options.STEPS))):
+            tn.add(h)
+            if i%options.SKIP == 0:
+                print >>ofile, i, ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood/ndata
+                print >>ofile, getattr(h,'ll_counts', None)
+                print >>ofile, h # ends in \0 so we can sort with sort -g -z
 
-        if i%options.SKIP == 0:
-            print i, ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood/ndata,
-            print h
-            print getattr(h,'ll_counts', None),
-            print '\0'
+    return tn
 
 
 def simple_mpi_map(run, args):
@@ -56,7 +65,7 @@ def simple_mpi_map(run, args):
     hypo_set = run(*(args[rank]))
 
     global prefix
-    dump(hypo_set, open(prefix+'hypotheses_'+options.LANG+'_%i'%rank+suffix, 'w'))
+    dump(hypo_set, open(prefix+'hypotheses_'+options.LANG+'_%i'%rank+suffix+".pkl", 'w'))
 
 
 if __name__ == "__main__":
@@ -79,7 +88,6 @@ if __name__ == "__main__":
     parser.add_option("--steps", dest="STEPS", type="int", default=40000, help="Number of samples to run")
     parser.add_option("--skip", dest="SKIP", type="int", default=100, help="Print out every this many")
     parser.add_option("--top", dest="TOP_COUNT", type="int", default=20, help="Top number of hypotheses to store")
-    parser.add_option("--finite", dest="FINITE", type="int", default=1000, help="specify the max_length to make language finite")
     parser.add_option("--name", dest="NAME", type="string", default='', help="name of file")
     parser.add_option("--N", dest="N", type="int", default=3, help="number of inner hypotheses")
     parser.add_option("--terminal", dest="TERMINALS", type="string", default='', help="extra terminals")
@@ -89,6 +97,7 @@ if __name__ == "__main__":
 
     global prefix
     prefix = options.OUT
+    global suffix
     suffix = time.strftime('_' + options.NAME + '_%m%d_%H%M%S', time.localtime())
 
     sys.stdout = codecs.getwriter('utf8')(sys.stdout)
