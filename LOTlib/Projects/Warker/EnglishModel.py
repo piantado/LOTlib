@@ -10,12 +10,28 @@ import numpy
 from LOTlib.Miscellaneous import logsumexp,nicelog, Infinity,attrmem
 from Levenshtein import distance
 from math import log
-from OptionParser import options
+from optparse import OptionParser
 
+parser = OptionParser()
+parser.add_option("-f", "--file", dest="filename", help="file name of the pickled results", default="FirstOrderHyps.pkl")
+parser.add_option("-d", "--datasize", dest="datasize", type="int", help="number of data points", default=100)
+parser.add_option("-t", "--top", dest="top", type="int", help="top N count of hypotheses from each chain", default=100)
+parser.add_option("-s", "--steps", dest="steps", type="int", help="steps for the chainz", default=10000)
+parser.add_option("-c", "--chainz", dest="chains", type="int", help="number of chainz :P", default=15)
+
+(options, args) = parser.parse_args()
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Data
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+def make_data(size=options.datasize):
+    return [FunctionData(input=[],
+                         output={'h e s': size, 'm e s': size, 'm e g': size, 'h e g': size, 'm e n': size, 'h e m': size, 'm e k': size, 'k e s': size, 'h e k': size, 'k e N': size, 'k e g': size, 'h e n': size, 'm e N': size, 'k e n': size, 'h e N': size, 'f e N': size, 'g e N': size, 'n e N': size, 'n e s': size, 'f e n': size, 'g e n': size, 'g e m': size, 'f e m': size, 'g e k': size, 'f e k': size, 'f e g': size, 'f e s': size, 'n e g': size, 'k e m': size, 'n e m': size, 'g e s': size, 'n e k': size})]
+
+
+
+
 
 import LOTlib.Miscellaneous
 from LOTlib.Grammar import Grammar
@@ -107,12 +123,8 @@ class MyHypothesis(StochasticLikelihood, LOTHypothesis):
 def make_hypothesis():
     return MyHypothesis(grammar)
 
-def runme(x,datamt):
-    def make_data(size=datamt):
-        return [FunctionData(input=[],
-                             output={'h e s': size, 'm e s': size, 'm e g': size, 'h e g': size, 'm e n': size, 'h e m': size, 'm e k': size, 'k e s': size, 'h e k': size, 'k e N': size, 'k e g': size, 'h e n': size, 'm e N': size, 'k e n': size, 'h e N': size, 'f e N': size, 'g e N': size, 'n e N': size, 'n e s': size, 'f e n': size, 'g e n': size, 'g e m': size, 'f e m': size, 'g e k': size, 'f e k': size, 'f e g': size, 'f e s': size, 'n e g': size, 'k e m': size, 'n e m': size, 'g e s': size, 'n e k': size})]
-
-    print "Start: " + str(x) + " on this many: " + str(datamt)
+def runme(x):
+    print "Start: " + str(x)
     return standard_sample(make_hypothesis, make_data, show=False, N=options.top, save_top="topModel1.pkl", steps=options.steps)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -125,8 +137,9 @@ if __name__ == "__main__":
 
     #standard_sample(make_hypothesis, make_data, show_skip=9, save_top=False)
 
+    #for running parallel
     from LOTlib.MPI import MPI_map
-    args=[[x, d] for d in range(1, options.datasize+2,10) for x in range(options.chains)]
+    args=[[x] for x in range(options.chains)]
     myhyp=set()
 
     for top in MPI_map(runme, args):
