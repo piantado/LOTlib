@@ -46,7 +46,7 @@ class AnBnCnHypothesis(StochasticLikelihood, FactorizedDataHypothesis):
 
         ll = 0.0 # We are going to compute a pseudo-likelihood, counting close strings as being close
         for k in datum.output.keys():
-            ll += datum.output[k] * logsumexp([ log(llcounts[r])-log(lo) - 100.0 * distance(r, k) for r in llcounts.keys() ])
+            ll += datum.output[k] * logsumexp([ log(llcounts[r])-log(lo) - 1000000.0 * distance(r, k) for r in llcounts.keys() ])
         return ll
 
 
