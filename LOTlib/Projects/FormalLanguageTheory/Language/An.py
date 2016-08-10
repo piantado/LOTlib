@@ -4,9 +4,9 @@ from FormalLanguage import FormalLanguage
 
 class An(FormalLanguage):
 
-    def __init__(self, atom='a', max_length=10):
+    def __init__(self, atom='a'):
         self.atom = atom
-        FormalLanguage.__init__(self, max_length)
+        FormalLanguage.__init__(self)
 
     def all_strings(self, max_length):
 
