@@ -106,35 +106,45 @@ class FactorizedLambdaHypothesis(SimpleLexicon):
     def __init__(self, N=4, grammar=None, argument_type='FUNCTION', variable_weight=2.0, value=None, **kwargs):
 
         SimpleLexicon.__init__(self, value=value)
-
-        self.N = N
+        self.base_grammar = deepcopy(grammar)
+        self.argument_type = argument_type
+        self.variable_weight = variable_weight
 
         if grammar is not None: # else we are in a copy initializer, and the rest will get copied
+            self.N = 0
+
             for w in xrange(N):
-                nthgrammar = deepcopy(grammar)
+                self.add_new_word()
 
-                # Add all the bound variables
-                args = [  ]
-                for xi in xrange(w):  # no first argument
-                    argi = 'x%s'%xi
+    def add_new_word(self):
+        """ add the k'th word to the model"""
 
-                    # Add a rule for the variable
-                    nthgrammar.add_rule(argument_type, argi, None, variable_weight)
+        nthgrammar = deepcopy(self.base_grammar)
 
-                    args.append(argi)
+        # Add all the bound variables
+        args = []
+        for xi in xrange(self.N):  # no first argument
+            argi = 'x%s' % xi
 
-                # and add a rule for the n-ary recursion
-                nthgrammar.add_rule('LIST', 'recurse_', ['FUNCTION']*(w), 1.)
-                # we wrap the content with lambda to make it callable for next recursion level
-                nthgrammar.add_rule('FUNCTION', 'lambda', ['LIST'], 1.)
-                nthgrammar.add_rule('LIST', '(%s)()', ['FUNCTION'], 1.)
-                
-                arg_str = "lambda recurse_"
-                for argi in args:
-                    arg_str = arg_str + ", " + argi
-                arg_str = arg_str + ": %s"
+            # Add a rule for the variable
+            nthgrammar.add_rule(self.argument_type, argi, None, self.variable_weight)
 
-                self.set_word(w, self.make_hypothesis(grammar=nthgrammar, display=arg_str))
+            args.append(argi)
+
+        # and add a rule for the n-ary recursion
+        nthgrammar.add_rule('LIST', 'recurse_', ['FUNCTION'] * (self.N), 1.)
+        # we wrap the content with lambda to make it callable for next recursion level
+        nthgrammar.add_rule('FUNCTION', 'lambda', ['LIST'], 1.)
+        nthgrammar.add_rule('LIST', '(%s)()', ['FUNCTION'], 1.)
+
+        arg_str = "lambda recurse_"
+        for argi in args:
+            arg_str = arg_str + ", " + argi
+        arg_str = arg_str + ": %s"
+
+        self.set_word(self.N, self.make_hypothesis(grammar=nthgrammar, display=arg_str))
+
+        self.N += 1 # we have one more word
 
     def __call__(self):
         # The call here must take no arguments. If this changes, alter x%si above
