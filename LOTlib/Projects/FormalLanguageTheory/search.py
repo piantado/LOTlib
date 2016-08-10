@@ -5,6 +5,7 @@ from LOTlib import break_ctrlc
 from optparse import OptionParser
 from pickle import dump
 import time
+import random
 import numpy as np
 import LOTlib
 from LOTlib.Miscellaneous import display_option_summary, q
@@ -12,7 +13,7 @@ from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib.Eval import register_primitive
 from LOTlib.Miscellaneous import flatten2str, logsumexp, qq
 from LOTlib.TopN import TopN
-from Model.Hypothesis import AnBnCnHypothesis
+from Model.Hypothesis import MyHypothesis
 from Language import *
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
@@ -30,6 +31,8 @@ global suffix
 prefix = ""
 suffix = ""
 
+LARGE_SAMPLE = 100000 # sample this many and then re-normalize to fractional counts
+
 def run(options, ndata):
     """
     This out on the DATA_RANGE amounts of data and returns all hypotheses in top count
@@ -38,24 +41,34 @@ def run(options, ndata):
         return set()
 
     language = eval(options.LANG+"()")
-    data = language.sample_data(ndata)
+    data = language.sample_data(LARGE_SAMPLE)
+    assert len(data) == 1
 
+    # renormalize the counts
+    for k in data[0].output.keys():
+        data[0].output[k] = float(data[0].output[k] * ndata) / LARGE_SAMPLE
+
+    print data
+    # Now add the rules to the grammar
     grammar = deepcopy(base_grammar)
     for t in language.terminals():  # add in the specifics
         grammar.add_rule('ATOM', q(t), None, 2)
 
-    h0 = AnBnCnHypothesis(grammar=grammar, N=options.N)
+    h0 = MyHypothesis(grammar=grammar, N=options.N)
 
     tn = TopN(N=options.TOP_COUNT)
 
-    with open(prefix+'hypotheses_'+options.LANG+'_%i'%rank+suffix+".txt", 'a') as ofile:
+    with open(prefix+'hypotheses_'+options.LANG+'_'+str(rank)+'_'+str(ndata)+'_'+suffix+".txt", 'a') as ofile:
 
         for i, h in enumerate(break_ctrlc(MHSampler(h0, data, steps=options.STEPS))):
             tn.add(h)
+            # print h.posterior_score, getattr(h, 'll_counts', None), h
             if i%options.SKIP == 0:
+                print >>ofile, "\n"
                 print >>ofile, i, ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood/ndata
-                print >>ofile, getattr(h,'ll_counts', None)
+                print >>ofile, getattr(h,'ll_counts', None),
                 print >>ofile, h # ends in \0 so we can sort with sort -g -z
+
 
     return tn
 
@@ -104,7 +117,8 @@ if __name__ == "__main__":
     if rank == 0: display_option_summary(options); fff()
 
     #DATA_RANGE = np.arange(120, 264, 12)
-    DATA_RANGE = np.arange(10, 1000, 10)
+    DATA_RANGE = np.arange(100, 50000, 100)
+    random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))
 
