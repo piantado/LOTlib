@@ -56,13 +56,14 @@ def run(options, ndata):
 
     tn = TopN(N=options.TOP_COUNT)
 
-    for outer in xrange(5):
+    for outer in xrange(options.N): # how many do we add?
         for h in break_ctrlc(MHSampler(h0, data, steps=options.STEPS)):
             tn.add(h)
 
             # print h.posterior_score, h
             # print getattr(h, 'll_counts', None)
 
+        h0 = deepcopy(h)
         h0.add_new_word()
 
     return ndata, tn
@@ -82,11 +83,8 @@ if __name__ == "__main__":
     parser.add_option("--language", dest="LANG", type="string", default='An', help="name of a language")
     parser.add_option("--steps", dest="STEPS", type="int", default=40000, help="Number of samples to run")
     parser.add_option("--skip", dest="SKIP", type="int", default=100, help="Print out every this many")
-    parser.add_option("--top", dest="TOP_COUNT", type="int", default=20, help="Top number of hypotheses to store")
-    parser.add_option("--name", dest="NAME", type="string", default='', help="name of file")
+    parser.add_option("--top", dest="TOP_COUNT", type="int", default=10, help="Top number of hypotheses to store")
     parser.add_option("--N", dest="N", type="int", default=3, help="number of inner hypotheses")
-    parser.add_option("--terminal", dest="TERMINALS", type="string", default='', help="extra terminals")
-    parser.add_option("--bound", dest="BOUND", type="int", default=5, help="recursion bound")
     parser.add_option("--out", dest="OUT", type="str", default="out/", help="Output directory")
     (options, args) = parser.parse_args()
 
@@ -98,21 +96,23 @@ if __name__ == "__main__":
         display_option_summary(options);
         sys.stdout.flush()
 
-    DATA_RANGE = np.arange(1, 10000, 10)
+    DATA_RANGE = np.arange(1, 1000, 10)
     random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))
 
-    # run(options, 1000)
     unq = set()
     for ndata, tn in MPI_unorderedmap(run, args):
         for h in tn:
             if h not in unq:
-                unq.add(h)
+                # unq.add(h)
 
                 print ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata
-                print getattr(h, 'll_counts', None)
+                print getattr(h, 'll_counts', None),
                 print h  # must add \0 when not Lexicon
         sys.stdout.flush()
 
-    dump(unq, options.OUT+"/all-hypotheses"+options.LANG+".pkl")
+    print "# Finishing"
+
+    # with open(options.OUT+"/all-hypotheses"+options.LANG+".pkl", 'w') as f:
+    #     dump(unq, f)
