@@ -1,5 +1,6 @@
 import pickle
 import numpy
+import random
 
 def build_conceptlist(c,l):
     return "CONCEPT_%s__LIST_%s.txt"%(c,l)
@@ -120,44 +121,18 @@ print "# Created L, NYes, NTrials, and HOutput of size %s" % len(L)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run inference
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# from LOTlib import break_ctrlc
-#
-# from LOTlib.Inference.GrammarInference.FullGrammarHypothesis import FullGrammarHypothesis
-#
-# from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
-#
-# h0 = FullGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
-# mhs = MHSampler(h0, [], 100000, skip=0)
-#
-# for s, h in break_ctrlc(enumerate(mhs)):
-#
-#     print mhs.acceptance_ratio(), h.prior, h.likelihood,\
-#           h.value['alpha'].value[0], h.value['beta'].value[0],\
-#           h.value['prior_temperature'].value, h.value['likelihood_temperature'].value,\
-#           'RULES',\
-#           ' '.join([str(x) for x in h.value['rulep']['BOOL'].value ]),\
-#           ' '.join([str(x) for x in h.value['rulep']['PREDICATE'].value ]),\
-#           ' '.join([str(x) for x in h.value['rulep']['START'].value ]),\
-#           ' '.join([str(x) for x in h.value['rulep']['SET'].value ])
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Run gradient ascent
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 from LOTlib import break_ctrlc
 
 from LOTlib.Inference.GrammarInference.FullGrammarHypothesis import FullGrammarHypothesis
 
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 
-
-from LOTlib.Inference.GrammarInference.GradientGrammarInference import GrammarGradient
-
 h0 = FullGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
+mhs = MHSampler(h0, [], 100000, skip=0)
 
-for h in break_ctrlc(GrammarGradient(h0,[])):
+for s, h in break_ctrlc(enumerate(mhs)):
 
-    print 0.0, h.prior, h.likelihood,\
+    print mhs.acceptance_ratio(), h.prior, h.likelihood,\
           h.value['alpha'].value[0], h.value['beta'].value[0],\
           h.value['prior_temperature'].value, h.value['likelihood_temperature'].value,\
           'RULES',\
@@ -165,3 +140,27 @@ for h in break_ctrlc(GrammarGradient(h0,[])):
           ' '.join([str(x) for x in h.value['rulep']['PREDICATE'].value ]),\
           ' '.join([str(x) for x in h.value['rulep']['START'].value ]),\
           ' '.join([str(x) for x in h.value['rulep']['SET'].value ])
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Run gradient ascent
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# from LOTlib import break_ctrlc
+#
+# from LOTlib.Inference.GrammarInference.FullGrammarHypothesis import FullGrammarHypothesis
+#
+#
+# from LOTlib.Inference.GrammarInference.GradientGrammarInference import GrammarGradient
+#
+# h0 = FullGrammarHypothesis(counts, L, GroupLength, prior_offset, NYes, NTrials, Output)
+#
+# for h in break_ctrlc(GrammarGradient(h0,[])):
+#
+#     print 0.0, h.prior, h.likelihood,\
+#           h.value['alpha'].value[0], h.value['beta'].value[0],\
+#           h.value['prior_temperature'].value, h.value['likelihood_temperature'].value,\
+#           'RULES',\
+#           ' '.join([str(x) for x in h.value['rulep']['BOOL'].value ]),\
+#           ' '.join([str(x) for x in h.value['rulep']['PREDICATE'].value ]),\
+#           ' '.join([str(x) for x in h.value['rulep']['START'].value ]),\
+#           ' '.join([str(x) for x in h.value['rulep']['SET'].value ])

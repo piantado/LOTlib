@@ -110,16 +110,18 @@ class DirichletDistribution(Stochastic):
         return dirichlet.logpdf(self.value, self.alpha)
 
     def propose(self):
-        ret = copy(self)
 
-        if len(ret.value) == 1: return ret, 0.0 # handle singleton rules
+        if len(self.value) == 1: return copy(self), 0.0 # handle singleton rules
 
-        ret.value = numpy.random.dirichlet(self.value * self.proposal_scale)
+        v = numpy.random.dirichlet(self.value * self.proposal_scale)
 
         # add a tiny bit of smoothing away from 0/1
-        ret.value = (1.0 - DirichletDistribution.SMOOTHING) * ret.value + DirichletDistribution.SMOOTHING / 2.0
-        # and renormalize it, slightly breaking MCMC
-        ret.value = ret.value / sum(ret.value)
+        v = (1.0 - DirichletDistribution.SMOOTHING) * v + DirichletDistribution.SMOOTHING / 2.0
+        # and renormalize it (both slightly breaking MCMC)
+        v = v / sum(v)
+
+        ret = copy(self)
+        ret.set_value(v)
 
         fb = dirichlet.logpdf(ret.value, self.value * self.proposal_scale) -\
              dirichlet.logpdf(self.value, ret.value * self.proposal_scale)

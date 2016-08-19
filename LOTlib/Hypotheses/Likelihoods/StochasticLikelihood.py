@@ -38,7 +38,7 @@ class StochasticLikelihood(Hypothesis):
 
         assert isinstance(datum.output, dict), "Data supplied to SimpleGenerativeHypothesis must be a dict of function outputs to counts"
 
-        z = sum(llcounts.values)
+        z = sum(llcounts.values())
         return sum([ datum.output[k] * (nicelog(llcounts[k] + sm)-nicelog(sum(z) + sm*len(datum.output.keys())) ) for k in datum.output.keys() ])
 
 

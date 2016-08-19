@@ -18,6 +18,7 @@ class RecursiveLOTHypothesis(LOTHypothesis):
         """
         Initializer. recurse gives the name for the recursion operation internally.
         """
+        assert "lambda recurse_" in display, "*** RecursiveLOTHypothesis must have 'recurse_' as first display element." # otherwise it can't eval
 
         # save recurse symbol
         self.recursive_depth_bound = recurse_bound # how deep can we recurse?

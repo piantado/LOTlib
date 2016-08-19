@@ -78,7 +78,7 @@ class Grammar(CommonEqualityMixin):
         rules = self.get_rules(t.returntype)
         matching_rules = [r for r in rules if (r.get_rule_signature() == t.get_rule_signature())]
         assert len(matching_rules) == 1, \
-            "Grammar Error: " + str(len(matching_rules)) + " matching rules for this FunctionNode! %s %s" % (t.get_rule_signature(), str(t))
+            "Grammar Error: " + str(len(matching_rules)) + " matching rules for this FunctionNode! %s %s %s" % (t.get_rule_signature(), str(t), matching_rules)
         return matching_rules[0]
 
     def single_probability(self, t):

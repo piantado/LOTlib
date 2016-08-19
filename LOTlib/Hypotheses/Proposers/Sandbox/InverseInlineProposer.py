@@ -2,7 +2,6 @@ from random import random
 from math import log
 from collections import defaultdict
 
-from LOTProposer import LOTProposer
 from LOTlib.Miscellaneous import sample1, lambdaOne, dropfirst, self_update
 from LOTlib.GrammarRule import *
 from LOTlib.Hypotheses.Proposers import ProposalFailedException
@@ -18,7 +17,7 @@ def lp_sample_equal_to(n, x, resampleProbability=lambdaOne):
     Z = n.sample_node_normalizer(resampleProbability=resampleProbability)
     return log(sum([resampleProbability(t) if (t==x) else 0.0 for t in n])) - log(Z)
 
-class InverseInlineProposer(LOTProposer):
+class InverseInlineProposer(object):
     """
         Inverse inlinling proposals.
     """
