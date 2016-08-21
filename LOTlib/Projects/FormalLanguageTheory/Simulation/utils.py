@@ -1,5 +1,5 @@
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
-from LOTlib.MCMCSummary.TopN import TopN
+from LOTlib.TopN import TopN
 from LOTlib.Miscellaneous import logsumexp
 from optparse import OptionParser
 import numpy as np
@@ -135,4 +135,4 @@ def run(mk_hypothesis, size, finite, options, get_data=None, terminals=None):
                            lambda: instance(options.LANG, finite).sample_data_as_FuncData(size) if get_data is None else get_data(size, max_length=options.FINITE),
                            N=options.TOP_COUNT,
                            steps=options.STEPS,
-                           show=True, save_top=None, skip=10)
+                           show=True, save_top=None, skip=200)

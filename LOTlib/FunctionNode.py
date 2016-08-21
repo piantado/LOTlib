@@ -6,7 +6,7 @@ from math import log
 from random import random
 
 from LOTlib.BVRuleContextManager import BVRuleContextManager
-from LOTlib.Miscellaneous import lambdaTrue, lambdaOne
+from LOTlib.Miscellaneous import lambdaTrue, lambdaOne, self_update
 
 
 # ------------------------------------------------------------------------------------------------------------
@@ -61,7 +61,7 @@ class FunctionNode(object):
     NoCopy = {'self', 'parent', 'returntype', 'name', 'args', 'parent'}
 
     def __init__(self, parent, returntype, name, args):
-        self.__dict__.update(locals())
+        self_update(self,locals())
         self.added_rule = None
         
         assert self.name is None or isinstance(self.name, str)
@@ -417,7 +417,7 @@ class FunctionNode(object):
             raise NodeSamplingException
 
         r = random() * Z # now select a random number (giving a random node)
-        #
+
         # for t in self:
         #     trp = float(resampleProbability(t))
         #     r -= trp
@@ -647,6 +647,9 @@ class FunctionNode(object):
                     yield g
 
 
+
+
+
 # ============================================================================================================
 # Other classes
 # ============================================================================================================
@@ -778,6 +781,7 @@ class BVUseFunctionNode(FunctionNode):
             a.parent = fn
 
         return fn
+
 
 
 

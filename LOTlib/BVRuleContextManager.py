@@ -1,4 +1,4 @@
-
+from LOTlib.Miscellaneous import self_update
 class BVRuleContextManager(object):
 
     def __init__(self, grammar, fn, recurse_up=False):
@@ -11,7 +11,7 @@ class BVRuleContextManager(object):
 
             This actually could go in FunctionNode, *except* that it needs to know the grammar, which FunctionNodes do not
         """
-        self.__dict__.update(locals())
+        self_update(self, locals())
         self.added_rules = [] # all of the rules we added -- may be more than one from recurse_up=True
 
     def __str__(self):

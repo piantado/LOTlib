@@ -2,6 +2,7 @@ from copy import deepcopy
 from LOTlib.Miscellaneous import flip, qq, attrmem
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
 from LOTlib.Hypotheses.FunctionHypothesis import FunctionHypothesis
+from LOTlib.Hypotheses.Proposers import ProposalFailedException
 
 class SimpleLexicon(Hypothesis):
     """
@@ -79,18 +80,32 @@ class SimpleLexicon(Hypothesis):
     def propose(self):
         """
         Propose to the lexicon by flipping a coin for each word and proposing to it.
+
+        This permits ProposalFailExceptions on individual words, but does not return a lexicon
+        unless we can propose to something.
         """
 
-        new = deepcopy(self)  ## Now we just copy the whole thing
+
         fb = 0.0
+        changed_any = False
 
-        for w in self.all_words():
-            if flip(self.propose_p):
-                xp, xfb = self.get_word(w).propose()
-                new.set_word(w, xp)
-                fb += xfb
+        while not changed_any:
+            new = deepcopy(self)  ## Now we just copy the whole thing
 
-        return new, fb
+            for w in self.all_words():
+                    if flip(self.propose_p):
+                        try:
+                            xp, xfb = self.get_word(w).propose()
+
+                            changed_any = True
+                            new.set_word(w, xp)
+                            fb += xfb
+
+                        except ProposalFailedException:
+                            pass
+
+
+            return new, fb
 
     @attrmem('prior')
     def compute_prior(self):

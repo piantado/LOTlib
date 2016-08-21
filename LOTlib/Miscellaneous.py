@@ -29,6 +29,14 @@ TAU = 6.28318530718     # fuck pi
 T = True
 F = False
 
+
+#-------------------------------------------------------------------------------------------------------------
+# self.__dict__.update creates a self.self object. We want to pop this off!
+# https://stackoverflow.com/questions/6025758/whats-the-pythonic-way-to-set-class-variables
+def self_update(s,l):
+    s.__dict__.update(l)
+    s.__dict__.pop('self')
+#_____________________________________________________________________________________________________________
 # ------------------------------------------------------------------------------------------------------------
 
 def first(x):
@@ -443,6 +451,12 @@ from itertools import imap
 def argmax(lst):
     return max([(x,i) for i,x in enumerate(lst)])[1]
 
+
+def logit(p):
+    return log(p/(1.-p))
+def ilogit(x):
+    return 1./(1.+exp(-x))
+
 # ------------------------------------------------------------------------------------------------------------
 # Sampling functions
 # ------------------------------------------------------------------------------------------------------------
@@ -606,4 +620,15 @@ def setup_directory(path):
 
     os.mkdir(path)
 
+# ------------------------------------------------------------------------------------------------------------
+# Generic Equality - stolen from https://stackoverflow.com/questions/390250/
+# ------------------------------------------------------------------------------------------------------------
 
+class CommonEqualityMixin(object):
+
+    def __eq__(self, other):
+        return (isinstance(other, self.__class__)
+            and self.__dict__ == other.__dict__)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)

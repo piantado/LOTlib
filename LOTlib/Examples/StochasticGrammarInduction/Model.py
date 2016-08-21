@@ -56,7 +56,7 @@ grammar.add_rule('EXPR', q('D'), None, TERMINAL_WEIGHT)
 grammar.add_rule('EXPR', q('A'), None, TERMINAL_WEIGHT)
 grammar.add_rule('EXPR', q('N'), None, TERMINAL_WEIGHT)
 grammar.add_rule('EXPR', q('V'), None, TERMINAL_WEIGHT)
-grammar.add_rule('EXPR', q('who'), None, TERMINAL_WEIGHT)
+# grammar.add_rule('EXPR', q('who'), None, TERMINAL_WEIGHT)
 
 
 ## Allow lambda abstraction
@@ -64,15 +64,14 @@ grammar.add_rule('EXPR', 'apply_', ['LAMBDAARG', 'LAMBDATHUNK'], 1)
 grammar.add_rule('LAMBDAARG',   'lambda', ['EXPR'], 1., bv_type='EXPR', bv_args=[] )
 grammar.add_rule('LAMBDATHUNK', 'lambda', ['EXPR'], 1., bv_type=None, bv_args=None ) # A thunk
 
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Hypothesis
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from LOTlib.Hypotheses.Likelihoods.StochasticFunctionLikelihood import StochasticFunctionLikelihood
+from LOTlib.Hypotheses.Likelihoods.StochasticLikelihood import StochasticLikelihood
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 
-class MyHypothesis(StochasticFunctionLikelihood, LOTHypothesis):
+class MyHypothesis(StochasticLikelihood, LOTHypothesis):
     def __init__(self, grammar=None, **kwargs):
         LOTHypothesis.__init__(self, grammar, display='lambda : %s', **kwargs)
 
@@ -88,4 +87,5 @@ if __name__ == "__main__":
     from LOTlib.Inference.Samplers.StandardSample import standard_sample
 
     standard_sample(make_hypothesis, make_data, save_top=False)
+
 

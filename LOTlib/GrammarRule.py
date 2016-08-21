@@ -1,6 +1,6 @@
 from FunctionNode import FunctionNode, BVAddFunctionNode, BVUseFunctionNode
 from copy import copy
-from LOTlib.Miscellaneous import None2Empty
+from LOTlib.Miscellaneous import None2Empty,self_update
 from uuid import uuid4
 
 class GrammarRule(object):
@@ -40,7 +40,7 @@ class GrammarRule(object):
         p = float(p)
         assert p>0.0, "*** p=0 in rule %s %s %s. What are you thinking?" %(nt,name,to)
 
-        self.__dict__.update(locals())
+        self_update(self, locals())
 
         assert to is None or isinstance(to, list) or isinstance(to, tuple), "*** 'to' in a GrammarRule must be a list!"
 
@@ -108,7 +108,7 @@ class BVAddGrammarRule(GrammarRule):
     """
     def __init__(self, nt, name, to, p=1.0, bv_prefix="y", bv_type=None, bv_args=None, bv_p=None):
         p = float(p)
-        self.__dict__.update(locals())
+        self_update(self, locals())
         assert bv_type is not None, "Did you mean to use a GrammarRule instead of a BVGrammarRule?"
         assert isinstance(bv_type, str), "bv_type must be a string! Make sure it's not a tuple or list."
         

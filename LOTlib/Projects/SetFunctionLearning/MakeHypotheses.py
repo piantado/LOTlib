@@ -15,7 +15,7 @@ from Model.Hypothesis import make_hypothesis
 from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("--out", dest="OUT_PATH", type="string", default="hypotheses.pkl", help="Output file of all hypotheses")
-parser.add_option("--steps", dest="STEPS", type="int", default=100000, help="Number of samples to run")
+parser.add_option("--steps", dest="STEPS", type="int", default=50000, help="Number of samples to run")
 parser.add_option("--top", dest="TOP_COUNT", type="int", default=100, help="Top number of hypotheses to store")
 parser.add_option("--chains", dest="CHAINS", type="int", default=1, help="Number of chains to run (new data set for each chain)")
 # parser.add_option("--grammar", dest="GRAMMAR", type="str", default="lot_grammar", help="The grammar we use (defined in Model)")

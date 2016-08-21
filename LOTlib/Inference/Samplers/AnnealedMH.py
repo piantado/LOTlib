@@ -4,7 +4,7 @@
 
 """
 from math import sin, pi, log, pow, exp
-
+from LOTlib.Miscellaneous import self_update
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Set up some schedule classes for how temp varies
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -33,7 +33,7 @@ class InverseSchedule(AnnealingSchedule):
     Temperature = max/(scale*time)
     """
     def __init__(self, max, scale):
-        self.__dict__.update(locals())
+        self_update(self, locals())
         self.ticks = 0
 
     def next(self):
@@ -45,7 +45,7 @@ class ExponentialSchedule(AnnealingSchedule):
     Temperature = c * alpha^t
     """
     def __init__(self, c, alpha):
-        self.__dict__.update(locals())
+        self_update(self, locals())
         self.ticks = 0
 
     def next(self):
@@ -60,7 +60,7 @@ class SinSchedule(AnnealingSchedule):
     def __init__(self, min, max, period):
         assert max>min
         assert period > 0.
-        self.__dict__.update(locals())
+        self_update(self, locals())
         self.ticks = 0 # how many times have we called next?
 
     def next(self):

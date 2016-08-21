@@ -2,12 +2,12 @@
     A simple class to do inference via enumeration
 """
 
-from LOTlib.Miscellaneous import Infinity
+from LOTlib.Miscellaneous import Infinity, self_update
 
 class EnumerationInference(object):
     
     def __init__(self, grammar, make_h, data, steps=Infinity):
-        self.__dict__.update(locals())
+        self_update(self, locals())
         
     def __iter__(self):
         for i, t in enumerate(self.grammar.enumerate()):

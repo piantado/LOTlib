@@ -66,3 +66,25 @@ class GrammarTreeTest(unittest.TestCase):
                 for therule in added_rules:
                     self.assertTrue(therule.name not in [r.name for r in grammar.rules[ti.returntype]])
 
+
+class FinitePackTest(unittest.TestCase):
+    def runTest(self):
+        print "# Testing packing (finite)"
+        for _ in xrange(5000):
+            t = finiteTestGrammar.generate()
+            s = finiteTestGrammar.pack_ascii(t)
+            t2 = finiteTestGrammar.unpack_ascii(s)
+
+            self.assertTrue(t==t2)
+
+
+class InfinitePackTest(unittest.TestCase):
+    def runTest(self):
+        print "# Testing packing (infinite)"
+        for _ in xrange(5000):
+            t = infiniteTestGrammar.generate()
+            s = infiniteTestGrammar.pack_ascii(t)
+            t2 = infiniteTestGrammar.unpack_ascii(s)
+
+            self.assertTrue(t==t2)
+

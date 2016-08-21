@@ -42,10 +42,18 @@ grammar.add_rule('SHAPE', q('diamond'), None, 1.0)
 # Hypothesis
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from LOTlib.Hypotheses.RationalRulesLOTHypothesis import RationalRulesLOTHypothesis
+from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
+from LOTlib.Hypotheses.Priors.RationalRules import RationaRulesPrior
+from LOTlib.Hypotheses.Likelihoods.BinaryLikelihood import BinaryLikelihood
+
+class MyHypothesis(RationaRulesPrior, BinaryLikelihood, LOTHypothesis):
+    pass
+
 
 def make_hypothesis(grammar=grammar, **kwargs):
-    return RationalRulesLOTHypothesis(grammar=grammar, rrAlpha=1.0, **kwargs)
+    h = MyHypothesis(grammar=grammar, **kwargs)
+    h.rrAlpha=2.0 # set this
+    return h
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Main

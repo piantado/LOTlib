@@ -26,7 +26,16 @@ def standard_sample(make_hypothesis, make_data, show_skip=9, show=True, N=100, s
 
     sampler = MHSampler(h0, data, **kwargs)
 
+#    # TODO change acceptance temperature over times
+#    sampler.acceptance_temperature = 0.5
+
     for i, h in enumerate(break_ctrlc(sampler)):
+
+#        if i % 10000 == 0 and i != 0:
+#            sampler.acceptance_temperature = min(1.0, sampler.acceptance_temperature+0.1)
+#            print '='*50
+#            print 'change acc temperature to', sampler.acceptance_temperature 
+
         best_hypotheses.add(h)
 
         if show and i%(show_skip+1) == 0:

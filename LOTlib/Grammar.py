@@ -1,4 +1,5 @@
 # *- coding: utf-8 -*-
+
 try: import numpy as np
 except ImportError: import numpypy as np
 
@@ -6,18 +7,23 @@ from copy import copy
 from collections import defaultdict
 import itertools
 
-from LOTlib import break_ctrlc
 from LOTlib.Miscellaneous import *
 from LOTlib.GrammarRule import GrammarRule, BVAddGrammarRule
 from LOTlib.BVRuleContextManager import BVRuleContextManager
-from LOTlib.FunctionNode import FunctionNode
+from LOTlib.FunctionNode import FunctionNode, BVAddFunctionNode
 
-class Grammar:
+
+# when we pack, we are allowed to use these characters, in this order
+import string
+pack_string = '0123456789'+string.ascii_lowercase+string.ascii_uppercase
+
+
+class Grammar(CommonEqualityMixin):
     """
     A PCFG-ish class that can handle rules that introduce bound variables
     """
     def __init__(self, BV_P=10.0, start='START'):
-        self.__dict__.update(locals())
+        self_update(self,locals())
         self.rules = defaultdict(list)  # A dict from nonterminals to lists of GrammarRules.
         self.rule_count = 0
         self.bv_count = 0   # How many rules in the grammar introduce bound variables?
@@ -36,6 +42,14 @@ class Grammar:
         The possible rules for any nonterminal
         """
         return self.rules[nt]
+
+    def get_all_rules(self):
+        """
+        A list of all rules
+        """
+        for nt in self.nonterminals():
+            for r in self.get_rules(nt):
+                yield r
 
     def is_nonterminal(self, x):
         """A nonterminal is just something that is a key for self.rules"""
@@ -64,7 +78,7 @@ class Grammar:
         rules = self.get_rules(t.returntype)
         matching_rules = [r for r in rules if (r.get_rule_signature() == t.get_rule_signature())]
         assert len(matching_rules) == 1, \
-            "Grammar Error: " + str(len(matching_rules)) + " matching rules for this FunctionNode! %s %s" % (t.get_rule_signature(), str(t))
+            "Grammar Error: " + str(len(matching_rules)) + " matching rules for this FunctionNode! %s %s %s" % (t.get_rule_signature(), str(t), matching_rules)
         return matching_rules[0]
 
     def single_probability(self, t):
@@ -150,9 +164,7 @@ class Grammar:
 
         # Dispatch different kinds of generation
         if isinstance(x,list):            
-            # If we get a list, just map along it to generate.
-            # We don't count lists as depth--only FunctionNodes.
-            return map(lambda xi: self.generate(x=xi), x)
+            return map(lambda xi: self.generate(x=xi), x)             # If we get a list, just map along it to generate.
         elif self.is_nonterminal(x):
 
             # sample a grammar rule
@@ -323,3 +335,132 @@ class Grammar:
             for r in self.get_rules(nt):
                 r.p = r.p / z
 
+
+    # --------------------------------------------------------------------------------------------------------
+    # Packing and unpacking trees
+    # This is useful for storing trees in a more concise, ascii format. Much smaller size than
+    # pickling hypotheses
+    # --------------------------------------------------------------------------------------------------------
+
+    def sig2idx(self):
+        """
+        Compute a dictionary from signatures to rule indices
+        this is so that when we add rules for bound variables, we don't
+        change all the rule indices.
+        NOTE: This step is slow and should be cached for a grammar
+        """
+        d = dict()
+        idx = 0 # store the rule index, making each unique. NOTE: we could make it unique for each nt, but that may mess with LZPrior
+
+        for nt in self.nonterminals():
+            for r in self.get_rules(nt):
+                d[r.get_rule_signature()] = idx
+                idx += 1
+
+        return d
+
+    def idx2rule(self):
+        """
+        Compute a dictionary from idx to rules that matches sig2idx
+        """
+        d = dict()
+        idx = 0 # store the rule index, making each unique. NOTE: we could make it unique for each nt, but that may mess with LZPrior
+
+        for nt in self.nonterminals():
+            for r in self.get_rules(nt):
+                d[idx] = r
+                idx += 1
+
+        return d
+
+    def pack_ascii(self, t, sig2idx=None):
+        """
+        Pack a tree into a simple ascii string, using grammar.
+        Not particularly optimized, but simple
+        """
+
+        if sig2idx is None:
+            sig2idx = self.sig2idx()
+
+
+        # the output string (starts empty)
+        s = ''
+
+        # compute the node's index (i.e. packed name)
+        # pack_string is a string, not a function
+        s = s + pack_string[sig2idx[t.get_rule_signature()]]
+
+        # add rule if we're adding a bound variable (i.e. a lambda)
+        if isinstance(t, BVAddFunctionNode):
+            r = t.added_rule
+            idx =  max(sig2idx.values())+1
+            sig2idx[r.get_rule_signature()] = idx
+
+        # recurse
+        for a in t.argFunctionNodes():
+            s = s+self.pack_ascii(a, sig2idx=sig2idx)
+
+        # remove bound variable rule after recursing
+        if isinstance(t, BVAddFunctionNode):
+            r = t.added_rule
+            del sig2idx[r.get_rule_signature()]
+            
+        return s
+
+    def unpack_ascii(self, s):
+        # we must convert to list(s) so that it will support pop, delete
+        s = list(s)
+
+        return self.unpack_ascii_rec(s, self.start, self.idx2rule())
+
+    def unpack_ascii_rec(self, s, x, idx2rule):
+        """
+        Unpack a string into a tree. Follows the format of Grammar.generate, but indexes
+        the choices with s
+        """
+        assert x is not None  # should have been given by unpack_ascii
+
+        # Dispatch different kinds of generation
+        if isinstance(x, list):
+            return map(lambda xi: self.unpack_ascii_rec(s, xi, idx2rule), x)
+
+        elif self.is_nonterminal(x):
+            
+            rules = self.get_rules(x)
+
+            # index
+            # instead of sampling a rule, get it from the string
+            i = pack_string.index(s[0])
+            del s[0]  # remove (works since s is a list)
+            r = idx2rule[i]
+
+            # Make a stub for this functionNode
+            fn = r.make_FunctionNodeStub(self, None)
+            with BVRuleContextManager(self, fn, recurse_up=False):
+
+                # add rule (to idx2rule)
+                if isinstance(r, BVAddGrammarRule):
+                    idx = max(idx2rule.keys()) + 1
+                    idx2rule[idx] = fn.added_rule
+
+                # recurse
+                if fn.args is not None:
+                    fn.args = self.unpack_ascii_rec(s, fn.args, idx2rule)
+
+                # remove rule (as we now do in packing, too)
+                if isinstance(r, BVAddGrammarRule):
+                    idx = max(idx2rule.keys())
+                    del idx2rule[idx]
+            
+                for a in fn.argFunctionNodes():
+                    a.parent = fn
+
+            return fn
+
+        else: # must be a terminal
+            return x
+
+    #def pack_test(self,n=1000):
+    #    """a quick test for packing and unpacking"""
+    #    one_test = lambda x: x == self.unpack_ascii(self.pack_ascii(x))
+    #    return all([one_test(self.generate()) for _ in xrange(n)])
