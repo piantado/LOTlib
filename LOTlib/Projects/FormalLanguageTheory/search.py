@@ -44,7 +44,7 @@ def run(options, ndata):
     # renormalize the counts
     for k in data[0].output.keys():
         data[0].output[k] = float(data[0].output[k] * ndata) / LARGE_SAMPLE
-    # print data
+    #print data
 
     # Now add the rules to the grammar
     grammar = deepcopy(base_grammar)
