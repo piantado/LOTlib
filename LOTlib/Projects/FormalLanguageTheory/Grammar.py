@@ -20,6 +20,10 @@ base_grammar.add_rule('LIST', '\'\'', None, 2)
 base_grammar.add_rule('BOOL', 'empty_', ['LIST'], 1.)
 base_grammar.add_rule('BOOL', 'flip_', [''], 1.)
 
+
+base_grammar.add_rule('LIST', 'recurse_(%s)', ['SELFF'], 1.0) # can call myself
+# base_grammar.add_rule('SELFF', '0', None, 1.0) # can call myself
+
 # lambda abstraction of lists
 
 # # # create a variable y

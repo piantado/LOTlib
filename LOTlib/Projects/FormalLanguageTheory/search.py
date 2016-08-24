@@ -27,7 +27,7 @@ from LOTlib.Projects.FormalLanguageTheory.Grammar import base_grammar # passed i
 
 register_primitive(flatten2str)
 
-LARGE_SAMPLE = 10000 # sample this many and then re-normalize to fractional counts
+LARGE_SAMPLE = 100 # sample this many and then re-normalize to fractional counts
 
 
 def run(options, ndata):
@@ -52,19 +52,29 @@ def run(options, ndata):
         grammar.add_rule('ATOM', q(t), None, 2)
 
     h0 = IncrementalLexiconHypothesis(grammar=grammar)
+
     print "# Starting on ", h0
 
     tn = TopN(N=options.TOP_COUNT)
 
     for outer in xrange(options.N): # how many do we add?
+        # add to the grammar
+        grammar.add_rule('SELFF', '%s' % (outer), None, 1.0)
+
+        # Add one more to the number of words here
+        h0.set_word(outer, h0.make_hypothesis(grammar=grammar))
+        h0.N = outer+1
+        assert len(h0.value.keys())==h0.N==outer+1
+
+        # now run mcmc
         for h in break_ctrlc(MHSampler(h0, data, steps=options.STEPS)):
             tn.add(h)
 
             # print h.posterior_score, h
             # print getattr(h, 'll_counts', None)
 
-        h0 = deepcopy(h)
-        h0.add_new_word()
+        # and start from where we ended
+        h0 = deepcopy(h) # must deepcopy
 
     return ndata, tn
 
@@ -96,7 +106,7 @@ if __name__ == "__main__":
         display_option_summary(options);
         sys.stdout.flush()
 
-    DATA_RANGE = np.arange(1, 1000, 10)
+    DATA_RANGE =  np.arange(1, 1000, 10)
     random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))

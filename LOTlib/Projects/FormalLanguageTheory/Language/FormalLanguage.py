@@ -16,7 +16,7 @@ class FormalLanguage(object):
             s = str(self.grammar.generate())
             cnt[s] += 1
 
-        return [FunctionData(input=(), output=cnt)]
+        return [FunctionData(input=[0], output=cnt)]
 
     def terminals(self):
         """ This returns a list of terminal symbols, specific to each language
