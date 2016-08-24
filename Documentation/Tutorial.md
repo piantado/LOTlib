@@ -8,7 +8,7 @@ Suppose that you know basic arithmetic operations (called "primitives") like add
 
 ## Grammars
 
-The general strategy of LOTlib models is to specify a space of possible compositions using a grammar. The grammar is actually a probabilistic context free grammar (with one small modification described below) that specifies a prior distribution on trees, or equivalently compositional structures like (1+1)*6, 2+2+2+2+2+2, (1+1)+(2*5), etc. If this is unfamiliar, the wiki on [PCFGs](https://help.github.com/articles/markdown-basics/) would be useful to read first. 
+The general strategy of LOTlib models is to specify a space of possible compositions using a grammar. The grammar is actually a probabilistic context free grammar (with one small modification described below) that specifies a prior distribution on trees, or equivalently compositional structures like (1+1)*6, 2+2+2+2+2+2, (1+1)+(2*5), etc. If this is unfamiliar, the wiki on [PCFGs](https://en.wikipedia.org/wiki/Stochastic_context-free_grammar) would be useful to read first. 
 
 However, the best way to understand the grammar is as a way of specifying a program: any expansion of the grammar "renders" into a python program, whose code can then be evaluated. This will be made more concrete later.
 
