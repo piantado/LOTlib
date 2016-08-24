@@ -472,7 +472,7 @@ Just for fun here, let's take the posterior predictive and see how likely we are
     tn = TopN(1000) 
 
     h0 = MyHypothesisX()
-    for h in MHSampler(h0, data, steps=1000000): # run more steps
+    for h in MHSampler(h0, data, steps=100000): # run more steps
         tn.add(h)
 
     # store these in a list (tn.get_all is defaultly a generator)
@@ -656,16 +656,15 @@ Here is a simple example:
     ######################################## 
     from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis
     
-    
     class MyRecursiveHypothesis(RecursiveLOTHypothesis):
         def __init__(self, **kwargs):
-            RecursiveLOTHypothesis.__init__(self, grammar=grammar, display="lambda x: %s", **kwargs)
+            RecursiveLOTHypothesis.__init__(self, grammar=grammar, display="lambda recurse_, x: %s", **kwargs)
         
     ######################################## 
     ## Look at some examples
     ######################################## 
     import re
-    from LOTlib.Evaluation.EvaluationException import RecursionDepthException
+    from LOTlib.Eval import RecursionDepthException
     
     for _ in xrange(50000):
         h = MyRecursiveHypothesis()
