@@ -157,7 +157,7 @@ Fortunately, we can hack our hypothesis class to address this by catching the ex
 
     class MyHypothesis(LOTHypothesis):
         def __init__(self, **kwargs):
-            LOTHypothesis.__init__(self, grammar=grammar, args=[], **kwargs)
+            LOTHypothesis.__init__(self, grammar=grammar, display="lambda: %s", **kwargs)
             
         def __call__(self, *args):
             try:
@@ -379,15 +379,7 @@ Of course, SampleStream also has a way to get at the best hypotheses. It is the 
 
 ## Hypotheses as functions
 
-Remember how we made `args=[]` in the definition of MyHypothesis? That stated that a hypothesis was not a function of any arguments. However, you may have noticed that when a hypothesis is converting to a string (for printing or evaling) it acquired an additional `lambda` on the outside, indicating that the hypothesis was a function of no arguments. Compare a tree produced by the grammar, with the hypothesis created with the tree as its "value". To do this, we can pass the tree as a `value` in the hypothesis constructor:
-```python
-    t = grammar.generate()
-    print str(t)
-
-    h = MyHypothesis(value=t)
-    print str(h)    
-```
-This is an important distinction: the result of `grammar.generate()` is always a tree, or a hierarchy of `LOTlib.FunctionNode`s which can get rendered into a string. A LOTHypothesis, in contrast, is always a function of some arguments. When there are no arguments, it is a [thunk](https://en.wikipedia.org/wiki/Thunk). 
+Remember how we made `display="lambda: %s"` in the definition of MyHypothesis? That stated that a hypothesis was not a function of any arguments since the `lambda` has no arguments. However, you may have noticed that when a hypothesis is converting to a string (for printing or evaling) it acquired an additional `lambda` on the outside, indicating that the hypothesis was a function of no arguments, or a thunk [thunk](https://en.wikipedia.org/wiki/Thunk). 
 
 Here is a new listing where a class like MyHypothesis requires an argument. Now, when it renders, it comes with a `lambda x` in front, rather than just a `lambda`. There are two other primary changes: the grammar now has to allow the argument (`x`) to be produced in expressions, and the `datum.input` has to provide an argument, which gets bound to `x` when the function is evaluated. 
 ```python
@@ -420,7 +412,7 @@ Here is a new listing where a class like MyHypothesis requires an argument. Now,
     # define a 
     class MyHypothesisX(LOTHypothesis):
         def __init__(self, **kwargs):
-            LOTHypothesis.__init__(self, grammar=grammar, args=['x'], **kwargs)
+            LOTHypothesis.__init__(self, grammar=grammar, display="lambda x: %s", **kwargs)
         
         def __call__(self, *args):
             try:
@@ -667,7 +659,7 @@ Here is a simple example:
     
     class MyRecursiveHypothesis(RecursiveLOTHypothesis):
         def __init__(self, **kwargs):
-            RecursiveLOTHypothesis.__init__(self, grammar=grammar, args=['x'], **kwargs)
+            RecursiveLOTHypothesis.__init__(self, grammar=grammar, display="lambda x: %s", **kwargs)
         
     ######################################## 
     ## Look at some examples
