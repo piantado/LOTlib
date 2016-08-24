@@ -656,16 +656,15 @@ Here is a simple example:
     ######################################## 
     from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis
     
-    
     class MyRecursiveHypothesis(RecursiveLOTHypothesis):
         def __init__(self, **kwargs):
-            RecursiveLOTHypothesis.__init__(self, grammar=grammar, display="lambda x: %s", **kwargs)
+            RecursiveLOTHypothesis.__init__(self, grammar=grammar, display="lambda recurse_, x: %s", **kwargs)
         
     ######################################## 
     ## Look at some examples
     ######################################## 
     import re
-    from LOTlib.Evaluation.EvaluationException import RecursionDepthException
+    from LOTlib.Eval import RecursionDepthException
     
     for _ in xrange(50000):
         h = MyRecursiveHypothesis()
