@@ -112,7 +112,7 @@ Even better, `MyHypothesis` also inherits a `compute_posterior` function:
 For convenience, when `compute_posterior` is called, it sets attributes on `h` for the prior, likelihood, and posterior (score):
 ```python
     h = MyHypothesis()
-    h.compute_prior(data)
+    h.compute_posterior(data)
     print h.posterior_score, h.prior, h.likelihood, h
 ```
 
