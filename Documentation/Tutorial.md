@@ -8,7 +8,7 @@ Suppose that you know basic arithmetic operations (called "primitives") like add
 
 ## Grammars
 
-The general strategy of LOTlib models is to specify a space of possible compositions using a grammar. The grammar is actually a probabilistic context free grammar (with one small modification described below) that specifies a prior distribution on trees, or equivalently compositional structures like (1+1)*6, 2+2+2+2+2+2, (1+1)+(2*5), etc. If this is unfamiliar, the wiki on [PCFGs](https://help.github.com/articles/markdown-basics/) would be useful to read first. 
+The general strategy of LOTlib models is to specify a space of possible compositions using a grammar. The grammar is actually a probabilistic context free grammar (with one small modification described below) that specifies a prior distribution on trees, or equivalently compositional structures like (1+1)*6, 2+2+2+2+2+2, (1+1)+(2*5), etc. If this is unfamiliar, the wiki on [PCFGs](https://en.wikipedia.org/wiki/Stochastic_context-free_grammar) would be useful to read first. 
 
 However, the best way to understand the grammar is as a way of specifying a program: any expansion of the grammar "renders" into a python program, whose code can then be evaluated. This will be made more concrete later.
 
@@ -76,7 +76,7 @@ Fortunately, for our purposes, there is a simple hypothesis class that it built-
     # define a 
     class MyHypothesis(LOTHypothesis):
         def __init__(self, **kwargs):
-            LOTHypothesis.__init__(self, grammar=grammar, args=[], **kwargs)
+            LOTHypothesis.__init__(self, grammar=grammar, display="lambda: %s", **kwargs)
     
         def compute_single_likelihood(self, datum):
             if self(*datum.input) == datum.output:
@@ -85,7 +85,7 @@ Fortunately, for our purposes, there is a simple hypothesis class that it built-
                 return log((1.0-datum.alpha)/100.)
             
 ```
-There are a few things going on here. First, we import LOTHypothesis and use that to define the new class `MyHypothesis`. LOTHypothesis defines `compute_prior()` and `compute_likelihood(data)`--more about these later. We define the initializer `__init__`. We overwrite the LOTHypothesis default and specify that the grammar we want is the one defined above. LOTHypotheses also defaultly take an argument called `x` (more on this later), but for now we want our hypothesis to be a function of no arguments. So we set `args=[]`. 
+There are a few things going on here. First, we import LOTHypothesis and use that to define the new class `MyHypothesis`. LOTHypothesis defines `compute_prior()` and `compute_likelihood(data)`--more about these later. We define the initializer `__init__`. We overwrite the LOTHypothesis default and specify that the grammar we want is the one defined above. LOTHypotheses also defaultly take an argument called `x` (more on this later), but for now we want our hypothesis to be a function of no arguments. When we convert the value of the hypothesis into a string, it will get substituted into the `display` keyword. Here, `display="lambda: %s` meaning that the hypothesis will be displayed and also evaled in python as appearing after a lambda.
 
 Essentially, `compute_likelihood` maps `compute_single_likelihood` over a list of data (treating each as IID conditioned on the hypothesis). So when we want to define how the likelihood works, we typically want to overwrite `compute_single_likelihood` as we have above. In this function, we expect an input `datum` with attirbutes `input`, `output`, and `alpha`. The LOTHypothesis `self` can be viewed as a function (here, one with no arguments) and so it can be called on `datum.input`. The likelihood this defines is one in which we generate a random number from 1..100 with probability `1-datum.alpha` and the correct number with probability `datum.alpha`. Thus, when the hypothesis returns the correct value (e.g. `self(*datum.input) == datum.output`) we must add these quantities to get the total probability of producing the data. When it does not, we must return only the former. LOTlib.Hypotheses.Likelihoods defines a number of other standard likelihoods, including the most commonly used  one, `BinaryLikelihood`. 
 
@@ -112,7 +112,7 @@ Even better, `MyHypothesis` also inherits a `compute_posterior` function:
 For convenience, when `compute_posterior` is called, it sets attributes on `h` for the prior, likelihood, and posterior (score):
 ```python
     h = MyHypothesis()
-    h.compute_prior(data)
+    h.compute_posterior(data)
     print h.posterior_score, h.prior, h.likelihood, h
 ```
 
@@ -157,7 +157,7 @@ Fortunately, we can hack our hypothesis class to address this by catching the ex
 
     class MyHypothesis(LOTHypothesis):
         def __init__(self, **kwargs):
-            LOTHypothesis.__init__(self, grammar=grammar, args=[], **kwargs)
+            LOTHypothesis.__init__(self, grammar=grammar, display="lambda: %s", **kwargs)
             
         def __call__(self, *args):
             try:
@@ -379,15 +379,7 @@ Of course, SampleStream also has a way to get at the best hypotheses. It is the 
 
 ## Hypotheses as functions
 
-Remember how we made `args=[]` in the definition of MyHypothesis? That stated that a hypothesis was not a function of any arguments. However, you may have noticed that when a hypothesis is converting to a string (for printing or evaling) it acquired an additional `lambda` on the outside, indicating that the hypothesis was a function of no arguments. Compare a tree produced by the grammar, with the hypothesis created with the tree as its "value". To do this, we can pass the tree as a `value` in the hypothesis constructor:
-```python
-    t = grammar.generate()
-    print str(t)
-
-    h = MyHypothesis(value=t)
-    print str(h)    
-```
-This is an important distinction: the result of `grammar.generate()` is always a tree, or a hierarchy of `LOTlib.FunctionNode`s which can get rendered into a string. A LOTHypothesis, in contrast, is always a function of some arguments. When there are no arguments, it is a [thunk](https://en.wikipedia.org/wiki/Thunk). 
+Remember how we made `display="lambda: %s"` in the definition of MyHypothesis? That stated that a hypothesis was not a function of any arguments since the `lambda` has no arguments. However, you may have noticed that when a hypothesis is converting to a string (for printing or evaling) it acquired an additional `lambda` on the outside, indicating that the hypothesis was a function of no arguments, or a thunk [thunk](https://en.wikipedia.org/wiki/Thunk). 
 
 Here is a new listing where a class like MyHypothesis requires an argument. Now, when it renders, it comes with a `lambda x` in front, rather than just a `lambda`. There are two other primary changes: the grammar now has to allow the argument (`x`) to be produced in expressions, and the `datum.input` has to provide an argument, which gets bound to `x` when the function is evaluated. 
 ```python
@@ -420,7 +412,7 @@ Here is a new listing where a class like MyHypothesis requires an argument. Now,
     # define a 
     class MyHypothesisX(LOTHypothesis):
         def __init__(self, **kwargs):
-            LOTHypothesis.__init__(self, grammar=grammar, args=['x'], **kwargs)
+            LOTHypothesis.__init__(self, grammar=grammar, display="lambda x: %s", **kwargs)
         
         def __call__(self, *args):
             try:
@@ -664,16 +656,15 @@ Here is a simple example:
     ######################################## 
     from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis
     
-    
     class MyRecursiveHypothesis(RecursiveLOTHypothesis):
         def __init__(self, **kwargs):
-            RecursiveLOTHypothesis.__init__(self, grammar=grammar, args=['x'], **kwargs)
+            RecursiveLOTHypothesis.__init__(self, grammar=grammar, display="lambda recurse_, x: %s", **kwargs)
         
     ######################################## 
     ## Look at some examples
     ######################################## 
     import re
-    from LOTlib.Evaluation.EvaluationException import RecursionDepthException
+    from LOTlib.Eval import RecursionDepthException
     
     for _ in xrange(50000):
         h = MyRecursiveHypothesis()
