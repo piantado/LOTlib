@@ -52,6 +52,7 @@ def run(options, ndata):
         grammar.add_rule('ATOM', q(t), None, 2)
 
     h0 = IncrementalLexiconHypothesis(grammar=grammar)
+    h0.add_new_word()
     print "# Starting on ", h0
 
     tn = TopN(N=options.TOP_COUNT)
