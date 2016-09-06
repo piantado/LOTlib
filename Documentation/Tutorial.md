@@ -76,7 +76,7 @@ Fortunately, for our purposes, there is a simple hypothesis class that it built-
     # define a 
     class MyHypothesis(LOTHypothesis):
         def __init__(self, **kwargs):
-            LOTHypothesis.__init__(self, grammar=grammar, display="lambda: %s", **kwargs)
+            LOTHypothesis.__init__(self, grammar=grammar, display="lambda x: %s", **kwargs)
     
         def compute_single_likelihood(self, datum):
             if self(*datum.input) == datum.output:
@@ -449,7 +449,7 @@ Here is a new listing where a class like MyHypothesis requires an argument. Now,
     for h in SampleStream(MHSampler(h0, data, steps=10000)) >> Unique() >> PrintH():
         pass
 ```
-Why does this matter? Well now instead of just explaining the data we saw, we can use the hypothesis to generalize to *new*, unseen data. For instane, we can take each hypothesis and see what it has to say about other numbers
+Why does this matter? Well now instead of just explaining the data we saw, we can use the hypothesis to generalize to *new*, unseen data. For instance, we can take each hypothesis and see what it has to say about other numbers
 ```python
 
     from LOTlib.SampleStream import *
@@ -472,7 +472,7 @@ Just for fun here, let's take the posterior predictive and see how likely we are
     tn = TopN(1000) 
 
     h0 = MyHypothesisX()
-    for h in MHSampler(h0, data, steps=1000000): # run more steps
+    for h in MHSampler(h0, data, steps=100000): # run more steps
         tn.add(h)
 
     # store these in a list (tn.get_all is defaultly a generator)
