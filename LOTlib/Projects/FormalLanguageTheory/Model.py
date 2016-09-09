@@ -69,16 +69,27 @@ class IncrementalLexiconHypothesis(StochasticLikelihood, RecursiveLexicon):
 
             z = log(sum(llcounts.values()))
 
-            ll = 0.0  # We are going to compute a pseudo-likelihood, counting close strings as being close
-            for k in datum.output.keys():
-                # ll += datum.output[k] * (log(llcounts.get(k)) - z) if k in llcounts else -100.0
-                ll += datum.output[k] * (log(llcounts.get(k))-z if k in llcounts else -100.0)
-                # ll += datum.output[k] * (log(llcounts.get(k))-z if k in llcounts else -10000.0)
-                # ll += datum.output[k] * (log(llcounts.get(k, 1.0e-12)) - z)
-                # ll += datum.output[k] * logsumexp([ log(llcounts[r])-log(lo) - 1.0 * matching_prefix(r, k) for r in llcounts.keys() ])
+            # find the largest N such that we get all the strings n<N exactly
+            for N in xrange(max([len(r) for r in datum.output.keys()])):
+                s1 = {k for k in datum.output.keys() if len(k) <= N }
+                s2 = {k for k in llcounts.keys() if len(k) <= N}
 
-            # a type prior?
-            # ll = 10000*float(len(set(llcounts.keys()) & set(datum.output.keys()))) / float(len(set(llcounts.keys()) | set(datum.output.keys())))
+                if len(s1 ^ s2) != 0: break # leaving N to be the largest value we found, if the symmetric difference is nonempty
+            ll = N*sum(datum.output.values())
+
+            # ll = 0.0  # We are going to compute a pseudo-likelihood, counting close strings as being close
+            # for k in datum.output.keys():
+            #     # ll += datum.output[k] * (log(llcounts.get(k)) - z) if k in llcounts else -100.0
+            #     # ll += datum.output[k] * (log(llcounts.get(k))-z if k in llcounts else -100.0)
+            #     # ll += datum.output[k] * (log(llcounts.get(k))-z if k in llcounts else -10000.0)
+            #     # ll += datum.output[k] * (log(llcounts.get(k, 1.0e-12)) - z)
+            #     # ll += datum.output[k] * logsumexp([ log(llcounts[r])-log(lo) - 1.0 * matching_prefix(r, k) for r in llcounts.keys() ])
+            #     # ll += datum.output[k] * logsumexp([ log(llcounts[r])-z - 1.0 * distance(r, k) for r in llcounts.keys() ])
+            #     # TODO: Can be sped up by pre-computing the probs once
+            #     # ll += datum.output[k] * max([log(llcounts[r]) - z - 1.0 * distance(r, k) for r in llcounts.keys()])
+            #
+            # # a type prior?
+            # # ll = 10000*float(len(set(llcounts.keys()) & set(datum.output.keys()))) / float(len(set(llcounts.keys()) | set(datum.output.keys())))
 
             return ll
 

@@ -104,7 +104,7 @@ if __name__ == "__main__":
         display_option_summary(options);
         sys.stdout.flush()
 
-    DATA_RANGE =  np.arange(1, 1000, 10)
+    DATA_RANGE =  np.arange(1, 10000, 10)
     random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))
