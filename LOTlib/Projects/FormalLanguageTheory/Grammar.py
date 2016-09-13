@@ -13,13 +13,11 @@ base_grammar.add_rule('LIST', 'car_', ['LIST'], 1.)
 # base_grammar.add_rule('LIST', 'optional_',  ['LIST', 'LIST'], 1.)
 # base_grammar.add_rule('LIST', 'geometric_', ['LIST', 'LIST'], 1.)
 
-base_grammar.add_rule('LIST', '', ['ATOM'], 2.)
-base_grammar.add_rule('LIST', '\'\'', None, 2)
+base_grammar.add_rule('LIST', '', ['ATOM'], 3.0)
+base_grammar.add_rule('LIST', '\'\'', None, 1.0)
 # base_grammar.add_rule('LIST', 'recurse_', [], 1.) # This is added by factorizedDataHypothesis
 
 base_grammar.add_rule('BOOL', 'empty_', ['LIST'], 1.)
-base_grammar.add_rule('BOOL', 'flip_', ['PROB'], 1.)
-
 base_grammar.add_rule('BOOL', 'flip_(p=%s)', ['PROB'], 1.)
 
 for i in xrange(1,10):
