@@ -45,6 +45,23 @@ def generate_unique_partial_subtrees(grammar, start='START', N=1000, npartial=10
             for _ in xrange(npartial):
                 yield ti.random_partial_subtree(p=p)
 
+def least_common_difference(t1,t2):
+    """
+        For a pair of trees, find the nodes (one in each tree) defining
+        the root of their differences. Return None for identical trees.
+    """
+    if t1 == t2:
+        return None, None
+    if (t1.parent == t2.parent and
+        t1.name == t2.name and
+        t1.returntype == t2.returntype and
+        len(t1.args) == len(t2.args)):
+        differing = [arg1 != arg2 for arg1,arg2 in zip(t1.args,t2.args)]
+        if sum(differing) == 1:
+            idx = differing.index(True)
+            return least_common_difference(t1.args[idx],t2.args[idx])
+    return t1,t2
+
 # # # # # # # # # # # # # # # # # # # # # # # # #
 # Quick helper functions for subtrees
 

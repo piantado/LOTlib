@@ -406,6 +406,9 @@ class FunctionNode(object):
         """
         return sum([ 1.0*resampleProbability(x) for x in self])
 
+    def sampling_log_probability(self,node,resampleProbability=lambdaOne):
+        return log(1.0*resampleProbability(node)) - log(self.sample_node_normalizer(resampleProbability=resampleProbability))
+
     def sample_subnode(self, resampleProbability=lambdaOne):
         """Sample a subnode at random.
 
