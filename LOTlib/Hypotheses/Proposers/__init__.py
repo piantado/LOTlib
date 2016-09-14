@@ -1,4 +1,4 @@
-#from CopyRegenProposal import copy_regen_proposal
+from Proposer import *
 #from InsertDeleteProposal import insert_delete_proposal
 from RegenerationProposer import RegenerationProposer
 regeneration_proposal = RegenerationProposer().proposal_content

@@ -6,7 +6,7 @@ from math import log
 from random import random
 
 from LOTlib.BVRuleContextManager import BVRuleContextManager
-from LOTlib.Miscellaneous import lambdaTrue, lambdaOne, self_update
+from LOTlib.Miscellaneous import lambdaTrue, lambdaOne, self_update, nicelog
 
 
 # ------------------------------------------------------------------------------------------------------------
@@ -407,7 +407,7 @@ class FunctionNode(object):
         return sum([ 1.0*resampleProbability(x) for x in self])
 
     def sampling_log_probability(self,node,resampleProbability=lambdaOne):
-        return log(1.0*resampleProbability(node)) - log(self.sample_node_normalizer(resampleProbability=resampleProbability))
+        return nicelog(1.0*resampleProbability(node)) - nicelog(self.sample_node_normalizer(resampleProbability=resampleProbability))
 
     def sample_subnode(self, resampleProbability=lambdaOne):
         """Sample a subnode at random.

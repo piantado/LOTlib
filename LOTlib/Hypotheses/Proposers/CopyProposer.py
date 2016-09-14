@@ -7,10 +7,9 @@
 from LOTlib.BVRuleContextManager import BVRuleContextManager
 from LOTlib.FunctionNode import NodeSamplingException
 from LOTlib.Hypotheses.Proposers.Proposer import *
-from LOTlib.Miscellaneous import lambdaOne, Infinity, logsumexp
+from LOTlib.Miscellaneous import Infinity, lambdaOne, logsumexp, nicelog
 from LOTlib.Subtrees import least_common_difference
 from copy import copy, deepcopy
-from math import log
 from random import random
 
 def give_grammar(grammar,node):
@@ -53,21 +52,16 @@ class CopyProposer(Proposer):
         if chosen_node1 is None: # any node in the tree could have been copied
             for node in t1:
                 could_be_source = lambda x: 1.0 * nodes_equal_except_parents(grammar,x,node) * resampleProbability(x)
-                numerator =  (t1.sample_node_normalizer(could_be_source) - could_be_source(node))
-                lp_of_choosing_source = (log(numerator) - log(t1.sample_node_normalizer(resampleProbability))) if numerator > 0 else -Infinity
+                lp_of_choosing_source = (nicelog(t1.sample_node_normalizer(could_be_source) - could_be_source(node)) - nicelog(t1.sample_node_normalizer(resampleProbability)))
                 lp_of_choosing_target = t1.sampling_log_probability(chosen_node1,resampleProbability=resampleProbability)
                 lps += [lp_of_choosing_source + lp_of_choosing_target]
         else: # we have a specific path up the tree
             while chosen_node1:
                 could_be_source = lambda x: 1.0 * nodes_equal_except_parents(grammar,x,chosen_node2) * resampleProbability(x)
     
-                mass_on_sources = t1.sample_node_normalizer(could_be_source)
-                if mass_on_sources == 0.0:
-                    lps += [-Infinity]
-                else:
-                    lp_of_choosing_source = log(t1.sample_node_normalizer(could_be_source)) - log(t1.sample_node_normalizer(resampleProbability))
-                    lp_of_choosing_target = t1.sampling_log_probability(chosen_node1,resampleProbability=resampleProbability)
-                    lps += [lp_of_choosing_source + lp_of_choosing_target]
+                lp_of_choosing_source = nicelog(t1.sample_node_normalizer(could_be_source)) - nicelog(t1.sample_node_normalizer(resampleProbability))
+                lp_of_choosing_target = t1.sampling_log_probability(chosen_node1,resampleProbability=resampleProbability)
+                lps += [lp_of_choosing_source + lp_of_choosing_target]
     
                 if recurse:
                     chosen_node1 = chosen_node1.parent

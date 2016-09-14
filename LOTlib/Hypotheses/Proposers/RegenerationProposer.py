@@ -1,5 +1,5 @@
 """
-    Regeneration proposal - choose a node of type X and replace it with
+    Regeneration Proposer - choose a node of type X and replace it with
     a newly sampled value of type X.
 
     NOTE: ERGODIC!

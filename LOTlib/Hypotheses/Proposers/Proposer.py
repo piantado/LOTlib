@@ -48,7 +48,6 @@ def test_proposer(the_class):
         """
         def __init__(self, *args, **kwargs ):
             LOTHypothesis.__init__(self, grammar, display='lambda x,y: %s', **kwargs)
-            super(CRHypothesis, self).__init__(*args, **kwargs)
 
     def make_hypothesis(**kwargs):
         return CRHypothesis(**kwargs)

@@ -7,8 +7,7 @@
 """
 
 from LOTlib.Hypotheses.Proposers.Proposer import *
-from LOTlib.Miscellaneous import lambdaOne, logsumexp, self_update, weighted_sample
-from math import log
+from LOTlib.Miscellaneous import lambdaOne, logsumexp, nicelog, self_update, weighted_sample
 
 class MixtureProposer(Proposer):
     def __init__(self,proposers=[],proposer_weights=[]):
@@ -31,7 +30,7 @@ class MixtureProposer(Proposer):
             lp = proposer.compute_proposal_probability(grammar,t1,t2,
                                                        resampleProbability=resampleProbability,
                                                        recurse=recurse)
-            lw = log(self.proposer_weights[idx])
+            lw = nicelog(self.proposer_weights[idx])
             lps += [lw+lp]
         return logsumexp(lps)
 
