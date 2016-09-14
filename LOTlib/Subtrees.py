@@ -52,8 +52,7 @@ def least_common_difference(t1,t2):
     """
     if t1 == t2:
         return None, None
-    if (t1.parent == t2.parent and
-        t1.name == t2.name and
+    if (t1.name == t2.name and
         t1.returntype == t2.returntype and
         len(t1.args) == len(t2.args)):
         differing = [arg1 != arg2 for arg1,arg2 in zip(t1.args,t2.args)]
