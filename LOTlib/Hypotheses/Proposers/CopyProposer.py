@@ -7,23 +7,10 @@
 from LOTlib.BVRuleContextManager import BVRuleContextManager
 from LOTlib.FunctionNode import NodeSamplingException
 from LOTlib.Hypotheses.Proposers.Proposer import *
+from LOTlib.Hypotheses.Proposers.Utilities import *
 from LOTlib.Miscellaneous import Infinity, lambdaOne, logsumexp, nicelog
 from LOTlib.Subtrees import least_common_difference
 from copy import copy, deepcopy
-from random import random
-
-def give_grammar(grammar,node):
-    # BVRuleContextManager gives the grammar used inside a node, not
-    # at the node itself, so we consider the node's parent
-    with BVRuleContextManager(grammar, node.parent, recurse_up=True):
-        g = deepcopy(grammar)
-    return g
-
-def nodes_equal_except_parents(grammar,n1,n2):
-    return ((n1.name == n2.name) and
-            (n1.args == n2.args) and
-            (n1.returntype == n2.returntype) and
-            (give_grammar(grammar,n1) == give_grammar(grammar,n2)))
 
 class CopyProposer(Proposer):
     def propose_tree(self,grammar,tree,resampleProbability=lambdaOne):

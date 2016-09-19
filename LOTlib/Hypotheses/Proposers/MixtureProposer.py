@@ -10,17 +10,17 @@ from LOTlib.Hypotheses.Proposers.Proposer import *
 from LOTlib.Miscellaneous import lambdaOne, logsumexp, nicelog, self_update, weighted_sample
 
 class MixtureProposer(Proposer):
-    def __init__(self,proposers=[],proposer_weights=[]):
+    def __init__(self,proposers=[],proposer_weights=[],**kwargs):
         assert len(proposers) == len(proposer_weights) , "MixtureProposer.py >> __init__: different number of proposals and weights!"
         self_update(self,locals())
-        # TODO: how to add this? super(MixtureProposer, self).__init__(*args, **kwargs)
+        Proposer.__init__(self,**kwargs)
 
     def propose_tree(self,grammar,tree,resampleProbability=lambdaOne):
         """ sample a sub-proposer and propose from it """
         chosen_proposer = weighted_sample(self.proposers, probs=self.proposer_weights)
         return chosen_proposer.propose_tree(grammar,tree,resampleProbability)
 
-    def compute_proposal_probability(self,grammar, t1, t2, resampleProbability=lambdaOne, recurse=True):
+    def compute_proposal_probability(self,grammar, t1, t2, resampleProbability=lambdaOne, **kwargs):
         """
             sum over all possible ways of generating t2 from t1 over all
             proposers, adjusted for their weight
@@ -29,7 +29,7 @@ class MixtureProposer(Proposer):
         for idx,proposer in enumerate(self.proposers):
             lp = proposer.compute_proposal_probability(grammar,t1,t2,
                                                        resampleProbability=resampleProbability,
-                                                       recurse=recurse)
+                                                       **kwargs)
             lw = nicelog(self.proposer_weights[idx])
             lps += [lw+lp]
         return logsumexp(lps)

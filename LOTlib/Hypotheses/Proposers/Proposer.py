@@ -1,4 +1,4 @@
-from LOTlib.Miscellaneous import lambdaOne
+from LOTlib.Miscellaneous import lambdaOne, Infinity
 
 class ProposalFailedException(Exception):
     """
@@ -14,8 +14,8 @@ class Proposer(object):
                 ret_value, fb =  self.proposal_content(self.grammar, self.value, **kwargs)
             except ProposalFailedException:
                 pass
-            ret = self.__copy__(value=ret_value)
-            return ret, fb
+        ret = self.__copy__(value=ret_value)
+        return ret, fb
 
     def proposal_content(self, grammar, tree, resampleProbability=lambdaOne):
         t = self.propose_tree(grammar,tree,resampleProbability)
