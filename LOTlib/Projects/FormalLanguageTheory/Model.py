@@ -70,16 +70,16 @@ class IncrementalLexiconHypothesis(StochasticLikelihood, RecursiveLexicon):
             z = log(sum(llcounts.values()))
 
             # find the largest N such that we get all the strings n<N exactly
-            for N in xrange(max([len(r) for r in datum.output.keys()])):
-                s1 = {k for k in datum.output.keys() if len(k) <= N }
-                s2 = {k for k in llcounts.keys() if len(k) <= N}
+            # for N in xrange(max([len(r) for r in datum.output.keys()])):
+            #     s1 = {k for k in datum.output.keys() if len(k) <= N }
+            #     s2 = {k for k in llcounts.keys() if len(k) <= N}
+            #
+            #     if len(s1 ^ s2) != 0: break # leaving N to be the largest value we found, if the symmetric difference is nonempty
+            # ll = N*sum(datum.output.values())
 
-                if len(s1 ^ s2) != 0: break # leaving N to be the largest value we found, if the symmetric difference is nonempty
-            ll = N*sum(datum.output.values())
-
-            # ll = 0.0  # We are going to compute a pseudo-likelihood, counting close strings as being close
-            # for k in datum.output.keys():
-            #     # ll += datum.output[k] * (log(llcounts.get(k)) - z) if k in llcounts else -100.0
+            ll = 0.0  # We are going to compute a pseudo-likelihood, counting close strings as being close
+            for k in datum.output.keys():
+                ll += datum.output[k] * (log(llcounts.get(k)) - z) if k in llcounts else -100.0
             #     # ll += datum.output[k] * (log(llcounts.get(k))-z if k in llcounts else -100.0)
             #     # ll += datum.output[k] * (log(llcounts.get(k))-z if k in llcounts else -10000.0)
             #     # ll += datum.output[k] * (log(llcounts.get(k, 1.0e-12)) - z)

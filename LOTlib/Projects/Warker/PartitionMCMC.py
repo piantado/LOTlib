@@ -43,7 +43,8 @@ grammar.add_rule('EXPR', 'cons_', ['EXPR', 'EXPR'], 1.0/2.0)
 grammar.add_rule('SET', '"%s"', ['STRING'], 1.0)
 
 
-# Build up partitions
+# Build up partitions before we have the terminals and strings
+# this way, partitions are mainly structural
 partitions = []
 for t in grammar.enumerate(7):
 
@@ -103,16 +104,6 @@ class MyHypothesis(StochasticLikelihood, LOTHypothesis):
                 return -Infinity
 
         return ll / self.likelihood_temperature
-    #overwrite compute_single_likelihood to alter distance factor
-    '''def compute_single_likelihood(self, datum, distance_factor=1000.0):
-        assert isinstance(datum.output, dict), "Data supplied must be a dict (function outputs to counts)"
-
-        llcounts = self.make_ll_counts(datum.input)
-
-        lo = sum(llcounts.values()) # normalizing constant
-
-        # We are going to compute a pseudo-likelihood, counting close strings as being close
-        return sum([datum.output[k]*logsumexp([log(llcounts[r])-log(lo) - distance_factor*distance(r, k) for r in llcounts.keys()]) for k in datum.output.keys()])'''
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -139,5 +130,6 @@ if __name__ == "__main__":
                              output={'h e s': size, 'm e s': size, 'm e g': size, 'h e g': size, 'm e n': size, 'h e m': size, 'm e k': size, 'k e s': size, 'h e k': size, 'k e N': size, 'k e g': size, 'h e n': size, 'm e N': size, 'k e n': size, 'h e N': size, 'f e N': size, 'g e N': size, 'n e N': size, 'n e s': size, 'f e n': size, 'g e n': size, 'g e m': size, 'f e m': size, 'g e k': size, 'f e k': size, 'f e g': size, 'f e s': size, 'n e g': size, 'k e m': size, 'n e m': size, 'g e s': size, 'n e k': size})]
 
         for h in break_ctrlc(MHSampler(h0, data, steps=1000, skip=0)):
+            # Show the partition and the hypothesis
             print h.posterior_score, p, h
 
