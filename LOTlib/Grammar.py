@@ -189,12 +189,19 @@ class Grammar(CommonEqualityMixin):
                         print "*** Runtime error in %s" % fn
                         raise e
 
-
                 # and set the parents
                 for a in fn.argFunctionNodes():
                     a.parent = fn
 
             return fn
+        elif isinstance(x, FunctionNode): # this will let us finish generation of a partial tree
+
+            x.args = [ self.generate(a) for a in x.args]
+
+            for a in x.argFunctionNodes():
+                a.parent = x
+
+            return x
 
         else:  # must be a terminal
             assert isinstance(x, str), ("*** Terminal must be a string! x="+x)

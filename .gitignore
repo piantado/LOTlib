@@ -38,15 +38,13 @@ doc/_build
 *.profile
 
 # out/old
-*/old/*
-*/out/*
-LOTlib/Examples/NumberGame/GrammarInference/Run/out/*
-LOTlib/Examples/FormalLanguageTheory/out/*
-
+**/old/*
+**/out/*
 
 # zips
 *.zip
 
-# idea folder
-/.idea/*
-.idea/
+# idea file/folder
+**/.idea/*
+**/idea/*
+*.idea
