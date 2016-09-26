@@ -10,24 +10,12 @@ import numpy
 from LOTlib.Miscellaneous import logsumexp,nicelog, Infinity,attrmem
 from Levenshtein import distance
 from math import log
-from optparse import OptionParser
-
-parser = OptionParser()
-parser.add_option("-f", "--file", dest="filename", help="file name of the pickled results", default="FirstOrderHyps.pkl")
-parser.add_option("-d", "--datasize", dest="datasize", type="int", help="number of data points", default=100)
-parser.add_option("-t", "--top", dest="top", type="int", help="top N count of hypotheses from each chain", default=100)
-parser.add_option("-s", "--steps", dest="steps", type="int", help="steps for the chainz", default=10000)
-parser.add_option("-c", "--chainz", dest="chains", type="int", help="number of chainz :P", default=15)
-
-(options, args) = parser.parse_args()
+from OptionParser import options
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Data
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def make_data(size=options.datasize):
-    return [FunctionData(input=[],
-                         output={'h e s': size, 'm e s': size, 'm e g': size, 'h e g': size, 'm e n': size, 'h e m': size, 'm e k': size, 'k e s': size, 'h e k': size, 'k e N': size, 'k e g': size, 'h e n': size, 'm e N': size, 'k e n': size, 'h e N': size, 'f e N': size, 'g e N': size, 'n e N': size, 'n e s': size, 'f e n': size, 'g e n': size, 'g e m': size, 'f e m': size, 'g e k': size, 'f e k': size, 'f e g': size, 'f e s': size, 'n e g': size, 'k e m': size, 'n e m': size, 'g e s': size, 'n e k': size})]
 
 
 
@@ -50,7 +38,7 @@ TERMINAL_WEIGHT = 15
 
 grammar = Grammar()
 
-# flattern2str lives at the top, and it takes a cons, cdr, car structure and projects it to a string
+
 grammar.add_rule('START', 'flatten2str', ['EXPR'], 1.0)
 grammar.add_rule('EXPR', 'sample_', ['SET'], 1.)
 
@@ -62,16 +50,37 @@ grammar.add_rule('STRING', '%s', ['TERMINAL'], 1.0)
 
 
 
+grammar.add_rule('TERMINAL', 'e', None, TERMINAL_WEIGHT * 9.96)
+grammar.add_rule('TERMINAL', 'I', None, TERMINAL_WEIGHT * 9.75)
+grammar.add_rule('TERMINAL', 'a', None, TERMINAL_WEIGHT * 3.09)
+grammar.add_rule('TERMINAL', 'A', None, TERMINAL_WEIGHT * 1.8)
+grammar.add_rule('TERMINAL', 'u', None, TERMINAL_WEIGHT * 1.52)
+grammar.add_rule('TERMINAL', 'O', None, TERMINAL_WEIGHT * 1.49)
+grammar.add_rule('TERMINAL', 'o', None, TERMINAL_WEIGHT *.06)
+grammar.add_rule('TERMINAL', 'U', None, TERMINAL_WEIGHT * .99)
 
-grammar.add_rule('TERMINAL', 'g', None, TERMINAL_WEIGHT)
-grammar.add_rule('TERMINAL', 'e', None, TERMINAL_WEIGHT)
-grammar.add_rule('TERMINAL', 'k', None, TERMINAL_WEIGHT)
-grammar.add_rule('TERMINAL', 's', None, TERMINAL_WEIGHT)
-grammar.add_rule('TERMINAL', 'f', None, TERMINAL_WEIGHT)
-grammar.add_rule('TERMINAL', 'n', None, TERMINAL_WEIGHT)
-grammar.add_rule('TERMINAL', 'm', None, TERMINAL_WEIGHT)
-grammar.add_rule('TERMINAL', 'h', None, TERMINAL_WEIGHT)
-grammar.add_rule('TERMINAL', 'N', None, TERMINAL_WEIGHT)
+grammar.add_rule('TERMINAL', 't', None, TERMINAL_WEIGHT *7.59)
+grammar.add_rule('TERMINAL', 'r', None, TERMINAL_WEIGHT * 7.1)
+grammar.add_rule('TERMINAL', 'l', None, TERMINAL_WEIGHT * 3.65)
+grammar.add_rule('TERMINAL', 's', None, TERMINAL_WEIGHT * 4.89)
+grammar.add_rule('TERMINAL', 'd', None, TERMINAL_WEIGHT * 3.35)
+grammar.add_rule('TERMINAL', 'n', None, TERMINAL_WEIGHT * 7.95)
+grammar.add_rule('TERMINAL', 'k', None, TERMINAL_WEIGHT * 2.98)
+grammar.add_rule('TERMINAL', 'm', None, TERMINAL_WEIGHT * 2.87)
+grammar.add_rule('TERMINAL', 'z', None, TERMINAL_WEIGHT * 2.36)
+grammar.add_rule('TERMINAL', 'v', None, TERMINAL_WEIGHT * 2.33)
+
+grammar.add_rule('TERMINAL', 'p', None, TERMINAL_WEIGHT * 2.25)
+grammar.add_rule('TERMINAL', 'w', None, TERMINAL_WEIGHT * 1.77)
+grammar.add_rule('TERMINAL', 'b', None, TERMINAL_WEIGHT * 1.65)
+grammar.add_rule('TERMINAL', 'f', None, TERMINAL_WEIGHT * 1.61)
+grammar.add_rule('TERMINAL', 'y', None, TERMINAL_WEIGHT * 1.2)
+grammar.add_rule('TERMINAL', 'g', None, TERMINAL_WEIGHT * 1.14)
+grammar.add_rule('TERMINAL', 'h', None, TERMINAL_WEIGHT * 1.11)
+grammar.add_rule('TERMINAL', 'S', None, TERMINAL_WEIGHT * .87)
+grammar.add_rule('TERMINAL', 'N', None, TERMINAL_WEIGHT * .8)
+grammar.add_rule('TERMINAL', 'j', None, TERMINAL_WEIGHT * .5)
+grammar.add_rule('TERMINAL', 'T', None, TERMINAL_WEIGHT * .44)
 
 
 
@@ -123,9 +132,13 @@ class MyHypothesis(StochasticLikelihood, LOTHypothesis):
 def make_hypothesis():
     return MyHypothesis(grammar)
 
-def runme(x):
-    print "Start: " + str(x)
-    return standard_sample(make_hypothesis, make_data, show=False, N=options.top, save_top="topModel1.pkl", steps=options.steps)
+def runme(x,datamt):
+    def make_data(size=datamt):
+        return [FunctionData(input=[],
+                             output={'h e s': size, 'm e s': size, 'm e g': size, 'h e g': size, 'm e n': size, 'h e m': size, 'm e k': size, 'k e s': size, 'h e k': size, 'k e N': size, 'k e g': size, 'h e n': size, 'm e N': size, 'k e n': size, 'h e N': size, 'f e N': size, 'g e N': size, 'n e N': size, 'n e s': size, 'f e n': size, 'g e n': size, 'g e m': size, 'f e m': size, 'g e k': size, 'f e k': size, 'f e g': size, 'f e s': size, 'n e g': size, 'k e m': size, 'n e m': size, 'g e s': size, 'n e k': size})]
+
+    print "Start: " + str(x) + " on this many: " + str(datamt)
+    return standard_sample(make_hypothesis, make_data, show=False, N=options.top, save_top="topEnglish1.pkl", steps=options.steps)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Main
@@ -137,9 +150,8 @@ if __name__ == "__main__":
 
     #standard_sample(make_hypothesis, make_data, show_skip=9, save_top=False)
 
-    #for running parallel
     from LOTlib.MPI import MPI_map
-    args=[[x] for x in range(options.chains)]
+    args=[[x, d] for d in range(1, options.datasize+2,10) for x in range(options.chains)]
     myhyp=set()
 
     for top in MPI_map(runme, args):
