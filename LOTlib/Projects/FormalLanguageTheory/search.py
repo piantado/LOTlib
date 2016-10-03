@@ -68,8 +68,8 @@ def run(options, ndata):
         for h in break_ctrlc(MHSampler(h0, data, steps=options.STEPS)):
             tn.add(h)
 
-            # print h.posterior_score, h
-            # print getattr(h, 'll_counts', None)
+            print h.posterior_score, h
+            print getattr(h, 'll_counts', None)
 
         # and start from where we ended
         h0 = deepcopy(h) # must deepcopy
@@ -101,10 +101,10 @@ if __name__ == "__main__":
 
     # Save options
     if is_master_process():
-        display_option_summary(options);
+        display_option_summary(options)
         sys.stdout.flush()
 
-    DATA_RANGE =  np.arange(1, 10000, 10)
+    DATA_RANGE =  np.arange(1, 1000, 10)
     random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))

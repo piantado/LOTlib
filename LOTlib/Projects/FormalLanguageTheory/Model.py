@@ -1,7 +1,7 @@
 
 from copy import deepcopy, copy
 from math import log
-from LOTlib.Miscellaneous import attrmem, logsumexp
+from LOTlib.Miscellaneous import attrmem, logsumexp, sample_one
 from Levenshtein import distance
 from LOTlib.Hypotheses.Proposers import ProposalFailedException
 from LOTlib.Hypotheses.Likelihoods.StochasticLikelihood import StochasticLikelihood
@@ -10,18 +10,16 @@ from LOTlib.Hypotheses.Likelihoods.StochasticLikelihood import StochasticLikelih
 # from LOTlib.Hypotheses.FactorizedDataHypothesis import InnerHypothesis
 
 
-def matching_prefix(x,y):
-    for i in xrange(min(len(x), len(y))):
-        if x[i] != y[i]:
-            return len(y) - i
-    return len(y) - min(len(x), len(y))
+# def matching_prefix(x,y):
+#     for i in xrange(min(len(x), len(y))):
+#         if x[i] != y[i]:
+#             return len(y) - i
+#     return len(y) - min(len(x), len(y))
 
 
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-import random
-from LOTlib.Hypotheses.Proposers.InsertDeleteProposal import insert_delete_proposal
-from LOTlib.Hypotheses.Proposers.RegenerationProposal import regeneration_proposal
-from LOTlib.Hypotheses import Hypothesis
+from LOTlib.Hypotheses.Proposers import IDR_proposal
+
 class InnerHypothesis(StochasticLikelihood, LOTHypothesis):
     """
     The type of each function F. This is NOT recursive, but it does allow recurse_ (to refer to the whole lexicon)
@@ -29,9 +27,23 @@ class InnerHypothesis(StochasticLikelihood, LOTHypothesis):
     def __init__(self, grammar=None, display="lambda recurse_: %s", **kwargs):
         LOTHypothesis.__init__(self, grammar=grammar, display=display, **kwargs)
 
-from LOTlib.Miscellaneous import sample_one
-from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursionDepthException
+
+    def propose(self, **kwargs):
+        ret_value, fb = None, None
+        while True: # keep trying to propose
+            try:
+                ret_value, fb = IDR_proposal(self.grammar, self.value, **kwargs)
+                break
+            except ProposalFailedException:
+                pass
+
+        ret = self.__copy__(value=ret_value)
+
+        return ret, fb
+
+
 from LOTlib.Hypotheses.Lexicon.RecursiveLexicon import RecursiveLexicon
+
 class IncrementalLexiconHypothesis(StochasticLikelihood, RecursiveLexicon):
         """ A hypothesis where we can incrementally add words and propose to only the additions
         """
@@ -40,14 +52,6 @@ class IncrementalLexiconHypothesis(StochasticLikelihood, RecursiveLexicon):
             RecursiveLexicon.__init__(self, recurse_bound=5, maxnodes=50, variable_weight=3.0, **kwargs)
             self.grammar=grammar
             self.N = 0
-
-        def propose(self):
-            while True:
-                try:
-                    return RecursiveLexicon.propose(self)
-                except RecursionDepthException:
-                    pass
-
 
         def make_hypothesis(self, **kwargs):
             return InnerHypothesis(**kwargs)
@@ -79,8 +83,8 @@ class IncrementalLexiconHypothesis(StochasticLikelihood, RecursiveLexicon):
 
             ll = 0.0  # We are going to compute a pseudo-likelihood, counting close strings as being close
             for k in datum.output.keys():
-                ll += datum.output[k] * (log(llcounts.get(k)) - z) if k in llcounts else -100.0
-            #     # ll += datum.output[k] * (log(llcounts.get(k))-z if k in llcounts else -100.0)
+                # ll += datum.output[k] * (log(llcounts.get(k)) - z) if k in llcounts else -100.0
+                ll += datum.output[k] * (log(llcounts.get(k))-z if k in llcounts else -1000.0)
             #     # ll += datum.output[k] * (log(llcounts.get(k))-z if k in llcounts else -10000.0)
             #     # ll += datum.output[k] * (log(llcounts.get(k, 1.0e-12)) - z)
             #     # ll += datum.output[k] * logsumexp([ log(llcounts[r])-log(lo) - 1.0 * matching_prefix(r, k) for r in llcounts.keys() ])
@@ -100,7 +104,8 @@ class IncrementalLexiconHypothesis(StochasticLikelihood, RecursiveLexicon):
             new = deepcopy(self)  ## Now we just copy the whole thing
             while True:
                 try:
-                    i = sample_one(range(self.N))
+                    i = sample_one(range(self.N)) # random one
+                    # i = max(self.value.keys()) # only propose to last
                     x, fb = self.get_word(i).propose()
                     new.set_word(i, x)
 
