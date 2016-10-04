@@ -1,4 +1,6 @@
 import pickle
+from LOTlib import break_ctrlc
+import LOTlib # if we want to set LOTlib.SIG_INTERRUPTED=False for resuming ipython
 
 try:
     import numpy
@@ -7,17 +9,6 @@ except ImportError:
 
 def build_conceptlist(c,l):
     return "CONCEPT_%s__LIST_%s.txt"%(c,l)
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Set up some logging
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-from LOTlib.Miscellaneous import setup_directory, qq
-
-LOG = "log"
-setup_directory(LOG) # make a directory for ourselves
-
-# Make sure we print the entire matrix
-numpy.set_printoptions(threshold=numpy.inf)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load the hypotheses
@@ -33,9 +24,6 @@ for hset in concept2hypotheses.values():
     hypotheses.update(hset)
 
 print "# Loaded %s hypotheses" % len(hypotheses)
-with open(LOG+"/hypotheses.txt", 'w') as f:
-    for i, h in enumerate(hypotheses):
-        print >>f, i, qq(h)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load the human data
@@ -73,7 +61,7 @@ from Model.Grammar import grammar
 
 trees = [h.value for h in hypotheses]
 
-nt2counts, sig2idx, prior_offset = create_counts(grammar, trees, log=LOG)
+nt2counts, sig2idx, prior_offset = create_counts(grammar, trees, log=None)
 
 print "# Computed counts for each hypothesis & nonterminal"
 
@@ -83,37 +71,53 @@ print "# Computed counts for each hypothesis & nonterminal"
 # Build up the info about the data
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-L        = [] # each hypothesis's cumulative likelihood to each data point
+concepts = concept2data.keys()
+
 NYes     = []
 NNo      = []
-output   = []
 
-for concept in concept2data.keys()[:50]: ## TODO: DO THIS FOR ALL
-    print "#\t Doing concept %s" % concept
-    data = concept2data[concept]
+# Make NYes and Nno
+for c in concepts:
+    data = concept2data[c]
 
-    # compute the likelihood for all the data here
-    for h in hypotheses:
-        h.stored_likelihood = [h.compute_single_likelihood(d) for d in data]
-
-    for di in xrange(25):
-        print "Doing ", concept, " ", di
-
-        ll  = [ sum(h.stored_likelihood[:di]) for h in hypotheses ] # each likelihood
-        out = [ map(lambda x: 1*h(data[di].input, x), data[di].input) for h in hypotheses] # each response
-
-        # Each out is a set of responses, that we have to unwrap
-        for oi in xrange(len(data[di].input)):
-            k = tuple([concept, di+1, oi+1])
-
+    for di, d in enumerate(data[:25]): # as far as we go into the trial
+        for ri in xrange(len(d.input)): # each individual response
+            k = tuple([c, di+1, ri+1])
             # assert k in human_yes and k in human_no, "*** Hmmm key %s is not in the data" % k
             if k in human_yes or k in human_no:
-                output.extend( [x[oi] for x in out] ) # each hypothesis's prediction for this item
-                L.extend( ll ) # add all the likelihoods on
-                NYes.append( human_yes[k]  )
-                NNo.append( human_no[k] )
+                NYes.append( human_yes[k])
+                NNo.append( human_no[k])
             else:
-                print "*** Warning, %s not in human_yes or human_no"%str(k)
+                print "*** Warning, %s not in human" % k
+                NYes.append( human_yes[k])
+                NNo.append( human_no[k])
+
+
+# Now load up every response from each hypothesis
+L        = [] # each hypothesis's cumulative likelihood to each data point
+output   = []
+
+NHyp = 0
+for h in break_ctrlc(hypotheses):
+    NHyp += 1 # keep track in case we break
+    print "# Processing ", NHyp, h
+
+    for c in concepts:
+        data = concept2data[c]
+
+        ll = [h.compute_single_likelihood(d) for d in data]
+
+        # add on the outputs
+        sumll = 0.0 # the total ll we've seen so far
+        for di, d in enumerate(data[:25]): # as far as we go into the trial
+
+            for ri in xrange(len(d.input)): # each individual response
+                if tuple([c, di+1, ri+1]) in human_yes or k in human_no: # in case we removed any above
+                    output.append( 1.0 * h(d.input, d.input[ri]) )
+                    L.append(sumll)
+
+            sumll += ll[di] # the likelihood for the next go round
+    assert len(L) == len(output)
 
 
 print "# Created L, NYes, NNo, and Output of size %s" % len(L)
@@ -129,17 +133,26 @@ ntlen = [len(nt2counts[k][0]) for k in kys] # store how long each
 counts = numpy.concatenate([nt2counts[k] for k in kys], axis=1)
 
 print "const int NRULES = %s;" % sum(ntlen)
-print "const int NHYP = %s;" % len(hypotheses)
+print "const int NHYP = %s;" % NHyp
 print "const int NDATA = %s;" % len(NYes)
 print "const int NNT = %s;" % len(ntlen)
 print "const int NTLEN[NNT] = {%s};" % ','.join(map(str,ntlen))
 
+# print out the key for understanding the columns
+sigs = sig2idx.keys()
+for k in kys:
+    s = [sig for sig in sigs if sig[0] == k]
+    s = sorted(s, key=sig2idx.get)
+    for si in s:
+        print sig2idx[si], si
+
+
 import h5py
 with h5py.File('data.h5', 'w') as hf:
     # first write the 'specs'
-    hf.create_dataset('specs',    data=[len(hypotheses), sum(ntlen), len(NYes), len(ntlen)], dtype=int)
+    hf.create_dataset('specs',    data=[NHyp, sum(ntlen), len(NYes), len(ntlen)], dtype=int)
     # write all the data
-    hf.create_dataset('counts',    data=numpy.ravel(counts, order='C'), dtype=int)
+    hf.create_dataset('counts',    data=numpy.ravel(counts[:NHyp], order='C'), dtype=int) # must be sure if we stop early, we don't include too many counts
     hf.create_dataset('output',    data=output, dtype=float)
     hf.create_dataset('human_yes', data=numpy.ravel(NYes, order='C'), dtype=int)
     hf.create_dataset('human_no',  data=numpy.ravel(NNo, order='C'), dtype=int)

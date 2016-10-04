@@ -1,20 +1,16 @@
-
 /*
 
-    TODO:   
-        - Fix param proposal near 0,1, for fb
-        - Fix grammar proposal with abs --> Just reject proposal
-        - Add parameter priors
 */
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <cuda_runtime.h>
-#include <helper_functions.h>
 #include <getopt.h>
 #include <string.h>
-#include <vector>
+
+// for CUDA
+#include <cuda_runtime.h>
+#include <helper_functions.h>
 #include "cuPrintf.cu" //!
 
 // for randomness
@@ -24,11 +20,30 @@
 // for loading matrices 
 #include "hdf5.h"
 
+// our kernels for prior, likelihood
+#include "kernels.cu"
 
 using namespace std;
 
 const int BLOCK_SIZE = 1024;
 const int N_BLOCKS = 1024; // set below
+const int NPARAMS = 4;
+
+// priors on temperatures // NOTE: These values are not appropriate to fit because the normalizing constants are not computed in the posteriors below
+const float TEMPERATURE_k = 2.0;
+const float TEMPERATURE_theta = 0.5; 
+
+// the k and theta on grammar productions x
+const float X_k = 2.0;
+const float X_theta = 0.5;
+
+
+// MCMC parameters
+int STEPS = 1000000;
+int SKIP  = 1000;
+int WHICH_GPU = 0;
+string in_file_path = "data.h5"; 
+bool DO_RR = 0; // do rational rules or pcfg?
 
 // Macro for defining arrays with name device_name, and then copying name over
 #define DEVARRAY(type, nom, size) \
@@ -53,68 +68,59 @@ boost::uniform_01<boost::mt19937> random_real(rng);
  * To add: prior offset
  */
 
-__global__ void compute_prior(float* lpx, int* counts, float* to, int Nhyp, int Nrules) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if(idx >= Nhyp) { return; }
-    
-    float p = 0.0;
-    for(int r=0;r<Nrules;r++) {
-        p += counts[idx*Nrules+r]*logf(lpx[r]);
-    }    
-    
-    to[idx] = p;    
+
+double lgammapdf(float x, float k, float theta) {
+    // Does not bother with normalizing constant
+    return log(x)*(k-1.0) - x/theta;
 }
 
 
 
-/*
- * output[h][d] gives the output for the dth point
- * prior[h]
- * likelihood[h][d]
- * output[h][d]
- * human_yes[d]
- * human_no[d]
- * to[d]
- 
- We might be able to make this faster by parallelizing over hypotheses rather than data points
- since there are more hyps. Then we'd have to sum up with separate kernels
- */
-__global__ void compute_human_likelihood(float alpha, float beta, float pt, float lt,
-                                         float* prior, float* likelihood, float* output, 
-                                         int* human_yes, int* human_no, float* to, int Nhyp, int Ndata) {
- 
-    // now, idx will run over data points and each thread will add its own hypotheses
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if(idx >= Ndata) { return; }
-    
-    // logsumexp normalizing constant Z 
-    float mx = -9e99;
-    for(int h=0;h<Nhyp;h++) {
-        float v = prior[h]/pt+likelihood[idx*Nhyp + h]/lt;
-        if(v>mx) { mx=v; }
-    }
-    float sm = 0.0;
-    for(int h=0;h<Nhyp;h++) {
-        sm += expf(prior[h]/pt+likelihood[idx*Nhyp + h]/lt - mx);
-    }
-    float Z = mx+logf(sm);    /// normalizing constant
 
-    // now compute the p human data
-    float pyes=0.0;
-    for(int h=0;h<Nhyp;h++) {
-        pyes += output[idx*Nhyp + h] * expf(prior[h]/pt+likelihood[idx*Nhyp + h]/lt - Z); // weighted average over hypotheses
-    }
-    
-    to[idx] = logf(      pyes*alpha  + (1.0-alpha)*beta)*human_yes[idx] + \
-              logf( (1.0-pyes)*alpha + (1.0-alpha)*(1.0-beta))*human_no[idx];
-}
-
-
-
+static struct option long_options[] =
+    {   
+        {"in",           required_argument,    NULL, 'd'},
+        {"steps",        required_argument,    NULL, 's'},
+        {"skip",         required_argument,    NULL, 'k'},
+        {"gpu",          required_argument,    NULL, 'g'},
+        {"rr",           no_argument,    NULL, 'r'},
+        {"pcfg",         no_argument,    NULL, 'p'},
+        {NULL, 0, 0, 0} // zero row for bad arguments
+    };  
 
 int main(int argc, char** argv) {    
     
-    hid_t file = H5Fopen("/home/piantado/Desktop/datasets/data-50concept.h5", H5F_ACC_RDONLY, H5P_DEFAULT);
+    // -----------------------------------------------------------------------
+    // Parse command line
+    // -----------------------------------------------------------------------
+    int option_index = 0, opt=0;
+    while( (opt = getopt_long( argc, argv, "bp", long_options, &option_index )) != -1 )
+            switch( opt ) {
+                    case 'd': in_file_path = optarg; break;
+                    case 's': STEPS = atoi(optarg); break;
+                    case 'k': SKIP = atoi(optarg); break;
+                    case 'g': WHICH_GPU = atoi(optarg); break;
+                    case 'r': DO_RR = 1; break;
+                    case 'p': DO_RR = 0; break;
+                    default: return 1; // unspecified
+            }
+    
+    // set the GPU 
+    int deviceCount = 0;
+    cudaGetDeviceCount(&deviceCount);
+    if(WHICH_GPU <= deviceCount) {
+        cudaSetDevice(WHICH_GPU);
+    }
+    else {
+        cerr << "Invalid GPU device " << WHICH_GPU << endl;
+        return 1;
+    }
+        
+    // -----------------------------------------------------------------------
+    // Process the HDF5 file
+    // -----------------------------------------------------------------------
+    
+    hid_t file = H5Fopen(in_file_path.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
     hid_t dset; // used in macros for reading each data set 
     herr_t status; // used in macro for checking
     
@@ -126,17 +132,21 @@ int main(int argc, char** argv) {
     int NDATA  = specs[2];
     int NNT    = specs[3];
 
-    cout << "# Loaded with " << NHYP << " hypotheses, " << NRULES << " rules, " << NDATA << " data, and " << NNT << " nonterminals." << endl;
+    cout << "# Loaded with " << NHYP << " hypotheses, " << 
+                              NRULES << " rules, " << 
+                               NDATA << " data, and " << 
+                                 NNT << " nonterminals." << endl;
     
     int ntlen[NNT]; // now load the lengths of each nonterminal
     LOAD_HDF5(ntlen, H5T_NATIVE_INT)
-
+    DEVARRAY(int, ntlen, NNT*sizeof(int))
+    
     // Now load the real data
     int counts_size = NHYP*NRULES*sizeof(int);
     int* counts = new int[NHYP*NRULES];
     LOAD_HDF5(counts, H5T_NATIVE_INT)
     DEVARRAY(int, counts, counts_size)
-
+    
     int output_size = NHYP*NDATA*sizeof(int);
     float* output = new float[NHYP*NDATA];
     LOAD_HDF5(output, H5T_NATIVE_FLOAT)
@@ -157,10 +167,10 @@ int main(int argc, char** argv) {
     LOAD_HDF5(likelihood, H5T_NATIVE_FLOAT)
     DEVARRAY(float, likelihood, likelihood_size)
     
-
-    /////////////////////////////////////////
-    // Set up local variables 
-    /////////////////////////////////////////
+    // -----------------------------------------------------------------------
+    // Local variables
+    // -----------------------------------------------------------------------
+    
     cout << "# Setting up MCMC variables" << endl;
     
     float X[NRULES]; // probabilities
@@ -171,8 +181,7 @@ int main(int argc, char** argv) {
     float oldX[NRULES]; // used for copying and saving old version
     
     // other parameters
-    const int NPARAMS = 4;
-    float params[NPARAMS] = {0.75, 0.5, 1.0, 1.0}; // alpha, beta, priortemp, lltemp
+    float params[NPARAMS] = {0.5, 0.5, 1.0, 1.0}; // alpha, beta, priortemp, lltemp
     float oldparams[NPARAMS];
     
     float prior_size =  NHYP*sizeof(float);
@@ -182,100 +191,120 @@ int main(int argc, char** argv) {
     float human_ll[NDATA];
     int human_ll_size = NDATA*sizeof(float);
     DEVARRAY(float, human_ll, human_ll_size)
-
-    /////////////////////////////////////////
-    // MCMC
-    /////////////////////////////////////////
     
-    double current = -99e99; // proposals to a single dimension of X (for simplicity)
-    int proposal_i = 0;
+    // -----------------------------------------------------------------------
+    // Actual MCMC
+    // -----------------------------------------------------------------------    
+    
+    double current = -INFINITY; // the current posterior
+    double proposal; // store the proposal value 
+    cudaError_t error;
     
     cout << "# Starting MCMC" << endl;
-    for(int steps=0;steps<100;steps++) {
-        
-        // decide whether to propose to x or something else
-        int proposetoX = (rng() % 2)==0; 
+    for(int steps=0;steps<STEPS;steps++) {
+		
+        int proposetoX = (rng() % 2)==0;   // decide whether to propose to x or something else
         if(proposetoX) {
             
-            proposal_i = rng()%NRULES;
-        
-            memcpy(oldX, X, X_size);
+            int j = rng()%NRULES; // who do I propose to?
             
-            X[proposal_i] = abs(X[proposal_i] + 0.01*var_nor());
+            float v = X[j] + (DO_RR ? 0.1 : 0.01) *var_nor(); // make a proposal
             
-            // renormalize                                          TODO: CHECK F/B
-            int xi=0;
-            for(int nt=0;nt<NNT;nt++) {
-                float sm = 0.0;
-                for(int i=0;i<ntlen[nt];i++) 
-                    sm += X[xi+i];
-                
-                for(int i=0;i<ntlen[nt];i++) 
-                    X[xi+i] = X[xi+i] / sm;            
-                
-                xi += ntlen[nt];
+            if(v < 0.0) goto REJECT_SAMPLE; // 
+            
+            memcpy(oldX, X, X_size); // save the old version
+            
+            X[j] = v;
+                        
+            if(!DO_RR) { // renormalize if we are doing a pdcfg   TODO: CHECK F/B
+                int xi=0;
+                for(int nt=0;nt<NNT;nt++) {
+                        float sm = 0.0;
+                        for(int i=0;i<ntlen[nt];i++) 
+                                sm += X[xi+i];
+                        
+                        for(int i=0;i<ntlen[nt];i++) 
+                                X[xi+i] = X[xi+i] / sm;            
+                        
+                        xi += ntlen[nt];
+                }
+                assert(xi == NRULES);
             }
-            assert(xi == NRULES);
             
+            // and copy to the device
             cudaMemcpy(device_X, X, X_size, cudaMemcpyHostToDevice);
-        } else {
+        
+        } else { // otherwise we propose to the parameters
             int i = rng() % NPARAMS;
+                        
+            float v = params[i] + 0.01*var_nor();
             
-            memcpy(oldparams, params, NPARAMS*sizeof(float));
+            // deal with bounds
+            if( i <= 1 && (v > 0.99 || v < 0.01) ) goto REJECT_SAMPLE;
+            if( i >= 2 && (v < 0.01) )             goto REJECT_SAMPLE;
+
+            memcpy(oldparams, params, NPARAMS*sizeof(float)); // save old version
             
-            params[i] = params[i] + 0.05*var_nor();
-            
-            // enforce some bounds
-            if(params[0] < 0.01) params[0] = 0.01;
-            if(params[0] > 0.99) params[0] = 0.99;
-            if(params[1] < 0.01) params[1] = 0.01;
-            if(params[1] > 0.99) params[1] = 0.99;
-            if(params[2] < 0.01) params[2] = 0.01;
-            if(params[3] < 0.01) params[3] = 0.01;       
+            params[i] = v;
         }
         
-        // TODO: ENSURE THAT BLOCKS ARE SET CORRECTLY AND OPTIMALLY
-        
         assert(BLOCK_SIZE*N_BLOCKS > NHYP);
-        compute_prior<<<N_BLOCKS,BLOCK_SIZE>>>(device_X, device_counts, device_prior, NHYP, NRULES);
+        if(DO_RR) compute_RR_prior<<<N_BLOCKS,BLOCK_SIZE>>>(device_X, device_counts, device_prior, NHYP, NRULES, NNT, device_ntlen);
+        else 	  compute_PCFG_prior<<<N_BLOCKS,BLOCK_SIZE>>>(device_X, device_counts, device_prior, NHYP, NRULES);
         cudaMemcpy(prior, device_prior, prior_size, cudaMemcpyDeviceToHost);
-//             for(int h=0;h<10;h++) {  cout << prior[h] << " "; }
-        
-        assert(BLOCK_SIZE*BLOCK_SIZE > NDATA);
+
+        assert(BLOCK_SIZE*N_BLOCKS > NDATA);
         compute_human_likelihood<<<N_BLOCKS,BLOCK_SIZE>>>(params[0], params[1], params[2], params[3], device_prior, device_likelihood, device_output, device_human_yes, device_human_no, device_human_ll, NHYP, NDATA);
-        
         cudaMemcpy(human_ll, device_human_ll, human_ll_size, cudaMemcpyDeviceToHost);
         
-        cudaError_t error = cudaGetLastError();
-        if(error != cudaSuccess) {
-            printf("CUDA error: %s\n", cudaGetErrorString(error));
-            break;
-        }	
+        error = cudaGetLastError();
+        if(error != cudaSuccess) {  printf("CUDA error: %s\n", cudaGetErrorString(error)); break; }	
         
-        double proposal = 0.0;
+        // -------------------------------------------------------------------
+        // Now compute the posterior
+        proposal = 0.0; // the proposal probability
+
+        // compute the prior on the params
+        proposal += lgammapdf(params[2], TEMPERATURE_k, TEMPERATURE_theta) + 
+	            lgammapdf(params[3], TEMPERATURE_k, TEMPERATURE_theta);
+        
+        // add up the prior on X
+        for(int i=0;i<NRULES;i++) {
+            proposal += lgammapdf(X[i], X_k, X_theta);
+        }
+        
+        // now compute the human ll from what CUDA returned
         for(int d=0;d<NDATA;d++) {
 //             cout << human_ll[d] << " " ;
             proposal += human_ll[d];
         }
         
-        // decide whether to accept
+        // --------------------------------------------------------------------
+        // decide whether to accept via MH rule
+        
         if(proposal > current || random_real() < exp(proposal - current)){
-            current = proposal;  // update current, that's all
+            current = proposal;  // update current, that's all since X and params are already set
         }
         else {
-            // restore what we had
-            if(proposetoX) {        
-                memcpy(X, oldX, X_size);
-            } else {
-                memcpy(params, oldparams, NPARAMS*sizeof(float));
-            }            
+            // restore what we had for whatever was proposed to
+            if(proposetoX) memcpy(X, oldX, X_size);
+            else           memcpy(params, oldparams, NPARAMS*sizeof(float));
         }
         
-        cout << steps << "\t" << current << "\t" << proposal << "\t";
-        for(int i=0;i<4;i++) { cout << params[i] << " "; }
-        cout << "\t";
-        for(int i=0;i<NRULES;i++) { cout << X[i] << " "; }
-        cout << endl;
+        // -----------------------------------------------------------------------
+        // Print out
+        // -----------------------------------------------------------------------
+    
+        
+REJECT_SAMPLE: // we'll skip the memcpy back since X was never set
+
+        if(steps % SKIP == 0) {
+            cout << steps << "\t" << current << "\t" << proposal << "\t";
+            for(int i=0;i<4;i++) { cout << params[i] << " "; }
+            cout << "\t";
+            for(int i=0;i<NRULES;i++) { cout << X[i] << " "; }
+            cout << endl;
+        }
     }
     
 

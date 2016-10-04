@@ -1,5 +1,6 @@
-# CUDA_VERSION=5.0
-CUDA_VERSION=5.5
+CUDA_VERSION=5.0
+#CUDA_VERSION=5.5
+#CUDA_VERSION=8.0
 
 CUDA_SAMPLES_INCLUDE=/usr/local/cuda/samples/common/inc/
 CUDA_INCLUDE=/usr/local/cuda/lib64 
