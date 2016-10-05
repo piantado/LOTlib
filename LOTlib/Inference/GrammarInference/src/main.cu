@@ -187,10 +187,10 @@ int main(int argc, char** argv) {
     float oldparams[NPARAMS];
     
     float prior_size =  NHYP*sizeof(float);
-    float prior[NHYP];
+    float* prior = new float[NHYP];
     DEVARRAY(float, prior, prior_size)
     
-    float human_ll[NDATA];
+    float* human_ll = new float[NDATA];
     int human_ll_size = NDATA*sizeof(float);
     DEVARRAY(float, human_ll, human_ll_size)
     
