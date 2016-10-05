@@ -52,13 +52,22 @@ def least_common_difference(t1,t2):
     """
     if t1 == t2:
         return None, None
-    if (t1.name == t2.name and
-        t1.returntype == t2.returntype and
+    elif( t1.name == t2.name and \
+        t1.returntype == t2.returntype and \
         len(t1.args) == len(t2.args)):
-        differing = [arg1 != arg2 for arg1,arg2 in zip(t1.args,t2.args)]
+
+        # first check if any strings (non functions nodes) below differ
+        for a,b in zip(t1.argNonFunctionNodes(), t2.argNonFunctionNodes()):
+            if a != b:
+                return t1,t2 # if so, t1 and t2 differ
+
+        # otherwise check the functionNodes
+        differing = [arg1 != arg2 for arg1,arg2 in zip(t1.argFunctionNodes(),t2.argFunctionNodes())]
         if sum(differing) == 1:
             idx = differing.index(True)
             return least_common_difference(t1.args[idx],t2.args[idx])
+        else:
+            return t1, t2
     return t1,t2
 
 # # # # # # # # # # # # # # # # # # # # # # # # #
