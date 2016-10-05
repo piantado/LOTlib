@@ -16,7 +16,7 @@ class NumberGameHypothesis(LOTHypothesis):
     """
 
     def __init__(self, grammar=None, value=None, domain=100, **kwargs):
-        LOTHypothesis.__init__(self, grammar=grammar, value=value, args=[], **kwargs)
+        LOTHypothesis.__init__(self, grammar=grammar, value=value, display="lambda : %s", **kwargs)
         self.domain = domain
 
     @attrmem('prior')

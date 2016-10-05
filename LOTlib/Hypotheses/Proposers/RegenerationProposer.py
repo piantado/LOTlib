@@ -14,6 +14,7 @@ from copy import copy
 from math import log
 
 class RegenerationProposer(Proposer):
+
     def propose_tree(self, grammar, t, resampleProbability=lambdaOne):
         """Propose, returning the new tree"""
         new_t = copy(t)
@@ -30,8 +31,12 @@ class RegenerationProposer(Proposer):
         return new_t
     
     def compute_proposal_probability(self, grammar, t1, t2, resampleProbability=lambdaOne, recurse=True):
+        # NOTE: This is not strictly necessary since we don't actually have to sum over trees
+        # if we use an auxiliary variable argument. But this fits nicely with the other proposers
+        # and is not much slower.
+
         chosen_node1 , chosen_node2 = least_common_difference(t1,t2)
-    
+
         lps = []
         if chosen_node1 is None: # any node in the tree could have been regenerated
             for node in t1:
@@ -50,7 +55,7 @@ class RegenerationProposer(Proposer):
                     chosen_node2 = chosen_node2.parent
                 else:
                     chosen_node1 = None
-    
+
         return logsumexp(lps)
 
 if __name__ == "__main__": # test code

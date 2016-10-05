@@ -295,9 +295,20 @@ class FunctionNode(object):
 
         """
         if self.args is not None:
-            # TODO: In python 3, use yeild from
-            for n in filter(isFunctionNode, self.args):
-                yield n
+            for n in self.args:
+                if isFunctionNode(n):
+                    yield n
+
+    def argNonFunctionNodes(self):
+        """Yield non-FunctionNode immediately below.
+
+        Also handles args is None, so we don't have to check constantly
+
+        """
+        if self.args is not None:
+            for n in self.args:
+                if not isFunctionNode(n):
+                    yield n
 
     def argStrings(self):
         """

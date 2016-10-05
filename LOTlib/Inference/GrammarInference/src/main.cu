@@ -1,5 +1,5 @@
 /*
-
+    Todo: Add prior offset
 */
 #include <stdio.h>
 #include <time.h>
@@ -37,10 +37,9 @@ const float TEMPERATURE_theta = 0.5;
 const float X_k = 2.0;
 const float X_theta = 0.5;
 
-
-// MCMC parameters
+// Default parameters
 int STEPS = 1000000;
-int SKIP  = 1000;
+int THIN  = 1000;
 int WHICH_GPU = 0;
 string in_file_path = "data.h5"; 
 bool DO_RR = 0; // do rational rules or pcfg?
@@ -64,9 +63,7 @@ boost::normal_distribution<> nd(0.0, 1.0);
 boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > var_nor(rng, nd);
 boost::uniform_01<boost::mt19937> random_real(rng);
         
-/*
- * To add: prior offset
- */
+
 
 
 double lgammapdf(float x, float k, float theta) {
@@ -81,7 +78,7 @@ static struct option long_options[] =
     {   
         {"in",           required_argument,    NULL, 'd'},
         {"steps",        required_argument,    NULL, 's'},
-        {"skip",         required_argument,    NULL, 'k'},
+        {"thin",         required_argument,    NULL, 't'},
         {"gpu",          required_argument,    NULL, 'g'},
         {"rr",           no_argument,    NULL, 'r'},
         {"pcfg",         no_argument,    NULL, 'p'},
@@ -93,19 +90,23 @@ int main(int argc, char** argv) {
     // -----------------------------------------------------------------------
     // Parse command line
     // -----------------------------------------------------------------------
+    
     int option_index = 0, opt=0;
     while( (opt = getopt_long( argc, argv, "bp", long_options, &option_index )) != -1 )
             switch( opt ) {
                     case 'd': in_file_path = optarg; break;
                     case 's': STEPS = atoi(optarg); break;
-                    case 'k': SKIP = atoi(optarg); break;
+                    case 't': THIN = atoi(optarg); break;
                     case 'g': WHICH_GPU = atoi(optarg); break;
                     case 'r': DO_RR = 1; break;
                     case 'p': DO_RR = 0; break;
                     default: return 1; // unspecified
             }
     
-    // set the GPU 
+    // -----------------------------------------------------------------------
+    // Initialize the GPU
+    // -----------------------------------------------------------------------
+     
     int deviceCount = 0;
     cudaGetDeviceCount(&deviceCount);
     if(WHICH_GPU <= deviceCount) {
@@ -136,6 +137,7 @@ int main(int argc, char** argv) {
                               NRULES << " rules, " << 
                                NDATA << " data, and " << 
                                  NNT << " nonterminals." << endl;
+    cout << "# Allocating memory " << endl;
     
     int ntlen[NNT]; // now load the lengths of each nonterminal
     LOAD_HDF5(ntlen, H5T_NATIVE_INT)
@@ -258,7 +260,7 @@ int main(int argc, char** argv) {
         cudaMemcpy(human_ll, device_human_ll, human_ll_size, cudaMemcpyDeviceToHost);
         
         error = cudaGetLastError();
-        if(error != cudaSuccess) {  printf("CUDA error: %s\n", cudaGetErrorString(error)); break; }	
+        if(error != cudaSuccess) {  printf("CUDA error: %s\n", cudaGetErrorString(error)); cerr << error << endl; break; }	
         
         // -------------------------------------------------------------------
         // Now compute the posterior
@@ -266,7 +268,7 @@ int main(int argc, char** argv) {
 
         // compute the prior on the params
         proposal += lgammapdf(params[2], TEMPERATURE_k, TEMPERATURE_theta) + 
-	            lgammapdf(params[3], TEMPERATURE_k, TEMPERATURE_theta);
+	                lgammapdf(params[3], TEMPERATURE_k, TEMPERATURE_theta);
         
         // add up the prior on X
         for(int i=0;i<NRULES;i++) {
@@ -298,7 +300,7 @@ int main(int argc, char** argv) {
         
 REJECT_SAMPLE: // we'll skip the memcpy back since X was never set
 
-        if(steps % SKIP == 0) {
+        if(steps % THIN == 0) {
             cout << steps << "\t" << current << "\t" << proposal << "\t";
             for(int i=0;i<4;i++) { cout << params[i] << " "; }
             cout << "\t";

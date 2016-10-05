@@ -1,11 +1,7 @@
 import pickle
 from LOTlib import break_ctrlc
 import LOTlib # if we want to set LOTlib.SIG_INTERRUPTED=False for resuming ipython
-
-try:
-    import numpy
-except ImportError:
-    import numpypy as numpy
+import numpy
 
 def build_conceptlist(c,l):
     return "CONCEPT_%s__LIST_%s.txt"%(c,l)
@@ -124,8 +120,10 @@ print "# Created L, NYes, NNo, and Output of size %s" % len(L)
 assert len(L) == len(output)
 assert len(NYes)==len(NNo)
 
-
-from struct import pack
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Export
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+import h5py
 
 # stack together counts
 kys = nt2counts.keys()
@@ -146,8 +144,7 @@ for k in kys:
     for si in s:
         print sig2idx[si], si
 
-
-import h5py
+# export as hdf5
 with h5py.File('data.h5', 'w') as hf:
     # first write the 'specs'
     hf.create_dataset('specs',    data=[NHyp, sum(ntlen), len(NYes), len(ntlen)], dtype=int)
