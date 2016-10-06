@@ -1,7 +1,6 @@
 /*
     Todo: 
         -Add prior offset
-        - multiple chains
         - randomize start
         - check fb in pcfg proposal
 */
@@ -44,8 +43,9 @@ const float x_theta = 0.5;
 // Default parameters
 int STEPS = 1000000;
 int THIN  = 1000;
-int CHAINS = 4;
+int NCHAINS = 4;
 int WHICH_GPU = 0;
+float XSCALE = 0.1; // scale of proposals to X
 string in_file_path = "data.h5"; 
 bool DO_RR = 0; // do rational rules or pcfg?
 
@@ -84,6 +84,7 @@ static struct option long_options[] =
         {"steps",        required_argument,    NULL, 's'},
         {"thin",         required_argument,    NULL, 't'},
         {"chains",       required_argument,    NULL, 'c'},
+        {"xscale",       required_argument,    NULL, 'x'},
         {"gpu",          required_argument,    NULL, 'g'},
         {"rr",           no_argument,    NULL, 'r'},
         {"pcfg",         no_argument,    NULL, 'p'},
@@ -103,7 +104,8 @@ int main(int argc, char** argv) {
                     case 's': STEPS = atoi(optarg); break;
                     case 't': THIN = atoi(optarg); break;
                     case 'g': WHICH_GPU = atoi(optarg); break;
-                    case 'c': CHAINS = atoi(optarg); break;
+                    case 'c': NCHAINS = atoi(optarg); break;
+                    case 'x': XSCALE = atof(optarg); break;
                     case 'r': DO_RR = 1; break;
                     case 'p': DO_RR = 0; break;
                     default: return 1; // unspecified
@@ -182,8 +184,8 @@ int main(int argc, char** argv) {
     
     cout << "# Setting up MCMC variables" << endl;
     
-    float X[CHAINS][NRULES]; // the local copies of X, one for each chain; little x is the variable for the current chain
-    for(int c=0;c<CHAINS;c++) {
+    float X[NCHAINS][NRULES]; // the local copies of X, one for each chain; little x is the variable for the current chain
+    for(int c=0;c<NCHAINS;c++) {
         for(int i=0;i<NRULES;i++) {
             X[c][i] = 1.0;
         }
@@ -198,7 +200,13 @@ int main(int argc, char** argv) {
     float oldx[NRULES]; // used for copying and saving old version
     
     // other parameters
-    float params[NPARAMS] = {0.5, 0.5, 1.0, 1.0}; // alpha, beta, priortemp, lltemp
+    float PARAMS[NCHAINS][NPARAMS];
+    for(int c=0;c<NCHAINS;c++) {
+        PARAMS[c][0] = 0.5; // alpha
+        PARAMS[c][1] = 0.5; // beta
+        PARAMS[c][2] = 1.0; // priortemp
+        PARAMS[c][3] = 1.0; // lltemp
+    }
     float oldparams[NPARAMS];
     
     float prior_size =  NHYP*sizeof(float);
@@ -214,20 +222,23 @@ int main(int argc, char** argv) {
     // Actual MCMC
     // -----------------------------------------------------------------------    
     
-    double current = -INFINITY; // the current posterior
+    double current[NCHAINS];
+    for(int c=0;c<NCHAINS;c++) current[c] = -INFINITY; // the current posterior
+    
     double proposal; // store the proposal value 
    
     cout << "# Starting MCMC" << endl;
     for(int steps=0;steps<STEPS;steps++) {
-        for(int chain=0;chain<CHAINS;chain++) {
+        for(int chain=0;chain<NCHAINS;chain++) {
             float* x = X[chain]; // which chain are we on?
+            float* params = PARAMS[chain];
             
             int proposetoX = (rng() % 2)==0;   // decide whether to propose to x or something else
             if(proposetoX) {
                 
                 int j = rng()%NRULES; // who do I propose to?
                 
-                float v = x[j] + (DO_RR ? 0.1 : 0.01) *var_nor(); // make a proposal
+                float v = x[j] + XSCALE * var_nor(); // make a proposal
                 
                 if(v < 0.0) goto REJECT_SAMPLE; // 
                 
@@ -288,7 +299,7 @@ int main(int argc, char** argv) {
 
             // compute the prior on the params
             proposal += lgammapdf(params[2], TEMPERATURE_k, TEMPERATURE_theta) + 
-                            lgammapdf(params[3], TEMPERATURE_k, TEMPERATURE_theta);
+                        lgammapdf(params[3], TEMPERATURE_k, TEMPERATURE_theta);
             
             // add up the prior on X
             for(int i=0;i<NRULES;i++) {
@@ -304,8 +315,8 @@ int main(int argc, char** argv) {
             // --------------------------------------------------------------------
             // decide whether to accept via MH rule
             
-            if(proposal > current || random_real() < exp(proposal - current)){
-                current = proposal;  // update current, that's all since X and params are already set
+            if(proposal > current[chain] || random_real() < exp(proposal - current[chain])){
+                current[chain] = proposal;  // update current, that's all since X and params are already set
             }
             else {
                 // restore what we had for whatever was proposed to
@@ -321,7 +332,7 @@ int main(int argc, char** argv) {
     REJECT_SAMPLE: // we'll skip the memcpy back since X was never set
 
             if(steps % THIN == 0) {
-                cout << steps << " " << chain << "\t" << current << "\t" << proposal << "\t";
+                cout << steps << " " << chain << "\t" << current[chain] << "\t" << proposal << "\t";
                 for(int i=0;i<4;i++) { cout << params[i] << " "; }
                 cout << "\t";
                 for(int i=0;i<NRULES;i++) { cout << x[i] << " "; }
