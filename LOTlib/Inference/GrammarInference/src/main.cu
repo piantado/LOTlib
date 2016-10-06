@@ -1,5 +1,9 @@
 /*
-    Todo: Add prior offset
+    Todo: 
+        -Add prior offset
+        - multiple chains
+        - randomize start
+        - check fb in pcfg proposal
 */
 #include <stdio.h>
 #include <time.h>
@@ -48,7 +52,10 @@ bool DO_RR = 0; // do rational rules or pcfg?
 #define DEVARRAY(type, nom, size) \
         type* device_ ## nom;\
         cudaMalloc((void **) &device_ ## nom, size); \
-	cudaMemcpy(device_ ## nom, nom, size, cudaMemcpyHostToDevice);
+	cudaMemcpy(device_ ## nom, nom, size, cudaMemcpyHostToDevice);\
+	error = cudaGetLastError();\
+    if(error != cudaSuccess) {  printf("CUDA error on allocating " #nom ": %s\n", cudaGetErrorString(error)); } 
+   
 
 // macro for reading hdf5 call "nom" in the data to the variable nom
 #define LOAD_HDF5(nom, type) \
@@ -64,14 +71,10 @@ boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > var_nor
 boost::uniform_01<boost::mt19937> random_real(rng);
         
 
-
-
 double lgammapdf(float x, float k, float theta) {
     // Does not bother with normalizing constant
     return log(x)*(k-1.0) - x/theta;
 }
-
-
 
 
 static struct option long_options[] =
@@ -124,6 +127,7 @@ int main(int argc, char** argv) {
     hid_t file = H5Fopen(in_file_path.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
     hid_t dset; // used in macros for reading each data set 
     herr_t status; // used in macro for checking
+    cudaError_t error; // used to error check after each allocation in case we are too big (thus assumed in the macro DEVARRAY)
     
     // first load the specs to unpack all of our variable dimensions
     int specs[5];
@@ -139,7 +143,7 @@ int main(int argc, char** argv) {
                                  NNT << " nonterminals." << endl;
     cout << "# Allocating memory " << endl;
     
-    int ntlen[NNT]; // now load the lengths of each nonterminal
+    int* ntlen = new int[NNT]; // now load the lengths of each nonterminal
     LOAD_HDF5(ntlen, H5T_NATIVE_INT)
     DEVARRAY(int, ntlen, NNT*sizeof(int))
     
@@ -194,14 +198,14 @@ int main(int argc, char** argv) {
     int human_ll_size = NDATA*sizeof(float);
     DEVARRAY(float, human_ll, human_ll_size)
     
+    
     // -----------------------------------------------------------------------
     // Actual MCMC
     // -----------------------------------------------------------------------    
     
     double current = -INFINITY; // the current posterior
     double proposal; // store the proposal value 
-    cudaError_t error;
-    
+   
     cout << "# Starting MCMC" << endl;
     for(int steps=0;steps<STEPS;steps++) {
 		
@@ -249,19 +253,22 @@ int main(int argc, char** argv) {
             
             params[i] = v;
         }
-        
+      
         assert(BLOCK_SIZE*N_BLOCKS > NHYP);
         if(DO_RR) compute_RR_prior<<<N_BLOCKS,BLOCK_SIZE>>>(device_X, device_counts, device_prior, NHYP, NRULES, NNT, device_ntlen);
         else 	  compute_PCFG_prior<<<N_BLOCKS,BLOCK_SIZE>>>(device_X, device_counts, device_prior, NHYP, NRULES);
         cudaMemcpy(prior, device_prior, prior_size, cudaMemcpyDeviceToHost);
-
+        
+        error = cudaGetLastError();
+        if(error != cudaSuccess) {  printf("CUDA error (in prior): %s\n", cudaGetErrorString(error)); break; } 
+        
         assert(BLOCK_SIZE*N_BLOCKS > NDATA);
         compute_human_likelihood<<<N_BLOCKS,BLOCK_SIZE>>>(params[0], params[1], params[2], params[3], device_prior, device_likelihood, device_output, device_human_yes, device_human_no, device_human_ll, NHYP, NDATA);
         cudaMemcpy(human_ll, device_human_ll, human_ll_size, cudaMemcpyDeviceToHost);
-        
+     
         error = cudaGetLastError();
-        if(error != cudaSuccess) {  printf("CUDA error: %s\n", cudaGetErrorString(error)); cerr << error << endl; break; }	
-        
+        if(error != cudaSuccess) {  printf("CUDA error (in likelihood): %s\n", cudaGetErrorString(error)); break; }	
+
         // -------------------------------------------------------------------
         // Now compute the posterior
         proposal = 0.0; // the proposal probability
