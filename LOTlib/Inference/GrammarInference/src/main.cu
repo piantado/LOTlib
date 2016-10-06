@@ -38,12 +38,13 @@ const float TEMPERATURE_k = 2.0;
 const float TEMPERATURE_theta = 0.5; 
 
 // the k and theta on grammar productions x
-const float X_k = 2.0;
-const float X_theta = 0.5;
+const float x_k = 2.0;
+const float x_theta = 0.5;
 
 // Default parameters
 int STEPS = 1000000;
 int THIN  = 1000;
+int CHAINS = 4;
 int WHICH_GPU = 0;
 string in_file_path = "data.h5"; 
 bool DO_RR = 0; // do rational rules or pcfg?
@@ -82,6 +83,7 @@ static struct option long_options[] =
         {"in",           required_argument,    NULL, 'd'},
         {"steps",        required_argument,    NULL, 's'},
         {"thin",         required_argument,    NULL, 't'},
+        {"chains",       required_argument,    NULL, 'c'},
         {"gpu",          required_argument,    NULL, 'g'},
         {"rr",           no_argument,    NULL, 'r'},
         {"pcfg",         no_argument,    NULL, 'p'},
@@ -101,6 +103,7 @@ int main(int argc, char** argv) {
                     case 's': STEPS = atoi(optarg); break;
                     case 't': THIN = atoi(optarg); break;
                     case 'g': WHICH_GPU = atoi(optarg); break;
+                    case 'c': CHAINS = atoi(optarg); break;
                     case 'r': DO_RR = 1; break;
                     case 'p': DO_RR = 0; break;
                     default: return 1; // unspecified
@@ -179,12 +182,20 @@ int main(int argc, char** argv) {
     
     cout << "# Setting up MCMC variables" << endl;
     
-    float X[NRULES]; // probabilities
-    for(int i=0;i<NRULES;i++) 
-        X[i] = 1.0;
-    float X_size =  NRULES*sizeof(float);
-    DEVARRAY(float, X, X_size)
-    float oldX[NRULES]; // used for copying and saving old version
+    float X[CHAINS][NRULES]; // the local copies of X, one for each chain; little x is the variable for the current chain
+    for(int c=0;c<CHAINS;c++) {
+        for(int i=0;i<NRULES;i++) {
+            X[c][i] = 1.0;
+        }
+    }
+    float x_size =  NRULES*sizeof(float);
+    float* device_x;
+    cudaMalloc((void **) &device_x, x_size); 
+    cudaMemcpy(device_x, X[0], x_size, cudaMemcpyHostToDevice);
+    error = cudaGetLastError();
+    if(error != cudaSuccess) {  printf("CUDA error on allocating x: %s\n", cudaGetErrorString(error)); } 
+   
+    float oldx[NRULES]; // used for copying and saving old version
     
     // other parameters
     float params[NPARAMS] = {0.5, 0.5, 1.0, 1.0}; // alpha, beta, priortemp, lltemp
@@ -208,113 +219,116 @@ int main(int argc, char** argv) {
    
     cout << "# Starting MCMC" << endl;
     for(int steps=0;steps<STEPS;steps++) {
-		
-        int proposetoX = (rng() % 2)==0;   // decide whether to propose to x or something else
-        if(proposetoX) {
+        for(int chain=0;chain<CHAINS;chain++) {
+            float* x = X[chain]; // which chain are we on?
             
-            int j = rng()%NRULES; // who do I propose to?
-            
-            float v = X[j] + (DO_RR ? 0.1 : 0.01) *var_nor(); // make a proposal
-            
-            if(v < 0.0) goto REJECT_SAMPLE; // 
-            
-            memcpy(oldX, X, X_size); // save the old version
-            
-            X[j] = v;
-                        
-            if(!DO_RR) { // renormalize if we are doing a pdcfg   TODO: CHECK F/B
-                int xi=0;
-                for(int nt=0;nt<NNT;nt++) {
-                        float sm = 0.0;
-                        for(int i=0;i<ntlen[nt];i++) 
-                                sm += X[xi+i];
-                        
-                        for(int i=0;i<ntlen[nt];i++) 
-                                X[xi+i] = X[xi+i] / sm;            
-                        
-                        xi += ntlen[nt];
+            int proposetoX = (rng() % 2)==0;   // decide whether to propose to x or something else
+            if(proposetoX) {
+                
+                int j = rng()%NRULES; // who do I propose to?
+                
+                float v = x[j] + (DO_RR ? 0.1 : 0.01) *var_nor(); // make a proposal
+                
+                if(v < 0.0) goto REJECT_SAMPLE; // 
+                
+                memcpy(oldx, x, x_size); // save the old version
+                
+                x[j] = v;
+                            
+                if(!DO_RR) { // renormalize if we are doing a pdcfg   TODO: CHECK F/B
+                    int xi=0;
+                    for(int nt=0;nt<NNT;nt++) {
+                            float sm = 0.0;
+                            for(int i=0;i<ntlen[nt];i++) 
+                                    sm += x[xi+i];
+                            
+                            for(int i=0;i<ntlen[nt];i++) 
+                                    x[xi+i] = x[xi+i] / sm;            
+                            
+                            xi += ntlen[nt];
+                    }
+                    assert(xi == NRULES);
                 }
-                assert(xi == NRULES);
+                
+                // and copy to the device
+                cudaMemcpy(device_x, x, x_size, cudaMemcpyHostToDevice);
+            
+            } else { // otherwise we propose to the parameters
+                int i = rng() % NPARAMS;
+                            
+                float v = params[i] + 0.01*var_nor();
+                
+                // deal with bounds
+                if( i <= 1 && (v > 0.99 || v < 0.01) ) goto REJECT_SAMPLE;
+                if( i >= 2 && (v < 0.01) )             goto REJECT_SAMPLE;
+
+                memcpy(oldparams, params, NPARAMS*sizeof(float)); // save old version
+                
+                params[i] = v;
+            }
+        
+            assert(BLOCK_SIZE*N_BLOCKS > NHYP);
+            if(DO_RR) compute_RR_prior<<<N_BLOCKS,BLOCK_SIZE>>>(device_x, device_counts, device_prior, NHYP, NRULES, NNT, device_ntlen);
+            else 	  compute_PCFG_prior<<<N_BLOCKS,BLOCK_SIZE>>>(device_x, device_counts, device_prior, NHYP, NRULES);
+            cudaMemcpy(prior, device_prior, prior_size, cudaMemcpyDeviceToHost);
+            
+            error = cudaGetLastError();
+            if(error != cudaSuccess) {  printf("CUDA error (in prior): %s\n", cudaGetErrorString(error)); break; } 
+            
+            assert(BLOCK_SIZE*N_BLOCKS > NDATA);
+            compute_human_likelihood<<<N_BLOCKS,BLOCK_SIZE>>>(params[0], params[1], params[2], params[3], device_prior, device_likelihood, device_output, device_human_yes, device_human_no, device_human_ll, NHYP, NDATA);
+            cudaMemcpy(human_ll, device_human_ll, human_ll_size, cudaMemcpyDeviceToHost);
+        
+            error = cudaGetLastError();
+            if(error != cudaSuccess) {  printf("CUDA error (in likelihood): %s\n", cudaGetErrorString(error)); break; }	
+
+            // -------------------------------------------------------------------
+            // Now compute the posterior
+            proposal = 0.0; // the proposal probability
+
+            // compute the prior on the params
+            proposal += lgammapdf(params[2], TEMPERATURE_k, TEMPERATURE_theta) + 
+                            lgammapdf(params[3], TEMPERATURE_k, TEMPERATURE_theta);
+            
+            // add up the prior on X
+            for(int i=0;i<NRULES;i++) {
+                proposal += lgammapdf(x[i], x_k, x_theta);
             }
             
-            // and copy to the device
-            cudaMemcpy(device_X, X, X_size, cudaMemcpyHostToDevice);
-        
-        } else { // otherwise we propose to the parameters
-            int i = rng() % NPARAMS;
-                        
-            float v = params[i] + 0.01*var_nor();
+            // now compute the human ll from what CUDA returned
+            for(int d=0;d<NDATA;d++) {
+    //             cout << human_ll[d] << " " ;
+                proposal += human_ll[d];
+            }
             
-            // deal with bounds
-            if( i <= 1 && (v > 0.99 || v < 0.01) ) goto REJECT_SAMPLE;
-            if( i >= 2 && (v < 0.01) )             goto REJECT_SAMPLE;
-
-            memcpy(oldparams, params, NPARAMS*sizeof(float)); // save old version
+            // --------------------------------------------------------------------
+            // decide whether to accept via MH rule
             
-            params[i] = v;
-        }
-      
-        assert(BLOCK_SIZE*N_BLOCKS > NHYP);
-        if(DO_RR) compute_RR_prior<<<N_BLOCKS,BLOCK_SIZE>>>(device_X, device_counts, device_prior, NHYP, NRULES, NNT, device_ntlen);
-        else 	  compute_PCFG_prior<<<N_BLOCKS,BLOCK_SIZE>>>(device_X, device_counts, device_prior, NHYP, NRULES);
-        cudaMemcpy(prior, device_prior, prior_size, cudaMemcpyDeviceToHost);
+            if(proposal > current || random_real() < exp(proposal - current)){
+                current = proposal;  // update current, that's all since X and params are already set
+            }
+            else {
+                // restore what we had for whatever was proposed to
+                if(proposetoX) memcpy(x, oldx, x_size);
+                else           memcpy(params, oldparams, NPARAMS*sizeof(float));
+            }
+            
+            // -----------------------------------------------------------------------
+            // Print out
+            // -----------------------------------------------------------------------
         
-        error = cudaGetLastError();
-        if(error != cudaSuccess) {  printf("CUDA error (in prior): %s\n", cudaGetErrorString(error)); break; } 
-        
-        assert(BLOCK_SIZE*N_BLOCKS > NDATA);
-        compute_human_likelihood<<<N_BLOCKS,BLOCK_SIZE>>>(params[0], params[1], params[2], params[3], device_prior, device_likelihood, device_output, device_human_yes, device_human_no, device_human_ll, NHYP, NDATA);
-        cudaMemcpy(human_ll, device_human_ll, human_ll_size, cudaMemcpyDeviceToHost);
-     
-        error = cudaGetLastError();
-        if(error != cudaSuccess) {  printf("CUDA error (in likelihood): %s\n", cudaGetErrorString(error)); break; }	
+            
+    REJECT_SAMPLE: // we'll skip the memcpy back since X was never set
 
-        // -------------------------------------------------------------------
-        // Now compute the posterior
-        proposal = 0.0; // the proposal probability
+            if(steps % THIN == 0) {
+                cout << steps << " " << chain << "\t" << current << "\t" << proposal << "\t";
+                for(int i=0;i<4;i++) { cout << params[i] << " "; }
+                cout << "\t";
+                for(int i=0;i<NRULES;i++) { cout << x[i] << " "; }
+                cout << endl;
+            }
+            
+        } //chains
+    } // steps
 
-        // compute the prior on the params
-        proposal += lgammapdf(params[2], TEMPERATURE_k, TEMPERATURE_theta) + 
-	                lgammapdf(params[3], TEMPERATURE_k, TEMPERATURE_theta);
-        
-        // add up the prior on X
-        for(int i=0;i<NRULES;i++) {
-            proposal += lgammapdf(X[i], X_k, X_theta);
-        }
-        
-        // now compute the human ll from what CUDA returned
-        for(int d=0;d<NDATA;d++) {
-//             cout << human_ll[d] << " " ;
-            proposal += human_ll[d];
-        }
-        
-        // --------------------------------------------------------------------
-        // decide whether to accept via MH rule
-        
-        if(proposal > current || random_real() < exp(proposal - current)){
-            current = proposal;  // update current, that's all since X and params are already set
-        }
-        else {
-            // restore what we had for whatever was proposed to
-            if(proposetoX) memcpy(X, oldX, X_size);
-            else           memcpy(params, oldparams, NPARAMS*sizeof(float));
-        }
-        
-        // -----------------------------------------------------------------------
-        // Print out
-        // -----------------------------------------------------------------------
-    
-        
-REJECT_SAMPLE: // we'll skip the memcpy back since X was never set
-
-        if(steps % THIN == 0) {
-            cout << steps << "\t" << current << "\t" << proposal << "\t";
-            for(int i=0;i<4;i++) { cout << params[i] << " "; }
-            cout << "\t";
-            for(int i=0;i<NRULES;i++) { cout << X[i] << " "; }
-            cout << endl;
-        }
-    }
-    
-
-}
+} // main
