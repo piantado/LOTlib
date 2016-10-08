@@ -207,7 +207,7 @@ int main(int argc, char** argv) {
         PARAMS[c][2] = 1.0; // priortemp
         PARAMS[c][3] = 1.0; // lltemp
     }
-    float oldparams[NPARAMS];
+    float oldparams[NPARAMS]; // temporary store for old values
     
     float prior_size =  NHYP*sizeof(float);
     float* prior = new float[NHYP];
@@ -261,22 +261,23 @@ int main(int argc, char** argv) {
                     assert(xi == NRULES);
                 }
                 
-                // and copy to the device
-                cudaMemcpy(device_x, x, x_size, cudaMemcpyHostToDevice);
-            
+                            
             } else { // otherwise we propose to the parameters
                 int i = rng() % NPARAMS;
                             
                 float v = params[i] + 0.01*var_nor();
                 
                 // deal with bounds
-                if( i <= 1 && (v > 0.99 || v < 0.01) ) goto REJECT_SAMPLE;
-                if( i >= 2 && (v < 0.01) )             goto REJECT_SAMPLE;
+                if( i <= 1 && (v > 0.999 || v < 0.001) ) goto REJECT_SAMPLE;
+                if( i >= 2 && (v < 0.001) )              goto REJECT_SAMPLE;
 
                 memcpy(oldparams, params, NPARAMS*sizeof(float)); // save old version
                 
                 params[i] = v;
             }
+            
+            // and copy to the device (no matter the proposal, thanks to multiple chains)
+            cudaMemcpy(device_x, x, x_size, cudaMemcpyHostToDevice);
         
             assert(BLOCK_SIZE*N_BLOCKS > NHYP);
             if(DO_RR) compute_RR_prior<<<N_BLOCKS,BLOCK_SIZE>>>(device_x, device_counts, device_prior, NHYP, NRULES, NNT, device_ntlen);
@@ -329,8 +330,7 @@ int main(int argc, char** argv) {
             // -----------------------------------------------------------------------
         
             
-    REJECT_SAMPLE: // we'll skip the memcpy back since X was never set
-
+    REJECT_SAMPLE: // we'll skip the memcpy back since x was never set
             if(steps % THIN == 0) {
                 cout << steps << " " << chain << "\t" << current[chain] << "\t" << proposal << "\t";
                 for(int i=0;i<4;i++) { cout << params[i] << " "; }
