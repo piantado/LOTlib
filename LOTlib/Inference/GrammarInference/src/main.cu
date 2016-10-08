@@ -1,8 +1,8 @@
 /*
+ *  Steve Piantadosi, October 2016
     Todo: 
         -Add prior offset
-        - randomize start
-        - check fb in pcfg proposal
+        -Should the prior be renormalized or not?
 */
 #include <stdio.h>
 #include <time.h>
@@ -28,17 +28,30 @@
 
 using namespace std;
 
+// -----------------------------------------------------------------------
+// CUDA setup
+// -----------------------------------------------------------------------     
+
 const int BLOCK_SIZE = 1024;
 const int N_BLOCKS = 1024; // set below
-const int NPARAMS = 4;
 
-// priors on temperatures // NOTE: These values are not appropriate to fit because the normalizing constants are not computed in the posteriors below
+// -----------------------------------------------------------------------
+// Hyperparameters
+// -----------------------------------------------------------------------     
+
+// NOTE: If a future change lets us fit these, we need to add normalizing constants to the code below
 const float TEMPERATURE_k = 2.0;
 const float TEMPERATURE_theta = 0.5; 
 
 // the k and theta on grammar productions x
 const float x_k = 2.0;
 const float x_theta = 0.5;
+
+const int NPARAMS = 4; // number of free parameters in fitting (alpha, beta, priortemp, lltemp)
+
+// -----------------------------------------------------------------------
+// Command line parameters
+// -----------------------------------------------------------------------     
 
 // Default parameters
 int STEPS = 1000000;
@@ -49,6 +62,23 @@ float XSCALE = 0.1; // scale of proposals to X
 string in_file_path = "data.h5"; 
 bool DO_RR = 0; // do rational rules or pcfg?
 bool start1 = 0; // should we start at 1 or randomly initialize?
+
+static struct option long_options[] = {   
+        {"in",           required_argument,    NULL, 'd'},
+        {"steps",        required_argument,    NULL, 's'},
+        {"thin",         required_argument,    NULL, 't'},
+        {"chains",       required_argument,    NULL, 'c'},
+        {"xscale",       required_argument,    NULL, 'x'},
+        {"gpu",          required_argument,    NULL, 'g'},
+        {"start1",       no_argument,    NULL, '1'}, // should we start at 1?        
+        {"rr",           no_argument,    NULL, 'r'},
+        {"pcfg",         no_argument,    NULL, 'p'},
+        {NULL, 0, 0, 0} // zero row for bad arguments
+};  
+
+// -----------------------------------------------------------------------
+// Macros
+// -----------------------------------------------------------------------     
 
 // Macro for defining arrays with name device_name, and then copying name over
 #define DEVARRAY(type, nom, size) \
@@ -67,18 +97,26 @@ bool start1 = 0; // should we start at 1 or randomly initialize?
     status = H5Dclose (dset);\
     assert(status==0);
 	
+// -----------------------------------------------------------------------
+// RNG
+// -----------------------------------------------------------------------     
+
 boost::mt19937 rng; // I don't seed it on purpouse (it's not relevant)
 boost::normal_distribution<> nd(0.0, 1.0);
 boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > var_nor(rng, nd);
 boost::uniform_01<boost::mt19937> random_real(rng);
-        
+
+// -----------------------------------------------------------------------
+// Helpful functions
+// -----------------------------------------------------------------------     
 
 double lgammapdf(float x, float k, float theta) {
     // Does not bother with normalizing constant
     return log(x)*(k-1.0) - x/theta;
 }
 
-void normalize(float* x, int NNT, int ntlen){
+void normalize_by_nonterminals(float* x, int NRULES, int NNT, int* ntlen){
+    // renormalize a vector by its 
     int xi=0;
     for(int nt=0;nt<NNT;nt++) {
             float sm = 0.0;
@@ -93,19 +131,9 @@ void normalize(float* x, int NNT, int ntlen){
     assert(xi == NRULES);   
 }
 
-static struct option long_options[] =
-    {   
-        {"in",           required_argument,    NULL, 'd'},
-        {"steps",        required_argument,    NULL, 's'},
-        {"thin",         required_argument,    NULL, 't'},
-        {"chains",       required_argument,    NULL, 'c'},
-        {"xscale",       required_argument,    NULL, 'x'},
-        {"gpu",          required_argument,    NULL, 'g'},
-        {"start1",       no_argument,    NULL, '1'}, // should we start at 1?        
-        {"rr",           no_argument,    NULL, 'r'},
-        {"pcfg",         no_argument,    NULL, 'p'},
-        {NULL, 0, 0, 0} // zero row for bad arguments
-    };  
+// ############################################################################################
+// # Main
+// ############################################################################################
 
 int main(int argc, char** argv) {    
     
@@ -143,7 +171,7 @@ int main(int argc, char** argv) {
     }
         
     // -----------------------------------------------------------------------
-    // Process the HDF5 file
+    // Process the HDF5 file, make device arrays
     // -----------------------------------------------------------------------
     
     hid_t file = H5Fopen(in_file_path.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -206,7 +234,7 @@ int main(int argc, char** argv) {
         for(int i=0;i<NRULES;i++) {
             X[c][i] = start1 ? 1.0 : abs(1.0+var_nor()); // start at normal value near 1
         }
-        normalize(X[c], NNT, ntlen);
+        if(!DO_RR) normalize_by_nonterminals(X[c], NRULES, NNT, ntlen);
     }
     float x_size =  NRULES*sizeof(float);
     float* device_x;
@@ -215,17 +243,14 @@ int main(int argc, char** argv) {
     error = cudaGetLastError();
     if(error != cudaSuccess) {  printf("CUDA error on allocating x: %s\n", cudaGetErrorString(error)); } 
    
-    float oldx[NRULES]; // used for copying and saving old version
-    
     // other parameters
     float PARAMS[NCHAINS][NPARAMS];
     for(int c=0;c<NCHAINS;c++) {
-        PARAMS[c][0] = start1 ? 0.50 : 1.0/(1.0+exp(-var_nor())); // alpha
-        PARAMS[c][1] = start1 ? 0.50 : 1.0/(1.0+exp(-var_nor())); // beta
-        PARAMS[c][2] = start1 ? 1.0 : abs(1+var_nor())); // priortemp
-        PARAMS[c][3] = start1 ? 1.0 : abs(1+var_nor())); // lltemp
+        PARAMS[c][0] = start1 ? 0.5 : 1.0/(1.0+exp(-var_nor())); // alpha
+        PARAMS[c][1] = start1 ? 0.5 : 1.0/(1.0+exp(-var_nor())); // beta
+        PARAMS[c][2] = start1 ? 1.0 : abs(1.0+var_nor()); // priortemp
+        PARAMS[c][3] = start1 ? 1.0 : abs(1.0+var_nor()); // lltemp
     }
-    float oldparams[NPARAMS]; // temporary store for old values
     
     float prior_size =  NHYP*sizeof(float);
     float* prior = new float[NHYP];
@@ -235,12 +260,15 @@ int main(int argc, char** argv) {
     int human_ll_size = NDATA*sizeof(float);
     DEVARRAY(float, human_ll, human_ll_size)
     
+    // save old values when we propose
+    float oldx[NRULES]; // used for copying and saving old version
+    float oldparams[NPARAMS]; // temporary store for old values
     
     // -----------------------------------------------------------------------
     // Actual MCMC
     // -----------------------------------------------------------------------    
     
-    double current[NCHAINS];
+    double current[NCHAINS]; // the current posterior
     for(int c=0;c<NCHAINS;c++) current[c] = -INFINITY; // the current posterior
     
     double proposal; // store the proposal value 
@@ -257,15 +285,14 @@ int main(int argc, char** argv) {
                 int j = rng()%NRULES; // who do I propose to?
                 
                 float v = x[j] + XSCALE * var_nor(); // make a proposal
-                
-                if(v < 0.0) goto REJECT_SAMPLE; // 
+                if(v < 0.0) goto REJECT_SAMPLE; 
                 
                 memcpy(oldx, x, x_size); // save the old version
                 
                 x[j] = v;
                             
                 if(!DO_RR) { // renormalize if we are doing a pcfg
-                   normalize(X[c], NNT, ntlen);
+                   normalize_by_nonterminals(X[chain], NRULES, NNT, ntlen);
                 }
                 
                             
@@ -273,9 +300,7 @@ int main(int argc, char** argv) {
                 int i = rng() % NPARAMS;
                             
                 float v = params[i] + 0.01*var_nor();
-                
-                // deal with bounds
-                if( i <= 1 && (v > 0.999 || v < 0.001) ) goto REJECT_SAMPLE;
+                if( i <= 1 && (v > 0.999 || v < 0.001) ) goto REJECT_SAMPLE; // deal with bounds
                 if( i >= 2 && (v < 0.001) )              goto REJECT_SAMPLE;
 
                 memcpy(oldparams, params, NPARAMS*sizeof(float)); // save old version
