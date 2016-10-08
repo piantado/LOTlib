@@ -48,6 +48,7 @@ int WHICH_GPU = 0;
 float XSCALE = 0.1; // scale of proposals to X
 string in_file_path = "data.h5"; 
 bool DO_RR = 0; // do rational rules or pcfg?
+bool start1 = 0; // should we start at 1 or randomly initialize?
 
 // Macro for defining arrays with name device_name, and then copying name over
 #define DEVARRAY(type, nom, size) \
@@ -77,6 +78,20 @@ double lgammapdf(float x, float k, float theta) {
     return log(x)*(k-1.0) - x/theta;
 }
 
+void normalize(float* x, int NNT, int ntlen){
+    int xi=0;
+    for(int nt=0;nt<NNT;nt++) {
+            float sm = 0.0;
+            for(int i=0;i<ntlen[nt];i++) 
+                    sm += x[xi+i];
+            
+            for(int i=0;i<ntlen[nt];i++) 
+                    x[xi+i] = x[xi+i] / sm;            
+            
+            xi += ntlen[nt];
+    }
+    assert(xi == NRULES);   
+}
 
 static struct option long_options[] =
     {   
@@ -86,6 +101,7 @@ static struct option long_options[] =
         {"chains",       required_argument,    NULL, 'c'},
         {"xscale",       required_argument,    NULL, 'x'},
         {"gpu",          required_argument,    NULL, 'g'},
+        {"start1",       no_argument,    NULL, '1'}, // should we start at 1?        
         {"rr",           no_argument,    NULL, 'r'},
         {"pcfg",         no_argument,    NULL, 'p'},
         {NULL, 0, 0, 0} // zero row for bad arguments
@@ -106,6 +122,7 @@ int main(int argc, char** argv) {
                     case 'g': WHICH_GPU = atoi(optarg); break;
                     case 'c': NCHAINS = atoi(optarg); break;
                     case 'x': XSCALE = atof(optarg); break;
+                    case '1': start1 = 1; break;
                     case 'r': DO_RR = 1; break;
                     case 'p': DO_RR = 0; break;
                     default: return 1; // unspecified
@@ -187,8 +204,9 @@ int main(int argc, char** argv) {
     float X[NCHAINS][NRULES]; // the local copies of X, one for each chain; little x is the variable for the current chain
     for(int c=0;c<NCHAINS;c++) {
         for(int i=0;i<NRULES;i++) {
-            X[c][i] = 1.0;
+            X[c][i] = start1 ? 1.0 : abs(1.0+var_nor()); // start at normal value near 1
         }
+        normalize(X[c], NNT, ntlen);
     }
     float x_size =  NRULES*sizeof(float);
     float* device_x;
@@ -202,10 +220,10 @@ int main(int argc, char** argv) {
     // other parameters
     float PARAMS[NCHAINS][NPARAMS];
     for(int c=0;c<NCHAINS;c++) {
-        PARAMS[c][0] = 0.5; // alpha
-        PARAMS[c][1] = 0.5; // beta
-        PARAMS[c][2] = 1.0; // priortemp
-        PARAMS[c][3] = 1.0; // lltemp
+        PARAMS[c][0] = start1 ? 0.50 : 1.0/(1.0+exp(-var_nor())); // alpha
+        PARAMS[c][1] = start1 ? 0.50 : 1.0/(1.0+exp(-var_nor())); // beta
+        PARAMS[c][2] = start1 ? 1.0 : abs(1+var_nor())); // priortemp
+        PARAMS[c][3] = start1 ? 1.0 : abs(1+var_nor())); // lltemp
     }
     float oldparams[NPARAMS]; // temporary store for old values
     
@@ -246,19 +264,8 @@ int main(int argc, char** argv) {
                 
                 x[j] = v;
                             
-                if(!DO_RR) { // renormalize if we are doing a pdcfg   TODO: CHECK F/B
-                    int xi=0;
-                    for(int nt=0;nt<NNT;nt++) {
-                            float sm = 0.0;
-                            for(int i=0;i<ntlen[nt];i++) 
-                                    sm += x[xi+i];
-                            
-                            for(int i=0;i<ntlen[nt];i++) 
-                                    x[xi+i] = x[xi+i] / sm;            
-                            
-                            xi += ntlen[nt];
-                    }
-                    assert(xi == NRULES);
+                if(!DO_RR) { // renormalize if we are doing a pcfg
+                   normalize(X[c], NNT, ntlen);
                 }
                 
                             
