@@ -41,7 +41,7 @@ def myrun(observed_set):
     tn = TopN(N=options.TOP_COUNT)
     for h in break_ctrlc(MHSampler(h0, data, steps=options.STEPS)):
         tn.add(h)
-        print "#", h
+        # print "#", h
 
     print "# Finished %s" % str(observed_set)
 

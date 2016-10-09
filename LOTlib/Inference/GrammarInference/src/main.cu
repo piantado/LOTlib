@@ -347,6 +347,7 @@ int main(int argc, char** argv) {
             
             // --------------------------------------------------------------------
             // decide whether to accept via MH rule
+            // --------------------------------------------------------------------
             
             if(proposal > current[chain] || random_real() < exp(proposal - current[chain])){
                 current[chain] = proposal;  // update current, that's all since X and params are already set
@@ -360,7 +361,6 @@ int main(int argc, char** argv) {
             // -----------------------------------------------------------------------
             // Print out
             // -----------------------------------------------------------------------
-        
             
     REJECT_SAMPLE: // we'll skip the memcpy back since x was never set
             if(steps % THIN == 0) {
