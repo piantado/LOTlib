@@ -1,8 +1,0 @@
-
-Requirements
-------------
-
-CUDA 
-
-sudo apt-get install libhdf5-dev libboost-dev
-
