@@ -51,7 +51,7 @@ print "# Loaded concept2data"
 # Get the rule count matrices
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from LOTlib.Inference.GrammarInference.Precompute import create_counts
+from LOTlib.GrammarInference.Precompute import create_counts
 
 from Model.Grammar import grammar
 
@@ -101,18 +101,17 @@ for h in break_ctrlc(hypotheses):
     for c in concepts:
         data = concept2data[c]
 
-        ll = [h.compute_single_likelihood(d) for d in data]
+        predll = h.predictive_likelihood(data)
+
+        ll = [h.compute_predictive_likelihood(d) for d in data]
 
         # add on the outputs
-        sumll = 0.0 # the total ll we've seen so far
         for di, d in enumerate(data[:25]): # as far as we go into the trial
-
             for ri in xrange(len(d.input)): # each individual response
                 if tuple([c, di+1, ri+1]) in human_yes or k in human_no: # in case we removed any above
                     output.append( 1.0 * h(d.input, d.input[ri]) )
-                    L.append(sumll)
+                    L.append(predll[di])
 
-            sumll += ll[di] # the likelihood for the next go round
     assert len(L) == len(output)
 
 
