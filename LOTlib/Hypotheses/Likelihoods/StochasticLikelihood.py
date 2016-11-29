@@ -18,11 +18,12 @@ class StochasticLikelihood(Hypothesis):
             Run this model forward nsamples times (defaultly self.nsamples),
             returning a dictionary of how often each outcome occurred
         """
-
         llcounts = Counter()
 
         for _ in xrange(nsamples):
-            llcounts[self(*input)] += 1
+            v = self(*input)
+            # print v
+            llcounts[v] += 1
 
         return llcounts
 

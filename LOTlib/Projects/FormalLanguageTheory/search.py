@@ -22,12 +22,13 @@ from Language import *
 
 from LOTlib.MPI import is_master_process, MPI_unorderedmap
 
-from Model import IncrementalLexiconHypothesis
+from Model import IncrementalLexiconHypothesis, InnerHypothesis
 from LOTlib.Projects.FormalLanguageTheory.Grammar import base_grammar # passed in as kwargs
 
 register_primitive(flatten2str)
 
-LARGE_SAMPLE = 100 # sample this many and then re-normalize to fractional counts
+LARGE_SAMPLE = 1000 # sample this many and then re-normalize to fractional counts
+
 
 
 def run(options, ndata):
@@ -40,11 +41,9 @@ def run(options, ndata):
     language = eval(options.LANG+"()")
     data = language.sample_data(LARGE_SAMPLE)
     assert len(data) == 1
-
     # renormalize the counts
     for k in data[0].output.keys():
         data[0].output[k] = float(data[0].output[k] * ndata) / LARGE_SAMPLE
-    #print data
 
     # Now add the rules to the grammar
     grammar = deepcopy(base_grammar)
@@ -52,29 +51,97 @@ def run(options, ndata):
         grammar.add_rule('ATOM', q(t), None, 2)
 
     h0 = IncrementalLexiconHypothesis(grammar=grammar)
-
     tn = TopN(N=options.TOP_COUNT)
 
     for outer in xrange(options.N): # how many do we add?
+
+        # NOV 27, trying out a version that builds up the grammar a little more incrementally
+        # language = eval(options.LANG + str(outer) + "()")
+        # data = language.sample_data(LARGE_SAMPLE)
+        # assert len(data) == 1
+        # # renormalize the counts
+        # for k in data[0].output.keys():
+        #     data[0].output[k] = float(data[0].output[k] * ndata) / LARGE_SAMPLE
+
         # add to the grammar
         grammar.add_rule('SELFF', '%s' % (outer), None, 1.0)
 
+        # Make the initial value of the last function be a recursion to the previous
+        # If we don't do this, proposals wreck all that we had before!
+        if outer > 0:
+            initfn                         = grammar.get_rule_by_name('flatten2str').make_FunctionNodeStub(grammar, None)
+            initfn.args[0]                 = grammar.get_rule_by_name('', nt='ABSTRACTIONS').make_FunctionNodeStub(grammar, initfn)
+            initfn.args[0].args[0]         = grammar.get_rule_by_name("recurse_(%s)").make_FunctionNodeStub(grammar, initfn.args[0])
+            initfn.args[0].args[0].args[0] = grammar.get_rule_by_name('%s' % (outer-1)).make_FunctionNodeStub(grammar, initfn.args[0].args[0])
+        else:
+            initfn = grammar.generate()
+
         # Add one more to the number of words here
-        h0.set_word(outer, h0.make_hypothesis(grammar=grammar))
+        h0.set_word(outer, h0.make_hypothesis(value=initfn, grammar=grammar))
         h0.N = outer+1
         assert len(h0.value.keys())==h0.N==outer+1
+
+        # and re-set the posterior or else it's something weird
+        h0.compute_posterior(data)
 
         # now run mcmc
         for h in break_ctrlc(MHSampler(h0, data, steps=options.STEPS)):
             tn.add(h)
 
-            print h.posterior_score, h
-            print getattr(h, 'll_counts', None)
+            # print h.posterior_score, h.prior, h.likelihood, h
+            # print getattr(h, 'll_counts', None)
 
         # and start from where we ended
         h0 = deepcopy(h) # must deepcopy
 
     return ndata, tn
+
+#
+# def run(options, ndata):
+#     """
+#     This out on the DATA_RANGE amounts of data and returns all hypotheses in top count
+#     """
+#     if LOTlib.SIG_INTERRUPTED:
+#         return 0, set()
+#
+#     language = eval(options.LANG+"()")
+#     data = language.sample_data(LARGE_SAMPLE)
+#     assert len(data) == 1
+#
+#     # renormalize the counts
+#     for k in data[0].output.keys():
+#         data[0].output[k] = float(data[0].output[k] * ndata) / LARGE_SAMPLE
+#     # print data
+#
+#     # Now add the rules to the grammar
+#     grammar = deepcopy(base_grammar)
+#     for t in language.terminals():  # add in the specifics
+#         grammar.add_rule('ATOM', q(t), None, 2)
+#
+#     h0 = IncrementalLexiconHypothesis(grammar=grammar)
+#
+#     tn = TopN(N=options.TOP_COUNT)
+#
+#     for outer in xrange(options.N): # how many do we add?
+#         # add to the grammar
+#         grammar.add_rule('SELFF', '%s' % (outer), None, 1.0)
+#
+#         # Add one more to the number of words here
+#         h0.set_word(outer, h0.make_hypothesis(grammar=grammar))
+#         h0.N = outer+1
+#         assert len(h0.value.keys())==h0.N==outer+1
+#
+#         # now run mcmc
+#         for h in break_ctrlc(MHSampler(h0, data, steps=options.STEPS)):
+#             tn.add(h)
+#
+#             print h.posterior_score, h.prior, h.likelihood, h
+#             print getattr(h, 'll_counts', None)
+#
+#         # and start from where we ended
+#         h0 = deepcopy(h) # must deepcopy
+#
+#     return ndata, tn
 
 
 if __name__ == "__main__":
@@ -104,7 +171,7 @@ if __name__ == "__main__":
         display_option_summary(options)
         sys.stdout.flush()
 
-    DATA_RANGE =  np.arange(1, 1000, 10)
+    DATA_RANGE = np.arange(1, 100, 1)
     random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))
@@ -113,7 +180,7 @@ if __name__ == "__main__":
     for ndata, tn in MPI_unorderedmap(run, args):
         for h in tn:
             if h not in unq:
-                # unq.add(h)
+                unq.add(h)
 
                 print ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata
                 print getattr(h, 'll_counts', None),
