@@ -143,8 +143,8 @@ class IncrementalLexiconHypothesis(StochasticLikelihood, RecursiveLexicon):
             new = deepcopy(self)  ## Now we just copy the whole thing
             while True:
                 try:
-                    # i = sample_one(range(self.N)) # random one
-                    i = max(self.value.keys()) # only propose to last
+                    i = sample_one(range(self.N)) # random one
+                    # i = max(self.value.keys()) # only propose to last
                     x, fb = self.get_word(i).propose()
                     new.set_word(i, x)
 
