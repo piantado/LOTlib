@@ -27,14 +27,10 @@ from LOTlib.Projects.FormalLanguageTheory.Grammar import base_grammar # passed i
 
 register_primitive(flatten2str)
 
-LARGE_SAMPLE = 1000 # sample this many and then re-normalize to fractional counts
-
+LARGE_SAMPLE = 10000 # sample this many and then re-normalize to fractional counts
 
 
 def run(options, ndata):
-    """
-    This out on the DATA_RANGE amounts of data and returns all hypotheses in top count
-    """
     if LOTlib.SIG_INTERRUPTED:
         return 0, set()
 
@@ -44,6 +40,7 @@ def run(options, ndata):
     # renormalize the counts
     for k in data[0].output.keys():
         data[0].output[k] = float(data[0].output[k] * ndata) / LARGE_SAMPLE
+    # print data, sum(data[0].output.values())
 
     # Now add the rules to the grammar
     grammar = deepcopy(base_grammar)
@@ -54,14 +51,6 @@ def run(options, ndata):
     tn = TopN(N=options.TOP_COUNT)
 
     for outer in xrange(options.N): # how many do we add?
-
-        # NOV 27, trying out a version that builds up the grammar a little more incrementally
-        # language = eval(options.LANG + str(outer) + "()")
-        # data = language.sample_data(LARGE_SAMPLE)
-        # assert len(data) == 1
-        # # renormalize the counts
-        # for k in data[0].output.keys():
-        #     data[0].output[k] = float(data[0].output[k] * ndata) / LARGE_SAMPLE
 
         # add to the grammar
         grammar.add_rule('SELFF', '%s' % (outer), None, 1.0)
@@ -96,54 +85,6 @@ def run(options, ndata):
 
     return ndata, tn
 
-#
-# def run(options, ndata):
-#     """
-#     This out on the DATA_RANGE amounts of data and returns all hypotheses in top count
-#     """
-#     if LOTlib.SIG_INTERRUPTED:
-#         return 0, set()
-#
-#     language = eval(options.LANG+"()")
-#     data = language.sample_data(LARGE_SAMPLE)
-#     assert len(data) == 1
-#
-#     # renormalize the counts
-#     for k in data[0].output.keys():
-#         data[0].output[k] = float(data[0].output[k] * ndata) / LARGE_SAMPLE
-#     # print data
-#
-#     # Now add the rules to the grammar
-#     grammar = deepcopy(base_grammar)
-#     for t in language.terminals():  # add in the specifics
-#         grammar.add_rule('ATOM', q(t), None, 2)
-#
-#     h0 = IncrementalLexiconHypothesis(grammar=grammar)
-#
-#     tn = TopN(N=options.TOP_COUNT)
-#
-#     for outer in xrange(options.N): # how many do we add?
-#         # add to the grammar
-#         grammar.add_rule('SELFF', '%s' % (outer), None, 1.0)
-#
-#         # Add one more to the number of words here
-#         h0.set_word(outer, h0.make_hypothesis(grammar=grammar))
-#         h0.N = outer+1
-#         assert len(h0.value.keys())==h0.N==outer+1
-#
-#         # now run mcmc
-#         for h in break_ctrlc(MHSampler(h0, data, steps=options.STEPS)):
-#             tn.add(h)
-#
-#             print h.posterior_score, h.prior, h.likelihood, h
-#             print getattr(h, 'll_counts', None)
-#
-#         # and start from where we ended
-#         h0 = deepcopy(h) # must deepcopy
-#
-#     return ndata, tn
-
-
 if __name__ == "__main__":
     """
         example:
@@ -171,7 +112,7 @@ if __name__ == "__main__":
         display_option_summary(options)
         sys.stdout.flush()
 
-    DATA_RANGE = np.arange(1, 100, 1)
+    DATA_RANGE = np.exp(np.linspace(0, np.log(100000), num=1000))# [1000] # np.arange(1, 1000, 1)
     random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))
@@ -180,7 +121,7 @@ if __name__ == "__main__":
     for ndata, tn in MPI_unorderedmap(run, args):
         for h in tn:
             if h not in unq:
-                unq.add(h)
+                # unq.add(h)
 
                 print ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata
                 print getattr(h, 'll_counts', None),

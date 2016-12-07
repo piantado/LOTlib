@@ -5,18 +5,6 @@ from LOTlib.Miscellaneous import attrmem, logsumexp, sample_one
 from Levenshtein import distance
 from LOTlib.Hypotheses.Proposers import ProposalFailedException
 from LOTlib.Hypotheses.Likelihoods.StochasticLikelihood import StochasticLikelihood
-
-# from LOTlib.Hypotheses.FactorizedDataHypothesis import FactorizedLambdaHypothesis
-# from LOTlib.Hypotheses.FactorizedDataHypothesis import InnerHypothesis
-
-
-# def matching_prefix(x,y):
-#     for i in xrange(min(len(x), len(y))):
-#         if x[i] != y[i]:
-#             return len(y) - i
-#     return len(y) - min(len(x), len(y))
-
-
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Hypotheses.Proposers import IDR_proposal
 
@@ -43,33 +31,6 @@ class InnerHypothesis(StochasticLikelihood, LOTHypothesis):
 
 
 from LOTlib.Hypotheses.Lexicon.RecursiveLexicon import RecursiveLexicon
-
-def prefix(s,k): ## NOT WORKING RIGHT
-    i = 0
-    while i < min(len(k), len(s)):
-        # print s[:i], k[:i]
-        if s[i] != k[i]:
-            break
-        else:
-            i += 1
-    return -(len(k)-1-i)
-
-
-def longest_common_substring(s1, s2):
-    # Ffrom https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Longest_common_substring#Python_2
-    m = [[0] * (1 + len(s2)) for i in xrange(1 + len(s1))]
-    longest, x_longest = 0, 0
-    for x in xrange(1, 1 + len(s1)):
-        for y in xrange(1, 1 + len(s2)):
-            if s1[x - 1] == s2[y - 1]:
-                m[x][y] = m[x - 1][y - 1] + 1
-                if m[x][y] > longest:
-                    longest = m[x][y]
-                    x_longest = x
-            else:
-                m[x][y] = 0
-    return s1[x_longest - longest: x_longest]
-
 class IncrementalLexiconHypothesis(StochasticLikelihood, RecursiveLexicon):
         """ A hypothesis where we can incrementally add words and propose to only the additions
         """
@@ -95,45 +56,14 @@ class IncrementalLexiconHypothesis(StochasticLikelihood, RecursiveLexicon):
 
             assert isinstance(datum.output, dict), "Data supplied must be a dict (function outputs to counts)"
 
-            llcounts = self.make_ll_counts(datum.input, nsamples=512)
+            llcounts = self.make_ll_counts(datum.input, nsamples=5000) # Increased nsamples to get the tail of the distribution better
 
             z = log(sum(llcounts.values()))
-
-            # find the largest N such that we get all the strings n<N exactly
-            # for N in xrange(max([len(r) for r in datum.output.keys()])):
-            #     s1 = {k for k in datum.output.keys() if len(k) <= N }
-            #     s2 = {k for k in llcounts.keys() if len(k) <= N}
-            #
-            #     if len(s1 ^ s2) != 0: break # leaving N to be the largest value we found, if the symmetric difference is nonempty
-            # ll = N*sum(datum.output.values())
 
             # real likelihood, with a little smoothing
             ll = 0.0  # We are going to compute a pseudo-likelihood, counting close strings as being close
             for k in datum.output.keys():
                 ll += datum.output[k] * ((log(llcounts.get(k)) - z) if k in llcounts else -100.0)
-
-            # ll = 0.0  # We are going to compute a pseudo-likelihood, counting close strings as being close
-            # for k in datum.output.keys():
-            #     # ll += datum.output[k] * (log(llcounts.get(k)) - z) if k in llcounts else -100.0
-            #     ll += datum.output[k] * (log(llcounts.get(k))-z if k in llcounts else -10.0)
-            # #     # ll += datum.output[k] * (log(llcounts.get(k))-z if k in llcounts else -10000.0)
-            # #     # ll += datum.output[k] * (log(llcounts.get(k, 1.0e-12)) - z)
-            # #     # ll += datum.output[k] * logsumexp([ log(llcounts[r])-log(lo) - 1.0 * matching_prefix(r, k) for r in llcounts.keys() ])
-            # #     # ll += datum.output[k] * logsumexp([ log(llcounts[r])-z - 1.0 * distance(r, k) for r in llcounts.keys() ])
-            # #     # TODO: Can be sped up by pre-computing the probs once
-            # #     # ll += datum.output[k] * max([log(llcounts[r]) - z - 1.0 * distance(r, k) for r in llcounts.keys()])
-            # #
-            # # # a type prior?
-            # # # ll = 10000*float(len(set(llcounts.keys()) & set(datum.output.keys()))) / float(len(set(llcounts.keys()) | set(datum.output.keys())))
-
-            # ll = 0.0  #  noise process of wanting to get the prefix right
-            # for k in datum.output.keys():
-            #     ll += datum.output[k] * max( list(prefix(s,k) + log(llcounts[s]) - z for s in llcounts.keys()))
-
-            #pseudo-likelihood of the longest string we match
-            # ll = 0.0  #  noise process of wanting to get the prefix right
-            # for k in datum.output.keys():
-            #     ll += datum.output[k] * max( list( len(longest_common_substring(s,k)) + log(llcounts[s]) - z for s in llcounts.keys()))
 
             return ll
 
@@ -163,6 +93,7 @@ class IncrementalLexiconHypothesis(StochasticLikelihood, RecursiveLexicon):
                 return ''
             else:
                 return self.value[word](self.dispatch_word)  # pass in "self" as lex, using the recursive version
+
         def recursive_call(self, word, *args):
             raise NotImplementedError
 
