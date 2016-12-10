@@ -59,9 +59,9 @@ def run(options, ndata):
         # If we don't do this, proposals wreck all that we had before!
         if outer > 0:
             initfn                         = grammar.get_rule_by_name('flatten2str').make_FunctionNodeStub(grammar, None)
-            initfn.args[0]                 = grammar.get_rule_by_name('', nt='ABSTRACTIONS').make_FunctionNodeStub(grammar, initfn)
-            initfn.args[0].args[0]         = grammar.get_rule_by_name("recurse_(%s)").make_FunctionNodeStub(grammar, initfn.args[0])
-            initfn.args[0].args[0].args[0] = grammar.get_rule_by_name('%s' % (outer-1)).make_FunctionNodeStub(grammar, initfn.args[0].args[0])
+            # initfn.args[0]                 = grammar.get_rule_by_name('', nt='ABSTRACTIONS').make_FunctionNodeStub(grammar, initfn)
+            initfn.args[0]         = grammar.get_rule_by_name("recurse_(%s)").make_FunctionNodeStub(grammar, initfn)
+            initfn.args[0].args[0] = grammar.get_rule_by_name('%s' % (outer-1)).make_FunctionNodeStub(grammar, initfn.args[0])
         else:
             initfn = grammar.generate()
 
