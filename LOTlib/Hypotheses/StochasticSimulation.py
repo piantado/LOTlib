@@ -11,4 +11,11 @@ class StochasticSimulation(Hypothesis):
         for _ in xrange(nsamples):
             v = super(self)(*input)
             output[v] += 1
+
+        # renormalize
+        z = sum(output.values())
+
+        for k, v in output.items():
+            output[k] = v/z
+
         return output

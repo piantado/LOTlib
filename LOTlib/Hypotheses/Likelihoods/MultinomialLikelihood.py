@@ -16,12 +16,10 @@ class MultinomialLikelihood(object):
 
         try:
 
-            hc = self(*datum.intput) # output dictionary, output->counts
-            assert isinstance(hc, dict)
+            hp = self(*datum.intput) # output dictionary, output->probabilities
+            assert isinstance(hp, dict)
 
-            hz = log(sum(ho.values())) # normalizing factor
-
-            return sum( dc * ( log(hc.get(k,outlier)) - hz ) for k, dc in datum.output.items() )
+            return sum( dc * (log(hp[k]) if k in hp else outlier) for k, dc in datum.output.items() )
 
             return ll
         except RecursionDepthException as e:
