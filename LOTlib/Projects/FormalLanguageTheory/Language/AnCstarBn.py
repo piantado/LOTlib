@@ -2,7 +2,7 @@
 from FormalLanguage import FormalLanguage
 from LOTlib.Grammar import Grammar
 
-class AnBn(FormalLanguage):
+class AnCstarBn(FormalLanguage):
 
     def __init__(self):
         self.grammar = Grammar(start='S')
