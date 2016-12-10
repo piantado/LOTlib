@@ -1,4 +1,4 @@
-import re
+
 from FormalLanguage import FormalLanguage
 from LOTlib.Grammar import Grammar
 

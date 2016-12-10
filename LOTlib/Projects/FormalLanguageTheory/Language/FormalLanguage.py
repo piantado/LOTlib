@@ -9,12 +9,14 @@ class FormalLanguage(object):
     Set up a super-class for formal languages, so we can compute things like accuracy, precision, etc.
     """
 
+    def sample_string(self):
+        return str(self.grammar.generate())
+
     def sample_data(self, n):
         # Sample a string of data
         cnt = Counter()
         for _ in xrange(n):
-            s = str(self.grammar.generate())
-            cnt[s] += 1
+            cnt[self.sample_string()] += 1
 
         return [FunctionData(input=[0], output=cnt)]
 
