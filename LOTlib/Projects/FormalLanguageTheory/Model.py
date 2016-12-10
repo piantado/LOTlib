@@ -5,7 +5,6 @@ from LOTlib.Miscellaneous import attrmem, logsumexp, sample_one
 from Levenshtein import distance
 from LOTlib.Hypotheses.Proposers import ProposalFailedException
 from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import MultinomialLikelihood
-from LOTlib.Hypotheses.StochasticSimulation import StochasticSimulation
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Hypotheses.Proposers import IDR_proposal
 
@@ -32,7 +31,7 @@ class InnerHypothesis(LOTHypothesis):
 
 from collections import Counter
 from LOTlib.Hypotheses.Lexicon.RecursiveLexicon import RecursiveLexicon
-class IncrementalLexiconHypothesis(StochasticSimulation, MultinomialLikelihood, RecursiveLexicon):
+class IncrementalLexiconHypothesis( MultinomialLikelihood, RecursiveLexicon):
         """ A hypothesis where we can incrementally add words and propose to only the additions
         """
 
@@ -100,9 +99,6 @@ class IncrementalLexiconHypothesis(StochasticSimulation, MultinomialLikelihood, 
             Wrap in self as a first argument that we don't have to in the grammar. This way, we can use self(word, X Y) as above.
             NOTE: This overwrites much of the logic of StochasticSimulation since we have a special call function
             """
-
-
-
             output = Counter()
             for _ in xrange(nsamples):
                 self.recursive_call_depth = 0

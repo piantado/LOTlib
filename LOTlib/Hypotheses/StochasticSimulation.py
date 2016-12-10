@@ -1,20 +1,26 @@
 
+from LOTlib.Miscellaneous import attrmem
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
 from collections import Counter
 
 class StochasticSimulation(Hypothesis):
+    """
+    If you inherit this, you get a function called simulate that returns the output of many function calls
+    """
 
-    def __call__(self, nsamples=1024, *input):
+    @attrmem('simulation_counts')
+    def simulate(self, nsamples=1024, normalize=True, *input):
         """ Overwrite call with a dictionary of outputs """
 
         output = Counter()
         for _ in xrange(nsamples):
-            v = super(self)(*input)
+            v = super(type(self), self).__call__(*input)
             output[v] += 1
 
         # renormalize
-        z = float(sum(output.values()))
-        for k, v in output.items():
-            output[k] = v/z
+        if normalize:
+            z = float(sum(output.values()))
+            for k, v in output.items():
+                output[k] = v/z
 
         return output

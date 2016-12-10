@@ -62,8 +62,8 @@ def run(options, ndata):
         for h in break_ctrlc(MHSampler(h0, data, steps=options.STEPS)):
             tn.add(h)
 
-            # print h.posterior_score, h.prior, h.likelihood, h
-            # print h()
+            print h.posterior_score, h.prior, h.likelihood, h
+            print h()
 
         # and start from where we ended
         h0 = deepcopy(h) # must deepcopy
