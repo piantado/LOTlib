@@ -42,6 +42,8 @@ class IncrementalLexiconHypothesis(StochasticSimulation, MultinomialLikelihood, 
             self.N = 0
             self.outlier = -100 # read in MultinomialLikelihood
 
+
+
         def make_hypothesis(self, **kwargs):
             return InnerHypothesis(**kwargs)
 
@@ -73,6 +75,25 @@ class IncrementalLexiconHypothesis(StochasticSimulation, MultinomialLikelihood, 
 
         def recursive_call(self, word, *args):
             raise NotImplementedError
+
+        def deepen(self):
+            """ Add one more word here """
+
+            # update the grammar
+            self.grammar = deepcopy(self.grammar)
+            self.grammar.add_rule('SELFF', '%s' % (self.N), None, 1.0)
+
+            # update the hypothesis.
+            if self.N == 0: # if we're empty
+                initfn = self.grammar.generate()
+            else: # else automatically recurse to the current word in order to avoid losing the likelihood
+                initfn                 = self.grammar.get_rule_by_name('flatten2str').make_FunctionNodeStub(self.grammar, None)
+                initfn.args[0]         = self.grammar.get_rule_by_name("recurse_(%s)").make_FunctionNodeStub(self.grammar, initfn)
+                initfn.args[0].args[0] = self.grammar.get_rule_by_name('%s' % (self.N)).make_FunctionNodeStub(self.grammar, initfn.args[0])
+
+            self.set_word(self.N, self.make_hypothesis(value=initfn, grammar=self.grammar))
+
+            self.N += 1
 
         def __call__(self, nsamples=1024, *args):
             """

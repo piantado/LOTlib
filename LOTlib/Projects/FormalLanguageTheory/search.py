@@ -16,13 +16,13 @@ from LOTlib.Miscellaneous import display_option_summary, q
 
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib.Eval import register_primitive
-from LOTlib.Miscellaneous import flatten2str, logsumexp, qq, Infinity
+from LOTlib.Miscellaneous import flatten2str
 from LOTlib.TopN import TopN
 from Language import *
 
 from LOTlib.MPI import is_master_process, MPI_unorderedmap
 
-from Model import IncrementalLexiconHypothesis, InnerHypothesis
+from Model import IncrementalLexiconHypothesis
 from LOTlib.Projects.FormalLanguageTheory.Grammar import base_grammar # passed in as kwargs
 
 register_primitive(flatten2str)
@@ -52,22 +52,7 @@ def run(options, ndata):
 
     for outer in xrange(options.N): # how many do we add?
 
-        # add to the grammar
-        grammar.add_rule('SELFF', '%s' % (outer), None, 1.0)
-
-        # Make the initial value of the last function be a recursion to the previous
-        # If we don't do this, proposals wreck all that we had before!
-        if outer > 0:
-            initfn                         = grammar.get_rule_by_name('flatten2str').make_FunctionNodeStub(grammar, None)
-            # initfn.args[0]                 = grammar.get_rule_by_name('', nt='ABSTRACTIONS').make_FunctionNodeStub(grammar, initfn)
-            initfn.args[0]         = grammar.get_rule_by_name("recurse_(%s)").make_FunctionNodeStub(grammar, initfn)
-            initfn.args[0].args[0] = grammar.get_rule_by_name('%s' % (outer-1)).make_FunctionNodeStub(grammar, initfn.args[0])
-        else:
-            initfn = grammar.generate()
-
-        # Add one more to the number of words here
-        h0.set_word(outer, h0.make_hypothesis(value=initfn, grammar=grammar))
-        h0.N = outer+1
+        h0.deepen() # add one more word
         assert len(h0.value.keys())==h0.N==outer+1
 
         # and re-set the posterior or else it's something weird
@@ -77,8 +62,8 @@ def run(options, ndata):
         for h in break_ctrlc(MHSampler(h0, data, steps=options.STEPS)):
             tn.add(h)
 
-            print h.posterior_score, h.prior, h.likelihood, h
-            print h()
+            # print h.posterior_score, h.prior, h.likelihood, h
+            # print h()
 
         # and start from where we ended
         h0 = deepcopy(h) # must deepcopy
