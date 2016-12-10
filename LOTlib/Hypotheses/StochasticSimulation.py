@@ -13,8 +13,7 @@ class StochasticSimulation(Hypothesis):
             output[v] += 1
 
         # renormalize
-        z = sum(output.values())
-
+        z = float(sum(output.values()))
         for k, v in output.items():
             output[k] = v/z
 

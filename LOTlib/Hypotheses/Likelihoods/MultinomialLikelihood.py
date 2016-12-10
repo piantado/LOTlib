@@ -11,16 +11,12 @@ class MultinomialLikelihood(object):
     out of sample items
     """
 
-    def compute_single_likelihood(self, datum, outlier=-100):
+    def compute_single_likelihood(self, datum):
+        outlier = self.__dict__.get('outlier', -Infinity) # pull the outleir prob from self adjective
+
         assert isinstance(datum.output, dict)
 
-        try:
+        hp = self(*datum.input) # output dictionary, output->probabilities
+        assert isinstance(hp, dict)
 
-            hp = self(*datum.intput) # output dictionary, output->probabilities
-            assert isinstance(hp, dict)
-
-            return sum( dc * (log(hp[k]) if k in hp else outlier) for k, dc in datum.output.items() )
-
-            return ll
-        except RecursionDepthException as e:
-            return -Infinity
+        return sum( dc * (log(hp[k]) if k in hp else outlier) for k, dc in datum.output.items() )
