@@ -1,7 +1,8 @@
 from LOTlib.Eval import primitive
 from LOTlib.DataAndObjects import FunctionData
 
-from LOTlib.Hypotheses.Likelihoods.StochasticLikelihood import StochasticLikelihood
+from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import MultinomialLikelihood
+from LOTlib.Hypotheses.StochasticSimulation import StochasticSimulation
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Hypotheses.Likelihoods.LevenshteinLikelihood import StochasticLevenshteinLikelihood
 from LOTlib.Hypotheses.Proposers import insert_delete_proposal, ProposalFailedException, regeneration_proposal
@@ -62,7 +63,7 @@ grammar.add_rule('TERMINAL', 'N', None, TERMINAL_WEIGHT)
 
 
 
-class MyHypothesis(StochasticLikelihood, LOTHypothesis):
+class MyHypothesis(StochasticSimulation, MultinomialLikelihood, LOTHypothesis):
 #class MyHypothesis(StochasticLevenshteinLikelihood, LOTHypothesis):
     def __init__(self, grammar=None, **kwargs):
         LOTHypothesis.__init__(self, grammar, display='lambda : %s', **kwargs)
@@ -79,30 +80,6 @@ class MyHypothesis(StochasticLikelihood, LOTHypothesis):
         ret = self.__copy__(value=ret_value)
 
         return ret, fb
-
-    @attrmem('likelihood')
-    def compute_likelihood(self, data, shortcut=-Infinity, nsamples=512, sm=0.1, **kwargs):
-        # For each input, if we don't see its input (via llcounts), recompute it through simulation
-
-        ll = 0.0
-        for datum in data:
-            self.ll_counts = self.make_ll_counts(datum.input, nsamples=nsamples)
-            z = sum(self.ll_counts.values())
-            ll += sum([datum.output[k]*(nicelog(self.ll_counts[k]+sm) - nicelog(z+sm*len(datum.output.keys()))) for k in datum.output.keys()])
-            if ll < shortcut:
-                return -Infinity
-
-        return ll / self.likelihood_temperature
-    #overwrite compute_single_likelihood to alter distance factor
-    '''def compute_single_likelihood(self, datum, distance_factor=1000.0):
-        assert isinstance(datum.output, dict), "Data supplied must be a dict (function outputs to counts)"
-
-        llcounts = self.make_ll_counts(datum.input)
-
-        lo = sum(llcounts.values()) # normalizing constant
-
-        # We are going to compute a pseudo-likelihood, counting close strings as being close
-        return sum([datum.output[k]*logsumexp([log(llcounts[r])-log(lo) - distance_factor*distance(r, k) for r in llcounts.keys()]) for k in datum.output.keys()])'''
 
 def make_hypothesis():
     return MyHypothesis(grammar)
