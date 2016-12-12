@@ -2,7 +2,7 @@
 from copy import deepcopy, copy
 from math import log
 from LOTlib.Miscellaneous import attrmem, logsumexp, sample_one
-from Levenshtein import distance
+# from Levenshtein import distance
 from LOTlib.Hypotheses.Proposers import ProposalFailedException
 from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import MultinomialLikelihoodLog
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
