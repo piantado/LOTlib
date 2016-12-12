@@ -427,16 +427,21 @@ def geometric_ldensity(n,p):
 
 from math import expm1, log1p
 
-def log1mexp(a):
+def log1mexp(a, epsilon=1e-6):
     """
             Computes log(1-exp(a)) according to Machler, "Accurately computing ..."
             Note: a should be a large negative value!
+            epsilon -- count things > 0 by this much as zero
     """
-    if a > 0:
-        print >>sys.stderr, "# Warning, log1mexp with a=", a, " > 0"
-    
-    if a < -log(2.0): return log1p(-exp(a))
-    else:             return log(-expm1(a))
+
+
+    if abs(a) < epsilon: # close to zero up to numerical precision
+        return -Infinity
+
+    if a < -log(2.0):
+        return log1p(-exp(a))
+    else:
+        return log(-expm1(a))
 
 
 def EV(fn, n_samples, *args):
