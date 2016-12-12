@@ -40,12 +40,11 @@ def run(options, ndata):
     # renormalize the counts
     for k in data[0].output.keys():
         data[0].output[k] = float(data[0].output[k] * ndata) / LARGE_SAMPLE
-    # print data, sum(data[0].output.values())
 
     # Now add the rules to the grammar
     grammar = deepcopy(base_grammar)
     for t in language.terminals():  # add in the specifics
-        grammar.add_rule('ATOM', q(t), None, 2)
+        grammar.add_rule('ATOM', '{\'%s\':0.0}' % t, None, 2.0)
 
     h0 = IncrementalLexiconHypothesis(grammar=grammar)
     tn = TopN(N=options.TOP_COUNT)
@@ -60,10 +59,11 @@ def run(options, ndata):
 
         # now run mcmc
         for h in break_ctrlc(MHSampler(h0, data, steps=options.STEPS)):
+            # print ">>", h
             tn.add(h)
 
-            print h.posterior_score, h.prior, h.likelihood, h
-            print h()
+            # print h.posterior_score, h.prior, h.likelihood, h
+            # print h()
 
         # and start from where we ended
         h0 = deepcopy(h) # must deepcopy
@@ -109,7 +109,7 @@ if __name__ == "__main__":
                 # unq.add(h)
 
                 print ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata
-                print getattr(h, 'll_counts', None),
+                print h(),
                 print h  # must add \0 when not Lexicon
         sys.stdout.flush()
 

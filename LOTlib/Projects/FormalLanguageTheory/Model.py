@@ -4,9 +4,10 @@ from math import log
 from LOTlib.Miscellaneous import attrmem, logsumexp, sample_one
 from Levenshtein import distance
 from LOTlib.Hypotheses.Proposers import ProposalFailedException
-from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import MultinomialLikelihood
+from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import MultinomialLikelihoodLog
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Hypotheses.Proposers import IDR_proposal
+from LOTlib.Eval import TooBigException
 
 class InnerHypothesis(LOTHypothesis):
     """
@@ -29,19 +30,20 @@ class InnerHypothesis(LOTHypothesis):
 
         return ret, fb
 
+class MyException(Exception):
+    pass
+
 from collections import Counter
 from LOTlib.Hypotheses.Lexicon.RecursiveLexicon import RecursiveLexicon
-class IncrementalLexiconHypothesis( MultinomialLikelihood, RecursiveLexicon):
+class IncrementalLexiconHypothesis( MultinomialLikelihoodLog, RecursiveLexicon):
         """ A hypothesis where we can incrementally add words and propose to only the additions
         """
 
         def __init__(self, grammar=None, **kwargs):
-            RecursiveLexicon.__init__(self, recurse_bound=5, maxnodes=50, variable_weight=3.0, **kwargs)
+            RecursiveLexicon.__init__(self, recursive_depth_bound=50, maxnodes=50, variable_weight=3.0, **kwargs)
             self.grammar=grammar
             self.N = 0
             self.outlier = -100 # read in MultinomialLikelihood
-
-
 
         def make_hypothesis(self, **kwargs):
             return InnerHypothesis(**kwargs)
@@ -66,11 +68,15 @@ class IncrementalLexiconHypothesis( MultinomialLikelihood, RecursiveLexicon):
         def dispatch_word(self, word, *input):
             """ We override this so that the hypothesis defaultly calls with the last word via __call__"""
             self.recursive_call_depth += 1
+            # print self.recursive_call_depth, str(self)
 
             if self.recursive_call_depth > self.recursive_depth_bound:
-                return ''
+                return {'':0.0} # empty string, log p
             else:
-                return self.value[word](self.dispatch_word, *input)  # pass in "self" as lex, using the recursive version
+                v = self.value[word](self.dispatch_word, *input)  # pass in "self" as lex, using the recursive version
+                if len(v.keys()) > 2000:
+                    raise MyException
+                return v
 
         def recursive_call(self, word, *args):
             raise NotImplementedError
@@ -86,7 +92,7 @@ class IncrementalLexiconHypothesis( MultinomialLikelihood, RecursiveLexicon):
             if self.N == 0: # if we're empty
                 initfn = self.grammar.generate()
             else: # else automatically recurse to the current word in order to avoid losing the likelihood
-                initfn                 = self.grammar.get_rule_by_name('flatten2str').make_FunctionNodeStub(self.grammar, None)
+                initfn                 = self.grammar.get_rule_by_name('', nt='START').make_FunctionNodeStub(self.grammar, None)
                 initfn.args[0]         = self.grammar.get_rule_by_name("recurse_(%s)").make_FunctionNodeStub(self.grammar, initfn)
                 initfn.args[0].args[0] = self.grammar.get_rule_by_name('%s' % (self.N)).make_FunctionNodeStub(self.grammar, initfn.args[0])
 
@@ -97,18 +103,14 @@ class IncrementalLexiconHypothesis( MultinomialLikelihood, RecursiveLexicon):
         def __call__(self, nsamples=1024, *args):
             """
             Wrap in self as a first argument that we don't have to in the grammar. This way, we can use self(word, X Y) as above.
-            NOTE: This overwrites much of the logic of StochasticSimulation since we have a special call function
             """
-            output = Counter()
-            for _ in xrange(nsamples):
-                self.recursive_call_depth = 0
-                v = self.dispatch_word(self.N-1, *args)
-                output[v] += 1
+            self.recursive_call_depth = 0
+            try:
+                return self.dispatch_word(self.N - 1, *args)
+            except MyException:
+                return {'': 0.0}
 
-            # renormalize
-            z = float(sum(output.values()))
-            for k, v in output.items():
-                output[k] = v / z
-
-            return output
-
+            # except SizeException as e:
+            #     return {'':0.0}
+            # except TooBigException as e:
+            #     return {'':0.0}
