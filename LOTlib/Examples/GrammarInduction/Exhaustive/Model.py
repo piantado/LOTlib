@@ -16,25 +16,24 @@ from LOTlib.Grammar import Grammar
 ## Here we use the _d primitives which manipulate an entire distribution of strings. This tends to be much faster.
 grammar = Grammar()
 
-grammar.add_rule('START', '', ['LIST'], 1.0)
+grammar.add_rule('START', '', ['EXPR'], 1.0)
 
-grammar.add_rule('LIST', 'if_d', ['BOOL', 'LIST', 'LIST'], 1.)
+grammar.add_rule('LIST', 'if_d', ['BOOL', 'EXPR', 'EXPR'], 1.)
 
 grammar.add_rule('BOOL', 'and_d', ['BOOL', 'BOOL'], 1.)
 grammar.add_rule('BOOL', 'or_d', ['BOOL', 'BOOL'], 1.)
 grammar.add_rule('BOOL', 'not_d', ['BOOL'], 1.)
 
-grammar.add_rule('LIST', 'cons_d', ['LIST', 'LIST'], 1.)
-grammar.add_rule('LIST', 'cdr_d', ['LIST'], 1.)
-grammar.add_rule('LIST', 'car_d', ['LIST'], 1.)
+grammar.add_rule('EXPR', 'cons_d', ['EXPR', 'EXPR'], 1.)
+grammar.add_rule('EXPR', 'cdr_d', ['EXPR'], 1.)
+grammar.add_rule('EXPR', 'car_d', ['EXPR'], 1.)
 
-grammar.add_rule('BOOL', 'empty_d', ['LIST'], 1.)
+grammar.add_rule('BOOL', 'empty_d', ['EXPR'], 1.)
 grammar.add_rule('BOOL', 'flip_d(0.5)', None, TERMINAL_WEIGHT)
 
-grammar.add_rule('LIST', '{\'\':0.0}', None, 1.0)
+grammar.add_rule('EXPR', '{\'\':0.0}', None, 1.0)
 for t in 'DANV':
-    grammar.add_rule('LIST', '{\'%s\':0.0}' % t, None, TERMINAL_WEIGHT)
-
+    grammar.add_rule('EXPR', '{\'%s\':0.0}' % t, None, TERMINAL_WEIGHT)
 
 ## Allow lambda abstraction
 grammar.add_rule('EXPR', 'apply_', ['LAMBDAARG', 'LAMBDATHUNK'], 1)
