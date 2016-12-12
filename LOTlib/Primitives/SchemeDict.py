@@ -58,3 +58,24 @@ def if_d(prb,x,y):
     return out
 
 
+@primitive
+def and_d(x,y):
+    out = defaultdict(lambda: -Infinity)
+    out[True] = x.get(True,-Infinity) + y.get(True,-Infinity)
+    out[False] = log1mexp(out[True])
+    return out
+
+@primitive
+def or_d(x,y):
+    out = defaultdict(lambda: -Infinity)
+    out[True] = logplusexp(x.get(True,-Infinity) + y.get(False,-Infinity),
+                           x.get(False,-Infinity) + y.get(True,-Infinity))
+    out[False] = log1mexp(out[True])
+    return out
+
+@primitive
+def not_d(x):
+    out = defaultdict(lambda: -Infinity)
+    out[True] = x.get(False,-Infinity)
+    out[False] = log1mexp(out[True])
+    return out

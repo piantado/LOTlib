@@ -20,20 +20,20 @@ grammar.add_rule('START', '', ['LIST'], 1.0)
 
 grammar.add_rule('LIST', 'if_d', ['BOOL', 'LIST', 'LIST'], 1.)
 
-grammar.add_rule('LIST', 'cons_d', ['ATOM', 'LIST'], 1./6.)
-grammar.add_rule('LIST', 'cons_d', ['LIST', 'LIST'], 1./6.)
-grammar.add_rule('LIST', 'cdr_d', ['LIST'], 1./3.)
-grammar.add_rule('LIST', 'car_d', ['LIST'], 1./3.)
+grammar.add_rule('BOOL', 'and_d', ['BOOL', 'BOOL'], 1.)
+grammar.add_rule('BOOL', 'or_d', ['BOOL', 'BOOL'], 1.)
+grammar.add_rule('BOOL', 'not_d', ['BOOL'], 1.)
 
-grammar.add_rule('LIST', '', ['ATOM'], 3.0)
-grammar.add_rule('LIST', '{\'\':0.0}', None, 1.0)
-# base_grammar.add_rule('LIST', 'recurse_', [], 1.) #
+grammar.add_rule('LIST', 'cons_d', ['LIST', 'LIST'], 1.)
+grammar.add_rule('LIST', 'cdr_d', ['LIST'], 1.)
+grammar.add_rule('LIST', 'car_d', ['LIST'], 1.)
 
 grammar.add_rule('BOOL', 'empty_d', ['LIST'], 1.)
-grammar.add_rule('BOOL', 'flip_d(0.5)', None, 1.)
+grammar.add_rule('BOOL', 'flip_d(0.5)', None, TERMINAL_WEIGHT)
 
+grammar.add_rule('LIST', '{\'\':0.0}', None, 1.0)
 for t in 'DANV':
-    grammar.add_rule('ATOM', '{\'%s\':0.0}' % t, None, 2.0)
+    grammar.add_rule('LIST', '{\'%s\':0.0}' % t, None, TERMINAL_WEIGHT)
 
 
 ## Allow lambda abstraction
