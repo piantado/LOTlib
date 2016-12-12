@@ -57,6 +57,12 @@ def if_d(prb,x,y):
 
     return out
 
+@primitive
+def equal_d(x,y):
+    peq = -Infinity
+    for a,v in x.items():
+        peq = logplusexp(peq, v + y.get(a,-Infinity)) # P(x=a,y=a)
+    return {True: peq, False:log1mexp(peq)}
 
 @primitive
 def and_d(x,y):

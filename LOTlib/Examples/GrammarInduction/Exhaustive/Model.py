@@ -18,7 +18,7 @@ grammar = Grammar()
 
 grammar.add_rule('START', '', ['EXPR'], 1.0)
 
-grammar.add_rule('LIST', 'if_d', ['BOOL', 'EXPR', 'EXPR'], 1.)
+grammar.add_rule('EXPR', 'if_d', ['BOOL', 'EXPR', 'EXPR'], 1.)
 
 grammar.add_rule('BOOL', 'and_d', ['BOOL', 'BOOL'], 1.)
 grammar.add_rule('BOOL', 'or_d', ['BOOL', 'BOOL'], 1.)
@@ -28,7 +28,8 @@ grammar.add_rule('EXPR', 'cons_d', ['EXPR', 'EXPR'], 1.)
 grammar.add_rule('EXPR', 'cdr_d', ['EXPR'], 1.)
 grammar.add_rule('EXPR', 'car_d', ['EXPR'], 1.)
 
-grammar.add_rule('BOOL', 'empty_d', ['EXPR'], 1.)
+grammar.add_rule('BOOL', 'equal_d', ['EXPR', 'EXPR'], 1.)
+# grammar.add_rule('BOOL', 'empty_d', ['EXPR'], 1.)
 grammar.add_rule('BOOL', 'flip_d(0.5)', None, TERMINAL_WEIGHT)
 
 grammar.add_rule('EXPR', '{\'\':0.0}', None, 1.0)
@@ -72,6 +73,6 @@ if __name__ == "__main__":
 
     from LOTlib.Inference.Samplers.StandardSample import standard_sample
 
-    standard_sample(make_hypothesis, make_data, save_top=False)
+    standard_sample(make_hypothesis, make_data, save_top=False) #, alsoprint="lambda h: h()")
 
 

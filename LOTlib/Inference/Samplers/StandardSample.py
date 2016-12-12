@@ -20,6 +20,7 @@ def standard_sample(make_hypothesis, make_data, show_skip=9, show=True, N=100, s
     h0 = make_hypothesis()
     data = make_data()
 
+
     best_hypotheses = TopN(N=N)
 
     f = eval(alsoprint)
