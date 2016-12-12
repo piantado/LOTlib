@@ -1,5 +1,6 @@
 from LOTlib.Miscellaneous import Infinity, attrmem
 from copy import copy, deepcopy
+import numpy
 
 class Hypothesis(object):
     """A hypothesis bundles together a value (hypothesis value) with a bunch of remembered states,
@@ -104,6 +105,18 @@ class Hypothesis(object):
                 return -Infinity
 
         return ll
+
+    def compute_predictive_likelihood(self, data, include_last=False, **kwargs):
+        """
+        The predictive likelihood is a list of likelihoods aligned to data. The i'th predictive likelihood
+        is the likelihood of 0..(i-1) data points (thus it is the likelihood used in the predictive
+        posterior for the i'th data point)
+        """
+
+        # all but the last data point unless include_last
+        lls = [0.0] + [self.compute_single_likelihood(datum, **kwargs) for datum in data[:(None if include_last else -1)]]
+
+        return numpy.cumsum(lls)
 
     # ========================================================================================================
     #  Methods for accessing likelihoods etc. on a big arrays of data

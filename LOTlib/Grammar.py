@@ -71,6 +71,14 @@ class Grammar(CommonEqualityMixin):
         """Returns all non-terminals."""
         return self.rules.keys()
 
+    def get_rule_by_name(self, n, nt=None):
+        if nt is None:
+            matches = [r for r in self.get_all_rules() if r.name == n]
+        else:
+            matches = [r for r in self.get_rules(nt) if r.name == n]
+        assert len(matches)==1, "%s %s %s" % (n, nt, str(matches))
+        return matches[0]
+
     def get_matching_rule(self, t):
         """
         Get the rule matching t's signature. Note: We could probably speed this up with a hash table if need be.

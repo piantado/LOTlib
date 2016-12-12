@@ -2,7 +2,7 @@ from FormalLanguage import FormalLanguage
 import itertools
 from collections import Counter
 from LOTlib.Miscellaneous import logsumexp
-from Levenshtein import distance
+# from Levenshtein import distance
 from math import log
 
 

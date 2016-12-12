@@ -10,3 +10,4 @@ from Semantics import *
 from SetTheory import *
 from Stochastics import *
 from Trees import *
+from SchemeDict import *

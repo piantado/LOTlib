@@ -115,4 +115,20 @@ def mapset_(f,A):
 def Ystar_(*args):
     return Ystar(*args)
 
+from random import random
+
+@primitive
+def optional_(x, y):
+    if random() < 0.5:
+        return cons_(x,y)
+    else:
+        return y
+
+@primitive
+def geometric_(x,y):
+    # geometric number of xes followed by y
+    if random() < 0.5:
+        return y
+    else:
+        return cons_(x, geometric_(x,y))
 

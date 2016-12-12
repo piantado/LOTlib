@@ -16,7 +16,7 @@ from LOTlib.Miscellaneous import display_option_summary, q
 
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib.Eval import register_primitive
-from LOTlib.Miscellaneous import flatten2str, logsumexp, qq, Infinity
+from LOTlib.Miscellaneous import flatten2str
 from LOTlib.TopN import TopN
 from Language import *
 
@@ -27,55 +27,48 @@ from LOTlib.Projects.FormalLanguageTheory.Grammar import base_grammar # passed i
 
 register_primitive(flatten2str)
 
-LARGE_SAMPLE = 100 # sample this many and then re-normalize to fractional counts
+LARGE_SAMPLE = 10000 # sample this many and then re-normalize to fractional counts
 
 
 def run(options, ndata):
-    """
-    This out on the DATA_RANGE amounts of data and returns all hypotheses in top count
-    """
     if LOTlib.SIG_INTERRUPTED:
         return 0, set()
 
     language = eval(options.LANG+"()")
     data = language.sample_data(LARGE_SAMPLE)
     assert len(data) == 1
-
     # renormalize the counts
     for k in data[0].output.keys():
         data[0].output[k] = float(data[0].output[k] * ndata) / LARGE_SAMPLE
-    #print data
 
     # Now add the rules to the grammar
     grammar = deepcopy(base_grammar)
     for t in language.terminals():  # add in the specifics
-        grammar.add_rule('ATOM', q(t), None, 2)
+        grammar.add_rule('ATOM', '{\'%s\':0.0}' % t, None, 2.0)
 
     h0 = IncrementalLexiconHypothesis(grammar=grammar)
-
     tn = TopN(N=options.TOP_COUNT)
 
     for outer in xrange(options.N): # how many do we add?
-        # add to the grammar
-        grammar.add_rule('SELFF', '%s' % (outer), None, 1.0)
 
-        # Add one more to the number of words here
-        h0.set_word(outer, h0.make_hypothesis(grammar=grammar))
-        h0.N = outer+1
+        h0.deepen() # add one more word
         assert len(h0.value.keys())==h0.N==outer+1
+
+        # and re-set the posterior or else it's something weird
+        h0.compute_posterior(data)
 
         # now run mcmc
         for h in break_ctrlc(MHSampler(h0, data, steps=options.STEPS)):
+            # print ">>", h
             tn.add(h)
 
-            # print h.posterior_score, h
-            # print getattr(h, 'll_counts', None)
+            # print h.posterior_score, h.prior, h.likelihood, h
+            # print h()
 
         # and start from where we ended
         h0 = deepcopy(h) # must deepcopy
 
     return ndata, tn
-
 
 if __name__ == "__main__":
     """
@@ -101,10 +94,10 @@ if __name__ == "__main__":
 
     # Save options
     if is_master_process():
-        display_option_summary(options);
+        display_option_summary(options)
         sys.stdout.flush()
 
-    DATA_RANGE =  np.arange(1, 10000, 10)
+    DATA_RANGE = np.exp(np.linspace(0, np.log(100000), num=10))# [1000] # np.arange(1, 1000, 1)
     random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))
@@ -116,7 +109,7 @@ if __name__ == "__main__":
                 # unq.add(h)
 
                 print ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata
-                print getattr(h, 'll_counts', None),
+                print h(),
                 print h  # must add \0 when not Lexicon
         sys.stdout.flush()
 
