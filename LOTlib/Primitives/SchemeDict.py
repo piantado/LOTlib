@@ -85,3 +85,9 @@ def not_d(x):
     out[True] = x.get(False,-Infinity)
     out[False] = log1mexp(out[True])
     return out
+
+@primitive
+def sample_uniform_d(s):
+    """ return a unifom sample of the set s """
+    l = -nicelog(len(s))
+    return {x: l for x in s }

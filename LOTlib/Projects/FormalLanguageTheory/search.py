@@ -29,7 +29,6 @@ register_primitive(flatten2str)
 
 LARGE_SAMPLE = 10000 # sample this many and then re-normalize to fractional counts
 
-
 def run(options, ndata):
     if LOTlib.SIG_INTERRUPTED:
         return 0, set()
@@ -86,6 +85,8 @@ if __name__ == "__main__":
     parser.add_option("--skip", dest="SKIP", type="int", default=100, help="Print out every this many")
     parser.add_option("--top", dest="TOP_COUNT", type="int", default=10, help="Top number of hypotheses to store")
     parser.add_option("--N", dest="N", type="int", default=3, help="number of inner hypotheses")
+    parser.add_option("--ndata", dest="ndata", type="int", default=1000, help="number of data steps to run")
+    parser.add_option("--datamax", dest="datamax", type="int", default=100000, help="Max data to run")
     parser.add_option("--out", dest="OUT", type="str", default="out/", help="Output directory")
     (options, args) = parser.parse_args()
 
@@ -97,7 +98,7 @@ if __name__ == "__main__":
         display_option_summary(options)
         sys.stdout.flush()
 
-    DATA_RANGE = np.exp(np.linspace(0, np.log(100000), num=10))# [1000] # np.arange(1, 1000, 1)
+    DATA_RANGE = np.exp(np.linspace(0, np.log(options.datamax), num=options.ndata))# [1000] # np.arange(1, 1000, 1)
     random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))
@@ -106,7 +107,7 @@ if __name__ == "__main__":
     for ndata, tn in MPI_unorderedmap(run, args):
         for h in tn:
             if h not in unq:
-                # unq.add(h)
+                unq.add(h)
 
                 print ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata
                 print h(),
@@ -115,5 +116,5 @@ if __name__ == "__main__":
 
     print "# Finishing"
 
-    # with open(options.OUT+"/all-hypotheses"+options.LANG+".pkl", 'w') as f:
-    #     dump(unq, f)
+    with open(options.OUT+"/hypotheses-"+options.LANG+".pkl", 'w') as f:
+        dump(unq, f)
