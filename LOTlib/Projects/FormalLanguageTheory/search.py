@@ -5,6 +5,7 @@
 import sys
 import codecs
 import itertools
+import operator
 from LOTlib import break_ctrlc
 from pickle import dump
 from copy import deepcopy
@@ -55,11 +56,13 @@ def run(options, ndata):
 
         # now run mcmc
         for h in break_ctrlc(MHSampler(h0, data, steps=options.STEPS)):
-            # print ">>", h
             tn.add(h)
 
-            # print h.posterior_score, h.prior, h.likelihood, h
-            # print h()
+            if options.TRACE:
+                print h.posterior_score, h.prior, h.likelihood, h
+                v = h()
+                sortedv = sorted(v.items(), key=operator.itemgetter(1), reverse=True )
+                print "{" + ', '.join(["%s:%s"% i if len(i[0]) != 0 else "'':%s"%i[1] for i in sortedv]) + "}"
 
         # and start from where we ended
         h0 = deepcopy(h) # must deepcopy
@@ -85,6 +88,7 @@ if __name__ == "__main__":
     parser.add_option("--ndata", dest="ndata", type="int", default=1000, help="number of data steps to run")
     parser.add_option("--datamax", dest="datamax", type="int", default=100000, help="Max data to run")
     parser.add_option("--out", dest="OUT", type="str", default="out/", help="Output directory")
+    parser.add_option("--trace", dest="TRACE", action="store_true", default=False, help="Show every step?")
     (options, args) = parser.parse_args()
 
     # Set the output

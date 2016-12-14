@@ -65,7 +65,7 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLogPrefixDistance, Recu
                 except ProposalFailedException:
                     pass
 
-        def dispatch_word(self, word, *input):
+        def dispatch_word(self, word, memoized):
             """ We override this so that the hypothesis defaultly calls with the last word via __call__"""
             self.recursive_call_depth += 1
             # print self.recursive_call_depth, str(self)
@@ -73,10 +73,19 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLogPrefixDistance, Recu
             if self.recursive_call_depth > self.recursive_depth_bound:
                 return {'':0.0} # empty string, log p
             else:
-                v = self.value[word](self.dispatch_word, *input)  # pass in "self" as lex, using the recursive version
-                if len(v.keys()) > 2000:
-                    raise MyException
-                return v
+
+                if memoized and word in self.fmem:
+                    return self.fmem[word]
+                else:
+                    # it's funny, hre we don't pass mem since the args to InnerHypothesis don't need the arguments
+                    # to recurse. They only need to know recurse's name, and the grammar takes care of passing it
+                    # the memoized argumetn above
+                    v = self.value[word](self.dispatch_word)  # pass in "self" as lex, using the recursive version
+
+                    if len(v.keys()) > 2000: raise MyException
+
+                    self.fmem[word] = v
+                    return v
 
         def recursive_call(self, word, *args):
             raise NotImplementedError
@@ -93,24 +102,23 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLogPrefixDistance, Recu
                 initfn = self.grammar.generate()
             else: # else automatically recurse to the current word in order to avoid losing the likelihood
                 initfn                 = self.grammar.get_rule_by_name('', nt='START').make_FunctionNodeStub(self.grammar, None)
-                initfn.args[0]         = self.grammar.get_rule_by_name("recurse_(%s)").make_FunctionNodeStub(self.grammar, initfn)
+                initfn.args[0]         = self.grammar.get_rule_by_name("recurse_(%s, False)").make_FunctionNodeStub(self.grammar, initfn)
                 initfn.args[0].args[0] = self.grammar.get_rule_by_name('%s' % (self.N)).make_FunctionNodeStub(self.grammar, initfn.args[0])
 
             self.set_word(self.N, self.make_hypothesis(value=initfn, grammar=self.grammar))
 
             self.N += 1
 
-        def __call__(self, nsamples=1024, *args):
+        def __call__(self, *args):
             """
             Wrap in self as a first argument that we don't have to in the grammar. This way, we can use self(word, X Y) as above.
             """
             self.recursive_call_depth = 0
+            self.fmem = dict() # zero out
+
+            assert len(args) == 0, "*** Currently no args are supported"
+
             try:
-                return self.dispatch_word(self.N - 1, *args)
+                return self.dispatch_word(self.N - 1, False) # defaultly, a call to h() is a call to the last word and it won't be memoized, so h() samples forward
             except MyException:
                 return {'': 0.0}
-
-            # except SizeException as e:
-            #     return {'':0.0}
-            # except TooBigException as e:
-            #     return {'':0.0}

@@ -26,7 +26,9 @@ base_grammar.add_rule('BOOL', 'flip_d(p=%s)', ['PROB'], 1.)
 for i in xrange(1,10):
     base_grammar.add_rule('PROB', '0.%s' % i, None, 1.)
 
-base_grammar.add_rule('LIST', 'recurse_(%s)', ['SELFF'], 1.0) # can call myself
+# can call memoized and non-memoized versions of myself
+base_grammar.add_rule('LIST', 'recurse_(%s, True)',  ['SELFF'], 1.0) # can call myself
+base_grammar.add_rule('LIST', 'recurse_(%s, False)', ['SELFF'], 1.0) # can call myself
 
 
 if __name__ == "__main__":
