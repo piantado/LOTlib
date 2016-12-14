@@ -23,8 +23,8 @@ for w in all_words:
 
 stimdict = dict((w.strip(' \t\n\r'), 100) for w in stim_words)
 
-print stimdict
-print possible
+#print stimdict
+#print possible
 
 
 
@@ -44,7 +44,7 @@ for w in KGall_words:
         if w[2]=='i' and w[4]!='g':
             kaggik_words.append(w)
 
-print kaggikvowel
+print kaggik_words
 
 KGstimdict = dict((w.strip(' \t\n\r'), 100) for w in kaggik_words)
 
@@ -56,7 +56,7 @@ for w in englishALL:
     w = w.strip(' \t\n\r')
     if w[2] in vowels and w[0] not in vowels and w[4] not in vowels:
         english_vowel.append(w)
-print english_vowel
+#print english_vowel
 
 classesALL = [''.join(i) for i in product(['p ','b ','m ','w ','i ','e ','f ','v ','t ','s ','z ','h ','d ','s ','z ','n ','l ','r ','h ','j ','k ','g ','N '], repeat = 3)]
 cvowels=['e','i']
@@ -65,5 +65,5 @@ for w in classesALL:
     w = w.strip(' \t\n\r')
     if w[2] in cvowels and w[0] not in cvowels and w[4] not in cvowels:
         classes_vowel.append(w)
-print classes_vowel
+#print classes_vowel
 

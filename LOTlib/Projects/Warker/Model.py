@@ -7,7 +7,10 @@ from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Hypotheses.Likelihoods.LevenshteinLikelihood import StochasticLevenshteinLikelihood
 from LOTlib.Hypotheses.Proposers import insert_delete_proposal, ProposalFailedException, regeneration_proposal
 import numpy
-
+from copy import deepcopy
+from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
+from LOTlib import break_ctrlc
+from LOTlib.TopN import TopN
 from LOTlib.Miscellaneous import logsumexp,nicelog, Infinity,attrmem
 from Levenshtein import distance
 from math import log
@@ -22,15 +25,13 @@ parser.add_option("-s", "--steps", dest="steps", type="int", help="steps for the
 parser.add_option("-c", "--chainz", dest="chains", type="int", help="number of chainz :P", default=25)
 parser.add_option("--terminals",dest="TERMINALS",help="which terminals are we using? one string")
 parser.add_option("--data",dest="DATA",help="what data is seen?")
+parser.add_option("--partition", dest="PARTITION", default=False, help="are we running partition MCMC?")
+#consider making a flag for partitionMCMC
 (options, args) = parser.parse_args()
 print options
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Data
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-def make_data(size=options.datasize):
-        return [FunctionData(input=[],
-                             output={'h e s': size, 'm e s': size, 'm e g': size, 'h e g': size, 'm e n': size, 'h e m': size, 'm e k': size, 'k e s': size, 'h e k': size, 'k e N': size, 'k e g': size, 'h e n': size, 'm e N': size, 'k e n': size, 'h e N': size, 'f e N': size, 'g e N': size, 'n e N': size, 'n e s': size, 'f e n': size, 'g e n': size, 'g e m': size, 'f e m': size, 'g e k': size, 'f e k': size, 'f e g': size, 'f e s': size, 'n e g': size, 'k e m': size, 'n e m': size, 'g e s': size, 'n e k': size})]
-
 
 import LOTlib.Miscellaneous
 from LOTlib.Grammar import Grammar
@@ -40,16 +41,22 @@ register_primitive(LOTlib.Miscellaneous.flatten2str)
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Parse the input
+# Parse the input: the terminals and the data seen
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-f = open(options.TERMINALS,"r")
-WEIGHTED = f.readline().strip("\n")
-TERMINALS = f.readline().strip("\n")
+terminal_file = open(options.TERMINALS,"r")
+TERMINALS = []
 weights = []
-if WEIGHTED =="True":
-    weights = f.readline().split()
+d = []
+for line in terminal_file:
+    line = line.split(" ")
+    TERMINALS.append(line[0])
+    weights.append(line[1].strip("\n"))
 
-d = open(options.DATA,"r").readline().strip("\n").split(",")
+data_file = open(options.DATA,"r")
+
+for line in data_file:
+    d.append(line.strip("\n"))
+
 def make_data(d=d,size=options.datasize):
     output = {}
     for val in d:
@@ -73,6 +80,20 @@ grammar.add_rule('START', '', ['EXPR'], 1.0)
 grammar.add_rule('EXPR', 'sample_uniform_d', ['SET'], 1.) # this requires its own set for terminals
 grammar.add_rule('SET', '%s', ['DETTERMINAL'], 1.0)
 grammar.add_rule('SET', '%s+%s', ['DETTERMINAL', 'SET'], 1.0)
+#grammar.add_rule('SET', 'if_d', ['.5','SET','SET'],1.0)
+
+# Build up partitions before we have the terminals and strings
+# this way, partitions are mainly structural
+partitions = []
+for t in grammar.enumerate(7):
+
+    t = deepcopy(t) # just make sure it's a copy (may not be necessary)
+    for n in t:
+        setattr(n, "p_propose", 0.0) # add a tree attribute saying we can't propose
+    partitions.append(t)
+for part in partitions:
+    print part
+
 for t in TERMINALS:
     grammar.add_rule('DETTERMINAL', "'%s'"%t, None, TERMINAL_WEIGHT) # deterministic terminals participate in sets
 
@@ -80,10 +101,8 @@ grammar.add_rule('EXPR', 'cons_d', ['EXPR', 'EXPR'], 1.0/2.0)
 
 for t,w in zip(TERMINALS,weights):
     assert len(t) == 1, "*** Terminals can only be single characters"
-    if not WEIGHTED:
-        grammar.add_rule('EXPR', "{'%s':0.0}"%t, None, TERMINAL_WEIGHT)
-    else:
-        grammar.add_rule('EXPR', "{'%s':0.0}"%t, None, TERMINAL_WEIGHT*float(w))
+
+    grammar.add_rule('EXPR', "{'%s':0.0}"%t, None, TERMINAL_WEIGHT*float(w))
 
 
 
@@ -128,8 +147,26 @@ def runme(x,datamt):
             output.update({val:size})
         return [FunctionData(input=[],output=output)]
     print "Start: " + str(x) + " on this many: " + str(datamt)
-    return standard_sample(make_hypothesis, make_data, show=True, N=100, save_top="topModel1.pkl", steps=100000)
+    if options.PARTITION:
+        partitionMCMC(d)
+    else:
+        return standard_sample(make_hypothesis, make_data, show=True, N=100, save_top="topModel1.pkl", steps=100000)
 
+
+def partitionMCMC(data):
+    topn= TopN(N=200, key="posterior_score")
+    for p in break_ctrlc(partitions):
+        print "Starting on partition ", p
+
+        # Now we have to go in and fill in the nodes that are nonterminals
+        v = grammar.generate(deepcopy(p))
+
+        h0 = MyHypothesis(grammar, value=v)
+        for h in break_ctrlc(MHSampler(h0, data, steps=10000, skip=0)):
+            # Show the partition and the hypothesis
+            #print h.posterior_score, p, h
+            topn.add(h)
+    return set(topn)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Main
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -140,9 +177,7 @@ if __name__ == "__main__":
 
     NCHAINS = 1
 
-    standard_sample(make_hypothesis, make_data, show_skip=9, save_top=False)
-
-    '''from LOTlib.MPI import MPI_map
+    from LOTlib.MPI import MPI_map
     args=[[x, d] for d in range(1,10) for x in range(NCHAINS)]
 
     myhyp=set()
@@ -150,6 +185,6 @@ if __name__ == "__main__":
         myhyp.update(top)
 
     import pickle
-    pickle.dump(myhyp, open("out.pkl", "wb"))'''
+    pickle.dump(myhyp, open("out.pkl", "wb"))
 
 
