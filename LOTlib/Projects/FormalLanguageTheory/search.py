@@ -13,10 +13,8 @@ import numpy as np
 import LOTlib
 
 from LOTlib.Miscellaneous import display_option_summary, q
-
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib.Eval import register_primitive
-from LOTlib.Miscellaneous import flatten2str
 from LOTlib.TopN import TopN
 from Language import *
 
@@ -25,7 +23,6 @@ from LOTlib.MPI import is_master_process, MPI_unorderedmap
 from Model import IncrementalLexiconHypothesis
 from LOTlib.Projects.FormalLanguageTheory.Grammar import base_grammar # passed in as kwargs
 
-register_primitive(flatten2str)
 
 LARGE_SAMPLE = 10000 # sample this many and then re-normalize to fractional counts
 
@@ -98,7 +95,8 @@ if __name__ == "__main__":
         display_option_summary(options)
         sys.stdout.flush()
 
-    DATA_RANGE = np.exp(np.linspace(0, np.log(options.datamax), num=options.ndata))# [1000] # np.arange(1, 1000, 1)
+    # DATA_RANGE = np.exp(np.linspace(0, np.log(options.datamax), num=options.ndata))# [1000] # np.arange(1, 1000, 1)
+    DATA_RANGE = [1000]
     random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))

@@ -8,11 +8,11 @@ Here, the probabilities that are stored in the dictionary are log probabilities
 
 from LOTlib.Primitives import primitive
 from collections import defaultdict
-from LOTlib.Miscellaneous import logplusexp, Infinity, nicelog, log1mexp
+from LOTlib.Miscellaneous import logplusexp, Infinity, nicelog, log1mexp, lambdaMinusInfinity
 
 @primitive
 def cons_d(x,y):
-    out = defaultdict(lambda: -Infinity)
+    out = defaultdict(lambdaMinusInfinity)
 
     for a, av in x.items():
         for b, bv in y.items():
@@ -21,7 +21,7 @@ def cons_d(x,y):
 
 @primitive
 def cdr_d(x):
-    out = defaultdict(lambda: -Infinity)
+    out = defaultdict(lambdaMinusInfinity)
     for a, av in x.items():
         v = a[1:] if len(a) > 1 else ''
         out[v] = logplusexp(out[v], av)
@@ -30,7 +30,7 @@ def cdr_d(x):
 
 @primitive
 def car_d(x):
-    out = defaultdict(lambda: -Infinity)
+    out = defaultdict(lambdaMinusInfinity)
     for a, av in x.items():
         v = a[1] if len(a) > 1 else ''
         out[v] = logplusexp(out[v], av)
@@ -47,7 +47,7 @@ def empty_d(x):
 
 @primitive
 def if_d(prb,x,y):
-    out = defaultdict(lambda: -Infinity)
+    out = defaultdict(lambdaMinusInfinity)
     pt = prb[True]
     pf = prb[False]
     for a, av in x.items():
@@ -66,14 +66,14 @@ def equal_d(x,y):
 
 @primitive
 def and_d(x,y):
-    out = defaultdict(lambda: -Infinity)
+    out = defaultdict(lambdaMinusInfinity)
     out[True] = x.get(True,-Infinity) + y.get(True,-Infinity)
     out[False] = log1mexp(out[True])
     return out
 
 @primitive
 def or_d(x,y):
-    out = defaultdict(lambda: -Infinity)
+    out = defaultdict(lambdaMinusInfinity)
     out[True] = logplusexp(x.get(True,-Infinity) + y.get(False,-Infinity),
                            x.get(False,-Infinity) + y.get(True,-Infinity))
     out[False] = log1mexp(out[True])
@@ -81,7 +81,7 @@ def or_d(x,y):
 
 @primitive
 def not_d(x):
-    out = defaultdict(lambda: -Infinity)
+    out = defaultdict(lambdaMinusInfinity)
     out[True] = x.get(False,-Infinity)
     out[False] = log1mexp(out[True])
     return out

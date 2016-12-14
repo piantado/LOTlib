@@ -559,6 +559,8 @@ def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, 
 # Some innate lambdas
 def lambdaZero(*x): return 0
 def lambdaOne(*x): return 1
+def lambdaInfinity(*x): return Infinity
+def lambdaMinusInfinity(*x): return -Infinity
 def lambdaNull(*x): return []
 def lambdaNone(*x): return None
 def lambdaTrue(*x): return True

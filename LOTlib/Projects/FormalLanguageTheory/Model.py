@@ -4,7 +4,6 @@ from math import log
 from LOTlib.Miscellaneous import attrmem, logsumexp, sample_one
 # from Levenshtein import distance
 from LOTlib.Hypotheses.Proposers import ProposalFailedException
-from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import MultinomialLikelihoodLog
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Hypotheses.Proposers import IDR_proposal
 from LOTlib.Eval import TooBigException
@@ -34,8 +33,9 @@ class MyException(Exception):
     pass
 
 from collections import Counter
+from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import MultinomialLikelihoodLogPrefixDistance
 from LOTlib.Hypotheses.Lexicon.RecursiveLexicon import RecursiveLexicon
-class IncrementalLexiconHypothesis( MultinomialLikelihoodLog, RecursiveLexicon):
+class IncrementalLexiconHypothesis( MultinomialLikelihoodLogPrefixDistance, RecursiveLexicon):
         """ A hypothesis where we can incrementally add words and propose to only the additions
         """
 
