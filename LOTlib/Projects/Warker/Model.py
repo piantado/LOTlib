@@ -11,9 +11,19 @@ import numpy
 from LOTlib.Miscellaneous import logsumexp,nicelog, Infinity,attrmem
 from Levenshtein import distance
 from math import log
-# from OptionParser import options
 
+from optparse import OptionParser
 
+parser = OptionParser()
+parser.add_option("-f", "--file", dest="filename", help="file name of the pickled results", default="out.pkl")
+parser.add_option("-d", "--datasize", dest="datasize", type="int", help="number of data points", default=1000)
+parser.add_option("-t", "--top", dest="top", type="int", help="top N count of hypotheses from each chain", default=100)
+parser.add_option("-s", "--steps", dest="steps", type="int", help="steps for the chainz", default=100000)
+parser.add_option("-c", "--chainz", dest="chains", type="int", help="number of chainz :P", default=25)
+parser.add_option("--terminals",dest="TERMINALS",help="which terminals are we using? one string")
+parser.add_option("--data",dest="DATA",help="what data is seen?")
+(options, args) = parser.parse_args()
+print options
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Data
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -25,6 +35,22 @@ from LOTlib.Eval import register_primitive
 register_primitive(LOTlib.Miscellaneous.flatten2str)
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Parse the input
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+f = open(options.TERMINALS,"r")
+WEIGHTED = f.readline().strip("\n")
+TERMINALS = f.readline().strip("\n")
+weights = []
+if WEIGHTED =="True":
+    weights = f.readline().split()
+
+d = open(options.DATA,"r").readline().strip("\n").split(",")
+def make_data(d=d,size=options.datasize):
+    output = {}
+    for val in d:
+        output.update({val:size})
+    return [FunctionData(input=[],output=output)]
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -34,7 +60,8 @@ register_primitive(LOTlib.Miscellaneous.flatten2str)
 TERMINAL_WEIGHT = .1
 
 grammar = Grammar()
-TERMINALS = 'geksfnmhN'
+
+
 
 # flattern2str lives at the top, and it takes a cons, cdr, car structure and projects it to a string
 grammar.add_rule('START', '', ['EXPR'], 1.0)
@@ -47,9 +74,12 @@ for t in TERMINALS:
 
 grammar.add_rule('EXPR', 'cons_d', ['EXPR', 'EXPR'], 1.0/2.0)
 
-for t in TERMINALS:
+for t,w in zip(TERMINALS,weights):
     assert len(t) == 1, "*** Terminals can only be single characters"
-    grammar.add_rule('EXPR', "{'%s':0.0}"%t, None, TERMINAL_WEIGHT)
+    if not WEIGHTED:
+        grammar.add_rule('EXPR', "{'%s':0.0}"%t, None, TERMINAL_WEIGHT)
+    else:
+        grammar.add_rule('EXPR', "{'%s':0.0}"%t, None, TERMINAL_WEIGHT*float(w))
 
 
 
@@ -88,10 +118,11 @@ def make_hypothesis():
     return MyHypothesis(grammar)
 
 def runme(x,datamt):
-    def make_data(size=datamt):
-        return [FunctionData(input=[],
-                             output={'h e s': size, 'm e s': size, 'm e g': size, 'h e g': size, 'm e n': size, 'h e m': size, 'm e k': size, 'k e s': size, 'h e k': size, 'k e N': size, 'k e g': size, 'h e n': size, 'm e N': size, 'k e n': size, 'h e N': size, 'f e N': size, 'g e N': size, 'n e N': size, 'n e s': size, 'f e n': size, 'g e n': size, 'g e m': size, 'f e m': size, 'g e k': size, 'f e k': size, 'f e g': size, 'f e s': size, 'n e g': size, 'k e m': size, 'n e m': size, 'g e s': size, 'n e k': size})]
-
+    def make_data(d=d,size=options.datasize):
+        output = {}
+        for val in d:
+            output.update({val:size})
+        return [FunctionData(input=[],output=output)]
     print "Start: " + str(x) + " on this many: " + str(datamt)
     return standard_sample(make_hypothesis, make_data, show=True, N=100, save_top="topModel1.pkl", steps=100000)
 
@@ -105,9 +136,9 @@ if __name__ == "__main__":
 
     NCHAINS = 1
 
-    #standard_sample(make_hypothesis, make_data, show_skip=9, save_top=False)
+    standard_sample(make_hypothesis, make_data, show_skip=9, save_top=False)
 
-    from LOTlib.MPI import MPI_map
+    '''from LOTlib.MPI import MPI_map
     args=[[x, d] for d in range(1,10) for x in range(NCHAINS)]
 
     myhyp=set()
@@ -115,6 +146,6 @@ if __name__ == "__main__":
         myhyp.update(top)
 
     import pickle
-    pickle.dump(myhyp, open("out.pkl", "wb"))
+    pickle.dump(myhyp, open("out.pkl", "wb"))'''
 
 

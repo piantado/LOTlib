@@ -1,16 +1,17 @@
+
 from __future__ import division
 import pickle
 from scipy.misc import logsumexp
 import numpy as np
 from itertools import product
 
-from DataAndObjects import FunctionData
+from LOTlib.DataAndObjects import FunctionData
 from LOTlib.Miscellaneous import Infinity, nicelog
-from Projects.Warker.Model import MyHypothesis
+from LOTlib.Projects.Warker.Model import MyHypothesis
 from operator import attrgetter
-from optparse import OptionParser
 
-files = [("SecondSegment.pkl","secondexponly.csv")]
+
+files = [("SecondPartition.pkl","secondexponly.csv")]
 
 for f in files:
     print f[0]
@@ -28,12 +29,20 @@ for f in files:
 
 
     for h in space:
-        #print h
-        #print h.posterior_score
-        print("The best hypothesis is: ")
-        print(max(space, key=attrgetter('posterior_score')).value)
+        print h
+        print h.posterior_score
+
+from LOTlib.Projects.Warker.KaggikPartition import make_data, grammar
+from LOTlib.Primitives import *
+from LOTlib.Miscellaneous import flatten2str
+data = make_data(3000)
+target = MyHypothesis(grammar)
+target.force_function(lambda:flatten2str(if_(flip_(), if_(flip_(), if_(flip_(), sample_("nm"), sample_("m")), if_(flip_(), sample_("a"), sample_("m"))), if_(flip_(), if_(flip_(), sample_("si"), sample_("i")), if_(flip_(), sample_("h"), sample_("m"))))))
+target.make_ll_counts(data[0].input, nsamples=10000)
+print target.ll_counts
 
 
+'''
     #the data given to the models
     def make_data(size):
         return [FunctionData(input=[],
@@ -44,7 +53,7 @@ for f in files:
     target = mdata[0].output.keys()
     print target
     for h in space:
-        #print h
+        print h
         h.likelihood = h.likelihood/sum(mdata[0].output.values())
 
 
@@ -79,9 +88,11 @@ for f in files:
                     recall_target += tr * p
                     precision_target += tp * p
 
+                    print("The best hypothesis is: ")
+                    print(max(space, key=attrgetter('posterior_score')).value)
 
 
-                print>>f,f1_target,recall_target,precision_target, damt
+                #print>>f,f1_target,recall_target,precision_target, damt'''
 
 
 
