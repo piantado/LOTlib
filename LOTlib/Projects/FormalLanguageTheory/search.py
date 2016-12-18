@@ -42,6 +42,8 @@ def run(options, ndata):
     grammar = deepcopy(base_grammar)
     for t in language.terminals():  # add in the specifics
         grammar.add_rule('ATOM', '{\'%s\':0.0}' % t, None, 2.0)
+        grammar.add_rule('DETATOM', '\'%s\'' % t, None, 2.0)
+
 
     h0 = IncrementalLexiconHypothesis(grammar=grammar)
     tn = TopN(N=options.TOP_COUNT)
@@ -62,7 +64,7 @@ def run(options, ndata):
                 print h.posterior_score, h.prior, h.likelihood, h
                 v = h()
                 sortedv = sorted(v.items(), key=operator.itemgetter(1), reverse=True )
-                print "{" + ', '.join(["%s:%s"% i if len(i[0]) != 0 else "'':%s"%i[1] for i in sortedv]) + "}"
+                print "{" + ', '.join(["'%s':%s"% i for i in sortedv]) + "}"
 
         # and start from where we ended
         h0 = deepcopy(h) # must deepcopy
@@ -100,7 +102,7 @@ if __name__ == "__main__":
         sys.stdout.flush()
 
     # DATA_RANGE = np.exp(np.linspace(0, np.log(options.datamax), num=options.ndata))# [1000] # np.arange(1, 1000, 1)
-    DATA_RANGE = [1000]
+    DATA_RANGE = [10000]
     random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))
