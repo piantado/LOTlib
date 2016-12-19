@@ -11,7 +11,7 @@ from LOTlib.Grammar import Grammar
 
 base_grammar = Grammar()
 base_grammar.add_rule('START', '', ['LIST'], 1.0) # stochasic computation
-base_grammar.add_rule('START', 'detfunc(lambda rec: lambda x: %s, %s)', ['DETLIST', 'LIST'], 1.0) # deterministic computation (map)
+base_grammar.add_rule('START', 'detfunc(lambda rec_: lambda x: %s, %s)', ['DETLIST', 'LIST'], 1.0) # deterministic computation (map)
 
 base_grammar.add_rule('LIST', 'if_d', ['BOOL', 'LIST', 'LIST'], 1.)
 
@@ -44,6 +44,8 @@ base_grammar.add_rule('DETLIST', 'cons_', ['DETLIST', 'DETLIST'], 1./6.)
 base_grammar.add_rule('DETLIST', 'cdr_', ['DETLIST'], 1./3.)
 base_grammar.add_rule('DETLIST', 'car_', ['DETLIST'], 1./3.)
 
+base_grammar.add_rule('DETLIST', 'rec_', ['DETLIST'], 1./3.)
+
 base_grammar.add_rule('DETLIST', 'x', None, 10.0)
 
 base_grammar.add_rule('DETLIST', '', ['DETATOM'], 3.0)
@@ -55,7 +57,8 @@ from LOTlib.Primitives import primitive
 from LOTlib.Miscellaneous import Infinity, logplusexp, lambdaMinusInfinity, flatten2str
 from collections import defaultdict
 
-Y = lambda f: (lambda x: x(x))(lambda y: f(lambda *args: y(y)(*args))) #https://rosettacode.org/wiki/Y_combinator#Python
+#Y = lambda f: (lambda x: x(x))(lambda y: f(lambda *args: y(y)(*args))) #https://rosettacode.org/wiki/Y_combinator#Python
+from LOTlib.Primitives.Functional import Y_bounded, RecursionDepthException
 
 @primitive
 def detfunc(f, l):
@@ -63,7 +66,11 @@ def detfunc(f, l):
         This works item-wise """
     out = defaultdict(lambdaMinusInfinity)
     for x,lp in l.items():
-        v = flatten2str(Y(f)(x))
+        try:
+            v = flatten2str(Y_bounded(f)(x))
+        except RecursionDepthException:
+            v = ''
+
         out[ v ] = logplusexp(out[v], lp)
     return out
 

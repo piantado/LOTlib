@@ -150,5 +150,5 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLogPrefixDistance, Simp
 
             try:
                 return self.dispatch_word(self.N - 1) # defaultly, a call to h() is a call to the last word and it won't be memoized, so h() samples forward
-            except MyException:
+            except (MyException, TooBigException):
                 return {'': 0.0}

@@ -101,8 +101,8 @@ if __name__ == "__main__":
         display_option_summary(options)
         sys.stdout.flush()
 
-    # DATA_RANGE = np.exp(np.linspace(0, np.log(options.datamax), num=options.ndata))# [1000] # np.arange(1, 1000, 1)
-    DATA_RANGE = [10000]
+    DATA_RANGE = np.exp(np.linspace(0, np.log(options.datamax), num=options.ndata))# [1000] # np.arange(1, 1000, 1)
+    # DATA_RANGE = [10000]
     random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))
