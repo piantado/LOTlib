@@ -15,7 +15,6 @@ import LOTlib
 
 from LOTlib.Miscellaneous import display_option_summary, q
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
-from LOTlib.Eval import register_primitive
 from LOTlib.TopN import TopN
 from Language import *
 

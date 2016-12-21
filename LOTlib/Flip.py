@@ -100,7 +100,7 @@ def compute_outcomes(f, *args, **kwargs):
     cs.add(RandomContext(cs)) # add a single context with no history
 
     while len(cs) > 0:
-        context = cs.pop()  # pop an element from Context set.
+        context = cs.pop()  # pop an element from Context set. TODO: We should probably do a heapq of the highest probability sequences
         # print "CTX", context, "  \t", cs
 
         try:
