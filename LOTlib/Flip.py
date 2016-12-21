@@ -8,22 +8,40 @@ The alternative is this code, which uses a special "random context" and "flip" w
 enumerate all of the possible program traces and their associated probabilities. Thisi is based on many ideas from
 probabilistic programming.
 """
+from math import log
+from collections import defaultdict
+from LOTlib.Miscellaneous import logplusexp, lambdaMinusInfinity
 
+MAX_CONTEXTS = 5000
+
+class TooManyContextsException(Exception):
+    """ Called when a ContextSet has too many contexts in it
+    """
 
 class ContextSizeException(Exception):
+    """ Called when a context has too many choices in it
+    """
     pass
+
 
 class ContextSet(set):
     """ Store a set of contexts """
     pass
 
-from math import log
+
 class RandomContext(object): # manage uncertainty
-    def __init__(self, cs, choices=()):
+    """
+    This stores a list of random choices we have made, to allow us to evaluate a stochastic hypothesis in a deterministic way,
+    by calling RandomContext.flip().
+
+    """
+
+    def __init__(self, cs, choices=(), max_size=80):
         self.choices = choices
         self.contextset = cs # who we update
         self.idx = 0
         self.lp = 0.0
+        self.max_size = max_size
 
     def __str__(self):
         return ''.join([ '1' if x else '0' for x in self.choices])
@@ -41,7 +59,7 @@ class RandomContext(object): # manage uncertainty
         and then when we use the clases here we can enumerate all program traces
 
         """
-        # print ">>POP>>", self
+
         ret = None
 
         if self.idx < len(self.choices): # if we are on the first choice,
@@ -50,7 +68,7 @@ class RandomContext(object): # manage uncertainty
         else:
             ret = True # which way we choose when its unspecified
 
-            if len(self.choices) > 25:
+            if len(self.choices) > self.max_size:
                 raise ContextSizeException
 
             # The choice we make later
@@ -66,3 +84,36 @@ class RandomContext(object): # manage uncertainty
             self.lp += log(1.0 - p)
 
         return ret
+
+def compute_outcomes(f, *args, **kwargs):
+    """
+    Return a dictionary of outcomes using our RandomContext tools, giving each possible trace (up to the given depth)
+    and its probability.
+    f here is a function of context, as in f(context, *args, **kwargs)
+
+    In kwargs you can pass "alsocatch" as a tuple of exceptions to catch
+    """
+
+    out = defaultdict(lambdaMinusInfinity)  # dict from strings to lps that we accumulate
+
+    cs = ContextSet() # this is the "open" set of contexts we need to explore
+    cs.add(RandomContext(cs)) # add a single context with no history
+
+    while len(cs) > 0:
+        context = cs.pop()  # pop an element from Context set.
+        # print "CTX", context, "  \t", cs
+
+        try:
+            v = f(context, *args) # when we call context.flip, we may update cs with new paths to explore
+
+            out[v] = logplusexp(out[v], context.lp)  # add up the lp for this outcomem
+
+        except kwargs.get('alsocatch', None) as e:
+            pass
+        except ContextSizeException:
+            pass
+
+        if len(cs) > MAX_CONTEXTS:
+            raise TooManyContextsException
+
+    return out

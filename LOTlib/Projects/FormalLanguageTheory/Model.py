@@ -8,12 +8,12 @@ from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis, Rec
 
 MAX_STRINGS = 2000 # if we generate more than this, we trim the computation
 
-class InnerHypothesis(RecursiveLOTHypothesis):
+class InnerHypothesis(LOTHypothesis):
     """s
     The type of each function F. This is NOT recursive, but it does allow recurse_ (to refer to the whole lexicon)
     """
-    def __init__(self, grammar=None, display="lambda recurse_, lex_: %s", **kwargs):
-        RecursiveLOTHypothesis.__init__(self, grammar=grammar, display=display,  recurse_bound=10, **kwargs)
+    def __init__(self, grammar=None, display="lambda C, lex_, x: %s", **kwargs): # lexicon, x arg, context
+        LOTHypothesis.__init__(self, grammar=grammar, display=display,  recurse_bound=10, **kwargs)
 
 
     def propose(self, **kwargs):
@@ -29,46 +29,33 @@ class InnerHypothesis(RecursiveLOTHypothesis):
 
         return ret, fb
 
-    def recursive_call(self, *args):
-        """
-        This was overwritten to NOT raise an exception, but rather return an emptry stirng. That way we can still generate all the shorter strings.
-        An exception (Default behavior) prevents all other reursive calls from executing
-        """
+    def __call__(self, *args):
+        return flatten2str(LOTHypothesis.__call__(self, *args), sep="" )
 
-        self.recursive_call_depth += 1
-
-        if self.recursive_call_depth > self.recursive_depth_bound:
-            return {'': 0.0}
-
-        v = LOTHypothesis.__call__(self, self.recursive_call, *args)
-
-        # and prevent us from dealing with gigantic sets of strings
-        if len(v.keys()) > MAX_STRINGS:
-            raise MyException
-
-        return v
 
 class MyException(Exception):
+    """ Used to escape recursion here"""
     pass
 
+from LOTlib.Flip import *
 
-
-from collections import Counter
+from LOTlib.Miscellaneous import flatten2str
 from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import MultinomialLikelihoodLogPrefixDistance
 from LOTlib.Hypotheses.Lexicon.SimpleLexicon import SimpleLexicon
 class IncrementalLexiconHypothesis( MultinomialLikelihoodLogPrefixDistance, SimpleLexicon):
-        """ A hypothesis where we can incrementally add words and propose to only the additions
-        """
+        """ A hypothesis where we can incrementally add words """
 
         def __init__(self, grammar=None, **kwargs):
-            SimpleLexicon.__init__(self,  maxnodes=50, variable_weight=3.0, **kwargs)
-            self.grammar=grammar
-            self.N = 0
-            self.outlier = -100 # read in MultinomialLikelihood
-            self.max_total_calls = 100 # this is the most internal recurse_ calls we can do without raising an exception
+            SimpleLexicon.__init__(self,  maxnodes=50, **kwargs)
+            self.grammar=grammar # the base gramar (with 0 included); we copy and add in other recursions on self.deepen()
+            self.N = 0 # the number of meanings we have
+            self.outlier = -1000.0 # read in MultinomialLikelihood
+            self.max_total_calls = 30 # this is the most internal recurse_ calls we can do without raising an exception
+            self.total_calls = 0
+            self.distance = 10.0 # penalize
 
         def make_hypothesis(self, **kwargs):
-            return InnerHypothesis(**kwargs)
+            return InnerHypothesis(**kwargs) # no default grammar since it will differ by word
 
         def propose(self):
 
@@ -87,68 +74,53 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLogPrefixDistance, Simp
                 except ProposalFailedException:
                     pass
 
-        def dispatch_word(self, word):
+        def dispatch_word(self, context, word, x):
             """ We override this so that the hypothesis defaultly calls with the last word via __call__"""
 
-            if self.total_calls > self.max_total_calls: raise MyException
-
-            # handle the 0th word which may call lex inappropriately
-            if word < 0:
+            # keep track of too many calls
+            self.total_calls += 1
+            if self.total_calls > self.max_total_calls:
                 raise MyException
 
-            if word in self.fmem:
-                return self.fmem[word]
-            else:
-                # it's funny, hre we don't pass mem since the args to InnerHypothesis don't need the arguments
-                # to recurse. They only need to know recurse's name, and the grammar takes care of passing it
-                # the memoized argument above. There are two versions, one for recursing to myself and one
-                # for recursing to another word. If I go to another word, I reset the recursion depth (since that
-                # word must be earlier)
-
-                v = self.value[word](self.dispatch_word)  # pass in "self" as lex, using the recursive version
-
-                self.total_calls += self.value[word].recursive_call_depth # how many recurses did we do?
-
-                # things that can give excpetions: to big, or too much recursing
-                if len(v.keys()) > MAX_STRINGS: raise MyException
-
-                self.fmem[word] = v
-                return v
+            # call this word
+            return self.value[word](context, self.dispatch_word, x)  # pass in "self" as lex, using the recursive version
 
         def recursive_call(self, word, *args):
             raise NotImplementedError
 
         def deepen(self):
-            """ Add one more word here """
+            """ Add one more word here. This requires making a new grammar and setting the word to recurse to the
+             previous one so that all of our hard work is not lost."""
 
             # update the grammar
-            self.grammar = deepcopy(self.grammar)
+            grammar = deepcopy(self.grammar)
 
-            # update the hypothesis.
-            if self.N == 0: # if we're empty
-                initfn = self.grammar.generate()
-            else: # else automatically recurse to the current word in order to avoid losing thresete likelihood
-                self.grammar.add_rule('SELFF', '%s' % (self.N-1), None, 1.0)
+            for n in xrange(1,self.N+1): # add in all the rules up till the next one
+                grammar.add_rule('SELFF', '%s' % (n,), None, 1.0)  # add the new N # needed for the new grammar, wdd what we will use
 
-                initfn                 = self.grammar.get_rule_by_name('', nt='START').make_FunctionNodeStub(self.grammar, None)
-                initfn.args[0]         = self.grammar.get_rule_by_name("lex_(%s)").make_FunctionNodeStub(self.grammar, initfn)
-                initfn.args[0].args[0] = self.grammar.get_rule_by_name('%s' % (self.N-1)).make_FunctionNodeStub(self.grammar, initfn.args[0])
+            initfn                 = grammar.get_rule_by_name('', nt='START').make_FunctionNodeStub(grammar, None)
+            initfn.args[0]         = grammar.get_rule_by_name("lex_(C, %s, %s)").make_FunctionNodeStub(grammar, initfn)
+            initfn.args[0].args[0] = grammar.get_rule_by_name('%s' % (self.N-1)).make_FunctionNodeStub(grammar, initfn.args[0])
+            initfn.args[0].args[1] = grammar.get_rule_by_name('x').make_FunctionNodeStub(grammar, initfn.args[0])
 
-
-            self.set_word(self.N, self.make_hypothesis(value=initfn, grammar=self.grammar))
+            self.set_word(self.N, self.make_hypothesis(value=initfn, grammar=grammar)) # set N to what it should, using our new grammar
 
             self.N += 1
 
-        def __call__(self, *args):
-            """
-            Wrap in self as a first argument that we don't have to in the grammar. This way, we can use self(word, X Y) as above.
+        def reset_and_call(self, *args):
+            """ Call returns a dictinoary. This calls once, reseting the total_calls counter.
+                We can't pass dispatch_word since that doesn't reset the total_call counter
             """
             self.total_calls = 0
-            self.fmem = dict() # zero out
+            return self.dispatch_word(*args)
 
-            assert len(args) == 0, "*** Currently no args are supported"
+        def __call__(self):
+            """
+            Following the MultinomialLikelihood we want a dictionary fromm outcomes to LPs
+            """
+            assert self.N > 0, "*** Cannot call IncrementalLexiconHypothesis unless N>0"
 
             try:
-                return self.dispatch_word(self.N - 1) # defaultly, a call to h() is a call to the last word and it won't be memoized, so h() samples forward
-            except (MyException, TooBigException):
-                return {'': 0.0}
+                return compute_outcomes(self.reset_and_call, self.N-1, '',  alsocatch=(MyException, TooBigException))
+            except TooManyContextsException:
+                return {'':0.0} # return nothing

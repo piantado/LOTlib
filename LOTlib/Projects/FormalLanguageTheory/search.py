@@ -21,7 +21,7 @@ from Language import *
 
 from LOTlib.MPI import is_master_process, MPI_unorderedmap
 
-from Model import IncrementalLexiconHypothesis
+from Model import IncrementalLexiconHypothesis, InnerHypothesis
 from LOTlib.Projects.FormalLanguageTheory.Grammar import base_grammar # passed in as kwargs
 
 
@@ -41,17 +41,16 @@ def run(options, ndata):
     # Now add the rules to the grammar
     grammar = deepcopy(base_grammar)
     for t in language.terminals():  # add in the specifics
-        grammar.add_rule('ATOM', '{\'%s\':0.0}' % t, None, 2.0)
-        grammar.add_rule('DETATOM', '\'%s\'' % t, None, 2.0)
+        grammar.add_rule('ATOM', "'%s'" % t, None, 2.0)
 
 
     h0 = IncrementalLexiconHypothesis(grammar=grammar)
+    h0.set_word(0, h0.make_hypothesis(grammar=grammar))# set up the first word, just at random
+    h0.N = 1
+
     tn = TopN(N=options.TOP_COUNT)
 
     for outer in xrange(options.N): # how many do we add?
-
-        h0.deepen() # add one more word
-        assert len(h0.value.keys())==h0.N==outer+1
 
         # and re-set the posterior or else it's something weird
         h0.compute_posterior(data)
@@ -61,13 +60,15 @@ def run(options, ndata):
             tn.add(h)
 
             if options.TRACE:
-                print h.posterior_score, h.prior, h.likelihood, h
+                print h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata, h
                 v = h()
                 sortedv = sorted(v.items(), key=operator.itemgetter(1), reverse=True )
                 print "{" + ', '.join(["'%s':%s"% i for i in sortedv]) + "}"
 
         # and start from where we ended
         h0 = deepcopy(h) # must deepcopy
+
+        h0.deepen()
 
     return ndata, tn
 
