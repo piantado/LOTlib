@@ -1,20 +1,27 @@
 
-from copy import deepcopy, copy
+from copy import deepcopy
 from LOTlib.Hypotheses.Proposers import ProposalFailedException
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Hypotheses.Proposers import IDR_proposal
 from LOTlib.Eval import TooBigException
-from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursiveLOTHypothesis, RecursionDepthException
+from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursionDepthException
+from LOTlib.Miscellaneous import flatten2str, sample_one, attrmem
+from LOTlib.Flip import *
+from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import *
+from LOTlib.Hypotheses.Lexicon.SimpleLexicon import SimpleLexicon
 
-MAX_STRINGS = 2000 # if we generate more than this, we trim the computation
+class StringLengthException(Exception):
+    """ When strings get too long (through recursion)
+    """
+    MAX_LENGTH = 100
+    pass
 
 class InnerHypothesis(LOTHypothesis):
     """s
     The type of each function F. This is NOT recursive, but it does allow recurse_ (to refer to the whole lexicon)
     """
     def __init__(self, grammar=None, display="lambda C, lex_, x: %s", **kwargs): # lexicon, x arg, context
-        LOTHypothesis.__init__(self, grammar=grammar, display=display,  recurse_bound=10, **kwargs)
-
+        LOTHypothesis.__init__(self, grammar=grammar, display=display, **kwargs)
 
     def propose(self, **kwargs):
         ret_value, fb = None, None
@@ -29,20 +36,14 @@ class InnerHypothesis(LOTHypothesis):
 
         return ret, fb
 
-    def __call__(self, *args):
-        return flatten2str(LOTHypothesis.__call__(self, *args), sep="" )
+    def __call__(self, C, lex_, x):
+        if len(x) > StringLengthException.MAX_LENGTH:
+            raise StringLengthException
+
+        return flatten2str(LOTHypothesis.__call__(self, C, lex_, x), sep="" )
 
 
-class MyException(Exception):
-    """ Used to escape recursion here"""
-    pass
-
-from LOTlib.Flip import *
-
-from LOTlib.Miscellaneous import flatten2str
-from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import MultinomialLikelihoodLogPrefixDistance
-from LOTlib.Hypotheses.Lexicon.SimpleLexicon import SimpleLexicon
-class IncrementalLexiconHypothesis( MultinomialLikelihoodLogPrefixDistance, SimpleLexicon):
+class IncrementalLexiconHypothesis( MultinomialLikelihoodLogLongestSubstring, SimpleLexicon):
         """ A hypothesis where we can incrementally add words """
 
         def __init__(self, grammar=None, **kwargs):
@@ -50,12 +51,16 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLogPrefixDistance, Simp
             self.grammar=grammar # the base gramar (with 0 included); we copy and add in other recursions on self.deepen()
             self.N = 0 # the number of meanings we have
             self.outlier = -1000.0 # read in MultinomialLikelihood
-            self.max_total_calls = 30 # this is the most internal recurse_ calls we can do without raising an exception
+            self.max_total_calls = 10 # this is the most internal recurse_ calls we can do without raising an exception It gets increased every deepen()
             self.total_calls = 0
-            self.distance = 10.0 # penalize
+            self.distance = 100.0 # penalize
 
         def make_hypothesis(self, **kwargs):
             return InnerHypothesis(**kwargs) # no default grammar since it will differ by word
+
+        @attrmem('prior')
+        def compute_prior(self):
+            return SimpleLexicon.compute_prior(self) + self.N * log(2.0) # coin flip for each additional word
 
         def propose(self):
 
@@ -74,20 +79,6 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLogPrefixDistance, Simp
                 except ProposalFailedException:
                     pass
 
-        def dispatch_word(self, context, word, x):
-            """ We override this so that the hypothesis defaultly calls with the last word via __call__"""
-
-            # keep track of too many calls
-            self.total_calls += 1
-            if self.total_calls > self.max_total_calls:
-                raise MyException
-
-            # call this word
-            return self.value[word](context, self.dispatch_word, x)  # pass in "self" as lex, using the recursive version
-
-        def recursive_call(self, word, *args):
-            raise NotImplementedError
-
         def deepen(self):
             """ Add one more word here. This requires making a new grammar and setting the word to recurse to the
              previous one so that all of our hard work is not lost."""
@@ -105,7 +96,27 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLogPrefixDistance, Simp
 
             self.set_word(self.N, self.make_hypothesis(value=initfn, grammar=grammar)) # set N to what it should, using our new grammar
 
+            self.max_total_calls += 10
             self.N += 1
+
+        def dispatch_word(self, context, word, x):
+            """ We override this so that the hypothesis defaultly calls with the last word via __call__"""
+
+            # keep track of too many calls
+            self.total_calls += 1
+            if self.total_calls > self.max_total_calls:
+                raise RecursionDepthException
+
+            # call this word
+            v = self.value[word](context, self.dispatch_word, x)  # pass in "self" as lex, using the recursive version
+
+            if len(v) > StringLengthException.MAX_LENGTH:
+                raise StringLengthException
+
+            return v
+
+        def recursive_call(self, word, *args):
+            raise NotImplementedError
 
         def reset_and_call(self, *args):
             """ Call returns a dictinoary. This calls once, reseting the total_calls counter.
@@ -119,8 +130,8 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLogPrefixDistance, Simp
             Following the MultinomialLikelihood we want a dictionary fromm outcomes to LPs
             """
             assert self.N > 0, "*** Cannot call IncrementalLexiconHypothesis unless N>0"
-
+            # print ">>>>>>", self
             try:
-                return compute_outcomes(self.reset_and_call, self.N-1, '',  alsocatch=(MyException, TooBigException))
+                return compute_outcomes(self.reset_and_call, self.N-1, '',  catchandpass=(RecursionDepthException, TooBigException, StringLengthException))
             except TooManyContextsException:
                 return {'':0.0} # return nothing

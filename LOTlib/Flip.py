@@ -11,22 +11,31 @@ probabilistic programming.
 from math import log
 from collections import defaultdict
 from LOTlib.Miscellaneous import logplusexp, lambdaMinusInfinity
-
-MAX_CONTEXTS = 5000
+import LOTlib
 
 class TooManyContextsException(Exception):
     """ Called when a ContextSet has too many contexts in it
     """
+    pass
 
 class ContextSizeException(Exception):
-    """ Called when a context has too many choices in it
-    """
     pass
 
+import heapq
+class ContextSet(object):
+    """ Store a set of contexts, only the top N """
 
-class ContextSet(set):
-    """ Store a set of contexts """
-    pass
+    def __init__(self):
+        self.Q = []
+
+    def pop(self):
+        return heapq.heappop(self.Q)
+
+    def add(self, o):
+        return heapq.heappush(self.Q, o)
+
+    def __len__(self):
+        return len(self.Q)
 
 
 class RandomContext(object): # manage uncertainty
@@ -36,17 +45,20 @@ class RandomContext(object): # manage uncertainty
 
     """
 
-    def __init__(self, cs, choices=(), max_size=80):
+    def __init__(self, cs, choices=(), lp=0.0, max_size=50):
         self.choices = choices
         self.contextset = cs # who we update
         self.idx = 0
-        self.lp = 0.0
+        self.lp = lp
         self.max_size = max_size
 
     def __str__(self):
         return ''.join([ '1' if x else '0' for x in self.choices])
     def __repr__(self):
         return str(self)
+
+    def __cmp__(self, other): # comparisons are made by lp. We do this way so that heapq stores the *highest* prob
+        return self.lp < other.lp
 
     def flip(self, p=0.5):
         """ Flip a coin according to the context. This is somewhat complicated. If we have outcomes stored in the
@@ -68,20 +80,18 @@ class RandomContext(object): # manage uncertainty
         else:
             ret = True # which way we choose when its unspecified
 
-            if len(self.choices) > self.max_size:
-                raise ContextSizeException
+            otherpath = RandomContext(self.contextset, choices=self.choices + (not ret,), lp=self.lp + log(1-p), max_size=self.max_size)
 
             # The choice we make later
-            self.contextset.add(RandomContext(self.contextset, self.choices + (not ret,)))
+            self.contextset.add(otherpath)
 
             # the choice we make now
             self.choices = self.choices + (ret,)
+            self.lp += log(p)
 
-        # and update my lps
-        if ret:
-            self.lp += log(p)  # update the context lp (summing all our random choices)
-        else:
-            self.lp += log(1.0 - p)
+            # this is necessary because otherwise we can hang
+            if len(self.choices) > self.max_size:
+                raise ContextSizeException
 
         return ret
 
@@ -89,9 +99,9 @@ def compute_outcomes(f, *args, **kwargs):
     """
     Return a dictionary of outcomes using our RandomContext tools, giving each possible trace (up to the given depth)
     and its probability.
-    f here is a function of context, as in f(context, *args, **kwargs)
+    f here is a function of context, as in f(context, *args)
 
-    In kwargs you can pass "alsocatch" as a tuple of exceptions to catch
+    In kwargs you can pass "catchandpass" as a tuple of exceptions to catch and do nothing with
     """
 
     out = defaultdict(lambdaMinusInfinity)  # dict from strings to lps that we accumulate
@@ -99,21 +109,26 @@ def compute_outcomes(f, *args, **kwargs):
     cs = ContextSet() # this is the "open" set of contexts we need to explore
     cs.add(RandomContext(cs)) # add a single context with no history
 
+    i = 0
     while len(cs) > 0:
         context = cs.pop()  # pop an element from Context set. TODO: We should probably do a heapq of the highest probability sequences
-        # print "CTX", context, "  \t", cs
+        # print "CTX", context.lp, context#, "  \t", cs.Q
 
         try:
             v = f(context, *args) # when we call context.flip, we may update cs with new paths to explore
 
             out[v] = logplusexp(out[v], context.lp)  # add up the lp for this outcomem
-
-        except kwargs.get('alsocatch', None) as e:
+        except kwargs.get('catchandpass', None) as e:
             pass
-        except ContextSizeException:
+        except ContextSizeException: # prune that path
             pass
 
-        if len(cs) > MAX_CONTEXTS:
+        if i > kwargs.get('maxit', 100):
+            return out ## TODO: Hmm can either return the partial answer here or raise an exception
+
+        if len(cs) > kwargs.get('maxcontext', 1000): # sometimes we can generate way too many contexts, so let's avoid that
             raise TooManyContextsException
+
+        i += 1
 
     return out

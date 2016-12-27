@@ -42,6 +42,8 @@ class MultinomialLikelihoodLog(object):
             print "*** Math domain error", hp, str(self)
             raise e
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 from Levenshtein import distance
 
 class MultinomialLikelihoodLogLevenshtein(object):
@@ -65,6 +67,8 @@ class MultinomialLikelihoodLogLevenshtein(object):
         except ValueError as e:
             print "*** Math domain error", hp, str(self)
             raise e
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def prefix_distance(x,s):
     """
@@ -99,6 +103,52 @@ class MultinomialLikelihoodLogPrefixDistance(object):
 
             # now we have to add up every string that we could get
             return sum(dc * ( logsumexp([rlp - distance_scale*prefix_distance(r, k) for r, rlp in hp.items()]))\
+                           for k, dc in datum.output.items())
+
+        except ValueError as e:
+            print "*** Math domain error", hp, str(self)
+            raise e
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+def longest_common_substring(s1, s2):
+    # from https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Longest_common_substring#Python_2
+   m = [[0] * (1 + len(s2)) for i in xrange(1 + len(s1))]
+   longest, x_longest = 0, 0
+   for x in xrange(1, 1 + len(s1)):
+       for y in xrange(1, 1 + len(s2)):
+           if s1[x - 1] == s2[y - 1]:
+               m[x][y] = m[x - 1][y - 1] + 1
+               if m[x][y] > longest:
+                   longest = m[x][y]
+                   x_longest = x
+           else:
+               m[x][y] = 0
+   return s1[x_longest - longest: x_longest]
+
+
+def longest_substring_distance(x,s):
+    if len(x) > len(s): # don't over-generate, only treat substrings
+        return Infinity
+    else:
+        return len(s) - len(longest_common_substring(x,s))
+
+class MultinomialLikelihoodLogLongestSubstring(object):
+    """
+    This distance between strings here is the remainder
+    """
+
+    def compute_single_likelihood(self, datum):
+        distance_scale = self.__dict__.get('distance', 1.0)
+
+        assert isinstance(datum.output, dict)
+
+        hp = self(*datum.input)  # output dictionary, output->probabilities
+        assert isinstance(hp, dict)
+        try:
+
+            # now we have to add up every string that we could get
+            return sum(dc * ( logsumexp([rlp - distance_scale*longest_substring_distance(r, k) for r, rlp in hp.items()]))\
                            for k, dc in datum.output.items())
 
         except ValueError as e:

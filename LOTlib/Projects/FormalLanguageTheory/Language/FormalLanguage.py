@@ -68,7 +68,7 @@ class FormalLanguage(object):
 
     def estimate_KL_divergence(self, h, n=1024, max_length=50):
         """ Estimate the KL divergence between me and h """
-
+        pass
         # h_out = Counter([h() for _ in xrange(n)])
         # expect = 0
         # for e in self.all_strings(max_length=max_length):

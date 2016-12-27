@@ -14,15 +14,14 @@ base_grammar.add_rule('START', '', ['LIST'], 1.0)
 
 base_grammar.add_rule('LIST', '(%s if %s else %s)', ['LIST', 'BOOL', 'LIST'], 1.)
 
-base_grammar.add_rule('LIST', 'cons_', ['ATOM', 'LIST'], 1./6.)
-base_grammar.add_rule('LIST', 'cons_', ['LIST', 'LIST'], 1./6.)
+base_grammar.add_rule('LIST', 'cons_', ['LIST', 'LIST'], 1./3.)
 base_grammar.add_rule('LIST', 'cdr_', ['LIST'], 1./3.)
 base_grammar.add_rule('LIST', 'car_', ['LIST'], 1./3.)
 
 base_grammar.add_rule('LIST', '', ['ATOM'], 1.0)
-base_grammar.add_rule('LIST', "\'\'", None, 1.0)
+base_grammar.add_rule('LIST', 'x', None, 2.0) # the argument
 
-base_grammar.add_rule('LIST', 'x', None, 1.0) # the argument
+base_grammar.add_rule('ATOM', "\'\'", None, 1.0)
 
 base_grammar.add_rule('BOOL', 'empty_', ['LIST'], 1.)
 base_grammar.add_rule('BOOL', 'C.flip(p=%s)', ['PROB'], 1.) # flip within a context
