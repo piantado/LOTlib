@@ -26,6 +26,7 @@ from LOTlib.Projects.FormalLanguageTheory.Grammar import base_grammar # passed i
 
 LARGE_SAMPLE = 10000 # sample this many and then re-normalize to fractional counts
 
+@profile
 def run(options, ndata):
     if LOTlib.SIG_INTERRUPTED:
         return 0, set()
@@ -121,7 +122,7 @@ if __name__ == "__main__":
             for h in tn:
                 hpck = h.pack_ascii() # condensed form -- storing all of h is too complex
                 if hpck not in unq:
-                    unq.add(hpck)
+                    # unq.add(hpck)
                     # dump(h, f)
                     print ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata
 

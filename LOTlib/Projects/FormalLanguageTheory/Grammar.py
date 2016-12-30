@@ -19,7 +19,7 @@ base_grammar.add_rule('LIST', 'cdr_', ['LIST'], 1./3.)
 base_grammar.add_rule('LIST', 'car_', ['LIST'], 1./3.)
 
 base_grammar.add_rule('LIST', '', ['ATOM'], 1.0)
-base_grammar.add_rule('LIST', 'x', None, 2.0) # the argument
+base_grammar.add_rule('LIST', 'x', None, 5.0) # the argument
 
 base_grammar.add_rule('ATOM', "\'\'", None, 1.0)
 
