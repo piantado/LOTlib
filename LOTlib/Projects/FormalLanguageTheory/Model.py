@@ -1,5 +1,5 @@
 
-from copy import deepcopy
+from copy import copy, deepcopy
 from LOTlib.Hypotheses.Proposers import ProposalFailedException
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Hypotheses.Proposers import IDR_proposal
@@ -60,19 +60,18 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLogLongestSubstring, Si
 
         @attrmem('prior')
         def compute_prior(self):
-            return SimpleLexicon.compute_prior(self) + self.N * log(2.0) # coin flip for each additional word
+            return SimpleLexicon.compute_prior(self) + self.N * log(2.0)/self.prior_temperature # coin flip for each additional word
 
         def propose(self):
 
-            new = deepcopy(self)  ## Now we just copy the whole thing
+            new = copy(self)  ## Now we just copy the whole thing
+
             while True:
                 try:
                     # i = sample_one(range(self.N)) # random one
                     i = max(self.value.keys()) # only propose to last
                     x, fb = self.get_word(i).propose()
                     new.set_word(i, x)
-
-                    new.grammar = self.value[0].grammar # keep the grammar the same object
 
                     return new, fb
 
@@ -96,7 +95,7 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLogLongestSubstring, Si
 
             self.set_word(self.N, self.make_hypothesis(value=initfn, grammar=grammar)) # set N to what it should, using our new grammar
 
-            self.max_total_calls += 10
+            self.max_total_calls += 5
             self.N += 1
 
         def dispatch_word(self, context, word, x):

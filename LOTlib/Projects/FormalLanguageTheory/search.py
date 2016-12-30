@@ -26,7 +26,6 @@ from LOTlib.Projects.FormalLanguageTheory.Grammar import base_grammar # passed i
 
 LARGE_SAMPLE = 10000 # sample this many and then re-normalize to fractional counts
 
-@profile
 def run(options, ndata):
     if LOTlib.SIG_INTERRUPTED:
         return 0, set()
