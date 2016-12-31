@@ -1,4 +1,4 @@
-from copy import deepcopy
+from copy import copy
 from LOTlib.Miscellaneous import flip, qq, attrmem
 from LOTlib.Hypotheses.Hypothesis import Hypothesis
 from LOTlib.Hypotheses.FunctionHypothesis import FunctionHypothesis
@@ -28,6 +28,21 @@ class SimpleLexicon(Hypothesis):
         Hypothesis.__init__(self, value=value, **kwargs)
 
         self.propose_p = propose_p
+
+    def __copy__(self):
+
+        thecopy = type(self)()  # Empty initializer
+
+        # copy over all the relevant attributes and things.
+        # Note objects like Grammar are not given new copies
+        thecopy.__dict__.update(self.__dict__)
+
+        # and copy the self.value
+        thecopy.value = dict()
+        for k,v in self.value.items():
+            thecopy.set_word(k, copy(v))
+
+        return thecopy
 
     def __call__(self, word, *args):
         """
@@ -100,7 +115,7 @@ class SimpleLexicon(Hypothesis):
         changed_any = False
 
         while not changed_any:
-            new = deepcopy(self)  ## Now we just copy the whole thing
+            new = copy(self)  ## Now we just copy the whole thing
 
             for w in self.all_words():
                     if flip(self.propose_p):
