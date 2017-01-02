@@ -5,7 +5,7 @@ from LOTlib.Eval import primitive, RecursionDepthException
 
 class StringLengthException(Exception):
     """ When strings get too long """
-    MAX_LENGTH = 100
+    MAX_LENGTH = 256
     pass
 
 @primitive
