@@ -11,3 +11,4 @@ from SetTheory import *
 from Stochastics import *
 from Trees import *
 from SchemeDict import *
+from Strings import *

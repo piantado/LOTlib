@@ -21,6 +21,7 @@ class TooManyContextsException(Exception):
 class ContextSizeException(Exception):
     pass
 
+
 import heapq
 class ContextSet(object):
     """ Store a set of contexts, only the top N """
@@ -74,7 +75,7 @@ class RandomContext(object): # manage uncertainty
 
         ret = None
 
-        if self.idx < len(self.choices): # if we are on the first choice,
+        if self.idx < len(self.choices): # if we are on the specified choices
             ret = self.choices[self.idx]
             self.idx += 1
         else:
@@ -123,7 +124,7 @@ def compute_outcomes(f, *args, **kwargs):
         except ContextSizeException: # prune that path
             pass
 
-        if i > kwargs.get('maxit', 100):
+        if i >= kwargs.get('maxit', 1000):
             return out ## TODO: Hmm can either return the partial answer here or raise an exception
 
         if len(cs) > kwargs.get('maxcontext', 1000): # sometimes we can generate way too many contexts, so let's avoid that
