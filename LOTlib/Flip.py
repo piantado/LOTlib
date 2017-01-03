@@ -21,6 +21,7 @@ class TooManyContextsException(Exception):
 class ContextSizeException(Exception):
     pass
 
+
 import heapq
 class ContextSet(object):
     """ Store a set of contexts, only the top N """
@@ -74,7 +75,7 @@ class RandomContext(object): # manage uncertainty
 
         ret = None
 
-        if self.idx < len(self.choices): # if we are on the first choice,
+        if self.idx < len(self.choices): # if we are on the specified choices
             ret = self.choices[self.idx]
             self.idx += 1
         else:
@@ -95,11 +96,14 @@ class RandomContext(object): # manage uncertainty
 
         return ret
 
+
 def compute_outcomes(f, *args, **kwargs):
     """
     Return a dictionary of outcomes using our RandomContext tools, giving each possible trace (up to the given depth)
     and its probability.
     f here is a function of context, as in f(context, *args)
+
+    kwargs['Cfirst'] constrols whether C is the first or last argument to f. It cannot be anything else
 
     In kwargs you can pass "catchandpass" as a tuple of exceptions to catch and do nothing with
     """
@@ -115,7 +119,13 @@ def compute_outcomes(f, *args, **kwargs):
         # print "CTX", context.lp, context#, "  \t", cs.Q
 
         try:
-            v = f(context, *args) # when we call context.flip, we may update cs with new paths to explore
+
+            # does C go at the beginning or the end?
+            if kwargs.get('Cfirst', True):
+                v = f(context, *args) # when we call context.flip, we may update cs with new paths to explore
+            else:
+                newargs = args + (context,)
+                v = f(*newargs)
 
             out[v] = logplusexp(out[v], context.lp)  # add up the lp for this outcomem
         except kwargs.get('catchandpass', None) as e:
@@ -123,7 +133,7 @@ def compute_outcomes(f, *args, **kwargs):
         except ContextSizeException: # prune that path
             pass
 
-        if i > kwargs.get('maxit', 100):
+        if i >= kwargs.get('maxit', 1000):
             return out ## TODO: Hmm can either return the partial answer here or raise an exception
 
         if len(cs) > kwargs.get('maxcontext', 1000): # sometimes we can generate way too many contexts, so let's avoid that

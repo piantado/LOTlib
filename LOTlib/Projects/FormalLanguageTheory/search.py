@@ -72,8 +72,7 @@ def run(options, ndata):
 
 
         # and start from where we ended
-        h0 = deepcopy(h) # must deepcopy
-
+        h0 = copy(h)
         h0.deepen()
 
     return ndata, tn
@@ -110,27 +109,35 @@ if __name__ == "__main__":
         sys.stdout.flush()
 
     DATA_RANGE = np.exp(np.linspace(np.log(options.datamin), np.log(options.datamax), num=options.ndata))# [1000] # np.arange(1, 1000, 1)
-    # DATA_RANGE = [10000]
     random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))
 
-    with open(options.OUT+"/hypotheses-"+options.LANG+".pkl", 'w') as f:
-        unq = set()
-        for ndata, tn in MPI_unorderedmap(run, args):
-            for h in tn:
-                hpck = h.pack_ascii() # condensed form -- storing all of h is too complex
-                if hpck not in unq:
-                    # unq.add(hpck)
-                    # dump(h, f)
-                    print ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata
+    for ndata, tn in MPI_unorderedmap(run, args):
+        for h in tn:
+            print ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata
+            v = h()
+            sortedv = sorted(v.items(), key=operator.itemgetter(1), reverse=True)
+            print "{" + ', '.join(["'%s':%s" % i for i in sortedv]) + "}"
+            print h  # must add \0 when not Lexicon
+    sys.stdout.flush()
 
-                    v = h()
-                    sortedv = sorted(v.items(), key=operator.itemgetter(1), reverse=True)
-                    print "{" + ', '.join(["'%s':%s" % i for i in sortedv]) + "}"
-
-                    print h  # must add \0 when not Lexicon
-            sys.stdout.flush()
+    # with open(options.OUT+"/hypotheses-"+options.LANG+".pkl", 'w') as f:
+    #     unq = set()
+    #     for ndata, tn in MPI_unorderedmap(run, args):
+    #         for h in tn:
+    #             hpck = h.pack_ascii() # condensed form -- storing all of h is too complex
+    #             if hpck not in unq:
+    #                 # unq.add(hpck)
+    #                 # dump(h, f)
+    #                 print ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata
+    #
+    #                 v = h()
+    #                 sortedv = sorted(v.items(), key=operator.itemgetter(1), reverse=True)
+    #                 print "{" + ', '.join(["'%s':%s" % i for i in sortedv]) + "}"
+    #
+    #                 print h  # must add \0 when not Lexicon
+    #         sys.stdout.flush()
 
     print "# Finishing"
 

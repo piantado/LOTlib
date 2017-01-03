@@ -14,9 +14,9 @@ base_grammar.add_rule('START', '', ['LIST'], 1.0)
 
 base_grammar.add_rule('LIST', '(%s if %s else %s)', ['LIST', 'BOOL', 'LIST'], 1.)
 
-base_grammar.add_rule('LIST', 'cons_', ['LIST', 'LIST'], 1./3.)
-base_grammar.add_rule('LIST', 'cdr_', ['LIST'], 1./3.)
-base_grammar.add_rule('LIST', 'car_', ['LIST'], 1./3.)
+base_grammar.add_rule('LIST', 'strcons_', ['LIST', 'LIST'], 1./3.)
+base_grammar.add_rule('LIST', 'strcdr_', ['LIST'], 1./3.)
+base_grammar.add_rule('LIST', 'strcar_', ['LIST'], 1./3.)
 
 base_grammar.add_rule('LIST', '', ['ATOM'], 1.0)
 base_grammar.add_rule('LIST', 'x', None, 5.0) # the argument

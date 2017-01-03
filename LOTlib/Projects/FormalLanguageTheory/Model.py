@@ -9,12 +9,7 @@ from LOTlib.Miscellaneous import flatten2str, sample_one, attrmem
 from LOTlib.Flip import *
 from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import *
 from LOTlib.Hypotheses.Lexicon.SimpleLexicon import SimpleLexicon
-
-class StringLengthException(Exception):
-    """ When strings get too long (through recursion)
-    """
-    MAX_LENGTH = 100
-    pass
+from LOTlib.Primitives.Strings import StringLengthException
 
 class InnerHypothesis(LOTHypothesis):
     """s
@@ -36,12 +31,6 @@ class InnerHypothesis(LOTHypothesis):
 
         return ret, fb
 
-    def __call__(self, C, lex_, x):
-        if len(x) > StringLengthException.MAX_LENGTH:
-            raise StringLengthException
-
-        return flatten2str(LOTHypothesis.__call__(self, C, lex_, x), sep="" )
-
 
 class IncrementalLexiconHypothesis( MultinomialLikelihoodLogLongestSubstring, SimpleLexicon):
         """ A hypothesis where we can incrementally add words """
@@ -50,7 +39,7 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLogLongestSubstring, Si
             SimpleLexicon.__init__(self,  maxnodes=50, **kwargs)
             self.grammar=grammar # the base gramar (with 0 included); we copy and add in other recursions on self.deepen()
             self.N = 0 # the number of meanings we have
-            self.outlier = -1000.0 # read in MultinomialLikelihood
+            # self.outlier = -1000.0 # read in MultinomialLikelihood
             self.max_total_calls = 10 # this is the most internal recurse_ calls we can do without raising an exception It gets increased every deepen()
             self.total_calls = 0
             self.distance = 100.0 # penalize
@@ -108,9 +97,6 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLogLongestSubstring, Si
 
             # call this word
             v = self.value[word](context, self.dispatch_word, x)  # pass in "self" as lex, using the recursive version
-
-            if len(v) > StringLengthException.MAX_LENGTH:
-                raise StringLengthException
 
             return v
 

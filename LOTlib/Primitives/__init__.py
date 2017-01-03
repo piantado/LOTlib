@@ -8,6 +8,7 @@ from Logic import *
 from Number import *
 from Semantics import *
 from SetTheory import *
-from Stochastics import *
+from Random import *
 from Trees import *
 from SchemeDict import *
+from Strings import *
