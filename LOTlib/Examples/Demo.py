@@ -7,7 +7,6 @@ NOTE: ctrl-c defaultly will break
 """
 
 if __name__ == "__main__":
-
     from LOTlib.Miscellaneous import Infinity
 
     # ========================================================================================================

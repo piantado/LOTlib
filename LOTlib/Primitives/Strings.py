@@ -9,11 +9,12 @@ class StringLengthException(Exception):
     pass
 
 @primitive
-def strcons_(x,y):
-    if len(x) > StringLengthException.MAX_LENGTH or len(y) > StringLengthException.MAX_LENGTH:
-        raise StringLengthException
+def strcons_(*x, **kwargs):
+    for xi in x:
+        if len(xi) > StringLengthException.MAX_LENGTH:
+            raise StringLengthException
 
-    return x+y
+    return kwargs.get('sep','').join(x)
 
 @primitive
 def strcar_(x):

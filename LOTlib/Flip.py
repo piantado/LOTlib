@@ -103,6 +103,8 @@ def compute_outcomes(f, *args, **kwargs):
     and its probability.
     f here is a function of context, as in f(context, *args)
 
+    kwargs['Cfirst'] constrols whether C is the first or last argument to f. It cannot be anything else
+
     In kwargs you can pass "catchandpass" as a tuple of exceptions to catch and do nothing with
     """
 
@@ -117,7 +119,13 @@ def compute_outcomes(f, *args, **kwargs):
         # print "CTX", context.lp, context#, "  \t", cs.Q
 
         try:
-            v = f(context, *args) # when we call context.flip, we may update cs with new paths to explore
+
+            # does C go at the beginning or the end?
+            if kwargs.get('Cfirst', True):
+                v = f(context, *args) # when we call context.flip, we may update cs with new paths to explore
+            else:
+                newargs = args + (context,)
+                v = f(*newargs)
 
             out[v] = logplusexp(out[v], context.lp)  # add up the lp for this outcomem
         except kwargs.get('catchandpass', None) as e:
