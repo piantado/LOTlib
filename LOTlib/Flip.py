@@ -96,6 +96,7 @@ class RandomContext(object): # manage uncertainty
 
         return ret
 
+
 def compute_outcomes(f, *args, **kwargs):
     """
     Return a dictionary of outcomes using our RandomContext tools, giving each possible trace (up to the given depth)
