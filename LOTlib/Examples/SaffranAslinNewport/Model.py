@@ -3,7 +3,7 @@
 A simple example to show use of flip(). Here, we observe strings and have to come up with a stochastic generating
 function (one that happens to have memorized "words").
 
-Run with python Demo.py --model=SaffranAslinNewport --alsoprint='lambda h: str([(k,v) for k,v in sorted(h().items(), key=operator.itemgetter(1))])'
+Run with python Demo.py --model=SaffranAslinNewport --alsoprint='lambda h: str([(k,v) for k,v in sorted(h().items(), reverse=True, key=operator.itemgetter(1))])'
 
 """
 
@@ -75,21 +75,27 @@ def make_hypothesis(*args, **kwargs):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from LOTlib.DataAndObjects import FunctionData
+from collections import Counter
+from LOTlib.Miscellaneous import sample_one
 
-def make_data(N=1):
+words = ['barogi', 'patola', 'biguso']
+
+def make_data(N=30):
     """
     The data here consist of saffran-aslin-newport type strings. They have a geometric length distribution more like what
     you might find in natural data, with more frequent shorter strings. This is modeled in the hypothesis with a flip to
     whether or not you recurse to generate a longer string.
     """
 
-    return [FunctionData(input=[], output={'barogipatolabigusopatolabiguso': 1,
-                                           'bigusopatolabigusobarogi': 2,
-                                           'barogipatola': 8,
-                                           'patolabiguso': 8,
-                                           'bigusopatola': 8})]*N
+    data = []
+    cnt = Counter()
+    for _ in xrange(N):
+        cnt[''.join(sample_one(words) for _ in xrange(5))] += 1
+
+    return [FunctionData(input=[], output=cnt)]
 
 if __name__ == "__main__":
+    print make_data()
 
     for _ in xrange(100):
         h = SANHypothesis()
