@@ -5,6 +5,8 @@
 import sys
 import codecs
 import itertools
+import operator
+from copy import copy
 from LOTlib import break_ctrlc
 from pickle import dump
 from copy import deepcopy
@@ -12,11 +14,8 @@ import random
 import numpy as np
 import LOTlib
 
-from LOTlib.Miscellaneous import display_option_summary, q
-
+from LOTlib.Miscellaneous import display_option_summary
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
-from LOTlib.Eval import register_primitive
-from LOTlib.Miscellaneous import flatten2str
 from LOTlib.TopN import TopN
 from Language import *
 
@@ -24,8 +23,6 @@ from LOTlib.MPI import is_master_process, MPI_unorderedmap
 
 from Model import IncrementalLexiconHypothesis
 from LOTlib.Projects.FormalLanguageTheory.Grammar import base_grammar # passed in as kwargs
-
-register_primitive(flatten2str)
 
 LARGE_SAMPLE = 10000 # sample this many and then re-normalize to fractional counts
 
@@ -43,29 +40,40 @@ def run(options, ndata):
     # Now add the rules to the grammar
     grammar = deepcopy(base_grammar)
     for t in language.terminals():  # add in the specifics
-        grammar.add_rule('ATOM', '{\'%s\':0.0}' % t, None, 2.0)
+        grammar.add_rule('ATOM', "'%s'" % t, None, 1.0)
 
+    # set up the hypothesis
     h0 = IncrementalLexiconHypothesis(grammar=grammar)
+    h0.set_word(0, h0.make_hypothesis(grammar=grammar)) # make the first word at random
+    h0.N = 1
+
     tn = TopN(N=options.TOP_COUNT)
 
     for outer in xrange(options.N): # how many do we add?
-
-        h0.deepen() # add one more word
-        assert len(h0.value.keys())==h0.N==outer+1
 
         # and re-set the posterior or else it's something weird
         h0.compute_posterior(data)
 
         # now run mcmc
         for h in break_ctrlc(MHSampler(h0, data, steps=options.STEPS)):
-            # print ">>", h
-            tn.add(h)
+            tn.add(copy(h))
 
-            # print h.posterior_score, h.prior, h.likelihood, h
-            # print h()
+            if options.TRACE:
+                print h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata, h
+                v = h()
+                sortedv = sorted(v.items(), key=operator.itemgetter(1), reverse=True )
+                print "{" + ', '.join(["'%s':%s"% i for i in sortedv]) + "}"
+
+                # for r,c in sortedv:
+                #     print r, sorted( (longest_substring_distance(r, k), k) for k, dc in data[0].output.items() )
+
+                # for k, dc in sorted(data[0].output.items()):
+                #     print dc * ( logsumexp([rlp - 100.0 * longest_substring_distance(r, k) for r, rlp in v.items()])), k
+
 
         # and start from where we ended
-        h0 = deepcopy(h) # must deepcopy
+        h0 = copy(h)
+        h0.deepen()
 
     return ndata, tn
 
@@ -86,8 +94,10 @@ if __name__ == "__main__":
     parser.add_option("--top", dest="TOP_COUNT", type="int", default=10, help="Top number of hypotheses to store")
     parser.add_option("--N", dest="N", type="int", default=3, help="number of inner hypotheses")
     parser.add_option("--ndata", dest="ndata", type="int", default=1000, help="number of data steps to run")
+    parser.add_option("--datamin", dest="datamin", type="int", default=1, help="Min data to run (>0 due to log)")
     parser.add_option("--datamax", dest="datamax", type="int", default=100000, help="Max data to run")
     parser.add_option("--out", dest="OUT", type="str", default="out/", help="Output directory")
+    parser.add_option("--trace", dest="TRACE", action="store_true", default=False, help="Show every step?")
     (options, args) = parser.parse_args()
 
     # Set the output
@@ -98,23 +108,37 @@ if __name__ == "__main__":
         display_option_summary(options)
         sys.stdout.flush()
 
-    DATA_RANGE = np.exp(np.linspace(0, np.log(options.datamax), num=options.ndata))# [1000] # np.arange(1, 1000, 1)
+    DATA_RANGE = np.exp(np.linspace(np.log(options.datamin), np.log(options.datamax), num=options.ndata))# [1000] # np.arange(1, 1000, 1)
     random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))
 
-    unq = set()
     for ndata, tn in MPI_unorderedmap(run, args):
         for h in tn:
-            if h not in unq:
-                unq.add(h)
+            print ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata
+            v = h()
+            sortedv = sorted(v.items(), key=operator.itemgetter(1), reverse=True)
+            print "{" + ', '.join(["'%s':%s" % i for i in sortedv]) + "}"
+            print h  # must add \0 when not Lexicon
+    sys.stdout.flush()
 
-                print ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata
-                print h(),
-                print h  # must add \0 when not Lexicon
-        sys.stdout.flush()
+    # with open(options.OUT+"/hypotheses-"+options.LANG+".pkl", 'w') as f:
+    #     unq = set()
+    #     for ndata, tn in MPI_unorderedmap(run, args):
+    #         for h in tn:
+    #             hpck = h.pack_ascii() # condensed form -- storing all of h is too complex
+    #             if hpck not in unq:
+    #                 # unq.add(hpck)
+    #                 # dump(h, f)
+    #                 print ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata
+    #
+    #                 v = h()
+    #                 sortedv = sorted(v.items(), key=operator.itemgetter(1), reverse=True)
+    #                 print "{" + ', '.join(["'%s':%s" % i for i in sortedv]) + "}"
+    #
+    #                 print h  # must add \0 when not Lexicon
+    #         sys.stdout.flush()
 
     print "# Finishing"
 
-    with open(options.OUT+"/hypotheses-"+options.LANG+".pkl", 'w') as f:
-        dump(unq, f)
+

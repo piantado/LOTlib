@@ -2,6 +2,9 @@
 Here is a version where the string operations manipulate dictionaries mapping strings to probabilities.
 This prevents us from having to simulate everything. NOTE: It requires RecursionDepthException to
 be handled as generating empty string
+
+TODO: Add BOOL -- and or not, equality, etc.
+
 """
 
 from LOTlib.Grammar import Grammar
@@ -9,30 +12,24 @@ from LOTlib.Grammar import Grammar
 base_grammar = Grammar()
 base_grammar.add_rule('START', '', ['LIST'], 1.0)
 
-base_grammar.add_rule('LIST', 'if_d', ['BOOL', 'LIST', 'LIST'], 1.)
+base_grammar.add_rule('LIST', '(%s if %s else %s)', ['LIST', 'BOOL', 'LIST'], 1.)
 
-base_grammar.add_rule('LIST', 'cons_d', ['ATOM', 'LIST'], 1./6.)
-base_grammar.add_rule('LIST', 'cons_d', ['LIST', 'LIST'], 1./6.)
-base_grammar.add_rule('LIST', 'cdr_d', ['LIST'], 1./3.)
-base_grammar.add_rule('LIST', 'car_d', ['LIST'], 1./3.)
+base_grammar.add_rule('LIST', 'strcons_', ['LIST', 'LIST'], 1./3.)
+base_grammar.add_rule('LIST', 'strcdr_', ['LIST'], 1./3.)
+base_grammar.add_rule('LIST', 'strcar_', ['LIST'], 1./3.)
 
-base_grammar.add_rule('LIST', '', ['ATOM'], 3.0)
-base_grammar.add_rule('LIST', '{\'\':0.0}', None, 1.0)
-# base_grammar.add_rule('LIST', 'recurse_', [], 1.) # This is added by factorizedDataHypothesis
+base_grammar.add_rule('LIST', '', ['ATOM'], 1.0)
+base_grammar.add_rule('LIST', 'x', None, 5.0) # the argument
 
-base_grammar.add_rule('BOOL', 'empty_d', ['LIST'], 1.)
-base_grammar.add_rule('BOOL', 'flip_d(p=%s)', ['PROB'], 1.)
+base_grammar.add_rule('ATOM', "\'\'", None, 1.0)
 
-for i in xrange(1,10):
+base_grammar.add_rule('BOOL', 'empty_', ['LIST'], 1.)
+base_grammar.add_rule('BOOL', 'C.flip(p=%s)', ['PROB'], 1.) # flip within a context
+
+for i in xrange(5,10):
     base_grammar.add_rule('PROB', '0.%s' % i, None, 1.)
 
-base_grammar.add_rule('LIST', 'recurse_(%s)', ['SELFF'], 1.0) # can call myself
+# can call memoized and non-memoized versions of myself
+base_grammar.add_rule('LIST', 'lex_(C, %s, %s)',   ['SELFF', 'LIST'], 1.0) # can call other words, but I have to say whether to memoize or not
+base_grammar.add_rule('SELFF', '0', None, 1.0)  #needed to tha tif lex is called on the first word, the grammar still works. It has low prob so its not generated wonce the other lex are added
 
-
-if __name__ == "__main__":
-    from Model import InnerHypothesis
-
-    for _ in xrange(1000):
-        h = InnerHypothesis(grammar=base_grammar)
-        print h
-        print h(h)

@@ -6,7 +6,7 @@ class AnBnCn(FormalLanguage):
     def __init__(self):
         self.grammar = Grammar(start='S')
         self.grammar.add_rule('S', 'a%sb', ['S'], 1.0)
-        self.grammar.add_rule('S', '',    None, 1.0)
+        self.grammar.add_rule('S', 'ab',    None, 1.0)
 
     def terminals(self):
         return list('abc')

@@ -1,4 +1,4 @@
-from LOTlib.Eval import primitive
+ from LOTlib.Eval import primitive
 from LOTlib.DataAndObjects import FunctionData
 from LOTlib.Miscellaneous import attrmem, Infinity, nicelog
 from copy import deepcopy

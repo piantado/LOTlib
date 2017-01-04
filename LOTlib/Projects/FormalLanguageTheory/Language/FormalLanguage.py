@@ -18,7 +18,7 @@ class FormalLanguage(object):
         for _ in xrange(n):
             cnt[self.sample_string()] += 1
 
-        return [FunctionData(input=[0], output=cnt)]
+        return [FunctionData(input=[], output=cnt)]
 
     def terminals(self):
         """ This returns a list of terminal symbols, specific to each language
@@ -68,7 +68,7 @@ class FormalLanguage(object):
 
     def estimate_KL_divergence(self, h, n=1024, max_length=50):
         """ Estimate the KL divergence between me and h """
-
+        pass
         # h_out = Counter([h() for _ in xrange(n)])
         # expect = 0
         # for e in self.all_strings(max_length=max_length):

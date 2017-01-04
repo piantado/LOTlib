@@ -331,25 +331,6 @@ def lazyproduct(iterators, restart_ith):
 # Math functions
 # ------------------------------------------------------------------------------------------------------------
 
-# Special handilng for numpypy that doesn't use gammaln, assertion error otherwise
-try:
-    from scipy.special import gammaln
-except ImportError:
-    # Die if we try to use this in numpypy
-    def gammaln(*args, **kwargs): assert False
-
-
-try:
-    from scipy.misc import logsumexp as logsumexp_base
-except ImportError:
-    try:
-        from scipy.maxentropy import logsumexp as logsumexp_base
-    except ImportError:
-        # fine, our own version, no numpy
-        def logsumexp_base(v):
-            m = max(v)
-            return m+log(sum(map( lambda x: exp(x-m), v)))
-
 def nicelog(x):
     if x > 0.:
         return log(x)
@@ -358,17 +339,19 @@ def nicelog(x):
 
 def logsumexp(v):
     """
-            logsumexp - our own version wraps the version defined about (logsumexp_base)
-            to avoid logsumexp([-inf, -inf, -inf...]) warnings
+            stable numerical computation of log(sum(exp(v)))
     """
+
     if len(v) == 0:
         return -Infinity
-    elif max(v) == Infinity: # needed!
-        return Infinity
-    elif max(v) > -Infinity:
-        return logsumexp_base(v)
     else:
-        return -Infinity
+        m = max(v)
+        if m == Infinity: # needed!
+            return Infinity
+        elif m == -Infinity:
+            return -Infinity
+        else:
+            return m + log(sum([exp(x - m) for x in v]))
 
 def lognormalize(v):
     return v - logsumexp(v)
@@ -379,6 +362,31 @@ def logplusexp(a, b):
     """
     m = max(a,b)
     return m+log(exp(a-m)+exp(b-m))
+
+
+def log1mexp(a, epsilon=1e-6):
+    """
+            Computes log(1-exp(a)) according to Machler, "Accurately computing ..."
+            Note: a should be a large negative value!
+            epsilon -- count things > 0 by this much as zero
+    """
+
+
+    if abs(a) < epsilon: # close to zero up to numerical precision
+        return -Infinity
+
+    if a < -log(2.0):
+        return log1p(-exp(a))
+    else:
+        return log(-expm1(a))
+
+# Special handilng for numpypy that doesn't use gammaln, assertion error otherwise
+try:
+    from scipy.special import gammaln
+except ImportError:
+    # Die if we try to use this in numpypy
+    def gammaln(*args, **kwargs): assert False
+
 
 def beta(a):
     """ Here a is a vector (of ints or floats) and this computes the Beta normalizing function,"""
@@ -427,23 +435,6 @@ def geometric_ldensity(n,p):
 
 from math import expm1, log1p
 
-def log1mexp(a, epsilon=1e-6):
-    """
-            Computes log(1-exp(a)) according to Machler, "Accurately computing ..."
-            Note: a should be a large negative value!
-            epsilon -- count things > 0 by this much as zero
-    """
-
-
-    if abs(a) < epsilon: # close to zero up to numerical precision
-        return -Infinity
-
-    if a < -log(2.0):
-        return log1p(-exp(a))
-    else:
-        return log(-expm1(a))
-
-
 def EV(fn, n_samples, *args):
     """
         Estimates (via sampling) the expected value of a function that returns
@@ -468,7 +459,6 @@ def ilogit(x):
 
 def sample1(*args):
     return sample_one(*args)
-
 
 def sample_one(*args):
     if len(args) == 1:
@@ -559,6 +549,8 @@ def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, 
 # Some innate lambdas
 def lambdaZero(*x): return 0
 def lambdaOne(*x): return 1
+def lambdaInfinity(*x): return Infinity
+def lambdaMinusInfinity(*x): return -Infinity
 def lambdaNull(*x): return []
 def lambdaNone(*x): return None
 def lambdaTrue(*x): return True
