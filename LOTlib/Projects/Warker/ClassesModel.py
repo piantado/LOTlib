@@ -294,5 +294,3 @@ if __name__ == "__main__":
 from LOTlib.Miscellaneous import *
 from LOTlib.Primitives import *
 
-'''for i in range(100):
-    print(flatten2str(cons_(cons_(sample_(strunion(glottal_(), strdifference(strdifference(strdifference(strunion(vl(), stops()), strdifference(alveolar_(), sonorants())), bLNNstops()), velarNS()))), "e"), sample_(strdifference(strunion(vN(), obstruents()), labfric())))))'''
