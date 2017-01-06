@@ -1,122 +1,122 @@
 
-from copy import deepcopy, copy
-from math import log
-from LOTlib.Miscellaneous import attrmem, logsumexp
-from Levenshtein import distance
+from copy import copy, deepcopy
 from LOTlib.Hypotheses.Proposers import ProposalFailedException
-from LOTlib.Hypotheses.Likelihoods.StochasticLikelihood import StochasticLikelihood
-
-# from LOTlib.Hypotheses.FactorizedDataHypothesis import FactorizedLambdaHypothesis
-# from LOTlib.Hypotheses.FactorizedDataHypothesis import InnerHypothesis
-
-
-def matching_prefix(x,y):
-    for i in xrange(min(len(x), len(y))):
-        if x[i] != y[i]:
-            return len(y) - i
-    return len(y) - min(len(x), len(y))
-
-
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-import random
-from LOTlib.Hypotheses.Proposers.InsertDeleteProposal import insert_delete_proposal
-from LOTlib.Hypotheses.Proposers.RegenerationProposal import regeneration_proposal
-from LOTlib.Hypotheses import Hypothesis
-class InnerHypothesis(StochasticLikelihood, LOTHypothesis):
-    """
+from LOTlib.Hypotheses.Proposers import IDR_proposal
+from LOTlib.Eval import TooBigException
+from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursionDepthException
+from LOTlib.Miscellaneous import flatten2str, sample_one, attrmem
+from LOTlib.Flip import *
+from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import *
+from LOTlib.Hypotheses.Lexicon.SimpleLexicon import SimpleLexicon
+from LOTlib.Primitives.Strings import StringLengthException
+
+class InnerHypothesis(LOTHypothesis):
+    """s
     The type of each function F. This is NOT recursive, but it does allow recurse_ (to refer to the whole lexicon)
     """
-    def __init__(self, grammar=None, display="lambda recurse_: %s", **kwargs):
+    def __init__(self, grammar=None, display="lambda C, lex_, x: %s", **kwargs): # lexicon, x arg, context
         LOTHypothesis.__init__(self, grammar=grammar, display=display, **kwargs)
 
-from LOTlib.Miscellaneous import sample_one
-from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursionDepthException
-from LOTlib.Hypotheses.Lexicon.RecursiveLexicon import RecursiveLexicon
-class IncrementalLexiconHypothesis(StochasticLikelihood, RecursiveLexicon):
-        """ A hypothesis where we can incrementally add words and propose to only the additions
-        """
+    def propose(self, **kwargs):
+        ret_value, fb = None, None
+        while True: # keep trying to propose
+            try:
+                ret_value, fb = IDR_proposal(self.grammar, self.value, **kwargs)
+                break
+            except ProposalFailedException:
+                pass
+
+        ret = self.__copy__(value=ret_value)
+
+        return ret, fb
+
+
+class IncrementalLexiconHypothesis( MultinomialLikelihoodLogLongestSubstring, SimpleLexicon):
+        """ A hypothesis where we can incrementally add words """
 
         def __init__(self, grammar=None, **kwargs):
-            RecursiveLexicon.__init__(self, recurse_bound=5, maxnodes=50, variable_weight=3.0, **kwargs)
-            self.grammar=grammar
-            self.N = 0
-
-        def propose(self):
-            while True:
-                try:
-                    return RecursiveLexicon.propose(self)
-                except RecursionDepthException:
-                    pass
-
+            SimpleLexicon.__init__(self,  maxnodes=50, **kwargs)
+            self.grammar=grammar # the base gramar (with 0 included); we copy and add in other recursions on self.deepen()
+            self.N = 0 # the number of meanings we have
+            # self.outlier = -1000.0 # read in MultinomialLikelihood
+            self.max_total_calls = 10 # this is the most internal recurse_ calls we can do without raising an exception It gets increased every deepen()
+            self.total_calls = 0
+            self.distance = 100.0 # penalize
 
         def make_hypothesis(self, **kwargs):
-            return InnerHypothesis(**kwargs)
+            return InnerHypothesis(**kwargs) # no default grammar since it will differ by word
 
-        @attrmem('likelihood')
-        def compute_likelihood(self, data, shortcut=None):
-            # We'll just be overwriting this
-            assert len(data) == 1
-            return self.compute_single_likelihood(data[0])
-
-        def compute_single_likelihood(self, datum):
-            """
-                Compute the likelihood with a Levenshtein noise model
-            """
-
-            assert isinstance(datum.output, dict), "Data supplied must be a dict (function outputs to counts)"
-
-            llcounts = self.make_ll_counts(datum.input, nsamples=512)
-
-            z = log(sum(llcounts.values()))
-
-            ll = 0.0  # We are going to compute a pseudo-likelihood, counting close strings as being close
-            for k in datum.output.keys():
-                # ll += datum.output[k] * (log(llcounts.get(k)) - z) if k in llcounts else -100.0
-                ll += datum.output[k] * (log(llcounts.get(k))-z if k in llcounts else -100.0)
-                # ll += datum.output[k] * (log(llcounts.get(k))-z if k in llcounts else -10000.0)
-                # ll += datum.output[k] * (log(llcounts.get(k, 1.0e-12)) - z)
-                # ll += datum.output[k] * logsumexp([ log(llcounts[r])-log(lo) - 1.0 * matching_prefix(r, k) for r in llcounts.keys() ])
-
-            # a type prior?
-            # ll = 10000*float(len(set(llcounts.keys()) & set(datum.output.keys()))) / float(len(set(llcounts.keys()) | set(datum.output.keys())))
-
-            return ll
-
+        @attrmem('prior')
+        def compute_prior(self):
+            return SimpleLexicon.compute_prior(self) + self.N * log(2.0)/self.prior_temperature # coin flip for each additional word
 
         def propose(self):
-            """ We only propose to the last in this kind of lexicon
-            """
-            new = deepcopy(self)  ## Now we just copy the whole thing
+
+            new = copy(self)  ## Now we just copy the whole thing
+
             while True:
                 try:
-                    i = sample_one(range(self.N))
+                    # i = sample_one(range(self.N)) # random one
+                    i = max(self.value.keys()) # only propose to last
                     x, fb = self.get_word(i).propose()
                     new.set_word(i, x)
-
-                    new.grammar = self.value[0].grammar # keep the grammar the same object
 
                     return new, fb
 
                 except ProposalFailedException:
                     pass
 
-        def dispatch_word(self, word):
-            """ We override this so that the hypothesis defaultly calls with the last word via __call__"""
-            self.recursive_call_depth += 1
+        def deepen(self):
+            """ Add one more word here. This requires making a new grammar and setting the word to recurse to the
+             previous one so that all of our hard work is not lost."""
 
-            if self.recursive_call_depth > self.recursive_depth_bound:
-                return ''
-            else:
-                return self.value[word](self.dispatch_word)  # pass in "self" as lex, using the recursive version
+            # update the grammar
+            grammar = deepcopy(self.grammar)
+
+            for n in xrange(1,self.N+1): # add in all the rules up till the next one
+                grammar.add_rule('SELFF', '%s' % (n,), None, 1.0)  # add the new N # needed for the new grammar, wdd what we will use
+
+            initfn                 = grammar.get_rule_by_name('', nt='START').make_FunctionNodeStub(grammar, None)
+            initfn.args[0]         = grammar.get_rule_by_name("lex_(C, %s, %s)").make_FunctionNodeStub(grammar, initfn)
+            initfn.args[0].args[0] = grammar.get_rule_by_name('%s' % (self.N-1)).make_FunctionNodeStub(grammar, initfn.args[0])
+            initfn.args[0].args[1] = grammar.get_rule_by_name('x').make_FunctionNodeStub(grammar, initfn.args[0])
+
+            self.set_word(self.N, self.make_hypothesis(value=initfn, grammar=grammar)) # set N to what it should, using our new grammar
+
+            self.max_total_calls += 5
+            self.N += 1
+
+        def dispatch_word(self, context, word, x):
+            """ We override this so that the hypothesis defaultly calls with the last word via __call__"""
+
+            # keep track of too many calls
+            self.total_calls += 1
+            if self.total_calls > self.max_total_calls:
+                raise RecursionDepthException
+
+            # call this word
+            v = self.value[word](context, self.dispatch_word, x)  # pass in "self" as lex, using the recursive version
+
+            return v
+
         def recursive_call(self, word, *args):
             raise NotImplementedError
 
-        def __call__(self, *args):
+        def reset_and_call(self, *args):
+            """ Call returns a dictinoary. This calls once, reseting the total_calls counter.
+                We can't pass dispatch_word since that doesn't reset the total_call counter
             """
-            Wrap in self as a first argument that we don't have to in the grammar. This way, we can use self(word, X Y) as above.
+            self.total_calls = 0
+            return self.dispatch_word(*args)
+
+        def __call__(self):
             """
-            assert self.N > 0, "Cannot call unless something is defined!"
-
-            self.recursive_call_depth = 0
-
-            return self.dispatch_word(self.N-1) # run the last word on calls
+            Following the MultinomialLikelihood we want a dictionary fromm outcomes to LPs
+            """
+            assert self.N > 0, "*** Cannot call IncrementalLexiconHypothesis unless N>0"
+            # print ">>>>>>", self
+            try:
+                return compute_outcomes(self.reset_and_call, self.N-1, '',  catchandpass=(RecursionDepthException, TooBigException, StringLengthException))
+            except TooManyContextsException:
+                return {'':0.0} # return nothing

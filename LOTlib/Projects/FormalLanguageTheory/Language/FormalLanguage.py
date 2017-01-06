@@ -9,14 +9,16 @@ class FormalLanguage(object):
     Set up a super-class for formal languages, so we can compute things like accuracy, precision, etc.
     """
 
+    def sample_string(self):
+        return str(self.grammar.generate())
+
     def sample_data(self, n):
         # Sample a string of data
         cnt = Counter()
         for _ in xrange(n):
-            s = str(self.grammar.generate())
-            cnt[s] += 1
+            cnt[self.sample_string()] += 1
 
-        return [FunctionData(input=[0], output=cnt)]
+        return [FunctionData(input=[], output=cnt)]
 
     def terminals(self):
         """ This returns a list of terminal symbols, specific to each language
@@ -66,7 +68,7 @@ class FormalLanguage(object):
 
     def estimate_KL_divergence(self, h, n=1024, max_length=50):
         """ Estimate the KL divergence between me and h """
-
+        pass
         # h_out = Counter([h() for _ in xrange(n)])
         # expect = 0
         # for e in self.all_strings(max_length=max_length):

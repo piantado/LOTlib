@@ -155,6 +155,7 @@ grammar = Grammar()
 grammar.add_rule('START', 'flatten2str', ['EXPR'], 1.0)
 grammar.add_rule('EXPR', 'sample_', ['SET'], 1.0)
 grammar.add_rule('EXPR', 'cons_', ['EXPR', 'EXPR'], 1.0/2.0)
+grammar.add_rule('EXPR','"%s"', ['TERMINAL'],1.0)
 
 #clean string version
 '''grammar.add_rule('SET', '"%s"', ['STRING'], 1.0)
@@ -279,16 +280,17 @@ if __name__ == "__main__":
 
     from LOTlib.Inference.Samplers.StandardSample import standard_sample
 
-    #standard_sample(make_hypothesis, make_data, show_skip=9, save_top=False)
+    standard_sample(make_hypothesis, make_data, show_skip=9, save_top=False)
 
     from LOTlib.MPI import MPI_map
-    args=[[x, d] for d in range(1, options.datasize+2,10) for x in range(options.chains)]
+    '''args=[[x, d] for d in range(1, options.datasize+2,10) for x in range(options.chains)]
     myhyp=set()
 
     for top in MPI_map(runme, args):
         myhyp.update(top)
 
     import pickle
-    pickle.dump(myhyp, open(options.filename, "wb"))
-
+    pickle.dump(myhyp, open(options.filename, "wb"))'''
+from LOTlib.Miscellaneous import *
+from LOTlib.Primitives import *
 

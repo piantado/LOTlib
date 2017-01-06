@@ -71,6 +71,14 @@ class Grammar(CommonEqualityMixin):
         """Returns all non-terminals."""
         return self.rules.keys()
 
+    def get_rule_by_name(self, n, nt=None):
+        if nt is None:
+            matches = [r for r in self.get_all_rules() if r.name == n]
+        else:
+            matches = [r for r in self.get_rules(nt) if r.name == n]
+        assert len(matches)==1, "%s %s %s" % (n, nt, str(matches))
+        return matches[0]
+
     def get_matching_rule(self, t):
         """
         Get the rule matching t's signature. Note: We could probably speed this up with a hash table if need be.
@@ -189,12 +197,19 @@ class Grammar(CommonEqualityMixin):
                         print "*** Runtime error in %s" % fn
                         raise e
 
-
                 # and set the parents
                 for a in fn.argFunctionNodes():
                     a.parent = fn
 
             return fn
+        elif isinstance(x, FunctionNode): # this will let us finish generation of a partial tree
+
+            x.args = [ self.generate(a) for a in x.args]
+
+            for a in x.argFunctionNodes():
+                a.parent = x
+
+            return x
 
         else:  # must be a terminal
             assert isinstance(x, str), ("*** Terminal must be a string! x="+x)

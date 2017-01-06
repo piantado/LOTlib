@@ -6,7 +6,7 @@ from math import log
 from random import random
 
 from LOTlib.BVRuleContextManager import BVRuleContextManager
-from LOTlib.Miscellaneous import lambdaTrue, lambdaOne, self_update
+from LOTlib.Miscellaneous import lambdaTrue, lambdaOne, self_update, nicelog
 
 
 # ------------------------------------------------------------------------------------------------------------
@@ -295,9 +295,20 @@ class FunctionNode(object):
 
         """
         if self.args is not None:
-            # TODO: In python 3, use yeild from
-            for n in filter(isFunctionNode, self.args):
-                yield n
+            for n in self.args:
+                if isFunctionNode(n):
+                    yield n
+
+    def argNonFunctionNodes(self):
+        """Yield non-FunctionNode immediately below.
+
+        Also handles args is None, so we don't have to check constantly
+
+        """
+        if self.args is not None:
+            for n in self.args:
+                if not isFunctionNode(n):
+                    yield n
 
     def argStrings(self):
         """
@@ -405,6 +416,9 @@ class FunctionNode(object):
         NOTE: We allow resampleProbability to return a boolean, for 0/1 probability.
         """
         return sum([ 1.0*resampleProbability(x) for x in self])
+
+    def sampling_log_probability(self,node,resampleProbability=lambdaOne):
+        return nicelog(1.0*resampleProbability(node)) - nicelog(self.sample_node_normalizer(resampleProbability=resampleProbability))
 
     def sample_subnode(self, resampleProbability=lambdaOne):
         """Sample a subnode at random.

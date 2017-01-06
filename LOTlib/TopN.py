@@ -73,6 +73,12 @@ class TopN(object):
         for yi in y:
             self.add(yi)
 
+    def pop(self):
+        v = heapq.heappop(self.Q).item
+        self.unique_set.remove(v)
+        self.N -= 1
+        return v
+
     def best(self):
         return self.get_all(sorted=True)[-1]
 

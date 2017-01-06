@@ -32,5 +32,5 @@ class RecursiveLexicon(SimpleLexicon):
         self.recursive_call_depth += 1
         if self.recursive_call_depth > self.recursive_depth_bound:
             raise RecursionDepthException
-        # print ">>>", self.value[word]
+
         return self.value[word](self.recursive_call, *args)

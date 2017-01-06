@@ -45,6 +45,32 @@ def generate_unique_partial_subtrees(grammar, start='START', N=1000, npartial=10
             for _ in xrange(npartial):
                 yield ti.random_partial_subtree(p=p)
 
+def least_common_difference(t1,t2):
+    """
+        For a pair of trees, find the nodes (one in each tree) defining
+        the root of their differences. Return None for identical trees.
+    """
+
+    if t1 == t2:
+        return None, None
+    elif t1.get_rule_signature() == t2.get_rule_signature(): # if these rules look the same, counting terminals and nonterminal kids
+
+        # first check if any strings (non functions nodes) below differ
+        for a,b in zip(t1.argNonFunctionNodes(), t2.argNonFunctionNodes()):
+            if a != b:
+                return t1,t2 # if so, t1 and t2 differ
+
+        # otherwise check the functionNodes
+        t1afn = list(t1.argFunctionNodes())
+        t2afn = list(t2.argFunctionNodes())
+        differing = [arg1 != arg2 for arg1,arg2 in zip(t1afn, t2afn)]
+        if sum(differing) == 1:
+            idx = differing.index(True)
+            return least_common_difference(t1afn[idx],t2afn[idx])
+        else:
+            return t1, t2
+    return t1,t2
+
 # # # # # # # # # # # # # # # # # # # # # # # # #
 # Quick helper functions for subtrees
 

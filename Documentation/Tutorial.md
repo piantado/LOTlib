@@ -94,7 +94,7 @@ Essentially, `compute_likelihood` maps `compute_single_likelihood` over a list o
 Given that our hypothesis wants those kinds of data, we can then create data as follows:
 ```python
     from LOTlib.DataAndObjects import FunctionData
-    data = [ FunctionData(input=[], output=12, alpha=0.95) ]
+    data = [ FunctionData(input=[6], output=12, alpha=0.95) ]
 ```
 Note here that the most natural form of data is a list--even if its only a single element--where each element, a datum, gets passed to `compute_single_likelihood`. The data here specifies the input, output, and noise value `alpha`. Note that even though `alpha` could live as an attribute of hypotheses, it makes most sense to view it as a known part of the data. 
 

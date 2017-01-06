@@ -23,13 +23,12 @@ def MH_acceptance(cur, prop, fb, p=None, acceptance_temperature=1.0):
         What is the temperature of this acceptance?
     """
     # If we get infs or are in a stupid state, let's just sample from the prior so things don't get crazy
-    if isnan(cur) or (cur == float("-inf") and prop == float("-inf")):
+    if isnan(cur) or (cur == -Infinity and prop == -Infinity):
         # Just choose at random -- we can't sample priors since they may be -inf both
         r = -log(2.0)
 
-    elif isnan(prop):
-        # Never accept
-        r = float("-inf")
+    elif isnan(prop) or prop==-Infinity or fb == Infinity:
+        return False # never accept
 
     else:
         r = (prop-cur-fb) / acceptance_temperature
