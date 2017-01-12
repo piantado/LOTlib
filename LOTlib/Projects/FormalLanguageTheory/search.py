@@ -24,7 +24,7 @@ from LOTlib.MPI import is_master_process, MPI_unorderedmap
 from Model import IncrementalLexiconHypothesis
 from LOTlib.Projects.FormalLanguageTheory.Grammar import base_grammar # passed in as kwargs
 
-LARGE_SAMPLE = 10000 # sample this many and then re-normalize to fractional counts
+LARGE_SAMPLE = 100000 # sample this many and then re-normalize to fractional counts
 
 def run(options, ndata):
     if LOTlib.SIG_INTERRUPTED:
