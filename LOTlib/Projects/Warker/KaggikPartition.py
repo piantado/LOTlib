@@ -1,7 +1,7 @@
- from LOTlib.Eval import primitive
+from LOTlib.Eval import primitive
 from LOTlib.DataAndObjects import FunctionData
 from LOTlib.Miscellaneous import attrmem, Infinity, nicelog
-from copy import deepcopy
+from copy import deepcopy, copy
 from optparse import OptionParser
 
 parser = OptionParser()
@@ -9,7 +9,7 @@ parser.add_option("-f", "--file", dest="filename", help="file name of the pickle
 parser.add_option("-d", "--datasize", dest="datasize", type="int", help="number of data points", default=1000)
 parser.add_option("-t", "--top", dest="top", type="int", help="top N count of hypotheses from each chain", default=100)
 parser.add_option("-s", "--steps", dest="steps", type="int", help="steps for the chainz", default=100000)
-parser.add_option("-c", "--chainz", dest="chains", type="int", help="number of chainz :P", default=25)
+parser.add_option("-c", "--chainz", dest="chains", type="int", help="number of chainz :P", default=2)
 
 (options, args) = parser.parse_args()
 
@@ -39,29 +39,37 @@ grammar = Grammar()
 
 grammar.add_rule('START', 'flatten2str', ['EXPR'], 1.0)
 
-grammar.add_rule('EXPR', 'sample_', ['SET'], 1.0)
+grammar.add_rule('EXPR', 'sample_', ['SET'], 5.0)
 
-grammar.add_rule('EXPR', 'cons_', ['EXPR', 'EXPR'], 1.0/1.5)#downweight the recursion
+grammar.add_rule('EXPR', 'cons_', ['EXPR', 'EXPR'], 1.0)#downweight the recursion
 
 grammar.add_rule('SET', '"%s"', ['STRING'], 1.0)
 
 
-grammar.add_rule('EXPR', 'if_', ['BOOL', 'EXPR', 'EXPR'], 1./5)#downweight the recursion
+grammar.add_rule('EXPR', 'if_', ['BOOL', 'EXPR', 'EXPR'], 1.)#downweight the recursion
 grammar.add_rule('BOOL', 'flip_', [''], 1.)
 
-
-# Build up partitions before we have the terminals and strings
-# this way, partitions are mainly structural (and we search for the terminals in the templates)
+# Enumerate trees to make partitions
 partitions = []
-for t in grammar.enumerate(6):
-
+for t in grammar.enumerate_at_depth(3, leaves=False):  # 6
     t = deepcopy(t) # just make sure it's a copy (may not be necessary)
-    for n in t:
-        setattr(n, "p_propose", 0.0) # add a tree attribute saying we can't propose
     partitions.append(t)
-for part in partitions:
-    print part
-    print "\n"
+
+# Take each partition, which doesn't have leaves, and generate leaves, setting
+# it to a random generation (fill in the leaves with random hypotheses)
+for p in partitions:
+    print "# Initializing partition:", p
+    print ">>", p
+    for n in p.subnodes():
+        # set to not resample these
+        setattr(n, 'p_propose', 0.0) ## NOTE: Hypothesis proposals must be sensitive to resample_p for this to work!
+
+        # and fill in the missing leaves with a random generation
+        for i, a in enumerate(n.args):
+            if grammar.is_nonterminal(a):
+                n.args[i] = grammar.generate(a)
+print "# Initialized %s partitions" % len(partitions)
+
 
 grammar.add_rule('STRING', '%s%s', ['TERMINAL', 'STRING'], 1.0)
 grammar.add_rule('STRING', '%s', ['TERMINAL'], 1.0)
@@ -138,61 +146,64 @@ def make_hypothesis():
     return MyHypothesis(grammar)
 from LOTlib.TopN import TopN
 
-def runme(x,datamt):
-    def make_data(size=datamt):
-        return [FunctionData(input=[],
-                             output={'n i k': size, 'h i N': size, 'f a n': size, 'g i f': size, 'm a N': size, 'f a m': size, 'g i k': size, 'k a n': size, 'f a f': size, 'g i n': size, 'g i m': size, 'g i s': size, 's i f': size, 's i n': size, 'n i s': size, 's i m': size, 's i k': size, 'h a N': size, 'f i N': size, 'h i m': size, 'h i n': size, 'h a m': size, 'n i N': size, 'h i k': size, 'f a s': size, 'f i n': size, 'h i f': size, 'n i m': size, 'g i N': size, 'h a g': size, 's i N': size, 'n i n': size, 'f i m': size, 's i s': size, 'h i s': size, 'n a s': size, 'k a s': size, 'f i s': size, 'n i f': size, 'm i n': size, 's a s': size, 'f a g': size, 'k a g': size, 'k a f': size, 's a m': size, 'n a f': size, 'n a g': size, 'm i N': size, 's a g': size, 'f i k': size, 'k a m': size, 'n a n': size, 's a f': size, 'n a m': size, 'm a s': size, 'h a f': size, 'h a s': size, 'n a N': size, 'm i s': size, 's a n': size, 's a N': size, 'm i k': size, 'f a N': size, 'm i m': size, 'm a g': size, 'm a f': size, 'f i f': size, 'k a N': size, 'h a n': size, 'm a n': size, 'm a m': size, 'm i f': size})]
-    print "Start: " + str(x) + " on this many: " + str(datamt)
-    messup = TopN(options.top)
-    try:
-        return standard_sample(make_hypothesis, make_data, show=False, N=options.top, save_top="topkaggik.pkl", steps=options.steps)
-    except:
-        return messup
+# def runme(x,datamt):
+#     def make_data(size=datamt):
+#         return [FunctionData(input=[],
+#                              output={'n i k': size, 'h i N': size, 'f a n': size, 'g i f': size, 'm a N': size, 'f a m': size, 'g i k': size, 'k a n': size, 'f a f': size, 'g i n': size, 'g i m': size, 'g i s': size, 's i f': size, 's i n': size, 'n i s': size, 's i m': size, 's i k': size, 'h a N': size, 'f i N': size, 'h i m': size, 'h i n': size, 'h a m': size, 'n i N': size, 'h i k': size, 'f a s': size, 'f i n': size, 'h i f': size, 'n i m': size, 'g i N': size, 'h a g': size, 's i N': size, 'n i n': size, 'f i m': size, 's i s': size, 'h i s': size, 'n a s': size, 'k a s': size, 'f i s': size, 'n i f': size, 'm i n': size, 's a s': size, 'f a g': size, 'k a g': size, 'k a f': size, 's a m': size, 'n a f': size, 'n a g': size, 'm i N': size, 's a g': size, 'f i k': size, 'k a m': size, 'n a n': size, 's a f': size, 'n a m': size, 'm a s': size, 'h a f': size, 'h a s': size, 'n a N': size, 'm i s': size, 's a n': size, 's a N': size, 'm i k': size, 'f a N': size, 'm i m': size, 'm a g': size, 'm a f': size, 'f i f': size, 'k a N': size, 'h a n': size, 'm a n': size, 'm a m': size, 'm i f': size})]
+#     print "Start: " + str(x) + " on this many: " + str(datamt)
+#     messup = TopN(options.top)
+#     try:
+#         return standard_sample(make_hypothesis, make_data, show=False, N=options.top, save_top="topkaggik.pkl", steps=options.steps)
+#     except:
+#         return messup
 
-def runparts(x,datamt):
+def runparts(size, x, p):
     #problem: right now only recording last partition, never saving from others.
-    print "Start: " + str(x) + " on this many: " + str(datamt)
-    messup = TopN(options.top)
+    print "Start: " + str(x) + " on this many: " + str(size)
     try:
         #make new TopN for each data amount
         topn= TopN(N=200, key="posterior_score")
-        for p in break_ctrlc(partitions):
-            print "Starting on partition ", p
+        print "Starting on partition ", p
 
-            # Now we have to go in and fill in the nodes that are nonterminals
-            # We can do this with generate
-            v = grammar.generate(deepcopy(p))
+        # Now we have to go in and fill in the nodes that are nonterminals
+        # We can do this with generate
+        v = grammar.generate(copy(p))
 
-            h0 = MyHypothesis(grammar, value=v)
-            size = datamt
-            data = [FunctionData(input=[],
-                             output={'n i k': size, 'h i N': size, 'f a n': size, 'g i f': size, 'm a N': size, 'f a m': size, 'g i k': size, 'k a n': size, 'f a f': size, 'g i n': size, 'g i m': size, 'g i s': size, 's i f': size, 's i n': size, 'n i s': size, 's i m': size, 's i k': size, 'h a N': size, 'f i N': size, 'h i m': size, 'h i n': size, 'h a m': size, 'n i N': size, 'h i k': size, 'f a s': size, 'f i n': size, 'h i f': size, 'n i m': size, 'g i N': size, 'h a g': size, 's i N': size, 'n i n': size, 'f i m': size, 's i s': size, 'h i s': size, 'n a s': size, 'k a s': size, 'f i s': size, 'n i f': size, 'm i n': size, 's a s': size, 'f a g': size, 'k a g': size, 'k a f': size, 's a m': size, 'n a f': size, 'n a g': size, 'm i N': size, 's a g': size, 'f i k': size, 'k a m': size, 'n a n': size, 's a f': size, 'n a m': size, 'm a s': size, 'h a f': size, 'h a s': size, 'n a N': size, 'm i s': size, 's a n': size, 's a N': size, 'm i k': size, 'f a N': size, 'm i m': size, 'm a g': size, 'm a f': size, 'f i f': size, 'k a N': size, 'h a n': size, 'm a n': size, 'm a m': size, 'm i f': size})]
+        h0 = MyHypothesis(grammar, value=v)
+        data = [FunctionData(input=[],
+                         output={'n i k': size, 'h i N': size, 'f a n': size, 'g i f': size, 'm a N': size, 'f a m': size, 'g i k': size, 'k a n': size, 'f a f': size, 'g i n': size, 'g i m': size, 'g i s': size, 's i f': size, 's i n': size, 'n i s': size, 's i m': size, 's i k': size, 'h a N': size, 'f i N': size, 'h i m': size, 'h i n': size, 'h a m': size, 'n i N': size, 'h i k': size, 'f a s': size, 'f i n': size, 'h i f': size, 'n i m': size, 'g i N': size, 'h a g': size, 's i N': size, 'n i n': size, 'f i m': size, 's i s': size, 'h i s': size, 'n a s': size, 'k a s': size, 'f i s': size, 'n i f': size, 'm i n': size, 's a s': size, 'f a g': size, 'k a g': size, 'k a f': size, 's a m': size, 'n a f': size, 'n a g': size, 'm i N': size, 's a g': size, 'f i k': size, 'k a m': size, 'n a n': size, 's a f': size, 'n a m': size, 'm a s': size, 'h a f': size, 'h a s': size, 'n a N': size, 'm i s': size, 's a n': size, 's a N': size, 'm i k': size, 'f a N': size, 'm i m': size, 'm a g': size, 'm a f': size, 'f i f': size, 'k a N': size, 'h a n': size, 'm a n': size, 'm a m': size, 'm i f': size})]
 
+        for h in break_ctrlc(MHSampler(h0, data, steps=options.steps, trace=False)):
+            # print "\t", h.posterior_score, h
+            topn.add(h)
 
+        return size, set(topn)
 
-            for h in break_ctrlc(MHSampler(h0, data, steps=options.steps, trace=False)):
-                topn.add(h)
-        return set(topn)
-
-    except:
+    except Exception as e:
+        print "*** Exception ignored: ", e
         #if we fail, we can return a blank TopN
-        return messup
+        return size, set()
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Main
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 if __name__ == "__main__":
+    import itertools
     from LOTlib.Inference.Samplers.StandardSample import standard_sample
     from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
     from LOTlib import break_ctrlc
 
     from LOTlib.MPI import MPI_map
-    args=[[x, d] for d in range(1, options.datasize+2,100) for x in range(options.chains)]
+    args=list(itertools.product(range(1, options.datasize+2,100),
+                                range(options.chains),
+                                partitions))
     all_hypotheses=set()
 
-    for top in MPI_map(runparts, args):
-        all_hypotheses.update(top)
+    for ndata, top in MPI_map(runparts, args):
+        for h in top:
+            print ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata, h
+            all_hypotheses.add(h)
 
     import pickle
     pickle.dump(all_hypotheses, open(options.filename, "wb"))

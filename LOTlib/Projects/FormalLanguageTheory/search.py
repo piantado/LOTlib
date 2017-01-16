@@ -1,6 +1,8 @@
 """
     This version incrementally adds symbols and then does not change them.
 
+    Todo: show highest prob "mistake" strings
+
 """
 import sys
 import codecs
