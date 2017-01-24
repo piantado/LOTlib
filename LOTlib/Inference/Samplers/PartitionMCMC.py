@@ -13,7 +13,6 @@ from LOTlib import break_ctrlc
 from LOTlib.Miscellaneous import Infinity, infrange
 from LOTlib.Subtrees import trim_leaves
 from LOTlib.Miscellaneous import None2Empty, lambdaNone
-from LOTlib.Inference.Proposals.RegenerationProposal import RegenerationProposal
 
 from MultipleChainMCMC import MultipleChainMCMC
 
@@ -23,11 +22,6 @@ class BreakException(Exception):
     Break out of multiple loops
     """
     pass
-
-# Now we need to define a class to wrap in resample_p so it gets used here.
-class MyProposal(RegenerationProposal):
-    def propose_tree(self, t):
-        return RegenerationProposal.propose_tree(self, t, resampleProbability=lambda x: getattr(x,'resample_p', 1.0))
 
 class PartitionMCMC(MultipleChainMCMC):
     """
@@ -77,7 +71,7 @@ class PartitionMCMC(MultipleChainMCMC):
 
             for n in p.subnodes():
                 # set to not resample these
-                setattr(n, 'resample_p', 0.0) ## NOTE: This is an old version of how proposals were made, but we use it here to store in each node a prob of being resampled
+                setattr(n, 'p_propose', 0.0) ## NOTE: Hypothesis proposals must be sensitive to resample_p for this to work!
 
                 # and fill in the missing leaves with a random generation
                 for i, a in enumerate(n.args):
@@ -88,11 +82,10 @@ class PartitionMCMC(MultipleChainMCMC):
         # initialize each chain
         MultipleChainMCMC.__init__(self, lambdaNone, data, steps=steps, nchains=len(partitions), **kwargs)
 
-
         # And set each to the partition
         for c, p in zip(self.chains, partitions):
             # We need to make sure the proposal_function is set to use resample_p, which is set above
-            v = make_h0(value=p, proposal_function=MyProposal(grammar) )
+            v = make_h0(value=p )
             c.set_state(v, compute_posterior=False) # and make v use the right proposal function
 
 

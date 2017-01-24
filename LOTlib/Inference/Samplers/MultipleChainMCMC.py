@@ -11,7 +11,7 @@ from copy import copy
 
 from LOTlib.Miscellaneous import Infinity
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
-from LOTlib.Inference.Sampler import Sampler
+from LOTlib.Inference.Samplers import Sampler
 
 class MultipleChainMCMC(Sampler):
     
