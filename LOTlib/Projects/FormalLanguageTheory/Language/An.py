@@ -16,4 +16,4 @@ class An(FormalLanguage):
 # just for testing
 if __name__ == '__main__':
     language = An()
-    print language.sample_data(10000)
+    print language.sample_data(100)

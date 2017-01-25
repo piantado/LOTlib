@@ -25,36 +25,38 @@ class FormalLanguage(object):
         """
         raise NotImplementedError
 
-    def estimate_precision_and_recall(self, h, data, truncate=True):
+    def estimate_precision_and_recall(self, h, data, truncate=False):
         """
             the precision and recall of h given a data set, data should be usually large
 
             truncate: ignore those generated strings from h whose lengths exceed the max length in data set, it should
-             be set False in finite vs infinite case.
+             be set False in most case (and must be False in finite vs infinite case).
         """
         output = set(data[0].output.keys())
-        tmp_list = []
-        for _ in xrange(int(sum(data[0].output.values()))):
-            try:
-                tmp_list.append(h())
-            except:
-                tmp_list.append('')
-        h_llcounts = Counter(tmp_list)
+        # tmp_list = []
+        # for _ in xrange(int(sum(data[0].output.values()))):
+        #     try:
+        #         tmp_list.append(h(*data[0]))
+        #     except:
+        #         tmp_list.append('')
+        h_llcounts = h()
         h_out = set(h_llcounts.keys())
 
         if truncate:
             max_len = max(map(len, output))
-            tmp = deepcopy(h_out)
-            for _str in tmp:
-                if len(_str) > max_len:
-                    h_out.remove(_str)
-                    del h_llcounts[_str]
+            # tmp = deepcopy(h_out)
+            # for _str in tmp:
+            #     if len(_str) > max_len:
+            #         h_out.remove(_str)
+            #         del h_llcounts[_str]
+        else:
+            max_len = 0x7fffffff
 
-        base = len(h_out)
+        base = sum(1 for k in h_out if len(k) <= max_len)
         cnt = 0.0
         for v in h_out:
             if v in output: cnt += 1
-        precision = cnt / base
+        precision = 0 if base == 0 else cnt / base
 
         base = len(output)
         cnt = 0.0
