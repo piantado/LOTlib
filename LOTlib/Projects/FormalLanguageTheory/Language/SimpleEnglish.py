@@ -16,10 +16,9 @@ class SimpleEnglish(FormalLanguage):
         self.grammar.add_rule('AP', 'a%s', ['AP'], 1.0)
         self.grammar.add_rule('AP', 'a', None, 3.0)
 
-        self.grammar.add_rule('NP', '%s%s', ['NP', 'PP'], 1.0) # a little ambiguity
-        self.grammar.add_rule('VP', '%s%s', ['VP', 'PP'], 1.0)
-
-        self.grammar.add_rule('PP', 'p%s', ['NP'], 1.0)
+        #self.grammar.add_rule('NP', '%s%s', ['NP', 'PP'], 1.0) # a little ambiguity
+        #self.grammar.add_rule('VP', '%s%s', ['VP', 'PP'], 1.0)
+        #self.grammar.add_rule('PP', 'p%s', ['NP'], 1.0)
 
         self.grammar.add_rule('VP', 'v', None, 2.0) # intransitive
         self.grammar.add_rule('VP', 'v%s', ['NP'], 1.0) # transitive

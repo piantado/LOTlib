@@ -82,7 +82,7 @@ def run(options, ndata):
 if __name__ == "__main__":
     """
         example:
-            mpiexec -n 12 python my_search_stp.py --language=SimpleEnglish --steps=100000
+            mpiexec -n 12 python search.py --language=SimpleEnglish --steps=100000
     """
     # ========================================================================================================
     # Process command line arguments /
@@ -110,7 +110,7 @@ if __name__ == "__main__":
         display_option_summary(options)
         sys.stdout.flush()
 
-    DATA_RANGE = np.exp(np.linspace(np.log(options.datamin), np.log(options.datamax), num=options.ndata))# [1000] # np.arange(1, 1000, 1)
+    DATA_RANGE = [10000] # np.exp(np.linspace(np.log(options.datamin), np.log(options.datamax), num=options.ndata))# [1000] # np.arange(1, 1000, 1)
     random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))

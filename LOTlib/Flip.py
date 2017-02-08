@@ -115,13 +115,12 @@ def compute_outcomes(f, *args, **kwargs):
 
     i = 0
     while len(cs) > 0:
-        context = cs.pop()  # pop an element from Context set. TODO: We should probably do a heapq of the highest probability sequences
+        context = cs.pop()  # pop an element from Context set.
         # print "CTX", context.lp, context#, "  \t", cs.Q
 
         try:
-
-            # does C go at the beginning or the end?
-            if kwargs.get('Cfirst', True):
+            # figure out the ordering of where C is passed to the lambda
+            if kwargs.get('Cfirst', True):# does C go at the beginning or the end?
                 v = f(context, *args) # when we call context.flip, we may update cs with new paths to explore
             else:
                 newargs = args + (context,)

@@ -32,14 +32,14 @@ class InnerHypothesis(LOTHypothesis):
         return ret, fb
 
 
-class IncrementalLexiconHypothesis( MultinomialLikelihoodLogLongestSubstring, SimpleLexicon):
+class IncrementalLexiconHypothesis( MultinomialLikelihoodLog, SimpleLexicon):
         """ A hypothesis where we can incrementally add words """
 
         def __init__(self, grammar=None, **kwargs):
             SimpleLexicon.__init__(self,  maxnodes=50, **kwargs)
             self.grammar=grammar # the base gramar (with 0 included); we copy and add in other recursions on self.deepen()
             self.N = 0 # the number of meanings we have
-            # self.outlier = -1000.0 # read in MultinomialLikelihood
+            self.outlier = -1000.0 # read in MultinomialLikelihood
             self.max_total_calls = 10 # this is the most internal recurse_ calls we can do without raising an exception It gets increased every deepen()
             self.total_calls = 0
             self.distance = 100.0 # penalize
@@ -117,6 +117,6 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLogLongestSubstring, Si
             assert self.N > 0, "*** Cannot call IncrementalLexiconHypothesis unless N>0"
             # print ">>>>>>", self
             try:
-                return compute_outcomes(self.reset_and_call, self.N-1, '',  catchandpass=(RecursionDepthException, TooBigException, StringLengthException))
+                return compute_outcomes(self.reset_and_call, self.N-1, '',  maxcontext=100, maxit=250, catchandpass=(RecursionDepthException, TooBigException, StringLengthException))
             except TooManyContextsException:
                 return {'':0.0} # return nothing
