@@ -10,8 +10,9 @@ from LOTlib.Flip import *
 from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import *
 from LOTlib.Hypotheses.Lexicon.SimpleLexicon import SimpleLexicon
 from LOTlib.Primitives.Strings import StringLengthException
+from LOTlib.Hypotheses.Proposers.InsertDeleteRegenerationProposer import InsertDeleteRegenerationProposer
 
-class InnerHypothesis(LOTHypothesis):
+class InnerHypothesis(InsertDeleteRegenerationProposer, LOTHypothesis):
     """s
     The type of each function F. This is NOT recursive, but it does allow recurse_ (to refer to the whole lexicon)
     """
@@ -49,7 +50,7 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLog, SimpleLexicon):
 
         @attrmem('prior')
         def compute_prior(self):
-            return SimpleLexicon.compute_prior(self) + self.N * log(2.0)/self.prior_temperature # coin flip for each additional word
+            return SimpleLexicon.compute_prior(self) - self.N * log(2.0)/self.prior_temperature # coin flip for each additional word
 
         def propose(self):
 
@@ -57,8 +58,8 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLog, SimpleLexicon):
 
             while True:
                 try:
-                    # i = sample_one(range(self.N)) # random one
-                    i = max(self.value.keys()) # only propose to last
+                    i = sample_one(range(self.N)) # random one
+                    # i = max(self.value.keys()) # only propose to last
                     x, fb = self.get_word(i).propose()
                     new.set_word(i, x)
 
@@ -79,7 +80,7 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLog, SimpleLexicon):
 
             initfn                 = grammar.get_rule_by_name('', nt='START').make_FunctionNodeStub(grammar, None)
             initfn.args[0]         = grammar.get_rule_by_name("lex_(C, %s, %s)").make_FunctionNodeStub(grammar, initfn)
-            initfn.args[0].args[0] = grammar.get_rule_by_name('%s' % (self.N-1)).make_FunctionNodeStub(grammar, initfn.args[0])
+            initfn.args[0].args[0] = grammar.get_rule_by_name('%s' % (self.N-1), nt='SELFF').make_FunctionNodeStub(grammar, initfn.args[0])
             initfn.args[0].args[1] = grammar.get_rule_by_name('x').make_FunctionNodeStub(grammar, initfn.args[0])
 
             self.set_word(self.N, self.make_hypothesis(value=initfn, grammar=grammar)) # set N to what it should, using our new grammar
@@ -117,6 +118,6 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLog, SimpleLexicon):
             assert self.N > 0, "*** Cannot call IncrementalLexiconHypothesis unless N>0"
             # print ">>>>>>", self
             try:
-                return compute_outcomes(self.reset_and_call, self.N-1, '',  maxcontext=100, maxit=250, catchandpass=(RecursionDepthException, TooBigException, StringLengthException))
+                return compute_outcomes(self.reset_and_call, self.N-1, '',  maxcontext=500, maxit=1500, catchandpass=(RecursionDepthException, TooBigException, StringLengthException))
             except TooManyContextsException:
                 return {'':0.0} # return nothing

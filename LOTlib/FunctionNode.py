@@ -432,12 +432,6 @@ class FunctionNode(object):
 
         r = random() * Z # now select a random number (giving a random node)
 
-        # for t in self:
-        #     trp = float(resampleProbability(t))
-        #     r -= trp
-        #     print "\t", r, trp, t
-        #
-
         for t in self:
             trp = float(resampleProbability(t))
             r -= trp

@@ -11,6 +11,7 @@ import operator
 from copy import copy
 from LOTlib import break_ctrlc
 from pickle import dump
+from math import log
 from copy import deepcopy
 import random
 import numpy as np
@@ -26,7 +27,7 @@ from LOTlib.MPI import is_master_process, MPI_unorderedmap
 from Model import IncrementalLexiconHypothesis
 from LOTlib.Projects.FormalLanguageTheory.Grammar import base_grammar # passed in as kwargs
 
-LARGE_SAMPLE = 100000 # sample this many and then re-normalize to fractional counts
+LARGE_SAMPLE = 10000 #100000 # sample this many and then re-normalize to fractional counts
 
 def run(options, ndata):
     if LOTlib.SIG_INTERRUPTED:
@@ -34,10 +35,24 @@ def run(options, ndata):
 
     language = eval(options.LANG+"()")
     data = language.sample_data(LARGE_SAMPLE)
+
+    # Now transform the data to prefix counts (if we want this)
+    # from collections import Counter
+    # from LOTlib.DataAndObjects import FunctionData
+    # newdata = Counter()
+    # for k,v in data[0].output.items():
+    #     newdata[k[:5]] += v
+    # data = [FunctionData(input=[], output=newdata)]
+    # print data[0]
+
+
     assert len(data) == 1
     # renormalize the counts
     for k in data[0].output.keys():
         data[0].output[k] = float(data[0].output[k] * ndata) / LARGE_SAMPLE
+
+    z = sum(data[0].output.values())
+    best_ll = sum([ (p/z)*log(p/z) for p in data[0].output.values() ])
 
     # Now add the rules to the grammar
     grammar = deepcopy(base_grammar)
@@ -58,6 +73,7 @@ def run(options, ndata):
 
         # now run mcmc
         for h in break_ctrlc(MHSampler(h0, data, steps=options.STEPS)):
+            h.best_ll = best_ll # just store this
             tn.add(copy(h))
 
             if options.TRACE:
@@ -110,14 +126,14 @@ if __name__ == "__main__":
         display_option_summary(options)
         sys.stdout.flush()
 
-    DATA_RANGE = [10000] # np.exp(np.linspace(np.log(options.datamin), np.log(options.datamax), num=options.ndata))# [1000] # np.arange(1, 1000, 1)
+    DATA_RANGE = np.exp(np.linspace(np.log(options.datamin), np.log(options.datamax), num=options.ndata))# [1000] # np.arange(1, 1000, 1)
     random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))
 
     for ndata, tn in MPI_unorderedmap(run, args):
         for h in tn:
-            print ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata
+            print ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata, h.best_ll
             v = h()
             sortedv = sorted(v.items(), key=operator.itemgetter(1), reverse=True)
             print "{" + ', '.join(["'%s':%s" % i for i in sortedv]) + "}"

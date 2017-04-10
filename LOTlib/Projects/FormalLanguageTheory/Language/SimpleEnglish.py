@@ -24,10 +24,10 @@ class SimpleEnglish(FormalLanguage):
         self.grammar.add_rule('VP', 'v%s', ['NP'], 1.0) # transitive
         self.grammar.add_rule('VP', 'vt%s', ['S'], 1.0) # v that S
 
-        # self.grammar.add_rule('S', 'i%sh%s', ['S', 'S'], 0.10)  # add if S then S grammar -- seems hard, and unnattural to get so many
+        self.grammar.add_rule('S', 'i%sh%s', ['S', 'S'], 0.10)  # add if S then S grammar -- seems hard, and unnattural to get so many
 
     def terminals(self):
-        return list('dnavtp')
+        return list('dnavt')
 
 
 # just for testing
