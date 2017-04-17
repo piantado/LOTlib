@@ -118,6 +118,6 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLog, SimpleLexicon):
             assert self.N > 0, "*** Cannot call IncrementalLexiconHypothesis unless N>0"
             # print ">>>>>>", self
             try:
-                return compute_outcomes(self.reset_and_call, self.N-1, '',  maxcontext=500, maxit=1500, catchandpass=(RecursionDepthException, TooBigException, StringLengthException))
+                return compute_outcomes(self.reset_and_call, self.N-1, '',  maxcontext=500, maxit=500, catchandpass=(RecursionDepthException, TooBigException, StringLengthException))
             except TooManyContextsException:
                 return {'':0.0} # return nothing

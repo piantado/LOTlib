@@ -9,7 +9,7 @@ class SimpleEnglish(FormalLanguage):
 
     def __init__(self):
         self.grammar = Grammar(start='S')
-        self.grammar.add_rule('S', '%s%s', ['NP', 'VP'], 2.0)
+        self.grammar.add_rule('S', '%s%s', ['NP', 'VP'], 4.0)
         self.grammar.add_rule('NP', 'd%sn', ['AP'], 1.0)
         self.grammar.add_rule('NP', 'dn', None, 1.0)
         self.grammar.add_rule('NP', 'n', None, 2.0)
@@ -24,7 +24,7 @@ class SimpleEnglish(FormalLanguage):
         self.grammar.add_rule('VP', 'v%s', ['NP'], 1.0) # transitive
         self.grammar.add_rule('VP', 'vt%s', ['S'], 1.0) # v that S
 
-        self.grammar.add_rule('S', 'i%sh%s', ['S', 'S'], 0.10)  # add if S then S grammar -- seems hard, and unnattural to get so many
+        #self.grammar.add_rule('S', 'i%sh%s', ['S', 'S'], 1.0)  # add if S then S grammar -- seems hard, and unnattural to get so many
 
     def terminals(self):
         return list('dnavt')

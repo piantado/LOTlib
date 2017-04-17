@@ -131,14 +131,19 @@ if __name__ == "__main__":
 
     args = list(itertools.product([options], DATA_RANGE))
 
+    hypotheses = set()
     for ndata, tn in MPI_unorderedmap(run, args):
         for h in tn:
+            hypotheses.add(h)
             print ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata, h.best_ll
             v = h()
             sortedv = sorted(v.items(), key=operator.itemgetter(1), reverse=True)
             print "{" + ', '.join(["'%s':%s" % i for i in sortedv]) + "}"
             print h  # must add \0 when not Lexicon
     sys.stdout.flush()
+
+    with open(options.OUT+"/hypotheses-"+options.LANG+".pkl", 'w') as f:
+        dump(hypotheses, f)
 
     # with open(options.OUT+"/hypotheses-"+options.LANG+".pkl", 'w') as f:
     #     unq = set()

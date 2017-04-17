@@ -1,9 +1,5 @@
 """
-Here is a version where the string operations manipulate dictionaries mapping strings to probabilities.
-This prevents us from having to simulate everything. NOTE: It requires RecursionDepthException to
-be handled as generating empty string
-
-TODO: Add BOOL -- and or not, equality, etc.
+This version uses Flip.py
 
 """
 
@@ -14,29 +10,12 @@ base_grammar.add_rule('START', '', ['LIST'], 1.0)
 
 base_grammar.add_rule('LIST', '(%s if %s else %s)', ['LIST', 'BOOL', 'LIST'], 1.)
 
-base_grammar.add_rule('LIST', 'strcons_', ['LIST', 'LIST'], 3.)
-
-# temporarily removed these because they make everything much more complex, unnecessarily so?
-# But they are needed for anbncn, right? Perhaps we can just enable recursion on emptry string or strcdr(x)?
-# so that we simplify the search process a lot?
+base_grammar.add_rule('LIST', 'strcons_', ['LIST', 'LIST'], 3.) # upweighted to help in search/proposals
 base_grammar.add_rule('LIST', 'strcdr_', ['LIST'], 1.)
 base_grammar.add_rule('LIST', 'strcar_', ['LIST'], 1.)
 
-
-from LOTlib.Eval import primitive
-
-# @primitive
-# def insert_(l,s,i):
-#     return l[:i]+s+l[i:]
-#
-# base_grammar.add_rule('LIST', 'insert_', ['LIST', 'LIST', 'POSITION'], 1.)
-# for n in xrange(1,5):
-#     base_grammar.add_rule('POSITION', str(n), None, 1.0)
-
 base_grammar.add_rule('LIST', '', ['ATOM'], 3.0) # Terminals
 base_grammar.add_rule('LIST', 'x', None, 3.0) # the argument
-
-# base_grammar.add_rule('ATOM', "\'\'", None, 1.0)
 
 base_grammar.add_rule('BOOL', 'empty_', ['LIST'], 1.)
 base_grammar.add_rule('BOOL', 'C.flip(p=%s)', ['PROB'], 1.) # flip within a context
