@@ -24,9 +24,10 @@ hypotheses = list(set([MyHypothesis(grammar=grammar, maxnodes=100) for _ in xran
 
 from LOTlib.GrammarInference.Precompute import create_counts
 
-trees = [h.value for h in hypotheses]
+# Decide which rules to use
+which_rules = [r for r in grammar if r.nt not in ['START']]
 
-nt2counts, sig2idx, prior_offset = create_counts(grammar, trees, log=None)
+counts, sig2idx, prior_offset = create_counts(grammar, hypotheses, which_rules=which_rules)
 
 print "# Computed counts for each hypothesis & nonterminal"
 
@@ -90,24 +91,13 @@ for h in hypotheses:
     # Note that since we model a response after data[0] AND data[1], we must include_last
     predll = h.compute_predictive_likelihood(data, include_last=True)
 
-    for l in xrange(len(predll)):
+    for i in xrange(len(data)):
         for o in objects:
             output.append( 1.0 * h(o) ) # give this hypothesis' output to the object
-            L.append(l)             # what was the likelihood on all previous data for that output?
+            L.append(predll[i])             # what was the likelihood on all previous data for that output?
 
     assert len(L) == len(output)
 
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Take into account the likelihoods in our inference
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-from LOTlib.GrammarInference import create_counts
-
-# Decide which rules to use
-which_rules = [r for r in grammar if r.nt not in ['START']]
-
-counts, sig2idx, prior_offset = create_counts(grammar, hypotheses, which_rules=which_rules)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Export
@@ -119,9 +109,9 @@ import h5py
 import numpy
 
 # stack together counts
-kys = nt2counts.keys()
-ntlen = [len(nt2counts[k][0]) for k in kys] # store how long each
-counts = numpy.concatenate([nt2counts[k] for k in kys], axis=1)
+kys = counts.keys()
+ntlen = [len(counts[k][0]) for k in kys] # store how long each
+counts = numpy.concatenate([counts[k] for k in kys], axis=1)
 NHyp = len(hypotheses)
 
 print "const int NRULES = %s;" % sum(ntlen)
