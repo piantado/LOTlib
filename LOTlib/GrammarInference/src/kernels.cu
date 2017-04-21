@@ -47,15 +47,28 @@ __global__ void compute_human_likelihood(float alpha, float beta, float pt, floa
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if(idx >= Ndata) { return; }
     
-    // logsumexp normalizing constant Z 
+    // first normalize the prior, using logsumexp 
     float mx = -1.0/0.0;
     for(int h=0;h<Nhyp;h++) {
-        float v = prior[h]/pt+likelihood[Ndata*h + idx]/lt;
+        float v = prior[h]/pt;
         if(v>mx) { mx=v; }
     }
     float sm = 0.0;
     for(int h=0;h<Nhyp;h++) {
-        sm += expf(prior[h]/pt+likelihood[Ndata*h + idx]/lt - mx);
+        sm += expf(prior[h]/pt- mx);
+    }
+    float priorZ = mx+logf(sm);    /// normalizing constant
+
+    
+    // logsumexp normalizing constant Z 
+    mx = -1.0/0.0;
+    for(int h=0;h<Nhyp;h++) {
+        float v = prior[h]/pt-priorZ+likelihood[Ndata*h + idx]/lt;
+        if(v>mx) { mx=v; }
+    }
+    sm = 0.0;
+    for(int h=0;h<Nhyp;h++) {
+        sm += expf(prior[h]/pt-priorZ+likelihood[Ndata*h + idx]/lt - mx);
     }
     float Z = mx+logf(sm);    /// normalizing constant
 
