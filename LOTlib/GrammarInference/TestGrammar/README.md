@@ -1,0 +1,1 @@
+This creates test data for grammar inference with a specified known prior, which we can then try to recover from behavioral responses.

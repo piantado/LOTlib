@@ -495,7 +495,7 @@ def weighted_sample(objs, N=1, probs=None, log=False, return_probability=False, 
         objs = list(objs)
 
     myprobs = None
-    if probs is None:   # Defaultly, we use .lp
+    if probs is None:
         myprobs = [1.0] * len(objs)     # Sample uniform
     elif isinstance(probs, types.FunctionType) or isinstance(probs, types.UnboundMethodType):     # Note: this does not work for class instance methods
         myprobs = map(probs, objs)
