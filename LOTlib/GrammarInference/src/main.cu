@@ -41,14 +41,14 @@ const int N_BLOCKS = 1024; // set below
 // -----------------------------------------------------------------------     
 
 // NOTE: If a future change lets us fit these, we need to add normalizing constants to the code below
-const float TEMPERATURE_k = 2.0;
+const float TEMPERATURE_k = 2.0; // mean is k*theta, variance is k*theta^2
 const float TEMPERATURE_theta = 0.5; 
 
 // the k and theta on grammar productions x
 const float RR_GAMMA_K = 2.0;
 const float RR_GAMMA_THETA = 0.5;
 
-float PCFG_DIRICHLET_ALPHA = 0.5;
+float PCFG_DIRICHLET_ALPHA = 1.0;
 
 const int NPARAMS = 4; // number of free parameters in fitting (alpha, beta, priortemp, lltemp)
 
@@ -120,6 +120,7 @@ double lgammapdf(float x, float k, float theta) {
 }
 
 double ldirichletpdf(float x, float alpha) {
+    // ignores normalizing constant
     return log(x)*(alpha-1.0);
 }
 
@@ -164,6 +165,7 @@ int main(int argc, char** argv) {
                     default: return 1; // unspecified
             }
     
+
     // -----------------------------------------------------------------------
     // Initialize the GPU
     // -----------------------------------------------------------------------
@@ -268,9 +270,9 @@ int main(int argc, char** argv) {
     int human_ll_size = NDATA*sizeof(float);
     DEVARRAY(float, human_ll, human_ll_size)
 
-    float tmp_size =  NHYP*sizeof(float);
-    float* tmp = new float[NHYP];
-    DEVARRAY(float, tmp, tmp_size)
+    float tmp_size =  NHYP*NDATA*sizeof(double);
+    double* tmp = new double[NHYP*NDATA];
+    DEVARRAY(double, tmp, tmp_size)
     
     // save old values when we propose
     float oldx[NRULES]; // used for copying and saving old version
@@ -337,7 +339,12 @@ int main(int argc, char** argv) {
         
             error = cudaGetLastError();
             if(error != cudaSuccess) {  printf("CUDA error (in likelihood): %s\n", cudaGetErrorString(error)); break; }	
-
+/*
+            for(int i=0;i<NDATA;i++) {
+                cout << i <<" " << human_ll[i] << " " << endl;
+            }
+            return 0;*/
+            
             // -------------------------------------------------------------------
             // Now compute the posterior
             proposal = 0.0; // the proposal probability

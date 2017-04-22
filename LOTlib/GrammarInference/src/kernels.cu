@@ -37,43 +37,47 @@ __global__ void compute_RR_prior(float* x, int* counts, float* to, int Nhyp, int
     to[idx] = lp;    
 }
 
-__device__ double logsumexp(float* x, const int n) {
+__device__ double logsumexp(int idx, int ndata, double* x, const int n) {
     double mx = -1.0/0.0; // the max
     for(int i=0;i<n;i++) {
-        if(x[i]>mx) { mx=x[i]; }
+        if(x[ndata*i+idx]>mx) { mx=x[ndata*i+idx]; }
     }
     
     // TODO: Should be sorted
     double sum = 0.0;
     for(int i=0;i<n;i++) {
-        sum += expf(x[i]-mx);
+        sum += exp((double)x[ndata*i+idx]-mx);
     }  
-    return logf(sum)+mx;
+    return log(sum)+mx;
 
 }
 
 __global__ void compute_human_likelihood(float alpha, float beta, float pt, float lt,
                                          float* prior, float* likelihood, float* output, 
                                          int* human_yes, int* human_no, float* to,
-                                         float* tmp, int Nhyp,int Ndata) {
- 
+                                         double* tmp, int Nhyp,int Ndata) {
+    
     // now, idx will run over data points and each thread will add its own hypotheses
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if(idx >= Ndata) { return; }
     
-    for(int h=0;h<Nhyp;h++) tmp[h] = prior[h]/pt;
-    float priorZ = logsumexp(tmp,Nhyp);    /// normalizing constant
+    for(int h=0;h<Nhyp;h++) 
+        tmp[Ndata*h+idx] = prior[h]/pt;
+    float priorZ = logsumexp(idx,Ndata, tmp,Nhyp);    /// normalizing constant
     
     // the log posterior normalizing constant 
-    for(int h=0;h<Nhyp;h++) tmp[h] = prior[h]/pt-priorZ+likelihood[Ndata*h + idx]/lt;
-    float Z = logsumexp(tmp, Nhyp);
-
+    for(int h=0;h<Nhyp;h++) 
+        tmp[Ndata*h+idx] = prior[h]/pt-priorZ+likelihood[Ndata*h + idx]/lt;
+    float Z = logsumexp(idx,Ndata, tmp, Nhyp);
+    
     // now compute the p human data
     float pyes=0.0;
     for(int h=0;h<Nhyp;h++) {
-        pyes += output[Ndata*h + idx] * expf(prior[h]/pt-priorZ+likelihood[Ndata*h + idx]/lt - Z); // weighted average over hypotheses
+        pyes += output[Ndata*h + idx] * expf(prior[h]/pt-priorZ + likelihood[Ndata*h + idx]/lt - Z); // weighted average over hypotheses
+//         pyes += exp(prior[h]/pt-priorZ + likelihood[Ndata*h + idx]/lt - Z); // weighted average over hypotheses
     }
     
+//     to[idx] = pyes;
     to[idx] = human_yes[idx] * logf(      pyes*alpha  + (1.0-alpha)*beta) + \
               human_no[idx]  * logf( (1.0-pyes)*alpha + (1.0-alpha)*(1.0-beta));
 }

@@ -8,6 +8,8 @@ from LOTlib import break_ctrlc
 NDATASETS = 30  # how many "Sequences" do we train people on?
 DATASET_SIZE = 10 # how long is each sequence?
 NPEOPLE = 50
+ALPHA = 0.9
+BETA  = 0.3 # yes-bias on noise
 
 SHAPES = ['square', 'triangle', 'rectangle']
 COLORS = ['blue', 'red', 'green']
@@ -62,6 +64,7 @@ for t in grammar.enumerate(d=4):
 
 from LOTlib.DataAndObjects import FunctionData, make_all_objects
 from LOTlib.Miscellaneous import sample_one
+from random import random
 
 all_objects = make_all_objects( shape=SHAPES, color=COLORS )
 
@@ -74,8 +77,13 @@ for di in xrange(NDATASETS):
     print "# Target:", target
     data = []
     for _ in xrange(DATASET_SIZE):
-        o = sample_one(all_objects)
-        data.append( FunctionData(input=[o], output=target(o), alpha=0.90) )
+        obj = sample_one(all_objects)
+        if random() < ALPHA:
+            output = target(obj)
+        else:
+            output = random() < BETA
+
+        data.append( FunctionData(input=[obj], output=output, alpha=ALPHA) )
 
     datas.append(data)
 
