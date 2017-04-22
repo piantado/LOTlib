@@ -2,7 +2,7 @@
 # error while loading shared libraries: libcudart.so.2: cannot open shared object file: No such file or directory
 # then you must add the cuda library to your path, as in export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-7.0/lib64
 
-CUDA_VERSION=8.0
+CUDA_VERSION=7.0
 
 CUDA_SAMPLES_INCLUDE=/usr/local/cuda/samples/common/inc/
 CUDA_INCLUDE=/usr/local/cuda/lib64 

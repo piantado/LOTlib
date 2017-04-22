@@ -3,6 +3,7 @@
     Todo: 
         -Add prior offset
         -Should the prior be renormalized or not?
+        - change the prior on teh params depending on whether its rr (gamma) or pcfg (dirichlet)
 */
 #include <stdio.h>
 #include <time.h>
@@ -14,7 +15,7 @@
 // for CUDA
 #include <cuda_runtime.h>
 #include <helper_functions.h>
-#include "cuPrintf.cu" //!
+//#include "cuPrintf.cu" //!
 
 // for randomness
 #include <boost/random.hpp>
@@ -44,8 +45,10 @@ const float TEMPERATURE_k = 2.0;
 const float TEMPERATURE_theta = 0.5; 
 
 // the k and theta on grammar productions x
-const float x_k = 2.0;
-const float x_theta = 0.5;
+const float RR_GAMMA_K = 2.0;
+const float RR_GAMMA_THETA = 0.5;
+
+float PCFG_DIRICHLET_ALPHA = 0.5;
 
 const int NPARAMS = 4; // number of free parameters in fitting (alpha, beta, priortemp, lltemp)
 
@@ -58,7 +61,8 @@ int STEPS = 1000000;
 int THIN  = 1000;
 int NCHAINS = 4;
 int WHICH_GPU = 0;
-float XSCALE = 0.1; // scale of proposals to X
+float X_PROPOSAL_SCALE = 0.1; // scale of proposals to X
+float PARAM_PROPOSAL_SCALE = 0.1; // scale of proposals to all parameters
 string in_file_path = "data.h5"; 
 bool DO_RR = 0; // do rational rules or pcfg?
 bool start1 = 0; // should we start at 1 or randomly initialize?
@@ -115,6 +119,10 @@ double lgammapdf(float x, float k, float theta) {
     return log(x)*(k-1.0) - x/theta;
 }
 
+double ldirichletpdf(float x, float alpha) {
+    return log(x)*(alpha-1.0);
+}
+
 void normalize_by_nonterminals(float* x, int NRULES, int NNT, int* ntlen){
     // renormalize a vector by its 
     int xi=0;
@@ -149,7 +157,7 @@ int main(int argc, char** argv) {
                     case 't': THIN = atoi(optarg); break;
                     case 'g': WHICH_GPU = atoi(optarg); break;
                     case 'c': NCHAINS = atoi(optarg); break;
-                    case 'x': XSCALE = atof(optarg); break;
+                    case 'x': X_PROPOSAL_SCALE = atof(optarg); break;
                     case '1': start1 = 1; break;
                     case 'r': DO_RR = 1; break;
                     case 'p': DO_RR = 0; break;
@@ -259,6 +267,10 @@ int main(int argc, char** argv) {
     float* human_ll = new float[NDATA];
     int human_ll_size = NDATA*sizeof(float);
     DEVARRAY(float, human_ll, human_ll_size)
+
+    float tmp_size =  NHYP*sizeof(float);
+    float* tmp = new float[NHYP];
+    DEVARRAY(float, tmp, tmp_size)
     
     // save old values when we propose
     float oldx[NRULES]; // used for copying and saving old version
@@ -279,12 +291,12 @@ int main(int argc, char** argv) {
             float* x = X[chain]; // which chain are we on?
             float* params = PARAMS[chain];
             
-            int proposetoX = (rng() % 2)==0;   // decide whether to propose to x or something else
+            int proposetoX = steps%10!=0; //(rng() % 2)==0;   // decide whether to propose to x or something else
             if(proposetoX) {
                 
                 int j = rng()%NRULES; // who do I propose to?
                 
-                float v = x[j] + XSCALE * var_nor(); // make a proposal
+                float v = x[j] + X_PROPOSAL_SCALE * var_nor(); // make a proposal
                 if(v < 0.0) goto REJECT_SAMPLE; 
                 
                 memcpy(oldx, x, x_size); // save the old version
@@ -299,7 +311,7 @@ int main(int argc, char** argv) {
             } else { // otherwise we propose to the parameters
                 int i = rng() % NPARAMS;
                             
-                float v = params[i] + 0.01*var_nor();
+                float v = params[i] + PARAM_PROPOSAL_SCALE*var_nor();
                 if( i <= 1 && (v > 0.999 || v < 0.001) ) goto REJECT_SAMPLE; // deal with bounds
                 if( i >= 2 && (v < 0.001) )              goto REJECT_SAMPLE;
 
@@ -320,7 +332,7 @@ int main(int argc, char** argv) {
             if(error != cudaSuccess) {  printf("CUDA error (in prior): %s\n", cudaGetErrorString(error)); break; } 
             
             assert(BLOCK_SIZE*N_BLOCKS > NDATA);
-            compute_human_likelihood<<<N_BLOCKS,BLOCK_SIZE>>>(params[0], params[1], params[2], params[3], device_prior, device_likelihood, device_output, device_human_yes, device_human_no, device_human_ll, NHYP, NDATA);
+            compute_human_likelihood<<<N_BLOCKS,BLOCK_SIZE>>>(params[0], params[1], params[2], params[3], device_prior, device_likelihood, device_output, device_human_yes, device_human_no, device_human_ll, device_tmp, NHYP, NDATA);
             cudaMemcpy(human_ll, device_human_ll, human_ll_size, cudaMemcpyDeviceToHost);
         
             error = cudaGetLastError();
@@ -336,7 +348,10 @@ int main(int argc, char** argv) {
             
             // add up the prior on X
             for(int i=0;i<NRULES;i++) {
-                proposal += lgammapdf(x[i], x_k, x_theta);
+                if(DO_RR)
+                    proposal += lgammapdf(x[i], RR_GAMMA_K, RR_GAMMA_THETA);
+                else
+                    proposal += ldirichletpdf(x[i], PCFG_DIRICHLET_ALPHA);
             }
             
             // now compute the human ll from what CUDA returned
@@ -363,9 +378,11 @@ int main(int argc, char** argv) {
             // -----------------------------------------------------------------------
             
     REJECT_SAMPLE: // we'll skip the memcpy back since x was never set
+    
+    
             if(steps % THIN == 0) {
                 cout << steps << " " << chain << "\t" << current[chain] << "\t" << proposal << "\t";
-                for(int i=0;i<4;i++) { cout << params[i] << " "; }
+                for(int i=0;i<NPARAMS;i++) { cout << params[i] << " "; }
                 cout << "\t";
                 for(int i=0;i<NRULES;i++) { cout << x[i] << " "; }
                 cout << endl;

@@ -5,9 +5,9 @@ Make some test data to try out grammar inference with a known prior
 """
 from LOTlib import break_ctrlc
 
-NDATASETS = 20  # how many "Sequences" do we train people on?
+NDATASETS = 30  # how many "Sequences" do we train people on?
 DATASET_SIZE = 10 # how long is each sequence?
-NPEOPLE = 20
+NPEOPLE = 50
 
 SHAPES = ['square', 'triangle', 'rectangle']
 COLORS = ['blue', 'red', 'green']
@@ -53,7 +53,7 @@ def make_hypothesis(**kwargs):
     return MyHypothesis(**kwargs)
 
 hypotheses = []
-for t in grammar.enumerate(d=3):
+for t in grammar.enumerate(d=4):
     hypotheses.append(make_hypothesis(value=t))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -88,23 +88,23 @@ from LOTlib.Miscellaneous import weighted_sample
 NYes = [0] * (DATASET_SIZE*NDATASETS) #number of yes/no responses for each
 NNo  = [0] * (DATASET_SIZE*NDATASETS)
 
-for person in break_ctrlc(xrange(NPEOPLE)):
-    di = 0
-    print "# Simulating person", person
-    for data in datas:
-        for i in xrange(len(data)):
+di = 0
+for datasi, data in enumerate(datas):
+    print "# Simulating data for ", datasi
+    for i in xrange(len(data)):
 
-            # update the posterior
-            for h in hypotheses:
-                h.compute_posterior( [data[j] for j in xrange(i)])
-
-            # sample (if this is the hypothesis)
-            h = weighted_sample(hypotheses, probs=[x.posterior_score for x in hypotheses], log=True)
+        # update the posterior
+        for h in hypotheses:
+            h.compute_posterior( [data[j] for j in xrange(i)])
+        probs = [x.posterior_score for x in hypotheses]
+        # sample (if this is the hypothesis)
+        for person in break_ctrlc(xrange(NPEOPLE)):
+            h = weighted_sample(hypotheses, probs=probs, log=True)
             r = h(*data[i].input)            # and use it to respond to the next one
             if r: NYes[di] += 1
             else: NNo[di]  += 1
 
-            di += 1
+        di += 1
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

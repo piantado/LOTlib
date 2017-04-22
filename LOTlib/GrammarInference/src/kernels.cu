@@ -37,45 +37,41 @@ __global__ void compute_RR_prior(float* x, int* counts, float* to, int Nhyp, int
     to[idx] = lp;    
 }
 
+__device__ double logsumexp(float* x, const int n) {
+    double mx = -1.0/0.0; // the max
+    for(int i=0;i<n;i++) {
+        if(x[i]>mx) { mx=x[i]; }
+    }
+    
+    // TODO: Should be sorted
+    double sum = 0.0;
+    for(int i=0;i<n;i++) {
+        sum += expf(x[i]-mx);
+    }  
+    return logf(sum)+mx;
 
+}
 
 __global__ void compute_human_likelihood(float alpha, float beta, float pt, float lt,
                                          float* prior, float* likelihood, float* output, 
-                                         int* human_yes, int* human_no, float* to, int Nhyp, int Ndata) {
+                                         int* human_yes, int* human_no, float* to,
+                                         float* tmp, int Nhyp,int Ndata) {
  
     // now, idx will run over data points and each thread will add its own hypotheses
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if(idx >= Ndata) { return; }
     
-    // first normalize the prior, using logsumexp 
-    float mx = -1.0/0.0;
-    for(int h=0;h<Nhyp;h++) {
-        float v = prior[h]/pt;
-        if(v>mx) { mx=v; }
-    }
-    float sm = 0.0;
-    for(int h=0;h<Nhyp;h++) {
-        sm += expf(prior[h]/pt- mx);
-    }
-    float priorZ = mx+logf(sm);    /// normalizing constant
-
+    for(int h=0;h<Nhyp;h++) tmp[h] = prior[h]/pt;
+    float priorZ = logsumexp(tmp,Nhyp);    /// normalizing constant
     
-    // logsumexp normalizing constant Z 
-    mx = -1.0/0.0;
-    for(int h=0;h<Nhyp;h++) {
-        float v = prior[h]/pt-priorZ+likelihood[Ndata*h + idx]/lt;
-        if(v>mx) { mx=v; }
-    }
-    sm = 0.0;
-    for(int h=0;h<Nhyp;h++) {
-        sm += expf(prior[h]/pt-priorZ+likelihood[Ndata*h + idx]/lt - mx);
-    }
-    float Z = mx+logf(sm);    /// normalizing constant
+    // the log posterior normalizing constant 
+    for(int h=0;h<Nhyp;h++) tmp[h] = prior[h]/pt-priorZ+likelihood[Ndata*h + idx]/lt;
+    float Z = logsumexp(tmp, Nhyp);
 
     // now compute the p human data
     float pyes=0.0;
     for(int h=0;h<Nhyp;h++) {
-        pyes += output[Ndata*h + idx] * expf(prior[h]/pt+likelihood[Ndata*h + idx]/lt - Z); // weighted average over hypotheses
+        pyes += output[Ndata*h + idx] * expf(prior[h]/pt-priorZ+likelihood[Ndata*h + idx]/lt - Z); // weighted average over hypotheses
     }
     
     to[idx] = human_yes[idx] * logf(      pyes*alpha  + (1.0-alpha)*beta) + \
