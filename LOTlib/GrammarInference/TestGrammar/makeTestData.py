@@ -22,22 +22,27 @@ from LOTlib.Grammar import Grammar
 from LOTlib.Miscellaneous import q
 
 # Set up the grammar
-# Here, we create our own instead of using DefaultGrammars.Nand because
-# we don't want a BOOL/PREDICATE distinction
 grammar = Grammar()
 
-grammar.add_rule('START', '', ['BOOL'], 1.0)
+grammar.add_rule('START', '', ['BOOL'],  0.7)
+grammar.add_rule('START', 'True',  None, 0.2)
+grammar.add_rule('START', 'False', None, 0.1)
 
-grammar.add_rule('BOOL', 'and_', ['BOOL', 'BOOL'],  5.)
-grammar.add_rule('BOOL', 'or_', ['BOOL', 'BOOL'],   1.)
-grammar.add_rule('BOOL', 'not_', ['BOOL'],          2.)
+grammar.add_rule('BOOL', 'and_',     ['BOOL', 'BOOL'], 0.1)
+grammar.add_rule('BOOL', 'or_',      ['BOOL', 'BOOL'], 0.05)
+grammar.add_rule('BOOL', 'not_',     ['BOOL'],         0.1)
+grammar.add_rule('BOOL', 'iff_',     ['BOOL', 'BOOL'], 0.049)
+grammar.add_rule('BOOL', 'implies_', ['BOOL', 'BOOL'], 0.01)
+grammar.add_rule('BOOL', '',         ['FEATURE'],      0.7)
 
-# And finally, add the primitives
-for s in SHAPES:
-    grammar.add_rule('BOOL', 'is_shape_', ['x', q(s)], 3.)
+grammar.add_rule('FEATURE', 'is_shape_', ['x', 'SHAPE'], 0.3)
+grammar.add_rule('FEATURE', 'is_color_', ['x', 'COLOR'], 0.7)
 
-for c in COLORS:
-    grammar.add_rule('BOOL', 'is_color_', ['x', q(c)], 5.)
+for i, s in enumerate(SHAPES):
+    grammar.add_rule('SHAPE', '%s'%q(s), None, 2.0 * (i+1))
+
+for i, c in enumerate(COLORS):
+    grammar.add_rule('COLOR', '%s'%q(c), None, 1.0/len(COLORS))
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -55,7 +60,7 @@ def make_hypothesis(**kwargs):
     return MyHypothesis(**kwargs)
 
 hypotheses = []
-for t in grammar.enumerate(d=4):
+for t in grammar.enumerate(d=6):
     hypotheses.append(make_hypothesis(value=t))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -78,6 +83,7 @@ for di in xrange(NDATASETS):
     data = []
     for _ in xrange(DATASET_SIZE):
         obj = sample_one(all_objects)
+
         if random() < ALPHA:
             output = target(obj)
         else:
@@ -108,7 +114,12 @@ for datasi, data in enumerate(datas):
         # sample (if this is the hypothesis)
         for person in break_ctrlc(xrange(NPEOPLE)):
             h = weighted_sample(hypotheses, probs=probs, log=True)
-            r = h(*data[i].input)            # and use it to respond to the next one
+
+            if random() < ALPHA:
+                r =  h(*data[i].input)            # and use it to respond to the next one
+            else:
+                r = random() < BETA
+
             if r: NYes[di] += 1
             else: NNo[di]  += 1
 
@@ -148,7 +159,8 @@ assert len(L) == len(output)
 from LOTlib.GrammarInference import create_counts
 
 # Decide which rules to use
-which_rules = [r for r in grammar if r.nt not in ['START']]
+#which_rules = [r for r in grammar if r.nt not in ['START']] # if we want to exclude start
+which_rules = [r for r in grammar]
 
 counts, sig2idx, prior_offset = create_counts(grammar, hypotheses, which_rules=which_rules)
 
@@ -161,6 +173,7 @@ counts, sig2idx, prior_offset = create_counts(grammar, hypotheses, which_rules=w
 
 import h5py
 import numpy
+from LOTlib.GrammarInference import export_rule_labels
 
 # stack together counts
 kys = counts.keys()
@@ -193,3 +206,10 @@ with h5py.File('data.h5', 'w') as hf:
     hf.create_dataset('human_no',  data=numpy.ravel(NNo, order='C'), dtype=int)
     hf.create_dataset('likelihood',  data=numpy.ravel(L, order='C'), dtype=float)
     hf.create_dataset('ntlen', data=ntlen, dtype=int)
+
+    # these are tab separated since they just get printed by C
+    # we must use numpy.string_ to get it in the right format: http://docs.h5py.org/en/latest/strings.html
+    # C defaultly reads in 1000 bytes
+    #hf.create_dataset('names', data=numpy.string_('\t'.join(r.name for r in which_rules)), dtype="S1000" )
+    # hf.create_dataset('names', data='\t'.join(r.name for r in which_rules), dtype=h5py.special_dtype(vlen=bytes) )
+    hf.create_dataset('names', data=export_rule_labels(which_rules), dtype=int)

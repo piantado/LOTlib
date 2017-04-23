@@ -99,3 +99,28 @@ def create_counts(grammar, hypotheses, which_rules=None, log=None):
                 print >>f, i, x
 
     return counts, sig2idx, prior_offset
+
+def export_rule_labels(which_rules):
+    """ Exports an integer string coding a single line that C will print as a header for the rule names.
+    This uses an integer array because coding char arrays seemed buggy.
+    It takes which_rules so that the order is the same as in the other exported parts
+    """
+
+    out = []
+    for r in which_rules:
+
+        s = ''
+        if r.name is '':
+            s = r.nt
+        else:
+            s = r.name
+
+        if r.to is not None:
+            s += "." + '.'.join(r.to)
+
+        # remove quotes
+        s = re.sub(r"['\"]", "", s)
+
+        out.append(s)
+
+    return [ord(v) for v in '\t'.join(out) + '\0']

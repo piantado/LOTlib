@@ -3,7 +3,6 @@
     Todo: 
         -Add prior offset
         -Should the prior be renormalized or not?
-        - change the prior on teh params depending on whether its rr (gamma) or pcfg (dirichlet)
 */
 #include <stdio.h>
 #include <time.h>
@@ -41,8 +40,8 @@ const int N_BLOCKS = 1024; // set below
 // -----------------------------------------------------------------------     
 
 // NOTE: If a future change lets us fit these, we need to add normalizing constants to the code below
-const float TEMPERATURE_k = 2.0; // mean is k*theta, variance is k*theta^2
-const float TEMPERATURE_theta = 0.5; 
+const float TEMPERATURE_k = 10.0; // mean is k*theta, variance is k*theta^2
+const float TEMPERATURE_theta = 0.1; 
 
 // the k and theta on grammar productions x
 const float RR_GAMMA_K = 2.0;
@@ -57,8 +56,8 @@ const int NPARAMS = 4; // number of free parameters in fitting (alpha, beta, pri
 // -----------------------------------------------------------------------     
 
 // Default parameters
-int STEPS = 1000000;
-int THIN  = 1000;
+int STEPS = 5000000;
+int THIN  = 50;
 int NCHAINS = 4;
 int WHICH_GPU = 0;
 float X_PROPOSAL_SCALE = 0.1; // scale of proposals to X
@@ -233,6 +232,11 @@ int main(int argc, char** argv) {
     LOAD_HDF5(likelihood, H5T_NATIVE_FLOAT)
     DEVARRAY(float, likelihood, likelihood_size)
     
+    char* names_str  = new char[1000]; // load the names for each column, tab separated already from python
+    int* names = new int[1000]; // load as ints since chars are bad
+    LOAD_HDF5(names, H5T_NATIVE_INT)
+    for(int i=0;i<1000;i++) { names_str[i] = (char)names[i]; }
+    
     // -----------------------------------------------------------------------
     // Local variables
     // -----------------------------------------------------------------------
@@ -288,10 +292,15 @@ int main(int argc, char** argv) {
     double proposal; // store the proposal value 
    
     cout << "# Starting MCMC" << endl;
+    
+    // print a header
+    cout << "steps\tchain\tposterior\tproposal\talpha\tbeta\tpriot.temp\tll.temp\t" << names_str << endl;
+            
     for(int steps=0;steps<STEPS;steps++) {
         for(int chain=0;chain<NCHAINS;chain++) {
             float* x = X[chain]; // which chain are we on?
             float* params = PARAMS[chain];
+            params[2] = 1.0;
             
             int proposetoX = steps%10!=0; //(rng() % 2)==0;   // decide whether to propose to x or something else
             if(proposetoX) {
@@ -386,7 +395,7 @@ int main(int argc, char** argv) {
             
     REJECT_SAMPLE: // we'll skip the memcpy back since x was never set
     
-    
+            
             if(steps % THIN == 0) {
                 cout << steps << " " << chain << "\t" << current[chain] << "\t" << proposal << "\t";
                 for(int i=0;i<NPARAMS;i++) { cout << params[i] << " "; }
