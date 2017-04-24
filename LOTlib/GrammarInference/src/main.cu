@@ -301,6 +301,7 @@ int main(int argc, char** argv) {
             float* x = X[chain]; // which chain are we on?
             float* params = PARAMS[chain];
             params[2] = 1.0;
+            params[3] = 1.0;
             
             int proposetoX = steps%10!=0; //(rng() % 2)==0;   // decide whether to propose to x or something else
             if(proposetoX) {

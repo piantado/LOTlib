@@ -5,9 +5,9 @@ Make some test data to try out grammar inference with a known prior
 """
 from LOTlib import break_ctrlc
 
-NDATASETS = 30  # how many "Sequences" do we train people on?
-DATASET_SIZE = 10 # how long is each sequence?
-NPEOPLE = 50
+NDATASETS = 50  # how many "Sequences" do we train people on?
+DATASET_SIZE = 20 # how long is each sequence?
+NPEOPLE = 150
 ALPHA = 0.9
 BETA  = 0.3 # yes-bias on noise
 
@@ -30,10 +30,10 @@ grammar.add_rule('START', 'False', None, 0.1)
 
 grammar.add_rule('BOOL', 'and_',     ['BOOL', 'BOOL'], 0.1)
 grammar.add_rule('BOOL', 'or_',      ['BOOL', 'BOOL'], 0.05)
-grammar.add_rule('BOOL', 'not_',     ['BOOL'],         0.1)
-grammar.add_rule('BOOL', 'iff_',     ['BOOL', 'BOOL'], 0.049)
-grammar.add_rule('BOOL', 'implies_', ['BOOL', 'BOOL'], 0.01)
-grammar.add_rule('BOOL', '',         ['FEATURE'],      0.7)
+grammar.add_rule('BOOL', 'not_',     ['BOOL'],         0.025)
+grammar.add_rule('BOOL', 'iff_',     ['BOOL', 'BOOL'], 0.0249)
+grammar.add_rule('BOOL', 'implies_', ['BOOL', 'BOOL'], 0.0001) # if we sample hypotheses (below), we will have high uncertainty on this
+grammar.add_rule('BOOL', '',         ['FEATURE'],      0.8)
 
 grammar.add_rule('FEATURE', 'is_shape_', ['x', 'SHAPE'], 0.3)
 grammar.add_rule('FEATURE', 'is_color_', ['x', 'COLOR'], 0.7)
@@ -54,15 +54,22 @@ from LOTlib.Hypotheses.Likelihoods.BinaryLikelihood import BinaryLikelihood
 
 class MyHypothesis(BinaryLikelihood, LOTHypothesis):
     def __init__(self, grammar=grammar, **kwargs):
-        LOTHypothesis.__init__(self, grammar=grammar, display="lambda x : %s", **kwargs)
+        LOTHypothesis.__init__(self, grammar=grammar, display="lambda x : %s", maxnodes=150, **kwargs)
 
 def make_hypothesis(**kwargs):
     return MyHypothesis(**kwargs)
 
-hypotheses = []
-for t in grammar.enumerate(d=6):
-    hypotheses.append(make_hypothesis(value=t))
+hset = set([make_hypothesis(value=grammar.generate()) for _ in xrange(10000)])
+hypotheses = list(hset)
 
+# for h in hypotheses:
+    # print h
+
+# hypotheses = []
+# for t in grammar.enumerate(d=6):
+#     hypotheses.append(make_hypothesis(value=t))
+
+print "# Generated ", len(hypotheses), " hypotheses"
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Data
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
