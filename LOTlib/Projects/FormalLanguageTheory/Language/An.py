@@ -12,6 +12,12 @@ class An(FormalLanguage):
     def terminals(self):
         return list('a')
 
+    def all_strings(self):
+        n=1
+        while True:
+            yield 'a'*n
+            n += 1
+
 
 # just for testing
 if __name__ == '__main__':

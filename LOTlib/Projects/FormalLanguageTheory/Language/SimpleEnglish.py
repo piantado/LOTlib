@@ -29,6 +29,9 @@ class SimpleEnglish(FormalLanguage):
     def terminals(self):
         return list('dnavt')
 
+    def all_strings(self):
+        for g in self.grammar.enumerate():
+            yield g
 
 # just for testing
 if __name__ == '__main__':

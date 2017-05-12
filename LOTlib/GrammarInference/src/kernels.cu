@@ -74,7 +74,6 @@ __global__ void compute_human_likelihood(float alpha, float beta, float pt, floa
     float pyes=0.0;
     for(int h=0;h<Nhyp;h++) {
         pyes += output[Ndata*h + idx] * expf(prior[h]/pt-priorZ + likelihood[Ndata*h + idx]/lt - Z); // weighted average over hypotheses
-//         pyes += exp(prior[h]/pt-priorZ + likelihood[Ndata*h + idx]/lt - Z); // weighted average over hypotheses
     }
     
 //     to[idx] = pyes;

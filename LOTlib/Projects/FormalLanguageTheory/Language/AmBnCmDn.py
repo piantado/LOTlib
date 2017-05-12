@@ -1,7 +1,12 @@
+import itertools
+from LOTlib.Miscellaneous import partitions
 from FormalLanguage import FormalLanguage
 from LOTlib.Grammar import Grammar
 
 class AmBnCmDn(FormalLanguage):
+    """
+    See Shieber 1985
+    """
 
     def __init__(self):
         self.grammar = Grammar(start='S')
@@ -18,6 +23,14 @@ class AmBnCmDn(FormalLanguage):
         s = str(self.grammar.generate()) # from a^m b^n
         s = s+'c'*s.count('a') + 'd'*s.count('b')
         return s
+
+    def all_strings(self):
+        for r in itertools.count(1):
+            for n,m in partitions(r, 2, 1): # partition into two groups (NOTE: does not return both orders)
+                yield 'a'*n + 'b'*m + 'c'*n + 'd'*m
+                if n != m:
+                    yield 'a'*m + 'b'*n + 'c'*m + 'd'*n
+
 
 # just for testing
 if __name__ == '__main__':

@@ -15,6 +15,12 @@ class AnBnCn(FormalLanguage):
         s = str(self.grammar.generate())
         return s + 'c'*(len(s)/2)
 
+    def all_strings(self):
+        n=1
+        while True:
+            yield 'a'*n + 'b'*n + 'c'*n
+            n += 1
+
 # just for testing
 if __name__ == '__main__':
     language = AnBnCn()

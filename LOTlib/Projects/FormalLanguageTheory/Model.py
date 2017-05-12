@@ -1,4 +1,4 @@
-
+import sys
 from copy import copy, deepcopy
 from LOTlib.Hypotheses.Proposers import ProposalFailedException
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
@@ -11,6 +11,9 @@ from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import *
 from LOTlib.Hypotheses.Lexicon.SimpleLexicon import SimpleLexicon
 from LOTlib.Primitives.Strings import StringLengthException
 from LOTlib.Hypotheses.Proposers.InsertDeleteRegenerationProposer import InsertDeleteRegenerationProposer
+
+MAX_SELF_RECURSION = 200 # how many times can a hypothesis call itself? NOTE: This bounds the length of strings, as in a^n
+sys.setrecursionlimit(50000) # needed for generating long strings
 
 class InnerHypothesis(InsertDeleteRegenerationProposer, LOTHypothesis):
     """s
@@ -41,9 +44,9 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLog, SimpleLexicon):
             self.grammar=grammar # the base gramar (with 0 included); we copy and add in other recursions on self.deepen()
             self.N = 0 # the number of meanings we have
             self.outlier = -1000.0 # read in MultinomialLikelihood
-            self.max_total_calls = 10 # this is the most internal recurse_ calls we can do without raising an exception It gets increased every deepen()
+            self.max_total_calls = MAX_SELF_RECURSION # this is the most internal recurse_ calls we can do without raising an exception It gets increased every deepen(). NOTE: if this is small, then it bounds the length of each string
             self.total_calls = 0
-            self.distance = 100.0 # penalize
+            self.distance = 100.0 # penalize (if we use that likelihood)
 
         def make_hypothesis(self, **kwargs):
             return InnerHypothesis(**kwargs) # no default grammar since it will differ by word
@@ -85,7 +88,7 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLog, SimpleLexicon):
 
             self.set_word(self.N, self.make_hypothesis(value=initfn, grammar=grammar)) # set N to what it should, using our new grammar
 
-            self.max_total_calls += 5
+            self.max_total_calls += MAX_SELF_RECURSION
             self.N += 1
 
         def dispatch_word(self, context, word, x):
@@ -118,6 +121,6 @@ class IncrementalLexiconHypothesis( MultinomialLikelihoodLog, SimpleLexicon):
             assert self.N > 0, "*** Cannot call IncrementalLexiconHypothesis unless N>0"
             # print ">>>>>>", self
             try:
-                return compute_outcomes(self.reset_and_call, self.N-1, '',  maxcontext=500, maxit=500, catchandpass=(RecursionDepthException, TooBigException, StringLengthException))
-            except TooManyContextsException:
+                return compute_outcomes(self.reset_and_call, self.N-1, '',  maxcontext=500, maxit=500, catchandpass=(RecursionDepthException, StringLengthException))
+            except (TooManyContextsException, TooBigException):
                 return {'':0.0} # return nothing

@@ -1,5 +1,5 @@
 
-from LOTlib.Projects.FormalLanguageTheory.Language.FormalLanguage import FormalLanguage
+from FormalLanguage import FormalLanguage
 from LOTlib.Grammar import Grammar
 
 class ABn(FormalLanguage):
@@ -12,8 +12,11 @@ class ABn(FormalLanguage):
     def terminals(self):
         return list('ab')
 
-
-        # just for testing
+    def all_strings(self):
+        n=1
+        while True:
+            yield 'ab'*n
+            n += 1
 
 
 if __name__ == '__main__':

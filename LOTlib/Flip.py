@@ -46,7 +46,7 @@ class RandomContext(object): # manage uncertainty
 
     """
 
-    def __init__(self, cs, choices=(), lp=0.0, max_size=50):
+    def __init__(self, cs, choices=(), lp=0.0, max_size=1024):
         self.choices = choices
         self.contextset = cs # who we update
         self.idx = 0

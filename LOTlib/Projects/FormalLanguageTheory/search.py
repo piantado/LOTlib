@@ -17,7 +17,7 @@ import random
 import numpy as np
 import LOTlib
 
-from LOTlib.Miscellaneous import display_option_summary
+from LOTlib.Miscellaneous import display_option_summary, Infinity
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib.TopN import TopN
 from Language import *
@@ -52,7 +52,10 @@ def run(options, ndata):
         data[0].output[k] = float(data[0].output[k] * ndata) / LARGE_SAMPLE
 
     z = sum(data[0].output.values())
-    best_ll = sum([ (p/z)*log(p/z) for p in data[0].output.values() ])
+    if z > 0:
+        best_ll = sum([ (p/z)*log(p/z) for p in data[0].output.values() ])
+    else:
+        best_ll = 0.0
 
     # Now add the rules to the grammar
     grammar = deepcopy(base_grammar)
@@ -127,6 +130,7 @@ if __name__ == "__main__":
         sys.stdout.flush()
 
     DATA_RANGE = np.exp(np.linspace(np.log(options.datamin), np.log(options.datamax), num=options.ndata))# [1000] # np.arange(1, 1000, 1)
+    DATA_RANGE = np.append(DATA_RANGE, [0]) # include the prior
     random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))
@@ -142,25 +146,8 @@ if __name__ == "__main__":
             print h  # must add \0 when not Lexicon
     sys.stdout.flush()
 
-    with open(options.OUT+"/hypotheses-"+options.LANG+".pkl", 'w') as f:
+    with open(options.OUT+"/hypotheses-"+options.LANG+".pkl", 'wb') as f:
         dump(hypotheses, f)
-
-    # with open(options.OUT+"/hypotheses-"+options.LANG+".pkl", 'w') as f:
-    #     unq = set()
-    #     for ndata, tn in MPI_unorderedmap(run, args):
-    #         for h in tn:
-    #             hpck = h.pack_ascii() # condensed form -- storing all of h is too complex
-    #             if hpck not in unq:
-    #                 # unq.add(hpck)
-    #                 # dump(h, f)
-    #                 print ndata, h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata
-    #
-    #                 v = h()
-    #                 sortedv = sorted(v.items(), key=operator.itemgetter(1), reverse=True)
-    #                 print "{" + ', '.join(["'%s':%s" % i for i in sortedv]) + "}"
-    #
-    #                 print h  # must add \0 when not Lexicon
-    #         sys.stdout.flush()
 
     print "# Finishing"
 

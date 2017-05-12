@@ -2,7 +2,7 @@
 library(tidyr)
 library(ggplot2)
 
-dwide <- read.table("o.txt", header=T)
+dwide <- read.table("o-partial-example.txt", header=T)
 
 d <- gather(dwide, parameter, value, 3:ncol(dwide)) # put a single parameters on each row, like ggplot wants
 d$chain <- as.factor(d$chain)
