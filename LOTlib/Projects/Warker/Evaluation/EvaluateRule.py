@@ -4,9 +4,9 @@ from scipy.misc import logsumexp
 import numpy as np
 from itertools import product
 
-from DataAndObjects import FunctionData
+from LOTlib.DataAndObjects import FunctionData
 from LOTlib.Miscellaneous import Infinity, nicelog
-from Projects.Warker.Model import MyHypothesis
+from LOTlib.Projects.Warker.Model import MyHypothesis
 from operator import attrgetter
 from optparse import OptionParser
 
@@ -33,7 +33,7 @@ for f in files:
     spaceset = pickle.load(open(f[0], "r"))
 
     space = list(spaceset)
-    # filter the space
+    # filter the space for this weird error
     space = [h for h in space if 'll_counts' in dir(h)]
     target = ['h e s', 'm e s', 'm e g', 'h e g', 'm e m', 'm e n', 'h e m', 'm e k', 'k e s', 'h e k', 'k e N', 'k e g', 'h e n', 'k e k', 'm e N', 'k e n', 'h e N', 'f e N', 'g e N', 'n e N', 'n e s', 'f e n', 'g e n', 'g e m', 'f e m', 'g e k', 'f e k', 'g e g', 'f e g', 'f e s', 'n e g', 'k e m', 'n e n', 'n e m', 'g e s', 'n e k']
 
@@ -44,10 +44,10 @@ for f in files:
 
 
     worst = min(space, key=attrgetter('posterior_score'))
-    best =max(space, key=attrgetter('posterior_score'))
+    best = max(space, key=attrgetter('posterior_score')) #best posterior
     print("The best hypothesis is: ")
     print best.value
-    print best.ll_counts
+    print best.ll_counts #what are the probabilities for each "word"
 
 
     #the data given to the models

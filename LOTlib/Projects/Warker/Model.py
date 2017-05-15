@@ -4,7 +4,6 @@ from LOTlib.DataAndObjects import FunctionData
 from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import MultinomialLikelihood
 from LOTlib.Hypotheses.StochasticSimulation import StochasticSimulation
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
-from LOTlib.Hypotheses.Likelihoods.LevenshteinLikelihood import StochasticLevenshteinLikelihood
 from LOTlib.Hypotheses.Proposers import insert_delete_proposal, ProposalFailedException, regeneration_proposal
 import numpy
 from copy import deepcopy
@@ -12,7 +11,7 @@ from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib import break_ctrlc
 from LOTlib.TopN import TopN
 from LOTlib.Miscellaneous import logsumexp,nicelog, Infinity,attrmem
-from Levenshtein import distance
+
 from math import log
 
 from optparse import OptionParser
@@ -23,8 +22,8 @@ parser.add_option("-d", "--datasize", dest="datasize", type="int", help="number 
 parser.add_option("-t", "--top", dest="top", type="int", help="top N count of hypotheses from each chain", default=100)
 parser.add_option("-s", "--steps", dest="steps", type="int", help="steps for the chainz", default=100000)
 parser.add_option("-c", "--chainz", dest="chains", type="int", help="number of chainz :P", default=25)
-parser.add_option("--terminals",dest="TERMINALS",help="which terminals are we using? one string")
-parser.add_option("--data",dest="DATA",help="what data is seen?")
+parser.add_option("--terminals",dest="TERMINALS",help="which terminals are we using? one string", default = 'Terminals/exponly.txt')
+parser.add_option("--data",dest="DATA",help="what data is seen?", default = "Data/firstDATA.txt")
 parser.add_option("-p","--partition", dest="PARTITION", default=False, help="are we running partition MCMC?")
 (options, args) = parser.parse_args()
 print options
@@ -163,13 +162,8 @@ def runme(d,x,datamt,partitions):
         partitionMCMC(make_data(),partitions)
     else:
         return standard_sample(make_hypothesis, make_data, show=True, N=100, save_top="topModel1.pkl", steps=100000)
-def howyoudoin(h):
-    doin = False
-    for key, values in h().iteritems():
-        print key
-        if len(key)>=3 and (key[2] == 'e' or key[2]== 'a' or key[2]== 'i'):
-            doin = True
-    return doin
+
+
 
 
 
@@ -187,7 +181,7 @@ def partitionMCMC(data,partitions):
         print h0
         for h in break_ctrlc(MHSampler(h0, data, steps=5000, skip=0)):
             # Show the partition and the hypothesis
-            print h.posterior_score, p, h, howyoudoin(h)
+            print h.posterior_score, p, h
             topn.add(h)
     return set(topn)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
