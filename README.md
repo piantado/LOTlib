@@ -15,12 +15,11 @@ REQUIREMENTS
 - numpy
 - scipy
 - cachetools (for memoization)
+- mpi4py (for running on MPI)
 
 The following are used by some LOTlib components:
 
-- pystan (for Grammar inference)
 - matplotlib (for plotting)
-- mpi4py (for running on MPI)
 - graphviz (for DOT images of trees)
 - pyswip (for Prolog example)
 
@@ -50,14 +49,21 @@ A good starting place is the FOL folder, which contains a simple example to gene
 
 More examples are provided in the "Examples" folder. These include: simple symbolic regression, the recursive number learning model, a quantifier learning model. The "tests" folder may also be useful, as this runs some simple models to check for, e.g., correct sampling and inference. 
 
+
+GRAMMAR INFERENCE
+-----------------
+
+LOTlib contains experimental GPU code in C under LOTlib.GrammarInference. This takes a set of behavioral data (see LOTlib.GrammarInference.Demo.ExportToGPU for the format) and doing inference over the production probabilities on a finite approximation to the fully PCFG hypothesis space. 
+
+
 Citation:
 ---------
 
 This software may be cited as:
 
 	@misc{piantadosi2014lotlib,
-	author={Steven T. Piantadosi},
-	title={{LOTlib: Learning and Inference in the Language of Thought}},
-	year={2014},
-	howpublished={available from https://github.com/piantado/LOTlib}
+            author={Steven T. Piantadosi},
+            title={{LOTlib: Learning and Inference in the Language of Thought}},
+            year={2014},
+            howpublished={available from https://github.com/piantado/LOTlib}
 	}
