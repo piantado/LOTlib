@@ -17,6 +17,11 @@ base_grammar.add_rule('LIST', 'strcar_', ['LIST'], 1.)
 base_grammar.add_rule('LIST', '', ['ATOM'], 3.0) # Terminals
 base_grammar.add_rule('LIST', 'x', None, 3.0) # the argument
 
+# base_grammar.add_rule('LIST', '', ['ATOMSEQ'], 3.0) # Terminals
+# base_grammar.add_rule('ATOMSEQ', '%s+%s', ['ATOMSEQ', 'ATOM'], 1.0) # Terminals
+# base_grammar.add_rule('ATOMSEQ', '%s', ['ATOM'],            2.0) # Terminals
+
+
 base_grammar.add_rule('BOOL', 'empty_', ['LIST'], 1.)
 base_grammar.add_rule('BOOL', 'C.flip(p=%s)', ['PROB'], 1.) # flip within a context
 

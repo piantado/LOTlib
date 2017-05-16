@@ -1,45 +1,32 @@
-from LOTlib.Eval import primitive
+import LOTlib
 from LOTlib.DataAndObjects import FunctionData
-
-from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import MultinomialLikelihood
-from LOTlib.Hypotheses.StochasticSimulation import StochasticSimulation
 from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Hypotheses.Proposers import insert_delete_proposal, ProposalFailedException, regeneration_proposal
-import numpy
-from copy import deepcopy
+from LOTlib.Hypotheses.Likelihoods.StringLikelihoods import MonkeyNoiseLikelihood
+from random import shuffle
 from LOTlib.Inference.Samplers.MetropolisHastings import MHSampler
 from LOTlib import break_ctrlc
 from LOTlib.TopN import TopN
-from LOTlib.Miscellaneous import logsumexp,nicelog, Infinity,attrmem
+from LOTlib.Flip import compute_outcomes
+from LOTlib.Miscellaneous import display_option_summary, sample1
 
-from math import log
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Process options
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from optparse import OptionParser
-
 parser = OptionParser()
 parser.add_option("-f", "--file", dest="filename", help="file name of the pickled results", default="out.pkl")
-parser.add_option("-d", "--datasize", dest="datasize", type="int", help="number of data points", default=1000)
+parser.add_option("-d", "--datasize", dest="datasize", type="int", help="number of data points", default=100)
 parser.add_option("-t", "--top", dest="top", type="int", help="top N count of hypotheses from each chain", default=100)
-parser.add_option("-s", "--steps", dest="steps", type="int", help="steps for the chainz", default=100000)
+parser.add_option("-s", "--steps", dest="steps", type="int", help="steps for the chainz", default=1000)
 parser.add_option("-c", "--chainz", dest="chains", type="int", help="number of chainz :P", default=25)
 parser.add_option("--terminals",dest="TERMINALS",help="which terminals are we using? one string", default = 'Terminals/exponly.txt')
 parser.add_option("--data",dest="DATA",help="what data is seen?", default = "Data/firstDATA.txt")
-parser.add_option("-p","--partition", dest="PARTITION", default=False, help="are we running partition MCMC?")
 (options, args) = parser.parse_args()
-print options
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Data
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-import LOTlib.Miscellaneous
-from LOTlib.Grammar import Grammar
-from LOTlib.Miscellaneous import q
-from LOTlib.Eval import register_primitive
-register_primitive(LOTlib.Miscellaneous.flatten2str)
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Parse the input: the terminals and the data seen
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 terminal_file = open(options.TERMINALS,"r")
@@ -52,83 +39,57 @@ for line in terminal_file:
     TERMINALS.append(line[0])
     weights.append(line[1].strip("\n"))
 
+DATA_STRINGS = []
+with open(options.DATA,"r") as data_file:
+    for line in data_file:
+        DATA_STRINGS.append(line.strip("\n"))
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Data
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-data_file = open(options.DATA,"r")
-
-for line in data_file:
-    d.append(line.strip("\n"))
-
-def make_data(d=d,size=options.datasize):
-    output = {}
-    print d
-    for val in d:
-        output.update({val:size})
-    return [FunctionData(input=[],output=output)]
-
+def make_data(n):
+    return [FunctionData(input=[], output={val : n for val in DATA_STRINGS}, alpha=0.999)]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Grammar
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-@primitive
-def prob_():
-    return {True:log(.5),False:log(.5)}
 
-TERMINAL_WEIGHT = .1
+from LOTlib.Grammar import Grammar
+
+TERMINAL_WEIGHT = 3.0
 
 grammar = Grammar()
 
-
-
-# flattern2str lives at the top, and it takes a cons, cdr, car structure and projects it to a string
 grammar.add_rule('START', '', ['EXPR'], 1.0)
 
-grammar.add_rule('EXPR', 'sample_uniform_d', ['SET'], 1.) # this requires its own set for terminals
+grammar.add_rule('EXPR', 'C.uniform_sample', ['SET'], 1.0) # this requires its own set for terminals
 grammar.add_rule('SET', '%s', ['DETTERMINAL'], 1.0)
 grammar.add_rule('SET', '%s+%s', ['DETTERMINAL', 'SET'], 1.0)
-grammar.add_rule('PROB','prob_()', None,1.0)
+grammar.add_rule('BOOL','C.flip(0.5)', None,1.0)
+grammar.add_rule('EXPR', '(%s if %s else %s)', ['EXPR','BOOL','EXPR'],1.0)
+grammar.add_rule('EXPR', 'strcons_(%s, %s, sep=" ")', ['EXPR', 'EXPR'], 1.0)
 
 
-# Build up partitions before we have the terminals and strings
-# this way, partitions are mainly structural
-partitions = []
-for t in grammar.enumerate(7):
-
-    t = deepcopy(t) # just make sure it's a copy (may not be necessary)
-    for n in t:
-        setattr(n, "p_propose", 0.0) # add a tree attribute saying we can't propose
-    partitions.append(t)
-for part in partitions:
-    print part
-
-for t in TERMINALS:
-    grammar.add_rule('DETTERMINAL', "'%s'"%t, None, TERMINAL_WEIGHT) # deterministic terminals participate in sets
-
-grammar.add_rule('EXPR', 'if_d', ['PROB','EXPR','EXPR'],1.0)
-
-grammar.add_rule('EXPR', 'cons_d', ['EXPR', 'EXPR'], 1.0/2.0)
-
-for t,w in zip(TERMINALS,weights):
+for w,t in zip(weights, TERMINALS):
     assert len(t) == 1, "*** Terminals can only be single characters"
+    grammar.add_rule('DETTERMINAL', "'%s'"%t, None, TERMINAL_WEIGHT/len(TERMINALS)) # deterministic terminals participate in sets
+    grammar.add_rule('EXPR', "'%s'"%t,        None, TERMINAL_WEIGHT*float(w)/len(TERMINALS)) # otherwise terminals are EXPR
 
-    grammar.add_rule('EXPR', "{'%s':0.0}"%t, None, TERMINAL_WEIGHT*float(w))
 
-
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Hypothesis
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import MultinomialLikelihoodLog
 
-class MyHypothesis(MultinomialLikelihoodLog, LOTHypothesis):
+class MyHypothesis(MonkeyNoiseLikelihood, LOTHypothesis):
     def __init__(self, grammar=grammar, **kwargs):
-        LOTHypothesis.__init__(self, grammar, display='lambda : %s', **kwargs)
-        self.outlier = -100 # for MultinomialLikelihoodLog
+        LOTHypothesis.__init__(self, grammar, display='lambda C : %s', maxnodes=200, **kwargs)
+        # self.outlier = -100 # for MultinomialLikelihoodLog
+        self.alphabet_size = len(TERMINALS)
 
     def propose(self, **kwargs):
         ret_value, fb = None, None
         while True: # keep trying to propose
             try:
-                ret_value, fb = numpy.random.choice([insert_delete_proposal,regeneration_proposal])(self.grammar, self.value, **kwargs)
+                ret_value, fb = sample1([insert_delete_proposal,regeneration_proposal])(self.grammar, self.value, **kwargs)
                 break
             except ProposalFailedException:
                 pass
@@ -138,73 +99,56 @@ class MyHypothesis(MultinomialLikelihoodLog, LOTHypothesis):
         return ret, fb
 
     def __call__(self, *args, **kwargs):
-        d = LOTHypothesis.__call__(self, *args, **kwargs) # now returns a dictionary
-
-        # go through and reformat the keys to have spaces
-        #NOTE: requires that terminals are each single chars, see assertion above
-        out = dict()
-        for k, v in d.items():
-            out[' '.join(k)] = v
-        return out
+        return compute_outcomes(lambda *args: LOTHypothesis.__call__(self, *args, **kwargs), maxcontext=100000)
 
 
 def make_hypothesis():
-    return MyHypothesis(grammar)
+    return MyHypothesis()
 
-def runme(d,x,datamt,partitions):
-    def make_data(d=d,size=datamt):
-        output = {}
-        for val in d:
-            output.update({val:size})
-        return [FunctionData(input=[],output=output)]
-    print "Start: " + str(x) + " on this many: " + str(datamt)
-    if options.PARTITION:
-        partitionMCMC(make_data(),partitions)
-    else:
-        return standard_sample(make_hypothesis, make_data, show=True, N=100, save_top="topModel1.pkl", steps=100000)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# MPI running
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+def runme(chain, dataamt):
 
+    if LOTlib.SIG_INTERRUPTED: return ()
 
+    data = make_data(dataamt)
 
+    tn = TopN(options.top)
 
-def partitionMCMC(data,partitions):
-    print data
-    topn= TopN(N=200, key="posterior_score")
-    for p in break_ctrlc(partitions):
-        print "Starting on partition ", p
+    h0 = make_hypothesis()
+    for h in break_ctrlc(MHSampler(h0, data, steps=options.steps, skip=0)):
+        # print h.posterior_score, h.prior, h.likelihood, h
+        h.likelihood_per_data = h.likelihood/dataamt
+        tn.add(h)
 
-        # Now we have to go in and fill in the nodes that are nonterminals
-        v = grammar.generate(deepcopy(p))
+    return tn
 
-        #h0 = MyHypothesis(grammar, value=v)
-        h0= make_hypothesis()
-        print h0
-        for h in break_ctrlc(MHSampler(h0, data, steps=5000, skip=0)):
-            # Show the partition and the hypothesis
-            print h.posterior_score, p, h
-            topn.add(h)
-    return set(topn)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Main
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 if __name__ == "__main__":
 
-    from LOTlib.Inference.Samplers.StandardSample import standard_sample
-    NCHAINS = 25
-    #standard_sample(make_hypothesis, make_data, show=True, N=100, save_top="topModel1.pkl", steps=100000)
-    from LOTlib.Primitives import *
-    import LOTlib.Miscellaneous
-    from LOTlib.MPI import MPI_map
+    from LOTlib.MPI import MPI_unorderedmap, is_master_process
+
+    if is_master_process():
+        display_option_summary(options)
 
     #pass the data, data_amount, and chain number to MPI
-    args=[[d,damt, x, partitions] for damt in range(1,options.datasize) for x in range(NCHAINS)]
+    args=[[chain, damt] for damt in range(1, options.datasize) for chain in range(options.chains)]
+    shuffle(args)
 
-    myhyp=set()
-    for top in MPI_map(runme, args):
-        myhyp.update(top)
+    hypotheses=set()
+    for top in MPI_unorderedmap(runme, args):
+        hypotheses.update(top)
+
+        for h in top:
+             print h.posterior_score, h.prior, h.likelihood, h.likelihood_per_data, h
+
 
     import pickle
-    pickle.dump(myhyp, open("out.pkl", "wb"))
+    pickle.dump(hypotheses, open("out.pkl", "wb"))
 
 

@@ -7,13 +7,15 @@ from LOTlib.Eval import TooBigException
 from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursionDepthException
 from LOTlib.Miscellaneous import flatten2str, sample_one, attrmem
 from LOTlib.Flip import *
-from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import *
+from LOTlib.Hypotheses.Likelihoods.StringLikelihoods import edit_likelihood, LevenshteinPseudoLikelihood
 from LOTlib.Hypotheses.Lexicon.SimpleLexicon import SimpleLexicon
 from LOTlib.Primitives.Strings import StringLengthException
 from LOTlib.Hypotheses.Proposers.InsertDeleteRegenerationProposer import InsertDeleteRegenerationProposer
 
-MAX_SELF_RECURSION = 200 # how many times can a hypothesis call itself? NOTE: This bounds the length of strings, as in a^n
-sys.setrecursionlimit(50000) # needed for generating long strings
+from Levenshtein import editops # for distance likelihood only
+
+MAX_SELF_RECURSION = 100 # how many times can a hypothesis call itself? NOTE: This bounds the length of strings, as in a^n
+sys.setrecursionlimit(10000) # needed for generating long strings
 
 class InnerHypothesis(InsertDeleteRegenerationProposer, LOTHypothesis):
     """s
@@ -35,18 +37,15 @@ class InnerHypothesis(InsertDeleteRegenerationProposer, LOTHypothesis):
 
         return ret, fb
 
-
-class IncrementalLexiconHypothesis(SimpleLexicon):
+class IncrementalLexiconHypothesis(LevenshteinPseudoLikelihood, SimpleLexicon):
         """ A hypothesis where we can incrementally add words """
 
         def __init__(self, grammar=None, alphabet_size=2, **kwargs):
-            SimpleLexicon.__init__(self,  maxnodes=50, **kwargs)
+            SimpleLexicon.__init__(self,  **kwargs)
             self.grammar=grammar # the base gramar (with 0 included); we copy and add in other recursions on self.deepen()
             self.N = 0 # the number of meanings we have
-            # self.outlier = -1000.0 # read in MultinomialLikelihood
             self.max_total_calls = MAX_SELF_RECURSION # this is the most internal recurse_ calls we can do without raising an exception It gets increased every deepen(). NOTE: if this is small, then it bounds the length of each string
             self.total_calls = 0
-            self.distance = 100.0 # penalize (if we use that likelihood)
             self.alphabet_size = alphabet_size
 
         def make_hypothesis(self, **kwargs):
@@ -56,20 +55,7 @@ class IncrementalLexiconHypothesis(SimpleLexicon):
         def compute_prior(self):
             return SimpleLexicon.compute_prior(self) - self.N * log(2.0)/self.prior_temperature # coin flip for each additional word
 
-        def compute_single_likelihood(self, datum):
-            assert isinstance(datum.output, dict)
 
-            hp = self(*datum.input)  # output dictionary, output->probabilities
-            assert isinstance(hp, dict)
-
-            s = 0.0
-            for k, dc in datum.output.items():
-                lp = log(1.0-datum.alpha) - log(self.alphabet_size)*len(k)
-                if k in hp:
-                    lp = logplusexp(lp, log(datum.alpha) + hp[k]) # if non-noise possible
-                s += dc*lp
-            return s
-        
         def propose(self):
 
             new = copy(self)  ## Now we just copy the whole thing
@@ -136,6 +122,6 @@ class IncrementalLexiconHypothesis(SimpleLexicon):
             assert self.N > 0, "*** Cannot call IncrementalLexiconHypothesis unless N>0"
             # print ">>>>>>", self
             try:
-                return compute_outcomes(self.reset_and_call, self.N-1, '',  maxcontext=500, maxit=500, catchandpass=(RecursionDepthException, StringLengthException))
+                return compute_outcomes(self.reset_and_call, self.N-1, '',  maxcontext=200, maxit=200, catchandpass=(RecursionDepthException, StringLengthException))
             except (TooManyContextsException, TooBigException):
                 return {'':0.0} # return nothing

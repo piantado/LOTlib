@@ -19,6 +19,7 @@ class FormalLanguage(object):
     """
     Set up a super-class for formal languages, so we can compute things like accuracy, precision, etc.
     """
+    ALPHA = 0.999
 
     def sample_string(self):
         return str(self.grammar.generate())
@@ -29,7 +30,7 @@ class FormalLanguage(object):
         for _ in xrange(n):
             cnt[self.sample_string()] += 1
 
-        return [FunctionData(input=[], output=cnt)]
+        return [FunctionData(input=[], output=cnt, alpha=self.ALPHA)]
 
     def terminals(self):
         """ This returns a list of terminal symbols, specific to each language

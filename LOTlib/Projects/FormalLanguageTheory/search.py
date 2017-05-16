@@ -36,16 +36,6 @@ def run(options, ndata):
     language = eval(options.LANG+"()")
     data = language.sample_data(LARGE_SAMPLE)
 
-    # Now transform the data to prefix counts (if we want this)
-    # from collections import Counter
-    # from LOTlib.DataAndObjects import FunctionData
-    # newdata = Counter()
-    # for k,v in data[0].output.items():
-    #     newdata[k[:5]] += v
-    # data = [FunctionData(input=[], output=newdata)]
-    # print data[0]
-
-
     assert len(data) == 1
     # renormalize the counts
     for k in data[0].output.keys():
@@ -63,7 +53,7 @@ def run(options, ndata):
         grammar.add_rule('ATOM', "'%s'" % t, None, 1.0)
 
     # set up the hypothesis
-    h0 = IncrementalLexiconHypothesis(grammar=grammar)
+    h0 = IncrementalLexiconHypothesis(grammar=grammar, alphabet_size=len(language.terminals()))
     h0.set_word(0, h0.make_hypothesis(grammar=grammar)) # make the first word at random
     h0.N = 1
 
@@ -144,10 +134,12 @@ if __name__ == "__main__":
             sortedv = sorted(v.items(), key=operator.itemgetter(1), reverse=True)
             print "{" + ', '.join(["'%s':%s" % i for i in sortedv]) + "}"
             print h  # must add \0 when not Lexicon
-    sys.stdout.flush()
+            sys.stdout.flush()
 
-    with open(options.OUT+"/hypotheses-"+options.LANG+".pkl", 'wb') as f:
-        dump(hypotheses, f)
+        # Dump after ach so that we save incremental hypotheses
+        with open(options.OUT+"/"+options.LANG+".pkl", 'wb') as f:
+            dump(hypotheses, f)
+
 
     print "# Finishing"
 

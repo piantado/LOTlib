@@ -26,7 +26,7 @@ class MultinomialLikelihood(object):
 
 class MultinomialLikelihoodLog(object):
     """
-    Same but assumes we get out log likelihoods
+    Same but assumes the hypothesis (self) returns log likelihoods instead of likelihoods of each data point in hp
     """
 
     def compute_single_likelihood(self, datum):
@@ -34,7 +34,7 @@ class MultinomialLikelihoodLog(object):
 
         assert isinstance(datum.output, dict)
 
-        hp = self(*datum.input)  # output dictionary, output->probabilities
+        hp = self(*datum.input)  # output dictionary, output->logprobabilities
         assert isinstance(hp, dict)
         try:
             return sum(dc * (hp[k] if k in hp else outlier) for k, dc in datum.output.items())

@@ -6,7 +6,7 @@ class Saffran(FormalLanguage):
     """
     From Saffran, Aslin, Newport studies.
     Strings consisting of               tupiro golabu bidaku padoti
-    coded here with single characters:  tpr     glb    bdk    aoi
+    coded here with single characters:  tpr     glb    Bdk    PDT
     """
     def __init__(self):
         self.grammar = Grammar(start='S')
@@ -14,15 +14,15 @@ class Saffran(FormalLanguage):
         self.grammar.add_rule('S', '%s',   ['T'], 1.0)
         self.grammar.add_rule('T', 'tpr',    None, 0.25)
         self.grammar.add_rule('T', 'glb',    None, 0.25)
-        self.grammar.add_rule('T', 'bdk',    None, 0.25)
-        self.grammar.add_rule('T', 'aoi',    None, 0.25)
+        self.grammar.add_rule('T', 'Bdk',    None, 0.25)
+        self.grammar.add_rule('T', 'PDT',    None, 0.25)
 
     def terminals(self):
-        return list('a')
+        return list('tprglbBdkPDT')
 
     def all_strings(self):
         for g in self.grammar.enumerate():
-            yield g
+            yield str(g)
 
 
 
