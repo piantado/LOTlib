@@ -38,6 +38,9 @@ class ContextSet(object):
     def __len__(self):
         return len(self.Q)
 
+    def __str__(self):
+        return "<Context set: %s>" % self.Q
+
 
 class RandomContext(object): # manage uncertainty
     """
@@ -54,7 +57,7 @@ class RandomContext(object): # manage uncertainty
         self.max_size = max_size
 
     def __str__(self):
-        return ''.join([ '1' if x else '0' for x in self.choices])
+        return "<RandomContext: %s>" % str(self.choices)
     def __repr__(self):
         return str(self)
 
@@ -72,16 +75,17 @@ class RandomContext(object): # manage uncertainty
         and then when we use the clases here we can enumerate all program traces
 
         """
-
+        # print "Calling flip with context set ", self.contextset, self.idx, self.choices
         ret = None
 
         if self.idx < len(self.choices): # if we are on the specified choices
             ret = self.choices[self.idx]
-            self.idx += 1
+            # print "\tFlip ret: ", ret
+            assert ret is True or ret is False # must have this
         else:
             ret = True # which way we choose when its unspecified
 
-            otherpath = RandomContext(self.contextset, choices=self.choices + (not ret,), lp=self.lp + log(1-p), max_size=self.max_size)
+            otherpath = RandomContext(self.contextset, choices=self.choices + (not ret,), lp=self.lp + log(1.0-p), max_size=self.max_size)
 
             # The choice we make later
             self.contextset.add(otherpath)
@@ -93,6 +97,40 @@ class RandomContext(object): # manage uncertainty
             # this is necessary because otherwise we can hang
             if len(self.choices) > self.max_size:
                 raise ContextSizeException
+
+        self.idx += 1
+        return ret
+
+    def uniform_sample(self, outcomes):
+        """ All possible outcomes """
+        # print "Calling uniform sample with context set ", self.contextset, self.idx, self.choices
+        ret = None
+
+        if self.idx < len(self.choices):  # if we are on the specified choices
+            ret = self.choices[self.idx]
+            # print "\tUniform_sample ret: ", ret
+        else:
+            ret = outcomes[0]  # defaultly choose the first outcome
+
+            thislp = -log(len(outcomes)) # the probability of each outcome
+
+            for k in outcomes[1:]:
+
+                otherpath = RandomContext(self.contextset, choices=self.choices + (k,), lp=self.lp + thislp,
+                                          max_size=self.max_size)
+
+                # The choice we make later
+                self.contextset.add(otherpath)
+
+            # the choice we make now
+            self.choices = self.choices + (ret,)
+            self.lp += thislp
+
+            # this is necessary because otherwise we can hang
+            if len(self.choices) > self.max_size:
+                raise ContextSizeException
+
+        self.idx += 1
 
         return ret
 
@@ -125,8 +163,9 @@ def compute_outcomes(f, *args, **kwargs):
             else:
                 newargs = args + (context,)
                 v = f(*newargs)
-
-            out[v] = logplusexp(out[v], context.lp)  # add up the lp for this outcomem
+            # print ">>>", v
+            # add up the lp for this outcomem
+            out[v] = logplusexp(out[v], context.lp)
         except kwargs.get('catchandpass', None) as e:
             pass
         except ContextSizeException: # prune that path
