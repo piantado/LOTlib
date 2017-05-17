@@ -2,6 +2,10 @@ from LOTlib.FunctionNode import *
 from LOTlib.Miscellaneous import None2Empty
 
 def can_delete_FunctionNode(x):
+    """
+    We can delete from functionNodes if they use a rule X -> f(..., X, ...).
+    Then we can promote the inner X
+    """
     return ((not (isinstance(x, BVAddFunctionNode) and x.uses_bv()))
             and any([ x.returntype == a.returntype for a in
                       x.argFunctionNodes() ]))
@@ -9,8 +13,11 @@ def can_delete_FunctionNode(x):
 def can_insert_GrammarRule(r):
     return any([r.nt==a for a in None2Empty(r.to)])
 
-def can_insert_FunctionNode(x):
-    return any([x.returntype == a.returntype for a in x.argFunctionNodes()])
+def can_insert_FunctionNode(x, grammar):
+    """
+    We can insert ot a function node if the grammar contains a rule from its NT to itself
+    """
+    return any([can_insert_GrammarRule(r) for r in grammar[x.returntype]])
 
 def list_replicating_children(node):
     return [arg for arg in node.args if (isinstance(arg,FunctionNode)
