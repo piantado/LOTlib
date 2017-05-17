@@ -16,8 +16,6 @@ class InsertProposer(Proposer):
     def propose_tree(self,grammar,tree,resampleProbability=lambdaOne):
         new_t = copy(tree)
 
-        print "# INSERT PROPOSAL"
-
         try: # to choose a node to insert on
             ni, lp = new_t.sample_subnode(lambda t: can_insert_FunctionNode(t, grammar)*resampleProbability(t) )
         except NodeSamplingException:
