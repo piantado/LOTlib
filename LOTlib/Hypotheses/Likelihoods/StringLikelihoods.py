@@ -1,18 +1,17 @@
 from Levenshtein import editops
-from LOTlib.Miscellaneous import logplusexp
+from LOTlib.Miscellaneous import logplusexp, logsumexp
 from math import log
 
-def edit_likelihood(x,y, alphabet_size=2, noise=0.01):
+def edit_likelihood(x,y, alphabet_size=2, alpha=0.99):
 
     ops = editops(x,y)
-    lp = log(1.0-noise)*len(y) # all the unchanged
+    lp = log(alpha)*(len(y)-len(ops)) # all the unchanged
     for o, _, _ in ops:
         if   o == 'equal':   assert False # should never get here
-        elif o == 'replace': lp += log(noise) - log(4.0) - log(alphabet_size)
-        elif o == 'insert':  lp += log(noise) - log(4.0) - log(alphabet_size)
-        elif o == 'delete':  lp += log(noise) - log(4.0)
+        elif o == 'replace': lp += log(1.0-alpha) - log(3.0) - log(alphabet_size)
+        elif o == 'insert':  lp += log(1.0-alpha) - log(3.0) - log(alphabet_size)
+        elif o == 'delete':  lp += log(1.0-alpha) - log(3.0)
         else: assert False
-    # print lp, x, y
     return lp
 
 class LevenshteinPseudoLikelihood(object):
@@ -33,9 +32,10 @@ class LevenshteinPseudoLikelihood(object):
             if k in hp:
                 s += dc * hp[k]
             elif len(hp.keys()) > 0:
-                s += dc * min([ edit_likelihood(x, k, alphabet_size=self.alphabet_size) for x in hp.keys() ]) # the highest probability string; or we could logsumexp
+                # probability fo each string under this editing model
+                s += dc * logsumexp([ v + edit_likelihood(x, k, alphabet_size=self.alphabet_size, alpha=datum.alpha) for x, v in hp.items() ]) # the highest probability string; or we could logsumexp
             else:
-                s += dc * edit_likelihood('', k, alphabet_size=self.alphabet_size)
+                s += dc * edit_likelihood('', k, alphabet_size=self.alphabet_size, alpha=datum.alpha)
 
             # This is the mixing {a,b}* noise model
             # lp = log(1.0-datum.alpha) - log(self.alphabet_size+1)*(len(k)+1) #the +1s here count the character marking the end of the string
