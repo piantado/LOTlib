@@ -17,7 +17,7 @@ def can_insert_FunctionNode(x, grammar):
     """
     We can insert ot a function node if the grammar contains a rule from its NT to itself
     """
-    return any([can_insert_GrammarRule(r) for r in grammar[x.returntype]])
+    return any([can_insert_GrammarRule(r) for r in grammar.rules[x.returntype]])
 
 def list_replicating_children(node):
     return [arg for arg in node.args if (isinstance(arg,FunctionNode)

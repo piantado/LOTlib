@@ -16,15 +16,12 @@ from LOTlib.Hypotheses.Proposers.Utilities import *
 from LOTlib.Miscellaneous import Infinity, nicelog, None2Empty, sample1
 from LOTlib.Subtrees import least_common_difference
 
-def dp_rp(f):
-    return lambda x: 1.0*can_delete_FunctionNode(x)*f(x)
-
 class DeleteProposer(Proposer):
     def propose_tree(self,grammar,tree,resampleProbability=lambdaOne):
         new_t = copy(tree)
 
         try: # to choose a node to delete
-            n, lp = new_t.sample_subnode(dp_rp(resampleProbability))
+            n, lp = new_t.sample_subnode(lambda t: can_delete_FunctionNode(t)*resampleProbability(t))
         except NodeSamplingException:
             raise ProposalFailedException
 
@@ -48,7 +45,7 @@ class DeleteProposer(Proposer):
             any([nodes_are_roughly_equal(arg,node_2) for arg in
                  None2Empty(node_1.args)])):
 
-            lp_choosing_node_1 = t1.sampling_log_probability(node_1,dp_rp(resampleProbability))
+            lp_choosing_node_1 = t1.sampling_log_probability(node_1,lambda t: can_delete_FunctionNode(t)*resampleProbability(t))
             lp_choosing_child = -nicelog(len(list_replicating_children(node_1)))
             return lp_choosing_node_1 + lp_choosing_child
 

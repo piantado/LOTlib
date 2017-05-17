@@ -16,8 +16,10 @@ class InsertProposer(Proposer):
     def propose_tree(self,grammar,tree,resampleProbability=lambdaOne):
         new_t = copy(tree)
 
+        print "# INSERT PROPOSAL"
+
         try: # to choose a node to insert on
-            ni, lp = new_t.sample_subnode(can_insert_FunctionNode)
+            ni, lp = new_t.sample_subnode(lambda t: can_insert_FunctionNode(t, grammar)*resampleProbability(t) )
         except NodeSamplingException:
             raise ProposalFailedException
 
@@ -55,7 +57,7 @@ class InsertProposer(Proposer):
 
         if (node_1 and node_2 and any([nodes_are_roughly_equal(arg,node_1) for arg in None2Empty(node_2.args)])):
 
-            lp_choosing_node_1 =  t1.sampling_log_probability(node_1,resampleProbability=can_insert_FunctionNode)
+            lp_choosing_node_1 =  t1.sampling_log_probability(node_1,resampleProbability=lambda t: can_insert_FunctionNode(t, grammar)*resampleProbability(t))
 
             lp_choosing_rule = -nicelog(len(filter(can_insert_GrammarRule, grammar.rules[node_1.returntype])))
             lp_choosing_replacement = -nicelog(len(filter( lambda i: node_2.args[i].returntype == node_1.returntype, xrange(len(node_2.args)))))
