@@ -2,10 +2,11 @@
 String operations that are a little safer than defaults, and which mimic cons/cdr/car (for doing grammar induction)
 """
 from LOTlib.Eval import primitive, RecursionDepthException
+MAX_STRING_LENGTH = 256
 
 class StringLengthException(Exception):
     """ When strings get too long """
-    MAX_LENGTH = 256
+    MAX_LENGTH = MAX_STRING_LENGTH
     pass
 
 @primitive

@@ -30,8 +30,7 @@ from LOTlib.Projects.FormalLanguageTheory.Grammar import base_grammar # passed i
 LARGE_SAMPLE = 10000 #100000 # sample this many and then re-normalize to fractional counts
 
 def run(options, ndata):
-    if LOTlib.SIG_INTERRUPTED:
-        return 0, set()
+    if LOTlib.SIG_INTERRUPTED: return 0, set()
 
     language = eval(options.LANG+"()")
     data = language.sample_data(LARGE_SAMPLE)
@@ -60,6 +59,7 @@ def run(options, ndata):
     tn = TopN(N=options.TOP_COUNT)
 
     for outer in xrange(options.N): # how many do we add?
+        if LOTlib.SIG_INTERRUPTED: return 0, set()
 
         # and re-set the posterior or else it's something weird
         h0.compute_posterior(data)
@@ -74,7 +74,7 @@ def run(options, ndata):
                 v = h()
                 sortedv = sorted(v.items(), key=operator.itemgetter(1), reverse=True )
                 print "{" + ', '.join(["'%s':%s"% i for i in sortedv]) + "}"
-
+                # print data
                 # for r,c in sortedv:
                 #     print r, sorted( (longest_substring_distance(r, k), k) for k, dc in data[0].output.items() )
 
@@ -102,7 +102,7 @@ if __name__ == "__main__":
     parser.add_option("--language", dest="LANG", type="string", default='An', help="name of a language")
     parser.add_option("--steps", dest="STEPS", type="int", default=40000, help="Number of samples to run")
     parser.add_option("--skip", dest="SKIP", type="int", default=100, help="Print out every this many")
-    parser.add_option("--top", dest="TOP_COUNT", type="int", default=10, help="Top number of hypotheses to store")
+    parser.add_option("--top", dest="TOP_COUNT", type="int", default=100, help="Top number of hypotheses to store")
     parser.add_option("--N", dest="N", type="int", default=3, help="number of inner hypotheses")
     parser.add_option("--ndata", dest="ndata", type="int", default=1000, help="number of data steps to run")
     parser.add_option("--datamin", dest="datamin", type="int", default=1, help="Min data to run (>0 due to log)")

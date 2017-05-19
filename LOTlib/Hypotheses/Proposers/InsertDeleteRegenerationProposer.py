@@ -9,6 +9,6 @@ from LOTlib.Hypotheses.Proposers.MixtureProposer import *
 from LOTlib.Miscellaneous import lambdaOne, nicelog
 
 class InsertDeleteRegenerationProposer(MixtureProposer):
-    def __init__(self):
-        MixtureProposer.__init__(self,proposers=[InsertProposer(),DeleteProposer(), RegenerationProposer()],proposer_weights=[1.0,1.0,1.0])
+    def __init__(self, proposer_weights=[1.0,1.0,1.0]):
+        MixtureProposer.__init__(self,proposers=[InsertProposer(),DeleteProposer(), RegenerationProposer()],proposer_weights=proposer_weights)
 

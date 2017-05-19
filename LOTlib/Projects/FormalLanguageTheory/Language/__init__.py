@@ -9,12 +9,15 @@ from Reber import Reber
 from Saffran import Saffran
 from XX import XX
 from XXR import XXR
+from XY import XY
 from Fibo import Fibo
 from AmBnCmDn import AmBnCmDn
 from AnBnCn import AnBnCn
 from Dyck import Dyck
+from Gomez import *
 from BerwickPilato import BerwickPilato
 from Man import Man
 from SimpleEnglish import SimpleEnglish
 from LongDependency import LongDependency
-
+from MorganNewport import MorganNewport
+from NewportAslin import NewportAslin

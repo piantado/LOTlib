@@ -17,18 +17,21 @@ from Levenshtein import editops # for distance likelihood only
 MAX_SELF_RECURSION = 100 # how many times can a hypothesis call itself? NOTE: This bounds the length of strings, as in a^n
 sys.setrecursionlimit(10000) # needed for generating long strings
 
+from LOTlib.Hypotheses.Proposers.InsertDeleteRegenerationProposer import InsertDeleteRegenerationProposer
+my_proposal = InsertDeleteRegenerationProposer( proposer_weights=[1.0, 1.0, 0.5] ).proposal_content
+
 class InnerHypothesis(InsertDeleteRegenerationProposer, LOTHypothesis):
     """s
     The type of each function F. This is NOT recursive, but it does allow recurse_ (to refer to the whole lexicon)
     """
     def __init__(self, grammar=None, display="lambda C, lex_, x: %s", **kwargs): # lexicon, x arg, context
-        LOTHypothesis.__init__(self, grammar=grammar, display=display, **kwargs)
+        LOTHypothesis.__init__(self, grammar=grammar, display=display, maxnodes=100, **kwargs)
 
     def propose(self, **kwargs):
         ret_value, fb = None, None
         while True: # keep trying to propose
             try:
-                ret_value, fb = IDR_proposal(self.grammar, self.value, **kwargs)
+                ret_value, fb = my_proposal(self.grammar, self.value, **kwargs)
                 break
             except ProposalFailedException:
                 pass
@@ -83,9 +86,10 @@ class IncrementalLexiconHypothesis(LevenshteinPseudoLikelihood, SimpleLexicon):
                 grammar.add_rule('SELFF', '%s' % (n,), None, 1.0)  # add the new N # needed for the new grammar, wdd what we will use
 
             initfn                 = grammar.get_rule_by_name('', nt='START').make_FunctionNodeStub(grammar, None)
-            initfn.args[0]         = grammar.get_rule_by_name("lex_(C, %s, %s)").make_FunctionNodeStub(grammar, initfn)
-            initfn.args[0].args[0] = grammar.get_rule_by_name('%s' % (self.N-1), nt='SELFF').make_FunctionNodeStub(grammar, initfn.args[0])
-            initfn.args[0].args[1] = grammar.get_rule_by_name('x').make_FunctionNodeStub(grammar, initfn.args[0])
+            initfn.args[0]                 = grammar.get_rule_by_name('', nt='START2').make_FunctionNodeStub(grammar, initfn)
+            initfn.args[0].args[0]         = grammar.get_rule_by_name("lex_(C, %s, %s)").make_FunctionNodeStub(grammar, initfn.args[0])
+            initfn.args[0].args[0].args[0] = grammar.get_rule_by_name('%s' % (self.N-1), nt='SELFF').make_FunctionNodeStub(grammar, initfn.args[0].args[0])
+            initfn.args[0].args[0].args[1] = grammar.get_rule_by_name('x').make_FunctionNodeStub(grammar, initfn.args[0].args[0])
 
             self.set_word(self.N, self.make_hypothesis(value=initfn, grammar=grammar)) # set N to what it should, using our new grammar
 

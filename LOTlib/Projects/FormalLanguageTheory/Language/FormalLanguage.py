@@ -19,7 +19,7 @@ class FormalLanguage(object):
     """
     Set up a super-class for formal languages, so we can compute things like accuracy, precision, etc.
     """
-    ALPHA = 0.999
+    ALPHA = 0.99
 
     def sample_string(self):
         return str(self.grammar.generate())

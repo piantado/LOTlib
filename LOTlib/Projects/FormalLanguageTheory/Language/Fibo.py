@@ -2,11 +2,18 @@
 from LOTlib.Projects.FormalLanguageTheory.Language.FormalLanguage import FormalLanguage
 from random import random
 
+fib_cache = dict()
 def fib(n):
-    if n <= 1:
-        return 1
+    v = None
+    if n not in fib_cache:
+        if n <= 1:
+            v = 1
+        else:
+            v = fib(n-1)+fib(n-2)
+        fib_cache[n] = v
+        return v
     else:
-        return fib(n-1)+fib(n-2)
+        return fib_cache[n]
 
 class Fibo(FormalLanguage):
     """
