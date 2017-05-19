@@ -18,9 +18,9 @@ class AnBm(FormalLanguage):
         return list('ab')
 
     def sample_string(self): # fix that this is not CF
-        s = str(self.grammar.generate()) # from a^m b^n
+        s = str(self.grammar.generate()) # from a^n b^n
 
-        mmn=0
+        mmn=1
         while random() < 0.5:
             mmn += 1
 
@@ -40,3 +40,5 @@ class AnBm(FormalLanguage):
 if __name__ == '__main__':
     language = AnBm()
     print language.sample_data(10000)
+
+    print list(itertools.islice(language.all_strings(),100))
