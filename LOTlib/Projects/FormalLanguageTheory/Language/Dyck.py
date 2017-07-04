@@ -4,7 +4,7 @@ from LOTlib.Grammar import Grammar
 
 def dyck_at_depth(n):
     if n == 1:
-        yield ['()']
+        yield '()'
     else:
         for k in dyck_at_depth(n-1):
             yield '()' + k

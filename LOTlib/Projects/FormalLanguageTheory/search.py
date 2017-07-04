@@ -25,9 +25,9 @@ from Language import *
 from LOTlib.MPI import is_master_process, MPI_unorderedmap
 
 from Model import IncrementalLexiconHypothesis
-from LOTlib.Projects.FormalLanguageTheory.Grammar import base_grammar # passed in as kwargs
+from LOTlib.Projects.FormalLanguageTheory.Grammar import base_grammar
 
-LARGE_SAMPLE = 10000 #100000 # sample this many and then re-normalize to fractional counts
+LARGE_SAMPLE = 100000 # sample this many and then re-normalize to fractional counts
 
 def run(options, ndata):
     if LOTlib.SIG_INTERRUPTED: return 0, set()
@@ -74,12 +74,6 @@ def run(options, ndata):
                 v = h()
                 sortedv = sorted(v.items(), key=operator.itemgetter(1), reverse=True )
                 print "{" + ', '.join(["'%s':%s"% i for i in sortedv]) + "}"
-                # print data
-                # for r,c in sortedv:
-                #     print r, sorted( (longest_substring_distance(r, k), k) for k, dc in data[0].output.items() )
-
-                # for k, dc in sorted(data[0].output.items()):
-                #     print dc * ( logsumexp([rlp - 100.0 * longest_substring_distance(r, k) for r, rlp in v.items()])), k
 
 
         # and start from where we ended
@@ -105,8 +99,8 @@ if __name__ == "__main__":
     parser.add_option("--top", dest="TOP_COUNT", type="int", default=100, help="Top number of hypotheses to store")
     parser.add_option("--N", dest="N", type="int", default=3, help="number of inner hypotheses")
     parser.add_option("--ndata", dest="ndata", type="int", default=1000, help="number of data steps to run")
-    parser.add_option("--datamin", dest="datamin", type="int", default=1, help="Min data to run (>0 due to log)")
-    parser.add_option("--datamax", dest="datamax", type="int", default=100000, help="Max data to run")
+    parser.add_option("--datamin", dest="datamin", type="float", default=0.01, help="Min data to run (>0 due to log)")
+    parser.add_option("--datamax", dest="datamax", type="float", default=100, help="Max data to run")
     parser.add_option("--out", dest="OUT", type="str", default="out/", help="Output directory")
     parser.add_option("--trace", dest="TRACE", action="store_true", default=False, help="Show every step?")
     (options, args) = parser.parse_args()
@@ -119,8 +113,9 @@ if __name__ == "__main__":
         display_option_summary(options)
         sys.stdout.flush()
 
-    DATA_RANGE = np.exp(np.linspace(np.log(options.datamin), np.log(options.datamax), num=options.ndata))# [1000] # np.arange(1, 1000, 1)
-    DATA_RANGE = np.append(DATA_RANGE, [0]) # include the prior
+    # DATA_RANGE = np.exp(np.linspace(np.log(options.datamin), np.log(options.datamax), num=options.ndata))
+    DATA_RANGE = np.linspace(options.datamin, options.datamax, num=options.ndata)
+    DATA_RANGE = np.append(DATA_RANGE, [0,0,0,0,1,1,1,1]) # include a bunch from the prior
     random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))

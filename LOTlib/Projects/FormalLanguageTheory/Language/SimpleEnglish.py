@@ -31,7 +31,7 @@ class SimpleEnglish(FormalLanguage):
 
     def all_strings(self):
         for g in self.grammar.enumerate():
-            yield g
+            yield str(g)
 
 # just for testing
 if __name__ == '__main__':

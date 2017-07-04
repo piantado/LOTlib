@@ -22,5 +22,7 @@ class AB(FormalLanguage):
                 yield s
 
 if __name__ == '__main__':
-    language = ABn()
+    language = AB()
     print language.sample_data(10000)
+
+    print list(itertools.islice(language.all_strings(),100))

@@ -26,7 +26,7 @@ class Gomez(FormalLanguage):
 
     def all_strings(self):
         for g in self.grammar.enumerate():
-            yield g
+            yield str(g)
 
 
 class Gomez2(Gomez):

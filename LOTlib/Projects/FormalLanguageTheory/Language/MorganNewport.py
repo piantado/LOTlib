@@ -31,10 +31,38 @@ class MorganNewport(FormalLanguage):
         for g in self.grammar.enumerate():
             yield str(g)
 
+class MorganMeierNewport(FormalLanguage):
+    """
+    From Morgan, Meier, & Newport with function word cues to phrase structure boundaries
+
+    """
+    def __init__(self):
+        self.grammar = Grammar(start='S')
+        self.grammar.add_rule('S', '%s%s', ['AP', 'BP'], 1.0)
+        self.grammar.add_rule('S', '%s%s%s', ['AP', 'BP', 'CP'], 1.0)
+        self.grammar.add_rule('AP', 'oA',   None, 1.0)
+        self.grammar.add_rule('AP', 'oAD',  None, 1.0) # two terminals, A,D
+
+        self.grammar.add_rule('BP', 'uE', None, 1.0)
+        self.grammar.add_rule('BP', 'a%sF', ['CP'], 1.0)
+
+        self.grammar.add_rule('CP', 'iC', None, 1.0)
+        self.grammar.add_rule('CP', 'iCD', None, 1.0)
+
+
+    def terminals(self):
+        return list('ADECFouai')
+
+    def all_strings(self):
+        for g in self.grammar.enumerate():
+            yield str(g)
+
 
 
 # just for testing
 if __name__ == '__main__':
     language = MorganNewport()
     print language.sample_data(10000)
+
+    print MorganMeierNewport().sample_data(1000)
 

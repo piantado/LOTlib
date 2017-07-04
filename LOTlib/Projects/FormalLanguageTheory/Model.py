@@ -7,7 +7,7 @@ from LOTlib.Eval import TooBigException
 from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursionDepthException
 from LOTlib.Miscellaneous import flatten2str, sample_one, attrmem
 from LOTlib.Flip import *
-from LOTlib.Hypotheses.Likelihoods.StringLikelihoods import edit_likelihood, LevenshteinPseudoLikelihood
+from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import *
 from LOTlib.Hypotheses.Lexicon.SimpleLexicon import SimpleLexicon
 from LOTlib.Primitives.Strings import StringLengthException
 from LOTlib.Hypotheses.Proposers.InsertDeleteRegenerationProposer import InsertDeleteRegenerationProposer
@@ -17,21 +17,18 @@ from Levenshtein import editops # for distance likelihood only
 MAX_SELF_RECURSION = 100 # how many times can a hypothesis call itself? NOTE: This bounds the length of strings, as in a^n
 sys.setrecursionlimit(10000) # needed for generating long strings
 
-from LOTlib.Hypotheses.Proposers.InsertDeleteRegenerationProposer import InsertDeleteRegenerationProposer
-my_proposal = InsertDeleteRegenerationProposer( proposer_weights=[1.0, 1.0, 0.5] ).proposal_content
-
 class InnerHypothesis(InsertDeleteRegenerationProposer, LOTHypothesis):
     """s
     The type of each function F. This is NOT recursive, but it does allow recurse_ (to refer to the whole lexicon)
     """
     def __init__(self, grammar=None, display="lambda C, lex_, x: %s", **kwargs): # lexicon, x arg, context
-        LOTHypothesis.__init__(self, grammar=grammar, display=display, maxnodes=100, **kwargs)
+        LOTHypothesis.__init__(self, grammar=grammar, display=display, **kwargs)
 
     def propose(self, **kwargs):
         ret_value, fb = None, None
         while True: # keep trying to propose
             try:
-                ret_value, fb = my_proposal(self.grammar, self.value, **kwargs)
+                ret_value, fb = IDR_proposal(self.grammar, self.value, **kwargs)
                 break
             except ProposalFailedException:
                 pass
@@ -40,7 +37,23 @@ class InnerHypothesis(InsertDeleteRegenerationProposer, LOTHypothesis):
 
         return ret, fb
 
-class IncrementalLexiconHypothesis(LevenshteinPseudoLikelihood, SimpleLexicon):
+#from cachetools import lru_cache
+
+# @lru_cache(10000)
+def edit_likelihood(x,y, alphabet_size=2, noise=0.01):
+
+    ops = editops(x,y)
+    lp = log(1.0-noise)*len(y) # all the unchanged
+    for o, _, _ in ops:
+        if   o == 'equal':   lp += log(noise) - log(4.0)
+        elif o == 'replace': lp += log(noise) - log(4.0) - log(alphabet_size)
+        elif o == 'insert':  lp += log(noise) - log(4.0) - log(alphabet_size)
+        elif o == 'delete':  lp += log(noise) - log(4.0)
+        else: assert False
+    # print lp, x, y
+    return lp
+
+class IncrementalLexiconHypothesis(SimpleLexicon):
         """ A hypothesis where we can incrementally add words """
 
         def __init__(self, grammar=None, alphabet_size=2, **kwargs):
@@ -58,6 +71,27 @@ class IncrementalLexiconHypothesis(LevenshteinPseudoLikelihood, SimpleLexicon):
         def compute_prior(self):
             return SimpleLexicon.compute_prior(self) - self.N * log(2.0)/self.prior_temperature # coin flip for each additional word
 
+        def compute_single_likelihood(self, datum):
+            assert isinstance(datum.output, dict)
+
+            hp = self(*datum.input)  # output dictionary, output->probabilities
+            assert isinstance(hp, dict)
+
+            s = 0.0
+            for k, dc in datum.output.items():
+                if k in hp:
+                    s += dc * hp[k]
+                elif len(hp.keys()) > 0:
+                    s += dc * min([ edit_likelihood(x, k, alphabet_size=self.alphabet_size) for x in hp.keys() ]) # the highest probability string; or we could logsumexp
+                else:
+                    s += dc * edit_likelihood('', k, alphabet_size=self.alphabet_size)
+
+                # This is the mixing {a,b}* noise model
+                # lp = log(1.0-datum.alpha) - log(self.alphabet_size+1)*(len(k)+1) #the +1s here count the character marking the end of the string
+                # if k in hp:
+                #     lp = logplusexp(lp, log(datum.alpha) + hp[k]) # if non-noise possible
+                # s += dc*lp
+            return s
 
         def propose(self):
 
@@ -85,7 +119,7 @@ class IncrementalLexiconHypothesis(LevenshteinPseudoLikelihood, SimpleLexicon):
             for n in xrange(1,self.N+1): # add in all the rules up till the next one
                 grammar.add_rule('SELFF', '%s' % (n,), None, 1.0)  # add the new N # needed for the new grammar, wdd what we will use
 
-            initfn                 = grammar.get_rule_by_name('', nt='START').make_FunctionNodeStub(grammar, None)
+            initfn                         = grammar.get_rule_by_name('', nt='START').make_FunctionNodeStub(grammar, None)
             initfn.args[0]                 = grammar.get_rule_by_name('', nt='START2').make_FunctionNodeStub(grammar, initfn)
             initfn.args[0].args[0]         = grammar.get_rule_by_name("lex_(C, %s, %s)").make_FunctionNodeStub(grammar, initfn.args[0])
             initfn.args[0].args[0].args[0] = grammar.get_rule_by_name('%s' % (self.N-1), nt='SELFF').make_FunctionNodeStub(grammar, initfn.args[0].args[0])
