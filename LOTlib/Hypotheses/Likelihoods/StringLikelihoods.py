@@ -1,9 +1,13 @@
 from Levenshtein import editops
 from LOTlib.Miscellaneous import logplusexp, logsumexp
 from math import log
+from scipy.stats import geom
 
 def edit_likelihood(x,y, alphabet_size=2, alpha=0.99):
-
+    """
+    This computes the likelihood of going from x->y by choosing levenshtein ops uniformly at random,
+    and sampling from the alphabet on insertions and replacements.
+    """
     ops = editops(x,y)
     lp = log(alpha)*(len(y)-len(ops)) # all the unchanged
     for o, _, _ in ops:
@@ -13,6 +17,40 @@ def edit_likelihood(x,y, alphabet_size=2, alpha=0.99):
         elif o == 'delete':  lp += log(1.0-alpha) - log(3.0)
         else: assert False
     return lp
+
+
+def swappy_likelihood(x,y, alphabet_size=2, alpha=0.99):
+    """
+    We assume that y comes from x by randomly swapping back and forth on whether you are copying
+    elements of x or typing randomly
+    """
+
+    pass 
+
+
+def prefix_likelihood(x,y, alphabet_size=2, alpha=0.99):
+    """
+    Compute likelihood under a model you draw  l ~ geometric(1-alpha) and copy the first alpha positions
+    and  then generate a length l2 ~ geometric(0.5) and fill in with random characters from the alphabet
+    """
+
+    lp = geom.logpmf(len(y),0.5) - (len(y))*log(alphabet_size)
+    for i in xrange(min(len(x),len(y))):
+        if x[i]==y[i]:
+            # if these are still equal, they could have come from either, so together the probability of all
+            # of these
+            pthis = geom.logpmf(i,1.0-alpha) + geom.logpmf(len(y)-i,0.5) - (len(y)-i)*log(alphabet_size)
+
+            lp = logplusexp(lp, pthis)
+        else:
+            # once they are unequal, we had to have generated the rest from noise
+            # lp stores the sum of all of the ways of generating up to i
+
+            lp = logplusexp(lp, geom.logpmf(len(y)-i,0.5) - (len(y)-i)*log(alphabet_size))
+            break
+
+    return lp
+
 
 class LevenshteinPseudoLikelihood(object):
 
