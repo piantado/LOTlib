@@ -1,5 +1,5 @@
 from Levenshtein import editops
-from LOTlib.Miscellaneous import logplusexp, logsumexp
+from LOTlib.Miscellaneous import logplusexp, logsumexp, Infinity
 from math import log
 
 def edit_likelihood(x,y, alphabet_size=2, alpha=0.99):
@@ -29,33 +29,29 @@ def swappy_likelihood(x,y, alphabet_size=2, alpha=0.99):
 
 def log_geom_pdf(n,p):
     """ Scipy's is soooo slow"""
-    return (n-1)*log(1.0-p) + log(p)
+    if n <= 0:
+        return -Infinity
+    else:
+        return (n-1)*log(1.0-p) + log(p)
+
 
 def prefix_likelihood(x,y, alphabet_size=2, alpha=0.99):
     """
-    Compute likelihood under a model you draw  l ~ geometric(1-alpha) and copy the first alpha positions
-    and  then generate a length l2 ~ geometric(0.5) and fill in with random characters from the alphabet
+    Compute likelihood under a model where with probability alpha we pick a random location in x
+    and replace the remainder with a random strong of length l ~ geometric(0.5) (with random characters)
     """
 
-    if len(x) == 0 or len(y) == 0:
-        lp = log_geom_pdf(len(y),0.5) - (len(y))*log(alphabet_size)
-    else:
-        lp = 0.0
-        for i in xrange(min(len(x),len(y))):
-            if x[i]==y[i]:
-                # if these are still equal, they could have come from either, so together the probability of all
-                # of these
-                pthis = log_geom_pdf(i,1.0-alpha) + log_geom_pdf(len(y)-i,0.5) - (len(y)-i)*log(alphabet_size)
+    # find the tail generating probability by summing over all positions in x
+    ltail = -Infinity
+    for i in xrange(len(x)+1): # +1 since we'll consider the possibility of first position
+        if x[:i] == y[:i]:
+            #                         P(trimming)    P(position i, including start)    P(remainder of y)
+            ltail = logplusexp(ltail, log(1.0-alpha) - log(len(x)+1)               - (len(y)-i)*log(0.5) - (len(y)-i)*log(alphabet_size))
+        else:
+            break
 
-                lp = logplusexp(lp, pthis)
-            else:
-                # once they are unequal, we had to have generated the rest from noise
-                # lp stores the sum of all of the ways of generating up to i
-
-                lp = logplusexp(lp, log_geom_pdf(len(y)-i,0.5) - (len(y)-i)*log(alphabet_size))
-                break
-
-    return lp
+    # add together probability under noise and under the copying model (which is prob alpha iff they are equal)
+    return logplusexp(ltail, (log(alpha) if x==y else -Infinity))
 
 
 class LevenshteinPseudoLikelihood(object):
