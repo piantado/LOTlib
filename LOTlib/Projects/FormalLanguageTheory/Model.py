@@ -5,14 +5,15 @@ from LOTlib.Hypotheses.LOTHypothesis import LOTHypothesis
 from LOTlib.Hypotheses.Proposers import IDR_proposal
 from LOTlib.Eval import TooBigException
 from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursionDepthException
-from LOTlib.Miscellaneous import flatten2str, sample_one, attrmem
+from LOTlib.Miscellaneous import flatten2str, sample_one, attrmem, logsumexp
 from LOTlib.Flip import *
-from LOTlib.Hypotheses.Likelihoods.MultinomialLikelihood import *
+from LOTlib.Hypotheses.Likelihoods.StringLikelihoods import edit_likelihood
 from LOTlib.Hypotheses.Lexicon.SimpleLexicon import SimpleLexicon
 from LOTlib.Primitives.Strings import StringLengthException
 from LOTlib.Hypotheses.Proposers.InsertDeleteRegenerationProposer import InsertDeleteRegenerationProposer
 
-from Levenshtein import editops # for distance likelihood only
+# from Levenshtein import editops # for distance likelihood only
+from LOTlib.Hypotheses.Likelihoods.StringLikelihoods import prefix_likelihood
 
 MAX_SELF_RECURSION = 100 # how many times can a hypothesis call itself? NOTE: This bounds the length of strings, as in a^n
 sys.setrecursionlimit(10000) # needed for generating long strings
@@ -37,21 +38,7 @@ class InnerHypothesis(InsertDeleteRegenerationProposer, LOTHypothesis):
 
         return ret, fb
 
-#from cachetools import lru_cache
 
-# @lru_cache(10000)
-def edit_likelihood(x,y, alphabet_size=2, noise=0.01):
-
-    ops = editops(x,y)
-    lp = log(1.0-noise)*len(y) # all the unchanged
-    for o, _, _ in ops:
-        if   o == 'equal':   lp += log(noise) - log(4.0)
-        elif o == 'replace': lp += log(noise) - log(4.0) - log(alphabet_size)
-        elif o == 'insert':  lp += log(noise) - log(4.0) - log(alphabet_size)
-        elif o == 'delete':  lp += log(noise) - log(4.0)
-        else: assert False
-    # print lp, x, y
-    return lp
 
 class IncrementalLexiconHypothesis(SimpleLexicon):
         """ A hypothesis where we can incrementally add words """
@@ -79,18 +66,9 @@ class IncrementalLexiconHypothesis(SimpleLexicon):
 
             s = 0.0
             for k, dc in datum.output.items():
-                if k in hp:
-                    s += dc * hp[k]
-                elif len(hp.keys()) > 0:
-                    s += dc * min([ edit_likelihood(x, k, alphabet_size=self.alphabet_size) for x in hp.keys() ]) # the highest probability string; or we could logsumexp
-                else:
-                    s += dc * edit_likelihood('', k, alphabet_size=self.alphabet_size)
-
-                # This is the mixing {a,b}* noise model
-                # lp = log(1.0-datum.alpha) - log(self.alphabet_size+1)*(len(k)+1) #the +1s here count the character marking the end of the string
-                # if k in hp:
-                #     lp = logplusexp(lp, log(datum.alpha) + hp[k]) # if non-noise possible
-                # s += dc*lp
+                # P(k | x) P(x | model)
+                s += dc * logsumexp([prefix_likelihood(x, k, alphabet_size=self.alphabet_size) + hp[x] for x in hp.keys()])
+                # s += dc * logsumexp([edit_likelihood(x, k, alphabet_size=self.alphabet_size) + hp[x] for x in hp.keys()])
             return s
 
         def propose(self):
