@@ -102,6 +102,7 @@ if __name__ == "__main__":
     parser.add_option("--datamin", dest="datamin", type="float", default=0.01, help="Min data to run (>0 due to log)")
     parser.add_option("--datamax", dest="datamax", type="float", default=100, help="Max data to run")
     parser.add_option("--out", dest="OUT", type="str", default="out/", help="Output directory")
+    parser.add_option("--addzero", dest="addzero", type="int", default=10, help="Add this many chains with zero data points (sample from prior)")
     parser.add_option("--trace", dest="TRACE", action="store_true", default=False, help="Show every step?")
     (options, args) = parser.parse_args()
 
@@ -115,7 +116,8 @@ if __name__ == "__main__":
 
     # DATA_RANGE = np.exp(np.linspace(np.log(options.datamin), np.log(options.datamax), num=options.ndata))
     DATA_RANGE = np.linspace(options.datamin, options.datamax, num=options.ndata)
-    DATA_RANGE = np.append(DATA_RANGE, [0,0,0,0,1,1,1,1]) # include a bunch from the prior
+    for i in xrange(options.addzero):
+        DATA_RANGE = np.append(DATA_RANGE, [0])
     random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))
