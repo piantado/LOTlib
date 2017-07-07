@@ -1,7 +1,6 @@
 from Levenshtein import editops
 from LOTlib.Miscellaneous import logplusexp, logsumexp
 from math import log
-from scipy.stats import geom
 
 def edit_likelihood(x,y, alphabet_size=2, alpha=0.99):
     """
@@ -28,26 +27,33 @@ def swappy_likelihood(x,y, alphabet_size=2, alpha=0.99):
     pass 
 
 
+def log_geom_pdf(n,p):
+    """ Scipy's is soooo slow"""
+    return (n-1)*log(1.0-p) + log(p)
+
 def prefix_likelihood(x,y, alphabet_size=2, alpha=0.99):
     """
     Compute likelihood under a model you draw  l ~ geometric(1-alpha) and copy the first alpha positions
     and  then generate a length l2 ~ geometric(0.5) and fill in with random characters from the alphabet
     """
 
-    lp = geom.logpmf(len(y),0.5) - (len(y))*log(alphabet_size)
-    for i in xrange(min(len(x),len(y))):
-        if x[i]==y[i]:
-            # if these are still equal, they could have come from either, so together the probability of all
-            # of these
-            pthis = geom.logpmf(i,1.0-alpha) + geom.logpmf(len(y)-i,0.5) - (len(y)-i)*log(alphabet_size)
+    if len(x) == 0 or len(y) == 0:
+        lp = log_geom_pdf(len(y),0.5) - (len(y))*log(alphabet_size)
+    else:
+        lp = 0.0
+        for i in xrange(min(len(x),len(y))):
+            if x[i]==y[i]:
+                # if these are still equal, they could have come from either, so together the probability of all
+                # of these
+                pthis = log_geom_pdf(i,1.0-alpha) + log_geom_pdf(len(y)-i,0.5) - (len(y)-i)*log(alphabet_size)
 
-            lp = logplusexp(lp, pthis)
-        else:
-            # once they are unequal, we had to have generated the rest from noise
-            # lp stores the sum of all of the ways of generating up to i
+                lp = logplusexp(lp, pthis)
+            else:
+                # once they are unequal, we had to have generated the rest from noise
+                # lp stores the sum of all of the ways of generating up to i
 
-            lp = logplusexp(lp, geom.logpmf(len(y)-i,0.5) - (len(y)-i)*log(alphabet_size))
-            break
+                lp = logplusexp(lp, log_geom_pdf(len(y)-i,0.5) - (len(y)-i)*log(alphabet_size))
+                break
 
     return lp
 
