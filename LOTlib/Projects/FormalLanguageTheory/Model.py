@@ -7,13 +7,10 @@ from LOTlib.Eval import TooBigException
 from LOTlib.Hypotheses.RecursiveLOTHypothesis import RecursionDepthException
 from LOTlib.Miscellaneous import flatten2str, sample_one, attrmem, logsumexp
 from LOTlib.Flip import *
-from LOTlib.Hypotheses.Likelihoods.StringLikelihoods import edit_likelihood
+from LOTlib.Hypotheses.Likelihoods.StringLikelihoods import PrefixLikelihood, LevenshteinPseudoLikelihood, MonkeyNoiseLikelihood
 from LOTlib.Hypotheses.Lexicon.SimpleLexicon import SimpleLexicon
 from LOTlib.Primitives.Strings import StringLengthException
 from LOTlib.Hypotheses.Proposers.InsertDeleteRegenerationProposer import InsertDeleteRegenerationProposer
-
-# from Levenshtein import editops # for distance likelihood only
-from LOTlib.Hypotheses.Likelihoods.StringLikelihoods import prefix_likelihood
 
 MAX_SELF_RECURSION = 100 # how many times can a hypothesis call itself? NOTE: This bounds the length of strings, as in a^n
 sys.setrecursionlimit(10000) # needed for generating long strings
@@ -40,7 +37,7 @@ class InnerHypothesis(InsertDeleteRegenerationProposer, LOTHypothesis):
 
 
 
-class IncrementalLexiconHypothesis(SimpleLexicon):
+class IncrementalLexiconHypothesis(PrefixLikelihood,SimpleLexicon):
         """ A hypothesis where we can incrementally add words """
 
         def __init__(self, grammar=None, alphabet_size=2, **kwargs):
@@ -57,19 +54,6 @@ class IncrementalLexiconHypothesis(SimpleLexicon):
         @attrmem('prior')
         def compute_prior(self):
             return SimpleLexicon.compute_prior(self) - self.N * log(2.0)/self.prior_temperature # coin flip for each additional word
-
-        def compute_single_likelihood(self, datum):
-            assert isinstance(datum.output, dict)
-
-            hp = self(*datum.input)  # output dictionary, output->probabilities
-            assert isinstance(hp, dict)
-
-            s = 0.0
-            for k, dc in datum.output.items():
-                # P(k | x) P(x | model)
-                s += dc * logsumexp([prefix_likelihood(x, k, alphabet_size=self.alphabet_size) + hp[x] for x in hp.keys()])
-                # s += dc * logsumexp([edit_likelihood(x, k, alphabet_size=self.alphabet_size) + hp[x] for x in hp.keys()])
-            return s
 
         def propose(self):
 
@@ -138,6 +122,6 @@ class IncrementalLexiconHypothesis(SimpleLexicon):
             assert self.N > 0, "*** Cannot call IncrementalLexiconHypothesis unless N>0"
             # print ">>>>>>", self
             try:
-                return compute_outcomes(self.reset_and_call, self.N-1, '',  maxcontext=200, maxit=200, catchandpass=(RecursionDepthException, StringLengthException))
+                return compute_outcomes(self.reset_and_call, self.N-1, '',  maxcontext=100, maxit=100, catchandpass=(RecursionDepthException, StringLengthException))
             except (TooManyContextsException, TooBigException):
                 return {'':0.0} # return nothing

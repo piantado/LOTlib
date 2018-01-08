@@ -4,23 +4,15 @@
     Todo: show highest prob "mistake" strings
 
 """
-import sys
-import codecs
+import re
 import itertools
 import numpy
-import operator
-from copy import copy
-from LOTlib import break_ctrlc
 from pickle import load
 from math import log, exp
-from copy import deepcopy
-import random
-import numpy as np
-import LOTlib
 import LOTlib.Primitives
 from Language import *
 
-from LOTlib.Miscellaneous import display_option_summary, logsumexp
+from LOTlib.Miscellaneous import logsumexp, Infinity
 
 
 if __name__ == "__main__":
@@ -34,11 +26,11 @@ if __name__ == "__main__":
     import Model
     Model.MAX_SELF_RECURSION = 1000 # needed for bigger sets of strings
 
-
     from optparse import OptionParser
     parser = OptionParser()
-    parser.add_option("--language", dest="LANG", type="string", default='An', help="name of a language")
+    parser.add_option("--language", dest="LANG", type="string", default='AAAA', help="name of a language")
     parser.add_option("--ndata", dest="NDATA", type="int", default=1000, help="Max number of data points seen")
+    parser.add_option("--dir", dest="DIR", type="string", default="out/", help="Directory where the language lives")
     (options, args) = parser.parse_args()
 
     language = eval(options.LANG+"()")
@@ -48,7 +40,7 @@ if __name__ == "__main__":
     # datas = [language.sample_data(i) for i in xrange(Ndata)]
     print "# Sampled data for ", options.LANG
 
-    data_range = xrange(options.NDATA)
+    data_range = numpy.linspace(0.01, 1000, num=options.NDATA) #xrange(options.NDATA)
 
     # We need to be a little fancy here because we may enumerate strings in different orders, depending
     # on the details of how flip vs all_strings are implemented. This means we have to check overlap between
@@ -65,7 +57,7 @@ if __name__ == "__main__":
             if i < Ntop: top_data_strings.add(w)
     print "# Computed top data strings for ", options.LANG
 
-    with open("out/"+options.LANG+".pkl", 'rb') as f:
+    with open(options.DIR+"/"+options.LANG+".pkl", 'rb') as f:
         hypotheses = list(load(f))
     print "# Read hypotheses for ", options.LANG
     assert len(hypotheses)>0, "*** No hypotheses read for %s"%options.LANG
@@ -88,16 +80,15 @@ if __name__ == "__main__":
         else:
             h.precision = 0.0
 
-        # print h.prior, h.likelihood
-        # print h
-        # print sorted(list(h.top_strings))
-        # print sorted(list(top_data_strings))
-        # print top_data_strings - h.top_strings
-        # print "---------------"
+        # compute the probability of generating a...b for gomez
+        h.axb = logsumexp([lp if (len(s) == 3 and s[0] == 'a' and s[-1] == 'd') or \
+                                 (len(s) == 3 and s[0] == 'b' and s[-1] == 'e') else -Infinity for s, lp in v.items()])
+        # print h.axb, h, v
 
     print "# Computed hypotheses for ", options.LANG
 
     precision, recall = numpy.zeros(options.NDATA), numpy.zeros(options.NDATA)
+    axb = numpy.zeros(options.NDATA) # for gomez, do we match axb pattern?
 
     for i, di in enumerate(data_range):
 
@@ -106,6 +97,7 @@ if __name__ == "__main__":
         Z = logsumexp(posteriors)
 
         # print [(h.accuracy, exp(p-Z)) for h,p in zip(hypotheses, posteriors)]
+        axb[i] = sum([exp(h.axb) * exp(p - Z) for h, p in zip(hypotheses, posteriors)])
 
         precision[i] = sum([h.precision*exp(p-Z) for h,p in zip(hypotheses, posteriors)])
         recall[i]    = sum([h.recall   *exp(p-Z) for h,p in zip(hypotheses, posteriors)])
@@ -120,6 +112,8 @@ if __name__ == "__main__":
     p = fig.add_subplot(111)
     p.semilogx(data_range, precision, linewidth=3)
     p.semilogx(data_range, recall, linewidth=3, linestyle="dashed",)
+    if re.search(r"Gomez",options.LANG): # plot these for gomez data
+        p.semilogx(data_range, axb, linewidth=3, linestyle="dashdot")
     xlabel = p.set_xlabel('Amount of data')
     title  = p.set_title(options.LANG)
     p.set_ylim(0,1.05)

@@ -1,9 +1,3 @@
-"""
-    This version incrementally adds symbols and then does not change them.
-
-    Todo: show highest prob "mistake" strings
-
-"""
 import sys
 import codecs
 import itertools
@@ -27,7 +21,7 @@ from LOTlib.MPI import is_master_process, MPI_unorderedmap
 from Model import IncrementalLexiconHypothesis
 from LOTlib.Projects.FormalLanguageTheory.Grammar import base_grammar
 
-LARGE_SAMPLE = 100000 # sample this many and then re-normalize to fractional counts
+LARGE_SAMPLE = 1000 # 100000 # sample this many and then re-normalize to fractional counts
 
 def run(options, ndata):
     if LOTlib.SIG_INTERRUPTED: return 0, set()
@@ -70,7 +64,7 @@ def run(options, ndata):
             tn.add(copy(h))
 
             if options.TRACE:
-                print h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata, h
+                print h.posterior_score, h.prior, h.likelihood, h.likelihood / ndata, h.best_ll, h
                 v = h()
                 sortedv = sorted(v.items(), key=operator.itemgetter(1), reverse=True )
                 print "{" + ', '.join(["'%s':%s"% i for i in sortedv]) + "}"
@@ -116,8 +110,7 @@ if __name__ == "__main__":
 
     # DATA_RANGE = np.exp(np.linspace(np.log(options.datamin), np.log(options.datamax), num=options.ndata))
     DATA_RANGE = np.linspace(options.datamin, options.datamax, num=options.ndata)
-    for i in xrange(options.addzero):
-        DATA_RANGE = np.append(DATA_RANGE, [0])
+    DATA_RANGE = np.extend(DATA_RANGE, [0] * options.addzero)
     random.shuffle(DATA_RANGE) # run in random order
 
     args = list(itertools.product([options], DATA_RANGE))

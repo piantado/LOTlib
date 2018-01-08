@@ -18,24 +18,7 @@ def edit_likelihood(x,y, alphabet_size=2, alpha=0.99):
     return lp
 
 
-def swappy_likelihood(x,y, alphabet_size=2, alpha=0.99):
-    """
-    We assume that y comes from x by randomly swapping back and forth on whether you are copying
-    elements of x or typing randomly
-    """
-
-    pass 
-
-
-def log_geom_pdf(n,p):
-    """ Scipy's is soooo slow"""
-    if n <= 0:
-        return -Infinity
-    else:
-        return (n-1)*log(1.0-p) + log(p)
-
-
-def prefix_likelihood(x,y, alphabet_size=2, alpha=0.99):
+def choppy_likelihood(x,y, alphabet_size=2, alpha=0.99):
     """
     Compute likelihood under a model where with probability alpha we pick a random location in x
     and replace the remainder with a random strong of length l ~ geometric(0.5) (with random characters)
@@ -53,6 +36,68 @@ def prefix_likelihood(x,y, alphabet_size=2, alpha=0.99):
     # add together probability under noise and under the copying model (which is prob alpha iff they are equal)
     return logplusexp(ltail, (log(alpha) if x==y else -Infinity))
 
+def prefix_likelihood(x,y, alphabet_size=2, alpha=0.99):
+    """
+    Sample x with probability alpha, x+s, with len(s) ~ geometric(0.5) with probability 1-alpha.
+    The characters in s come from a uniform sample on alphabet size
+    """
+
+    if x == y:
+        return log(alpha)
+    elif x == y[:len(x)]:
+        d = len(y) - len(x)
+        return log(1.0-alpha) + d * (log(0.5) - log(alphabet_size))
+    else:
+        # we could not have been generated
+        return -Infinity
+
+
+class PrefixLikelihood(object):
+
+    """
+        Data is a dictionary from strings to counts; use the min edit distance if not in the output of the function.
+        Requires self.alphabet_size to say how many possible tokens there are
+    """
+
+    def compute_single_likelihood(self, datum):
+        assert isinstance(datum.output, dict)
+
+        hp = self(*datum.input)  # output dictionary, output->probabilities
+        assert isinstance(hp, dict)
+
+        s = 0.0
+        for k, dc in datum.output.items():
+
+            if len(hp.keys()) > 0:
+                # P(k | x) P(x | model)
+                s += dc * logsumexp([v + prefix_likelihood(x, k, alphabet_size=self.alphabet_size, alpha=datum.alpha) for x,v in hp.items()])
+            else:
+                s += dc * prefix_likelihood('', k, alphabet_size=self.alphabet_size, alpha=datum.alpha)
+        return s
+
+class ChoppyLikelihod(object):
+
+    """
+        Data is a dictionary from strings to counts; use the min edit distance if not in the output of the function.
+        Requires self.alphabet_size to say how many possible tokens there are
+    """
+
+    def compute_single_likelihood(self, datum):
+        assert isinstance(datum.output, dict)
+
+        hp = self(*datum.input)  # output dictionary, output->probabilities
+        assert isinstance(hp, dict)
+
+        s = 0.0
+        for k, dc in datum.output.items():
+
+            if len(hp.keys()) > 0:
+                # P(k | x) P(x | model)
+                s += dc * logsumexp([v + choppy_likelihood(x, k, alphabet_size=self.alphabet_size, alpha=datum.alpha) for x,v in hp.items()])
+            else:
+                s += dc * choppy_likelihood('', k, alphabet_size=self.alphabet_size, alpha=datum.alpha)
+        return s
+
 
 class LevenshteinPseudoLikelihood(object):
 
@@ -69,19 +114,12 @@ class LevenshteinPseudoLikelihood(object):
 
         s = 0.0
         for k, dc in datum.output.items():
-            if k in hp:
-                s += dc * hp[k]
-            elif len(hp.keys()) > 0:
-                # probability fo each string under this editing model
+            if len(hp.keys()) > 0:
+                # probability of each string under this editing model
                 s += dc * logsumexp([ v + edit_likelihood(x, k, alphabet_size=self.alphabet_size, alpha=datum.alpha) for x, v in hp.items() ]) # the highest probability string; or we could logsumexp
             else:
+                # If hp is empty, the only thing we cna create is the empty string
                 s += dc * edit_likelihood('', k, alphabet_size=self.alphabet_size, alpha=datum.alpha)
-
-            # This is the mixing {a,b}* noise model
-            # lp = log(1.0-datum.alpha) - log(self.alphabet_size+1)*(len(k)+1) #the +1s here count the character marking the end of the string
-            # if k in hp:
-            #     lp = logplusexp(lp, log(datum.alpha) + hp[k]) # if non-noise possible
-            # s += dc*lp
         return s
 
 class MonkeyNoiseLikelihood(object):
@@ -108,34 +146,3 @@ class MonkeyNoiseLikelihood(object):
 
         return s
 
-
-""" Some worse old ways to do this """
-from StochasticLikelihood import StochasticLikelihood
-from LOTlib.Hypotheses.Hypothesis import Hypothesis
-from Levenshtein import distance
-
-class LevenshteinPseudoLikelihood(Hypothesis):
-    """
-    A (pseudo)likelihood function that is e^(-string edit distance)
-    """
-
-    def compute_single_likelihood(self, datum, distance_factor=1.0):
-        return -distance_factor*distance(datum.output, self(*datum.input))
-
-
-class StochasticLevenshteinPseudoLikelihood(StochasticLikelihood):
-    """
-    A levenshtein distance metric on likelihoods, where the output of a program is corrupted by
-    levenshtein noise. This allows for a smoother space of hypotheses over strings.
-
-    Since compute_likelihood passes **kwargs to compute_single_likelihood, we can pass distance_factor
-    to compute_likelihood to get it here.
-    """
-
-    def compute_single_likelihood(self, datum, llcounts, distance_factor=100.0):
-        assert isinstance(datum.output, dict), "Data supplied must be a dict (function outputs to counts)"
-
-        lo = sum(llcounts.values()) # normalizing constant
-
-        # We are going to compute a pseudo-likelihood, counting close strings as being close
-        return sum([datum.output[k]*logsumexp([log(llcounts[r])-log(lo) - distance_factor*distance(r, k) for r in llcounts.keys()]) for k in datum.output.keys()])
