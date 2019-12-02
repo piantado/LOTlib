@@ -48,7 +48,7 @@ def xor_(A,B): return (A and (not B)) or ((not A) and B)
 def not_(A): return (not A)
 
 @primitive
-def implies_(A,B): return (A or (not B))
+def implies_(A,B): return ((not A) or B)
 
 @primitive
 def iff_(A,B): return ((A and B) or ((not A) and (not B)))
